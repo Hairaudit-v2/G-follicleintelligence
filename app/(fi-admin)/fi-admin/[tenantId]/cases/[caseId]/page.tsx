@@ -58,6 +58,8 @@ export default function CaseDetailPage() {
 
   if (loading || !data) return <p className="text-gray-500">Loading…</p>;
 
+  const latestReportJson = data.latest_report?.report_json;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -121,7 +123,7 @@ export default function CaseDetailPage() {
           <p className="text-sm">
             Overall: {((data.scorecard.overall_score ?? 0) * 10).toFixed(1)}/10 · Tier: {data.scorecard.risk_tier ?? "—"}
           </p>
-          {data.scorecard.payload && (
+          {Boolean(data.scorecard.payload) && (
             <pre className="mt-2 text-xs overflow-auto max-h-40 rounded bg-gray-100 p-2">
               {JSON.stringify(data.scorecard.payload, null, 2)}
             </pre>
@@ -129,10 +131,10 @@ export default function CaseDetailPage() {
         </section>
       )}
 
-      {data.latest_report?.report_json && (
+      {Boolean(latestReportJson) && (
         <section>
           <h3 className="text-sm font-medium mb-2">Report preview</h3>
-          <ReportPreview report={data.latest_report.report_json as Parameters<typeof ReportPreview>[0]["report"]} />
+          <ReportPreview report={latestReportJson as Parameters<typeof ReportPreview>[0]["report"]} />
         </section>
       )}
 
