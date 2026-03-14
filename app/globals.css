@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 216 25% 6%;
+    --foreground: 210 28% 95%;
+    --card: 218 18% 10%;
+    --card-foreground: 210 28% 95%;
+    --popover: 218 18% 10%;
+    --popover-foreground: 210 28% 95%;
+    --primary: 193 76% 55%;
+    --primary-foreground: 219 30% 8%;
+    --secondary: 219 14% 17%;
+    --secondary-foreground: 210 28% 95%;
+    --muted: 219 12% 20%;
+    --muted-foreground: 215 12% 70%;
+    --accent: 218 20% 14%;
+    --accent-foreground: 210 28% 95%;
+    --border: 218 15% 24%;
+    --input: 218 15% 24%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --ring: 193 76% 55%;
+    --radius: 0.5rem;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  background-image:
+    radial-gradient(circle at 10% -10%, rgb(42 168 220 / 12%), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgb(137 164 185 / 10%), transparent 26%),
+    linear-gradient(to bottom, rgb(7 11 17 / 96%), rgb(8 12 18 / 98%));
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .fi-grid {
+    background-image: linear-gradient(rgb(150 172 192 / 8%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(150 172 192 / 8%) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+
+  .fi-panel {
+    border: 1px solid rgb(155 178 198 / 22%);
+    background: linear-gradient(145deg, rgb(20 28 38 / 86%), rgb(14 19 28 / 82%));
+    box-shadow: 0 10px 40px rgb(1 5 12 / 45%);
+  }
+
+  .fi-trust {
+    color: rgb(224 196 129 / 92%);
+  }
+}
