@@ -4,6 +4,8 @@
  * Run: npx tsx scripts/replay-job-lock-test.ts
  * Requires: dev server + completed case (run replay-test.ts first, or set FI_CASE_ID, FI_TENANT_ID)
  */
+export {};
+
 const BASE = process.env.FI_BASE_URL || "http://localhost:3000";
 
 async function runModel(tenantId: string, caseId: string): Promise<unknown> {

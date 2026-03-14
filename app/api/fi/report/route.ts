@@ -33,7 +33,17 @@ export async function GET(req: Request) {
 
     const supabase = supabaseAdmin();
 
-    let report: { id: string; version: number; status: string; storage_path?: string; storage_url?: string; created_at?: string; approved_at?: string; released_at?: string; report_json?: Record<string, unknown> } | null;
+    let report: {
+      id: string;
+      version: number;
+      status: string;
+      storage_path?: string;
+      storage_url?: string;
+      created_at?: string;
+      approved_at?: string;
+      released_at?: string;
+      report_json?: Record<string, unknown>;
+    } | null = null;
 
     if (report_id && !case_id) {
       const { data } = await supabase

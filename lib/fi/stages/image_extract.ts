@@ -12,6 +12,7 @@ const IMAGE_TYPES = [
   "donor_rear",
   "postop_day0",
 ] as const;
+type ImageUploadType = (typeof IMAGE_TYPES)[number];
 
 export type ImageExtractInput = {
   uploads: Array<{
@@ -42,7 +43,7 @@ export async function runImageExtract(
   const enableImageSignals = input.enableImageSignals !== false;
 
   const imageUploads = enableImageSignals
-    ? input.uploads.filter((u) => IMAGE_TYPES.includes(u.type))
+    ? input.uploads.filter((u) => IMAGE_TYPES.includes(u.type as ImageUploadType))
     : [];
   const outputs: ImageExtractOutput = imageUploads.map((u) => ({
     filename: u.filename,

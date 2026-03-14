@@ -34,7 +34,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: true, queue: [] });
     }
 
-    const caseIds = [...new Set(reports.map((r) => r.case_id))];
+    const caseIds = reports.reduce<string[]>((acc, report) => {
+      if (!acc.includes(report.case_id)) acc.push(report.case_id);
+      return acc;
+    }, []);
     const { data: intakes } = await supabase
       .from("fi_intakes")
       .select("case_id, full_name, email")

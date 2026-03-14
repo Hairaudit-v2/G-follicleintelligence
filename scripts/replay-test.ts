@@ -7,6 +7,8 @@
  * Flow: create case → upload → submit → run model → re-run model → approve
  * Asserts: no duplicate reports, re-run returns same report, job locking.
  */
+export {};
+
 const BASE = process.env.FI_BASE_URL || "http://localhost:3000";
 
 function api(path: string, opts: RequestInit = {}) {

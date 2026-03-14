@@ -51,26 +51,27 @@ export function validateClaimSafety(text: string): ClaimSafetyResult {
 
   const violations: ClaimSafetyViolation[] = [];
 
-  for (const pattern of FORBIDDEN_PHRASES) {
-    const matches = text.matchAll(new RegExp(pattern.source, "gi"));
-    for (const m of matches) {
+  FORBIDDEN_PHRASES.forEach((pattern) => {
+    const re = new RegExp(pattern.source, "gi");
+    let m: RegExpExecArray | null = re.exec(text);
+    while (m) {
       const match = m[0];
       const index = m.index ?? 0;
       let suggestion: string | undefined;
-      for (const [forbidden, alt] of Object.entries(PREFERRED_ALTERNATIVES)) {
+      Object.entries(PREFERRED_ALTERNATIVES).forEach(([forbidden, alt]) => {
         if (new RegExp(forbidden, "i").test(match)) {
           suggestion = alt;
-          break;
         }
-      }
+      });
       violations.push({
         phrase: pattern.source,
         index,
         match,
         suggestion: suggestion ?? "consider: may, risk, consistent with, suggests",
       });
+      m = re.exec(text);
     }
-  }
+  });
 
   if (violations.length > 0) {
     return { ok: false, violations };
@@ -106,13 +107,15 @@ export function validateReportCopySafety(
 ): ClaimSafetyResult {
   const violations: ClaimSafetyViolation[] = [];
 
-  if (reportJson.disclaimers) {
-    for (const text of reportJson.disclaimers) {
+  const canonical = reportJson as CanonicalReportPayload;
+  const disclaimers = Array.isArray(canonical.disclaimers) ? canonical.disclaimers : [];
+  for (const text of disclaimers) {
+    if (typeof text === "string") {
       const r = validateClaimSafety(text);
       if (!r.ok) violations.push(...r.violations);
     }
   }
-  const canonical = reportJson as CanonicalReportPayload;
+
   if (canonical.score_summary?.risk_tier_summary) {
     const r = validateClaimSafety(canonical.score_summary.risk_tier_summary);
     if (!r.ok) violations.push(...r.violations);
@@ -138,10 +141,15 @@ export function validateReportCopySafety(
 
   const legacy = reportJson as LegacyReportPayload;
   if (legacy.explainability) {
-    for (const lines of Object.values(legacy.explainability)) {
-      for (const line of lines ?? []) {
-        const r = validateClaimSafety(line);
-        if (!r.ok) violations.push(...r.violations);
+    const explainabilityMap = legacy.explainability as Record<string, unknown>;
+    for (const lines of Object.values(explainabilityMap)) {
+      if (Array.isArray(lines)) {
+        for (const line of lines) {
+          if (typeof line === "string") {
+            const r = validateClaimSafety(line);
+            if (!r.ok) violations.push(...r.violations);
+          }
+        }
       }
     }
   }

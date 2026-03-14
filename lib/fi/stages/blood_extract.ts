@@ -5,6 +5,7 @@
 import type { StageContext, StageResult } from "./types";
 
 const BLOOD_TYPES = ["blood_pdf", "blood_csv"] as const;
+type BloodUploadType = (typeof BLOOD_TYPES)[number];
 
 export type BloodExtractInput = {
   uploads: Array<{
@@ -38,7 +39,9 @@ export async function runBloodExtract(
 ): Promise<StageResult<BloodExtractOutput>> {
   const { tenantId, caseId, supabase } = ctx;
 
-  const bloodUploads = input.uploads.filter((u) => BLOOD_TYPES.includes(u.type));
+  const bloodUploads = input.uploads.filter((u) =>
+    BLOOD_TYPES.includes(u.type as BloodUploadType)
+  );
   const markers: BloodMarker[] = [];
 
   for (const u of bloodUploads) {
