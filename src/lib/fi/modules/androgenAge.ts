@@ -86,6 +86,7 @@ export function computeAndrogenAgeModule(
   const annotations: string[] = [];
   if (freeTPct == null) annotations.push("Free T not available");
   if (trt) annotations.push("TRT: yes");
+  if (dhtManagement) annotations.push("DHT management: yes");
 
   const ages: number[] = [];
   for (let a = AGE_MIN; a <= AGE_MAX; a += AGE_STEP) ages.push(a);
@@ -97,10 +98,11 @@ export function computeAndrogenAgeModule(
   const trtMult = trt ? TRT_MULT : 1;
   const unmanaged = normalized.map((v) => v * ftFactor * trtMult);
   const dhtManaged = unmanaged.map((v) => v * DHT_MANAGED_MULT);
+  const selectedCurve = dhtManagement ? dhtManaged : unmanaged;
 
   const ageIdx = ages.findIndex((a) => a >= patientAge);
   const idx = ageIdx >= 0 ? Math.min(ageIdx, ages.length - 1) : ages.length - 1;
-  const patientValue = unmanaged[idx];
+  const patientValue = selectedCurve[idx];
 
   const narrative: AndrogenAgeNarrative = {
     bullets: NARRATIVE_BULLETS,
