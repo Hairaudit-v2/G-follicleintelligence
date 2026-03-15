@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 
+import { HairEcosystemNav } from "@/components/layout/hair-ecosystem-nav";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen font-sans antialiased">
+        <HairEcosystemNav currentSite="follicleintelligence" />
         <Header />
         <main>{children}</main>
         <Footer />
