@@ -24,7 +24,7 @@ export default function ContactPage() {
                   For platform access, enterprise demos, and technical onboarding.
                 </p>
                 <Button asChild variant="outline" className="mt-6">
-                  <a href="mailto:hello@follicleintelligence.com">hello@follicleintelligence.com</a>
+                  <a href="mailto:hello@follicleintelligence.ai">hello@follicleintelligence.ai</a>
                 </Button>
               </CardContent>
             </Card>
@@ -38,7 +38,7 @@ export default function ContactPage() {
                   Discuss white-label deployments, volume licensing, and strategic partnerships.
                 </p>
                 <Button asChild variant="outline" className="mt-6">
-                  <a href="mailto:sales@follicleintelligence.com">sales@follicleintelligence.com</a>
+                  <a href="mailto:sales@follicleintelligence.ai">sales@follicleintelligence.ai</a>
                 </Button>
               </CardContent>
             </Card>
@@ -51,25 +51,25 @@ export default function ContactPage() {
               icon: Building2,
               title: "Enterprise Demo",
               copy: "Evaluate full platform intelligence and deployment pathways.",
-              email: "sales@follicleintelligence.com?subject=Enterprise%20Demo%20Request",
+              email: "sales@follicleintelligence.ai?subject=Enterprise%20Demo%20Request",
             },
             {
               icon: ShieldCheck,
               title: "White-Label Consultation",
               copy: "Plan branded deployments for clinics, groups, or institutions.",
-              email: "sales@follicleintelligence.com?subject=White-Label%20Consultation",
+              email: "sales@follicleintelligence.ai?subject=White-Label%20Consultation",
             },
             {
               icon: Handshake,
               title: "Strategic Partnership",
               copy: "Explore co-development and future specialty collaboration.",
-              email: "sales@follicleintelligence.com?subject=Strategic%20Partnership",
+              email: "sales@follicleintelligence.ai?subject=Strategic%20Partnership",
             },
             {
               icon: MessageSquare,
               title: "Institutional Interest",
               copy: "Discuss IIHR-aligned standards and advisory pathways.",
-              email: "hello@follicleintelligence.com?subject=Institutional%20Interest",
+              email: "hello@follicleintelligence.ai?subject=Institutional%20Interest",
             },
           ].map((item) => (
             <FadeIn key={item.title}>

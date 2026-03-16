@@ -11,7 +11,7 @@ const ECOSYSTEM_LINKS: { id: EcosystemSite; label: string; href: string }[] = [
   {
     id: "follicleintelligence",
     label: "Follicle Intelligence",
-    href: "https://follicleintelligence.com",
+    href: "https://www.follicleintelligence.ai",
   },
 ];
 
