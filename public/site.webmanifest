@@ -1,0 +1,26 @@
+{
+  "name": "Follicle Intelligence",
+  "short_name": "Follicle Intelligence",
+  "description": "Enterprise clinical auditing and benchmarking intelligence software.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1217",
+  "theme_color": "#2aa8dc",
+  "icons": [
+    {
+      "src": "/icons/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/android-chrome-196x196.png",
+      "sizes": "196x196",
+      "type": "image/png"
+    }
+  ]
+}

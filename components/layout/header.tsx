@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -27,10 +28,20 @@ export function Header() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-3 font-semibold tracking-tight">
-          <span className="inline-flex size-7 items-center justify-center rounded-sm border border-border/80 bg-card text-[10px] font-bold tracking-widest text-primary/90">
-            FI
-          </span>
-          <span className="text-sm text-foreground md:text-base">Follicle Intelligence</span>
+          <Image
+            src="/icons/favicon-32x32.png"
+            alt="Follicle Intelligence"
+            width={32}
+            height={32}
+            className="size-8 rounded-[6px]"
+            priority
+          />
+          <div className="flex flex-col leading-none">
+            <span className="text-sm text-foreground md:text-base">Follicle Intelligence</span>
+            <span className="hidden text-[10px] uppercase tracking-[0.25em] text-muted-foreground md:block">
+              AI Powered Audits
+            </span>
+          </div>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">

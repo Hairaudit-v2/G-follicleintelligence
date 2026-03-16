@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 
 import { HairEcosystemNav } from "@/components/layout/hair-ecosystem-nav";
@@ -7,10 +7,31 @@ import { Footer } from "@/components/layout/footer";
 
 import "./globals.css";
 
+const siteDescription =
+  "Enterprise clinical auditing and benchmarking intelligence software. HairAudit is the first application powered by the Follicle Intelligence engine.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.follicleintelligence.ai"),
   title: "Follicle Intelligence | Clinical Auditing Intelligence Platform",
-  description:
-    "Enterprise clinical auditing and benchmarking intelligence software. HairAudit is the first application powered by the Follicle Intelligence engine.",
+  description: siteDescription,
+  applicationName: "Follicle Intelligence",
+  manifest: "/site.webmanifest",
+  openGraph: {
+    title: "Follicle Intelligence | Clinical Auditing Intelligence Platform",
+    description: siteDescription,
+    siteName: "Follicle Intelligence",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Follicle Intelligence | Clinical Auditing Intelligence Platform",
+    description: siteDescription,
+  },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#2aa8dc",
 };
 
 export default function RootLayout({
