@@ -78,11 +78,11 @@ export default function MethodologyPage() {
             <p className="fi-trust text-xs uppercase tracking-[0.22em]">Standards and Trust</p>
             <p className="mt-4 max-w-4xl text-muted-foreground">
               Methodology layers are aligned with standards-led audit principles and structured to
-              support institutional collaboration, including IIHR advisory alignment.
+              support institutional collaboration, including IIOHR advisory alignment.
             </p>
             <div className="mt-7 flex flex-wrap gap-4">
               <Button asChild>
-                <Link href="/iihr">Review IIHR Alignment</Link>
+                <Link href="/iihr">Review IIOHR Alignment</Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href="/contact?intent=institution">Discuss Institutional Participation</Link>

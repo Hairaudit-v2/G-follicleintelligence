@@ -6,7 +6,7 @@ export const PRIMARY_NAV = [
   { href: "/methodology", label: "Methodology" },
   { href: "/dashboard-demo", label: "Dashboard Demo" },
   { href: "/future-verticals", label: "Future Verticals" },
-  { href: "/iihr", label: "IIHR" },
+  { href: "/iihr", label: "IIOHR" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];

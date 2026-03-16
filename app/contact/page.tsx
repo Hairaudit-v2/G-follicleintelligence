@@ -68,7 +68,7 @@ export default function ContactPage() {
             {
               icon: MessageSquare,
               title: "Institutional Interest",
-              copy: "Discuss IIHR-aligned standards and advisory pathways.",
+              copy: "Discuss IIOHR-aligned standards and advisory pathways.",
               email: "hello@follicleintelligence.ai?subject=Institutional%20Interest",
             },
           ].map((item) => (

@@ -11,6 +11,14 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["system-ui", "ui-sans-serif", "sans-serif"],
+        serif: [
+          "Iowan Old Style",
+          "Palatino Linotype",
+          "Book Antiqua",
+          "Georgia",
+          "ui-serif",
+          "serif",
+        ],
       },
       borderRadius: {
         lg: "var(--radius)",
