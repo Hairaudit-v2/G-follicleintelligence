@@ -375,9 +375,15 @@ export default function HomePage() {
       </section>
 
       <GlobalHairIntelligenceSection
-        variant="fi"
+        variant="follicle-intelligence"
         heading="The Engine Behind the Ecosystem"
-        description="Follicle Intelligence is the intelligence core—powering cross-platform analysis, pattern recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR. One engine; system-wide learning and authority."
+        description={`Follicle Intelligence is the core system powering the entire ecosystem—driving cross-platform analysis, pattern recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR.
+
+One engine.
+Continuous learning.
+System-wide intelligence.
+
+Built to scale across clinics, platforms, and global networks.`}
         size="hero"
         theme="dark"
       />
@@ -385,9 +391,9 @@ export default function HomePage() {
       <Section className="py-14 md:py-16">
         <FadeIn>
           <SectionIntro
-            eyebrow="The engine behind the ecosystem"
-            title="One intelligence layer. Three critical outputs."
-            description="Follicle Intelligence does not replace clinical systems. It consumes normalized signals and powers what matters for quality and governance."
+            eyebrow="Engine outputs"
+            title="What the intelligence engine powers next."
+            description="Every layer below is an output or application of Follicle Intelligence, translated into scoring, training feedback, and benchmarking workflows."
           />
           <ul className="mt-10 grid gap-6 border-t border-border/50 pt-10 sm:grid-cols-3">
             <li className="flex flex-col gap-2">

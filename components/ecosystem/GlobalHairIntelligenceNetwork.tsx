@@ -21,8 +21,8 @@ const OUTER_NODE_R = 88;
 const BASE_ANGLES = [270, 30, 150];
 
 export type GlobalNetworkTheme = "light" | "dark" | "auto";
-export type GlobalNetworkVariant = "hli" | "hairaudit" | "fi" | "iiohr";
-export type GlobalNetworkNodeId = "hli" | "hairaudit" | "fi" | "iiohr";
+export type GlobalNetworkVariant = "hli" | "hairaudit" | "follicle-intelligence" | "iiohr" | "fi";
+export type GlobalNetworkNodeId = "hli" | "hairaudit" | "follicle-intelligence" | "iiohr";
 
 export interface OuterNodeData {
   id: GlobalNetworkNodeId;
@@ -173,7 +173,8 @@ export function GlobalHairIntelligenceNetwork({
   const resolvedTheme = useResolvedTheme(theme);
   const colors = useMemo(() => getThemeColors(resolvedTheme), [resolvedTheme]);
 
-  const highlightNode = highlightNodeProp ?? variant;
+  const normalizedVariant = variant === "fi" ? "follicle-intelligence" : variant;
+  const highlightNode = highlightNodeProp ?? normalizedVariant;
   const [expandedId, setExpandedId] = useState<GlobalNetworkNodeId | null>(null);
   const [hoverId, setHoverId] = useState<GlobalNetworkNodeId | null>(null);
 
@@ -183,6 +184,8 @@ export function GlobalHairIntelligenceNetwork({
   const positions = useMemo(() => [pos1, pos2, pos3], [pos1, pos2, pos3]);
 
   const defsId = useRef(`ghin-${Math.random().toString(36).slice(2, 9)}`).current;
+
+  const centerLink = nodeLinks?.["follicle-intelligence"];
 
   return (
     <div
@@ -253,12 +256,12 @@ export function GlobalHairIntelligenceNetwork({
         <CenterNode
           colors={colors}
           animate={!noAnimation}
-          isHighlight={highlightNode === "fi"}
+          isHighlight={highlightNode === "follicle-intelligence"}
           defsId={defsId}
           size={size}
-          hasLink={Boolean(nodeLinks?.fi)}
-          onClick={nodeLinks?.fi ? () => window.open(nodeLinks!.fi) : undefined}
-          onMouseEnter={interactive ? () => setHoverId("fi") : undefined}
+          hasLink={Boolean(centerLink)}
+          onClick={centerLink ? () => window.open(centerLink) : undefined}
+          onMouseEnter={interactive ? () => setHoverId("follicle-intelligence") : undefined}
           onMouseLeave={interactive ? () => setHoverId(null) : undefined}
         />
 

@@ -1,7 +1,11 @@
 "use client";
 
 import { GlobalHairIntelligenceNetwork } from "@/components/ecosystem/GlobalHairIntelligenceNetwork";
-import type { GlobalNetworkTheme, GlobalNetworkVariant } from "@/components/ecosystem/GlobalHairIntelligenceNetwork";
+import type {
+  GlobalNetworkNodeId,
+  GlobalNetworkTheme,
+  GlobalNetworkVariant,
+} from "@/components/ecosystem/GlobalHairIntelligenceNetwork";
 import { GLOBAL_NETWORK_NODE_LINKS } from "@/components/ecosystem/constants";
 
 export type { GlobalNetworkVariant };
@@ -22,7 +26,7 @@ export interface GlobalHairIntelligenceSectionProps {
   /** Optional className for the section wrapper. */
   className?: string;
   /** Override node links (default: canonical ecosystem URLs). */
-  nodeLinks?: Partial<Record<"hli" | "hairaudit" | "fi" | "iiohr", string>>;
+  nodeLinks?: Partial<Record<GlobalNetworkNodeId, string>>;
 }
 
 /**
@@ -53,15 +57,12 @@ export function GlobalHairIntelligenceSection({
         >
           {heading}
         </h2>
-        <p
-          className="mx-auto mt-4 max-w-xl text-center text-muted-foreground leading-relaxed"
-        >
+        <p className="mx-auto mt-4 max-w-3xl whitespace-pre-line text-center leading-relaxed text-muted-foreground">
           {description}
         </p>
         <div className="mx-auto mt-8 min-h-[520px] w-full max-w-[min(1000px,100%)] overflow-visible md:min-h-[640px] lg:min-h-[720px]">
           <GlobalHairIntelligenceNetwork
             variant={variant}
-            highlightNode={variant}
             interactive
             theme={theme}
             showBackground={false}
