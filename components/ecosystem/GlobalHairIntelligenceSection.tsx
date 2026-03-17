@@ -58,7 +58,7 @@ export function GlobalHairIntelligenceSection({
         >
           {description}
         </p>
-        <div className="mx-auto mt-8 max-w-[min(1000px,100%)]">
+        <div className="mx-auto mt-8 min-h-[520px] w-full max-w-[min(1000px,100%)] overflow-visible md:min-h-[640px] lg:min-h-[720px]">
           <GlobalHairIntelligenceNetwork
             variant={variant}
             highlightNode={variant}

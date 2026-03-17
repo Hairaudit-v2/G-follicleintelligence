@@ -104,19 +104,19 @@ function getThemeColors(resolvedTheme: "light" | "dark") {
       }
     : {
         bg: "#F9F9F7",
-        ringStroke: "#E8E6E0",
-        lineStroke: "#D4D2CC",
-        lineAnimated: "rgba(166,139,75,0.6)",
+        ringStroke: "#B8B4AC",
+        lineStroke: "#7A7872",
+        lineAnimated: "rgba(139,115,64,0.85)",
         centerFill: "url(#ghin-gold-center)",
-        centerStroke: "#A68B4B",
-        centerGlow: "rgba(198,167,94,0.25)",
+        centerStroke: "#8B7340",
+        centerGlow: "rgba(166,139,75,0.35)",
         outerFill: "#FFFFFF",
-        outerStroke: "#E0DED8",
-        outerHighlightStroke: "rgba(198,167,94,0.5)",
-        textPrimary: "#2C2A26",
-        textSecondary: "#5C5A56",
-        textMuted: "#8A8884",
-        networkLabel: "#8A8884",
+        outerStroke: "#9A9892",
+        outerHighlightStroke: "rgba(139,115,64,0.9)",
+        textPrimary: "#1A1917",
+        textSecondary: "#3D3B38",
+        textMuted: "#5C5A56",
+        networkLabel: "#5C5A56",
       };
 }
 
@@ -186,14 +186,15 @@ export function GlobalHairIntelligenceNetwork({
 
   return (
     <div
-      className={`relative w-full max-w-[1000px] mx-auto ${className}`}
+      className={`relative mx-auto w-full max-w-[1000px] min-h-[520px] overflow-visible md:min-h-[640px] lg:min-h-[720px] ${className}`}
       style={{ aspectRatio: "1" }}
       role="img"
       aria-label={title}
     >
       <svg
         viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
-        className="w-full h-full select-none"
+        preserveAspectRatio="xMidYMid meet"
+        className="h-full w-full select-none"
         style={{ overflow: "visible" }}
       >
         <defs>
