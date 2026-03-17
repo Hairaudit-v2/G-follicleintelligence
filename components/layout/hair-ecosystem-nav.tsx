@@ -2,29 +2,21 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import type { EcosystemSiteId } from "@/lib/site-navigation";
+import { ECOSYSTEM_BAND } from "@/lib/site-navigation";
 
-export type EcosystemSite = "hli" | "hairaudit" | "follicleintelligence";
-
-const ECOSYSTEM_LINKS: { id: EcosystemSite; label: string; href: string }[] = [
-  { id: "hli", label: "Hair Longevity Institute", href: "https://hairlongevityinstitute.com" },
-  { id: "hairaudit", label: "HairAudit", href: "https://hairaudit.com" },
-  {
-    id: "follicleintelligence",
-    label: "Follicle Intelligence",
-    href: "https://www.follicleintelligence.ai",
-  },
-];
+export type EcosystemSite = EcosystemSiteId;
 
 export interface HairEcosystemNavProps {
   /** Which site is currently active for active-state styling */
-  currentSite?: EcosystemSite;
+  currentSite?: EcosystemSiteId;
   className?: string;
 }
 
 export function HairEcosystemNav({ currentSite, className }: HairEcosystemNavProps) {
   return (
     <nav
-      aria-label="Hair Intelligence Ecosystem"
+      aria-label="Surgical Intelligence Ecosystem"
       className={cn(
         "border-b border-border/40 bg-background/70 backdrop-blur-sm",
         "flex items-center justify-between gap-4 overflow-x-auto px-4 py-2 md:px-6",
@@ -35,12 +27,12 @@ export function HairEcosystemNav({ currentSite, className }: HairEcosystemNavPro
         className="min-w-0 shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/90"
         aria-hidden
       >
-        Part of the Hair Intelligence Ecosystem
+        {ECOSYSTEM_BAND.tagline}
       </span>
       <div className="flex min-w-0 flex-1 justify-end gap-1 overflow-x-auto md:gap-2 md:flex-initial">
-        {ECOSYSTEM_LINKS.map((item) => {
+        {ECOSYSTEM_BAND.links.map((item) => {
           const isCurrent = currentSite === item.id;
-          const isExternal = !isCurrent;
+          const isExternal = item.href.startsWith("http");
 
           return (
             <Link

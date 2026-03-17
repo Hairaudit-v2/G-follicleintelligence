@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 import { IiohrSeal } from "@/components/brand/iiohr-logo";
-import { FOOTER_NAV } from "@/lib/site-navigation";
+import { ECOSYSTEM_BAND, FOOTER_NAV } from "@/lib/site-navigation";
 
 export function Footer() {
   return (
@@ -84,7 +84,27 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div className="mt-8 border-t border-border/50 pt-8 text-xs text-muted-foreground">
+        <div className="mt-10 border-t border-border/50 pt-8">
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-6 sm:gap-y-1">
+            <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {ECOSYSTEM_BAND.tagline}
+            </span>
+            <nav aria-label="Surgical Intelligence Ecosystem" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+              {ECOSYSTEM_BAND.links.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  {...(item.href.startsWith("http") && { target: "_blank", rel: "noopener noreferrer" })}
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {item.label}
+                  <span className="ml-1 text-[10px] text-muted-foreground/70">({item.role})</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+        <div className="mt-6 border-t border-border/40 pt-6 text-xs text-muted-foreground">
           © {new Date().getFullYear()} Follicle Intelligence. All rights reserved.
         </div>
       </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { IiohrSeal } from "@/components/brand/iiohr-logo";
+import { EcosystemDiagramAnimated } from "@/components/EcosystemDiagramAnimated";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,6 @@ import {
   Landmark,
   Layers3,
   LineChart,
-  Microscope,
   Radar,
   ScanSearch,
   ShieldCheck,
@@ -237,18 +237,15 @@ export default function HomePage() {
           <FadeIn className="md:col-span-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-primary/90">
               <BadgeCheck className="h-3.5 w-3.5" />
-              Clinical Auditing Intelligence Platform
+              Core Engine of the Ecosystem
             </div>
             <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-foreground md:text-6xl">
-              Clinical Auditing Intelligence for Hair Restoration and Beyond
+              The intelligence engine behind audit, training, and benchmarking.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Follicle Intelligence powers audit scoring, outcome analysis, benchmarking, quality
-              assurance, and white-label intelligence systems for clinics, groups, and institutions.
-            </p>
-            <p className="fi-trust mt-5 text-sm font-medium">
-              Hair Longevity Institute drives biology. HairAudit delivers the audit surface. Follicle
-              Intelligence is the core engine.
+              Follicle Intelligence is the core engine. It powers HairAudit scoring, IIOHR training
+              feedback, and global surgical benchmarking—without being the operational database for any
+              source system.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <Button asChild size="lg" className="h-11 rounded-xl px-6">
@@ -377,6 +374,106 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* The Engine Behind the Ecosystem — prominent placement just below hero */}
+      <section className="relative border-b border-border/50 bg-[linear-gradient(180deg,hsl(var(--background))_0%,hsl(216_32%_6%)_100%)] py-16 md:py-20">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,hsl(var(--primary)/0.07),transparent_50%)]" aria-hidden />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <FadeIn>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">
+                Surgical Intelligence Ecosystem
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+                The Engine Behind the Ecosystem
+              </h2>
+              <p className="mt-5 text-base leading-7 text-muted-foreground md:text-lg">
+                Follicle Intelligence is the intelligence core—powering cross-platform analysis, pattern
+                recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR.
+                One engine; system-wide learning and authority.
+              </p>
+            </div>
+            <div className="mt-12 md:mt-16">
+              <EcosystemDiagramAnimated
+                currentSite="follicleintelligence"
+                animated
+                variant="follicleintelligence"
+              />
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      <Section className="py-14 md:py-16">
+        <FadeIn>
+          <SectionIntro
+            eyebrow="The engine behind the ecosystem"
+            title="One intelligence layer. Three critical outputs."
+            description="Follicle Intelligence does not replace clinical systems. It consumes normalized signals and powers what matters for quality and governance."
+          />
+          <ul className="mt-10 grid gap-6 border-t border-border/50 pt-10 sm:grid-cols-3">
+            <li className="flex flex-col gap-2">
+              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+                HairAudit scoring
+              </span>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Domain-level audit scorecards, cohort comparison, and review workflows for hair restoration outcomes.
+              </p>
+            </li>
+            <li className="flex flex-col gap-2">
+              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+                IIOHR training feedback
+              </span>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Structured feedback and methodology-backed signals that support training and institutional improvement.
+              </p>
+            </li>
+            <li className="flex flex-col gap-2">
+              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+                Global surgical benchmarking
+              </span>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Doctor, clinic, and group performance against peer cohorts and standards—without exposing raw operational data.
+              </p>
+            </li>
+          </ul>
+        </FadeIn>
+      </Section>
+
+      <Section className="border-y border-border/50 py-14 md:py-16">
+        <FadeIn>
+          <SectionIntro
+            eyebrow="What it analyses"
+            title="Evidence in. Intelligence out."
+            description="The engine structures procedural evidence into analysable dimensions that drive scoring and improvement."
+          />
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { term: "Graft quality", desc: "Extraction integrity, handling, and viability signals." },
+              { term: "Density", desc: "Distribution, coverage, and design alignment." },
+              { term: "Donor preservation", desc: "Donor management and long-term sustainability." },
+              { term: "Outcomes", desc: "Follow-up evidence, survival, and patient-reported alignment." },
+            ].map(({ term, desc }) => (
+              <div key={term} className="rounded-[1.25rem] border border-border/70 bg-card/40 px-5 py-4">
+                <p className="text-sm font-semibold text-foreground">{term}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-14 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-border/60 bg-background/50 py-8 px-4 sm:gap-3">
+            <span className="rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-sm font-semibold text-foreground">Analyse</span>
+            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+            <span className="rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-sm font-semibold text-foreground">Score</span>
+            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+            <span className="rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-sm font-semibold text-foreground">Learn</span>
+            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+            <span className="rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-sm font-semibold text-foreground">Improve</span>
+          </div>
+          <p className="mt-4 text-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            System loop
+          </p>
+        </FadeIn>
+      </Section>
+
       <Section className="py-12 md:py-14">
         <FadeIn>
           <div className="grid gap-4 md:grid-cols-5">
@@ -403,8 +500,8 @@ export default function HomePage() {
         <FadeIn>
           <SectionIntro
             eyebrow="What The Platform Does"
-            title="A serious intelligence layer for auditing, benchmarking, and quality improvement."
-            description="The platform is designed for clinical environments that need more than generic dashboards. It structures evidence, produces defensible scores, and supports formal review, governance, and white-label deployment."
+            title="Structured evidence. Defensible scores. Governance-ready."
+            description="Evidence in; domain-level assessments, benchmarks, and review workflows out. Supports formal governance and white-label deployment."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
@@ -431,7 +528,7 @@ export default function HomePage() {
           <SectionIntro
             eyebrow="How It Works"
             title="Upload. Analyze. Score. Benchmark. Improve."
-            description="A modern audit workflow that turns raw clinical evidence into benchmarked intelligence and practical quality improvement signals."
+            description="Raw evidence in; benchmarked intelligence and improvement signals out."
           />
         </FadeIn>
         <div className="mt-10 grid gap-5 xl:grid-cols-5">
@@ -669,7 +766,7 @@ export default function HomePage() {
                   desc: "A formal scoring framework that supports consistency, comparability, and defensible assessment.",
                 },
                 {
-                  icon: Microscope,
+                  icon: ClipboardList,
                   title: "Review capability",
                   desc: "Case-level review layers for adjudication, commentary, and standards-led oversight.",
                 },
