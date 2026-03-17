@@ -6,7 +6,7 @@ export const PRIMARY_NAV = [
   { href: "/methodology", label: "Methodology" },
   { href: "/dashboard-demo", label: "Dashboard Demo" },
   { href: "/future-verticals", label: "Future Verticals" },
-  { href: "/iihr", label: "IIOHR" },
+  { href: "https://iiohr.com", label: "IIOHR" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -25,7 +25,7 @@ export type EcosystemSiteId = "iiohr" | "hairaudit" | "follicleintelligence" | "
 export const ECOSYSTEM_BAND = {
   tagline: "Part of the Surgical Intelligence Ecosystem™",
   links: [
-    { id: "iiohr" as EcosystemSiteId, label: "IIOHR", role: "training", href: "/iihr" },
+    { id: "iiohr" as EcosystemSiteId, label: "IIOHR", role: "training", href: "https://iiohr.com" },
     { id: "hairaudit" as EcosystemSiteId, label: "HairAudit", role: "measurement", href: "https://hairaudit.com" },
     { id: "follicleintelligence" as EcosystemSiteId, label: "Follicle Intelligence", role: "analysis", href: "/" },
     { id: "hli" as EcosystemSiteId, label: "Hair Longevity Institute", role: "biology", href: "https://hairlongevityinstitute.com" },
@@ -45,6 +45,6 @@ export const ECOSYSTEM_DIAGRAM_NODES = {
   satellites: [
     { id: "hairaudit" as EcosystemSiteId, label: "HairAudit™", roleLabel: "Surgical audit and scoring", href: "https://hairaudit.com" },
     { id: "hli" as EcosystemSiteId, label: "Hair Longevity Institute™", roleLabel: "Diagnosis and treatment pathway", href: "https://hairlongevityinstitute.com" },
-    { id: "iiohr" as EcosystemSiteId, label: "IIOHR™", roleLabel: "Training and certification", href: "/iihr" },
+    { id: "iiohr" as EcosystemSiteId, label: "IIOHR™", roleLabel: "Training and certification", href: "https://iiohr.com" },
   ],
 } as const;

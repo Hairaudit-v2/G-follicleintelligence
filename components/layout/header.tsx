@@ -13,11 +13,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PRIMARY_NAV } from "@/lib/site-navigation";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const pathname = usePathname();
+  const headerNav: { href: string; label: string }[] = [];
 
   return (
     <motion.header
@@ -31,7 +31,7 @@ export function Header() {
           <div className="fi-panel-muted flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70">
             <Image
               src="/icons/favicon-32x32.png"
-              alt="Follicle Intelligence"
+              alt="Follicle"
               width={30}
               height={30}
               className="size-[30px] rounded-[8px]"
@@ -39,15 +39,15 @@ export function Header() {
             />
           </div>
           <div className="min-w-0 leading-none">
-            <span className="block text-sm text-foreground md:text-base">Follicle Intelligence</span>
+            <span className="block text-sm text-foreground md:text-base">Follicle</span>
             <span className="mt-1 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground md:text-[11px]">
-              Clinical Audit Intelligence
+              Clinical Audit
             </span>
           </div>
         </Link>
 
         <nav className="hidden items-center gap-5 lg:flex">
-          {PRIMARY_NAV.map((item) => (
+          {headerNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -74,7 +74,7 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {PRIMARY_NAV.map((item) => (
+              {headerNav.map((item) => (
                 <DropdownMenuItem key={item.href} asChild>
                   <Link href={item.href}>{item.label}</Link>
                 </DropdownMenuItem>
