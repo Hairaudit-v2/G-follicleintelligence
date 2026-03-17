@@ -13,11 +13,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PRIMARY_NAV } from "@/lib/site-navigation";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const pathname = usePathname();
-  const headerNav: { href: string; label: string }[] = [];
+  const headerNav = PRIMARY_NAV.filter((item) => item.label.toLowerCase() !== "iiohr");
 
   return (
     <motion.header
@@ -31,7 +32,7 @@ export function Header() {
           <div className="fi-panel-muted flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70">
             <Image
               src="/icons/favicon-32x32.png"
-              alt="Follicle"
+              alt="Follicle Intelligence"
               width={30}
               height={30}
               className="size-[30px] rounded-[8px]"
@@ -39,9 +40,9 @@ export function Header() {
             />
           </div>
           <div className="min-w-0 leading-none">
-            <span className="block text-sm text-foreground md:text-base">Follicle</span>
+            <span className="block text-sm text-foreground md:text-base">Follicle Intelligence</span>
             <span className="mt-1 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground md:text-[11px]">
-              Clinical Audit
+              Clinical Audit Intelligence
             </span>
           </div>
         </Link>
