@@ -82,7 +82,7 @@ export default function MethodologyPage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-4">
               <Button asChild>
-                <Link href="/iihr">Review IIOHR Alignment</Link>
+                <Link href="/contact?intent=institution">Review IIOHR Alignment</Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href="/contact?intent=institution">Discuss Institutional Participation</Link>

@@ -733,7 +733,7 @@ Built to scale across clinics, platforms, and global networks.`}
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button asChild className="rounded-xl">
-                  <Link href="/iihr">Explore IIOHR</Link>
+                  <Link href="/methodology">Explore IIOHR Methodology</Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-xl">
                   <Link href="/methodology">View Methodology</Link>
