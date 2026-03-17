@@ -1,6 +1,15 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Audit Dashboard Demo: Benchmarking & Quality Views | Follicle Intelligence",
+  description:
+    "See executive, clinical, and operations dashboards. Benchmark scores, quality signals, and training visibility—before you deploy.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -58,6 +67,7 @@ export default function DashboardDemoPage() {
                 <Link href="/contact?intent=partnership">Request Strategic Briefing</Link>
               </Button>
             </div>
+            <EcosystemMention className="mt-8 pt-6 border-t border-border/50" />
           </div>
         </FadeIn>
       </Section>

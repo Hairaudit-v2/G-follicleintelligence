@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { IiohrSeal } from "@/components/brand/iiohr-logo";
-import { GlobalHairIntelligenceSection } from "@/components/ecosystem/GlobalHairIntelligenceSection";
+import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +32,37 @@ import {
   Users,
   Workflow,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Enterprise Clinical Audit Intelligence for Hair & Procedural Medicine | Follicle Intelligence",
+  description:
+    "Score, benchmark, and govern hair transplant and surgical outcomes. The intelligence engine behind HairAudit—for clinics, groups, and enterprise. Audit scoring, transparency, and quality systems.",
+};
+
+const ECOSYSTEM_HEADING = "The Engine Behind the Ecosystem";
+const ECOSYSTEM_DESCRIPTION = `Follicle Intelligence is the core system powering the entire ecosystem—driving cross-platform analysis, pattern recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR.
+
+One engine.
+Continuous learning.
+System-wide intelligence.
+
+Built to scale across clinics, platforms, and global networks.`;
+
+const GlobalHairIntelligenceSectionDynamic = dynamic(
+  () =>
+    import("@/components/ecosystem/GlobalHairIntelligenceSection").then((m) => ({
+      default: m.GlobalHairIntelligenceSection,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <GlobalHairIntelligenceSectionPlaceholder
+        heading={ECOSYSTEM_HEADING}
+        description={ECOSYSTEM_DESCRIPTION}
+      />
+    ),
+  }
+);
 
 const HERO_METRICS = [
   { label: "Audit Score Coverage", value: "24 domains" },
@@ -374,16 +407,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <GlobalHairIntelligenceSection
+      <GlobalHairIntelligenceSectionDynamic
         variant="follicle-intelligence"
-        heading="The Engine Behind the Ecosystem"
-        description={`Follicle Intelligence is the core system powering the entire ecosystem—driving cross-platform analysis, pattern recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR.
-
-One engine.
-Continuous learning.
-System-wide intelligence.
-
-Built to scale across clinics, platforms, and global networks.`}
+        heading={ECOSYSTEM_HEADING}
+        description={ECOSYSTEM_DESCRIPTION}
         size="hero"
         theme="dark"
       />

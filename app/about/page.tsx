@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
 import { FadeIn } from "@/components/ui/fade-in";
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "About Us: Clinical Audit Intelligence for Hair & Procedural Medicine | Follicle Intelligence",
+  description:
+    "We build the intelligence layer for audit scoring, benchmarking, and quality improvement—not the clinic. Trusted by practices, groups, and enterprise operators worldwide.",
+};
 import { Section } from "@/components/layout/section";
 
 export default function AboutPage() {
@@ -31,9 +40,37 @@ export default function AboutPage() {
           <FadeIn delay={0.2}>
             <h2 className="text-xl font-semibold text-foreground">How we are staged</h2>
             <p className="mt-4 leading-relaxed text-muted-foreground">
-              HairAudit is the first application powered by Follicle Intelligence. Hair restoration is
-              launch focus, with architecture designed to scale into cosmetic surgery, plastic surgery,
+              <Link
+                href="https://hairaudit.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                HairAudit
+              </Link>{" "}
+              is the first application powered by Follicle Intelligence. Hair restoration is launch
+              focus, with architecture designed to scale into cosmetic surgery, plastic surgery,
               regenerative medicine, dermatology, dental aesthetics, and broader procedural medicine.
+            </p>
+            <p className="mt-4 leading-relaxed text-muted-foreground">
+              <Link
+                href="https://hairlongevityinstitute.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                Hair Longevity Institute
+              </Link>{" "}
+              (biology and treatment pathways) and{" "}
+              <Link
+                href="https://iiohr.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                IIOHR
+              </Link>{" "}
+              (training and certification) complete the ecosystem.
             </p>
           </FadeIn>
         </div>

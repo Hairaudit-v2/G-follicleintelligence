@@ -1,6 +1,14 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "HairAudit: Hair Restoration Audit & Benchmarking AI | Follicle Intelligence",
+  description:
+    "The first live application on the Follicle Intelligence engine. Audit outcomes, benchmark doctors and clinics, and surface training and quality improvement signals.",
+};
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,6 +65,38 @@ export default function HairIntelligencePage() {
             <p className="fi-trust text-xs uppercase tracking-[0.24em]">Core Positioning</p>
             <p className="mt-3 text-lg text-muted-foreground">
               HairAudit is the first application. Follicle Intelligence is the engine.
+            </p>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Part of the Surgical Intelligence Ecosystem™ with{" "}
+              <Link
+                href="https://hairlongevityinstitute.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                Hair Longevity Institute
+              </Link>{" "}
+              (biology & treatment) and{" "}
+              <Link
+                href="https://iiohr.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                IIOHR
+              </Link>{" "}
+              (training & certification).
+            </p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              For a long-form overview of AI hair transplant analysis and the future of surgical
+              evaluation, see our{" "}
+              <Link
+                href="/ai-hair-transplant-analysis"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                pillar page
+              </Link>
+              .
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Button asChild>

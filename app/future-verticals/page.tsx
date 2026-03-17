@@ -1,6 +1,15 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Procedural Medicine Intelligence Beyond Hair: Cosmetic, Dental, Dermatology | Follicle Intelligence",
+  description:
+    "Hair restoration first; the engine is built for expansion. Roadmap to cosmetic surgery, plastic surgery, regenerative medicine, and dermatology audit intelligence.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,6 +98,7 @@ export default function FutureVerticalsPage() {
                 <Link href="/platform">View Platform Architecture</Link>
               </Button>
             </div>
+            <EcosystemMention className="mt-8 pt-6 border-t border-border/50" />
           </div>
         </FadeIn>
       </Section>

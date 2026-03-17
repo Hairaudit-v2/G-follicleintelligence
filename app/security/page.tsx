@@ -1,6 +1,15 @@
 import { FadeIn } from "@/components/ui/fade-in";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Healthcare Data Security & Compliance for Clinical Audit | Follicle Intelligence",
+  description:
+    "Encryption, access control, and compliance-first infrastructure for procedural audit data. Built for clinics and enterprises that handle sensitive health information.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Lock, Shield, FileCheck, Server } from "lucide-react";
 
@@ -51,6 +60,7 @@ export default function SecurityPage() {
             </FadeIn>
           ))}
         </div>
+        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
       </Section>
     </>
   );

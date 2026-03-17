@@ -1,8 +1,33 @@
-import { FadeIn } from "@/components/ui/fade-in";
-import { AnimatedDivider } from "@/components/ui/animated-divider";
-import { ArchitectureDiagram } from "@/components/ui/architecture-diagram";
+import type { Metadata } from "next";
+import dynamic from "next/dynamic";
+
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
+import { FadeIn } from "@/components/ui/fade-in";
+import { AnimatedDivider } from "@/components/ui/animated-divider";
+
+const ArchitectureDiagramDynamic = dynamic(
+  () =>
+    import("@/components/ui/architecture-diagram").then((m) => ({
+      default: m.ArchitectureDiagram,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="min-h-[320px] w-full rounded-xl border border-border/50 bg-card/40"
+        aria-hidden
+      />
+    ),
+  }
+);
+
+export const metadata: Metadata = {
+  title: "AI Audit Modules: Blood, Imaging, Scoring & Reporting | Follicle Intelligence",
+  description:
+    "Composable engines: blood marker intelligence, image signal extraction, progression velocity, and structured reporting. Use as a full pipeline or individual modules.",
+};
 
 const MODULES = [
   {
@@ -68,7 +93,7 @@ export default function ModulesPage() {
           <div className="mb-4 font-mono text-xs font-medium uppercase tracking-wider text-primary/80">
             Pipeline architecture
           </div>
-          <ArchitectureDiagram />
+          <ArchitectureDiagramDynamic />
         </FadeIn>
         <AnimatedDivider />
         <div className="space-y-0">
@@ -98,6 +123,7 @@ export default function ModulesPage() {
             </div>
           ))}
         </div>
+        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
       </Section>
     </>
   );

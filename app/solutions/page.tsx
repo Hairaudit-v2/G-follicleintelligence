@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Audit & Benchmarking Solutions for Clinics & Enterprise | Follicle Intelligence",
+  description:
+    "Tailored deployment for doctor-led practices, clinic groups, enterprise operators, and institutions. One intelligence layer, flexible governance and quality strategies.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,6 +69,7 @@ export default function SolutionsPage() {
               <Link href="/contact?intent=white-label">Discuss White Label</Link>
             </Button>
           </div>
+          <EcosystemMention className="mt-8 pt-6 border-t border-border/50" />
         </FadeIn>
       </Section>
     </>

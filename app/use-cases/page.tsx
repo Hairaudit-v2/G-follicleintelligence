@@ -1,6 +1,15 @@
 import { FadeIn } from "@/components/ui/fade-in";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Hair Audit Use Cases: Clinics, Labs, Telehealth & Research | Follicle Intelligence",
+  description:
+    "Trichology clinics, diagnostic labs, telehealth providers, and clinical research. One infrastructure for evidence-based scoring and benchmarking across settings.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Building2, FlaskConical, Stethoscope, Users } from "lucide-react";
 
@@ -51,6 +60,7 @@ export default function UseCasesPage() {
             </FadeIn>
           ))}
         </div>
+        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
       </Section>
     </>
   );

@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
+
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { FadeIn } from "@/components/ui/fade-in";
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Request Demo & Enterprise Contact | Follicle Intelligence",
+  description:
+    "Schedule enterprise demos, white-label consultations, or partnership discussions. For clinics, health systems, and institutional buyers.",
+};
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -86,6 +95,7 @@ export default function ContactPage() {
             </FadeIn>
           ))}
         </div>
+        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
       </Section>
     </>
   );

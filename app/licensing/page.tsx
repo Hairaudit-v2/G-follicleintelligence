@@ -3,7 +3,16 @@ import Link from "next/link";
 import { FadeIn } from "@/components/ui/fade-in";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Clinic & Enterprise Licensing for Hair Audit Intelligence | Follicle Intelligence",
+  description:
+    "Clinic license, enterprise API access, or white-label diagnostic modules. Choose the tier that fits your scale and integration needs.",
+};
 import { Section } from "@/components/layout/section";
 
 const TIERS = [
@@ -100,6 +109,7 @@ export default function LicensingPage() {
             </FadeIn>
           ))}
         </div>
+        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
       </Section>
     </>
   );

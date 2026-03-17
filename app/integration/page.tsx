@@ -1,6 +1,15 @@
 import { FadeIn } from "@/components/ui/fade-in";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "EHR, LIMS & API Integration for Hair Audit Intelligence | Follicle Intelligence",
+  description:
+    "REST APIs, webhooks, and standard data formats. Plug audit scoring and reporting into your EHR, LIMS, or custom clinical workflows without lock-in.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Code2, Webhook, Database, Settings } from "lucide-react";
 
@@ -51,6 +60,7 @@ export default function IntegrationPage() {
             </FadeIn>
           ))}
         </div>
+        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
       </Section>
     </>
   );

@@ -1,6 +1,15 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "White-Label Hair Intelligence & Audit Software for Clinics | Follicle Intelligence",
+  description:
+    "Ship audit scoring and benchmarking under your brand. Your governance, your UX—same analytical depth. Built for clinic groups, institutions, and software vendors.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,6 +100,7 @@ export default function WhiteLabelPage() {
                 <Link href="/platform">Review Platform Architecture</Link>
               </Button>
             </div>
+            <EcosystemMention className="mt-8 pt-6 border-t border-border/50" />
           </div>
         </FadeIn>
       </Section>

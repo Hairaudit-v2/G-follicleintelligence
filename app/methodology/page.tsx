@@ -1,6 +1,14 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Clinical Hair Audit Methodology & Evidence Framework | Follicle Intelligence",
+  description:
+    "How we turn procedural evidence into structured, benchmarkable intelligence: evidence capture, data structuring, confidence weighting, and actionable audit outputs.",
+};
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,7 +86,45 @@ export default function MethodologyPage() {
             <p className="fi-trust text-xs uppercase tracking-[0.22em]">Standards and Trust</p>
             <p className="mt-4 max-w-4xl text-muted-foreground">
               Methodology layers are aligned with standards-led audit principles and structured to
-              support institutional collaboration, including IIOHR advisory alignment.
+              support institutional collaboration, including{" "}
+              <Link
+                href="https://iiohr.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                IIOHR
+              </Link>{" "}
+              advisory alignment. The same framework underpins{" "}
+              <Link
+                href="https://hairaudit.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                HairAudit
+              </Link>{" "}
+              scoring and supports{" "}
+              <Link
+                href="https://hairlongevityinstitute.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                Hair Longevity Institute
+              </Link>{" "}
+              pathways.
+            </p>
+            <p className="mt-6 text-sm text-muted-foreground">
+              For a long-form treatment of how this methodology applies to hair transplant
+              evaluation, see our{" "}
+              <Link
+                href="/ai-hair-transplant-analysis"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                pillar on AI hair transplant analysis
+              </Link>
+              .
             </p>
             <div className="mt-7 flex flex-wrap gap-4">
               <Button asChild>

@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHero } from "@/components/layout/page-hero";
+
+export const metadata: Metadata = {
+  title: "Clinical Audit & Benchmark Intelligence Platform for Clinics | Follicle Intelligence",
+  description:
+    "The core engine for procedural audit scoring, benchmarking, and governance. Deploy as a managed platform or API; HairAudit is the first production application built on it.",
+};
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,6 +99,36 @@ export default function PlatformPage() {
                 </div>
               ))}
             </div>
+            <p className="mt-6 text-sm text-muted-foreground">
+              This infrastructure powers{" "}
+              <Link
+                href="https://hairaudit.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                HairAudit
+              </Link>{" "}
+              for surgical audit, integrates with{" "}
+              <Link
+                href="https://hairlongevityinstitute.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                Hair Longevity Institute
+              </Link>{" "}
+              for biology and treatment pathways, and aligns with{" "}
+              <Link
+                href="https://iiohr.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
+              >
+                IIOHR
+              </Link>{" "}
+              for training and certification.
+            </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild>
                 <Link href="/contact?intent=demo">Book Enterprise Demo</Link>
@@ -99,6 +137,7 @@ export default function PlatformPage() {
                 <Link href="/dashboard-demo">View Intelligence Layer</Link>
               </Button>
             </div>
+            <EcosystemMention className="mt-8 pt-6 border-t border-border/50" />
           </div>
         </FadeIn>
       </Section>
