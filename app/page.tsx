@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { IiohrSeal } from "@/components/brand/iiohr-logo";
-import { EcosystemDiagramAnimated } from "@/components/EcosystemDiagramAnimated";
+import { GlobalHairIntelligenceSection } from "@/components/ecosystem/GlobalHairIntelligenceSection";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -374,34 +374,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* The Engine Behind the Ecosystem — prominent placement just below hero */}
-      <section className="relative border-b border-border/50 bg-[linear-gradient(180deg,hsl(var(--background))_0%,hsl(216_32%_6%)_100%)] py-16 md:py-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,hsl(var(--primary)/0.07),transparent_50%)]" aria-hidden />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <FadeIn>
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/90">
-                Surgical Intelligence Ecosystem
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl lg:text-5xl">
-                The Engine Behind the Ecosystem
-              </h2>
-              <p className="mt-5 text-base leading-7 text-muted-foreground md:text-lg">
-                Follicle Intelligence is the intelligence core—powering cross-platform analysis, pattern
-                recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR.
-                One engine; system-wide learning and authority.
-              </p>
-            </div>
-            <div className="mt-12 md:mt-16">
-              <EcosystemDiagramAnimated
-                currentSite="follicleintelligence"
-                animated
-                variant="follicleintelligence"
-              />
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+      <GlobalHairIntelligenceSection
+        variant="fi"
+        heading="The Engine Behind the Ecosystem"
+        description="Follicle Intelligence is the intelligence core—powering cross-platform analysis, pattern recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR. One engine; system-wide learning and authority."
+        size="hero"
+        theme="dark"
+      />
 
       <Section className="py-14 md:py-16">
         <FadeIn>
