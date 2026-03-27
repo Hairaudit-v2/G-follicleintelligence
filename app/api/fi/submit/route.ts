@@ -3,8 +3,7 @@
  * Validate required uploads and move case to SIGNALS_READY (status=submitted). Tenant-scoped.
  */
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateIntakeRequirements } from "@/src/lib/fi/requirements";
+import { submitCaseIfReady } from "@/lib/fi/services/caseSubmission";
 
 export const dynamic = "force-dynamic";
 
@@ -24,62 +23,34 @@ export async function POST(req: Request) {
         { status: 400 }
       );
 
-    const supabase = supabaseAdmin();
+    const result = await submitCaseIfReady(tenant_id, case_id);
 
-    const { data: caseRow } = await supabase
-      .from("fi_cases")
-      .select("id, status")
-      .eq("id", case_id)
-      .eq("tenant_id", tenant_id)
-      .single();
-
-    if (!caseRow)
+    if (!result.ok)
       return NextResponse.json({ ok: false, error: "Case not found." }, { status: 404 });
 
-    if (caseRow.status !== "draft")
+    if (result.reason === "already_not_draft")
       return NextResponse.json(
         {
           ok: false,
-          error: `Case cannot be submitted. Current status: ${caseRow.status}`,
+          error: `Case cannot be submitted. Current status: ${result.statusBefore}`,
         },
         { status: 400 }
       );
 
-    const { data: uploads } = await supabase
-      .from("fi_uploads")
-      .select("type")
-      .eq("case_id", case_id)
-      .eq("tenant_id", tenant_id);
-
-    const uploadTypes = (uploads ?? []).map((u) => u.type);
-    const validated = validateIntakeRequirements(uploadTypes);
-
-    if (!validated.ok)
+    if (result.reason === "requirements_not_met")
       return NextResponse.json(
         {
           ok: false,
-          error: validated.error,
-          missing: validated.missing,
+          error: result.error ?? "Missing required uploads.",
+          missing: result.missing ?? [],
         },
         { status: 400 }
       );
-
-    const { error: updateErr } = await supabase
-      .from("fi_cases")
-      .update({
-        status: "submitted",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", case_id)
-      .eq("tenant_id", tenant_id);
-
-    if (updateErr)
-      return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
 
     return NextResponse.json({
       ok: true,
       case_id,
-      status: "submitted",
+      status: result.statusAfter,
       stage: "signals_ready",
       message: "Case submitted. Ready for model run.",
     });

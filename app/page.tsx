@@ -29,24 +29,23 @@ import {
   ShieldCheck,
   Sparkles,
   Stethoscope,
+  TrendingUp,
   Users,
   Workflow,
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Enterprise Clinical Audit Intelligence for Hair & Procedural Medicine | Follicle Intelligence",
+  title: "Follicle Intelligence | Central Intelligence Layer for Hair Restoration Quality & Standards",
   description:
-    "Score, benchmark, and govern hair transplant and surgical outcomes. The intelligence engine behind HairAudit—for clinics, groups, and enterprise. Audit scoring, transparency, and quality systems.",
+    "The shared intelligence layer connecting HairAudit surgical evidence, HLI longitudinal biology, and IIOHR methodology—building transparency, accountability, and benchmark visibility for clinics, institutions, and global hair restoration.",
 };
 
-const ECOSYSTEM_HEADING = "The Engine Behind the Ecosystem";
-const ECOSYSTEM_DESCRIPTION = `Follicle Intelligence is the core system powering the entire ecosystem—driving cross-platform analysis, pattern recognition, and predictive insight across HairAudit, Hair Longevity Institute, and IIOHR.
+const ECOSYSTEM_HEADING = "One intelligence layer. Three operational surfaces.";
+const ECOSYSTEM_DESCRIPTION = `Follicle Intelligence sits at the center—not as another point solution, but as the system that learns across HairAudit™ (surgical evidence and audit surface), Hair Longevity Institute™ (biology and longitudinal treatment intelligence), and IIOHR™ (methodology, training, and standards).
 
-One engine.
-Continuous learning.
-System-wide intelligence.
+Evidence and standards enter at the edges; FI unifies scoring, benchmarks, and governance signals so improvement compounds network-wide—without replacing any source system of record.
 
-Built to scale across clinics, platforms, and global networks.`;
+A reinforcing loop: richer evidence sharpens benchmarks; clearer benchmarks raise accountability; stronger accountability feeds better training and standards.`;
 
 const GlobalHairIntelligenceSectionDynamic = dynamic(
   () =>
@@ -71,59 +70,74 @@ const HERO_METRICS = [
   { label: "Reporting Modes", value: "Public + internal" },
 ];
 
+const MARKET_WHY_POINTS: { title: string; desc: string }[] = [
+  {
+    title: "Fragmented quality landscape",
+    desc: "Hair restoration spans jurisdictions, techniques, and commercial models. Patients and payers rarely see comparable, defensible measures of technical quality—so excellence and underperformance can look alike at the marketing layer.",
+  },
+  {
+    title: "Evidence scattered across silos",
+    desc: "Surgical outcomes, biological treatment response, and professional standards have lived in separate workflows. Without a shared intelligence layer, institutions cannot align accountability, training, and benchmarks at industry scale.",
+  },
+  {
+    title: "The shift underway",
+    desc: "Stakeholders are asking for transparency that survives scrutiny—not slogans. FI exists to make quality legible: scored where evidence allows, benchmarked where cohorts exist, and governed where standards and review matter.",
+  },
+];
+
 const PROOF_CARDS = [
   {
     title: "Audit scorecard",
     value: "91.8 / 100",
-    detail: "Structured domain scoring across donor management, extraction quality, implantation quality, design, and post-op protocol.",
+    detail: "Domain-level scoring turns procedural evidence into comparable, reviewable assessments—so standing is earned on the record, not asserted in copy.",
   },
   {
     title: "Benchmark comparison",
     value: "Top 14%",
-    detail: "Doctor, clinic, and group performance compared against peer cohorts and internal historical baselines.",
+    detail: "Peer and historical baselines give clinics and groups a credible story on differentiation: where they lead, where they converge, and where governance should intervene.",
   },
   {
     title: "Governance signal",
     value: "3 flagged cases",
-    detail: "Outlier detection surfaces review-worthy cases before reporting, training, or reputational issues compound.",
+    detail: "Outliers surface early—before variance becomes reputational risk, before training budgets misallocate, and before weak patterns replicate across sites.",
   },
   {
     title: "Improvement trajectory",
     value: "+12.6%",
-    detail: "Quarter-over-quarter uplift makes training, process improvement, and quality assurance progress visible.",
+    detail: "Quarter-over-quarter lift is visible to operators and boards alike: a tangible loop from evidence to action, not a static snapshot.",
   },
   {
-    title: "Readiness index",
+    title: "Infrastructure posture",
     value: "Enterprise ready",
-    detail: "Supports private deployments, institutional review layers, and white-label audit infrastructure.",
+    detail: "Private deployments, institutional review layers, and white-label surfaces—positioning FI as durable audit infrastructure, not a single-app feature.",
   },
 ];
 
 const CAPABILITIES: { icon: LucideIcon; title: string; desc: string }[] = [
   {
     icon: ClipboardList,
-    title: "Audit and score clinical work",
-    desc: "Transform case imagery, records, and follow-up evidence into consistent, domain-level assessments.",
+    title: "Structure evidence into defensible scores",
+    desc: "Turn case imagery, records, and follow-up into consistent domain assessments—designed for audit, not anecdote.",
   },
   {
     icon: Radar,
-    title: "Benchmark doctors, clinics, and outcomes",
-    desc: "Compare performance against standards, peer cohorts, and internal historical baselines.",
+    title: "Benchmark where standing matters",
+    desc: "Compare doctors, clinics, and cohorts against standards and peers so quality leadership is visible internally and, where you choose, externally.",
   },
   {
     icon: Activity,
-    title: "Surface weaknesses and opportunity signals",
-    desc: "Detect recurring weaknesses, review flags, and operational patterns that are easy to miss manually.",
+    title: "Surface risk and opportunity with clarity",
+    desc: "Detect recurring weaknesses, review triggers, and operational patterns that manual review under-catches at scale.",
   },
   {
     icon: GraduationCap,
-    title: "Support governance, training, and consistency",
-    desc: "Translate audit findings into governance workflows, training priorities, and quality improvement loops.",
+    title: "Close the loop to training and governance",
+    desc: "Route audit outputs into governance queues, training priorities, and standards-aligned improvement—so insight converts to behavior change.",
   },
   {
     icon: Layers3,
-    title: "White-label the intelligence layer",
-    desc: "Deploy branded audit systems for clinic groups, institutes, and enterprise partners without rebuilding the engine.",
+    title: "Deploy as your intelligence layer",
+    desc: "Clinic groups, institutes, and enterprise partners white-label the engine: same benchmarks and rules backbone, your brand and policy envelope.",
   },
 ];
 
@@ -131,55 +145,60 @@ const WORKFLOW_STEPS = [
   {
     step: "01",
     title: "Upload",
-    desc: "Ingest case data, imagery, structured records, and contextual notes from live clinical workflows.",
+    desc: "Ingest case data, imagery, structured records, and context from live workflows across connected surfaces.",
   },
   {
     step: "02",
     title: "Analyze",
-    desc: "Run evidence structuring, scoring logic, and intelligence models to produce reviewable outputs.",
+    desc: "Structure evidence, apply scoring logic, and run models to produce review-ready outputs with confidence and provenance in mind.",
   },
   {
     step: "03",
     title: "Score",
-    desc: "Generate domain-level assessments across technique, outcomes, process quality, and supporting evidence.",
+    desc: "Generate domain assessments across technique, outcomes, process quality, and supporting documentation.",
   },
   {
     step: "04",
     title: "Benchmark",
-    desc: "Compare against standards, peers, and historical performance at doctor, clinic, and group level.",
+    desc: "Place performance in context: standards, peer cohorts, and historical baselines at surgeon, site, and group level.",
   },
   {
     step: "05",
     title: "Improve",
-    desc: "Identify training, governance, workflow, and reporting improvements with clear operational next steps.",
+    desc: "Prioritize training, governance, workflow, and reporting moves with explicit operational next steps.",
   },
 ];
 
 const AUDIENCES: { icon: LucideIcon; title: string; desc: string }[] = [
   {
     icon: Stethoscope,
-    title: "Doctors",
-    desc: "Clearer performance visibility, stronger evidence review, and more structured quality feedback.",
+    title: "Surgeons & clinical leads",
+    desc: "Defensible feedback on strengths and gaps—grounded in structured evidence rather than anecdote or internal politics alone.",
   },
   {
     icon: Building2,
-    title: "Clinics",
-    desc: "Operational consistency, case-level review workflows, and credible internal quality assurance.",
+    title: "Clinics & brands",
+    desc: "Differentiate on benchmarked quality: credible internal assurance, controlled transparency, and leadership narratives that hold up to scrutiny.",
   },
   {
     icon: Users,
-    title: "Group operators",
-    desc: "Cross-site benchmark visibility, governance oversight, and scalable reporting across portfolios.",
+    title: "Group & network operators",
+    desc: "Portfolio-wide visibility: where sites converge, diverge, and drift—so capital, training, and standards investments follow signal.",
   },
   {
     icon: Landmark,
-    title: "Training and auditing bodies",
-    desc: "Structured scoring frameworks, review pathways, and standards-led quality improvement systems.",
+    title: "Standards bodies & institutes",
+    desc: "Frameworks, review pathways, and longitudinal signal that institutions can adopt without rebuilding core infrastructure.",
   },
   {
     icon: Cpu,
-    title: "White-label enterprise partners",
-    desc: "A configurable intelligence layer for specialty-specific audit, scoring, and benchmarking products.",
+    title: "Platform & enterprise partners",
+    desc: "A configurable audit and benchmarking backbone for specialty products—ship faster without sacrificing governance depth.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Investors & strategic partners",
+    desc: "Category infrastructure: compounding proprietary signal from multi-surface evidence, standards engagement, and benchmark depth—defensible because the workflow integration is hard to replicate ad hoc.",
   },
 ];
 
@@ -187,7 +206,7 @@ const VERTICALS = [
   {
     title: "Hair restoration",
     status: "Live focus",
-    desc: "HairAudit is the first application layer built on the Follicle Intelligence engine.",
+    desc: "HairAudit, HLI, and IIOHR are the live surfaces; FI is the central layer learning across surgical evidence, biology, and standards.",
   },
   {
     title: "Facial aesthetics",
@@ -270,15 +289,17 @@ export default function HomePage() {
           <FadeIn className="md:col-span-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-primary/90">
               <BadgeCheck className="h-3.5 w-3.5" />
-              Core Engine of the Ecosystem
+              Central intelligence layer
             </div>
             <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-foreground md:text-6xl">
-              The intelligence engine behind audit, training, and benchmarking.
+              Transparency and accountability at global scale—in hair restoration.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Follicle Intelligence is the core engine. It powers HairAudit scoring, IIOHR training
-              feedback, and global surgical benchmarking—without being the operational database for any
-              source system.
+              Follicle Intelligence is the shared layer that turns fragmented procedural evidence into
+              benchmarked quality, standards-aligned review, and credible reporting. It connects HairAudit
+              (surgical audit surface), Hair Longevity Institute (biology and longitudinal treatment
+              intelligence), and IIOHR (methodology, training, and standards)—learning across all three
+              without replacing any clinic system of record.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <Button asChild size="lg" className="h-11 rounded-xl px-6">
@@ -314,7 +335,7 @@ export default function HomePage() {
                     Follicle Intelligence Preview
                   </p>
                   <h2 className="mt-3 text-xl font-semibold text-foreground md:text-2xl">
-                    Enterprise audit command layer
+                    Cross-surface audit command layer
                   </h2>
                 </div>
                 <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-300">
@@ -407,6 +428,27 @@ export default function HomePage() {
         </div>
       </section>
 
+      <Section className="border-b border-border/50 py-14 md:py-16">
+        <FadeIn>
+          <SectionIntro
+            eyebrow="Market context"
+            title="Why the industry needs a shared intelligence layer."
+            description="Hair restoration is a global, high-stakes field where outcomes are difficult to compare and quality is uneven. Marketing narratives outrun verifiable evidence; standards exist but rarely attach to comparable benchmarks across clinics and regions. FI addresses the gap—not with noise, but with structured audit, cohort visibility, and governance-grade reporting."
+          />
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {MARKET_WHY_POINTS.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-[1.35rem] border border-border/70 bg-card/35 p-6 md:p-7"
+              >
+                <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </FadeIn>
+      </Section>
+
       <GlobalHairIntelligenceSectionDynamic
         variant="follicle-intelligence"
         heading={ECOSYSTEM_HEADING}
@@ -418,33 +460,41 @@ export default function HomePage() {
       <Section className="py-14 md:py-16">
         <FadeIn>
           <SectionIntro
-            eyebrow="Engine outputs"
-            title="What the intelligence engine powers next."
-            description="Every layer below is an output or application of Follicle Intelligence, translated into scoring, training feedback, and benchmarking workflows."
+            eyebrow="The flywheel"
+            title="Three surfaces. One learning system."
+            description="HairAudit, HLI, and IIOHR each generate distinct evidence and standards signal. Follicle Intelligence is where those streams compound—so benchmarks sharpen, accountability scales, and improvement is measurable across the ecosystem."
           />
-          <ul className="mt-10 grid gap-6 border-t border-border/50 pt-10 sm:grid-cols-3">
+          <ul className="mt-10 grid gap-6 border-t border-border/50 pt-10 sm:grid-cols-2 lg:grid-cols-4">
             <li className="flex flex-col gap-2">
               <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
-                HairAudit scoring
+                HairAudit™
               </span>
               <p className="text-sm leading-6 text-muted-foreground">
-                Domain-level audit scorecards, cohort comparison, and review workflows for hair restoration outcomes.
+                Surgical evidence and the audit surface: case-level scoring, review workflows, and the comparability layer for transplant quality.
               </p>
             </li>
             <li className="flex flex-col gap-2">
               <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
-                IIOHR training feedback
+                Hair Longevity Institute™
               </span>
               <p className="text-sm leading-6 text-muted-foreground">
-                Structured feedback and methodology-backed signals that support training and institutional improvement.
+                Biology and longitudinal treatment intelligence: how patients respond over time—feeding FI with signal beyond a single procedure snapshot.
               </p>
             </li>
             <li className="flex flex-col gap-2">
               <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
-                Global surgical benchmarking
+                IIOHR™
               </span>
               <p className="text-sm leading-6 text-muted-foreground">
-                Doctor, clinic, and group performance against peer cohorts and standards—without exposing raw operational data.
+                Methodology, training, and standards: the institutional frame that makes scores reviewable and improvement programs legitimate.
+              </p>
+            </li>
+            <li className="flex flex-col gap-2">
+              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+                Follicle Intelligence™
+              </span>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Central intelligence layer: benchmarks, governance signals, and cross-platform learning—without owning any single operational database.
               </p>
             </li>
           </ul>
@@ -455,8 +505,8 @@ export default function HomePage() {
         <FadeIn>
           <SectionIntro
             eyebrow="What it analyses"
-            title="Evidence in. Intelligence out."
-            description="The engine structures procedural evidence into analysable dimensions that drive scoring and improvement."
+            title="Evidence in. Comparable quality out."
+            description="FI structures procedural evidence into dimensions institutions can govern: comparable scores, cohort-relative standing, and reviewable pathways—not opaque commentary."
           />
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -481,7 +531,7 @@ export default function HomePage() {
             <span className="rounded-xl border border-primary/25 bg-primary/10 px-4 py-2 text-sm font-semibold text-foreground">Improve</span>
           </div>
           <p className="mt-4 text-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            System loop
+            Evidence → score → benchmark → improve
           </p>
         </FadeIn>
       </Section>
@@ -511,9 +561,9 @@ export default function HomePage() {
       <Section>
         <FadeIn>
           <SectionIntro
-            eyebrow="What The Platform Does"
+            eyebrow="What the platform does"
             title="Structured evidence. Defensible scores. Governance-ready."
-            description="Evidence in; domain-level assessments, benchmarks, and review workflows out. Supports formal governance and white-label deployment."
+            description="From evidence to domain assessments, cohort benchmarks, and review queues—built for institutional process, not slide decks. Deploy privately, white-label publicly, or both."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
@@ -538,9 +588,9 @@ export default function HomePage() {
       <Section className="border-y border-border/50 py-20">
         <FadeIn>
           <SectionIntro
-            eyebrow="How It Works"
+            eyebrow="How it works"
             title="Upload. Analyze. Score. Benchmark. Improve."
-            description="Raw evidence in; benchmarked intelligence and improvement signals out."
+            description="Operational evidence enters from connected surfaces; what exits is comparable quality signal—ready for governance, training, and—where you choose—transparent disclosure."
           />
         </FadeIn>
         <div className="mt-10 grid gap-5 xl:grid-cols-5">
@@ -568,12 +618,12 @@ export default function HomePage() {
       <Section>
         <FadeIn>
           <SectionIntro
-            eyebrow="Who It Is For"
-            title="Built for doctors, clinics, operators, and standards-led partners."
-            description="Each audience gets a different value layer, but the core promise is the same: clearer quality visibility, stronger review structures, and more credible reporting."
+            eyebrow="Who it is for"
+            title="From operating room to boardroom—and the institutions in between."
+            description="Clinicians gain clarity on performance; operators gain portfolio truth; standards bodies gain implementable frameworks; capital partners gain infrastructure with compounding signal. The through-line is the same: accountable quality at scale."
           />
         </FadeIn>
-        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {AUDIENCES.map((item, index) => (
             <FadeIn key={item.title} delay={0.05 * index}>
               <Card className="h-full rounded-[1.4rem] border-border/70 bg-card/40">
@@ -593,9 +643,9 @@ export default function HomePage() {
       <Section className="py-20">
         <FadeIn>
           <SectionIntro
-            eyebrow="Dashboard Preview"
-            title="The intelligence interface worth deploying."
-            description="A premium operations and governance layer for audit scores, domain breakdowns, trends, benchmarking, and review workflows."
+            eyebrow="Dashboard preview"
+            title="The command layer for benchmarked quality."
+            description="Audit scores, domain breakdowns, cohort standing, governance queues, and disclosure controls—so leadership and clinical teams share one view of the truth."
           />
         </FadeIn>
         <FadeIn delay={0.06} className="mt-10">
@@ -754,9 +804,10 @@ export default function HomePage() {
                 </div>
               </div>
               <p className="mt-6 text-base leading-7 text-muted-foreground">
-                Follicle Intelligence is positioned as an intelligence engine, but it is grounded in a
-                structured methodology layer. IIOHR provides the standards, scoring logic, review
-                capability, and institutional framing that make the platform credible in clinical use.
+                FI is an intelligence layer, not a slogan factory. IIOHR supplies methodology, training
+                architecture, and standards framing—so scores mean something in professional context and
+                can travel into governance, credentialing, and institutional programs without losing
+                defensibility.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button asChild className="rounded-xl">
@@ -807,9 +858,9 @@ export default function HomePage() {
       <Section>
         <FadeIn>
           <SectionIntro
-            eyebrow="White-Label And Expansion"
-            title="Designed to scale beyond hair into broader clinical audit systems."
-            description="Hair restoration is the first live domain, but the underlying architecture is built as a reusable intelligence backbone for other procedural and cosmetic verticals."
+            eyebrow="Infrastructure & expansion"
+            title="Built as category infrastructure—not a single-product feature."
+            description="The data flywheel strengthens as more evidence types and standards programs connect: deeper cohorts, sharper benchmarks, and harder-to-replace workflow integration. Hair restoration is the live wedge; the architecture is modular for procedural and cosmetic verticals that share audit-shaped problems."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -823,7 +874,7 @@ export default function HomePage() {
                   {
                     icon: Cpu,
                     title: "Follicle Intelligence engine",
-                    desc: "Scoring logic, benchmark computation, confidence layers, governance rules, and reporting infrastructure.",
+                    desc: "Scoring logic, benchmark computation, confidence layers, governance rules, and reporting—shared across HairAudit, HLI, and IIOHR-connected workflows.",
                   },
                   {
                     icon: Sparkles,
@@ -878,12 +929,13 @@ export default function HomePage() {
                     Final CTA
                   </p>
                   <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
-                    Build a more credible audit and benchmarking system.
+                    Raise the standard for transparency—in practice, not prose.
                   </h2>
                   <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-                    Request a platform demo, explore white-label opportunities, or discuss how
-                    Follicle Intelligence can support benchmarking, governance, and quality systems at
-                    enterprise scale.
+                    Whether you run clinics, train surgeons, set standards, or deploy enterprise
+                    platforms: FI is the central layer for benchmarked quality and accountable reporting
+                    across the global hair restoration industry. Request a demo, explore white-label, or
+                    discuss institutional partnership.
                   </p>
                 </div>
                 <div className="grid gap-4">

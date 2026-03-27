@@ -52,7 +52,8 @@ export function buildWebSiteSchema(
 ): object {
   const {
     name = "Follicle Intelligence",
-    description = "Enterprise clinical auditing intelligence for hair and procedural medicine. Score, benchmark, and govern outcomes. The engine behind HairAudit and surgical quality systems.",
+    description =
+      "Central intelligence layer connecting HairAudit surgical evidence, Hair Longevity Institute biology, and IIOHR methodology—benchmarked quality, accountability, and standards for global hair restoration.",
   } = options;
   const base = siteUrl.replace(/\/$/, "");
   return {

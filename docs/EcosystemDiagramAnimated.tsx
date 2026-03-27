@@ -34,22 +34,22 @@ const OUTER_NODES: OuterNodeData[] = [
   {
     id: "iiohr",
     title: "IIOHR™",
-    subtitle: "Education & Certification",
-    detail: "Training · Standards · Accreditation",
+    subtitle: "Methodology, training & standards",
+    detail: "Frameworks · Credentialing · Governance",
     label: "STANDARDS",
   },
   {
     id: "hairaudit",
     title: "HairAudit™",
-    subtitle: "Surgical Audit System",
-    detail: "Scoring · Validation · Global Ranking",
+    subtitle: "Surgical evidence & audit surface",
+    detail: "Evidence · Scoring · Benchmark visibility",
     label: "OUTCOMES",
   },
   {
     id: "hli",
     title: "Hair Longevity Institute™",
-    subtitle: "Biological Treatment Pathway",
-    detail: "Diagnosis · Intervention · Monitoring",
+    subtitle: "Biology & longitudinal intelligence",
+    detail: "Diagnosis · Treatment · Follow-up signal",
     label: "DATA",
   },
 ];
@@ -329,7 +329,7 @@ function CenterNode({
         fill={colors.textPrimary}
         opacity={0.9}
       >
-        AI Analysis Engine
+        Central intelligence layer
       </text>
       <text
         x={CX}
@@ -340,7 +340,7 @@ function CenterNode({
         fill={colors.textPrimary}
         opacity={0.7}
       >
-        Data · Pattern Recognition · Prediction
+        Evidence · Benchmarks · Cross-surface learning
       </text>
     </g>
   );
