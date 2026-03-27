@@ -73,7 +73,8 @@ async function handleHairAuditCaseSubmittedImpl(
   }
 
   const sourcePatientId = envelope.identifiers?.source_patient_id?.trim() || null;
-  const caseSeed = payloadResult.data.case as HairAuditCaseSubmittedPayload["case"];
+  const hairAuditPayload = payloadResult.data as HairAuditCaseSubmittedPayload;
+  const caseSeed = hairAuditPayload.case;
 
   const eventLog = await createFiEventIfNotExists({
     tenantId: envelope.tenant_id,

@@ -17,7 +17,7 @@ export type FiEventIngestResult = {
 
 function readStringField(input: unknown, key: string): string | undefined {
   if (!input || typeof input !== "object" || Array.isArray(input)) return undefined;
-  const value = input[key as keyof typeof input];
+  const value = (input as Record<string, unknown>)[key];
   return typeof value === "string" ? value.trim() || undefined : undefined;
 }
 

@@ -1,38 +1,39 @@
-import { FadeIn } from "@/components/ui/fade-in";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Metadata } from "next";
+import Link from "next/link";
 
+import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
+import { Section } from "@/components/layout/section";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FadeIn } from "@/components/ui/fade-in";
+import { Code2, Database, Settings, Webhook } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "EHR, LIMS & API Integration for Hair Audit Intelligence | Follicle Intelligence",
+  title: "Integration: APIs, Events & Clinical Workflows | Follicle Intelligence",
   description:
-    "REST APIs, webhooks, and standard data formats. Plug audit scoring and reporting into your EHR, LIMS, or custom clinical workflows without lock-in.",
+    "Connect the central intelligence layer to EHR, LIMS, and custom stacks: APIs, webhooks, and configurable pipelines—so evidence flows in and benchmarked quality flows out.",
 };
-import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
-import { Section } from "@/components/layout/section";
-import { Code2, Webhook, Database, Settings } from "lucide-react";
 
 const INTEGRATIONS = [
   {
     icon: Code2,
-    title: "REST APIs",
-    desc: "Structured endpoints for extraction, scoring, and report generation. JSON request/response. API keys and rate limits.",
+    title: "APIs",
+    desc: "Structured endpoints for ingestion, scoring, and report generation. JSON contracts, authenticated access, and rate limits suited to production workloads.",
   },
   {
     icon: Webhook,
-    title: "Webhooks",
-    desc: "Async job completion notifications. Event-driven pipelines. Retry and DLQ support.",
+    title: "Events and webhooks",
+    desc: "Asynchronous completion signals and event-driven pipelines—so downstream systems stay in sync as cases move through audit and review.",
   },
   {
     icon: Database,
-    title: "Data formats",
-    desc: "HL7 FHIR-compatible outputs. Custom schema mapping. Batch upload and export.",
+    title: "Data exchange",
+    desc: "Standard-friendly outputs and schema mapping for interoperability. Batch and streaming patterns supported where deployment requires them.",
   },
   {
     icon: Settings,
     title: "Configurable pipelines",
-    desc: "Enable/disable modules. Custom scoring weights. Report templates and branding.",
+    desc: "Module toggles, scoring weights, templates, and branding—aligned to tenant policy without forking the core engine.",
   },
 ];
 
@@ -41,10 +42,17 @@ export default function IntegrationPage() {
     <>
       <PageHero
         eyebrow="Integration"
-        title="Built for your stack"
-        subtitle="REST APIs, webhooks, and flexible data formats. Integrate with existing EHR, LIMS, or custom workflows."
+        title="Plumbing that makes the intelligence layer stick."
+        subtitle="Defensibility in this category is partly workflow depth: the more evidence routes through FI—surgical, longitudinal, standards-adjacent—the stronger benchmarks and governance become. Integration is how Follicle Intelligence becomes infrastructure inside your stack, not a side export."
       />
       <Section>
+        <FadeIn>
+          <p className="mb-8 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            HairAudit, HLI, and IIOHR-connected programs each generate signal at different edges of care. APIs and
+            events let your systems feed the same central layer, preserving the ecosystem story: one
+            intelligence core, multiple operational surfaces.
+          </p>
+        </FadeIn>
         <div className="grid gap-8 md:grid-cols-2">
           {INTEGRATIONS.map((item, i) => (
             <FadeIn key={item.title} delay={i * 0.1}>
@@ -54,13 +62,22 @@ export default function IntegrationPage() {
                   <CardTitle className="text-xl">{item.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-base">{item.desc}</CardDescription>
+                  <CardDescription className="text-base leading-relaxed">{item.desc}</CardDescription>
                 </CardContent>
               </Card>
             </FadeIn>
           ))}
         </div>
-        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
+        <FadeIn delay={0.12}>
+          <p className="mt-10 text-sm text-muted-foreground">
+            Deployment-specific integration guides are provided during onboarding.{" "}
+            <Link href="/contact?intent=demo" className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary">
+              Contact
+            </Link>{" "}
+            for technical scoping.
+          </p>
+        </FadeIn>
+        <EcosystemMention className="mt-10 border-t border-border/50 pt-6" />
       </Section>
     </>
   );

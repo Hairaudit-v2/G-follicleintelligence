@@ -94,17 +94,30 @@ function parseHliIntakePayload(input: unknown): ValidationResult<HliIntakeSubmit
   const intake = isRecord(payload.intake) ? payload.intake : null;
   if (!intake) return { ok: false, error: "payload.intake is required." };
 
+  const full_name = asTrimmedString(intake.full_name);
+  const email = asTrimmedString(intake.email);
+  const dob = asTrimmedString(intake.dob);
+  const sex = asTrimmedString(intake.sex);
+  if (!full_name) return { ok: false, error: "payload.intake.full_name is required." };
+  if (!email) return { ok: false, error: "payload.intake.email is required." };
+  if (!dob) return { ok: false, error: "payload.intake.dob is required." };
+  if (!sex) return { ok: false, error: "payload.intake.sex is required." };
+
+  const selectionsRaw = parseSelections(intake.selections);
+  const selections =
+    selectionsRaw && !Array.isArray(selectionsRaw) ? selectionsRaw : undefined;
+
   return {
     ok: true,
     data: {
       intake: {
-        full_name: asOptionalTrimmedString(intake.full_name),
-        email: asOptionalTrimmedString(intake.email),
-        dob: asOptionalTrimmedString(intake.dob),
-        sex: asOptionalTrimmedString(intake.sex),
+        full_name,
+        email,
+        dob,
+        sex,
         country: asOptionalTrimmedString(intake.country),
         primary_concern: asOptionalTrimmedString(intake.primary_concern),
-        selections: parseSelections(intake.selections),
+        selections,
         notes: asOptionalTrimmedString(intake.notes),
       },
     },
@@ -148,6 +161,10 @@ function parseHairAuditCasePayload(input: unknown): ValidationResult<HairAuditCa
     asOptionalTrimmedString(casePayload.primary_concern) ??
     asOptionalTrimmedString(casePayload.concern);
 
+  const caseSelectionsRaw = parseSelections(casePayload.selections);
+  const caseSelections =
+    caseSelectionsRaw && !Array.isArray(caseSelectionsRaw) ? caseSelectionsRaw : undefined;
+
   return {
     ok: true,
     data: {
@@ -158,7 +175,7 @@ function parseHairAuditCasePayload(input: unknown): ValidationResult<HairAuditCa
         sex: asOptionalTrimmedString(casePayload.sex),
         primary_concern: primaryConcern,
         country: asOptionalTrimmedString(casePayload.country),
-        selections: parseSelections(casePayload.selections),
+        selections: caseSelections,
         notes: asOptionalTrimmedString(casePayload.notes),
       },
     },

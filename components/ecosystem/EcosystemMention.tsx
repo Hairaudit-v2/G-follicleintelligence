@@ -2,12 +2,12 @@ import Link from "next/link";
 
 /**
  * One-line ecosystem mention for use on marketing pages.
- * Keeps brand roles and external links consistent (HairAudit = audit, HLI = biology, IIOHR = training).
+ * Aligns roles: HairAudit = surgical evidence/audit surface, HLI = biology/longitudinal, IIOHR = methodology/standards.
  */
 export function EcosystemMention({ className = "" }: { className?: string }) {
   return (
     <p className={`text-sm text-muted-foreground ${className}`}>
-      Part of the Surgical Intelligence Ecosystem™ with{" "}
+      Follicle Intelligence™ connects{" "}
       <Link
         href="https://hairaudit.com"
         target="_blank"
@@ -16,7 +16,7 @@ export function EcosystemMention({ className = "" }: { className?: string }) {
       >
         HairAudit
       </Link>{" "}
-      (surgical audit),{" "}
+      (surgical evidence and audit surface),{" "}
       <Link
         href="https://hairlongevityinstitute.com"
         target="_blank"
@@ -25,7 +25,7 @@ export function EcosystemMention({ className = "" }: { className?: string }) {
       >
         Hair Longevity Institute
       </Link>{" "}
-      (biology & treatment), and{" "}
+      (biology and longitudinal treatment intelligence), and{" "}
       <Link
         href="https://iiohr.com"
         target="_blank"
@@ -34,7 +34,7 @@ export function EcosystemMention({ className = "" }: { className?: string }) {
       >
         IIOHR
       </Link>{" "}
-      (training & certification).
+      (methodology, training, standards, and governance alignment).
     </p>
   );
 }

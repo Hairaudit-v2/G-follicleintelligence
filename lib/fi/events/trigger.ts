@@ -48,7 +48,8 @@ export type EventPipelineResult =
         | "already_running"
         | "already_queued"
         | "already_complete"
-        | "case_not_submitted";
+        | "case_not_submitted"
+        | "pipeline_triggered";
       missing?: MissingRequirement[];
       modelRunId?: string;
     }

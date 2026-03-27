@@ -24,9 +24,9 @@ const ArchitectureDiagramDynamic = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "AI Audit Modules: Blood, Imaging, Scoring & Reporting | Follicle Intelligence",
+  title: "Modules: Evidence Processing, Scoring & Reporting | Follicle Intelligence",
   description:
-    "Composable engines: blood marker intelligence, image signal extraction, progression velocity, and structured reporting. Use as a full pipeline or individual modules.",
+    "Composable engines for lab and imaging evidence, progression scoring, and structured reporting—components of the Follicle Intelligence pipeline for audit and benchmark workflows.",
 };
 
 const MODULES = [
@@ -85,11 +85,16 @@ export default function ModulesPage() {
     <>
       <PageHero
         eyebrow="Platform modules"
-        title="AI engine modules"
-        subtitle="Four composable engines: blood marker extraction, image signal analysis, progression scoring, and structured reporting. Deploy individually or as a pipeline."
+        title="Composable engines inside the intelligence pipeline."
+        subtitle="These modules are the machinery beneath Follicle Intelligence: structured extraction, scoring, and reporting—wired into audit, benchmark, and governance workflows. They are not the strategy; they are how evidence becomes consistent enough to trust at scale."
       />
       <Section>
         <FadeIn>
+          <p className="mb-6 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            HairAudit and connected surfaces depend on repeatable processing. Module composition lets
+            deployments tune depth—full pipeline or selective components—while staying on the same core
+            that learns across HairAudit, HLI longitudinal signal, and IIOHR-aligned methodology.
+          </p>
           <div className="mb-4 font-mono text-xs font-medium uppercase tracking-wider text-primary/80">
             Pipeline architecture
           </div>
@@ -123,7 +128,7 @@ export default function ModulesPage() {
             </div>
           ))}
         </div>
-        <EcosystemMention className="mt-10 pt-6 border-t border-border/50" />
+        <EcosystemMention className="mt-10 border-t border-border/50 pt-6" />
       </Section>
     </>
   );

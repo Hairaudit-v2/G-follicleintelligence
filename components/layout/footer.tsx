@@ -29,20 +29,21 @@ export function Footer() {
               />
             </Link>
             <p className="mt-4 text-[11px] uppercase tracking-[0.32em] text-primary/85">
-              Enterprise Clinical Audit Intelligence
+              Central intelligence layer
             </p>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Follicle Intelligence is the core intelligence layer for audit scoring, benchmarking,
-              governance, and white-label quality systems. HairAudit is the first application surface.
+              Follicle Intelligence is the shared layer for benchmarked quality, governance, and
+              standards-aligned reporting—learning across HairAudit (surgical evidence), Hair Longevity
+              Institute (biology and longitudinal intelligence), and IIOHR (methodology and standards).
             </p>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="rounded-2xl border border-border/70 bg-background/45 p-4">
                 <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  Ecosystem Position
+                  Ecosystem
                 </p>
                 <p className="mt-2 text-sm text-foreground">
-                  Hair Longevity Institute for biology. HairAudit for surgical audit. Follicle
-                  Intelligence for the intelligence engine.
+                  HairAudit: surgical evidence and audit surface. HLI: biology and longitudinal treatment
+                  intelligence. IIOHR: methodology, training, and governance alignment. FI connects all three.
                 </p>
               </div>
               <div className="rounded-2xl border border-border/70 bg-background/45 p-4">

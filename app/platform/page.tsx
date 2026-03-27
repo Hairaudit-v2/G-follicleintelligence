@@ -1,50 +1,50 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { PageHero } from "@/components/layout/page-hero";
-
-export const metadata: Metadata = {
-  title: "Clinical Audit & Benchmark Intelligence Platform for Clinics | Follicle Intelligence",
-  description:
-    "The core engine for procedural audit scoring, benchmarking, and governance. Deploy as a managed platform or API; HairAudit is the first production application built on it.",
-};
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
+import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
-import { BarChart3, BrainCircuit, GitBranch, Scale, ShieldCheck, Workflow } from "lucide-react";
+import { BarChart3, Cpu, GitBranch, Scale, ShieldCheck, Workflow } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Platform: Audit, Benchmark & Governance Infrastructure | Follicle Intelligence",
+  description:
+    "The core platform for procedural audit scoring, cohort benchmarks, and governance—central intelligence across HairAudit, HLI, and IIOHR-connected workflows. Deploy managed, API, or white-label.",
+};
 
 const CAPABILITY_BLOCKS = [
   {
-    icon: BrainCircuit,
-    title: "Intelligence Engine",
-    desc: "Transforms case evidence into confidence-weighted intelligence signals across practitioner and clinic cohorts.",
+    icon: Cpu,
+    title: "Central intelligence core",
+    desc: "Transforms evidence from connected surfaces into consistent scores, cohort analytics, and review-ready signals—without replacing operational systems of record.",
   },
   {
     icon: BarChart3,
-    title: "Benchmark Layer",
-    desc: "Benchmark distributions, outlier identification, and trend intelligence for continuous quality improvement.",
+    title: "Benchmark and standing layer",
+    desc: "Distributions, drift, and outlier logic so performance is visible relative to peers and standards—not only versus last quarter’s spreadsheet.",
   },
   {
     icon: Scale,
-    title: "Audit Governance",
-    desc: "Structured audit pathways, review controls, and decision traceability for institutional oversight.",
+    title: "Audit governance",
+    desc: "Structured pathways, reviewer separation, and traceability suited to institutional oversight and serious quality programs.",
   },
   {
     icon: Workflow,
-    title: "Operational Workflows",
-    desc: "Case lifecycle orchestration from intake and scoring to quality review, actioning, and re-assessment.",
+    title: "Operational orchestration",
+    desc: "Case lifecycle from intake through scoring, escalation, and re-assessment—so improvement loops close instead of stalling in inboxes.",
   },
   {
     icon: ShieldCheck,
-    title: "Trust Indicators",
-    desc: "Confidence levels, evidence density metrics, and integrity signals attached to every insight output.",
+    title: "Trust and evidence posture",
+    desc: "Confidence, evidence density, and integrity indicators attached to outputs—so leaders know what to trust before they act or disclose.",
   },
   {
     icon: GitBranch,
-    title: "Deployment Flexibility",
-    desc: "Private, public, hybrid, and white-label deployment patterns designed for global multi-entity rollout.",
+    title: "Deployment patterns",
+    desc: "Private, hybrid, and white-label models for multi-entity rollout—same engine, your policy envelope and brand.",
   },
 ];
 
@@ -53,15 +53,21 @@ export default function PlatformPage() {
     <>
       <PageHero
         eyebrow="Platform"
-        title="Clinical auditing and benchmark intelligence infrastructure."
-        subtitle="Follicle Intelligence is the core engine. HairAudit is the first production application built on top of it."
+        title="The engine for benchmarked, governable quality."
+        subtitle="Follicle Intelligence is category infrastructure: the layer that turns fragmented procedural evidence into comparable scores, cohort standing, and governance actions. HairAudit is the first full production surface; HLI and IIOHR feed biology and standards signal into the same core."
       />
       <Section>
         <FadeIn>
-          <p className="text-xs uppercase tracking-[0.22em] text-primary/85">Platform Capabilities</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">Capabilities</p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-            Structured intelligence for quality, training, and trust.
+            Built for repeatability, review, and institutional adoption.
           </h2>
+          <p className="mt-4 max-w-3xl text-muted-foreground leading-relaxed">
+            Buyers get operational outcomes: clearer quality standing, faster governance decisions, and
+            training priorities tied to evidence. Investors and partners should see the same architecture as
+            a compounding data and workflow footprint—deeper cohorts and harder-to-replace integration over
+            time.
+          </p>
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {CAPABILITY_BLOCKS.map((item, i) => (
@@ -83,24 +89,22 @@ export default function PlatformPage() {
       <Section className="border-t border-border/40">
         <FadeIn>
           <div className="fi-panel rounded-2xl p-8 md:p-10">
-            <p className="text-xs uppercase tracking-[0.22em] text-primary/85">How It Operates</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">How it operates</p>
             <div className="mt-6 grid gap-4 md:grid-cols-4">
               {[
-                "Case evidence ingestion",
-                "Signal structuring and confidence scoring",
+                "Evidence ingestion from clinical workflows",
+                "Structuring, scoring, and confidence",
                 "Benchmark comparison and cohort analytics",
-                "Quality actions and training insight delivery",
+                "Governance actions and training priorities",
               ].map((step, i) => (
                 <div key={step} className="rounded-lg border border-border/70 bg-background/60 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    Step {i + 1}
-                  </p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Step {i + 1}</p>
                   <p className="mt-3 text-sm text-foreground">{step}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-6 text-sm text-muted-foreground">
-              This infrastructure powers{" "}
+            <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+              Production pathways include{" "}
               <Link
                 href="https://hairaudit.com"
                 target="_blank"
@@ -109,7 +113,7 @@ export default function PlatformPage() {
               >
                 HairAudit
               </Link>{" "}
-              for surgical audit, integrates with{" "}
+              for surgical audit; integration with{" "}
               <Link
                 href="https://hairlongevityinstitute.com"
                 target="_blank"
@@ -118,7 +122,7 @@ export default function PlatformPage() {
               >
                 Hair Longevity Institute
               </Link>{" "}
-              for biology and treatment pathways, and aligns with{" "}
+              for longitudinal biology; and alignment with{" "}
               <Link
                 href="https://iiohr.com"
                 target="_blank"
@@ -127,17 +131,17 @@ export default function PlatformPage() {
               >
                 IIOHR
               </Link>{" "}
-              for training and certification.
+              for methodology, training, and standards.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild>
-                <Link href="/contact?intent=demo">Book Enterprise Demo</Link>
+                <Link href="/contact?intent=demo">Book enterprise demo</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/dashboard-demo">View Intelligence Layer</Link>
+                <Link href="/dashboard-demo">View intelligence layer</Link>
               </Button>
             </div>
-            <EcosystemMention className="mt-8 pt-6 border-t border-border/50" />
+            <EcosystemMention className="mt-8 border-t border-border/50 pt-6" />
           </div>
         </FadeIn>
       </Section>
