@@ -84,11 +84,20 @@ function finalizeSection(
   };
 }
 
+export type BuildCaseReadinessOptions = {
+  /**
+   * When true, readiness excludes the timeline section (used on the cases index worklist where
+   * full timeline rows are not loaded).
+   */
+  worklistMode?: boolean;
+};
+
 /**
  * Computes SurgeryOS-style readiness from data already loaded on the case detail route (read-only).
  */
-export function buildCaseReadiness(input: CaseReadinessBuildInput): CaseReadinessReport {
+export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: BuildCaseReadinessOptions): CaseReadinessReport {
   const { detail, surgeryPlan, procedureDay, postOpTracking, followUps, timelineItems } = input;
+  const worklistMode = options?.worklistMode === true;
 
   const fu1 = followUpRow("day_1", followUps);
   const fu7 = followUpRow("day_7", followUps);
@@ -279,7 +288,7 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput): CaseReadines
     followSection,
     imageSection,
     bookingSection,
-    timelineSection,
+    ...(worklistMode ? [] : [timelineSection]),
   ];
 
   const allChecks = sections.flatMap((s) => s.checks);
