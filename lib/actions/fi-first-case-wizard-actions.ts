@@ -2,11 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { assertFiTenantExists, isFiAdminUuid, requireFiAdminKey } from "@/lib/server/fiAdminKeyGate";
+import { assertFiTenantExists, isFiAdminUuid } from "@/lib/server/fiAdminKeyGate";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
+
+function errMsg(e: unknown): string {
+  if (e instanceof CrmAccessError) return e.message;
+  if (e instanceof Error) return e.message;
+  return "Request failed.";
+}
 
 const inputSchema = z.object({
-  adminKey: z.string().min(1, "Admin key is required."),
+  adminKey: z
+    .string()
+    .optional()
+    .transform((s) => (s == null || s.trim() === "" ? undefined : s.trim())),
   tenantId: z.string().uuid("Invalid tenant id."),
   clinic_id: z.string().uuid("Select a valid clinic."),
   first_name: z.string().trim().min(1, "First name is required.").max(120),
@@ -32,6 +42,7 @@ export type CreateFirstPatientCaseWizardResult =
 /**
  * FI Admin: create fi_person → fi_patient → fi_case (+ optional fi_timeline_events) in one guarded flow.
  * Writes use service role only; validates tenant and clinic ownership.
+ * Authorisation: `assertCrmTenantWriteAllowed` (signed-in CRM mutation role or optional `FI_ADMIN_API_KEY`).
  */
 export async function createFirstPatientCaseWizardAction(
   raw: unknown
@@ -42,10 +53,17 @@ export async function createFirstPatientCaseWizardAction(
   }
   const input = parsed.data;
 
-  const gate = requireFiAdminKey(input.adminKey);
-  if (!gate.ok) return { ok: false, error: gate.error };
-
   const tenantId = input.tenantId.trim();
+  try {
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: input.adminKey,
+      request: undefined,
+    });
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+
   const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return { ok: false, error: t.error };
 

@@ -42,8 +42,8 @@ export function FirstCaseWizardClient({
     [firstName, lastName, email, phone]
   );
   const canSubmit = useMemo(
-    () => canStep1 && canStep2 && !!caseType.trim() && !!treatmentType.trim() && !!adminKey.trim(),
-    [canStep1, canStep2, caseType, treatmentType, adminKey]
+    () => canStep1 && canStep2 && !!caseType.trim() && !!treatmentType.trim(),
+    [canStep1, canStep2, caseType, treatmentType]
   );
 
   const goNext = useCallback(() => {
@@ -67,13 +67,14 @@ export function FirstCaseWizardClient({
   const onCreate = useCallback(async () => {
     setError(null);
     if (!canSubmit) {
-      setError("Complete all steps and enter your FI admin key.");
+      setError("Complete all steps before creating the case.");
       return;
     }
     setBusy(true);
     try {
+      const adminOverride = adminKey.trim();
       const res = await createFirstPatientCaseWizardAction({
-        adminKey: adminKey.trim(),
+        ...(adminOverride ? { adminKey: adminOverride } : {}),
         tenantId,
         clinic_id: clinicId.trim(),
         first_name: firstName.trim(),
@@ -138,8 +139,11 @@ export function FirstCaseWizardClient({
         <div>
           <h1 className="text-lg font-semibold text-gray-900">First patient / first case</h1>
           <p className="mt-1 max-w-xl text-sm text-gray-600">
-            Guided setup for a new tenant: one person, one patient record, and one case using the service role on the
-            server. Paste <code className="rounded bg-gray-100 px-1 text-xs">FI_ADMIN_API_KEY</code> on the last step.
+            Guided setup: one person, one patient record, and one case. If you are signed in with a role that can edit
+            cases (for example <code className="rounded bg-gray-100 px-1 text-xs">fi_admin</code>,{" "}
+            <code className="rounded bg-gray-100 px-1 text-xs">admin</code>, or{" "}
+            <code className="rounded bg-gray-100 px-1 text-xs">crm_operator</code>), you can create the case without an
+            API key. Optional: use an admin key override below for break-glass or automation.
           </p>
         </div>
         <Link href={`/fi-admin/${tenantId}/cases`} className="text-sm text-blue-600 hover:underline">
@@ -271,17 +275,25 @@ export function FirstCaseWizardClient({
               <span className="font-medium text-gray-800">Source:</span> manual_admin_test (default)
             </div>
           </div>
-          <label className="block text-sm text-gray-700">
-            FI admin API key
-            <input
-              className={fieldClass}
-              type="password"
-              autoComplete="off"
-              value={adminKey}
-              onChange={(e) => setAdminKey(e.target.value)}
-              placeholder="Matches server FI_ADMIN_API_KEY"
-            />
-          </label>
+          <details className="rounded border border-gray-200 bg-gray-50/80 px-3 py-2 text-sm text-gray-700">
+            <summary className="cursor-pointer font-medium text-gray-800">Advanced — admin key override (optional)</summary>
+            <p className="mt-2 text-xs text-gray-600">
+              Paste <code className="rounded bg-gray-100 px-0.5 text-[11px]">FI_ADMIN_API_KEY</code> only if you are
+              not using a signed-in CRM/clinical role, or for scripted break-glass access. Leave blank for normal staff
+              creation.
+            </p>
+            <label className="mt-2 block text-sm text-gray-700">
+              FI admin API key
+              <input
+                className={fieldClass}
+                type="password"
+                autoComplete="off"
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
+                placeholder="Optional — matches server FI_ADMIN_API_KEY"
+              />
+            </label>
+          </details>
           <div className="flex justify-between gap-2 pt-2">
             <button type="button" className="text-sm text-gray-700 underline" onClick={goBack}>
               Back

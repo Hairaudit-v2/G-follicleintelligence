@@ -12,7 +12,7 @@ The Follicle Intelligence **FI Admin** surface today is a single Next.js app seg
 
 **Stable foundation (do not regress):** tenant/org/clinic creation and configuration flows, directory search, cases index filters and loaders, foundation integrity read model, `FI_ADMIN_API_KEY` behaviour, CRM gate policy constants, and existing RLS posture.
 
-**Gaps for a “daily clinic” product:** no dedicated **home** route per tenant; first-patient flow exists as **`/fi-admin/[tenantId]/cases/new`** but is **admin-key-only** at mutation time; several APIs (e.g. audit queue) trust **caller-provided `tenant_id`** without mirroring the layout’s auth checks.
+**Gaps for a “daily clinic” product:** no dedicated **home** route per tenant; several APIs (e.g. audit queue) trust **caller-provided `tenant_id`** without mirroring the layout’s auth checks.
 
 ---
 
@@ -25,7 +25,7 @@ There is **no** `app/.../fi-admin/[tenantId]/page.tsx` — the default entry aft
 | Route | Purpose | Primary user | Read / write | Data touched (high level) | Admin-only vs daily workflow |
 | --- | --- | --- | --- | --- | --- |
 | `/fi-admin/[tenantId]/cases` | Cases worklist: search, filters, pagination, links to detail and first-case wizard | Tenant member (portal) | Read via server loaders (`supabaseAdmin`); no writes on page | `fi_cases`, extensions (patients, clinics, orgs, CRM hints per loaders) | **Daily** candidate; today still “FI Admin” chrome |
-| `/fi-admin/[tenantId]/cases/new` | First patient / first case wizard (clinic + person fields + case) | Tenant member | Read clinics list; **write** via `createFirstPatientCaseWizardAction` (**`FI_ADMIN_API_KEY`**) | `fi_persons`, `fi_patients`, `fi_cases`, `fi_timeline_events` | **Admin / operator** until gate relaxed + UX for clinic staff |
+| `/fi-admin/[tenantId]/cases/new` | First patient / first case wizard (clinic + person fields + case) | Tenant member | Read clinics list; **write** via `createFirstPatientCaseWizardAction` using **`assertCrmTenantWriteAllowed`** (signed-in `fi_admin` / `admin` / `crm_operator`, or optional **`FI_ADMIN_API_KEY`**) | `fi_persons`, `fi_patients`, `fi_cases`, `fi_timeline_events` | **Clinical / CRM staff** with mutation role; optional admin key override in UI |
 | `/fi-admin/[tenantId]/cases/[caseId]` | Case profile: readiness, timeline, surgery plan, procedure day, post-op, patches | Tenant member | Read loaders; writes via server actions using **`assertCrmTenantWriteAllowed`** (admin key **or** `fi_admin` / `admin` / `crm_operator` role) | `fi_cases`, `fi_intakes`, foundation joins, `fi_case_surgery_plans`, `fi_case_procedures`, `fi_case_post_op_tracking`, `fi_case_follow_ups`, timeline extras | **Mixed** — clinical ops want it; sensitive fields and keys confuse normal users |
 | `/fi-admin/[tenantId]/cases/[caseId]/summary` | Printable / summary document view | Tenant member | Read | Same as case detail | **Daily** candidate (read-only) |
 | `/fi-admin/[tenantId]/audit` | HairAudit-style **audit queue** list (client fetch) | Tenant member | Read (`/api/fi/audit/queue?tenant_id=`) | `fi_reports`, `fi_intakes` | **Auditor / internal**; queue API has **no auth check** (see gaps) |
@@ -188,7 +188,7 @@ Legend: **tenant_id** = row scoped to `fi_tenants.id` where applicable. **RLS** 
 
 | Action | Stable | Incomplete | Admin-only | Safe to reuse | Notes |
 | --- |:---:|:---:|:---:|:---:|:---|
-| `createFirstPatientCaseWizardAction` | ⚠️ new / wizard | Partial UX | ✅ admin key | Extend **additive** new gate later | Do not remove rollback of person/patient on case failure |
+| `createFirstPatientCaseWizardAction` | ⚠️ new / wizard | Partial UX | Key **or** CRM roles (`assertCrmTenantWriteAllowed`) | ✅ | Do not remove rollback of person/patient on case failure |
 | `updateCaseProfileAction` | ✅ | | Key **or** CRM roles | ✅ | Uses `assertCrmTenantWriteAllowed` |
 | `upsertCaseSurgeryPlanningAction`, `upsertCaseProcedureDayAction`, post-op actions | ✅ | | Key **or** CRM roles | ✅ | Same gate |
 
@@ -283,10 +283,10 @@ Legend: **tenant_id** = row scoped to `fi_tenants.id` where applicable. **RLS** 
 
 | Dimension | Observation |
 | --- | --- |
-| Understandable | Step flow is clear. |
-| Confusing | **Admin key** on final step is not a clinic pattern. |
+| Understandable | Step flow is clear; create uses session + CRM mutation role, with optional admin key under “Advanced”. |
+| Confusing | (Reduced) staff need the correct `fi_users.role` or they see the standard CRM write denial. |
 | Missing | Optional CRM lead creation link; post-create checklist. |
-| Hide from clinic users? | Flow is useful **if** gate changes to session + role. |
+| Hide from clinic users? | Useful for **fi_admin** / **admin** / **crm_operator** without pasting `FI_ADMIN_API_KEY`. |
 
 ---
 
@@ -314,7 +314,9 @@ Legend: **tenant_id** = row scoped to `fi_tenants.id` where applicable. **RLS** 
 
 **Current implementation path:** `/fi-admin/[tenantId]/cases/new` + `FirstCaseWizardClient` + `createFirstPatientCaseWizardAction`.
 
-**Target flow (unchanged steps, additive auth later):**
+**Authorisation:** same as other clinical writes — `assertCrmTenantWriteAllowed` (tenant member with `fi_admin`, `admin`, or `crm_operator`, or valid optional `FI_ADMIN_API_KEY`).
+
+**Target flow (steps):**
 
 1. Select clinic (from `fi_clinics` for tenant).
 2. Create `fi_person` (+ metadata).
@@ -348,7 +350,7 @@ Map **existing** mechanics to **future** roles:
 
 - Existing **RLS policies** and the explicit **“no RLS on `fi_cases`”** decision.
 - **Foundation creation** semantics (org/clinic insert rules, slug validation).
-- **`FI_ADMIN_API_KEY`** gates on configuration, directory writes, wizard, backfill.
+- **`FI_ADMIN_API_KEY`** gates on configuration, directory writes, backfill (first-case wizard uses role-based write + optional admin key; not admin-key-only).
 - **Configuration** action field validation and service-role write paths.
 - **Directory search** query semantics (`searchFoundationRecords` and URL params).
 - **Cases index** parsing, filter application, sort, pagination, and redirect-on-page behaviour (`parseCasesIndexQuery`, `applyCasesWorklistFilters`, etc.).
@@ -369,7 +371,7 @@ Map **existing** mechanics to **future** roles:
 
 - [ ] Choose home route strategy (`/fi-admin/[tenantId]` vs `/home` vs `/fi/...`).
 - [ ] Define which roles see which nav items (superset of today’s CRM shell).
-- [ ] Confirm whether first-case wizard keeps admin key until enterprise auth is ready.
+- [x] First-case wizard uses `assertCrmTenantWriteAllowed`; admin key is optional break-glass only.
 
 **Acceptance:** Written ADR or section appended here; stakeholders sign off.
 
@@ -390,7 +392,7 @@ Map **existing** mechanics to **future** roles:
 
 ### Phase 3 — First patient workflow hardening (optional auth change)
 
-- [ ] If admin key removed: new gate must enforce **`assertCrmTenantWriteAllowed`**-class rules **or** narrower clinical role — **documented**.
+- [ ] Optional future work: narrower clinical-only role than CRM mutation set — **documented** if implemented (wizard and case actions today share `assertCrmTenantWriteAllowed`).
 - [ ] Wizard still rolls back person/patient on case insert failure.
 
 **Acceptance:** Security review; CRM gate unit tests extended.
