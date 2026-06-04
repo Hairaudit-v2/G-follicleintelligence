@@ -466,7 +466,45 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 
 ### Deferred (unchanged)
 
-- FI Admin CRM list/kanban/detail UI (Phase 4–5).
+- Full FI Admin CRM list / kanban workflow (Phase 4–5); Stage 2E adds a minimal shell only.
+
+---
+
+## Stage 2E — CRM internal shell UI (implementation progress)
+
+**Goal (met):** Read-first FI Admin pages under `/fi-admin/[tenantId]/crm` to verify pipeline, lead detail, activity, tasks, notes, and message previews using the same access model as Stage 2D writes (`fi_users` roles), plus small smoke forms that call **`lib/actions/fi-crm-actions.ts`** only (no `@/src/lib/crm/server` in `src/components`).
+
+### Routes
+
+| Path | Purpose |
+|------|---------|
+| `/fi-admin/[tenantId]/crm` | Pipeline panel, lead UUID jump, create-lead smoke. |
+| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, pipeline recap, activity / tasks / notes / messages panels, mutation smoke (move stage, note, task, message preview). |
+
+### Access
+
+- **Nav:** `CRM` link in tenant FI layout only when `getCrmShellNavAllowed(tenantId)` — signed-in Supabase user with `fi_users.role` ∈ `{ fi_admin, crm_operator }` (case-insensitive).
+- **Route:** `assertCrmShellPageAccess` on both CRM pages; otherwise redirect to `/fi-admin` (no session) or `/fi-admin/[tenantId]/cases` (wrong / insufficient role).
+
+### Files
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/crmShellAccess.ts` | Nav visibility + `assertCrmShellPageAccess` (redirect-based gate). |
+| `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle loaders (caller must assert first). |
+| `src/lib/crm/crmGatePolicy.ts` | `CRM_SHELL_NAV_ROLES_LOWER`, `isCrmShellNavRole`. |
+| `src/components/fi/crm/CrmDataPanels.tsx` | Read-only presentation (props only). |
+| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadSmoke.tsx`, `CrmLeadSmokeForms.tsx` | Client smoke UI → server actions only. |
+
+### Commands
+
+- Same as Stage 2D: `npm run lint`, `npm run build`, `npm run test:unit`.
+
+### Checklist mapping (Stage 2E)
+
+- [x] CRM shell routes + tenant layout nav (role-gated).
+- [x] Read panels + empty states; smoke mutations via Stage 2D actions only.
+- [x] No `src/components` imports of `@/src/lib/crm/server` (loaders live under `src/lib/crm/`; pages orchestrate).
 
 ---
 

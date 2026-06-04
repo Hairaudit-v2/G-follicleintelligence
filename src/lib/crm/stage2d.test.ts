@@ -6,7 +6,7 @@ import {
   crmMoveLeadStageBodySchema,
 } from "./crmApiSchemas";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "./messageBodyKeysPolicy";
-import { isCrmMutationRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+import { isCrmMutationRole, isCrmShellNavRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
 import { validateCrmMessagePreviewInput } from "./validation";
 
 describe("Stage 2D CRM gates (pure)", () => {
@@ -19,6 +19,15 @@ describe("Stage 2D CRM gates (pure)", () => {
   it("member role is not a CRM mutation role", () => {
     assert.equal(isCrmMutationRole("member"), false);
     assert.equal(isCrmMutationRole("crm_operator"), true);
+  });
+});
+
+describe("Stage 2E CRM shell nav policy (pure)", () => {
+  it("allows fi_admin and crm_operator only for shell nav", () => {
+    assert.equal(isCrmShellNavRole("fi_admin"), true);
+    assert.equal(isCrmShellNavRole("crm_operator"), true);
+    assert.equal(isCrmShellNavRole("admin"), false);
+    assert.equal(isCrmShellNavRole("member"), false);
   });
 });
 

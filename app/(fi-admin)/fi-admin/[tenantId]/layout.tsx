@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
+import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 
 const NEUTRAL_EFFECTIVE: EffectiveBranding = {
   brand_name: null,
@@ -30,6 +31,7 @@ export default async function TenantAdminLayout({
 }) {
   const { tenantId } = await params;
   const base = `/fi-admin/${tenantId}`;
+  const showCrmNav = await getCrmShellNavAllowed(tenantId);
 
   let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
   try {
@@ -61,6 +63,11 @@ export default async function TenantAdminLayout({
         <Link href={`${base}/foundation-integrity`} className={navLink}>
           Foundation integrity
         </Link>
+        {showCrmNav ? (
+          <Link href={`${base}/crm`} className={navLink}>
+            CRM
+          </Link>
+        ) : null}
       </nav>
       {children}
     </FiTenantBrandFrame>
