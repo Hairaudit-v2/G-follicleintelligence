@@ -62,6 +62,7 @@ export {
   loadOrganisationBranding,
   loadTenantBranding,
   loadTenantConfigurationOverview,
+  resolveConfigurationPreviewContext,
   resolveEffectiveBranding,
   type ClinicWithSettings,
   type EffectiveBranding,

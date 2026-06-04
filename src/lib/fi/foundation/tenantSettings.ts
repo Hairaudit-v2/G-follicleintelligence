@@ -378,6 +378,62 @@ export async function loadTenantConfigurationOverview(
   };
 }
 
+/**
+ * FI Admin configuration page: derive which organisation/clinic participate in
+ * {@link resolveEffectiveBranding}. URL query params win when valid; otherwise a tenant with
+ * exactly one clinic implicitly previews that clinic (so Effective Branding matches the lone
+ * Clinic Settings "Current" block without requiring `?clinicId=`). Organisation-only preview with
+ * no `clinicId` uses the single clinic under that org when there is exactly one — avoids picking
+ * an arbitrary clinic when several share an organisation.
+ */
+export function resolveConfigurationPreviewContext(
+  overview: TenantConfigurationOverview,
+  urlOrganisationId: string | null,
+  urlClinicId: string | null
+): { organisationId: string | null; clinicId: string | null } {
+  const clinicIds = new Set(overview.clinics.map((c) => c.clinic.id));
+  const orgIds = new Set(overview.organisations.map((o) => o.organisation.id));
+
+  const rawOrg = urlOrganisationId?.trim() || null;
+  const rawClinic = urlClinicId?.trim() || null;
+
+  let organisationId = rawOrg && orgIds.has(rawOrg) ? rawOrg : null;
+  let clinicId = rawClinic && clinicIds.has(rawClinic) ? rawClinic : null;
+
+  if (rawClinic && !clinicId) {
+    return { organisationId, clinicId: null };
+  }
+  if (rawOrg && !organisationId) {
+    organisationId = null;
+  }
+
+  if (clinicId) {
+    const row = overview.clinics.find((c) => c.clinic.id === clinicId);
+    if (row?.clinic.organisation_id && !organisationId) {
+      organisationId = row.clinic.organisation_id;
+    }
+    return { organisationId, clinicId };
+  }
+
+  if (organisationId) {
+    const inOrg = overview.clinics.filter((c) => c.clinic.organisation_id === organisationId);
+    if (inOrg.length === 1) {
+      clinicId = inOrg[0]!.clinic.id;
+    }
+    return { organisationId, clinicId };
+  }
+
+  if (overview.clinics.length === 1) {
+    const only = overview.clinics[0]!;
+    return {
+      organisationId: only.clinic.organisation_id ?? null,
+      clinicId: only.clinic.id,
+    };
+  }
+
+  return { organisationId: null, clinicId: null };
+}
+
 /** Returns true when `fi_organisations` has a row for this tenant and id. */
 export async function organisationBelongsToTenant(
   tenantId: string,

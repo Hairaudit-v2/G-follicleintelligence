@@ -121,19 +121,18 @@ export function TenantConfigurationPanel({
   effective,
   previewOrganisationId,
   previewClinicId,
+  previewFromUrl = false,
 }: {
   tenantId: string;
   overview: TenantConfigurationOverview;
   effective: EffectiveBranding;
   previewOrganisationId: string | null;
   previewClinicId: string | null;
+  /** True when `organisationId` / `clinicId` came from the page URL (shows "Clear preview"). */
+  previewFromUrl?: boolean;
 }) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId}/configuration`;
-  const q = new URLSearchParams();
-  if (previewOrganisationId) q.set("organisationId", previewOrganisationId);
-  if (previewClinicId) q.set("clinicId", previewClinicId);
-  const previewQs = q.toString();
 
   const [adminKey, setAdminKey] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -464,7 +463,7 @@ export function TenantConfigurationPanel({
             {previewOrganisationId ? `organisation=${previewOrganisationId.slice(0, 8)}…` : "no organisation"}
             {previewClinicId ? ` · clinic=${previewClinicId.slice(0, 8)}…` : ""}
           </span>
-          {previewQs ? (
+          {previewFromUrl ? (
             <>
               {" "}
               <Link href={base} className="text-blue-700 hover:underline">

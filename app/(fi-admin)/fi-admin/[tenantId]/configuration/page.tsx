@@ -3,7 +3,11 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import { TenantConfigurationPanel } from "@/src/components/fi/TenantConfigurationPanel";
-import { loadTenantConfigurationOverview, resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
+import {
+  loadTenantConfigurationOverview,
+  resolveConfigurationPreviewContext,
+  resolveEffectiveBranding,
+} from "@/src/lib/fi/foundation/tenantSettings";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +38,14 @@ export default async function TenantConfigurationPage({
     typeof searchParams.clinicId === "string" && searchParams.clinicId.trim() ? searchParams.clinicId.trim() : null;
 
   const overview = await loadTenantConfigurationOverview(tenantId);
-  const effective = await resolveEffectiveBranding({ tenantId, organisationId, clinicId });
+  const previewCtx = resolveConfigurationPreviewContext(overview, organisationId, clinicId);
+  const effective = await resolveEffectiveBranding({
+    tenantId,
+    organisationId: previewCtx.organisationId,
+    clinicId: previewCtx.clinicId,
+  });
 
-  const showCascadePreview = Boolean(organisationId || clinicId);
+  const showCascadePreview = Boolean(previewCtx.organisationId || previewCtx.clinicId);
 
   return (
     <div className="space-y-4">
@@ -54,8 +63,9 @@ export default async function TenantConfigurationPage({
         tenantId={tenantId}
         overview={overview}
         effective={effective}
-        previewOrganisationId={organisationId}
-        previewClinicId={clinicId}
+        previewOrganisationId={previewCtx.organisationId}
+        previewClinicId={previewCtx.clinicId}
+        previewFromUrl={Boolean(organisationId || clinicId)}
       />
     </div>
   );

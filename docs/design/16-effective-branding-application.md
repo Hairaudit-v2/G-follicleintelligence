@@ -13,7 +13,7 @@ File: **`src/components/fi/FiTenantBrandFrame.tsx`** (client component).
 | Variant | Where used | Data source |
 | --- | --- | --- |
 | **`layout` (default)** | `app/(fi-admin)/fi-admin/[tenantId]/layout.tsx` | `resolveEffectiveBranding({ tenantId })` — tenant baseline only (no query params in layout). |
-| **`page-preview`** | Configuration page when `organisationId` and/or `clinicId` query params are present | Same `resolveEffectiveBranding` call as the page already uses, including org/clinic IDs for cascade preview. |
+| **`page-preview`** | Configuration page when the resolved preview context includes an organisation and/or clinic | `resolveEffectiveBranding` after **`resolveConfigurationPreviewContext(overview, urlOrganisationId, urlClinicId)`** — URL params when valid; otherwise a **single-clinic tenant** implicitly uses that clinic so the preview matches Clinic Settings without `?clinicId=`. |
 
 Displayed elements:
 
