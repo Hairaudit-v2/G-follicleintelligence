@@ -1,3 +1,21 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript", "prettier"]
+  "extends": ["next/core-web-vitals", "next/typescript", "prettier"],
+  "overrides": [
+    {
+      "files": ["src/components/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@/src/lib/crm/server",
+                "message": "CRM server module is server-only; call gated API routes or server actions instead."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

@@ -2,6 +2,8 @@
  * Pure validation for CRM mutation inputs (Stage 2C).
  */
 
+import { assertMessagePayloadHasNoForbiddenBodyKeys } from "./messageBodyKeysPolicy";
+
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -16,8 +18,6 @@ export function assertNonEmptyUuid(value: string, fieldName: string): string {
   }
   return t;
 }
-
-const FORBIDDEN_MESSAGE_BODY_KEYS = new Set(["body", "html_body", "text_body", "raw_body", "full_body"]);
 
 export type ValidatedCrmMessagePreviewInput = {
   channel: string;
@@ -38,11 +38,7 @@ const MAX_BODY_PREVIEW_CHARS = 512;
  * Phase 1: preview/metadata only — reject obvious full-body keys and cap preview length.
  */
 export function validateCrmMessagePreviewInput(raw: Record<string, unknown>): ValidatedCrmMessagePreviewInput {
-  for (const k of Object.keys(raw)) {
-    if (FORBIDDEN_MESSAGE_BODY_KEYS.has(k.toLowerCase())) {
-      throw new Error(`CRM messages cannot include full-body field "${k}"; use body_preview only.`);
-    }
-  }
+  assertMessagePayloadHasNoForbiddenBodyKeys(raw);
 
   const channel = typeof raw.channel === "string" ? raw.channel.trim() : "";
   if (!channel) throw new Error("CRM message channel is required.");

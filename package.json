@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:unit": "tsx --test src/lib/crm/pure.test.ts",
+    "test:unit": "tsx --test src/lib/crm/pure.test.ts src/lib/crm/stage2d.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "copy-check": "tsx scripts/copy-check.ts",
@@ -22,6 +22,7 @@
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-slot": "^1.2.4",
+    "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.97.0",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
@@ -35,7 +36,8 @@
     "server-only": "^0.0.1",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20",

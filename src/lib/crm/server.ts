@@ -1,7 +1,7 @@
 import "server-only";
 
 /**
- * Service-role CRM data access (Stage 2C). Import only from Server Components,
+ * Service-role CRM data access (Stage 2C / 2D). Import only from Server Components,
  * route handlers, or server actions — never from client components.
  */
 
@@ -18,13 +18,13 @@ export {
   type CreateCrmLeadWithPersonResolutionParams,
   type CreateCrmLeadWithResolvedPersonParams,
 } from "./leads";
-export { appendCrmActivityEvent, type AppendCrmActivityEventParams } from "./activity";
+export { appendCrmActivityEvent, loadCrmActivityTimelineForLead, type AppendCrmActivityEventParams } from "./activity";
 export {
   appendCrmLeadStageHistory,
   loadCrmLeadStageHistory,
   type AppendCrmLeadStageHistoryParams,
 } from "./stageHistory";
 export { moveCrmLeadToStage, type MoveCrmLeadToStageParams, type MoveCrmLeadToStageResult } from "./stageMovement";
-export { createCrmTask, type CreateCrmTaskParams } from "./tasks";
-export { createCrmNoteForLead, type CreateCrmNoteForLeadParams } from "./notes";
-export { createCrmMessagePreview, type CreateCrmMessagePreviewParams } from "./messages";
+export { createCrmTask, loadCrmTasksForLead, type CreateCrmTaskParams } from "./tasks";
+export { createCrmNoteForLead, loadCrmNotesForLead, type CreateCrmNoteForLeadParams } from "./notes";
+export { createCrmMessagePreview, loadCrmMessagesForLead, type CreateCrmMessagePreviewParams } from "./messages";

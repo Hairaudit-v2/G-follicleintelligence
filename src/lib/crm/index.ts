@@ -32,3 +32,5 @@ export {
 } from "./validation";
 export { normaliseOrgClinicScope, stageRowMatchesOrgClinicScope, type OrgClinicScopeColumns } from "./scope";
 export { mapFiCrmLeadRow } from "./leadRow";
+export { CRM_MUTATION_ROLES_LOWER, isCrmMutationRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+export { assertMessagePayloadHasNoForbiddenBodyKeys, FORBIDDEN_MESSAGE_BODY_KEYS_LOWER } from "./messageBodyKeysPolicy";

@@ -143,3 +143,28 @@ export async function createCrmTask(params: CreateCrmTaskParams, client?: Supaba
 
   return task;
 }
+
+/**
+ * Recent tasks for a lead (newest first).
+ */
+export async function loadCrmTasksForLead(
+  tenantId: string,
+  leadId: string,
+  opts?: { limit?: number; client?: SupabaseClient }
+): Promise<FiCrmTaskRow[]> {
+  const supabase: SupabaseClient = opts?.client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const lid = assertNonEmptyUuid(leadId, "leadId");
+  const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 200);
+
+  const { data, error } = await supabase
+    .from("fi_crm_tasks")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("lead_id", lid)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as Record<string, unknown>[]).map(mapTaskRow);
+}

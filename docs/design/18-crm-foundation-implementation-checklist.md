@@ -389,12 +389,12 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/leads.ts` | `createCrmLeadWithPerson` (always `resolveOrCreatePerson` or verified `person_id`), `loadCrmLeadById`. |
 | `src/lib/crm/stageMovement.ts` | `moveCrmLeadToStage` — updates lead, `appendCrmLeadStageHistory`, `appendCrmActivityEvent` (`stage.changed`); optional `fi_timeline_events` when `case_id` set. |
 | `src/lib/crm/stageHistory.ts` | `appendCrmLeadStageHistory`, `loadCrmLeadStageHistory`. |
-| `src/lib/crm/activity.ts` | `appendCrmActivityEvent`. |
-| `src/lib/crm/tasks.ts`, `notes.ts`, `messages.ts` | Task / lead note / preview-only message writers + activity append. |
+| `src/lib/crm/activity.ts` | `appendCrmActivityEvent`, `loadCrmActivityTimelineForLead`. |
+| `src/lib/crm/tasks.ts`, `notes.ts`, `messages.ts` | Task / lead note / preview-only message writers + activity append; read previews for lead. |
 
 ### Commands
 
-- Pure tests: `npm run test:unit` (`src/lib/crm/pure.test.ts`).
+- Pure tests: `npm run test:unit` (`src/lib/crm/pure.test.ts`, `src/lib/crm/stage2d.test.ts`).
 
 ### Checklist mapping (Phase 3 / Stage 2C)
 
@@ -403,10 +403,70 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 - [x] `appendCrmActivityEvent` for CRM-native activity.
 - [x] Service-role / `server-only` discipline for all mutating paths; **no** new client-side CRM mutation code.
 
-### Deferred to later stages (unchanged)
+### Deferred to later stages (post–Stage 2C)
 
-- FI Admin UI, server actions wiring, and `FI_ADMIN_API_KEY` gates (Phase 4+ / doc 15).
+- FI Admin CRM screens (list/detail) — see Stage 2D for gated HTTP/actions.
 - Further transaction wrapping for stage move + timeline dual-write.
+
+---
+
+## Stage 2D — CRM gated HTTP + server actions (implementation progress)
+
+**Goal (met):** Tenant-scoped CRM reads and privileged writes behind **Next.js Route Handlers** and **`lib/actions/fi-crm-actions.ts`** server actions. Every mutation path validates input (Zod + message preview key policy), enforces access **before** calling `@/src/lib/crm/server`, and keeps message bodies preview-only at the boundary.
+
+### Access model
+
+| Path | Requirement |
+|------|----------------|
+| **FI internal** | `adminKey` in JSON body (same as configuration actions) **or** HTTP header `X-FI-Admin-Key` / query `adminKey` for GET, matching `FI_ADMIN_API_KEY`, plus tenant must exist. |
+| **Authenticated tenant member (reads)** | Supabase session (`cookies()` or `Authorization: Bearer` on API requests) and an `fi_users` row with `auth_user_id` = current user and `tenant_id` = route tenant (any `role`). |
+| **Authenticated CRM writes** | Same membership **and** `fi_users.role` in `{ fi_admin, admin, crm_operator }` (case-insensitive). |
+
+### API routes (`/api/tenants/[tenantId]/crm/...`)
+
+| Method | Route | Purpose |
+|--------|--------|---------|
+| GET | `…/crm/pipeline-stages` | Lazy-seed default stages for scope; returns `stages`. Query: `organisationId`, `clinicId`, `pipelineKey`. |
+| GET | `…/crm/leads/[leadId]` | Lead detail. |
+| GET | `…/crm/leads/[leadId]/activity` | Activity timeline (`events`). Query: `limit`. |
+| GET | `…/crm/leads/[leadId]/previews` | Parallel `tasks`, `notes`, `messages` previews. |
+| POST | `…/crm/leads` | Create lead (+ person resolution). |
+| POST | `…/crm/leads/[leadId]/stage` | Move lead stage (`toStageId`). |
+| POST | `…/crm/leads/[leadId]/activity` | Append CRM activity event. |
+| POST | `…/crm/leads/[leadId]/tasks` | Create task. |
+| POST | `…/crm/leads/[leadId]/notes` | Create note. |
+| POST | `…/crm/leads/[leadId]/messages/preview` | Message preview only; rejects `body`, `content`, `html`, `text`, `fullbody`, etc. at top level and inside `preview`. |
+
+### Server actions
+
+- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `crmCreateNoteAction`, `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
+
+### Supporting modules
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/crmGate.ts` | `assertCrmTenantReadAllowed`, `assertCrmTenantWriteAllowed`, `resolveAuthUserId`, `CrmAccessError`. |
+| `src/lib/crm/crmGatePolicy.ts` | Pure role / FI-admin key helpers (unit-testable without Next). |
+| `src/lib/crm/crmApiSchemas.ts` | Zod schemas for POST bodies / pipeline query. |
+| `src/lib/crm/crmHttp.ts` | JSON helpers + `extractAdminKeyFromRequest` for routes. |
+| `src/lib/crm/messageBodyKeysPolicy.ts` | Forbidden full-body keys (shared with `validation.ts`). |
+| `src/lib/crm/activity.ts` | `loadCrmActivityTimelineForLead` (+ existing append). |
+| `src/lib/crm/tasks.ts`, `notes.ts`, `messages.ts` | `loadCrmTasksForLead`, `loadCrmNotesForLead`, `loadCrmMessagesForLead`. |
+
+### Commands
+
+- Unit tests: `npm run test:unit` (`pure.test.ts`, `stage2d.test.ts`).
+
+### Checklist mapping (Stage 2D)
+
+- [x] Gated CRM API routes + server actions; writes use service-role helpers from `@/src/lib/crm/server` only.
+- [x] Tenant-scoped reads; cross-tenant lead access returns 404 when lead missing for tenant.
+- [x] Zod + preview key policy; message preview rejects unsafe body-style keys at route and action level.
+- [x] `server-only` on `src/lib/crm/server.ts`; ESLint `no-restricted-imports` on `src/components/**/*.tsx` blocking `@/src/lib/crm/server`.
+
+### Deferred (unchanged)
+
+- FI Admin CRM list/kanban/detail UI (Phase 4–5).
 
 ---
 

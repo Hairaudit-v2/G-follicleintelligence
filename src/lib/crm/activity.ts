@@ -48,7 +48,10 @@ export async function appendCrmActivityEvent(
     .single();
 
   if (error) throw new Error(error.message);
-  const row = data as Record<string, unknown>;
+  return mapActivityRow(data as Record<string, unknown>);
+}
+
+function mapActivityRow(row: Record<string, unknown>): FiCrmActivityEventRow {
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
@@ -65,4 +68,29 @@ export async function appendCrmActivityEvent(
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
   };
+}
+
+/**
+ * Tenant-scoped activity timeline for a lead (newest first).
+ */
+export async function loadCrmActivityTimelineForLead(
+  tenantId: string,
+  leadId: string,
+  opts?: { limit?: number; client?: SupabaseClient }
+): Promise<FiCrmActivityEventRow[]> {
+  const supabase: SupabaseClient = opts?.client ?? supabaseAdmin();
+  const tid = tenantId.trim();
+  const lid = leadId.trim();
+  const limit = Math.min(Math.max(opts?.limit ?? 100, 1), 500);
+
+  const { data, error } = await supabase
+    .from("fi_crm_activity_events")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("lead_id", lid)
+    .order("occurred_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as Record<string, unknown>[]).map(mapActivityRow);
 }

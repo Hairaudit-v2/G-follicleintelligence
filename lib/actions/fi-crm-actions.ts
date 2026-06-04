@@ -1,0 +1,210 @@
+"use server";
+
+import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
+import {
+  crmAppendActivityBodySchema,
+  crmCreateLeadBodySchema,
+  crmCreateNoteBodySchema,
+  crmCreateTaskBodySchema,
+  crmMessagePreviewBodySchema,
+  crmMoveLeadStageBodySchema,
+} from "@/src/lib/crm/crmApiSchemas";
+import { assertMessagePayloadHasNoForbiddenBodyKeys } from "@/src/lib/crm/messageBodyKeysPolicy";
+import {
+  appendCrmActivityEvent,
+  createCrmLeadWithPerson,
+  createCrmMessagePreview,
+  createCrmNoteForLead,
+  createCrmTask,
+  moveCrmLeadToStage,
+} from "@/src/lib/crm/server";
+import { ZodError } from "zod";
+
+function errMsg(e: unknown): string {
+  if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
+  if (e instanceof CrmAccessError) return e.message;
+  if (e instanceof Error) return e.message;
+  return "Request failed.";
+}
+
+export async function crmCreateLeadAction(
+  tenantId: string,
+  body: unknown
+): Promise<{ ok: true; lead: Awaited<ReturnType<typeof createCrmLeadWithPerson>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmCreateLeadBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+
+    if (parsed.personId) {
+      const lead = await createCrmLeadWithPerson({
+        tenantId,
+        organisationId: parsed.organisationId ?? undefined,
+        clinicId: parsed.clinicId ?? undefined,
+        patientId: parsed.patientId ?? undefined,
+        caseId: parsed.caseId ?? undefined,
+        primaryOwnerUserId: parsed.primaryOwnerUserId ?? undefined,
+        status: parsed.status,
+        priority: parsed.priority ?? undefined,
+        summary: parsed.summary ?? undefined,
+        metadata: parsed.metadata ?? undefined,
+        pipelineKey: parsed.pipelineKey,
+        personId: parsed.personId,
+      });
+      return { ok: true, lead };
+    }
+
+    if (parsed.person) {
+      const lead = await createCrmLeadWithPerson({
+        tenantId,
+        organisationId: parsed.organisationId ?? undefined,
+        clinicId: parsed.clinicId ?? undefined,
+        patientId: parsed.patientId ?? undefined,
+        caseId: parsed.caseId ?? undefined,
+        primaryOwnerUserId: parsed.primaryOwnerUserId ?? undefined,
+        status: parsed.status,
+        priority: parsed.priority ?? undefined,
+        summary: parsed.summary ?? undefined,
+        metadata: parsed.metadata ?? undefined,
+        pipelineKey: parsed.pipelineKey,
+        person: {
+          source_system: parsed.person.source_system ?? undefined,
+          source_person_id: parsed.person.source_person_id ?? undefined,
+          source_patient_id: parsed.person.source_patient_id ?? undefined,
+          display_name: parsed.person.display_name ?? undefined,
+          email: parsed.person.email ?? undefined,
+          phone: parsed.person.phone ?? undefined,
+          date_of_birth: parsed.person.date_of_birth ?? undefined,
+          sex: parsed.person.sex ?? undefined,
+          metadata: parsed.person.metadata ?? undefined,
+        },
+      });
+      return { ok: true, lead };
+    }
+
+    return { ok: false, error: "Provide personId or person with resolution fields." };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function crmMoveLeadStageAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<
+  | { ok: true; lead: Awaited<ReturnType<typeof moveCrmLeadToStage>>["lead"]; timelineEventId: string | null }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = crmMoveLeadStageBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const result = await moveCrmLeadToStage({
+      tenantId,
+      leadId,
+      toStageId: parsed.toStageId,
+      changedBy: parsed.changedBy ?? null,
+      reason: parsed.reason ?? null,
+      source: parsed.source,
+    });
+    return { ok: true, lead: result.lead, timelineEventId: result.timelineEventId };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function crmAppendActivityAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; event: Awaited<ReturnType<typeof appendCrmActivityEvent>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmAppendActivityBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const event = await appendCrmActivityEvent({
+      tenantId,
+      leadId,
+      activityKind: parsed.activityKind,
+      title: parsed.title ?? null,
+      detail: parsed.detail ?? null,
+      occurredAt: parsed.occurredAt ?? null,
+      patientId: parsed.patientId ?? null,
+      caseId: parsed.caseId ?? null,
+    });
+    return { ok: true, event };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function crmCreateTaskAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; task: Awaited<ReturnType<typeof createCrmTask>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmCreateTaskBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const task = await createCrmTask({
+      tenantId,
+      leadId,
+      title: parsed.title,
+      description: parsed.description ?? null,
+      taskType: parsed.taskType,
+      status: parsed.status,
+      dueAt: parsed.dueAt ?? null,
+      patientId: parsed.patientId ?? null,
+      caseId: parsed.caseId ?? null,
+      assigneeUserId: parsed.assigneeUserId ?? null,
+      metadata: parsed.metadata ?? null,
+    });
+    return { ok: true, task };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function crmCreateNoteAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; note: Awaited<ReturnType<typeof createCrmNoteForLead>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmCreateNoteBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const note = await createCrmNoteForLead({
+      tenantId,
+      leadId,
+      body: parsed.body,
+      visibility: parsed.visibility,
+      authorUserId: parsed.authorUserId ?? null,
+      metadata: parsed.metadata ?? null,
+    });
+    return { ok: true, note };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function crmCreateMessagePreviewAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; message: Awaited<ReturnType<typeof createCrmMessagePreview>> } | { ok: false; error: string }> {
+  try {
+    if (body && typeof body === "object") {
+      assertMessagePayloadHasNoForbiddenBodyKeys(body as Record<string, unknown>);
+    }
+    const parsed = crmMessagePreviewBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const message = await createCrmMessagePreview({
+      tenantId,
+      leadId,
+      patientId: parsed.patientId ?? null,
+      caseId: parsed.caseId ?? null,
+      preview: parsed.preview as Record<string, unknown>,
+    });
+    return { ok: true, message };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
