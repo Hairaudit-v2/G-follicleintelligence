@@ -24,6 +24,7 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 | [16-effective-branding-application](./16-effective-branding-application.md) | Stage 1M: apply effective branding in FI Admin layout and configuration preview. |
 | [17-crm-foundation-architecture](./17-crm-foundation-architecture.md) | Stage 1N: CRM foundation tables, ERD, timeline/HubSpot strategy, RLS, migration order (design only). |
 | [18-crm-foundation-implementation-checklist](./18-crm-foundation-implementation-checklist.md) | Stage 1O: locked decisions, phased implementation checklist, acceptance criteria (no code). |
+| [19-fi-os-current-state-and-dashboard-roadmap](./19-fi-os-current-state-and-dashboard-roadmap.md) | Audit of FI Admin routes, tables, server actions, UX; safety rules; phased home dashboard and first-patient workflow (design only). |
 
 ## Local development
 

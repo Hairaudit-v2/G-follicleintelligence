@@ -50,6 +50,9 @@ export default async function TenantAdminLayout({
   return (
     <FiTenantBrandFrame effective={effective}>
       <nav className="flex flex-wrap gap-4 border-b border-gray-200 pb-2 text-sm">
+        <Link href={base} className={navLink}>
+          Home
+        </Link>
         <Link href={`${base}/cases`} className={navLink}>
           Cases
         </Link>

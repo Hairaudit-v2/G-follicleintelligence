@@ -140,7 +140,7 @@ export default function FiAdminPage() {
         {tenants.map((t) => (
           <li key={t.id}>
             <Link
-              href={`/fi-admin/${t.id}/cases`}
+              href={`/fi-admin/${t.id}`}
               className="inline-block rounded border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
             >
               {t.name} ({t.slug})
