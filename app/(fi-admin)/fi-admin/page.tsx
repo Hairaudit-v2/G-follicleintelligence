@@ -15,14 +15,32 @@ function authHelpBlock(code: string | undefined, message: string) {
       <div className="mt-3 max-w-xl space-y-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
         <p>
           <strong>Production mode</strong> (<code className="rounded bg-amber-100/80 px-1 text-xs">NODE_ENV=production</code>
-          , e.g. <code className="text-xs">next start</code>): FI Admin needs a Supabase Auth session. Sign in through your
-          app&apos;s auth flow, then ensure your user has an <code className="text-xs">fi_users</code> row for a tenant.
+          , e.g. <code className="text-xs">next start</code>): sign in at{" "}
+          <Link href="/follicle-intelligence/login" className="font-medium text-blue-700 underline">
+            /follicle-intelligence/login
+          </Link>{" "}
+          (or <code className="text-xs">/fi-login</code>), then ensure your user has <code className="text-xs">fi_users</code>{" "}
+          and/or <code className="text-xs">fi_os_identities</code> provisioning.
         </p>
         <p>
           For <strong>local</strong> tenant picking <em>without</em> login, run <code className="text-xs">next dev</code>{" "}
           (not <code className="text-xs">next start</code>) and set{" "}
           <code className="text-xs">FI_ENABLE_DEV_ADMIN_ACCESS=true</code> in <code className="text-xs">.env.local</code> — see{" "}
           <code className="text-xs">docs/dev-local-fi-admin.md</code> in this repository.
+        </p>
+      </div>
+    );
+  }
+  if (code === "FI_PORTAL_FORBIDDEN") {
+    return (
+      <div className="mt-3 max-w-xl space-y-2 rounded border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-950">
+        <p>{message}</p>
+        <p>
+          Use{" "}
+          <Link href="/follicle-intelligence/login" className="font-medium text-blue-700 underline">
+            Follicle Intelligence OS sign-in
+          </Link>{" "}
+          with an account that has been provisioned, or sign out and try a different account.
         </p>
       </div>
     );

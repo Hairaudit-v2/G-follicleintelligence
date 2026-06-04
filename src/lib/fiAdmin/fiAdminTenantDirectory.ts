@@ -3,7 +3,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isFiOsCrossTenantDirectoryRole } from "@/src/lib/fiOs/fiOsRoles";
-import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
+import { isFiPortalStaff, loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 
 export type FiAdminTenantRow = { id: string; name: string; slug: string };
 
@@ -43,7 +43,8 @@ async function loadAllTenants(): Promise<FiAdminTenantRow[]> {
 /**
  * Resolves the FI Admin home tenant directory for `GET /api/tenants`.
  *
- * - **Authenticated:** tenants where `fi_users.auth_user_id` matches the session (or Bearer) user.
+ * - **Authenticated (production):** must be FI portal staff (`fi_os_identities` or `fi_users`); otherwise **403**.
+ * - **Authenticated staff:** `fi_admin` / `fi_auditor` OS roles → all tenants; else tenants from `fi_users` membership.
  * - **Production, unauthenticated:** error (401).
  * - **Non-production, unauthenticated:** if `FI_ENABLE_DEV_ADMIN_ACCESS=true`, all `fi_tenants` (dev fallback); else 401.
  */
@@ -54,6 +55,18 @@ export async function resolveFiAdminTenantDirectory(request: Request): Promise<
   const authId = await resolveAuthUserId(request);
 
   if (authId) {
+    if (process.env.NODE_ENV === "production") {
+      const staff = await isFiPortalStaff(authId);
+      if (!staff) {
+        return {
+          kind: "error",
+          status: 403,
+          message: "This account is not provisioned for Follicle Intelligence OS.",
+          code: "FI_PORTAL_FORBIDDEN",
+        };
+      }
+    }
+
     const os = await loadFiOsIdentity(authId);
     if (os && isFiOsCrossTenantDirectoryRole(os.osRole)) {
       const tenants = await loadAllTenants();

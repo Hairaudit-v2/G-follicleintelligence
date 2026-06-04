@@ -7,10 +7,17 @@ import { createServerClient, type CookieOptions, type SetAllCookies } from "@sup
 
 import { resolveFiOsPostLoginRedirect } from "@/src/lib/fiOs/fiOsRedirect.server";
 
+function firstForwardedValue(raw: string | null): string | null {
+  if (!raw) return null;
+  const first = raw.split(",")[0]?.trim();
+  return first && first.length > 0 ? first : null;
+}
+
 function getRequestOrigin(): string {
   const h = headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const proto = (h.get("x-forwarded-proto") ?? "http").split(",")[0]?.trim() || "http";
+  const host = firstForwardedValue(h.get("x-forwarded-host")) ?? h.get("host")?.trim() ?? null;
+  const protoRaw = firstForwardedValue(h.get("x-forwarded-proto")) ?? "http";
+  const proto = protoRaw.split("/")[0]?.trim() || "http";
   if (host) return `${proto}://${host}`;
   const fallback = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   return fallback && fallback.length > 0 ? fallback : "http://localhost:3000";

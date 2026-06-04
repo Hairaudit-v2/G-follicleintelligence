@@ -67,13 +67,11 @@ export default async function HairAuditOsAdminPage() {
         </section>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
-          {process.env.NODE_ENV === "production" ? (
-            <form action={fiOsSignOutAction}>
-              <button type="submit" className="text-slate-500 hover:text-slate-400 hover:underline">
-                Sign out
-              </button>
-            </form>
-          ) : null}
+          <form action={fiOsSignOutAction}>
+            <button type="submit" className="text-slate-500 hover:text-slate-400 hover:underline">
+              Sign out
+            </button>
+          </form>
           <Link href="/follicle-intelligence/login" className="text-slate-500 hover:text-slate-400 hover:underline">
             OS sign-in
           </Link>

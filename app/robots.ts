@@ -8,7 +8,17 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/fi-admin/", "/api/", "/fi-login", "/follicle-intelligence/login", "/follicle-intelligence/forgot-password", "/follicle-intelligence/update-password", "/hair-audit/"],
+        disallow: [
+          "/fi-admin",
+          "/fi-admin/",
+          "/api/",
+          "/fi-login",
+          "/follicle-intelligence/login",
+          "/follicle-intelligence/forgot-password",
+          "/follicle-intelligence/update-password",
+          "/hair-audit",
+          "/hair-audit/",
+        ],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,

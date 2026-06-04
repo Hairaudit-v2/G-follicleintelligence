@@ -26,13 +26,11 @@ export default async function FiAdminLayout({
           <h1 className="text-lg font-semibold text-gray-900">FI Admin</h1>
           <p className="text-sm text-gray-500">Internal admin only</p>
         </div>
-        {process.env.NODE_ENV === "production" ? (
-          <form action={fiOsSignOutAction}>
-            <button type="submit" className="text-sm text-gray-600 underline hover:text-gray-900">
-              Sign out
-            </button>
-          </form>
-        ) : null}
+        <form action={fiOsSignOutAction}>
+          <button type="submit" className="text-sm text-gray-600 underline hover:text-gray-900">
+            Sign out
+          </button>
+        </form>
       </header>
       {children}
     </div>

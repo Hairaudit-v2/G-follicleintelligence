@@ -1,6 +1,6 @@
 # FI Admin — local development without login
 
-Use the dedicated OS sign-in page: **`/follicle-intelligence/login`** (alias **`/fi-login`**). Production builds require a Supabase Auth session and FI staff provisioning (`fi_os_identities` and/or `fi_users`) before `/fi-admin` and tenant routes load.
+Use the dedicated OS sign-in page: **`/follicle-intelligence/login`** (alias **`/fi-login`**). Production builds require a Supabase Auth session and FI staff provisioning (`fi_os_identities` and/or `fi_users`) before `/fi-admin` and tenant routes load. Full rules and a go-live checklist: **`docs/fi-os-access-production.md`**.
 
 The FI Admin home page (`/fi-admin`) loads tenants from `GET /api/tenants`. In **production** (`NODE_ENV === 'production'`), you must be signed in with Supabase Auth. Tenant directory rules:
 
