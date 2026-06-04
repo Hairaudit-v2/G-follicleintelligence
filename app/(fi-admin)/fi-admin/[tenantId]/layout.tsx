@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { FiAdminTenantNav } from "@/src/components/fi-admin/FiAdminTenantNav";
+import { fiAdminAmbientBackgroundStyle } from "@/src/components/fi-admin/dashboard-ui";
 import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
@@ -44,54 +45,27 @@ export default async function TenantAdminLayout({
     effective = NEUTRAL_EFFECTIVE;
   }
 
-  const navLink =
-    "rounded-lg px-2 py-1 text-[#94A3B8] decoration-transparent underline-offset-4 transition hover:bg-white/[0.04] hover:text-[#22C1FF] hover:underline hover:decoration-[#22C1FF]/50";
+  const year = new Date().getFullYear();
 
   return (
-    <FiTenantBrandFrame effective={effective}>
-      <nav
-        className="flex flex-wrap gap-x-1 gap-y-1 border-b border-white/[0.08] pb-3 text-sm sm:gap-x-2"
-        aria-label="Tenant admin"
-      >
-        <Link href={base} className={navLink}>
-          Home
-        </Link>
-        <Link href={`${base}/cases`} className={navLink}>
-          Cases
-        </Link>
-        <Link href={`${base}/audit`} className={navLink}>
-          Audit queue
-        </Link>
-        <Link href={`${base}/directory`} className={navLink}>
-          Directory
-        </Link>
-        <Link href={`${base}/configuration`} className={navLink}>
-          Configuration
-        </Link>
-        <Link href={`${base}/foundation-integrity`} className={navLink}>
-          Foundation integrity
-        </Link>
-        {showCrmNav ? (
-          <>
-            <Link href={`${base}/patients`} className={navLink}>
-              Patients
-            </Link>
-            <Link href={`${base}/crm`} className={navLink}>
-              CRM
-            </Link>
-            <Link href={`${base}/bookings`} className={navLink}>
-              Bookings
-            </Link>
-            <Link href={`${base}/calendar`} className={navLink}>
-              Calendar
-            </Link>
-            <Link href={`${base}/system-status`} className={navLink}>
-              System Status
-            </Link>
-          </>
-        ) : null}
-      </nav>
-      <div className="pt-6">{children}</div>
+    <FiTenantBrandFrame effective={effective} topSlot={<FiAdminTenantNav base={base} showCrmNav={showCrmNav} />}>
+      <div className="relative min-h-[min(50vh,560px)] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#050a14]/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_40px_rgba(0,0,0,0.35)]">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.42]"
+          style={fiAdminAmbientBackgroundStyle}
+          aria-hidden
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a1528]/50 via-transparent to-[#02060d]/80" aria-hidden />
+        <div className="relative p-4 sm:p-6 lg:p-8">{children}</div>
+      </div>
+
+      <footer className="mt-8 border-t border-white/[0.08] pt-6 text-center text-sm leading-relaxed text-[#64748B] sm:text-base">
+        <p>
+          Follicle Intelligence OS · Hair Restoration Operating System ·{" "}
+          <span className="text-[#94A3B8]">Internal tenant workspace</span>
+        </p>
+        <p className="mt-1 text-xs text-[#475569] sm:text-sm">© {year} Follicle Intelligence</p>
+      </footer>
     </FiTenantBrandFrame>
   );
 }

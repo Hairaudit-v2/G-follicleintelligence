@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import {
   buildBrandingCssVariables,
   safeBrandingColourHex,
@@ -45,12 +46,22 @@ function BrandingBlock({
 
   const box =
     density === "layout"
-      ? "rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 px-4 py-3 shadow-xl shadow-black/40 backdrop-blur-md"
+      ? "relative overflow-hidden rounded-2xl border border-white/[0.1] bg-[#0F1629]/80 px-4 py-4 shadow-xl shadow-black/50 backdrop-blur-md sm:px-5 sm:py-4"
       : "rounded border border-amber-200 bg-amber-50/80 px-3 py-2 shadow-sm";
 
   return (
     <div className={box}>
-      <div className="flex flex-wrap items-start gap-3 border-l-4 pl-3" style={{ borderLeftColor: accent }}>
+      {density === "layout" ? (
+        <div
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            background:
+              "radial-gradient(420px 120px at 0% 0%, rgba(34, 193, 255, 0.1), transparent 55%), radial-gradient(360px 100px at 100% 100%, rgba(124, 58, 237, 0.06), transparent 50%)",
+          }}
+          aria-hidden
+        />
+      ) : null}
+      <div className="relative flex flex-wrap items-start gap-3 border-l-4 pl-3" style={{ borderLeftColor: accent }}>
         {logoSrc ? (
           <div className="shrink-0 pt-0.5">
             <BrandingLogo url={logoSrc} alt={headline} />
@@ -94,10 +105,13 @@ export function FiTenantBrandFrame({
   effective,
   variant = "layout",
   children,
+  /** Rendered above the tenant brand strip (e.g. primary nav). */
+  topSlot,
 }: {
   effective: EffectiveBranding;
   variant?: "layout" | "page-preview";
-  children?: React.ReactNode;
+  children?: ReactNode;
+  topSlot?: ReactNode;
 }) {
   if (variant === "page-preview") {
     return (
@@ -110,6 +124,7 @@ export function FiTenantBrandFrame({
 
   return (
     <div className="space-y-4" style={buildBrandingCssVariables(effective)}>
+      {topSlot}
       <BrandingBlock effective={effective} density="layout" />
       {children}
     </div>

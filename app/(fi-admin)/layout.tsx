@@ -36,7 +36,7 @@ export default async function FiAdminLayout({
         <form action={fiOsSignOutAction}>
           <button
             type="submit"
-            className="rounded-lg border border-white/[0.1] bg-[#141C33]/80 px-4 py-2 text-sm font-medium text-[#94A3B8] transition hover:border-[#22C1FF]/35 hover:text-[#22C1FF]"
+            className="rounded-lg border border-white/[0.12] bg-[#141C33]/90 px-4 py-2 text-sm font-semibold text-[#94A3B8] shadow-md transition duration-200 ease-out hover:-translate-y-0.5 hover:border-[#22C1FF]/40 hover:text-[#22C1FF] hover:shadow-lg hover:shadow-cyan-950/25"
           >
             Sign out
           </button>
