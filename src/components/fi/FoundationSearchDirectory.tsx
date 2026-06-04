@@ -90,7 +90,17 @@ function Group({
   );
 }
 
-export function FoundationSearchDirectory({ tenantId, result }: { tenantId: string; result: FoundationSearchGroupedResult }) {
+export function FoundationSearchDirectory({
+  tenantId,
+  result,
+  organisationCount,
+  clinicCount,
+}: {
+  tenantId: string;
+  result: FoundationSearchGroupedResult;
+  organisationCount: number;
+  clinicCount: number;
+}) {
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
 
@@ -164,9 +174,26 @@ export function FoundationSearchDirectory({ tenantId, result }: { tenantId: stri
           records, or widen scope to &quot;All&quot;.
         </p>
       ) : noData ? (
-        <p className="rounded border border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm text-gray-600">
-          No foundation directory rows returned for this tenant yet. Create or ingest data, then refresh.
-        </p>
+        <div className="space-y-3 rounded border border-gray-200 bg-gray-50 px-4 py-6 text-center">
+          <p className="text-sm text-gray-600">
+            No foundation directory rows returned for this tenant yet. Ingest data and search again, or use{" "}
+            <a className="font-medium text-blue-700 underline" href="#foundation-tools">
+              foundation tools
+            </a>{" "}
+            above to create organisations and clinics.
+          </p>
+          {organisationCount === 0 && clinicCount === 0 ? (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <a
+                href="#foundation-tools"
+                className="inline-flex rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white no-underline hover:bg-gray-800"
+              >
+                Create organisation
+              </a>
+              <span className="text-xs text-gray-500">Then create a clinic in the same panel.</span>
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       {total > 0 && (

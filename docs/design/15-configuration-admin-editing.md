@@ -10,6 +10,8 @@ Stage 1L allows **Follicle Intelligence (FI) internal admins** to **create and u
 
 Edits support **white-label branding** and **public operational URLs** without exposing the Supabase service role to the browser and without granting authenticated users INSERT/UPDATE on these tables.
 
+**Base rows** (`fi_organisations`, `fi_clinics`) are not created from this page. FI admins create them from **Directory** (`/fi-admin/[tenantId]/directory`) using the same `FI_ADMIN_API_KEY` gate and server-side service role (`lib/actions/fi-foundation-bootstrap-actions.ts`); then return here to edit settings.
+
 ## Editable fields
 
 ### Tenant (`fi_tenant_settings`)
@@ -78,9 +80,9 @@ Planned follow-ups may include:
 
 ## Related code
 
-- Server actions: `lib/actions/fi-configuration-actions.ts`
+- Server actions: `lib/actions/fi-configuration-actions.ts`, `lib/actions/fi-foundation-bootstrap-actions.ts`
 - Loaders and upsert helpers: `src/lib/fi/foundation/tenantSettings.ts`
-- UI: `src/components/fi/TenantConfigurationPanel.tsx`
+- UI: `src/components/fi/TenantConfigurationPanel.tsx`, `src/components/fi/FoundationDirectoryTools.tsx` (Directory — create `fi_organisations` / `fi_clinics`)
 - Migration (tables): `supabase/migrations/20260606120001_fi_tenant_org_clinic_settings.sql`
 - Migration (service_role writes): `supabase/migrations/20260606130001_fi_settings_service_role_write.sql`
 

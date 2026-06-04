@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { assertFiTenantExists, isFiAdminUuid, requireFiAdminKey } from "@/lib/server/fiAdminKeyGate";
 import {
   clinicBelongsToTenant,
   organisationBelongsToTenant,
@@ -12,24 +12,6 @@ import {
   type WriteFiOrganisationSettingsPayload,
   type WriteFiTenantSettingsPayload,
 } from "@/src/lib/fi/foundation/tenantSettings";
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function isUuid(v: string): boolean {
-  return UUID_RE.test(v.trim());
-}
-
-function requireFiAdminKey(adminKey: string): { ok: true } | { ok: false; error: string } {
-  const expected = process.env.FI_ADMIN_API_KEY?.trim();
-  if (!expected) {
-    return { ok: false, error: "FI_ADMIN_API_KEY is not configured on the server." };
-  }
-  if (!adminKey || adminKey.trim() !== expected) {
-    return { ok: false, error: "Invalid or missing admin key." };
-  }
-  return { ok: true };
-}
 
 function trimToNull(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -102,15 +84,6 @@ function optionalTimezone(v: unknown, label: string): { ok: true; value: string 
   return { ok: true, value: raw };
 }
 
-async function assertTenantExists(tenantId: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const supabase = supabaseAdmin();
-  const tid = tenantId.trim();
-  const { data, error } = await supabase.from("fi_tenants").select("id").eq("id", tid).maybeSingle();
-  if (error) return { ok: false, error: "Could not verify tenant." };
-  if (!data) return { ok: false, error: "Tenant not found." };
-  return { ok: true };
-}
-
 export async function upsertTenantSettingsAction(input: {
   adminKey: string;
   tenantId: string;
@@ -126,9 +99,9 @@ export async function upsertTenantSettingsAction(input: {
   if (!gate.ok) return gate;
 
   const tenantId = trimToNull(input.tenantId);
-  if (!tenantId || !isUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+  if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
 
-  const t = await assertTenantExists(tenantId);
+  const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;
 
   const brand = optionalBoundedText(input.brand_name, 200, "Brand name");
@@ -182,10 +155,10 @@ export async function upsertOrganisationSettingsAction(input: {
 
   const tenantId = trimToNull(input.tenantId);
   const organisationId = trimToNull(input.organisationId);
-  if (!tenantId || !isUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
-  if (!organisationId || !isUuid(organisationId)) return { ok: false, error: "Invalid organisation id." };
+  if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+  if (!organisationId || !isFiAdminUuid(organisationId)) return { ok: false, error: "Invalid organisation id." };
 
-  const t = await assertTenantExists(tenantId);
+  const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;
 
   let belongs = false;
@@ -248,10 +221,10 @@ export async function upsertClinicSettingsAction(input: {
 
   const tenantId = trimToNull(input.tenantId);
   const clinicId = trimToNull(input.clinicId);
-  if (!tenantId || !isUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
-  if (!clinicId || !isUuid(clinicId)) return { ok: false, error: "Invalid clinic id." };
+  if (!tenantId || !isFiAdminUuid(tenantId)) return { ok: false, error: "Invalid tenant id." };
+  if (!clinicId || !isFiAdminUuid(clinicId)) return { ok: false, error: "Invalid clinic id." };
 
-  const t = await assertTenantExists(tenantId);
+  const t = await assertFiTenantExists(tenantId);
   if (!t.ok) return t;
 
   let belongs = false;
