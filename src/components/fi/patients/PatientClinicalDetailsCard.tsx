@@ -52,13 +52,11 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
   const [msg, setMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const baselineFingerprint = `${data.foundationPatientId}:${data.clinicalDetails.row?.updated_at ?? "none"}`;
-
   useEffect(() => {
     setForm(buildFormFromRow(data));
-  }, [baselineFingerprint, data]);
+  }, [data]);
 
-  const baselineStr = useMemo(() => JSON.stringify(buildFormFromRow(data)), [baselineFingerprint, data]);
+  const baselineStr = useMemo(() => JSON.stringify(buildFormFromRow(data)), [data]);
 
   const dirty = useMemo(() => JSON.stringify(form) !== baselineStr, [form, baselineStr]);
 
