@@ -54,23 +54,29 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
   { id: "patients", label: "Patients", path: "patients", permissionHint: { requiresCrmShellNav: true } },
   { id: "cases", label: "Cases", path: "cases", permissionHint: {} },
   { id: "messages", label: "Messages", path: "", permissionHint: {}, placeholder: true },
+  { id: "sales", label: "Sales", path: "crm", permissionHint: { requiresCrmShellNav: true } },
   { id: "reports", label: "Reports", path: "", permissionHint: {}, placeholder: true },
   { id: "training", label: "Training", path: "", permissionHint: {}, placeholder: true },
   { id: "audit", label: "Audit", path: "audit", permissionHint: {} },
-  { id: "settings", label: "Settings", path: "configuration", permissionHint: {} },
+  { id: "setup", label: "Setup", path: "configuration", permissionHint: {} },
 ];
 
 export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
-  { id: "new-patient", label: "New Patient", path: "", permissionHint: { requiresCrmShellNav: true }, placeholder: true },
-  { id: "new-lead", label: "New Lead", path: "crm", permissionHint: { requiresCrmShellNav: true } },
-  { id: "new-booking", label: "New Booking", path: "bookings", permissionHint: { requiresCrmShellNav: true } },
-  { id: "new-case", label: "New Case", path: "cases/new", permissionHint: {} },
-  { id: "new-task", label: "New Task", path: "", permissionHint: {}, placeholder: true },
-  { id: "send-message", label: "Send Message", path: "", permissionHint: {}, placeholder: true },
+  { id: "patient", label: "Patient", path: "", permissionHint: { requiresCrmShellNav: true }, placeholder: true },
+  { id: "lead", label: "Lead", path: "crm", permissionHint: { requiresCrmShellNav: true } },
+  { id: "booking", label: "Booking", path: "bookings", permissionHint: { requiresCrmShellNav: true } },
+  { id: "case", label: "Case", path: "cases/new", permissionHint: {} },
+  { id: "task", label: "Task", path: "", permissionHint: {}, placeholder: true },
+  { id: "message", label: "Message", path: "", permissionHint: {}, placeholder: true },
 ];
 
 function normalizeBase(base: string): string {
   return base.replace(/\/+$/, "") || "";
+}
+
+function normalizePath(p: string): string {
+  const t = p.replace(/\/+$/, "");
+  return t.length === 0 ? "/" : t;
 }
 
 function hrefFor(base: string, path: string): string {
@@ -78,6 +84,42 @@ function hrefFor(base: string, path: string): string {
   const p = path.trim();
   if (!p) return b;
   return `${b}/${p}`;
+}
+
+/**
+ * Which primary nav tab should show as active for the current URL.
+ * Uses path segments under `base`; also treats `/hair-audit/*` as Audit when outside the tenant prefix.
+ */
+export function getClinicOsShellActiveNavId(pathname: string, base: string): string | null {
+  const nb = normalizeBase(base);
+  const np = normalizePath(pathname);
+
+  if (np.startsWith("/hair-audit")) return "audit";
+  if (!np.startsWith(nb)) return null;
+
+  if (np === nb) return "dashboard";
+
+  const rest = np.slice(nb.length);
+  const sub = rest.startsWith("/") ? rest.slice(1) : rest;
+  const first = sub.split("/")[0] ?? "";
+
+  if (first === "calendar") return "calendar";
+  if (first === "patients") return "patients";
+  if (first === "cases") return "cases";
+  if (first === "crm") return "sales";
+  if (first === "audit") return "audit";
+  if (first === "configuration" || first === "settings") return "setup";
+
+  return null;
+}
+
+/** True when the shell should show the calendar-only secondary context row (UI placeholders). */
+export function isClinicOsShellCalendarContextRoute(pathname: string, base: string): boolean {
+  const nb = normalizeBase(base);
+  const np = normalizePath(pathname);
+  if (!np.startsWith(nb) || np === nb) return false;
+  const rest = np.slice(nb.length);
+  return rest === "/calendar" || rest.startsWith("/calendar/");
 }
 
 export function resolveClinicOsShellNavItems(base: string, showCrmNav: boolean): ResolvedClinicOsShellNavItem[] {
