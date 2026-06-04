@@ -9,12 +9,27 @@ import {
   ensureDefaultPipelineStages,
   loadCrmActivityTimelineForLead,
   loadCrmLeadById,
+  loadCrmLeadsShellPage,
   loadCrmMessagesForLead,
   loadCrmNotesForLead,
   loadCrmTasksForLead,
 } from "./server";
-import type { FiCrmActivityEventRow, FiCrmLeadRow, FiCrmMessageRow, FiCrmNoteRow, FiCrmPipelineStageRow, FiCrmTaskRow } from "./types";
+import type {
+  CrmShellUserPickerOption,
+  FiCrmActivityEventRow,
+  FiCrmLeadRow,
+  FiCrmMessageRow,
+  FiCrmNoteRow,
+  FiCrmPipelineStageRow,
+  FiCrmTaskRow,
+} from "./types";
 import { DEFAULT_CRM_PIPELINE_KEY } from "./types";
+import { attachSearchPattern, parseCrmLeadListQuery, type ParsedCrmLeadListQuery } from "./crmLeadListQuery";
+import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import type { CrmShellLeadListPage } from "./types";
+
+export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
 
 export async function loadCrmShellPipelineStages(tenantId: string): Promise<FiCrmPipelineStageRow[]> {
   const scope = {
@@ -48,4 +63,41 @@ export async function loadCrmShellLeadBundle(tenantId: string, leadId: string): 
     loadCrmMessagesForLead(tenantId, lid, { limit: 40 }),
   ]);
   return { lead, events, tasks, notes, messages };
+}
+
+export type CrmShellLeadsIndexResult = CrmShellLeadListPage & {
+  query: ParsedCrmLeadListQuery;
+};
+
+/**
+ * Lead index for CRM shell home: lazy default pipeline seed + paginated list (Stage 2F).
+ */
+export async function loadCrmShellLeadsIndex(
+  tenantId: string,
+  searchParams: Record<string, string | string[] | undefined>
+): Promise<CrmShellLeadsIndexResult> {
+  const tid = tenantId.trim();
+  const base = parseCrmLeadListQuery(searchParams);
+  const esc = base.searchRaw ? escapeIlikePattern(base.searchRaw) : null;
+  const parsed = attachSearchPattern(base, esc);
+  await ensureDefaultPipelineStages({
+    tenantId: tid,
+    organisationId: null,
+    clinicId: null,
+    pipelineKey: DEFAULT_CRM_PIPELINE_KEY,
+  });
+  const page = await loadCrmLeadsShellPage(tid, parsed);
+  return { ...page, query: parsed };
+}
+
+export async function loadCrmShellUserPickerOptions(tenantId: string): Promise<CrmShellUserPickerOption[]> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_users")
+    .select("id, email")
+    .eq("tenant_id", tenantId.trim())
+    .order("email", { ascending: true });
+  if (error) throw new Error(error.message);
+  const rows = (data ?? []) as { id: string; email: string | null }[];
+  return rows.map((r) => ({ id: String(r.id), email: r.email != null ? String(r.email) : null }));
 }

@@ -33,7 +33,7 @@ export default async function CrmLeadShellPage({
           No lead <code className="font-mono text-xs">{leadId}</code> for this tenant, or it was deleted.
         </p>
         <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-blue-600 hover:underline">
-          ← CRM shell home
+          ← Leads
         </Link>
       </div>
     );
@@ -48,7 +48,7 @@ export default async function CrmLeadShellPage({
           <h1 className="text-lg font-semibold text-gray-900">Lead (shell)</h1>
           <p className="text-sm text-gray-600">
             <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-600 hover:underline">
-              ← CRM shell
+              ← Leads
             </Link>
             {" · "}
             <Link href={`/fi-admin/${tenantId}/cases`} className="text-blue-600 hover:underline">

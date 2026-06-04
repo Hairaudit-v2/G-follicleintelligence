@@ -5,6 +5,9 @@
 
 export type {
   CrmPipelineScope,
+  CrmShellLeadListItem,
+  CrmShellLeadListPage,
+  CrmShellUserPickerOption,
   FiCrmActivityEventRow,
   FiCrmLeadRow,
   FiCrmLeadStageHistoryRow,
@@ -32,5 +35,18 @@ export {
 } from "./validation";
 export { normaliseOrgClinicScope, stageRowMatchesOrgClinicScope, type OrgClinicScopeColumns } from "./scope";
 export { mapFiCrmLeadRow } from "./leadRow";
+export {
+  attachSearchPattern,
+  buildCrmLeadListHref,
+  crmLeadListHasActiveFilters,
+  crmLeadListOffset,
+  CRM_LEAD_LIST_SORTS,
+  parseCrmLeadListQuery,
+  parsedCrmLeadListToHrefQuery,
+  type CrmLeadListHrefQuery,
+  type CrmLeadListSort,
+  type ParsedCrmLeadListQuery,
+} from "./crmLeadListQuery";
+export { leadTitleFromRow, personMetadataDisplayLabel } from "./crmLeadListDisplay";
 export { CRM_MUTATION_ROLES_LOWER, CRM_SHELL_NAV_ROLES_LOWER, isCrmMutationRole, isCrmShellNavRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
 export { assertMessagePayloadHasNoForbiddenBodyKeys, FORBIDDEN_MESSAGE_BODY_KEYS_LOWER } from "./messageBodyKeysPolicy";

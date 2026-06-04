@@ -44,6 +44,20 @@ export type FiCrmLeadRow = {
   updated_at: string;
 };
 
+/** One row in the FI Admin CRM lead index list (Stage 2F). */
+export type CrmShellLeadListItem = {
+  lead: FiCrmLeadRow;
+  stage: { id: string; slug: string; label: string; sort_order: number } | null;
+  person: { id: string; metadata: Record<string, unknown> } | null;
+  owner: { id: string; email: string | null } | null;
+  patient: { id: string } | null;
+};
+
+export type CrmShellLeadListPage = {
+  items: CrmShellLeadListItem[];
+  total: number;
+};
+
 export type FiCrmLeadStageHistoryRow = {
   id: string;
   tenant_id: string;
@@ -122,6 +136,9 @@ export type FiCrmMessageRow = {
   metadata: JsonObject;
   created_at: string;
 };
+
+/** FI Admin CRM shell: tenant user row for owner filter dropdown (Stage 2F). */
+export type CrmShellUserPickerOption = { id: string; email: string | null };
 
 /** Scope used for lazy pipeline seeding and stage resolution. */
 export type CrmPipelineScope = {

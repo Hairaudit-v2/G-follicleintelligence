@@ -478,7 +478,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 
 | Path | Purpose |
 |------|---------|
-| `/fi-admin/[tenantId]/crm` | Pipeline panel, lead UUID jump, create-lead smoke. |
+| `/fi-admin/[tenantId]/crm` | Lead index (filters, sort, pagination), pipeline panel, lead UUID jump, create-lead smoke. |
 | `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, pipeline recap, activity / tasks / notes / messages panels, mutation smoke (move stage, note, task, message preview). |
 
 ### Access
@@ -491,7 +491,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | Path | Role |
 |------|------|
 | `src/lib/crm/crmShellAccess.ts` | Nav visibility + `assertCrmShellPageAccess` (redirect-based gate). |
-| `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle loaders (caller must assert first). |
+| `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle + **lead index** loaders (caller must assert first). |
 | `src/lib/crm/crmGatePolicy.ts` | `CRM_SHELL_NAV_ROLES_LOWER`, `isCrmShellNavRole`. |
 | `src/components/fi/crm/CrmDataPanels.tsx` | Read-only presentation (props only). |
 | `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadSmoke.tsx`, `CrmLeadSmokeForms.tsx` | Client smoke UI → server actions only. |
@@ -503,8 +503,40 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 ### Checklist mapping (Stage 2E)
 
 - [x] CRM shell routes + tenant layout nav (role-gated).
-- [x] Read panels + empty states; smoke mutations via Stage 2D actions only.
+- [x] Read panels + empty states; **lead list** (Stage 2F) + smoke mutations via Stage 2D actions only.
 - [x] No `src/components` imports of `@/src/lib/crm/server` (loaders live under `src/lib/crm/`; pages orchestrate).
+
+---
+
+## Stage 2F — CRM lead list index (implementation progress)
+
+**Goal (met):** `/fi-admin/[tenantId]/crm` is the internal **lead index** (table, filters, sorting, pagination, deep links to `/crm/leads/[leadId]`). Reads stay behind `assertCrmShellPageAccess` + `crmShellLoaders` / `fi_crm_leads_shell_page` (always `p_tenant_id`-scoped). Client UI does **not** import `@/src/lib/crm/server`; filter bar is GET-only; mutations remain Stage 2D server actions / API.
+
+### Data
+
+| Piece | Role |
+|-------|------|
+| `supabase/migrations/20260607130001_fi_crm_leads_shell_page_fn.sql` | RPC `fi_crm_leads_shell_page` — filters, ILIKE search (summary + person `metadata` display/email hints), whitelist sort keys, limit/offset; `EXECUTE` granted to **`service_role` only**. |
+| `src/lib/crm/leadList.ts` | `loadCrmLeadsShellPage` — calls RPC, maps JSON to `CrmShellLeadListItem`. |
+| `src/lib/crm/crmShellLoaders.ts` | `loadCrmShellLeadsIndex` (lazy pipeline seed + list), `loadCrmShellUserPickerOptions` (owner filter). |
+| `src/lib/crm/crmLeadListQuery.ts` | Pure URL/query parsing, href builder, `crmLeadListHasActiveFilters`. |
+
+### UI
+
+| Path | Role |
+|------|------|
+| `app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx` | Orchestrates loaders + list + empty states; keeps pipeline + smoke create. |
+| `src/components/fi/crm/CrmLeadListFilters.tsx` | Client **GET** form (no CRM server imports). |
+| `src/components/fi/crm/CrmLeadListTable.tsx` | Server table + row links. |
+| `src/components/fi/crm/CrmLeadListPagination.tsx` | Server prev/next + range. |
+
+### Tests
+
+- `src/lib/crm/crmLeadListQuery.test.ts` (included in `npm run test:unit`).
+
+### Deferred
+
+- Kanban / board views; saved views; non–GET-driven filter UX.
 
 ---
 
