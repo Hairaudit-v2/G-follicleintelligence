@@ -5,10 +5,10 @@ import {
   CrmMessagesPanel,
   CrmNotesPanel,
   CrmPipelinePanel,
-  CrmTasksPanel,
 } from "@/src/components/fi/crm/CrmDataPanels";
 import { CrmLeadEditPanel } from "@/src/components/fi/crm/CrmLeadEditPanel";
 import { CrmLeadSmokeForms } from "@/src/components/fi/crm/CrmLeadSmokeForms";
+import { CrmLeadTasksWorkflow } from "@/src/components/fi/crm/CrmLeadTasksWorkflow";
 import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmShellLeadDetailPageData, loadCrmShellPipelineStages } from "@/src/lib/crm/crmShellLoaders";
 
@@ -41,6 +41,7 @@ export default async function CrmLeadShellPage({
   }
 
   const stageOpts = stages.map((s) => ({ id: s.id, label: s.label, slug: s.slug }));
+  const groupingNowIso = new Date().toISOString();
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 py-6">
@@ -75,7 +76,13 @@ export default async function CrmLeadShellPage({
       <CrmActivityPanel events={detail.events} />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <CrmTasksPanel tasks={detail.tasks} />
+        <CrmLeadTasksWorkflow
+          tenantId={tenantId}
+          leadId={detail.lead.id}
+          tasks={detail.tasks}
+          assigneeOptions={detail.owners}
+          groupingNowIso={groupingNowIso}
+        />
         <CrmNotesPanel notes={detail.notes} />
         <CrmMessagesPanel messages={detail.messages} />
       </div>

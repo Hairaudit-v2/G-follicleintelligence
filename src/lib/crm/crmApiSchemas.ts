@@ -4,6 +4,7 @@ import {
   CRM_LEAD_DETAIL_PRIORITY_VALUES,
   CRM_LEAD_DETAIL_STATUS_VALUES,
 } from "./crmLeadDetailsPolicy";
+import { CRM_TASK_ACTIVE_STATUS_VALUES, CRM_TASK_TYPE_VALUES } from "./crmTaskPolicy";
 import { normaliseOptionalLeadSource } from "./leadSourceMappingPolicy";
 
 const UUID = z.string().uuid();
@@ -94,18 +95,69 @@ export const crmAppendActivityBodySchema = z
   })
   .strict();
 
+const taskActiveStatusTuple = CRM_TASK_ACTIVE_STATUS_VALUES as unknown as [string, ...string[]];
+const taskTypeTuple = CRM_TASK_TYPE_VALUES as unknown as [string, ...string[]];
+
+function refineDueAtString(val: string | null | undefined, ctx: z.RefinementCtx, path: (string | number)[]) {
+  if (val === undefined || val === null) return;
+  const s = String(val).trim();
+  if (!s) return;
+  if (Number.isNaN(Date.parse(s))) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid due_at datetime.", path });
+  }
+}
+
 export const crmCreateTaskBodySchema = z
   .object({
     adminKey: z.string().optional(),
     title: z.string().min(1).max(512),
     description: z.string().max(8000).optional().nullable(),
-    taskType: z.string().max(64).optional(),
-    status: z.string().max(64).optional(),
+    taskType: z.enum(taskTypeTuple).optional(),
+    status: z.enum(taskActiveStatusTuple).optional(),
     dueAt: z.string().max(64).optional().nullable(),
     patientId: optionalUuid,
     caseId: optionalUuid,
     assigneeUserId: optionalUuid,
     metadata: z.record(z.string(), z.any()).optional().nullable(),
+  })
+  .strict()
+  .superRefine((body, ctx) => {
+    refineDueAtString(body.dueAt ?? undefined, ctx, ["dueAt"]);
+  });
+
+export const crmUpdateTaskBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    title: z.string().min(1).max(512).optional(),
+    description: z.string().max(8000).optional().nullable(),
+    taskType: z.string().max(64).optional(),
+    status: z.string().max(64).optional(),
+    dueAt: z.union([z.string().max(64), z.null()]).optional(),
+    assigneeUserId: optionalUuid,
+  })
+  .strict()
+  .superRefine((body, ctx) => {
+    refineDueAtString(body.dueAt === null ? undefined : body.dueAt, ctx, ["dueAt"]);
+    const keys = ["title", "description", "taskType", "status", "dueAt", "assigneeUserId"] as const;
+    const any = keys.some((k) => body[k] !== undefined);
+    if (!any) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Provide at least one field to update.",
+        path: ["title"],
+      });
+    }
+  });
+
+export const crmCompleteTaskBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+  })
+  .strict();
+
+export const crmReopenTaskBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
   })
   .strict();
 
@@ -172,6 +224,9 @@ export type CrmCreateLeadBody = z.infer<typeof crmCreateLeadBodySchema>;
 export type CrmMoveLeadStageBody = z.infer<typeof crmMoveLeadStageBodySchema>;
 export type CrmAppendActivityBody = z.infer<typeof crmAppendActivityBodySchema>;
 export type CrmCreateTaskBody = z.infer<typeof crmCreateTaskBodySchema>;
+export type CrmUpdateTaskBody = z.infer<typeof crmUpdateTaskBodySchema>;
+export type CrmCompleteTaskBody = z.infer<typeof crmCompleteTaskBodySchema>;
+export type CrmReopenTaskBody = z.infer<typeof crmReopenTaskBodySchema>;
 export type CrmCreateNoteBody = z.infer<typeof crmCreateNoteBodySchema>;
 export type CrmMessagePreviewBody = z.infer<typeof crmMessagePreviewBodySchema>;
 export type CrmUpdateLeadDetailsBody = z.infer<typeof crmUpdateLeadDetailsBodySchema>;

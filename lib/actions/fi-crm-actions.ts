@@ -3,22 +3,28 @@
 import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
 import {
   crmAppendActivityBodySchema,
+  crmCompleteTaskBodySchema,
   crmCreateLeadBodySchema,
   crmCreateNoteBodySchema,
   crmCreateTaskBodySchema,
   crmMessagePreviewBodySchema,
   crmMoveLeadStageBodySchema,
+  crmReopenTaskBodySchema,
   crmUpdateLeadDetailsBodySchema,
+  crmUpdateTaskBodySchema,
 } from "@/src/lib/crm/crmApiSchemas";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "@/src/lib/crm/messageBodyKeysPolicy";
 import {
   appendCrmActivityEvent,
+  completeCrmTask,
   createCrmLeadWithPerson,
   createCrmMessagePreview,
   createCrmNoteForLead,
   createCrmTask,
   moveCrmLeadToStage,
+  reopenCrmTask,
   updateCrmLeadDetails,
+  updateCrmTask,
 } from "@/src/lib/crm/server";
 import { ZodError } from "zod";
 
@@ -163,6 +169,64 @@ export async function crmCreateTaskAction(
       assigneeUserId: parsed.assigneeUserId ?? null,
       metadata: parsed.metadata ?? null,
     });
+    return { ok: true, task };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function updateCrmTaskAction(
+  tenantId: string,
+  leadId: string,
+  taskId: string,
+  body: unknown
+): Promise<{ ok: true; task: Awaited<ReturnType<typeof updateCrmTask>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmUpdateTaskBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const task = await updateCrmTask({
+      tenantId,
+      leadId,
+      taskId,
+      ...(parsed.title !== undefined ? { title: parsed.title } : {}),
+      ...(parsed.description !== undefined ? { description: parsed.description } : {}),
+      ...(parsed.taskType !== undefined ? { taskType: parsed.taskType } : {}),
+      ...(parsed.status !== undefined ? { status: parsed.status } : {}),
+      ...(parsed.dueAt !== undefined ? { dueAt: parsed.dueAt } : {}),
+      ...(parsed.assigneeUserId !== undefined ? { assigneeUserId: parsed.assigneeUserId } : {}),
+    });
+    return { ok: true, task };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function completeCrmTaskAction(
+  tenantId: string,
+  leadId: string,
+  taskId: string,
+  body: unknown
+): Promise<{ ok: true; task: Awaited<ReturnType<typeof completeCrmTask>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmCompleteTaskBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const task = await completeCrmTask({ tenantId, leadId, taskId });
+    return { ok: true, task };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function reopenCrmTaskAction(
+  tenantId: string,
+  leadId: string,
+  taskId: string,
+  body: unknown
+): Promise<{ ok: true; task: Awaited<ReturnType<typeof reopenCrmTask>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmReopenTaskBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const task = await reopenCrmTask({ tenantId, leadId, taskId });
     return { ok: true, task };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

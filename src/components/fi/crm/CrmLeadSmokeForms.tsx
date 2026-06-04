@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   crmCreateMessagePreviewAction,
   crmCreateNoteAction,
-  crmCreateTaskAction,
   crmMoveLeadStageAction,
 } from "@/lib/actions/fi-crm-actions";
 
@@ -26,7 +25,6 @@ export function CrmLeadSmokeForms({
   const [adminKey, setAdminKey] = useState("");
   const [toStageId, setToStageId] = useState(stages[0]?.id ?? "");
   const [noteBody, setNoteBody] = useState("");
-  const [taskTitle, setTaskTitle] = useState("");
   const [msgChannel, setMsgChannel] = useState("email");
   const [msgDirection, setMsgDirection] = useState<"inbound" | "outbound">("inbound");
   const [msgPreview, setMsgPreview] = useState("");
@@ -65,22 +63,6 @@ export function CrmLeadSmokeForms({
       setFeedback(r.ok ? "Note added." : r.error);
       if (r.ok) {
         setNoteBody("");
-        router.refresh();
-      }
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function doTask(e: React.FormEvent) {
-    e.preventDefault();
-    setFeedback(null);
-    setBusy(true);
-    try {
-      const r = await crmCreateTaskAction(tenantId, leadId, withAdmin({ title: taskTitle }));
-      setFeedback(r.ok ? "Task created." : r.error);
-      if (r.ok) {
-        setTaskTitle("");
         router.refresh();
       }
     } finally {
@@ -151,14 +133,6 @@ export function CrmLeadSmokeForms({
           <textarea value={noteBody} onChange={(e) => setNoteBody(e.target.value)} rows={3} className="w-full rounded border border-gray-300 px-2 py-1 text-sm" placeholder="Note body" required />
           <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
             Save note
-          </button>
-        </form>
-
-        <form onSubmit={doTask} className="space-y-2 rounded border border-amber-200 bg-white/80 p-3 text-sm">
-          <h3 className="font-medium text-gray-900">Add task</h3>
-          <input value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} className="w-full rounded border border-gray-300 px-2 py-1" placeholder="Task title" required />
-          <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
-            Create task
           </button>
         </form>
 

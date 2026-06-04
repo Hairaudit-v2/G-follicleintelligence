@@ -63,3 +63,20 @@ export {
   type LeadDetailTrackedKey,
 } from "./crmLeadDetailsPolicy";
 export { assertMessagePayloadHasNoForbiddenBodyKeys, FORBIDDEN_MESSAGE_BODY_KEYS_LOWER } from "./messageBodyKeysPolicy";
+export { groupCrmTasksByBuckets, type CrmTaskUiBucket, type CrmTasksGroupedByBucket } from "./crmTaskBuckets";
+export {
+  assertCompleteReopenBodyHasNoExtraKeys,
+  assertCrmTaskStatusAllowedForWrite,
+  assertCrmTaskTypeAllowed,
+  CRM_TASK_ACTIVE_STATUS_VALUES,
+  CRM_TASK_STATUS_DONE,
+  CRM_TASK_TYPE_VALUES,
+  isCrmTaskActiveStatus,
+  isCrmTaskType,
+} from "./crmTaskPolicy";
+export {
+  collectChangedTaskDetailKeys,
+  taskDetailSnapshotFromRowLike,
+  type TaskDetailComparableSnapshot,
+} from "./crmTaskChangedFields";
+export { isTaskOwnedByLeadTenant, type TaskLeadTenantRef } from "./crmTaskOwnership";

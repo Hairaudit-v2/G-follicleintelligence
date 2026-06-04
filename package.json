@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:unit": "tsx --test src/lib/crm/pure.test.ts src/lib/crm/stage2d.test.ts src/lib/crm/stage2g.test.ts src/lib/crm/stage2h.test.ts src/lib/crm/crmLeadListQuery.test.ts",
+    "test:unit": "tsx --test src/lib/crm/pure.test.ts src/lib/crm/stage2d.test.ts src/lib/crm/stage2g.test.ts src/lib/crm/stage2h.test.ts src/lib/crm/stage2i.test.ts src/lib/crm/crmLeadListQuery.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "copy-check": "tsx scripts/copy-check.ts",

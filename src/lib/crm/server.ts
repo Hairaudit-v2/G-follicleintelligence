@@ -28,6 +28,15 @@ export {
   type AppendCrmLeadStageHistoryParams,
 } from "./stageHistory";
 export { moveCrmLeadToStage, type MoveCrmLeadToStageParams, type MoveCrmLeadToStageResult } from "./stageMovement";
-export { createCrmTask, loadCrmTasksForLead, type CreateCrmTaskParams } from "./tasks";
+export {
+  completeCrmTask,
+  createCrmTask,
+  loadCrmTaskForLead,
+  loadCrmTasksForLead,
+  reopenCrmTask,
+  updateCrmTask,
+  type CreateCrmTaskParams,
+  type UpdateCrmTaskParams,
+} from "./tasks";
 export { createCrmNoteForLead, loadCrmNotesForLead, type CreateCrmNoteForLeadParams } from "./notes";
 export { createCrmMessagePreview, loadCrmMessagesForLead, type CreateCrmMessagePreviewParams } from "./messages";

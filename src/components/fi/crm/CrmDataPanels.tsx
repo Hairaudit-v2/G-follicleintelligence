@@ -1,11 +1,4 @@
-import type {
-  FiCrmActivityEventRow,
-  FiCrmLeadRow,
-  FiCrmMessageRow,
-  FiCrmNoteRow,
-  FiCrmPipelineStageRow,
-  FiCrmTaskRow,
-} from "@/src/lib/crm";
+import type { FiCrmActivityEventRow, FiCrmLeadRow, FiCrmMessageRow, FiCrmNoteRow, FiCrmPipelineStageRow } from "@/src/lib/crm";
 
 const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
 
@@ -94,30 +87,6 @@ export function CrmActivityPanel({ events }: { events: FiCrmActivityEventRow[] }
                 Fields: {(e.detail as { changed_keys: string[] }).changed_keys.join(", ")}
               </p>
             ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-export function CrmTasksPanel({ tasks }: { tasks: FiCrmTaskRow[] }) {
-  if (tasks.length === 0) {
-    return (
-      <section className={card}>
-        <h2 className="mb-2 text-sm font-semibold text-gray-900">Tasks</h2>
-        <p className="text-sm text-gray-600">No tasks on this lead.</p>
-      </section>
-    );
-  }
-  return (
-    <section className={card}>
-      <h2 className="mb-3 text-sm font-semibold text-gray-900">Tasks</h2>
-      <ul className="space-y-2 text-sm">
-        {tasks.map((t) => (
-          <li key={t.id} className="rounded bg-gray-50 p-2">
-            <span className="font-medium text-gray-900">{t.title}</span>
-            <span className="ml-2 text-xs text-gray-500">{t.status}</span>
           </li>
         ))}
       </ul>

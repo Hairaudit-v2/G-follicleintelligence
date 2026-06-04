@@ -435,12 +435,13 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | POST | `…/crm/leads/[leadId]/stage` | Move lead stage (`toStageId`). |
 | POST | `…/crm/leads/[leadId]/activity` | Append CRM activity event. |
 | POST | `…/crm/leads/[leadId]/tasks` | Create task. |
+| PATCH | `…/crm/leads/[leadId]/tasks/[taskId]` | Update task (non-terminal fields; Stage 2I). |
 | POST | `…/crm/leads/[leadId]/notes` | Create note. |
 | POST | `…/crm/leads/[leadId]/messages/preview` | Message preview only; rejects `body`, `content`, `html`, `text`, `fullbody`, etc. at top level and inside `preview`. |
 
 ### Server actions
 
-- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `updateCrmLeadDetailsAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `crmCreateNoteAction`, `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
+- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `updateCrmLeadDetailsAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `updateCrmTaskAction`, `completeCrmTaskAction`, `reopenCrmTaskAction`, `crmCreateNoteAction`, `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
 
 ### Supporting modules
 
@@ -480,7 +481,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | Path | Purpose |
 |------|---------|
 | `/fi-admin/[tenantId]/crm` | Lead index (filters, sort, pagination), pipeline panel, lead UUID jump, **create-lead panel** (Stage 2G). |
-| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, **edit-details panel** (Stage 2H), pipeline recap, activity / tasks / notes / messages panels, mutation smoke (move stage, note, task, message preview). |
+| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, **edit-details panel** (Stage 2H), pipeline recap, activity / **tasks workflow** (Stage 2I) / notes / messages panels, mutation smoke (move stage, note, message preview). |
 
 ### Access
 
@@ -495,7 +496,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle + **lead index** loaders (caller must assert first). |
 | `src/lib/crm/crmGatePolicy.ts` | `CRM_SHELL_NAV_ROLES_LOWER`, `isCrmShellNavRole`. |
 | `src/components/fi/crm/CrmDataPanels.tsx` | Read-only presentation (props only). |
-| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadEditPanel.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
+| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadEditPanel.tsx`, `CrmLeadTasksWorkflow.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
 
 ### Commands
 
@@ -617,6 +618,55 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 ### Tests
 
 - `src/lib/crm/stage2h.test.ts` — policy + Zod (included in `npm run test:unit`).
+
+### Commands
+
+- `npm run lint`, `npm run build`, `npm run test:unit`.
+
+---
+
+## Stage 2I — CRM lead task workflow (implementation progress)
+
+**Goal (met):** On `/fi-admin/[tenantId]/crm/leads/[leadId]`, CRM writers manage **tasks** end-to-end (create, edit fields, complete, reopen) via **`lib/actions/fi-crm-actions.ts`** and optional **`PATCH /api/tenants/[tenantId]/crm/leads/[leadId]/tasks/[taskId]`**, with tenant/lead-scoped ownership, assignee validation against **`fi_users`**, controlled **status** / **task_type** enums, **`completed_at`** only via complete/reopen paths, and **`fi_crm_activity_events`** for **`task.created`** (existing), **`task.updated`** (changed field names only), **`task.completed`**, **`task.reopened`**.
+
+### Validation rules
+
+| Rule | Enforcement |
+|------|-------------|
+| Task belongs to lead + tenant | `loadCrmTaskForLead` + `.eq` on `tenant_id`, `lead_id`, `id` |
+| Assignee in tenant | `fi_users` lookup on create/update |
+| Status / type | Zod enums + `crmTaskPolicy` pure helpers |
+| `completed_at` | Only `completeCrmTask` / `reopenCrmTask` (not `updateCrmTask`) |
+| `due_at` | Nullable; parsed ISO; invalid datetime rejected |
+| Title | Required non-empty on create and when `title` is in update patch |
+
+### API / actions
+
+| Surface | Role |
+|---------|------|
+| `updateCrmTaskAction`, `completeCrmTaskAction`, `reopenCrmTaskAction` | Server actions (same gate as Stage 2D). |
+| `PATCH …/crm/leads/[leadId]/tasks/[taskId]` | Optional REST update (same Zod + gate as action). |
+| `crmCreateTaskBodySchema` (tightened) | Create: enum **active** status + task type; `due_at` refine. |
+
+### Pure modules (unit-tested)
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/crmTaskPolicy.ts` | Active statuses, types, done constant, complete/reopen body key allow-list. |
+| `src/lib/crm/crmTaskBuckets.ts` | `groupCrmTasksByBuckets` — overdue / due today / upcoming / no due / completed (UTC day). |
+| `src/lib/crm/crmTaskChangedFields.ts` | `collectChangedTaskDetailKeys` / snapshots for activity metadata. |
+| `src/lib/crm/crmTaskOwnership.ts` | `isTaskOwnedByLeadTenant` (pure). |
+
+### UI
+
+| Path | Role |
+|------|------|
+| `src/components/fi/crm/CrmLeadTasksWorkflow.tsx` | Client task list (bucketed), create form, inline edit, complete/reopen; assignee picker from tenant users; **no** `@/src/lib/crm/server` import. |
+| `src/components/fi/crm/CrmLeadSmokeForms.tsx` | Task smoke removed; stage/note/message smoke unchanged. |
+
+### Tests
+
+- `src/lib/crm/stage2i.test.ts` — policy, buckets, changed keys, complete/reopen payload rules, ownership helper, update-task Zod (included in `npm run test:unit`).
 
 ### Commands
 
