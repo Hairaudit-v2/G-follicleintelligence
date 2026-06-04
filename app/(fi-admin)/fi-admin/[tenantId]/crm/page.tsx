@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CrmCreateLeadSmoke } from "@/src/components/fi/crm/CrmCreateLeadSmoke";
+import { CrmCreateLeadPanel } from "@/src/components/fi/crm/CrmCreateLeadPanel";
 import { CrmLeadIdJump } from "@/src/components/fi/crm/CrmLeadIdJump";
 import { CrmLeadListFilters } from "@/src/components/fi/crm/CrmLeadListFilters";
 import { CrmLeadListPagination } from "@/src/components/fi/crm/CrmLeadListPagination";
@@ -9,6 +9,7 @@ import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
 import {
   loadCrmShellLeadsIndex,
   loadCrmShellPipelineStages,
+  loadCrmShellScopePickerOptions,
   loadCrmShellUserPickerOptions,
 } from "@/src/lib/crm/crmShellLoaders";
 import { buildCrmLeadListHref, crmLeadListHasActiveFilters, parsedCrmLeadListToHrefQuery } from "@/src/lib/crm/crmLeadListQuery";
@@ -31,10 +32,11 @@ export default async function CrmShellPage({
   const session = await assertCrmShellPageAccess(tenantId);
   const sp = searchParams ?? {};
 
-  const [list, stages, owners] = await Promise.all([
+  const [list, stages, owners, scope] = await Promise.all([
     loadCrmShellLeadsIndex(tenantId, sp),
     loadCrmShellPipelineStages(tenantId),
     loadCrmShellUserPickerOptions(tenantId),
+    loadCrmShellScopePickerOptions(tenantId),
   ]);
 
   const { items, total, query } = list;
@@ -101,7 +103,13 @@ export default async function CrmShellPage({
         <CrmLeadIdJump tenantId={tenantId} />
       </section>
 
-      <CrmCreateLeadSmoke tenantId={tenantId} />
+      <CrmCreateLeadPanel
+        tenantId={tenantId}
+        defaultOwnerUserId={session.fiUserId}
+        owners={owners}
+        organisations={scope.organisations}
+        clinics={scope.clinics}
+      />
     </div>
   );
 }

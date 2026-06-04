@@ -9,6 +9,12 @@ import { ensureDefaultPipelineStages, getEntryPipelineStage } from "./pipeline";
 import { appendCrmLeadStageHistory } from "./stageHistory";
 import type { CrmPipelineScope, FiCrmLeadRow } from "./types";
 import { CRM_DEFAULT_PERSON_SOURCE_SYSTEM } from "./types";
+import { organisationBelongsToTenant, clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
+import {
+  leadSourceDuplicateErrorMessage,
+  leadSourceInsertRaceErrorMessage,
+  normaliseOptionalLeadSource,
+} from "./leadSourceMappingPolicy";
 import { normaliseOrgClinicScope } from "./scope";
 import { mapFiCrmLeadRow } from "./leadRow";
 
@@ -36,9 +42,13 @@ export type CreateCrmLeadShared = {
   primaryOwnerUserId?: string | null;
   status?: string;
   priority?: string | null;
-  summary?: string | null;
+  /** Required for staff-created leads (non-empty after trim). */
+  summary: string;
   metadata?: Record<string, unknown> | null;
   pipelineKey?: string;
+  /** When both set (after trim), inserted into `fi_crm_lead_source_ids` after the lead row. */
+  sourceSystem?: string | null;
+  sourceLeadId?: string | null;
 };
 
 export type CreateCrmLeadWithResolvedPersonParams = CreateCrmLeadShared & {
@@ -65,6 +75,44 @@ export async function createCrmLeadWithPerson(
     organisationId: params.organisationId,
     clinicId: params.clinicId,
   });
+
+  if (organisationId) {
+    const ok = await organisationBelongsToTenant(tenantId, organisationId, supabase);
+    if (!ok) throw new Error("Organisation not found for this tenant.");
+  }
+  if (clinicId) {
+    const ok = await clinicBelongsToTenant(tenantId, clinicId, supabase);
+    if (!ok) throw new Error("Clinic not found for this tenant.");
+    if (organisationId) {
+      const { data: clinicRow, error: cErr } = await supabase
+        .from("fi_clinics")
+        .select("organisation_id")
+        .eq("tenant_id", tenantId)
+        .eq("id", clinicId)
+        .maybeSingle();
+      if (cErr) throw new Error(cErr.message);
+      const cOrg = (clinicRow as { organisation_id: string | null } | null)?.organisation_id ?? null;
+      if (cOrg && cOrg !== organisationId) {
+        throw new Error("Selected clinic does not belong to the selected organisation.");
+      }
+    }
+  }
+
+  const leadSource = normaliseOptionalLeadSource(params.sourceSystem, params.sourceLeadId);
+  if (leadSource) {
+    const { data: existingMap, error: mapLookupErr } = await supabase
+      .from("fi_crm_lead_source_ids")
+      .select("lead_id")
+      .eq("tenant_id", tenantId)
+      .eq("source_system", leadSource.source_system)
+      .eq("source_lead_id", leadSource.source_lead_id)
+      .maybeSingle();
+    if (mapLookupErr) throw new Error(mapLookupErr.message);
+    const existingLeadId = (existingMap as { lead_id: string } | null)?.lead_id;
+    if (existingLeadId) {
+      throw new Error(leadSourceDuplicateErrorMessage(leadSource, existingLeadId));
+    }
+  }
 
   const scope: CrmPipelineScope = {
     tenantId,
@@ -98,6 +146,9 @@ export async function createCrmLeadWithPerson(
       ? params.metadata
       : {};
 
+  const summaryTrimmed = params.summary.trim();
+  if (!summaryTrimmed) throw new Error("Lead summary is required.");
+
   const { data: inserted, error: leadErr } = await supabase
     .from("fi_crm_leads")
     .insert({
@@ -111,7 +162,7 @@ export async function createCrmLeadWithPerson(
       primary_owner_user_id: params.primaryOwnerUserId?.trim() || null,
       status: (params.status ?? "open").trim() || "open",
       priority: params.priority?.trim() || null,
-      summary: params.summary?.trim() || null,
+      summary: summaryTrimmed,
       metadata,
     })
     .select("*")
@@ -119,6 +170,23 @@ export async function createCrmLeadWithPerson(
 
   if (leadErr) throw new Error(leadErr.message);
   const lead = mapFiCrmLeadRow(inserted as Record<string, unknown>);
+
+  if (leadSource) {
+    const { error: srcErr } = await supabase.from("fi_crm_lead_source_ids").insert({
+      tenant_id: tenantId,
+      lead_id: lead.id,
+      source_system: leadSource.source_system,
+      source_lead_id: leadSource.source_lead_id,
+    });
+    if (srcErr?.code === "23505") {
+      await supabase.from("fi_crm_leads").delete().eq("id", lead.id).eq("tenant_id", tenantId);
+      throw new Error(leadSourceInsertRaceErrorMessage(leadSource));
+    }
+    if (srcErr) {
+      await supabase.from("fi_crm_leads").delete().eq("id", lead.id).eq("tenant_id", tenantId);
+      throw new Error(srcErr.message);
+    }
+  }
 
   await appendCrmLeadStageHistory(
     {
@@ -145,6 +213,9 @@ export async function createCrmLeadWithPerson(
         current_stage_id: entry.id,
         organisation_id: organisationId,
         clinic_id: clinicId,
+        ...(leadSource
+          ? { source_system: leadSource.source_system, source_lead_id: leadSource.source_lead_id }
+          : {}),
       },
       patientId: lead.patient_id,
       caseId: lead.case_id,

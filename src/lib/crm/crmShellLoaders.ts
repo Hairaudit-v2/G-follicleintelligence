@@ -15,6 +15,9 @@ import {
   loadCrmTasksForLead,
 } from "./server";
 import type {
+  CrmShellClinicOption,
+  CrmShellLeadListPage,
+  CrmShellOrgOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
   FiCrmLeadRow,
@@ -27,7 +30,6 @@ import { DEFAULT_CRM_PIPELINE_KEY } from "./types";
 import { attachSearchPattern, parseCrmLeadListQuery, type ParsedCrmLeadListQuery } from "./crmLeadListQuery";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import type { CrmShellLeadListPage } from "./types";
 
 export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
 
@@ -100,4 +102,35 @@ export async function loadCrmShellUserPickerOptions(tenantId: string): Promise<C
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as { id: string; email: string | null }[];
   return rows.map((r) => ({ id: String(r.id), email: r.email != null ? String(r.email) : null }));
+}
+
+export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<{
+  organisations: CrmShellOrgOption[];
+  clinics: CrmShellClinicOption[];
+}> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const [orgsRes, clinicsRes] = await Promise.all([
+    supabase.from("fi_organisations").select("id, name").eq("tenant_id", tid).order("name", { ascending: true }),
+    supabase
+      .from("fi_clinics")
+      .select("id, display_name, organisation_id")
+      .eq("tenant_id", tid)
+      .order("display_name", { ascending: true }),
+  ]);
+  if (orgsRes.error) throw new Error(orgsRes.error.message);
+  if (clinicsRes.error) throw new Error(clinicsRes.error.message);
+  const organisations = (orgsRes.data ?? []).map((o) => {
+    const r = o as { id: string; name: string };
+    return { id: String(r.id), name: String(r.name) };
+  });
+  const clinics = (clinicsRes.data ?? []).map((c) => {
+    const r = c as { id: string; display_name: string; organisation_id: string | null };
+    return {
+      id: String(r.id),
+      display_name: String(r.display_name),
+      organisation_id: r.organisation_id != null ? String(r.organisation_id) : null,
+    };
+  });
+  return { organisations, clinics };
 }

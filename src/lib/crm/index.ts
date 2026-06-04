@@ -5,8 +5,10 @@
 
 export type {
   CrmPipelineScope,
+  CrmShellClinicOption,
   CrmShellLeadListItem,
   CrmShellLeadListPage,
+  CrmShellOrgOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
   FiCrmLeadRow,

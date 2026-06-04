@@ -32,14 +32,18 @@ describe("Stage 2E CRM shell nav policy (pure)", () => {
 });
 
 describe("Stage 2D Zod CRM payloads", () => {
-  it("create lead requires personId or resolvable person fields", () => {
+  it("create lead requires personId or resolvable person fields and a summary", () => {
     const bad = crmCreateLeadBodySchema.safeParse({ status: "open" });
     assert.equal(bad.success, false);
+    const badNoPerson = crmCreateLeadBodySchema.safeParse({ summary: "Lead title" });
+    assert.equal(badNoPerson.success, false);
     const ok = crmCreateLeadBodySchema.safeParse({
+      summary: "Lead title",
       personId: "11111111-1111-4111-8111-111111111111",
     });
     assert.ok(ok.success);
     const ok2 = crmCreateLeadBodySchema.safeParse({
+      summary: "Lead title",
       person: { email: "a@b.co" },
     });
     assert.ok(ok2.success);

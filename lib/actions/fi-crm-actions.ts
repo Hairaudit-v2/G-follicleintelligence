@@ -45,9 +45,11 @@ export async function crmCreateLeadAction(
         primaryOwnerUserId: parsed.primaryOwnerUserId ?? undefined,
         status: parsed.status,
         priority: parsed.priority ?? undefined,
-        summary: parsed.summary ?? undefined,
+        summary: parsed.summary,
         metadata: parsed.metadata ?? undefined,
         pipelineKey: parsed.pipelineKey,
+        sourceSystem: parsed.sourceSystem ?? undefined,
+        sourceLeadId: parsed.sourceLeadId ?? undefined,
         personId: parsed.personId,
       });
       return { ok: true, lead };
@@ -63,9 +65,11 @@ export async function crmCreateLeadAction(
         primaryOwnerUserId: parsed.primaryOwnerUserId ?? undefined,
         status: parsed.status,
         priority: parsed.priority ?? undefined,
-        summary: parsed.summary ?? undefined,
+        summary: parsed.summary,
         metadata: parsed.metadata ?? undefined,
         pipelineKey: parsed.pipelineKey,
+        sourceSystem: parsed.sourceSystem ?? undefined,
+        sourceLeadId: parsed.sourceLeadId ?? undefined,
         person: {
           source_system: parsed.person.source_system ?? undefined,
           source_person_id: parsed.person.source_person_id ?? undefined,

@@ -140,6 +140,12 @@ export type FiCrmMessageRow = {
 /** FI Admin CRM shell: tenant user row for owner filter dropdown (Stage 2F). */
 export type CrmShellUserPickerOption = { id: string; email: string | null };
 
+/** FI Admin CRM shell: organisation row for lead scope picker (Stage 2G). */
+export type CrmShellOrgOption = { id: string; name: string };
+
+/** FI Admin CRM shell: clinic row for lead scope picker (Stage 2G). */
+export type CrmShellClinicOption = { id: string; display_name: string; organisation_id: string | null };
+
 /** Scope used for lazy pipeline seeding and stage resolution. */
 export type CrmPipelineScope = {
   tenantId: string;

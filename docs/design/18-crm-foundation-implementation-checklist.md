@@ -478,7 +478,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 
 | Path | Purpose |
 |------|---------|
-| `/fi-admin/[tenantId]/crm` | Lead index (filters, sort, pagination), pipeline panel, lead UUID jump, create-lead smoke. |
+| `/fi-admin/[tenantId]/crm` | Lead index (filters, sort, pagination), pipeline panel, lead UUID jump, **create-lead panel** (Stage 2G). |
 | `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, pipeline recap, activity / tasks / notes / messages panels, mutation smoke (move stage, note, task, message preview). |
 
 ### Access
@@ -494,7 +494,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle + **lead index** loaders (caller must assert first). |
 | `src/lib/crm/crmGatePolicy.ts` | `CRM_SHELL_NAV_ROLES_LOWER`, `isCrmShellNavRole`. |
 | `src/components/fi/crm/CrmDataPanels.tsx` | Read-only presentation (props only). |
-| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadSmoke.tsx`, `CrmLeadSmokeForms.tsx` | Client smoke UI → server actions only. |
+| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
 
 ### Commands
 
@@ -525,7 +525,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 
 | Path | Role |
 |------|------|
-| `app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx` | Orchestrates loaders + list + empty states; keeps pipeline + smoke create. |
+| `app/(fi-admin)/fi-admin/[tenantId]/crm/page.tsx` | Orchestrates loaders + list + empty states; keeps pipeline + create-lead panel. |
 | `src/components/fi/crm/CrmLeadListFilters.tsx` | Client **GET** form (no CRM server imports). |
 | `src/components/fi/crm/CrmLeadListTable.tsx` | Server table + row links. |
 | `src/components/fi/crm/CrmLeadListPagination.tsx` | Server prev/next + range. |
@@ -537,6 +537,49 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 ### Deferred
 
 - Kanban / board views; saved views; non–GET-driven filter UX.
+
+---
+
+## Stage 2G — CRM internal lead creation (implementation progress)
+
+**Goal (met):** Replace the amber “smoke” create form with a structured **Create lead** panel on `/fi-admin/[tenantId]/crm` that always produces `fi_crm_leads.person_id` (link by UUID or `resolveOrCreatePerson`), enforces a **non-empty summary**, optionally records **`fi_crm_lead_source_ids`** (pre-check + insert with race cleanup), and scopes org/clinic when those entities exist.
+
+### Person paths
+
+| Mode | Behaviour |
+|------|-----------|
+| **New / matched person** | `person` payload: display name, email, phone, optional external person id, optional JSON metadata; `source_system` defaults to `fi_crm` when blank. |
+| **Existing person** | `personId` must be a tenant-scoped `fi_persons.id` (UUID). |
+
+### External lead id (`fi_crm_lead_source_ids`)
+
+- Request fields: `sourceSystem` + `sourceLeadId` (both required together when either is non-blank; Zod + `normaliseOptionalLeadSource`).
+- Server: duplicate lookup before lead insert; unique-violation cleanup deletes the draft lead and returns a friendly race message (`leadSourceInsertRaceErrorMessage`).
+
+### Mutations and validation
+
+- **Only** `crmCreateLeadAction` from `lib/actions/fi-crm-actions.ts` (Stage 2D pattern); `createCrmLeadWithPerson` extended for summary (required string), optional source mapping, org/clinic tenant checks + clinic↔org consistency.
+- Inline field errors on the panel; server / Zod errors in a prominent error banner.
+- Message preview rules and `crmCreateMessagePreviewAction` unchanged.
+
+### Files
+
+| Path | Role |
+|------|------|
+| `src/components/fi/crm/CrmCreateLeadPanel.tsx` | Client create form (two person modes, scope pickers, source id pair). |
+| `src/lib/crm/leadSourceMappingPolicy.ts` | Pure normalisation + duplicate/race copy (unit-tested). |
+| `src/lib/crm/leads.ts` | Source mapping + org/clinic validation + required summary. |
+| `src/lib/crm/crmApiSchemas.ts` | `crmCreateLeadBodySchema`: required `summary`, optional paired `sourceSystem` / `sourceLeadId`. |
+| `src/lib/crm/crmShellLoaders.ts` | `loadCrmShellScopePickerOptions` for org/clinic dropdowns. |
+| `src/lib/crm/types.ts` | `CrmShellOrgOption`, `CrmShellClinicOption`. |
+
+### Tests
+
+- `src/lib/crm/stage2g.test.ts` — Zod + `leadSourceMappingPolicy` (included in `npm run test:unit`).
+
+### Commands
+
+- `npm run lint`, `npm run build`, `npm run test:unit`.
 
 ---
 

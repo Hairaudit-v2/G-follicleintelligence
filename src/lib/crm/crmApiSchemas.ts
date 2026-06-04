@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "./messageBodyKeysPolicy";
+import { normaliseOptionalLeadSource } from "./leadSourceMappingPolicy";
 
 const UUID = z.string().uuid();
 
@@ -30,7 +31,7 @@ function hasPersonResolutionSignal(p: z.infer<typeof personResolutionSchema>): b
   );
 }
 
-/** POST /crm/leads — requires `personId` or `person` with at least one resolution field. */
+/** POST /crm/leads — requires non-empty summary, optional external source pair, and `personId` or resolvable `person`. */
 export const crmCreateLeadBodySchema = z
   .object({
     adminKey: z.string().optional(),
@@ -41,14 +42,24 @@ export const crmCreateLeadBodySchema = z
     primaryOwnerUserId: optionalUuid,
     status: z.string().max(64).optional(),
     priority: z.string().max(64).optional().nullable(),
-    summary: z.string().max(4000).optional().nullable(),
+    summary: z.string().min(1, "Lead title / summary is required.").max(4000),
     metadata: z.record(z.string(), z.any()).optional().nullable(),
     pipelineKey: z.string().max(128).optional(),
+    sourceSystem: z.string().max(128).optional().nullable(),
+    sourceLeadId: z.string().max(512).optional().nullable(),
     personId: UUID.optional(),
     person: personResolutionSchema.optional(),
   })
   .strict()
   .superRefine((val, ctx) => {
+    try {
+      normaliseOptionalLeadSource(val.sourceSystem, val.sourceLeadId);
+    } catch (e) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: e instanceof Error ? e.message : "Invalid source system / lead id pair.",
+      });
+    }
     if (val.personId) return;
     if (val.person && hasPersonResolutionSignal(val.person)) return;
     ctx.addIssue({
