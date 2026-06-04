@@ -15,6 +15,7 @@ Recent foundation-layer batches (after `20260324000010_fi_events_global_foundati
 | `20260605140001`–`09` | Core foundation tables + `fi_cases` FK columns + RLS on new tables |
 | `20260605140010`–`13` | `fi_global_cases`, `fi_event_links`, `fi_partners`, `fi_intakes` additive FKs |
 | `20260605140014` | Compatibility views: `v_fi_patient_resolution`, `v_fi_case_foundation`, `v_fi_media_unified` |
+| `20260606100001` | `fi_organisation_source_ids` (organisation ↔ producer id mapping for Stage 1E helpers) |
 
 Design reference: `docs/design/07-foundation-migration-specification.md`.
 

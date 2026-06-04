@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeFiUploadType, type FiUploadType } from "@/lib/fi/uploadTypes";
+import { dualWriteFoundationFromFiEvent } from "@/src/lib/fi/foundation/dualWriteEvent";
 import type { FiEventEnvelope, HairAuditImagesUploadedPayload } from "@/src/types/fi-events";
 import {
   attachFiEventError,
@@ -146,6 +147,16 @@ async function handleHairAuditImagesUploadedImpl(
     const uploadIds = linked.fiCaseId
       ? await loadLinkedUploadIds(linked.fiCaseId, storagePaths)
       : [];
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      envelope,
+      resolution: {
+        fiCaseId: linked.fiCaseId,
+        globalPatientId: linked.globalPatientId ?? null,
+        globalCaseId: linked.globalCaseId,
+      },
+    });
     return {
       ok: true,
       eventId: eventLog.row.id,
@@ -238,6 +249,17 @@ async function handleHairAuditImagesUploadedImpl(
       globalCaseId: linkedGlobalCase.id,
       fiCaseId: fiCase.id,
       globalPatientId: globalPatient?.id ?? null,
+    });
+
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      envelope,
+      resolution: {
+        fiCaseId: fiCase.id,
+        globalPatientId: globalPatient?.id ?? null,
+        globalCaseId: linkedGlobalCase.id,
+      },
     });
 
     const submitDecision = await maybeSubmitCaseFromEvent({
@@ -334,6 +356,17 @@ export async function handleHairAuditImagesUploaded(
             payloadResult.data.images.map((image) => image.storage_path)
           )
         : [];
+
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: existing.id,
+      envelope,
+      resolution: {
+        fiCaseId: linked.fiCaseId,
+        globalPatientId: linked.globalPatientId ?? null,
+        globalCaseId: linked.globalCaseId,
+      },
+    });
 
     return {
       ok: true,

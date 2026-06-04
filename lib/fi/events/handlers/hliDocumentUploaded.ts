@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeFiUploadType } from "@/lib/fi/uploadTypes";
+import { dualWriteFoundationFromFiEvent } from "@/src/lib/fi/foundation/dualWriteEvent";
 import type { FiEventEnvelope, HliDocumentUploadedPayload } from "@/src/types/fi-events";
 import {
   attachFiEventError,
@@ -117,6 +118,16 @@ async function handleHliDocumentUploadedImpl(
     const uploadId = linked.fiCaseId
       ? await loadLinkedUploadId(linked.fiCaseId, document.storage_path)
       : undefined;
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      envelope,
+      resolution: {
+        fiCaseId: linked.fiCaseId,
+        globalPatientId: linked.globalPatientId ?? null,
+        globalCaseId: linked.globalCaseId,
+      },
+    });
     return {
       ok: true,
       eventId: eventLog.row.id,
@@ -208,6 +219,17 @@ async function handleHliDocumentUploadedImpl(
       globalPatientId: globalPatient?.id ?? null,
     });
 
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      envelope,
+      resolution: {
+        fiCaseId: fiCase.id,
+        globalPatientId: globalPatient?.id ?? null,
+        globalCaseId: linkedGlobalCase.id,
+      },
+    });
+
     const submitDecision = await maybeSubmitCaseFromEvent({
       tenantId: envelope.tenant_id,
       fiCaseId: fiCase.id,
@@ -297,6 +319,17 @@ export async function handleHliDocumentUploaded(
       payloadResult.ok && linked.fiCaseId && "document" in payloadResult.data
         ? await loadLinkedUploadId(linked.fiCaseId, payloadResult.data.document.storage_path)
         : undefined;
+
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: existing.id,
+      envelope,
+      resolution: {
+        fiCaseId: linked.fiCaseId,
+        globalPatientId: linked.globalPatientId ?? null,
+        globalCaseId: linked.globalCaseId,
+      },
+    });
 
     return {
       ok: true,

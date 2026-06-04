@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { dualWriteFoundationFromFiEvent } from "@/src/lib/fi/foundation/dualWriteEvent";
 import type { FiEventEnvelope, HliIntakeSubmittedPayload } from "@/src/types/fi-events";
 import {
   attachFiEventError,
@@ -87,6 +88,16 @@ async function handleHliIntakeSubmittedImpl(
 
   if (!eventLog.created && ["processed", "ignored"].includes(eventLog.row.status)) {
     const linked = await loadLinkedEntities(eventLog.row.id);
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      envelope,
+      resolution: {
+        fiCaseId: linked.fiCaseId,
+        globalPatientId: linked.globalPatientId ?? null,
+        globalCaseId: linked.globalCaseId,
+      },
+    });
     return {
       ok: true,
       eventId: eventLog.row.id,
@@ -181,6 +192,17 @@ async function handleHliIntakeSubmittedImpl(
       globalPatientId: globalPatient?.id ?? null,
     });
 
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: eventLog.row.id,
+      envelope,
+      resolution: {
+        fiCaseId: fiCase.id,
+        globalPatientId: globalPatient?.id ?? null,
+        globalCaseId: linkedGlobalCase.id,
+      },
+    });
+
     const submitDecision = await maybeSubmitCaseFromEvent({
       tenantId: envelope.tenant_id,
       fiCaseId: fiCase.id,
@@ -241,6 +263,16 @@ export async function handleHliIntakeSubmitted(
 
   if (existing && ["processed", "ignored"].includes(existing.status)) {
     const linked = await loadLinkedEntities(existing.id);
+    await dualWriteFoundationFromFiEvent({
+      tenantId: envelope.tenant_id,
+      fiEventId: existing.id,
+      envelope,
+      resolution: {
+        fiCaseId: linked.fiCaseId,
+        globalPatientId: linked.globalPatientId ?? null,
+        globalCaseId: linked.globalCaseId,
+      },
+    });
     return {
       ok: true,
       eventId: existing.id,

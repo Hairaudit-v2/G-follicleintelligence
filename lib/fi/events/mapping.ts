@@ -45,7 +45,8 @@ export type FiEventLinkRow = {
   created_at: string;
 };
 
-function buildCaseExternalId(sourceSystem: FiSourceSystem | string, sourceCaseId: string): string {
+/** External id for fi_cases linking a producer case id to FI (shared with foundation helpers). */
+export function buildCaseExternalId(sourceSystem: FiSourceSystem | string, sourceCaseId: string): string {
   return `${sourceSystem}:${sourceCaseId}`;
 }
 
