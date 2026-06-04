@@ -1,40 +1,14 @@
 import Link from "next/link";
 import type { FiHomeDashboardPayload } from "@/src/lib/fiOs/fiHomeDashboardLoader.server";
-
-function CheckRow({ done, label, hint }: { done: boolean; label: string; hint?: string }) {
-  return (
-    <li className="flex gap-2 text-sm">
-      <span className={done ? "text-emerald-700" : "text-gray-400"} aria-hidden>
-        {done ? "✓" : "○"}
-      </span>
-      <div>
-        <span className={done ? "text-gray-800" : "text-gray-600"}>{label}</span>
-        {hint ? <p className="mt-0.5 text-xs text-gray-500">{hint}</p> : null}
-      </div>
-    </li>
-  );
-}
-
-function ActionCard({ href, title, description }: { href: string; title: string; description: string }) {
-  return (
-    <Link
-      href={href}
-      className="block rounded border border-gray-200 bg-white p-3 shadow-sm transition hover:border-gray-300 hover:bg-gray-50"
-    >
-      <div className="text-sm font-medium text-gray-900">{title}</div>
-      <p className="mt-1 text-xs text-gray-600">{description}</p>
-    </Link>
-  );
-}
-
-function CountTile({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded border border-gray-100 bg-gray-50/80 px-3 py-2">
-      <div className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</div>
-      <div className="mt-1 text-lg font-semibold tabular-nums text-gray-900">{value}</div>
-    </div>
-  );
-}
+import {
+  DashboardCard,
+  InfoNotice,
+  ProgressChecklist,
+  ProgressChecklistItem,
+  QuickActionCard,
+  SectionHeader,
+  StatCard,
+} from "@/src/components/fi-admin/dashboard-ui";
 
 export function FiHomeDashboard({
   data,
@@ -47,86 +21,83 @@ export function FiHomeDashboard({
   const pct = Math.round(data.setupProgressRatio * 100);
 
   return (
-    <div className="space-y-8 pb-8">
-      <header className="space-y-1">
-        <h1 className="text-base font-medium text-gray-900">Welcome</h1>
-        <p className="text-sm text-gray-700">
-          <span className="font-medium">{data.tenantName}</span>
+    <div className="space-y-8 pb-12">
+      <header className="space-y-2">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-[#22C1FF]/90">
+          Follicle Intelligence
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">Operating System</h1>
+        <p className="text-sm text-[#94A3B8]">
+          <span className="font-medium text-[#E2E8F0]">{data.tenantName}</span>
           {data.tenantSlug ? (
-            <span className="text-gray-500">
+            <span className="text-[#64748B]">
               {" "}
-              (<span className="font-mono text-xs">{data.tenantSlug}</span>)
+              (<span className="font-mono text-xs text-[#94A3B8]">{data.tenantSlug}</span>)
             </span>
           ) : null}
         </p>
-        <p className="max-w-2xl text-xs text-gray-600">
-          This is your tenant home in Follicle Intelligence Admin. Use it to see setup progress and jump to the right
-          screen — everything here is read-only.
+        <p className="max-w-2xl text-xs leading-relaxed text-[#94A3B8] sm:text-sm">
+          Tenant home in Follicle Intelligence Admin — setup progress and shortcuts. Everything here is read-only
+          context for operators.
         </p>
       </header>
 
-      <section className="space-y-2" aria-labelledby="setup-progress-heading">
-        <h2 id="setup-progress-heading" className="text-sm font-medium text-gray-900">
-          Setup progress
-        </h2>
-        <div className="max-w-md">
-          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-            <div
-              className="h-full rounded-full bg-[color:var(--fi-brand-accent,#2563eb)]"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <p className="mt-1 text-xs text-gray-600">{pct}% complete</p>
+      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="setup-progress-heading">
+        <SectionHeader
+          id="setup-progress-heading"
+          title="Setup progress"
+          description="Complete the checklist to bring this clinic workspace to full operational readiness."
+        />
+        <div className="mt-5">
+          <ProgressChecklist percentComplete={pct}>
+            <ProgressChecklistItem done={data.checklist.organisationCreated} label="Organisation created" />
+            <ProgressChecklistItem done={data.checklist.clinicCreated} label="Clinic created" />
+            <ProgressChecklistItem done={data.checklist.clinicSettingsComplete} label="Clinic settings completed" />
+            <ProgressChecklistItem done={data.checklist.firstCaseCreated} label="First patient / case created" />
+            {showCrmShellExtras ? (
+              <>
+                <ProgressChecklistItem
+                  done={Boolean(data.checklist.crmAccessAvailable)}
+                  label="CRM access available"
+                  hint="Your account can open CRM, bookings, and calendar from the navigation."
+                />
+                <ProgressChecklistItem
+                  done={Boolean(data.checklist.bookingsCalendarAvailable)}
+                  label="Bookings & calendar available"
+                  hint="Use Bookings and Calendar in the nav when you are ready to schedule."
+                />
+              </>
+            ) : null}
+          </ProgressChecklist>
         </div>
-        <ul className="max-w-xl space-y-2 border-t border-gray-100 pt-3">
-          <CheckRow done={data.checklist.organisationCreated} label="Organisation created" />
-          <CheckRow done={data.checklist.clinicCreated} label="Clinic created" />
-          <CheckRow done={data.checklist.clinicSettingsComplete} label="Clinic settings completed" />
-          <CheckRow done={data.checklist.firstCaseCreated} label="First patient / case created" />
-          {showCrmShellExtras ? (
-            <>
-              <CheckRow
-                done={Boolean(data.checklist.crmAccessAvailable)}
-                label="CRM access available"
-                hint="Your account can open CRM, bookings, and calendar from the navigation."
-              />
-              <CheckRow
-                done={Boolean(data.checklist.bookingsCalendarAvailable)}
-                label="Bookings & calendar available"
-                hint="Use Bookings and Calendar in the nav when you are ready to schedule."
-              />
-            </>
-          ) : null}
-        </ul>
-      </section>
+      </DashboardCard>
 
-      <section className="space-y-2 rounded border border-blue-100 bg-blue-50/60 px-4 py-3" aria-labelledby="next-action-heading">
-        <h2 id="next-action-heading" className="text-sm font-medium text-blue-950">
-          Recommended next step
-        </h2>
-        <p className="text-sm font-medium text-gray-900">{data.nextAction.title}</p>
-        <p className="text-xs text-gray-700">{data.nextAction.description}</p>
+      <InfoNotice variant="info" title="Recommended next step">
+        <p className="font-medium text-[#F8FAFC]">{data.nextAction.title}</p>
+        <p className="mt-1 text-xs text-[#94A3B8]">{data.nextAction.description}</p>
         <Link
           href={data.nextAction.href}
-          className="inline-block text-sm font-medium text-blue-800 underline decoration-blue-300 underline-offset-2 hover:text-blue-950"
+          className="mt-3 inline-block text-sm font-semibold text-[#22C1FF] underline decoration-[#22C1FF]/40 underline-offset-4 transition hover:text-[#0EA5E9] hover:decoration-[#0EA5E9]/50"
         >
           Go there →
         </Link>
-      </section>
+      </InfoNotice>
 
-      <section className="space-y-2" aria-labelledby="actions-heading">
-        <h2 id="actions-heading" className="text-sm font-medium text-gray-900">
-          Main actions
-        </h2>
+      <section className="space-y-4" aria-labelledby="actions-heading">
+        <SectionHeader id="actions-heading" title="Main actions" description="Jump to the most common operator flows." />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <ActionCard
+          <QuickActionCard
             href={`${base}/cases/new`}
             title="Create first case"
             description="Guided wizard for person, patient, and case."
           />
-          <ActionCard href={`${base}/cases`} title="View cases" description="Worklist, filters, and case detail." />
-          <ActionCard href={`${base}/directory`} title="Directory" description="Search foundation records and manage orgs/clinics." />
-          <ActionCard
+          <QuickActionCard href={`${base}/cases`} title="View cases" description="Worklist, filters, and case detail." />
+          <QuickActionCard
+            href={`${base}/directory`}
+            title="Directory"
+            description="Search foundation records and manage orgs and clinics."
+          />
+          <QuickActionCard
             href={`${base}/configuration`}
             title="Configuration"
             description="Tenant, organisation, and clinic branding and settings."
@@ -135,51 +106,64 @@ export function FiHomeDashboard({
       </section>
 
       {showCrmShellExtras ? (
-        <section className="space-y-2" aria-labelledby="crm-quick-heading">
-          <h2 id="crm-quick-heading" className="text-sm font-medium text-gray-900">
-            CRM &amp; scheduling
-          </h2>
-          <div className="flex flex-wrap gap-2 text-sm">
-            <Link href={`${base}/crm`} className="text-blue-800 underline underline-offset-2 hover:text-blue-950">
+        <DashboardCard className="p-5 sm:p-6">
+          <SectionHeader
+            id="crm-quick-heading"
+            kicker="Scheduling"
+            title="CRM & scheduling"
+            description="Operational surfaces for intake and the calendar."
+          />
+          <div className="mt-4 flex flex-wrap gap-3 text-sm">
+            <Link
+              href={`${base}/crm`}
+              className="rounded-lg border border-white/[0.08] bg-[#141C33]/50 px-3 py-2 font-medium text-[#22C1FF] transition hover:border-[#22C1FF]/30 hover:bg-[#141C33]"
+            >
               CRM
             </Link>
-            <span className="text-gray-300">|</span>
-            <Link href={`${base}/bookings`} className="text-blue-800 underline underline-offset-2 hover:text-blue-950">
+            <Link
+              href={`${base}/bookings`}
+              className="rounded-lg border border-white/[0.08] bg-[#141C33]/50 px-3 py-2 font-medium text-[#22C1FF] transition hover:border-[#22C1FF]/30 hover:bg-[#141C33]"
+            >
               Bookings
             </Link>
-            <span className="text-gray-300">|</span>
-            <Link href={`${base}/calendar`} className="text-blue-800 underline underline-offset-2 hover:text-blue-950">
+            <Link
+              href={`${base}/calendar`}
+              className="rounded-lg border border-white/[0.08] bg-[#141C33]/50 px-3 py-2 font-medium text-[#22C1FF] transition hover:border-[#22C1FF]/30 hover:bg-[#141C33]"
+            >
               Calendar
             </Link>
           </div>
-        </section>
+        </DashboardCard>
       ) : null}
 
-      <section className="space-y-2" aria-labelledby="status-heading">
-        <h2 id="status-heading" className="text-sm font-medium text-gray-900">
-          System status summary
-        </h2>
-        <p className="max-w-2xl text-xs text-gray-600">Counts are read-only snapshots for this tenant.</p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-          <CountTile label="Organisations" value={data.counts.organisations} />
-          <CountTile label="Clinics" value={data.counts.clinics} />
-          <CountTile label="Persons" value={data.counts.persons} />
-          <CountTile label="Patients" value={data.counts.patients} />
-          <CountTile label="Cases" value={data.counts.cases} />
+      <section className="space-y-4" aria-labelledby="status-heading">
+        <SectionHeader
+          id="status-heading"
+          title="System status summary"
+          description="Read-only snapshot counts for this tenant."
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+          <StatCard label="Organisations" value={data.counts.organisations} />
+          <StatCard label="Clinics" value={data.counts.clinics} />
+          <StatCard label="Persons" value={data.counts.persons} />
+          <StatCard label="Patients" value={data.counts.patients} />
+          <StatCard label="Cases" value={data.counts.cases} />
         </div>
       </section>
 
-      <section className="space-y-2 rounded border border-amber-100 bg-amber-50/50 px-4 py-3 text-xs text-amber-950">
-        <h2 className="text-sm font-medium text-amber-950">About Foundation integrity</h2>
-        <p className="max-w-3xl leading-relaxed">
-          <Link href={`${base}/foundation-integrity`} className="font-medium text-amber-900 underline underline-offset-2">
+      <InfoNotice variant="warning" title="About Foundation integrity">
+        <p className="max-w-3xl text-xs leading-relaxed sm:text-sm">
+          <Link
+            href={`${base}/foundation-integrity`}
+            className="font-semibold text-amber-200 underline decoration-amber-500/40 underline-offset-2 hover:text-amber-100"
+          >
             Foundation integrity
           </Link>{" "}
-          is a <strong>technical health</strong> screen for events, coverage, and data quality — not your daily clinic
-          dashboard. For everyday clinical and operational work, use <strong>Cases</strong> and (when available){" "}
-          <strong>CRM / Bookings</strong>.
+          is a <strong className="text-amber-50">technical health</strong> screen for events, coverage, and data quality —
+          not your daily clinic dashboard. For everyday clinical and operational work, use <strong className="text-amber-50">Cases</strong>{" "}
+          and (when available) <strong className="text-amber-50">CRM / Bookings</strong>.
         </p>
-      </section>
+      </InfoNotice>
     </div>
   );
 }

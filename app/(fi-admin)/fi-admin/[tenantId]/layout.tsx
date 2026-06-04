@@ -45,11 +45,14 @@ export default async function TenantAdminLayout({
   }
 
   const navLink =
-    "text-gray-600 underline decoration-transparent underline-offset-2 hover:text-[color:var(--fi-brand-accent)] hover:decoration-gray-400";
+    "rounded-lg px-2 py-1 text-[#94A3B8] decoration-transparent underline-offset-4 transition hover:bg-white/[0.04] hover:text-[#22C1FF] hover:underline hover:decoration-[#22C1FF]/50";
 
   return (
     <FiTenantBrandFrame effective={effective}>
-      <nav className="flex flex-wrap gap-4 border-b border-gray-200 pb-2 text-sm">
+      <nav
+        className="flex flex-wrap gap-x-1 gap-y-1 border-b border-white/[0.08] pb-3 text-sm sm:gap-x-2"
+        aria-label="Tenant admin"
+      >
         <Link href={base} className={navLink}>
           Home
         </Link>
@@ -88,7 +91,7 @@ export default async function TenantAdminLayout({
           </>
         ) : null}
       </nav>
-      {children}
+      <div className="pt-6">{children}</div>
     </FiTenantBrandFrame>
   );
 }

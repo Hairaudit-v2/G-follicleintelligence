@@ -45,7 +45,7 @@ function BrandingBlock({
 
   const box =
     density === "layout"
-      ? "rounded border border-gray-200 bg-white px-4 py-3 shadow-sm"
+      ? "rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 px-4 py-3 shadow-xl shadow-black/40 backdrop-blur-md"
       : "rounded border border-amber-200 bg-amber-50/80 px-3 py-2 shadow-sm";
 
   return (
@@ -57,15 +57,18 @@ function BrandingBlock({
           </div>
         ) : null}
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="text-base font-semibold tracking-tight text-gray-900">{headline}</p>
+          <p className={`text-base font-semibold tracking-tight ${density === "layout" ? "text-[#F8FAFC]" : "text-gray-900"}`}>
+            {headline}
+          </p>
           {clinicLine ? (
-            <p className="text-xs text-gray-600">
-              <span className="font-medium text-gray-700">Clinic:</span> {clinicLine}
+            <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-gray-600"}`}>
+              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-gray-700"}`}>Clinic:</span>{" "}
+              {clinicLine}
             </p>
           ) : null}
           {support ? (
-            <p className="text-xs text-gray-600">
-              <span className="font-medium text-gray-700">Support:</span>{" "}
+            <p className={`text-xs ${density === "layout" ? "text-[#94A3B8]" : "text-gray-600"}`}>
+              <span className={`font-medium ${density === "layout" ? "text-[#CBD5E1]" : "text-gray-700"}`}>Support:</span>{" "}
               <a
                 href={`mailto:${encodeURIComponent(support)}`}
                 className="underline decoration-dotted underline-offset-2 hover:opacity-90"
