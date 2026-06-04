@@ -63,6 +63,7 @@ export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): R
   const patientProfileSchemaOk = payload.patients.personsTable && payload.patients.patientsTable;
   const patientProfileHasRows = (payload.patients.patientsCount ?? 0) > 0;
   const clinicalDetailsTable = payload.patients.clinicalDetailsTable;
+  const patientImagesTable = payload.patients.patientImagesTable;
 
   const resolve = (id: string): FeatureRolloutStatus => {
     switch (id) {
@@ -91,6 +92,9 @@ export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): R
         if (!patientProfileSchemaOk) return "planned";
         return clinicalDetailsTable ? "ready" : "partial";
       case "patients.images":
+        if (!patientProfileSchemaOk) return "planned";
+        if (!patientImagesTable) return "partial";
+        return "ready";
       case "patients.hli":
         return "planned";
       case "hairaudit.core":

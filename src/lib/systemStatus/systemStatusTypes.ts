@@ -50,8 +50,12 @@ export type PatientsSectionModel = {
   personsTable: boolean;
   patientsTable: boolean;
   clinicalDetailsTable: boolean;
+  patientImagesTable: boolean;
   personsCount: number | null;
   patientsCount: number | null;
+  patientImagesTotal: number | null;
+  patientImagesActive: number | null;
+  patientImagesArchived: number | null;
   label: "Ready" | "Partial" | "Missing";
   traffic: TrafficLight;
 };
@@ -124,6 +128,9 @@ export type SystemStatusDbSnapshot = {
     activityLast7d: number | null;
     fiUsersTotal: number | null;
     fiUsersActive: number | null;
+    patientImagesTotal: number | null;
+    patientImagesActive: number | null;
+    patientImagesArchived: number | null;
   };
   supabaseConfigured: boolean;
   calendarLoadersAvailable: boolean;

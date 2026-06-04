@@ -13,6 +13,7 @@ const TABLES_TO_PROBE = [
   "fi_persons",
   "fi_patients",
   "fi_patient_clinical_details",
+  "fi_patient_images",
   "fi_cases",
   "fi_users",
   "fi_crm_activity_events",
@@ -154,6 +155,23 @@ async function countFiUsers(supabase: SupabaseClient, tenantId: string, withAuth
   return count ?? 0;
 }
 
+async function countPatientImages(
+  supabase: SupabaseClient,
+  tenantId: string,
+  status?: "active" | "archived"
+): Promise<number | null> {
+  let q = supabase.from("fi_patient_images").select("*", { head: true, count: "exact" }).eq("tenant_id", tenantId);
+  if (status) {
+    q = q.eq("image_status", status);
+  }
+  const { error, count } = await q;
+  if (error) {
+    if (isMissingRelationError(error.message)) return null;
+    return null;
+  }
+  return count ?? 0;
+}
+
 function emptySnapshot(tenantId: string, partial?: { supabaseConfigured?: boolean }): SystemStatusDbSnapshot {
   const z = null;
   return {
@@ -181,6 +199,9 @@ function emptySnapshot(tenantId: string, partial?: { supabaseConfigured?: boolea
       activityLast7d: z,
       fiUsersTotal: z,
       fiUsersActive: z,
+      patientImagesTotal: z,
+      patientImagesActive: z,
+      patientImagesArchived: z,
     },
     supabaseConfigured: partial?.supabaseConfigured ?? false,
     calendarLoadersAvailable: false,
@@ -239,6 +260,9 @@ export async function runSystemStatusDbQueries(tenantId: string): Promise<System
     activityLast7d,
     fiUsersTotal,
     fiUsersActive,
+    patientImagesTotal,
+    patientImagesActive,
+    patientImagesArchived,
   ] = await Promise.all([
     leadsTable ? countEq(supabase, "fi_crm_leads", tid) : Promise.resolve(null),
     tablePresence.fi_crm_tasks ? countEq(supabase, "fi_crm_tasks", tid) : Promise.resolve(null),
@@ -259,6 +283,9 @@ export async function runSystemStatusDbQueries(tenantId: string): Promise<System
     activityTable ? countActivitySince(supabase, tid, sevenDaysAgo.toISOString()) : Promise.resolve(null),
     tablePresence.fi_users ? countFiUsers(supabase, tid, false) : Promise.resolve(null),
     tablePresence.fi_users ? countFiUsers(supabase, tid, true) : Promise.resolve(null),
+    tablePresence.fi_patient_images ? countPatientImages(supabase, tid) : Promise.resolve(null),
+    tablePresence.fi_patient_images ? countPatientImages(supabase, tid, "active") : Promise.resolve(null),
+    tablePresence.fi_patient_images ? countPatientImages(supabase, tid, "archived") : Promise.resolve(null),
   ]);
 
   let activityTodayFinal: number | null = null;
@@ -297,6 +324,9 @@ export async function runSystemStatusDbQueries(tenantId: string): Promise<System
       activityLast7d,
       fiUsersTotal,
       fiUsersActive,
+      patientImagesTotal,
+      patientImagesActive,
+      patientImagesArchived,
     },
     supabaseConfigured: true,
     calendarLoadersAvailable: false,

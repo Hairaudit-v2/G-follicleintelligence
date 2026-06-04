@@ -10,3 +10,4 @@ export * from "./clinicalDetailsChangedFields";
 export * from "./clinicalDetailsLabels";
 export * from "./clinicalDetailsApiSchemas";
 export * from "./clinicalDetailsMerge";
+export * from "../patientImages";

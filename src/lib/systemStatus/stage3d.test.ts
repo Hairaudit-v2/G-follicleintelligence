@@ -21,6 +21,7 @@ function baseSnapshot(over: Partial<SystemStatusDbSnapshot> = {}): SystemStatusD
     "fi_persons",
     "fi_patients",
     "fi_patient_clinical_details",
+    "fi_patient_images",
     "fi_cases",
     "fi_users",
     "fi_crm_activity_events",
@@ -52,6 +53,9 @@ function baseSnapshot(over: Partial<SystemStatusDbSnapshot> = {}): SystemStatusD
       activityLast7d: z(3),
       fiUsersTotal: z(2),
       fiUsersActive: z(2),
+      patientImagesTotal: z(0),
+      patientImagesActive: z(0),
+      patientImagesArchived: z(0),
     },
     supabaseConfigured: true,
     calendarLoadersAvailable: true,
@@ -141,6 +145,8 @@ describe("Stage 3D — system status & readiness", () => {
     assert.equal(profile?.status, "ready");
     const clinical = rows.find((r) => r.id === "patients.clinicalDetails");
     assert.equal(clinical?.status, "ready");
+    const images = rows.find((r) => r.id === "patients.images");
+    assert.equal(images?.status, "ready");
     const surgery = rows.find((r) => r.id === "surgeryos.core");
     assert.equal(surgery?.status, "planned");
   });

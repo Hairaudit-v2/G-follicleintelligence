@@ -179,6 +179,10 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
               label="fi_patient_clinical_details"
               value={data.patients.clinicalDetailsTable ? "present" : "missing"}
             />
+            <SystemStatusMetric label="fi_patient_images" value={data.patients.patientImagesTable ? "present" : "missing"} />
+            <SystemStatusMetric label="Patient images (total)" value={fmt(data.patients.patientImagesTotal)} />
+            <SystemStatusMetric label="Patient images (active)" value={fmt(data.patients.patientImagesActive)} />
+            <SystemStatusMetric label="Patient images (archived)" value={fmt(data.patients.patientImagesArchived)} />
           </div>
         </SystemStatusCard>
       </SystemStatusSection>

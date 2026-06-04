@@ -1,10 +1,12 @@
-# Patient profile foundation (Stages 4A–4B)
+# Patient profile foundation (Stages 4A–4C)
 
 ## Purpose
 
 Stage 4A establishes the **patient** (`fi_patients` + `fi_persons`) as the **longitudinal anchor** inside Follicle Intelligence admin: a searchable directory, a profile shell with linked CRM, cases, and bookings, and **non-clinical** admin fields (`patient_status`, `admin_note`). It intentionally does **not** ship imaging, labs, HLI, HairAudit, surgery planning, or prescriptions — those attach in later stages.
 
 **Stage 4B** adds the first **structured clinical summary** layer (`fi_patient_clinical_details`): bounded text fields plus JSON `clinical_flags` / `metadata` for staff-maintained context. This is **not** the HLI diagnostic engine, not surgery planning, and not imaging — it is a safe foundation that later modules (HLI, trichoscopy, HairAudit exports, SurgeryOS) can read without inventing ad-hoc columns on `fi_patients`.
+
+**Stage 4C** adds **private patient images** (`fi_patient_images` + Storage bucket `patient-images`): upload, categorise, caption / taken-at / metadata, view via signed URLs, and archive — without AI analysis, HairAudit, surgery workflows, or patient-facing galleries. See `docs/design/22-patient-images-foundation.md`.
 
 This layer aligns with the broader **digital twin** direction: a stable tenant-scoped identity and timeline spine that future clinical modules (trichoscopy, HLI scoring, HairAudit exports, SurgeryOS) will reference without duplicating person/patient primitives.
 
@@ -65,6 +67,7 @@ Re-exports: `src/lib/patients/index.ts` includes the **pure** modules above (not
 
 - **Server action:** `updatePatientClinicalDetailsAction` in `lib/actions/fi-patient-actions.ts` — same CRM write gate as admin PATCH, `revalidatePath` for directory + profile.
 - **HTTP:** `PATCH /api/tenants/[tenantId]/patients/[patientId]/clinical-details` — same validation; service-role upsert.
+- **Stage 4C images:** `POST` / `PATCH` / archive `POST` under `/api/tenants/[tenantId]/patients/[patientId]/images` — see `22-patient-images-foundation.md`; server actions `updatePatientImageDetailsAction`, `archivePatientImageAction`.
 
 ### UI
 
@@ -94,7 +97,7 @@ Access gate: **`assertCrmShellPageAccess`** (same roles as CRM / Bookings / Cale
 | Loader | Responsibility |
 | --- | --- |
 | `src/lib/patients/patientDirectoryLoader.ts` | Paginated directory rows + counts (active cases, linked leads, latest booking). |
-| `src/lib/patients/patientProfileLoader.ts` | Foundation profile graph + summary metrics; legacy global anchor detection; **Stage 4B:** `clinicalDetails` bundle (`row` + `updatedByLabel`). |
+| `src/lib/patients/patientProfileLoader.ts` | Foundation profile graph + summary metrics; legacy global anchor detection; **Stage 4B:** `clinicalDetails` bundle (`row` + `updatedByLabel`). **Stage 4C:** `patientImages` bundle (counts, active tiles with signed URLs, archived rows without URLs). |
 
 ## Pure helpers
 
@@ -113,7 +116,7 @@ Access gate: **`assertCrmShellPageAccess`** (same roles as CRM / Bookings / Cale
 Under `src/components/fi/patients/`:
 
 - `PatientDirectoryPage`, `PatientDirectoryFilters`, `PatientDirectoryTable`, `PatientDirectoryRow`, `PatientStatusBadge`
-- `PatientProfilePage`, `PatientProfileHeader`, `PatientProfileSummaryCards`, `PatientPersonDetailsCard`, `PatientLinkedLeadsCard`, `PatientBookingsCard`, `PatientCasesCard`, `PatientActivityCard`, `PatientAdminNotesCard`, **`PatientClinicalDetailsCard`**
+- `PatientProfilePage`, `PatientProfileHeader`, `PatientProfileSummaryCards`, `PatientPersonDetailsCard`, `PatientLinkedLeadsCard`, `PatientBookingsCard`, `PatientCasesCard`, `PatientActivityCard`, `PatientAdminNotesCard`, **`PatientClinicalDetailsCard`**, **`PatientImagesCard`** (and `src/components/fi/patient-images/*` building blocks)
 
 ## Mutations & API
 
@@ -128,22 +131,26 @@ Under `src/components/fi/patients/`:
 
 `src/lib/patients/stage4b.test.ts` — clinical text limits, JSON object validation, `changed_keys`, strict schema, empty-row policy, tenant match helper, sparse PATCH merge.
 
+`src/lib/patientImages/stage4c.test.ts` — image policy (categories, MIME, size, metadata), paths, `changed_keys`, archived-edit guard, signed-URL descriptor shape.
+
 ## Intentionally deferred
 
-- Patient image upload & trichoscopy library
+- AI image analysis, HairAudit image scoring, surgery bulk imaging, trichoscopy measurement library, before/after engines, annotation, patient-facing galleries (Stage 4C covers **staff private** images only).
 - Blood analysis ingestion
 - HLI diagnostic engine
 - HairAudit integration
 - SurgeryOS / prescriptions / automated treatment timelines
-- Dedicated **patient-scoped** activity writer (read CRM activity only in 4A; clinical edits not mirrored to CRM in 4B)
+- Dedicated **patient-scoped** activity writer (read CRM activity only in 4A; clinical and image edits not mirrored to CRM in 4B/4C; `changed_keys` collected for future patient-native audit)
 
 ## Migrations
 
 - `20260611120001_fi_patients_admin_fields.sql` — `admin_note`, `patient_status` + check constraint.
 - `20260612120001_fi_patient_clinical_details.sql` — Stage 4B clinical summary table + RLS.
+- `20260613120001_fi_patient_images.sql` — Stage 4C image metadata table + RLS + `patient-images` storage bucket.
 
 ## Related docs
 
-- `docs/design/20-system-status-and-readiness.md` — feature registry rows for Patients / HLI / HairAudit / SurgeryOS.
+- `docs/design/20-system-status-and-readiness.md` — feature registry rows for Patients / HLI / HairAudit / SurgeryOS; core table list includes `fi_patient_images`.
+- `docs/design/22-patient-images-foundation.md` — Stage 4C private imaging layer (bucket, RLS, API, UI).
 - `docs/design/19-booking-calendar-foundation.md` — booking anchors including `patient_id`.
 - `docs/design/11-universal-patient-record.md` — legacy/global aggregate UI still used when no foundation row exists.

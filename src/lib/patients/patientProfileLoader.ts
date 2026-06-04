@@ -8,6 +8,8 @@ import { computePatientProfileSummaryMetrics, sortActivityEventsNewestFirst, spl
 import { normalizePatientStatus, type PatientStatusValue } from "./patientPolicy";
 import type { PatientClinicalDetailsRow } from "./clinicalDetailsServer";
 import { loadPatientClinicalDetails } from "./clinicalDetailsServer";
+import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
+import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 
 export type PatientProfilePerson = {
   id: string;
@@ -73,6 +75,7 @@ export type PatientProfileFoundationData = {
   patient: PatientProfilePatientRow;
   person: PatientProfilePerson;
   clinicalDetails: PatientClinicalDetailsProfileView;
+  patientImages: PatientImagesProfileBundle;
   leads: PatientProfileLeadCard[];
   cases: PatientProfileCaseCard[];
   bookings: { upcoming: PatientProfileBookingCard[]; past: PatientProfileBookingCard[] };
@@ -188,6 +191,7 @@ export async function loadPatientProfile(
   const person = mapPerson(personRow as Record<string, unknown>);
 
   const clinicalRow = await loadPatientClinicalDetails(tid, foundationPatientId, supabase);
+  const patientImages = await loadPatientImagesProfileBundle(tid, foundationPatientId, supabase);
   let clinicalDetailsUpdatedByLabel: string | null = null;
   if (clinicalRow?.updated_by_user_id) {
     const { data: updater, error: ueUp } = await supabase
@@ -369,6 +373,7 @@ export async function loadPatientProfile(
       patient,
       person,
       clinicalDetails: { row: clinicalRow, updatedByLabel: clinicalDetailsUpdatedByLabel },
+      patientImages,
       leads,
       cases,
       bookings: split,
