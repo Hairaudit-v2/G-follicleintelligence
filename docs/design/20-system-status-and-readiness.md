@@ -29,7 +29,7 @@ Missing tables are detected from PostgREST errors (schema cache / relation messa
 
 `calculateSystemReadinessScore()` is **pure** and documented in source. Weights:
 
-1. **Database core (60%)** — `present / |SYSTEM_STATUS_CORE_TABLES|` × 60.
+1. **Database core (60%)** — `present / |SYSTEM_STATUS_CORE_TABLES|` × 60 (currently 10 core tables including `fi_patient_clinical_details`).
 2. **Module strip (25%)** — Average of CRM, Bookings, Calendar, Patients, Cases traffic lights: green = 1.0, amber = 0.55, red = 0.0; scaled to 25 points.
 3. **Calendar stack (15%)** — Full points when Supabase is configured, `fi_bookings` exists, and calendar server loaders are present in the build.
 
@@ -39,8 +39,8 @@ The headline string bands the score into operator-friendly language (90+, 70+, 4
 
 `SYSTEM_FEATURE_REGISTRY` lists product-facing rows grouped under **CRM**, **Bookings**, **Patients**, **HairAudit**, **SurgeryOS**, and **IIOHR**. `resolveFeatureInventoryStatuses()` maps the live `SystemStatusPayload` to **Ready**, **Partial**, or **Planned**:
 
-- **Ready** — prerequisites met and (where relevant) tenant usage observed (e.g. patient **Profile** when `fi_persons` + `fi_patients` exist and the tenant has at least one patient row).
-- **Partial** — schema or shell exists but data or dependencies are incomplete (e.g. patient profile surface with zero patient rows).
+- **Ready** — prerequisites met and (where relevant) tenant usage observed (e.g. patient **Profile** when `fi_persons` + `fi_patients` exist and the tenant has at least one patient row; **Clinical Details** when those tables exist and `fi_patient_clinical_details` is present).
+- **Partial** — schema or shell exists but data or dependencies are incomplete (e.g. patient profile surface with zero patient rows; **Clinical Details** when foundation patients exist but the clinical-details table has not been migrated yet).
 - **Planned** — not yet implemented as first-class UI in this codebase (e.g. patient **Images**, **HLI**, **HairAudit**, **SurgeryOS**, **IIOHR**).
 
 ## Related routes
