@@ -20,7 +20,10 @@ import {
   assertNonCancelledBookingMutable,
 } from "./bookingPolicy";
 import { sortBookingsByStartAt } from "./bookingTime";
+import { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
 import type { FiBookingRow } from "./types";
+
+export { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
 
 function mapBookingRow(row: Record<string, unknown>): FiBookingRow {
   const meta = row.metadata;
@@ -231,6 +234,62 @@ export async function loadBookingsForTenantRange(
     .lt("start_at", rangeEndIso.trim())
     .gt("end_at", rangeStartIso.trim())
     .order("start_at", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return sortBookingsByStartAt(((data ?? []) as Record<string, unknown>[]).map(mapBookingRow));
+}
+
+export type LoadBookingsForOperatorViewParams = {
+  tenantId: string;
+  rangeStartIso: string;
+  rangeEndIso: string;
+  status?: string | null;
+  bookingType?: string | null;
+  assignedUserId?: string | null;
+  clinicId?: string | null;
+  /** When false, rows with `booking_status = cancelled` are omitted. */
+  includeCancelled?: boolean;
+  limit?: number;
+};
+
+/**
+ * Tenant-scoped bookings overlapping `[rangeStartIso, rangeEndIso)`, optional filters,
+ * ascending `start_at`, with a hard cap to avoid loading unbounded rows (Stage 3B).
+ */
+export async function loadBookingsForOperatorView(
+  params: LoadBookingsForOperatorViewParams,
+  client?: SupabaseClient
+): Promise<FiBookingRow[]> {
+  const supabase: SupabaseClient = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
+  assertEndAfterStart(params.rangeStartIso, params.rangeEndIso);
+  const cap = params.limit ?? DEFAULT_OPERATOR_BOOKINGS_LIMIT;
+  const limit = Math.min(Math.max(cap, 1), MAX_OPERATOR_BOOKINGS_LIMIT);
+
+  let q = supabase
+    .from("fi_bookings")
+    .select("*")
+    .eq("tenant_id", tid)
+    .lt("start_at", params.rangeEndIso.trim())
+    .gt("end_at", params.rangeStartIso.trim());
+
+  if (params.status?.trim()) {
+    q = q.eq("booking_status", params.status.trim());
+  }
+  if (params.bookingType?.trim()) {
+    q = q.eq("booking_type", params.bookingType.trim());
+  }
+  if (params.assignedUserId?.trim()) {
+    q = q.eq("assigned_user_id", params.assignedUserId.trim());
+  }
+  if (params.clinicId?.trim()) {
+    q = q.eq("clinic_id", params.clinicId.trim());
+  }
+  if (!params.includeCancelled) {
+    q = q.neq("booking_status", "cancelled");
+  }
+
+  const { data, error } = await q.order("start_at", { ascending: true }).limit(limit);
 
   if (error) throw new Error(error.message);
   return sortBookingsByStartAt(((data ?? []) as Record<string, unknown>[]).map(mapBookingRow));

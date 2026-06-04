@@ -7,6 +7,7 @@ export {
   loadBookingForTenant,
   loadBookingsForCase,
   loadBookingsForLead,
+  loadBookingsForOperatorView,
   loadBookingsForPatient,
   loadBookingsForPerson,
   loadBookingsForTenantRange,
@@ -15,5 +16,6 @@ export {
   type CancelBookingParams,
   type CompleteBookingParams,
   type CreateBookingParams,
+  type LoadBookingsForOperatorViewParams,
   type UpdateBookingParams,
 } from "./bookings";

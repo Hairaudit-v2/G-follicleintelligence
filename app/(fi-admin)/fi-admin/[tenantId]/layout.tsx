@@ -64,9 +64,14 @@ export default async function TenantAdminLayout({
           Foundation integrity
         </Link>
         {showCrmNav ? (
-          <Link href={`${base}/crm`} className={navLink}>
-            CRM
-          </Link>
+          <>
+            <Link href={`${base}/crm`} className={navLink}>
+              CRM
+            </Link>
+            <Link href={`${base}/bookings`} className={navLink}>
+              Bookings
+            </Link>
+          </>
         ) : null}
       </nav>
       {children}
