@@ -64,7 +64,7 @@ export default async function TenantAdminLayout({
           Follicle Intelligence OS · Hair Restoration Operating System ·{" "}
           <span className="text-[#94A3B8]">Internal tenant workspace</span>
         </p>
-        <p className="mt-1 text-xs text-[#475569] sm:text-sm">© {year} Follicle Intelligence</p>
+        <p className="mt-1 text-xs text-[#64748B] sm:text-sm">© {year} Follicle Intelligence</p>
       </footer>
     </FiTenantBrandFrame>
   );

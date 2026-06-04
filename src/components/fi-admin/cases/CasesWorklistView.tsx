@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import type { CaseWorklistRow, CasesIndexFilterOptions, CasesIndexQuery } from "@/src/lib/cases/casesIndexTypes";
 import { CasesWorklistFilters } from "./CasesWorklistFilters";
 import { CasesWorklistMobileCards } from "./CasesWorklistMobileCards";
@@ -54,38 +55,44 @@ export function CasesWorklistView({
     <div className="space-y-4">
       <CasesWorklistFilters tenantId={tenantId} query={query} filterOptions={filterOptions} />
       {totalMatching === 0 && emptyTenantNoFilters && firstCaseWizardHref ? (
-        <div className="rounded border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center text-sm text-gray-700">
-          <p className="font-medium text-gray-900">No cases in this tenant yet</p>
-          <p className="mt-1 text-xs text-gray-600">
-            Use the wizard to add a test person, patient, and case without SQL or imports.
+        <DashboardCard className="border-dashed border-[#22C1FF]/25 bg-[#0F1629]/90 p-8 text-center shadow-[0_0_40px_rgba(34,193,255,0.06)]">
+          <p className="text-lg font-semibold tracking-tight text-[#F8FAFC] sm:text-xl">No cases yet</p>
+          <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-[#94A3B8]">
+            Create your first patient case to begin using Follicle Intelligence.
           </p>
           <Link
             href={firstCaseWizardHref}
-            className="mt-4 inline-flex items-center justify-center rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-950/40 transition duration-200 ease-out hover:-translate-y-0.5 hover:from-cyan-500 hover:to-sky-500 hover:shadow-xl hover:shadow-cyan-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#22C1FF]/60"
           >
-            Create test case
+            Create first case
           </Link>
-        </div>
+        </DashboardCard>
       ) : null}
       {!(totalMatching === 0 && emptyTenantNoFilters && firstCaseWizardHref) ? (
-        <p className="text-xs text-gray-600">
+        <div className="text-sm text-[#94A3B8]">
           {totalMatching === 0 ? (
-            <>{emptyTenantNoFilters ? <>No cases in this tenant yet.</> : <>No cases match the current filters.</>}</>
+            emptyTenantNoFilters ? (
+              <p>No cases in this tenant yet.</p>
+            ) : (
+              <DashboardCard className="border-dashed border-white/[0.12] bg-[#0F1629]/70 p-4 text-base leading-relaxed text-[#CBD5E1]">
+                No cases match the current filters. Clear search or reset filters to see more of your worklist.
+              </DashboardCard>
+            )
           ) : (
-            <>
-              Showing <span className="font-medium text-gray-900">{pagination.rangeStart}</span>–
-              <span className="font-medium text-gray-900">{pagination.rangeEnd}</span> of{" "}
-              <span className="font-medium text-gray-900">{totalMatching}</span> {allInTenantUnfiltered ? "cases" : "matching"}
+            <p>
+              Showing <span className="font-medium text-[#F8FAFC]">{pagination.rangeStart}</span>–
+              <span className="font-medium text-[#F8FAFC]">{pagination.rangeEnd}</span> of{" "}
+              <span className="font-medium text-[#F8FAFC]">{totalMatching}</span> {allInTenantUnfiltered ? "cases" : "matching"}
               {!allInTenantUnfiltered ? (
                 <>
                   {" "}
-                  · <span className="font-medium text-gray-900">{totalBeforeFilters}</span> in this tenant
+                  · <span className="font-medium text-[#F8FAFC]">{totalBeforeFilters}</span> in this tenant
                 </>
               ) : null}
-              {hasActiveFilters ? <span className="text-gray-500"> (filters applied)</span> : null}
-            </>
+              {hasActiveFilters ? <span className="text-[#64748B]"> (filters applied)</span> : null}
+            </p>
           )}
-        </p>
+        </div>
       ) : null}
       {totalMatching > 0 ? (
         <>

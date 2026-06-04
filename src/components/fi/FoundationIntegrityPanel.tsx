@@ -4,16 +4,26 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { backfillFoundationFromProcessedEventsAction } from "@/lib/actions/fi-actions";
+import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import type { FoundationIntegrityMetrics } from "@/src/lib/fi/foundation/integrity";
 
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded border border-gray-200 bg-white px-3 py-2">
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className="text-lg font-semibold text-gray-900">{value}</div>
+    <div className="rounded-xl border border-white/[0.08] bg-[#141C33]/70 px-3 py-2.5 shadow-inner shadow-black/20 backdrop-blur-sm">
+      <div className="text-xs leading-snug text-[#94A3B8]">{label}</div>
+      <div className="mt-1 text-lg font-semibold tabular-nums text-[#F8FAFC]">{value}</div>
     </div>
   );
 }
+
+/** True when core foundation rows are still empty — zeros are expected, not a failure. */
+function isNewClinicSnapshot(m: FoundationIntegrityMetrics): boolean {
+  const t = m.totals;
+  return t.fi_cases === 0 && t.fi_patients === 0 && t.fi_persons === 0 && t.fi_timeline_events === 0;
+}
+
+const listShell = "max-h-48 space-y-1 overflow-auto rounded-xl border border-white/[0.08] bg-[#081020]/60 p-2 text-xs text-[#CBD5E1]";
+const linkClass = "font-mono text-[#22C1FF] hover:text-[#0EA5E9] hover:underline";
 
 export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
   const params = useParams();
@@ -51,7 +61,7 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
     setBackfillBusy(false);
     if (res.ok) {
       setBackfillMsg(
-        `Backfill: scanned ${res.scanned}, attempted ${res.attempted}, succeeded ${res.succeeded}, skipped ${res.skipped}, failed ${res.failed}.`
+        `Backfill: scanned ${res.scanned}, attempted ${res.attempted}, succeeded ${res.succeeded}, skipped ${res.skipped}, failed ${res.failed}.`,
       );
       if (res.errors.length) setBackfillMsg((m) => `${m} Errors: ${res.errors.join("; ")}`);
       load();
@@ -60,16 +70,48 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
     }
   };
 
-  if (loading) return <p className="text-sm text-gray-500">Loading foundation integrity…</p>;
-  if (error) return <p className="text-sm text-red-600">{error}</p>;
-  if (!data) return <p className="text-sm text-gray-500">No data.</p>;
+  if (loading) {
+    return (
+      <DashboardCard className="p-6 text-sm text-[#94A3B8]">
+        <p className="animate-pulse">Loading foundation integrity…</p>
+      </DashboardCard>
+    );
+  }
+  if (error) {
+    return (
+      <InfoNotice variant="danger" title="Could not load metrics">
+        <p className="text-sm">{error}</p>
+      </InfoNotice>
+    );
+  }
+  if (!data) {
+    return (
+      <DashboardCard className="p-6 text-sm text-[#94A3B8]">
+        <p>No data.</p>
+      </DashboardCard>
+    );
+  }
 
   const m = data;
+  const newClinic = isNewClinicSnapshot(m);
 
   return (
     <div className="space-y-8 text-sm">
+      {newClinic ? (
+        <InfoNotice variant="info" title="You are looking at a fresh workspace">
+          <p className="text-sm leading-relaxed text-[#CBD5E1]">
+            <strong className="text-[#F8FAFC]">Zeros are normal here</strong> until patients, cases, and timeline activity
+            exist. Event totals can still appear from platform ingestion — focus on persons, patients, cases, and timeline
+            climbing as you onboard.
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
+            These numbers will grow once patients, cases, and timeline events are created.
+          </p>
+        </InfoNotice>
+      ) : null}
+
       <section>
-        <h3 className="mb-2 text-base font-medium text-gray-900">Foundation coverage summary</h3>
+        <h3 className="mb-2 text-base font-semibold text-[#F8FAFC] sm:text-lg">Foundation coverage summary</h3>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
           <Metric label="fi_events" value={m.totals.fi_events} />
           <Metric label="fi_events (processed)" value={m.totals.fi_events_processed} />
@@ -83,8 +125,8 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
       </section>
 
       <section>
-        <h3 className="mb-2 text-base font-medium text-gray-900">Event → link → case coverage</h3>
-        <p className="mb-2 text-xs text-gray-500">
+        <h3 className="mb-2 text-base font-semibold text-[#F8FAFC] sm:text-lg">Event → link → case coverage</h3>
+        <p className="mb-2 text-xs leading-relaxed text-[#64748B] sm:text-sm">
           Counts use the latest fi_event_links row per event (by created_at). Scanned up to 200k events per tenant.
         </p>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -95,7 +137,7 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
       </section>
 
       <section>
-        <h3 className="mb-2 text-base font-medium text-gray-900">Risks & gaps</h3>
+        <h3 className="mb-2 text-base font-semibold text-[#F8FAFC] sm:text-lg">Risks & gaps</h3>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
           <Metric label="Unresolved global patients (view)" value={m.risks.unresolved_global_patients} />
           <Metric label="Cases w/o foundation_patient (view)" value={m.risks.unresolved_cases_no_foundation_patient} />
@@ -108,24 +150,21 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
       </section>
 
       {m.notes.length > 0 && (
-        <section className="rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-          <strong>Notes:</strong> {m.notes.join(" ")}
+        <section className="rounded-xl border border-amber-500/25 bg-amber-950/35 p-3 text-xs text-amber-100 backdrop-blur-sm">
+          <strong className="text-amber-50">Notes:</strong> {m.notes.join(" ")}
         </section>
       )}
 
       <section className="grid gap-6 md:grid-cols-2">
         <div>
-          <h4 className="mb-2 font-medium text-gray-900">Unresolved global patients (preview)</h4>
-          <ul className="max-h-48 space-y-1 overflow-auto rounded border border-gray-200 bg-white p-2 text-xs">
+          <h4 className="mb-2 font-semibold text-[#E2E8F0]">Unresolved global patients (preview)</h4>
+          <ul className={listShell}>
             {m.previews.unresolved_global_patients.length === 0 ? (
-              <li className="text-gray-500">None in preview window.</li>
+              <li className="text-[#64748B]">None in preview window.</li>
             ) : (
               m.previews.unresolved_global_patients.map((r) => (
                 <li key={r.global_patient_id}>
-                  <Link
-                    href={`/fi-admin/${routeTenant}/patients/${r.global_patient_id}`}
-                    className="font-mono text-blue-700 hover:underline"
-                  >
+                  <Link href={`/fi-admin/${routeTenant}/patients/${r.global_patient_id}`} className={linkClass}>
                     {r.global_patient_id}
                   </Link>{" "}
                   — {r.source_system}:{r.source_patient_id}
@@ -135,29 +174,25 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
           </ul>
         </div>
         <div>
-          <h4 className="mb-2 font-medium text-gray-900">Cases without foundation patient (preview)</h4>
-          <ul className="max-h-48 space-y-1 overflow-auto rounded border border-gray-200 bg-white p-2 text-xs">
+          <h4 className="mb-2 font-semibold text-[#E2E8F0]">Cases without foundation patient (preview)</h4>
+          <ul className={listShell}>
             {m.previews.unresolved_cases.length === 0 ? (
-              <li className="text-gray-500">None in preview window.</li>
+              <li className="text-[#64748B]">None in preview window.</li>
             ) : (
               m.previews.unresolved_cases.map((r) => (
                 <li key={r.case_id}>
-                  <span className="font-mono">{r.case_id}</span> — {r.status} —{" "}
-                  {r.source_case_id ?? "no source_case_id"}
+                  <span className="font-mono text-[#94A3B8]">{r.case_id}</span> — {r.status} — {r.source_case_id ?? "no source_case_id"}
                   {r.global_patient_id ? (
                     <>
                       {" "}
                       ·{" "}
-                      <Link
-                        href={`/fi-admin/${routeTenant}/patients/${r.global_patient_id}`}
-                        className="text-blue-700 hover:underline"
-                      >
+                      <Link href={`/fi-admin/${routeTenant}/patients/${r.global_patient_id}`} className={linkClass}>
                         Patient record
                       </Link>
                     </>
                   ) : null}
                   {" · "}
-                  <Link href={`/fi-admin/${routeTenant}/cases/${r.case_id}`} className="text-blue-700 hover:underline">
+                  <Link href={`/fi-admin/${routeTenant}/cases/${r.case_id}`} className={linkClass}>
                     Case record
                   </Link>
                 </li>
@@ -168,49 +203,50 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
       </section>
 
       <section>
-        <h4 className="mb-2 font-medium text-gray-900">Duplicate-risk: shared email_normalized</h4>
-        <ul className="max-h-40 space-y-1 overflow-auto rounded border border-gray-200 bg-white p-2 text-xs">
+        <h4 className="mb-2 font-semibold text-[#E2E8F0]">Duplicate-risk: shared email_normalized</h4>
+        <ul className="max-h-40 space-y-1 overflow-auto rounded-xl border border-white/[0.08] bg-[#081020]/60 p-2 text-xs text-[#CBD5E1]">
           {m.previews.duplicate_person_emails.length === 0 ? (
-            <li className="text-gray-500">No duplicate groups detected in scan.</li>
+            <li className="text-[#64748B]">No duplicate groups detected in scan.</li>
           ) : (
             m.previews.duplicate_person_emails.map((r) => (
               <li key={r.email_normalized}>
-                <strong>{r.email_normalized}</strong> — {r.person_count} persons ({r.person_ids.join(", ")})
+                <strong className="text-[#F8FAFC]">{r.email_normalized}</strong> — {r.person_count} persons ({r.person_ids.join(", ")})
               </li>
             ))
           )}
         </ul>
       </section>
 
-      <section className="rounded border border-gray-300 bg-gray-50 p-4">
-        <h4 className="mb-2 font-medium text-gray-900">Manual foundation backfill</h4>
-        <p className="mb-3 text-xs text-gray-600">
-          Replays dual-write for up to 50 recent <strong>processed</strong> events that have no timeline row with matching{" "}
-          <code className="rounded bg-gray-200 px-1">fi_event_id</code>. Requires server env{" "}
-          <code className="rounded bg-gray-200 px-1">FI_ADMIN_API_KEY</code>. Does not run automatically.
+      <DashboardCard elevated className="border-violet-500/25 bg-[#120a1e]/55 p-4 sm:p-5">
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-violet-300/90">Deployment operators</p>
+        <h4 className="mt-1 text-base font-semibold text-[#F8FAFC]">Manual foundation backfill</h4>
+        <p className="mt-2 text-xs leading-relaxed text-[#94A3B8] sm:text-sm">
+          Replays dual-write for up to 50 recent <strong className="text-[#E2E8F0]">processed</strong> events that have no timeline row with matching{" "}
+          <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-[0.7rem] text-[#22C1FF]">fi_event_id</code>. Requires server{" "}
+          <code className="rounded bg-[#141C33] px-1.5 py-0.5 text-[0.7rem] text-[#22C1FF]">FI_ADMIN_API_KEY</code>. Does not run automatically.
         </p>
-        <form onSubmit={runBackfill} className="flex flex-wrap items-end gap-2">
-          <label className="flex flex-col text-xs">
+        <form onSubmit={runBackfill} className="mt-4 flex flex-wrap items-end gap-3">
+          <label className="flex min-w-[12rem] flex-1 flex-col text-xs text-[#94A3B8]">
             Admin key
             <input
               type="password"
               autoComplete="off"
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
-              className="mt-1 w-64 rounded border px-2 py-1"
+              className="mt-1 w-full max-w-xs rounded-lg border border-white/[0.12] bg-[#081020]/90 px-3 py-2 text-sm text-[#F8FAFC] outline-none focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20"
               placeholder="FI_ADMIN_API_KEY value"
             />
           </label>
           <button
             type="submit"
             disabled={backfillBusy || !adminKey.trim()}
-            className="rounded bg-gray-900 px-4 py-2 text-xs font-medium text-white disabled:opacity-50"
+            className="rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md transition hover:from-cyan-500 hover:to-sky-500 disabled:opacity-45"
           >
             {backfillBusy ? "Running…" : "Run batch backfill (max 50)"}
           </button>
         </form>
-        {backfillMsg && <p className="mt-2 text-xs text-gray-700">{backfillMsg}</p>}
-      </section>
+        {backfillMsg ? <p className="mt-3 text-xs text-[#94A3B8] sm:text-sm">{backfillMsg}</p> : null}
+      </DashboardCard>
     </div>
   );
 }

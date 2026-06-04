@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { redirect } from "next/navigation";
 import { CasesWorklistView } from "@/src/components/fi-admin/cases/CasesWorklistView";
 import {
@@ -30,7 +31,11 @@ export default async function CasesIndexRoutePage({
   const sp = (await searchParams) ?? {};
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return (
+      <InfoNotice variant="danger" title="Server misconfigured">
+        <p className="text-sm">Supabase environment variables are missing.</p>
+      </InfoNotice>
+    );
   }
 
   const query = parseCasesIndexQuery(sp);
@@ -54,21 +59,24 @@ export default async function CasesIndexRoutePage({
   const worklistQueryString = buildCasesWorklistQueryString(effectiveQuery) || undefined;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 py-6">
+    <div className="mx-auto max-w-6xl space-y-6 py-2">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">Cases</h1>
-          <p className="mt-1 max-w-2xl text-sm text-gray-600">
+          <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Cases</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#94A3B8] sm:text-base">
             SurgeryOS worklist (Stage 5H): tenant-scoped cases with URL pagination, search, filters, and readiness
             summaries — read-only list; open a case for 5A–5G detail. No HairAudit, audit grading, AI scoring, or
             certification scoring here.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Link href={`/fi-admin/${tenantId}/cases/new`} className="text-sm font-medium text-blue-600 hover:underline">
+          <Link
+            href={`/fi-admin/${tenantId}/cases/new`}
+            className="text-sm font-semibold text-[#22C1FF] underline decoration-[#22C1FF]/35 underline-offset-4 transition hover:text-[#0EA5E9]"
+          >
             Create case
           </Link>
-          <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-[#94A3B8] transition hover:text-[#22C1FF]">
             CRM
           </Link>
         </div>

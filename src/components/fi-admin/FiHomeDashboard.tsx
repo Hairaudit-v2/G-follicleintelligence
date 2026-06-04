@@ -60,7 +60,7 @@ function SetupProgressRing({ percent }: { percent: number }) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold tabular-nums tracking-tight text-[#F8FAFC] sm:text-3xl">{pct}%</span>
-          <span className="text-xs font-medium text-[#64748B]">setup</span>
+          <span className="text-xs font-medium text-[#94A3B8]">setup</span>
         </div>
       </div>
     </div>

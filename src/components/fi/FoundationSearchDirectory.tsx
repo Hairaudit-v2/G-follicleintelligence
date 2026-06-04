@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import type { FoundationSearchFilter, FoundationSearchGroupedResult, FoundationSearchHit } from "@/src/lib/fi/foundation/search";
 
 const FILTERS: { value: FoundationSearchFilter; label: string }[] = [
@@ -72,11 +73,13 @@ function Group({
 }) {
   return (
     <section className="space-y-2">
-      <h2 className="text-sm font-medium text-gray-900">
-        {title} <span className="font-normal text-gray-500">({hits.length})</span>
+      <h2 className="text-sm font-semibold text-[#F8FAFC] sm:text-base">
+        {title} <span className="font-normal text-[#64748B]">({hits.length})</span>
       </h2>
       {hits.length === 0 ? (
-        <p className="rounded border border-dashed border-gray-200 bg-gray-50 px-3 py-4 text-xs text-gray-500">{empty}</p>
+        <DashboardCard className="border-dashed border-white/[0.1] bg-[#0F1629]/60 px-3 py-4 text-sm text-[#94A3B8]">
+          {empty}
+        </DashboardCard>
       ) : (
         <ul className="grid gap-2 sm:grid-cols-1 md:grid-cols-2">
           {hits.map((hit) => (
@@ -93,8 +96,6 @@ function Group({
 export function FoundationSearchDirectory({
   tenantId,
   result,
-  organisationCount,
-  clinicCount,
 }: {
   tenantId: string;
   result: FoundationSearchGroupedResult;
@@ -169,31 +170,38 @@ export function FoundationSearchDirectory({
       </nav>
 
       {noMatches ? (
-        <p className="rounded border border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm text-gray-600">
-          No matches for this query in the selected scope. Try a different term, clear the search to browse recent
-          records, or widen scope to &quot;All&quot;.
-        </p>
-      ) : noData ? (
-        <div className="space-y-3 rounded border border-gray-200 bg-gray-50 px-4 py-6 text-center">
-          <p className="text-sm text-gray-600">
-            No foundation directory rows returned for this tenant yet. Ingest data and search again, or use{" "}
-            <a className="font-medium text-blue-700 underline" href="#foundation-tools">
-              foundation tools
-            </a>{" "}
-            above to create organisations and clinics.
+        <DashboardCard className="border-dashed border-white/[0.12] p-6 text-center">
+          <p className="text-base leading-relaxed text-[#94A3B8]">
+            No matches for this query in the selected scope. Try another term, clear the search, or widen the scope to{" "}
+            <span className="text-[#E2E8F0]">All</span>.
           </p>
-          {organisationCount === 0 && clinicCount === 0 ? (
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <a
-                href="#foundation-tools"
-                className="inline-flex rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white no-underline hover:bg-gray-800"
-              >
-                Create organisation
-              </a>
-              <span className="text-xs text-gray-500">Then create a clinic in the same panel.</span>
-            </div>
-          ) : null}
-        </div>
+        </DashboardCard>
+      ) : noData ? (
+        <DashboardCard className="border-dashed border-[#22C1FF]/20 bg-[#0F1629]/90 p-6 sm:p-8">
+          <p className="text-center text-lg font-semibold text-[#F8FAFC] sm:text-xl">No foundation records yet</p>
+          <p className="mx-auto mt-3 max-w-xl text-center text-base leading-relaxed text-[#94A3B8]">
+            Your directory will list patients, cases, clinics, and organisations as they are created. Start by adding an{" "}
+            <strong className="text-[#E2E8F0]">organisation</strong> (your business or network), then a{" "}
+            <strong className="text-[#E2E8F0]">clinic</strong> (each site or brand that sees patients).
+          </p>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
+            <a
+              href="#directory-create-organisation"
+              className="inline-flex min-w-[12rem] items-center justify-center rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 px-5 py-3 text-sm font-semibold text-white no-underline shadow-lg shadow-cyan-950/30 transition duration-200 hover:-translate-y-0.5 hover:from-cyan-500 hover:to-sky-500"
+            >
+              Create organisation
+            </a>
+            <a
+              href="#directory-create-clinic"
+              className="inline-flex min-w-[12rem] items-center justify-center rounded-xl border border-white/[0.15] bg-[#141C33]/80 px-5 py-3 text-sm font-semibold text-[#22C1FF] no-underline transition duration-200 hover:border-[#22C1FF]/40 hover:bg-[#141C33]"
+            >
+              Create clinic
+            </a>
+          </div>
+          <p className="mt-4 text-center text-sm text-[#64748B]">
+            Forms live in <a className="text-[#22C1FF] underline decoration-[#22C1FF]/40 underline-offset-2" href="#foundation-tools">Foundation records</a> below — these links scroll there.
+          </p>
+        </DashboardCard>
       ) : null}
 
       {total > 0 && (
