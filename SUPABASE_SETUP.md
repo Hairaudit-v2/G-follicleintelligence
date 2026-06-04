@@ -2,7 +2,7 @@
 
 ## 1. Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in values. See `.env.example` for Supabase URL, anon key, service role key, and storage bucket names.
+Copy `.env.example` to `.env.local` and fill in values. See `.env.example` for Supabase URL, anon key, service role key, optional `FI_ENABLE_DEV_ADMIN_ACCESS` (local FI Admin tenant list without login — see [docs/dev-local-fi-admin.md](./dev-local-fi-admin.md)), and storage bucket names.
 
 **Note:** Migrations 20250220000001–000006 define the schema. If you previously ran older migrations, run `supabase db reset` or create a fresh project.
 
@@ -37,6 +37,8 @@ insert into fi_tenants (name, slug) values ('Demo Tenant', 'demo');
 ```
 
 Use the returned `id` for API calls: `/api/tenants/{tenant_id}/cases`
+
+To pick a tenant from the FI Admin UI without logging in locally, set `FI_ENABLE_DEV_ADMIN_ACCESS=true` on the **Next.js** process (non-production only); see [docs/dev-local-fi-admin.md](./dev-local-fi-admin.md).
 
 ## 5. API Endpoints
 

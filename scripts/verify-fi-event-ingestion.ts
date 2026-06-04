@@ -57,6 +57,7 @@ async function preflightAppReachability(): Promise<void> {
         `FI app responded from ${BASE}, but /api/tenants returned HTTP ${response.status}.`
       );
     }
+    // 401 is expected when unauthenticated and FI_ENABLE_DEV_ADMIN_ACCESS is off — app is still up.
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes("Could not reach FI app at")) {
       throw error;
@@ -93,7 +94,10 @@ async function getTenantId(): Promise<string> {
   if (tenantId) return tenantId;
 
   const { status, body } = await api("/api/tenants");
-  assert(status === 200 && body.ok, "Failed to load tenants. Set FI_TENANT_ID if needed.");
+  assert(
+    status === 200 && body.ok,
+    "Failed to load tenants via GET /api/tenants. Sign in to the app, set FI_TENANT_ID, or run the dev server with FI_ENABLE_DEV_ADMIN_ACCESS=true (non-production only; see docs/dev-local-fi-admin.md)."
+  );
   const tenants = Array.isArray(body.tenants) ? body.tenants : [];
   assert(tenants.length > 0, "No tenants found. Set FI_TENANT_ID or create a tenant.");
 

@@ -210,5 +210,6 @@ Cross-cutting follow-ups (unchanged direction): ICS export, patient portal read-
 
 ## Related docs
 
+- Patient profile foundation: [21-patient-profile-foundation.md](./21-patient-profile-foundation.md) (Stage 4A directory + profile; `patient_id` anchor).
 - CRM checklist: [18-crm-foundation-implementation-checklist.md](./18-crm-foundation-implementation-checklist.md) (Stage 2L conversion unlocks bookings).
 - CRM architecture: [17-crm-foundation-architecture.md](./17-crm-foundation-architecture.md).

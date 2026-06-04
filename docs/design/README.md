@@ -25,6 +25,12 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 | [17-crm-foundation-architecture](./17-crm-foundation-architecture.md) | Stage 1N: CRM foundation tables, ERD, timeline/HubSpot strategy, RLS, migration order (design only). |
 | [18-crm-foundation-implementation-checklist](./18-crm-foundation-implementation-checklist.md) | Stage 1O: locked decisions, phased implementation checklist, acceptance criteria (no code). |
 
+## Local development
+
+| Doc | Content |
+|-----|--------|
+| [FI Admin without login](../dev-local-fi-admin.md) | `FI_ENABLE_DEV_ADMIN_ACCESS` — optional `fi_tenants` listing when no Supabase session (non-production only). |
+
 ## Design rule
 
 **Follicle Intelligence must not become the operational database for HLI or HairAudit.** It consumes normalized signals, computes risk models and insights, and exposes analytics and recommendations back via read-only APIs.

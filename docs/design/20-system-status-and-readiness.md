@@ -37,14 +37,15 @@ The headline string bands the score into operator-friendly language (90+, 70+, 4
 
 ## Feature registry
 
-`SYSTEM_FEATURE_REGISTRY` lists product-facing rows grouped under **CRM**, **Bookings**, **Patients**, **HairAudit**, and **IIOHR**. `resolveFeatureInventoryStatuses()` maps the live `SystemStatusPayload` to **Ready**, **Partial**, or **Planned**:
+`SYSTEM_FEATURE_REGISTRY` lists product-facing rows grouped under **CRM**, **Bookings**, **Patients**, **HairAudit**, **SurgeryOS**, and **IIOHR**. `resolveFeatureInventoryStatuses()` maps the live `SystemStatusPayload` to **Ready**, **Partial**, or **Planned**:
 
-- **Ready** — prerequisites met and (where relevant) tenant usage observed.
-- **Partial** — schema or shell exists but data or dependencies are incomplete.
-- **Planned** — not yet implemented as first-class UI in this codebase (e.g. HLI, HairAudit, IIOHR).
+- **Ready** — prerequisites met and (where relevant) tenant usage observed (e.g. patient **Profile** when `fi_persons` + `fi_patients` exist and the tenant has at least one patient row).
+- **Partial** — schema or shell exists but data or dependencies are incomplete (e.g. patient profile surface with zero patient rows).
+- **Planned** — not yet implemented as first-class UI in this codebase (e.g. patient **Images**, **HLI**, **HairAudit**, **SurgeryOS**, **IIOHR**).
 
 ## Related routes
 
 - CRM shell: `/fi-admin/[tenantId]/crm`
 - Bookings operator: `/fi-admin/[tenantId]/bookings`
 - Calendar: `/fi-admin/[tenantId]/calendar`
+- Patients directory & profile: `/fi-admin/[tenantId]/patients`, `/fi-admin/[tenantId]/patients/[patientId]`

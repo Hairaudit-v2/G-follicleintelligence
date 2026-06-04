@@ -23,7 +23,9 @@ async function getTenant(): Promise<string> {
   if (tenantId) return tenantId;
   const d = await api("/api/tenants");
   if (!d.ok || !d.tenants?.length)
-    throw new Error("No tenants. Set FI_TENANT_ID or create a tenant.");
+    throw new Error(
+      "No tenants from GET /api/tenants. Set FI_TENANT_ID, sign in with a user linked in fi_users, or run the dev server with FI_ENABLE_DEV_ADMIN_ACCESS=true (non-production; see docs/dev-local-fi-admin.md)."
+    );
   return d.tenants[0].id;
 }
 

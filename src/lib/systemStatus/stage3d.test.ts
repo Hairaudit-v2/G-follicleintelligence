@@ -136,6 +136,10 @@ describe("Stage 3D — system status & readiness", () => {
     assert.equal(leads?.status, "ready");
     const hli = rows.find((r) => r.id === "patients.hli");
     assert.equal(hli?.status, "planned");
+    const profile = rows.find((r) => r.id === "patients.profile");
+    assert.equal(profile?.status, "ready");
+    const surgery = rows.find((r) => r.id === "surgeryos.core");
+    assert.equal(surgery?.status, "planned");
   });
 
   it("migration health unknown when metadata flag false", () => {

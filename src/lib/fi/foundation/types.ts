@@ -99,6 +99,9 @@ export type FiPatientRow = {
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+  /** Stage 4A — present when columns exist on `fi_patients`. */
+  admin_note?: string | null;
+  patient_status?: string;
 };
 
 export type ResolvePatientInput = {

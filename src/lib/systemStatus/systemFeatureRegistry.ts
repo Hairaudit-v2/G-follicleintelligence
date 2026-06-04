@@ -9,7 +9,7 @@ export type FeatureRolloutStatus = "ready" | "partial" | "planned";
 
 export type SystemFeatureEntry = {
   id: string;
-  group: "CRM" | "Bookings" | "Patients" | "HairAudit" | "IIOHR";
+  group: "CRM" | "Bookings" | "Patients" | "HairAudit" | "IIOHR" | "SurgeryOS";
   label: string;
 };
 
@@ -25,6 +25,7 @@ export const SYSTEM_FEATURE_REGISTRY: readonly SystemFeatureEntry[] = [
   { id: "patients.images", group: "Patients", label: "Images" },
   { id: "patients.hli", group: "Patients", label: "HLI" },
   { id: "hairaudit.core", group: "HairAudit", label: "HairAudit" },
+  { id: "surgeryos.core", group: "SurgeryOS", label: "SurgeryOS" },
   { id: "iiohr.core", group: "IIOHR", label: "IIOHR" },
 ] as const;
 
@@ -58,8 +59,8 @@ export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): R
   const operatorReady = bookingsReady && (payload.bookings.counts.total ?? 0) > 0;
   const calendarReady = payload.calendar.label === "Ready" && payload.calendar.traffic === "green";
 
-  const patientsReady = payload.patients.label === "Ready";
-  const patientsPartial = payload.patients.label === "Partial";
+  const patientProfileSchemaOk = payload.patients.personsTable && payload.patients.patientsTable;
+  const patientProfileHasRows = (payload.patients.patientsCount ?? 0) > 0;
 
   const resolve = (id: string): FeatureRolloutStatus => {
     switch (id) {
@@ -82,12 +83,13 @@ export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): R
       case "bookings.calendar":
         return bookingsReady ? (calendarReady ? "ready" : "partial") : "partial";
       case "patients.profile":
-        return patientsReady ? "ready" : patientsPartial ? "partial" : "planned";
+        if (!patientProfileSchemaOk) return "planned";
+        return patientProfileHasRows ? "ready" : "partial";
       case "patients.images":
-        return patientsReady ? "partial" : patientsPartial ? "partial" : "planned";
       case "patients.hli":
         return "planned";
       case "hairaudit.core":
+      case "surgeryos.core":
       case "iiohr.core":
         return "planned";
       default:

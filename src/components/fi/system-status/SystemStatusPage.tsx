@@ -34,7 +34,7 @@ function featureLabel(s: FeatureRolloutStatus): string {
 
 export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
   const features = resolveFeatureInventoryStatuses(data);
-  const groups = ["CRM", "Bookings", "Patients", "HairAudit", "IIOHR"] as const;
+  const groups = ["CRM", "Bookings", "Patients", "HairAudit", "SurgeryOS", "IIOHR"] as const;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 py-6">
@@ -44,9 +44,12 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
           Tenant-safe operational snapshot: schema presence, row volumes, calendar stack, and planned product areas.
           Generated <time dateTime={data.generatedAtIso}>{data.generatedAtIso}</time>.
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
           <Link href={`/fi-admin/${data.tenantId}/crm`} className="text-blue-600 hover:underline">
             ← CRM
+          </Link>
+          <Link href={`/fi-admin/${data.tenantId}/patients`} className="text-blue-600 hover:underline">
+            Patients
           </Link>
         </p>
       </header>
@@ -161,6 +164,13 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
 
       <SystemStatusSection id="patients" title="5. Patients" description="Foundation persons and clinical patients.">
         <SystemStatusCard title="Patients & persons" subtitle={data.patients.label}>
+          <p className="mt-2 text-sm text-gray-700">
+            Open the{" "}
+            <Link href={`/fi-admin/${data.tenantId}/patients`} className="text-blue-600 hover:underline">
+              patient directory
+            </Link>{" "}
+            for foundation profiles (Stage 4A).
+          </p>
           <SystemStatusBadge traffic={data.patients.traffic}>{data.patients.label}</SystemStatusBadge>
           <div className="grid grid-cols-2 gap-2">
             <SystemStatusMetric label="fi_persons rows" value={fmt(data.patients.personsCount)} />

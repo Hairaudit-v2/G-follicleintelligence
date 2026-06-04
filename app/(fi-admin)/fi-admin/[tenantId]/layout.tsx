@@ -65,6 +65,9 @@ export default async function TenantAdminLayout({
         </Link>
         {showCrmNav ? (
           <>
+            <Link href={`${base}/patients`} className={navLink}>
+              Patients
+            </Link>
             <Link href={`${base}/crm`} className={navLink}>
               CRM
             </Link>

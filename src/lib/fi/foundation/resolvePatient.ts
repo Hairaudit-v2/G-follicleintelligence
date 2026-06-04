@@ -9,7 +9,7 @@ import type {
 } from "./types";
 
 function asPatientRow(row: Record<string, unknown>): FiPatientRow {
-  return {
+  const out: FiPatientRow = {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
     person_id: String(row.person_id),
@@ -20,6 +20,9 @@ function asPatientRow(row: Record<string, unknown>): FiPatientRow {
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
+  if ("admin_note" in row) out.admin_note = row.admin_note != null ? String(row.admin_note) : null;
+  if ("patient_status" in row && row.patient_status != null) out.patient_status = String(row.patient_status);
+  return out;
 }
 
 async function ensurePatientSourceMapping(
@@ -71,7 +74,7 @@ export async function resolveOrCreatePatient(
     if (mapped.data?.patient_id) {
       const row = await supabase
         .from("fi_patients")
-        .select("id, tenant_id, person_id, primary_clinic_id, metadata, created_at, updated_at")
+        .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
         .eq("id", mapped.data.patient_id)
         .single();
       if (row.error || !row.data) throw new Error(row.error?.message ?? "Patient not found for mapping.");
@@ -101,7 +104,7 @@ export async function resolveOrCreatePatient(
       if (mapped.data?.patient_id) {
         const row = await supabase
           .from("fi_patients")
-          .select("id, tenant_id, person_id, primary_clinic_id, metadata, created_at, updated_at")
+          .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
           .eq("id", mapped.data.patient_id)
           .single();
         if (row.data) {
@@ -113,7 +116,7 @@ export async function resolveOrCreatePatient(
 
   const existingByPerson = await supabase
     .from("fi_patients")
-    .select("id, tenant_id, person_id, primary_clinic_id, metadata, created_at, updated_at")
+    .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
     .eq("tenant_id", tenantId)
     .eq("person_id", personId)
     .maybeSingle();
@@ -149,13 +152,13 @@ export async function resolveOrCreatePatient(
   const inserted = await supabase
     .from("fi_patients")
     .insert(insertRow)
-    .select("id, tenant_id, person_id, primary_clinic_id, metadata, created_at, updated_at")
+    .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
     .single();
 
   if (inserted.error?.code === "23505") {
     const retry = await supabase
       .from("fi_patients")
-      .select("id, tenant_id, person_id, primary_clinic_id, metadata, created_at, updated_at")
+      .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
       .eq("tenant_id", tenantId)
       .eq("person_id", personId)
       .single();
