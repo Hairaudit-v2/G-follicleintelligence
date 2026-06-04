@@ -48,3 +48,10 @@ export function caseDetailPageHref(tenantId: string, caseId: string, casesListRe
   if (!casesListReturnQuery) return base;
   return `${base}?fromCases=${encodeURIComponent(casesListReturnQuery)}`;
 }
+
+/** Read-only case summary / print view (Stage 5J). */
+export function caseSummaryDocumentPageHref(tenantId: string, caseId: string, casesListReturnQuery?: string): string {
+  const base = `/fi-admin/${tenantId.trim()}/cases/${caseId.trim()}/summary`;
+  if (!casesListReturnQuery) return base;
+  return `${base}?fromCases=${encodeURIComponent(casesListReturnQuery)}`;
+}

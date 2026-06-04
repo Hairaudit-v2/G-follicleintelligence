@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CaseAdminDetail } from "@/src/lib/cases/caseLoaders";
+import { caseSummaryDocumentPageHref } from "@/src/lib/cases/caseDetailFromCasesParam";
 import { CASE_DETAIL_SECTION_IDS } from "@/src/lib/cases/caseDetailNavConstants";
 import { UniversalCaseRecord } from "@/src/components/fi/UniversalCaseRecord";
 import type { UniversalCaseRecordResult } from "@/src/lib/fi/foundation/caseRecord";
@@ -75,12 +76,20 @@ export function CaseDetailPageView({
       </p>
 
       <div>
-        <h1 className="text-lg font-semibold text-gray-900">Treatment case</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1 className="text-lg font-semibold text-gray-900">Treatment case</h1>
+          <Link
+            href={caseSummaryDocumentPageHref(tenantId, detail.id, casesListReturnQuery)}
+            className="shrink-0 text-sm font-medium text-blue-600 hover:underline"
+          >
+            Print / Export summary
+          </Link>
+        </div>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">
           Tenant-scoped case profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
           day, Stage 5D post-op / outcome tracking, Stage 5E unified timeline, Stage 5F readiness indicators, Stage 5G–5I
-          worklist navigation polish, and case-level planning notes. HairAudit scoring, formal audit grading, AI outcome
-          scoring, and certification scoring are not part of this surface.
+          worklist navigation polish, case-level planning notes, and Stage 5J read-only summary / print. HairAudit
+          scoring, formal audit grading, AI outcome scoring, and certification scoring are not part of this surface.
         </p>
       </div>
 
