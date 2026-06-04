@@ -9,6 +9,7 @@ import {
   ensureDefaultPipelineStages,
   loadCrmActivityTimelineForLead,
   loadCrmLeadById,
+  loadCrmLeadNotesForLead,
   loadCrmLeadsShellPage,
   loadCrmMessagesForLead,
   loadCrmNotesForLead,
@@ -20,6 +21,7 @@ import type {
   CrmShellOrgOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
+  FiCrmLeadNoteRow,
   FiCrmLeadRow,
   FiCrmMessageRow,
   FiCrmNoteRow,
@@ -49,6 +51,7 @@ export type CrmLeadShellBundle = {
   events: FiCrmActivityEventRow[];
   tasks: FiCrmTaskRow[];
   notes: FiCrmNoteRow[];
+  leadNotes: FiCrmLeadNoteRow[];
   messages: FiCrmMessageRow[];
 };
 
@@ -62,15 +65,16 @@ export async function loadCrmShellLeadBundle(tenantId: string, leadId: string): 
   const lid = leadId.trim();
   const lead = await loadCrmLeadById(lid, tenantId);
   if (!lead) {
-    return { lead: null, events: [], tasks: [], notes: [], messages: [] };
+    return { lead: null, events: [], tasks: [], notes: [], leadNotes: [], messages: [] };
   }
-  const [events, tasks, notes, messages] = await Promise.all([
+  const [events, tasks, notes, leadNotes, messages] = await Promise.all([
     loadCrmActivityTimelineForLead(tenantId, lid, { limit: 80 }),
     loadCrmTasksForLead(tenantId, lid, { limit: 40 }),
     loadCrmNotesForLead(tenantId, lid, { limit: 40 }),
+    loadCrmLeadNotesForLead(tenantId, lid, { limit: 80 }),
     loadCrmMessagesForLead(tenantId, lid, { limit: 40 }),
   ]);
-  return { lead, events, tasks, notes, messages };
+  return { lead, events, tasks, notes, leadNotes, messages };
 }
 
 export type CrmShellLeadsIndexResult = CrmShellLeadListPage & {

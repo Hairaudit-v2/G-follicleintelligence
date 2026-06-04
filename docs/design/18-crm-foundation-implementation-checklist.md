@@ -436,12 +436,14 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | POST | `…/crm/leads/[leadId]/activity` | Append CRM activity event. |
 | POST | `…/crm/leads/[leadId]/tasks` | Create task. |
 | PATCH | `…/crm/leads/[leadId]/tasks/[taskId]` | Update task (non-terminal fields; Stage 2I). |
-| POST | `…/crm/leads/[leadId]/notes` | Create note. |
+| POST | `…/crm/leads/[leadId]/notes` | Create **internal lead note** (`fi_crm_lead_notes`, Stage 2J). |
+| PATCH | `…/crm/leads/[leadId]/notes/[noteId]` | Update lead note (body / visibility / pinned). |
+| POST | `…/crm/leads/[leadId]/notes/[noteId]/archive` | Archive lead note. |
 | POST | `…/crm/leads/[leadId]/messages/preview` | Message preview only; rejects `body`, `content`, `html`, `text`, `fullbody`, etc. at top level and inside `preview`. |
 
 ### Server actions
 
-- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `updateCrmLeadDetailsAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `updateCrmTaskAction`, `completeCrmTaskAction`, `reopenCrmTaskAction`, `crmCreateNoteAction`, `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
+- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `updateCrmLeadDetailsAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `updateCrmTaskAction`, `completeCrmTaskAction`, `reopenCrmTaskAction`, `crmCreateNoteAction` (general `fi_crm_notes`), **`createCrmLeadNoteAction`**, **`updateCrmLeadNoteAction`**, **`archiveCrmLeadNoteAction`** (Stage 2J), `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
 
 ### Supporting modules
 
@@ -453,11 +455,11 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/crmHttp.ts` | JSON helpers + `extractAdminKeyFromRequest` for routes. |
 | `src/lib/crm/messageBodyKeysPolicy.ts` | Forbidden full-body keys (shared with `validation.ts`). |
 | `src/lib/crm/activity.ts` | `loadCrmActivityTimelineForLead` (+ existing append). |
-| `src/lib/crm/tasks.ts`, `notes.ts`, `messages.ts` | `loadCrmTasksForLead`, `loadCrmNotesForLead`, `loadCrmMessagesForLead`. |
+| `src/lib/crm/tasks.ts`, `notes.ts`, `leadNotes.ts`, `messages.ts` | `loadCrmTasksForLead`, `loadCrmNotesForLead`, `loadCrmLeadNotesForLead`, `loadCrmMessagesForLead`. |
 
 ### Commands
 
-- Unit tests: `npm run test:unit` (`pure.test.ts`, `stage2d.test.ts`).
+- Unit tests: `npm run test:unit` (`pure.test.ts`, `stage2d.test.ts`, `stage2g.test.ts`, `stage2h.test.ts`, `stage2i.test.ts`, `stage2j.test.ts`, `crmLeadListQuery.test.ts`).
 
 ### Checklist mapping (Stage 2D)
 
@@ -481,7 +483,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | Path | Purpose |
 |------|---------|
 | `/fi-admin/[tenantId]/crm` | Lead index (filters, sort, pagination), pipeline panel, lead UUID jump, **create-lead panel** (Stage 2G). |
-| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, **edit-details panel** (Stage 2H), pipeline recap, activity / **tasks workflow** (Stage 2I) / notes / messages panels, mutation smoke (move stage, note, message preview). |
+| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, **edit-details panel** (Stage 2H), pipeline recap, activity / **tasks workflow** (Stage 2I) / **internal lead notes workflow** (Stage 2J) / general notes / messages panels, mutation smoke (move stage, foundation note, message preview). |
 
 ### Access
 
@@ -496,7 +498,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle + **lead index** loaders (caller must assert first). |
 | `src/lib/crm/crmGatePolicy.ts` | `CRM_SHELL_NAV_ROLES_LOWER`, `isCrmShellNavRole`. |
 | `src/components/fi/crm/CrmDataPanels.tsx` | Read-only presentation (props only). |
-| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadEditPanel.tsx`, `CrmLeadTasksWorkflow.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
+| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadEditPanel.tsx`, `CrmLeadTasksWorkflow.tsx`, `CrmLeadNotesWorkflow.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
 
 ### Commands
 
@@ -662,11 +664,62 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | Path | Role |
 |------|------|
 | `src/components/fi/crm/CrmLeadTasksWorkflow.tsx` | Client task list (bucketed), create form, inline edit, complete/reopen; assignee picker from tenant users; **no** `@/src/lib/crm/server` import. |
-| `src/components/fi/crm/CrmLeadSmokeForms.tsx` | Task smoke removed; stage/note/message smoke unchanged. |
+| `src/components/fi/crm/CrmLeadSmokeForms.tsx` | Task smoke removed; stage / foundation note / message smoke unchanged. |
 
 ### Tests
 
 - `src/lib/crm/stage2i.test.ts` — policy, buckets, changed keys, complete/reopen payload rules, ownership helper, update-task Zod (included in `npm run test:unit`).
+
+### Commands
+
+- `npm run lint`, `npm run build`, `npm run test:unit`.
+
+---
+
+## Stage 2J — CRM internal lead notes workflow (implementation progress)
+
+**Goal (met):** On `/fi-admin/[tenantId]/crm/leads/[leadId]`, CRM writers manage **internal lead notes** (`fi_crm_lead_notes`, distinct from general `fi_crm_notes`) via **`createCrmLeadNoteAction`**, **`updateCrmLeadNoteAction`**, **`archiveCrmLeadNoteAction`**, and REST **`POST/PATCH …/crm/leads/[leadId]/notes`** (+ **`POST …/notes/[noteId]/archive`**), with tenant/lead-scoped access, **visibility** enum (`internal` | `sales` | `clinical` | `admin`), **no client-driven** `tenant_id` / `lead_id` / `author_user_id` / timestamps / `archived_at`, **`archived_at`** blocking edits and pins, activity kinds **`lead_note.created`**, **`lead_note.updated`** (`changed_keys` only), **`lead_note.archived`** (no note body in activity detail), and **`tryResolveFiUserIdForTenant`** for author on create when using session auth.
+
+### Data
+
+| Table | Migration |
+|-------|-----------|
+| `fi_crm_lead_notes` | `supabase/migrations/20260608120001_fi_crm_lead_notes.sql` (RLS: authenticated SELECT; `service_role` INSERT/UPDATE/DELETE). |
+
+### Validation rules
+
+| Rule | Enforcement |
+|------|-------------|
+| Note belongs to lead + tenant | `loadCrmLeadNoteForLead` + `.eq` on `tenant_id`, `lead_id`, `id` |
+| Visibility | Zod enum + `crmLeadNotePolicy` |
+| Non-empty body | Policy + Zod `min(1)` on create/patch body |
+| Archived | `assertLeadNoteNotArchived` before update; archive clears pin |
+| Author | Optional `fi_users.id` from `tryResolveFiUserIdForTenant` only (not from client JSON) |
+
+### API / actions
+
+| Surface | Role |
+|---------|------|
+| `createCrmLeadNoteAction`, `updateCrmLeadNoteAction`, `archiveCrmLeadNoteAction` | Server actions (same gate as Stage 2D). |
+| `POST …/crm/leads/[leadId]/notes`, `PATCH …/notes/[noteId]`, `POST …/notes/[noteId]/archive` | REST (Zod + gate + optional author resolution from Bearer/cookies). |
+
+### Pure modules (unit-tested)
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/crmLeadNotePolicy.ts` | Visibility allow-list, non-empty body, archived guard, **`sortCrmLeadNotesForDisplay`**, `isLeadNoteOwnedByLeadTenant`. |
+| `src/lib/crm/crmLeadNoteChangedFields.ts` | `collectChangedLeadNoteDetailKeys` / snapshots (`note_body`, `note_visibility`, `is_pinned` only). |
+
+### UI / loader
+
+| Path | Role |
+|------|------|
+| `src/components/fi/crm/CrmLeadNotesWorkflow.tsx` | Create form, sorted list (pinned first), inline edit, archive; archived section collapsed by default. |
+| `src/lib/crm/crmShellLoaders.ts` | `loadCrmShellLeadBundle` includes **`leadNotes`** via `loadCrmLeadNotesForLead`. |
+
+### Tests
+
+- `src/lib/crm/stage2j.test.ts` — visibility, body, changed keys, archived guard, sort, scope helper, Zod (included in `npm run test:unit`).
 
 ### Commands
 

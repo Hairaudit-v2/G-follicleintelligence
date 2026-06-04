@@ -118,6 +118,20 @@ export type FiCrmNoteRow = {
   updated_at: string;
 };
 
+/** Internal lead notes (`fi_crm_lead_notes`, Stage 2J). */
+export type FiCrmLeadNoteRow = {
+  id: string;
+  tenant_id: string;
+  lead_id: string;
+  author_user_id: string | null;
+  note_body: string;
+  note_visibility: string;
+  is_pinned: boolean;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type FiCrmMessageRow = {
   id: string;
   tenant_id: string;

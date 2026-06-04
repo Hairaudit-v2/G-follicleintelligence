@@ -129,7 +129,8 @@ export function CrmLeadSmokeForms({
         </form>
 
         <form onSubmit={doNote} className="space-y-2 rounded border border-amber-200 bg-white/80 p-3 text-sm">
-          <h3 className="font-medium text-gray-900">Add note</h3>
+          <h3 className="font-medium text-gray-900">Foundation note (fi_crm_notes)</h3>
+          <p className="text-xs text-gray-600">Smoke path for the general notes table — internal lead notes use the dedicated section on this page.</p>
           <textarea value={noteBody} onChange={(e) => setNoteBody(e.target.value)} rows={3} className="w-full rounded border border-gray-300 px-2 py-1 text-sm" placeholder="Note body" required />
           <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
             Save note

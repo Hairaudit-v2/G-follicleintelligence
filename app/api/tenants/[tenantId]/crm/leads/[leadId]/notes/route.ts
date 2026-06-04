@@ -1,10 +1,10 @@
 /**
  * POST /api/tenants/[tenantId]/crm/leads/[leadId]/notes
  */
-import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
-import { crmCreateNoteBodySchema } from "@/src/lib/crm/crmApiSchemas";
+import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import { crmCreateLeadNoteBodySchema } from "@/src/lib/crm/crmApiSchemas";
 import { crmJsonOk, crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
-import { createCrmNoteForLead } from "@/src/lib/crm/server";
+import { createCrmLeadNote } from "@/src/lib/crm/server";
 
 export const dynamic = "force-dynamic";
 
@@ -17,15 +17,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     const adminKey = extractAdminKeyFromRequest(req, body);
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
 
-    const parsed = crmCreateNoteBodySchema.parse(body);
+    const parsed = crmCreateLeadNoteBodySchema.parse(body);
+    const authorUserId = await tryResolveFiUserIdForTenant(tenantId, req);
 
-    const note = await createCrmNoteForLead({
+    const note = await createCrmLeadNote({
       tenantId,
       leadId,
-      body: parsed.body,
-      visibility: parsed.visibility,
-      authorUserId: parsed.authorUserId ?? null,
-      metadata: parsed.metadata ?? null,
+      noteBody: parsed.noteBody,
+      noteVisibility: parsed.noteVisibility,
+      isPinned: parsed.isPinned,
+      authorUserId,
     });
 
     return crmJsonOk({ note });

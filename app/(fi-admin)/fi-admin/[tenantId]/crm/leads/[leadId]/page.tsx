@@ -8,6 +8,7 @@ import {
 } from "@/src/components/fi/crm/CrmDataPanels";
 import { CrmLeadEditPanel } from "@/src/components/fi/crm/CrmLeadEditPanel";
 import { CrmLeadSmokeForms } from "@/src/components/fi/crm/CrmLeadSmokeForms";
+import { CrmLeadNotesWorkflow } from "@/src/components/fi/crm/CrmLeadNotesWorkflow";
 import { CrmLeadTasksWorkflow } from "@/src/components/fi/crm/CrmLeadTasksWorkflow";
 import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmShellLeadDetailPageData, loadCrmShellPipelineStages } from "@/src/lib/crm/crmShellLoaders";
@@ -74,6 +75,8 @@ export default async function CrmLeadShellPage({
       />
 
       <CrmActivityPanel events={detail.events} />
+
+      <CrmLeadNotesWorkflow tenantId={tenantId} leadId={detail.lead.id} leadNotes={detail.leadNotes} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <CrmLeadTasksWorkflow

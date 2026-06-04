@@ -4,6 +4,7 @@ import {
   CRM_LEAD_DETAIL_PRIORITY_VALUES,
   CRM_LEAD_DETAIL_STATUS_VALUES,
 } from "./crmLeadDetailsPolicy";
+import { CRM_LEAD_NOTE_VISIBILITY_VALUES } from "./crmLeadNotePolicy";
 import { CRM_TASK_ACTIVE_STATUS_VALUES, CRM_TASK_TYPE_VALUES } from "./crmTaskPolicy";
 import { normaliseOptionalLeadSource } from "./leadSourceMappingPolicy";
 
@@ -168,6 +169,42 @@ export const crmCreateNoteBodySchema = z
     visibility: z.string().max(32).optional(),
     authorUserId: optionalUuid,
     metadata: z.record(z.string(), z.any()).optional().nullable(),
+  })
+  .strict();
+
+const leadNoteVisTuple = CRM_LEAD_NOTE_VISIBILITY_VALUES as unknown as [string, ...string[]];
+
+export const crmCreateLeadNoteBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    noteBody: z.string().min(1).max(32000),
+    noteVisibility: z.enum(leadNoteVisTuple).optional(),
+    isPinned: z.boolean().optional(),
+  })
+  .strict();
+
+export const crmUpdateLeadNoteBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    noteBody: z.string().min(1).max(32000).optional(),
+    noteVisibility: z.enum(leadNoteVisTuple).optional(),
+    isPinned: z.boolean().optional(),
+  })
+  .strict()
+  .superRefine((body, ctx) => {
+    const any = body.noteBody !== undefined || body.noteVisibility !== undefined || body.isPinned !== undefined;
+    if (!any) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Provide at least one field to update.",
+        path: ["noteBody"],
+      });
+    }
+  });
+
+export const crmArchiveLeadNoteBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
   })
   .strict();
 

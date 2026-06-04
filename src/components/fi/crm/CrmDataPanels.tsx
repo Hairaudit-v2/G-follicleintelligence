@@ -98,14 +98,14 @@ export function CrmNotesPanel({ notes }: { notes: FiCrmNoteRow[] }) {
   if (notes.length === 0) {
     return (
       <section className={card}>
-        <h2 className="mb-2 text-sm font-semibold text-gray-900">Notes</h2>
+        <h2 className="mb-2 text-sm font-semibold text-gray-900">General CRM notes</h2>
         <p className="text-sm text-gray-600">No notes on this lead.</p>
       </section>
     );
   }
   return (
     <section className={card}>
-      <h2 className="mb-3 text-sm font-semibold text-gray-900">Notes</h2>
+      <h2 className="mb-3 text-sm font-semibold text-gray-900">General CRM notes</h2>
       <ul className="max-h-64 space-y-2 overflow-y-auto text-sm">
         {notes.map((n) => (
           <li key={n.id} className="rounded border border-gray-100 p-2">

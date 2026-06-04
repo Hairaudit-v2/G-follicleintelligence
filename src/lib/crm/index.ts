@@ -11,6 +11,7 @@ export type {
   CrmShellOrgOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
+  FiCrmLeadNoteRow,
   FiCrmLeadRow,
   FiCrmLeadStageHistoryRow,
   FiCrmMessageRow,
@@ -80,3 +81,19 @@ export {
   type TaskDetailComparableSnapshot,
 } from "./crmTaskChangedFields";
 export { isTaskOwnedByLeadTenant, type TaskLeadTenantRef } from "./crmTaskOwnership";
+export {
+  assertCrmLeadNoteBodyNonEmpty,
+  assertCrmLeadNoteVisibilityAllowed,
+  assertLeadNoteNotArchived,
+  CRM_LEAD_NOTE_VISIBILITY_VALUES,
+  isCrmLeadNoteVisibility,
+  isLeadNoteOwnedByLeadTenant,
+  sortCrmLeadNotesForDisplay,
+  type CrmLeadNoteVisibility,
+} from "./crmLeadNotePolicy";
+export {
+  collectChangedLeadNoteDetailKeys,
+  noteDetailSnapshotFromRowLike,
+  type LeadNoteDetailComparableSnapshot,
+  type LeadNoteDetailTrackedKey,
+} from "./crmLeadNoteChangedFields";

@@ -39,4 +39,13 @@ export {
   type UpdateCrmTaskParams,
 } from "./tasks";
 export { createCrmNoteForLead, loadCrmNotesForLead, type CreateCrmNoteForLeadParams } from "./notes";
+export {
+  archiveCrmLeadNote,
+  createCrmLeadNote,
+  loadCrmLeadNoteForLead,
+  loadCrmLeadNotesForLead,
+  updateCrmLeadNote,
+  type CreateCrmLeadNoteParams,
+  type UpdateCrmLeadNoteParams,
+} from "./leadNotes";
 export { createCrmMessagePreview, loadCrmMessagesForLead, type CreateCrmMessagePreviewParams } from "./messages";

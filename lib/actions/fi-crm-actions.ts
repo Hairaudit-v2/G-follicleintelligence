@@ -1,22 +1,27 @@
 "use server";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
+import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
 import {
   crmAppendActivityBodySchema,
+  crmArchiveLeadNoteBodySchema,
   crmCompleteTaskBodySchema,
   crmCreateLeadBodySchema,
+  crmCreateLeadNoteBodySchema,
   crmCreateNoteBodySchema,
   crmCreateTaskBodySchema,
   crmMessagePreviewBodySchema,
   crmMoveLeadStageBodySchema,
   crmReopenTaskBodySchema,
   crmUpdateLeadDetailsBodySchema,
+  crmUpdateLeadNoteBodySchema,
   crmUpdateTaskBodySchema,
 } from "@/src/lib/crm/crmApiSchemas";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "@/src/lib/crm/messageBodyKeysPolicy";
 import {
   appendCrmActivityEvent,
+  archiveCrmLeadNote,
   completeCrmTask,
+  createCrmLeadNote,
   createCrmLeadWithPerson,
   createCrmMessagePreview,
   createCrmNoteForLead,
@@ -24,6 +29,7 @@ import {
   moveCrmLeadToStage,
   reopenCrmTask,
   updateCrmLeadDetails,
+  updateCrmLeadNote,
   updateCrmTask,
 } from "@/src/lib/crm/server";
 import { ZodError } from "zod";
@@ -249,6 +255,68 @@ export async function crmCreateNoteAction(
       authorUserId: parsed.authorUserId ?? null,
       metadata: parsed.metadata ?? null,
     });
+    return { ok: true, note };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function createCrmLeadNoteAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; note: Awaited<ReturnType<typeof createCrmLeadNote>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmCreateLeadNoteBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const authorUserId = await tryResolveFiUserIdForTenant(tenantId, undefined);
+    const note = await createCrmLeadNote({
+      tenantId,
+      leadId,
+      noteBody: parsed.noteBody,
+      noteVisibility: parsed.noteVisibility,
+      isPinned: parsed.isPinned,
+      authorUserId,
+    });
+    return { ok: true, note };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function updateCrmLeadNoteAction(
+  tenantId: string,
+  leadId: string,
+  noteId: string,
+  body: unknown
+): Promise<{ ok: true; note: Awaited<ReturnType<typeof updateCrmLeadNote>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmUpdateLeadNoteBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const note = await updateCrmLeadNote({
+      tenantId,
+      leadId,
+      noteId,
+      ...(parsed.noteBody !== undefined ? { noteBody: parsed.noteBody } : {}),
+      ...(parsed.noteVisibility !== undefined ? { noteVisibility: parsed.noteVisibility } : {}),
+      ...(parsed.isPinned !== undefined ? { isPinned: parsed.isPinned } : {}),
+    });
+    return { ok: true, note };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function archiveCrmLeadNoteAction(
+  tenantId: string,
+  leadId: string,
+  noteId: string,
+  body: unknown
+): Promise<{ ok: true; note: Awaited<ReturnType<typeof archiveCrmLeadNote>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmArchiveLeadNoteBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const note = await archiveCrmLeadNote({ tenantId, leadId, noteId });
     return { ok: true, note };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

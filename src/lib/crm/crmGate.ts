@@ -149,6 +149,17 @@ export async function assertCrmTenantWriteAllowed(opts: {
   }
 }
 
+/**
+ * Resolves `fi_users.id` for the signed-in tenant member (cookies or Bearer on `request`).
+ * Returns null when unauthenticated or the user has no row in this tenant.
+ */
+export async function tryResolveFiUserIdForTenant(tenantId: string, request?: Request | null): Promise<string | null> {
+  const authUserId = await resolveAuthUserId(request ?? null);
+  if (!authUserId) return null;
+  const row = await loadFiUserForTenant(tenantId, authUserId);
+  return row?.id ?? null;
+}
+
 export function parseAdminKeyFromUnknown(body: unknown): string | undefined {
   if (!body || typeof body !== "object") return undefined;
   const ak = (body as Record<string, unknown>).adminKey;
