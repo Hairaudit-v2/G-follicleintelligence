@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CaseDetailPageView } from "@/src/components/fi-admin/cases/CaseDetailPageView";
 import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
+import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { loadUniversalCaseRecord } from "@/src/lib/fi/foundation/caseRecord";
 
 export const metadata = {
@@ -31,7 +32,10 @@ export default async function CaseDetailRoutePage({
   const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
   if (te || !tenant) notFound();
 
-  const detail = await loadCaseAdminDetail(tenantId, caseId);
+  const [detail, surgeryPlan] = await Promise.all([
+    loadCaseAdminDetail(tenantId, caseId),
+    loadSurgeryPlanForCase(tenantId, caseId),
+  ]);
   if (!detail) notFound();
 
   const foundationParam = sp.foundation;
@@ -44,6 +48,6 @@ export default async function CaseDetailRoutePage({
   const foundationOk = foundationRecord && foundationRecord.ok ? foundationRecord : null;
 
   return (
-    <CaseDetailPageView tenantId={tenantId} detail={detail} foundationRecord={foundationOk} />
+    <CaseDetailPageView tenantId={tenantId} detail={detail} surgeryPlan={surgeryPlan} foundationRecord={foundationOk} />
   );
 }

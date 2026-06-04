@@ -7,15 +7,19 @@ import { CaseImagesCard } from "./CaseImagesCard";
 import { CaseLinkedLeadCard } from "./CaseLinkedLeadCard";
 import { CaseLinkedPatientCard } from "./CaseLinkedPatientCard";
 import { CasePlanningNotesPanel } from "./CasePlanningNotesPanel";
+import { CaseSurgeryPlanningCard } from "./CaseSurgeryPlanningCard";
 import { CaseSummaryCard } from "./CaseSummaryCard";
+import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 
 export function CaseDetailPageView({
   tenantId,
   detail,
+  surgeryPlan,
   foundationRecord,
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
+  surgeryPlan: CaseSurgeryPlanRow | null;
   foundationRecord: UniversalCaseRecordResult | null;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
@@ -39,8 +43,9 @@ export function CaseDetailPageView({
       <div>
         <h1 className="text-lg font-semibold text-gray-900">Treatment case</h1>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">
-          Tenant-scoped case profile bridging CRM and SurgeryOS foundations. Edit status, treatment labels, case type, and
-          planning notes here; graft planning and procedure-day tooling follow in Stage 5B.
+          Tenant-scoped case profile bridging CRM and SurgeryOS foundations: Stage 5A core profile, Stage 5B surgery
+          planning readiness below, and case-level planning notes. Procedure-day workflow and live graft counting stay
+          out of scope for these stages.
         </p>
       </div>
 
@@ -59,6 +64,8 @@ export function CaseDetailPageView({
           partner_id: detail.partner_id,
         }}
       />
+
+      <CaseSurgeryPlanningCard tenantId={tenantId} caseId={detail.id} plan={surgeryPlan} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <CaseLinkedPatientCard tenantId={tenantId} patient={detail.patient} />
