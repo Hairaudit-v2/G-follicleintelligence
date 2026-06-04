@@ -1,6 +1,9 @@
-import { BookingCalendarPage } from "@/src/components/fi/bookings/calendar/BookingCalendarPage";
-import { loadCalendarViewData } from "@/src/lib/bookings/calendarLoader";
-import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
+import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
+
+import { ClinicOsCalendarHome } from "@/src/components/fi-admin/calendar/ClinicOsCalendarHome";
+import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
   title: "Calendar",
@@ -9,16 +12,13 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function TenantCalendarPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ tenantId: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
-}) {
+export default async function TenantCalendarPage({ params }: { params: Promise<{ tenantId: string }> }) {
+  noStore();
   const { tenantId } = await params;
-  await assertCrmShellPageAccess(tenantId);
-  const data = await loadCalendarViewData(tenantId, searchParams ?? {});
+  if (!tenantId?.trim()) notFound();
 
-  return <BookingCalendarPage data={data} />;
+  await assertFiTenantPortalAccess(tenantId);
+  const showCrmNav = await getCrmShellNavAllowed(tenantId);
+
+  return <ClinicOsCalendarHome tenantId={tenantId.trim()} showCrmNav={showCrmNav} />;
 }

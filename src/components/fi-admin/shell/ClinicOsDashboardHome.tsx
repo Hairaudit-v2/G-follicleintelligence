@@ -103,7 +103,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
   const base = `/fi-admin/${tenantId.trim()}`;
   const workspaceName = clinicLabel?.trim() || "Your clinic";
 
-  const calendarHref = showCrmNav ? `${base}/calendar` : null;
+  const calendarHref = `${base}/calendar`;
   const newBookingLauncherHref = `${base}/bookings/new`;
   const crmHref = showCrmNav ? `${base}/crm` : null;
   const casesHref = `${base}/cases`;
@@ -172,25 +172,13 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
               <FlowRow title="Follow-ups" timeLabel="PM" />
             </div>
             <div className="mt-4 border-t border-slate-100 pt-4">
-              {calendarHref ? (
-                <Link
-                  href={calendarHref}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 py-2.5 text-sm font-medium text-slate-800 transition hover:border-sky-200 hover:bg-sky-50/60 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40"
-                >
-                  <Calendar className="h-4 w-4 text-sky-600" aria-hidden />
-                  Open Calendar
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 py-2.5 text-sm font-medium text-slate-400"
-                  title="Requires CRM workspace access"
-                >
-                  <Calendar className="h-4 w-4" aria-hidden />
-                  Open Calendar
-                </button>
-              )}
+              <Link
+                href={calendarHref}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 py-2.5 text-sm font-medium text-slate-800 transition hover:border-sky-200 hover:bg-sky-50/60 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40"
+              >
+                <Calendar className="h-4 w-4 text-sky-600" aria-hidden />
+                Open Calendar
+              </Link>
             </div>
           </div>
         </section>

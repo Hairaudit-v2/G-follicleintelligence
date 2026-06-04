@@ -50,7 +50,8 @@ export type ResolvedClinicOsQuickAction = {
 /** Primary shell tabs — hrefs resolved against `/fi-admin/[tenantId]`. */
 export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
   { id: "dashboard", label: "Dashboard", path: "", home: true, permissionHint: {} },
-  { id: "calendar", label: "Calendar", path: "calendar", permissionHint: { requiresCrmShellNav: true } },
+  /** Calendar home is tenant-wide; booking/CRM shortcuts on the page use `showCrmNav`. */
+  { id: "calendar", label: "Calendar", path: "calendar", permissionHint: {} },
   { id: "patients", label: "Patients", path: "patients", permissionHint: { requiresCrmShellNav: true } },
   { id: "cases", label: "Cases", path: "cases", permissionHint: {} },
   { id: "messages", label: "Messages", path: "", permissionHint: {}, placeholder: true },
