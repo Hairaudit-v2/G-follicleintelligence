@@ -5,6 +5,7 @@ import "server-only";
  * `assertCrmShellPageAccess(tenantId)` before invoking these functions.
  */
 
+import { loadBookingsForLead } from "@/src/lib/bookings/server";
 import {
   ensureDefaultPipelineStages,
   loadCrmActivityTimelineForLead,
@@ -17,6 +18,7 @@ import {
   loadCrmNotesForLead,
   loadCrmTasksForLead,
 } from "./server";
+import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type {
   CrmLeadConversionState,
   CrmShellClinicOption,
@@ -59,6 +61,7 @@ export type CrmLeadShellBundle = {
   leadCommunications: FiCrmLeadCommunicationRow[];
   messages: FiCrmMessageRow[];
   conversionState: CrmLeadConversionState | null;
+  leadBookings: FiBookingRow[];
 };
 
 export type CrmLeadShellDetailPageData = CrmLeadShellBundle & {
@@ -80,18 +83,21 @@ export async function loadCrmShellLeadBundle(tenantId: string, leadId: string): 
       leadCommunications: [],
       messages: [],
       conversionState: null,
+      leadBookings: [],
     };
   }
-  const [events, tasks, notes, leadNotes, leadCommunications, messages, conversionState] = await Promise.all([
-    loadCrmActivityTimelineForLead(tenantId, lid, { limit: 80 }),
-    loadCrmTasksForLead(tenantId, lid, { limit: 40 }),
-    loadCrmNotesForLead(tenantId, lid, { limit: 40 }),
-    loadCrmLeadNotesForLead(tenantId, lid, { limit: 80 }),
-    loadCrmLeadCommunicationsForLead(tenantId, lid, { limit: 80 }),
-    loadCrmMessagesForLead(tenantId, lid, { limit: 40 }),
-    loadCrmLeadConversionState(tenantId, lid),
-  ]);
-  return { lead, events, tasks, notes, leadNotes, leadCommunications, messages, conversionState };
+  const [events, tasks, notes, leadNotes, leadCommunications, messages, conversionState, leadBookings] =
+    await Promise.all([
+      loadCrmActivityTimelineForLead(tenantId, lid, { limit: 80 }),
+      loadCrmTasksForLead(tenantId, lid, { limit: 40 }),
+      loadCrmNotesForLead(tenantId, lid, { limit: 40 }),
+      loadCrmLeadNotesForLead(tenantId, lid, { limit: 80 }),
+      loadCrmLeadCommunicationsForLead(tenantId, lid, { limit: 80 }),
+      loadCrmMessagesForLead(tenantId, lid, { limit: 40 }),
+      loadCrmLeadConversionState(tenantId, lid),
+      loadBookingsForLead(tenantId, lid),
+    ]);
+  return { lead, events, tasks, notes, leadNotes, leadCommunications, messages, conversionState, leadBookings };
 }
 
 export type CrmShellLeadsIndexResult = CrmShellLeadListPage & {

@@ -8,6 +8,7 @@ import {
 } from "@/src/components/fi/crm/CrmDataPanels";
 import { CrmLeadEditPanel } from "@/src/components/fi/crm/CrmLeadEditPanel";
 import { CrmLeadSmokeForms } from "@/src/components/fi/crm/CrmLeadSmokeForms";
+import { LeadBookingPanel } from "@/src/components/fi/bookings/LeadBookingPanel";
 import { CrmLeadConversionPanel } from "@/src/components/fi/crm/CrmLeadConversionPanel";
 import { CrmLeadCommunicationsWorkflow } from "@/src/components/fi/crm/CrmLeadCommunicationsWorkflow";
 import { CrmLeadNotesWorkflow } from "@/src/components/fi/crm/CrmLeadNotesWorkflow";
@@ -77,6 +78,15 @@ export default async function CrmLeadShellPage({
       />
 
       <CrmLeadConversionPanel tenantId={tenantId} leadId={detail.lead.id} conversionState={detail.conversionState} />
+
+      <LeadBookingPanel
+        tenantId={tenantId}
+        lead={detail.lead}
+        bookings={detail.leadBookings}
+        assigneeOptions={detail.owners}
+        clinicOptions={detail.clinics}
+        groupingNowIso={groupingNowIso}
+      />
 
       <CrmActivityPanel events={detail.events} />
 

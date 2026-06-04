@@ -832,6 +832,14 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 
 ---
 
+## Stage 3A — Booking foundation (post–Stage 2L)
+
+**Design / spec:** [19-booking-calendar-foundation.md](./19-booking-calendar-foundation.md)
+
+Summary: additive `fi_bookings` (tenant-scoped anchors to lead/person/patient/case), CRM-pattern RLS, REST routes under `/api/tenants/[tenantId]/bookings`, server actions in `lib/actions/fi-booking-actions.ts`, pure helpers under `src/lib/bookings/`, lead detail loader field **`leadBookings`**, and first lead booking UI panels. Calendar grid / drag-drop scheduling are deferred to Stage 3B/3C in doc 19.
+
+---
+
 ## Document status
 
 **Stage 1O — checklist only.** Implementation PRs should reference this file and update checkboxes or link to GitHub issues/epics as work completes.
@@ -841,5 +849,6 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 ## Related documents
 
 - [17-crm-foundation-architecture.md](./17-crm-foundation-architecture.md)
+- [19-booking-calendar-foundation.md](./19-booking-calendar-foundation.md)
 - [15-configuration-admin-editing.md](./15-configuration-admin-editing.md) (service-action gate pattern)
 - [06-foundation-layer-architecture.md](./06-foundation-layer-architecture.md)
