@@ -375,6 +375,41 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 
 ---
 
+## Stage 2C — CRM service data access (implementation progress)
+
+**Goal (met):** Typed CRM helpers under `src/lib/crm/`, service-role-only mutations behind `server-only`, lazy idempotent default pipeline seeding per **explicit** tenant/org/clinic scope (no blanket multi-tenant seed), unit tests for pure helpers.
+
+### Library layout
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/index.ts` | Types + pure exports (safe tree-shake from docs; no Supabase). |
+| `src/lib/crm/server.ts` | **Server-only** re-exports: pipeline load/seed, leads, stage moves, history, activity, tasks, notes, message previews. Route handlers / server actions should import from here. |
+| `src/lib/crm/pipeline.ts` | `loadPipelineStages`, `ensureDefaultPipelineStages`, `getEntryPipelineStage`. |
+| `src/lib/crm/leads.ts` | `createCrmLeadWithPerson` (always `resolveOrCreatePerson` or verified `person_id`), `loadCrmLeadById`. |
+| `src/lib/crm/stageMovement.ts` | `moveCrmLeadToStage` — updates lead, `appendCrmLeadStageHistory`, `appendCrmActivityEvent` (`stage.changed`); optional `fi_timeline_events` when `case_id` set. |
+| `src/lib/crm/stageHistory.ts` | `appendCrmLeadStageHistory`, `loadCrmLeadStageHistory`. |
+| `src/lib/crm/activity.ts` | `appendCrmActivityEvent`. |
+| `src/lib/crm/tasks.ts`, `notes.ts`, `messages.ts` | Task / lead note / preview-only message writers + activity append. |
+
+### Commands
+
+- Pure tests: `npm run test:unit` (`src/lib/crm/pure.test.ts`).
+
+### Checklist mapping (Phase 3 / Stage 2C)
+
+- [x] Idempotent `ensureDefaultPipelineStages` for a given scope; no-op when any stage row already exists for that scope + `pipeline_key`.
+- [x] `createCrmLeadWithPerson` resolves or verifies `fi_persons` before `fi_crm_leads` insert.
+- [x] `appendCrmActivityEvent` for CRM-native activity.
+- [x] Service-role / `server-only` discipline for all mutating paths; **no** new client-side CRM mutation code.
+
+### Deferred to later stages (unchanged)
+
+- FI Admin UI, server actions wiring, and `FI_ADMIN_API_KEY` gates (Phase 4+ / doc 15).
+- Further transaction wrapping for stage move + timeline dual-write.
+
+---
+
 ## Document status
 
 **Stage 1O — checklist only.** Implementation PRs should reference this file and update checkboxes or link to GitHub issues/epics as work completes.
