@@ -1,0 +1,114 @@
+"use client";
+
+import { useState } from "react";
+import {
+  buildBrandingCssVariables,
+  safeBrandingColourHex,
+  safeLogoUrlForImg,
+  FI_ADMIN_NEUTRAL_ACCENT,
+} from "@/src/lib/fi/foundation/brandingCss";
+import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
+
+const DEFAULT_HEADLINE = "FI Admin";
+
+function BrandingLogo({ url, alt }: { url: string; alt: string }) {
+  const [hide, setHide] = useState(false);
+  if (hide) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- external tenant URLs; avoid remotePatterns config churn
+    <img
+      src={url}
+      alt={alt}
+      width={120}
+      height={40}
+      className="h-10 w-auto max-w-[140px] object-contain"
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => setHide(true)}
+    />
+  );
+}
+
+function BrandingBlock({
+  effective,
+  density,
+}: {
+  effective: EffectiveBranding;
+  density: "layout" | "preview";
+}) {
+  const accent = safeBrandingColourHex(effective.accent_colour, FI_ADMIN_NEUTRAL_ACCENT);
+  const headline = effective.brand_name?.trim() || DEFAULT_HEADLINE;
+  const logoSrc = safeLogoUrlForImg(effective.logo_url);
+  const support = effective.support_email?.trim() || null;
+  const clinicLine = effective.clinic_display_name?.trim() || null;
+
+  const box =
+    density === "layout"
+      ? "rounded border border-gray-200 bg-white px-4 py-3 shadow-sm"
+      : "rounded border border-amber-200 bg-amber-50/80 px-3 py-2 shadow-sm";
+
+  return (
+    <div className={box}>
+      <div className="flex flex-wrap items-start gap-3 border-l-4 pl-3" style={{ borderLeftColor: accent }}>
+        {logoSrc ? (
+          <div className="shrink-0 pt-0.5">
+            <BrandingLogo url={logoSrc} alt={headline} />
+          </div>
+        ) : null}
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="text-base font-semibold tracking-tight text-gray-900">{headline}</p>
+          {clinicLine ? (
+            <p className="text-xs text-gray-600">
+              <span className="font-medium text-gray-700">Clinic:</span> {clinicLine}
+            </p>
+          ) : null}
+          {support ? (
+            <p className="text-xs text-gray-600">
+              <span className="font-medium text-gray-700">Support:</span>{" "}
+              <a
+                href={`mailto:${encodeURIComponent(support)}`}
+                className="underline decoration-dotted underline-offset-2 hover:opacity-90"
+                style={{ color: "var(--fi-brand-accent)" }}
+              >
+                {support}
+              </a>
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Applies tenant (or cascaded) effective branding to FI Admin using validated CSS variables and optional logo.
+ *
+ * - `layout`: wraps navigation + page content (tenant-level cascade from layout loader).
+ * - `page-preview`: compact strip for configuration URL preview (`organisationId` / `clinicId` query params).
+ */
+export function FiTenantBrandFrame({
+  effective,
+  variant = "layout",
+  children,
+}: {
+  effective: EffectiveBranding;
+  variant?: "layout" | "page-preview";
+  children?: React.ReactNode;
+}) {
+  if (variant === "page-preview") {
+    return (
+      <div className="space-y-1" style={buildBrandingCssVariables(effective)}>
+        <p className="text-xs font-medium uppercase tracking-wide text-amber-900">Cascade preview</p>
+        <BrandingBlock effective={effective} density="preview" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4" style={buildBrandingCssVariables(effective)}>
+      <BrandingBlock effective={effective} density="layout" />
+      {children}
+    </div>
+  );
+}

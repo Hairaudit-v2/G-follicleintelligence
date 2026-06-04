@@ -16,6 +16,10 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 | [08-foundation-resolution-helpers](./08-foundation-resolution-helpers.md) | Stage 1E: server-side `src/lib/fi/foundation` find-or-create helpers, idempotency, matching order, dual-write prep. |
 | [09-foundation-dual-write-event-ingest](./09-foundation-dual-write-event-ingest.md) | Stage 1F: dual-write from FI event ingest into foundation tables; wiring, mapping, idempotency, rollback. |
 | [10-foundation-integrity-dashboard](./10-foundation-integrity-dashboard.md) | Stage 1G: admin integrity metrics, views, optional manual backfill, duplicate-risk heuristics. |
+| [11-universal-patient-record](./11-universal-patient-record.md) | Stage 1H: read-only universal patient aggregate in FI Admin. |
+| [12-universal-case-record](./12-universal-case-record.md) | Stage 1I: read-only universal case aggregate in FI Admin. |
+| [13-foundation-search-directory](./13-foundation-search-directory.md) | Stage 1J: tenant-scoped read-only foundation search and directory. |
+| [14-tenant-configuration-branding](./14-tenant-configuration-branding.md) | Stage 1K: tenant / organisation / clinic settings and branding cascade for white-label and future CRM. |
 
 ## Design rule
 

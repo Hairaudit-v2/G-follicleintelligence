@@ -1,7 +1,8 @@
 /**
  * Follicle Intelligence Foundation Layer — server-side resolution helpers (Stage 1E),
  * event-ingest dual-write (Stage 1F), integrity dashboard (Stage 1G), universal patient record (Stage 1H),
- * universal case record (Stage 1I).
+ * universal case record (Stage 1I), foundation directory search (Stage 1J),
+ * tenant configuration / branding (Stage 1K).
  * Use only with Supabase service role / admin client from trusted server code.
  */
 
@@ -56,6 +57,29 @@ export {
   reconstructFiEventEnvelopeForDualWrite,
   type BackfillFoundationBatchResult,
 } from "./backfillFoundation";
+export {
+  loadClinicSettings,
+  loadOrganisationBranding,
+  loadTenantBranding,
+  loadTenantConfigurationOverview,
+  resolveEffectiveBranding,
+  type ClinicWithSettings,
+  type EffectiveBranding,
+  type FiClinicSettingsRow,
+  type FiOrganisationSettingsRow,
+  type FiTenantSettingsRow,
+  type OrganisationWithSettings,
+  type ResolveEffectiveBrandingParams,
+  type TenantConfigurationOverview,
+} from "./tenantSettings";
+export {
+  escapeIlikePattern,
+  searchFoundationRecords,
+  type FoundationSearchFilter,
+  type FoundationSearchGroupedResult,
+  type FoundationSearchHit,
+  type SearchFoundationRecordsParams,
+} from "./search";
 export {
   loadUniversalCaseRecord,
   type CaseSourceIdentifierRow,
