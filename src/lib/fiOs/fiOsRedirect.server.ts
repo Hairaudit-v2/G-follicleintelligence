@@ -6,6 +6,7 @@ import { loadFiOsIdentity, loadFirstTenantIdForAuthUser } from "./fiOsIdentity.s
 /**
  * Server-only post-login redirect for Follicle Intelligence OS.
  * Uses `fi_os_identities` and `fi_users` only via service role — never trust client hints.
+ * When the login action has no valid `next` path, tenant members default to `/fi-admin/[tenantId]` (Home).
  */
 export async function resolveFiOsPostLoginRedirect(authUserId: string): Promise<string> {
   const os = await loadFiOsIdentity(authUserId);
@@ -21,11 +22,11 @@ export async function resolveFiOsPostLoginRedirect(authUserId: string): Promise<
 
   if (r === "fi_clinic_admin" || r === "fi_doctor" || r === "fi_nurse" || r === "fi_consultant") {
     const tenantId = await loadFirstTenantIdForAuthUser(authUserId);
-    if (tenantId) return `/fi-admin/${tenantId}/cases`;
+    if (tenantId) return `/fi-admin/${tenantId}`;
     return "/fi-admin";
   }
 
   const tenantId = await loadFirstTenantIdForAuthUser(authUserId);
-  if (tenantId) return `/fi-admin/${tenantId}/cases`;
+  if (tenantId) return `/fi-admin/${tenantId}`;
   return "/fi-admin";
 }
