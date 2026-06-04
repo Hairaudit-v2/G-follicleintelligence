@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
@@ -13,6 +14,7 @@ export default async function TenantConfigurationPage({
   params: Promise<{ tenantId: string }>;
   searchParams: { organisationId?: string; clinicId?: string };
 }) {
+  noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 

@@ -101,6 +101,53 @@ function asRecordMeta(v: unknown): Record<string, unknown> {
   return v as Record<string, unknown>;
 }
 
+function mapFiOrganisationSettingsRow(r: Record<string, unknown>): FiOrganisationSettingsRow {
+  return {
+    id: String(r.id),
+    tenant_id: String(r.tenant_id),
+    organisation_id: String(r.organisation_id),
+    brand_name: (r.brand_name as string | null) ?? null,
+    logo_url: (r.logo_url as string | null) ?? null,
+    primary_colour: (r.primary_colour as string | null) ?? null,
+    secondary_colour: (r.secondary_colour as string | null) ?? null,
+    accent_colour: (r.accent_colour as string | null) ?? null,
+    website_url: (r.website_url as string | null) ?? null,
+    support_email: (r.support_email as string | null) ?? null,
+    metadata: asRecordMeta(r.metadata),
+    created_at: String(r.created_at),
+    updated_at: String(r.updated_at),
+  };
+}
+
+function mapFiClinicSettingsRow(r: Record<string, unknown>): FiClinicSettingsRow {
+  return {
+    id: String(r.id),
+    tenant_id: String(r.tenant_id),
+    clinic_id: String(r.clinic_id),
+    display_name: (r.display_name as string | null) ?? null,
+    booking_url: (r.booking_url as string | null) ?? null,
+    public_intake_url: (r.public_intake_url as string | null) ?? null,
+    phone: (r.phone as string | null) ?? null,
+    email: (r.email as string | null) ?? null,
+    address: (r.address as string | null) ?? null,
+    timezone: (r.timezone as string | null) ?? null,
+    metadata: asRecordMeta(r.metadata),
+    created_at: String(r.created_at),
+    updated_at: String(r.updated_at),
+  };
+}
+
+/** PostgREST embedded rows are returned as an array (0–1 rows for unique settings per org/clinic). */
+function firstEmbeddedRow(rel: unknown): Record<string, unknown> | null {
+  if (rel == null) return null;
+  if (Array.isArray(rel)) {
+    const row = rel[0];
+    return row && typeof row === "object" && !Array.isArray(row) ? (row as Record<string, unknown>) : null;
+  }
+  if (typeof rel === "object" && !Array.isArray(rel)) return rel as Record<string, unknown>;
+  return null;
+}
+
 export async function loadTenantBranding(
   tenantId: string,
   client?: FoundationSupabase
@@ -143,22 +190,7 @@ export async function loadOrganisationBranding(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  const r = data as Record<string, unknown>;
-  return {
-    id: String(r.id),
-    tenant_id: String(r.tenant_id),
-    organisation_id: String(r.organisation_id),
-    brand_name: (r.brand_name as string | null) ?? null,
-    logo_url: (r.logo_url as string | null) ?? null,
-    primary_colour: (r.primary_colour as string | null) ?? null,
-    secondary_colour: (r.secondary_colour as string | null) ?? null,
-    accent_colour: (r.accent_colour as string | null) ?? null,
-    website_url: (r.website_url as string | null) ?? null,
-    support_email: (r.support_email as string | null) ?? null,
-    metadata: asRecordMeta(r.metadata),
-    created_at: String(r.created_at),
-    updated_at: String(r.updated_at),
-  };
+  return mapFiOrganisationSettingsRow(data as Record<string, unknown>);
 }
 
 export async function loadClinicSettings(
@@ -177,22 +209,7 @@ export async function loadClinicSettings(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  const r = data as Record<string, unknown>;
-  return {
-    id: String(r.id),
-    tenant_id: String(r.tenant_id),
-    clinic_id: String(r.clinic_id),
-    display_name: (r.display_name as string | null) ?? null,
-    booking_url: (r.booking_url as string | null) ?? null,
-    public_intake_url: (r.public_intake_url as string | null) ?? null,
-    phone: (r.phone as string | null) ?? null,
-    email: (r.email as string | null) ?? null,
-    address: (r.address as string | null) ?? null,
-    timezone: (r.timezone as string | null) ?? null,
-    metadata: asRecordMeta(r.metadata),
-    created_at: String(r.created_at),
-    updated_at: String(r.updated_at),
-  };
+  return mapFiClinicSettingsRow(data as Record<string, unknown>);
 }
 
 /**
@@ -203,6 +220,8 @@ export async function resolveEffectiveBranding(
   params: ResolveEffectiveBrandingParams,
   client?: FoundationSupabase
 ): Promise<EffectiveBranding> {
+  const supabase: SupabaseClient = client ?? supabaseAdmin();
+  const tid = params.tenantId.trim();
   const tenant = await loadTenantBranding(params.tenantId, client);
   const org = params.organisationId?.trim()
     ? await loadOrganisationBranding(params.tenantId, params.organisationId, client)
@@ -210,6 +229,24 @@ export async function resolveEffectiveBranding(
   const clinic = params.clinicId?.trim()
     ? await loadClinicSettings(params.tenantId, params.clinicId, client)
     : null;
+
+  let clinicFoundationDisplay: string | null = null;
+  const cid = params.clinicId?.trim();
+  if (cid && !clinic?.display_name?.trim()) {
+    const { data, error } = await supabase
+      .from("fi_clinics")
+      .select("display_name")
+      .eq("tenant_id", tid)
+      .eq("id", cid)
+      .maybeSingle();
+    if (!error && data) {
+      const s = String((data as { display_name: unknown }).display_name ?? "").trim();
+      clinicFoundationDisplay = s || null;
+    }
+  }
+
+  const resolvedClinicDisplay =
+    (clinic?.display_name?.trim() ? clinic.display_name : null) ?? clinicFoundationDisplay;
 
   const pick = <T extends string | null>(clinicVal: T | undefined, orgVal: T | null | undefined, tenantVal: T | null | undefined): T | null => {
     const c = clinicVal !== undefined ? clinicVal : undefined;
@@ -219,8 +256,7 @@ export async function resolveEffectiveBranding(
     return null;
   };
 
-  const brandName =
-    clinic?.display_name?.trim() ? clinic.display_name : org?.brand_name ?? tenant?.brand_name ?? null;
+  const brandName = resolvedClinicDisplay ?? org?.brand_name ?? tenant?.brand_name ?? null;
 
   return {
     brand_name: brandName,
@@ -231,7 +267,7 @@ export async function resolveEffectiveBranding(
     support_email: org?.support_email ?? tenant?.support_email ?? null,
     default_timezone: clinic?.timezone?.trim() ? clinic.timezone : tenant?.default_timezone ?? null,
     website_url: org?.website_url ?? null,
-    clinic_display_name: clinic?.display_name ?? null,
+    clinic_display_name: resolvedClinicDisplay,
     booking_url: clinic?.booking_url ?? null,
     public_intake_url: clinic?.public_intake_url ?? null,
     clinic_phone: clinic?.phone ?? null,
@@ -251,84 +287,86 @@ export async function loadTenantConfigurationOverview(
 
   const tenant_settings = await loadTenantBranding(tid, client);
 
-  const { data: orgs, error: oErr } = await supabase
+  // Drive lists from fi_organisations / fi_clinics and embed optional settings so rows without settings still appear.
+  const orgSelect = `
+    id,
+    name,
+    slug,
+    fi_organisation_settings (
+      id,
+      tenant_id,
+      organisation_id,
+      brand_name,
+      logo_url,
+      primary_colour,
+      secondary_colour,
+      accent_colour,
+      website_url,
+      support_email,
+      metadata,
+      created_at,
+      updated_at
+    )
+  `;
+
+  const { data: orgRows, error: oErr } = await supabase
     .from("fi_organisations")
-    .select("id, name, slug")
+    .select(orgSelect)
     .eq("tenant_id", tid)
     .order("name", { ascending: true });
   if (oErr) throw new Error(oErr.message);
 
-  const { data: orgSettings, error: osErr } = await supabase
-    .from("fi_organisation_settings")
-    .select("*")
-    .eq("tenant_id", tid);
-  if (osErr) throw new Error(osErr.message);
-  const orgSettingsByOrg = new Map<string, FiOrganisationSettingsRow>();
-  for (const row of orgSettings ?? []) {
+  const organisations: OrganisationWithSettings[] = (orgRows ?? []).map((row) => {
     const r = row as Record<string, unknown>;
-    orgSettingsByOrg.set(String(r.organisation_id), {
-      id: String(r.id),
-      tenant_id: String(r.tenant_id),
-      organisation_id: String(r.organisation_id),
-      brand_name: (r.brand_name as string | null) ?? null,
-      logo_url: (r.logo_url as string | null) ?? null,
-      primary_colour: (r.primary_colour as string | null) ?? null,
-      secondary_colour: (r.secondary_colour as string | null) ?? null,
-      accent_colour: (r.accent_colour as string | null) ?? null,
-      website_url: (r.website_url as string | null) ?? null,
-      support_email: (r.support_email as string | null) ?? null,
-      metadata: asRecordMeta(r.metadata),
-      created_at: String(r.created_at),
-      updated_at: String(r.updated_at),
-    });
-  }
-
-  const organisations: OrganisationWithSettings[] = (orgs ?? []).map((o) => {
-    const r = o as { id: string; name: string; slug: string | null };
+    const emb = firstEmbeddedRow(r.fi_organisation_settings);
     return {
-      organisation: { id: String(r.id), name: String(r.name), slug: r.slug },
-      settings: orgSettingsByOrg.get(String(r.id)) ?? null,
+      organisation: {
+        id: String(r.id),
+        name: String(r.name),
+        slug: r.slug == null ? null : String(r.slug),
+      },
+      settings: emb ? mapFiOrganisationSettingsRow(emb) : null,
     };
   });
 
-  const { data: clinics, error: cErr } = await supabase
+  const clinicSelect = `
+    id,
+    display_name,
+    organisation_id,
+    fi_clinic_settings (
+      id,
+      tenant_id,
+      clinic_id,
+      display_name,
+      booking_url,
+      public_intake_url,
+      phone,
+      email,
+      address,
+      timezone,
+      metadata,
+      created_at,
+      updated_at
+    )
+  `;
+
+  const { data: clinicRows, error: cErr } = await supabase
     .from("fi_clinics")
-    .select("id, display_name, organisation_id")
+    .select(clinicSelect)
     .eq("tenant_id", tid)
     .order("display_name", { ascending: true });
   if (cErr) throw new Error(cErr.message);
 
-  const { data: clinicSettings, error: csErr } = await supabase.from("fi_clinic_settings").select("*").eq("tenant_id", tid);
-  if (csErr) throw new Error(csErr.message);
-  const clinicSettingsByClinic = new Map<string, FiClinicSettingsRow>();
-  for (const row of clinicSettings ?? []) {
+  const clinicsOut: ClinicWithSettings[] = (clinicRows ?? []).map((row) => {
     const r = row as Record<string, unknown>;
-    clinicSettingsByClinic.set(String(r.clinic_id), {
-      id: String(r.id),
-      tenant_id: String(r.tenant_id),
-      clinic_id: String(r.clinic_id),
-      display_name: (r.display_name as string | null) ?? null,
-      booking_url: (r.booking_url as string | null) ?? null,
-      public_intake_url: (r.public_intake_url as string | null) ?? null,
-      phone: (r.phone as string | null) ?? null,
-      email: (r.email as string | null) ?? null,
-      address: (r.address as string | null) ?? null,
-      timezone: (r.timezone as string | null) ?? null,
-      metadata: asRecordMeta(r.metadata),
-      created_at: String(r.created_at),
-      updated_at: String(r.updated_at),
-    });
-  }
-
-  const clinicsOut: ClinicWithSettings[] = (clinics ?? []).map((c) => {
-    const r = c as { id: string; display_name: string; organisation_id: string | null };
+    const emb = firstEmbeddedRow(r.fi_clinic_settings);
     return {
       clinic: {
         id: String(r.id),
-        display_name: String(r.display_name),
-        organisation_id: r.organisation_id,
+        display_name: String(r.display_name ?? ""),
+        organisation_id: r.organisation_id == null ? null : String(r.organisation_id),
       },
-      settings: clinicSettingsByClinic.get(String(r.id)) ?? null,
+      settings: emb ? mapFiClinicSettingsRow(emb) : null,
     };
   });
 

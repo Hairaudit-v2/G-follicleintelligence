@@ -271,7 +271,13 @@ export function TenantConfigurationPanel({
                           <KeyVal k="Support email" v={settings.support_email} />
                         </dl>
                       ) : (
-                        <p className="text-xs text-gray-500">No organisation settings row — saving creates one.</p>
+                        <dl className="text-xs text-gray-700">
+                          <KeyVal k="Legal / registry name (fi_organisations)" v={organisation.name} />
+                          <p className="mt-2 text-xs text-gray-500">
+                            No organisation settings row yet — saving the form creates{" "}
+                            <code className="rounded bg-gray-100 px-1">fi_organisation_settings</code>.
+                          </p>
+                        </dl>
                       )}
                     </div>
                     <div>
@@ -305,7 +311,11 @@ export function TenantConfigurationPanel({
                           }
                         }}
                       >
-                        <Field label="Brand name" name="brand_name" defaultValue={settings?.brand_name} />
+                        <Field
+                          label="Brand name"
+                          name="brand_name"
+                          defaultValue={settings?.brand_name ?? organisation.name}
+                        />
                         <Field label="Logo URL" name="logo_url" defaultValue={settings?.logo_url} />
                         <Field label="Primary colour" name="primary_colour" defaultValue={settings?.primary_colour} />
                         <Field label="Secondary colour" name="secondary_colour" defaultValue={settings?.secondary_colour} />
@@ -372,7 +382,13 @@ export function TenantConfigurationPanel({
                           <KeyVal k="Timezone" v={settings.timezone} />
                         </dl>
                       ) : (
-                        <p className="text-xs text-gray-500">No clinic settings row — saving creates one.</p>
+                        <dl className="text-xs text-gray-700">
+                          <KeyVal k="Display name (fi_clinics)" v={clinic.display_name} />
+                          <p className="mt-2 text-xs text-gray-500">
+                            No clinic settings row yet — saving the form creates{" "}
+                            <code className="rounded bg-gray-100 px-1">fi_clinic_settings</code> for this clinic.
+                          </p>
+                        </dl>
                       )}
                     </div>
                     <div>
@@ -409,7 +425,11 @@ export function TenantConfigurationPanel({
                           }
                         }}
                       >
-                        <Field label="Display name" name="display_name" defaultValue={settings?.display_name} />
+                        <Field
+                          label="Display name"
+                          name="display_name"
+                          defaultValue={settings?.display_name ?? clinic.display_name}
+                        />
                         <Field label="Booking URL" name="booking_url" defaultValue={settings?.booking_url} />
                         <Field label="Public intake URL" name="public_intake_url" defaultValue={settings?.public_intake_url} />
                         <Field label="Phone" name="phone" defaultValue={settings?.phone} />
