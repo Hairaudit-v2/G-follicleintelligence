@@ -1,7 +1,11 @@
-import Link from "next/link";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { FiCalendarBlock } from "@/src/components/fi-design/FiCalendarBlock";
+import { FiCard } from "@/src/components/fi-design/FiCard";
+import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
+import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
+import { FiSection } from "@/src/components/fi-design/FiSection";
+import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
 
 const DAY_START_HOUR = 7;
 const DAY_END_HOUR = 18;
@@ -12,14 +16,14 @@ type PlaceholderEvent = {
   title: string;
   startMin: number;
   durationMin: number;
-  tone: "sky" | "violet" | "amber" | "emerald";
+  tone: "consult" | "treatment" | "surgery" | "followup";
 };
 
 const PLACEHOLDER_EVENTS: PlaceholderEvent[] = [
-  { id: "1", title: "Consultation", startMin: 9 * 60 - DAY_START_HOUR * 60, durationMin: 60, tone: "sky" },
-  { id: "2", title: "PRP / Treatment", startMin: 11 * 60 - DAY_START_HOUR * 60, durationMin: 90, tone: "violet" },
-  { id: "3", title: "Surgery planning", startMin: 13 * 60 - DAY_START_HOUR * 60, durationMin: 60, tone: "amber" },
-  { id: "4", title: "Follow-up", startMin: 15 * 60 + 30 - DAY_START_HOUR * 60, durationMin: 30, tone: "emerald" },
+  { id: "1", title: "Consultation", startMin: 9 * 60 - DAY_START_HOUR * 60, durationMin: 60, tone: "consult" },
+  { id: "2", title: "PRP / Treatment", startMin: 11 * 60 - DAY_START_HOUR * 60, durationMin: 90, tone: "treatment" },
+  { id: "3", title: "Surgery planning", startMin: 13 * 60 - DAY_START_HOUR * 60, durationMin: 60, tone: "surgery" },
+  { id: "4", title: "Follow-up", startMin: 15 * 60 + 30 - DAY_START_HOUR * 60, durationMin: 30, tone: "followup" },
 ];
 
 const HOUR_ROWS = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR }, (_, i) => DAY_START_HOUR + i);
@@ -28,57 +32,6 @@ function formatHourLabel(h: number): string {
   const d = new Date();
   d.setHours(h, 0, 0, 0);
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(d);
-}
-
-const toneClasses: Record<PlaceholderEvent["tone"], string> = {
-  sky: "border-sky-200 bg-sky-50 text-sky-900",
-  violet: "border-violet-200 bg-violet-50 text-violet-900",
-  amber: "border-amber-200 bg-amber-50 text-amber-900",
-  emerald: "border-emerald-200 bg-emerald-50 text-emerald-900",
-};
-
-function SidebarAction({
-  href,
-  label,
-  description,
-  enabled,
-  disabledReason,
-}: {
-  href: string;
-  label: string;
-  description: string;
-  enabled: boolean;
-  disabledReason?: string;
-}) {
-  const cardClass =
-    "flex flex-col rounded-lg border px-3 py-2.5 text-left text-sm transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/35";
-
-  if (!enabled) {
-    return (
-      <div
-        className={cn(cardClass, "cursor-not-allowed border-dashed border-slate-200 bg-slate-50/90 text-slate-500")}
-        aria-disabled="true"
-        title={disabledReason}
-      >
-        <span className="font-semibold text-slate-600">{label}</span>
-        <span className="mt-0.5 text-xs text-slate-500">{description}</span>
-        <span className="mt-2 text-[11px] font-medium text-slate-500">{disabledReason ?? "Unavailable"}</span>
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      href={href}
-      className={cn(
-        cardClass,
-        "border-slate-200 bg-white font-semibold text-slate-900 shadow-sm hover:border-sky-200/80 hover:bg-sky-50/50"
-      )}
-    >
-      <span>{label}</span>
-      <span className="mt-0.5 text-xs font-normal text-slate-600">{description}</span>
-    </Link>
-  );
 }
 
 function PlaceholderChip({ label }: { label: string }) {
@@ -114,34 +67,27 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
         Calendar grid and appointments are demonstration placeholders only. They are not live schedule data.
       </p>
 
-      <header className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-describedby="clinic-os-calendar-preview-note">
-        <div className="flex flex-wrap items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sky-700">
-            <CalendarIcon className="h-5 w-5" aria-hidden />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Calendar</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600">
-              View bookings, consultations, treatments and surgery-related appointments.
-            </p>
-          </div>
-        </div>
-      </header>
+      <FiCard className="sm:p-5" aria-describedby="clinic-os-calendar-preview-note">
+        <FiPageHeader
+          title="Calendar"
+          description="View bookings, consultations, treatments and surgery-related appointments."
+          leading={
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sky-700">
+              <CalendarIcon className="h-5 w-5" aria-hidden />
+            </div>
+          }
+          className="lg:items-start"
+        />
+      </FiCard>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-5">
-        <section
-          className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
-          aria-labelledby="clinic-os-day-calendar-heading"
+        <FiSection
+          className="min-w-0 flex-1 p-3 sm:p-4"
+          title="Day view"
+          action={<FiStatusBadge tone="neutral">Preview</FiStatusBadge>}
+          headingId="clinic-os-day-calendar-heading"
+          contentClassName="mt-0 border-t border-slate-100 pt-3"
         >
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-            <h2 id="clinic-os-day-calendar-heading" className="text-sm font-semibold text-slate-900">
-              Day view
-            </h2>
-            <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
-              Preview
-            </span>
-          </div>
-
           <div className="flex gap-0 overflow-x-auto">
             <div
               className="flex w-14 shrink-0 flex-col border-r border-slate-200 pr-2 text-right text-xs text-slate-500 sm:w-16"
@@ -174,74 +120,74 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
                   const topPct = (ev.startMin / TOTAL_MINUTES) * 100;
                   const heightPct = (ev.durationMin / TOTAL_MINUTES) * 100;
                   return (
-                    <div
+                    <FiCalendarBlock
                       key={ev.id}
-                      role="listitem"
-                      className={cn(
-                        "absolute left-0 right-0 overflow-hidden rounded-md border px-2 py-1.5 shadow-sm",
-                        toneClasses[ev.tone]
-                      )}
+                      title={ev.title}
+                      tone={ev.tone}
+                      placeholder
                       style={{ top: `${topPct}%`, height: `${heightPct}%`, minHeight: "2.25rem" }}
-                    >
-                      <p className="text-xs font-semibold leading-tight">{ev.title}</p>
-                      <p className="mt-0.5 text-[10px] font-medium opacity-80">Sample · not a live booking</p>
-                    </div>
+                    />
                   );
                 })}
               </div>
             </div>
           </div>
-        </section>
+        </FiSection>
 
         <aside className="w-full shrink-0 space-y-4 lg:w-72" aria-label="Calendar tools and filters">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-semibold text-slate-900">Quick actions</h2>
-            <p className="mt-0.5 text-xs text-slate-500">Jump to common workflows</p>
-            <div className="mt-3 space-y-2">
-              <SidebarAction
-                href={`${base}/bookings/new`}
-                label="New booking"
+          <FiSection title="Quick actions" description="Jump to common workflows">
+            <div className="space-y-2">
+              <FiQuickActionCard
+                className="min-h-0 py-3 sm:min-h-0"
+                title="New booking"
                 description="Start a booking for this clinic"
-                enabled={showCrmNav}
+                href={`${base}/bookings/new`}
+                disabled={!showCrmNav}
                 disabledReason="Booking workspace requires CRM access (fi_admin or crm_operator)."
+                showOpenAffordance={false}
               />
-              <SidebarAction
-                href={`${base}/patients/new`}
-                label="Add patient"
+              <FiQuickActionCard
+                className="min-h-0 py-3 sm:min-h-0"
+                title="Add patient"
                 description="Create a patient record"
-                enabled
+                href={`${base}/patients/new`}
+                showOpenAffordance={false}
               />
-              <SidebarAction
-                href={`${base}/crm`}
-                label="Open CRM leads"
+              <FiQuickActionCard
+                className="min-h-0 py-3 sm:min-h-0"
+                title="Open CRM leads"
                 description="Pipeline and lead inbox"
-                enabled={showCrmNav}
+                href={`${base}/crm`}
+                disabled={!showCrmNav}
                 disabledReason="CRM is available when your account has CRM workspace access."
+                showOpenAffordance={false}
               />
-              <SidebarAction href={`${base}/cases`} label="Open cases" description="Clinical cases and worklists" enabled />
+              <FiQuickActionCard
+                className="min-h-0 py-3 sm:min-h-0"
+                title="Open cases"
+                description="Clinical cases and worklists"
+                href={`${base}/cases`}
+                showOpenAffordance={false}
+              />
             </div>
-          </div>
+          </FiSection>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-semibold text-slate-900">Staff view</h2>
-            <p className="mt-0.5 text-xs text-slate-500">Filter by role (preview)</p>
-            <div className="mt-3 space-y-1.5">
+          <FiSection title="Staff view" description="Filter by role (preview)">
+            <div className="space-y-1.5">
               <PlaceholderChip label="All staff" />
               <PlaceholderChip label="Doctor" />
               <PlaceholderChip label="Nurse" />
               <PlaceholderChip label="Consultant" />
             </div>
-          </div>
+          </FiSection>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-semibold text-slate-900">Rooms & resources</h2>
-            <p className="mt-0.5 text-xs text-slate-500">Location filters (preview)</p>
-            <div className="mt-3 space-y-1.5">
+          <FiSection title="Rooms & resources" description="Location filters (preview)">
+            <div className="space-y-1.5">
               <PlaceholderChip label="Consultation room" />
               <PlaceholderChip label="Treatment room" />
               <PlaceholderChip label="Surgery room" />
             </div>
-          </div>
+          </FiSection>
         </aside>
       </div>
     </div>

@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ArrowRight, Briefcase, LineChart, Loader2, Search, User, X } from "lucide-react";
 import type { ClinicOsGlobalSearchPayload } from "@/src/lib/fiAdmin/clinicOsGlobalSearchTypes";
+import { FiCaseCard } from "@/src/components/fi-design/FiCaseCard";
+import { FiEmptyState } from "@/src/components/fi-design/FiEmptyState";
+import { FiLeadCard } from "@/src/components/fi-design/FiLeadCard";
+import { FiPatientCard } from "@/src/components/fi-design/FiPatientCard";
 
 const RECENT_PLACEHOLDERS = [
   { name: "Amelia Chen", meta: "Last visit · preview" },
@@ -274,9 +278,10 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
             onKeyDown={onResultsKeyDown}
           >
             {!debouncedTrim ? (
-              <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-8 text-center text-sm text-slate-500">
-                Start typing to search across patients, cases, and leads you have access to.
-              </p>
+              <FiEmptyState
+                title="Start typing"
+                description="Search across patients, cases, and leads you have access to."
+              />
             ) : loading ? (
               <div className="flex flex-col items-center justify-center gap-2 py-16 text-slate-500">
                 <Loader2 className="h-8 w-8 animate-spin text-sky-600" aria-hidden />
@@ -285,9 +290,10 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
             ) : error ? (
               <p className="rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-900">{error}</p>
             ) : !hasResults ? (
-              <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500">
-                No matches for that query. Try a different name, phone, email, or case reference.
-              </p>
+              <FiEmptyState
+                title="No matches"
+                description="Try a different name, phone, email, or case reference."
+              />
             ) : (
               <div className="space-y-8">
                 {data!.patients.length > 0 ? (
@@ -299,20 +305,14 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                     <ul className="space-y-1.5">
                       {data!.patients.map((p) => (
                         <li key={p.id}>
-                          <Link
-                            data-result-key={`p-${p.id}`}
+                          <FiPatientCard
+                            dataResultKey={`p-${p.id}`}
+                            name={p.name}
+                            phone={p.phone}
+                            email={p.email}
                             href={p.href}
-                            className="group flex flex-col rounded-xl border border-slate-100 bg-white px-3 py-2.5 outline-none transition hover:border-sky-200/80 hover:bg-sky-50/50 focus-visible:ring-2 focus-visible:ring-sky-400/40 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
-                            onClick={() => onOpenChange(false)}
-                          >
-                            <span className="font-medium text-slate-900">{p.name}</span>
-                            <span className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-slate-500 sm:mt-0 sm:text-sm">
-                              {p.phone ? <span>{p.phone}</span> : null}
-                              {p.email ? <span>{p.email}</span> : null}
-                              {!p.phone && !p.email ? <span className="text-slate-400">No phone or email on file</span> : null}
-                            </span>
-                            <ArrowRight className="ml-auto hidden h-4 w-4 shrink-0 text-sky-600 opacity-0 transition group-hover:opacity-100 sm:block" aria-hidden />
-                          </Link>
+                            onNavigate={() => onOpenChange(false)}
+                          />
                         </li>
                       ))}
                     </ul>
@@ -328,23 +328,14 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                     <ul className="space-y-1.5">
                       {data!.cases.map((c) => (
                         <li key={c.id}>
-                          <Link
-                            data-result-key={`c-${c.id}`}
+                          <FiCaseCard
+                            dataResultKey={`c-${c.id}`}
+                            title={c.caseNumber}
+                            patientName={c.patientName}
+                            status={c.status}
                             href={c.href}
-                            className="group flex flex-col gap-1 rounded-xl border border-slate-100 bg-white px-3 py-2.5 outline-none transition hover:border-sky-200/80 hover:bg-sky-50/50 focus-visible:ring-2 focus-visible:ring-sky-400/40 sm:flex-row sm:items-center sm:justify-between"
-                            onClick={() => onOpenChange(false)}
-                          >
-                            <div className="min-w-0">
-                              <p className="font-mono text-xs font-medium text-slate-700">{c.caseNumber}</p>
-                              <p className="text-sm text-slate-600">
-                                Patient <span className="font-medium text-slate-800">{c.patientName}</span>
-                              </p>
-                            </div>
-                            <span className="shrink-0 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                              {c.status}
-                            </span>
-                            <ArrowRight className="ml-auto hidden h-4 w-4 text-sky-600 opacity-0 transition group-hover:opacity-100 sm:block" aria-hidden />
-                          </Link>
+                            onNavigate={() => onOpenChange(false)}
+                          />
                         </li>
                       ))}
                     </ul>
@@ -360,16 +351,13 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                     <ul className="space-y-1.5">
                       {data!.leads.map((l) => (
                         <li key={l.id}>
-                          <Link
-                            data-result-key={`l-${l.id}`}
+                          <FiLeadCard
+                            dataResultKey={`l-${l.id}`}
+                            name={l.name}
+                            stage={l.stageLabel}
                             href={l.href}
-                            className="group flex flex-col rounded-xl border border-slate-100 bg-white px-3 py-2.5 outline-none transition hover:border-sky-200/80 hover:bg-sky-50/50 focus-visible:ring-2 focus-visible:ring-sky-400/40 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
-                            onClick={() => onOpenChange(false)}
-                          >
-                            <span className="font-medium text-slate-900">{l.name}</span>
-                            <span className="text-xs text-slate-500 sm:text-sm">Stage · {l.stageLabel}</span>
-                            <ArrowRight className="ml-auto hidden h-4 w-4 shrink-0 text-sky-600 opacity-0 transition group-hover:opacity-100 sm:block" aria-hidden />
-                          </Link>
+                            onNavigate={() => onOpenChange(false)}
+                          />
                         </li>
                       ))}
                     </ul>

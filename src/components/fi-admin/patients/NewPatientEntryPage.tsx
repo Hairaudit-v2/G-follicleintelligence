@@ -1,27 +1,15 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { FiCard } from "@/src/components/fi-design/FiCard";
+import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
+import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
 
 type NewPatientEntryPageProps = {
   tenantId: string;
   /** When false, lead and booking paths are shown disabled with guidance. */
   showCrmNav: boolean;
 };
-
-function EntryCardShell({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div
-      className={cn(
-        "flex min-h-[220px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:min-h-[240px] sm:p-6",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-}
 
 export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPageProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -40,31 +28,21 @@ export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPag
         </Link>
       </div>
 
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Add new patient</h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          Start from a lead, booking, or direct patient profile.
-        </p>
-      </header>
+      <FiPageHeader
+        title="Add new patient"
+        description="Start from a lead, booking, or direct patient profile."
+      />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
-        {/* A. Create from lead */}
         {showCrmNav ? (
-          <Link
+          <FiQuickActionCard
+            title="Create from lead"
+            description="Best for website, phone, or social enquiries."
             href={crmHref}
-            className="group flex min-h-[220px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200/90 hover:bg-sky-50/50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2 sm:min-h-[240px] sm:p-6"
-          >
-            <h2 className="text-lg font-semibold text-slate-900">Create from lead</h2>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
-              Best for website, phone, or social enquiries.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-sky-700 group-hover:text-sky-800">
-              Open CRM leads
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </span>
-          </Link>
+            openAffordanceLabel="Open CRM leads"
+          />
         ) : (
-          <EntryCardShell className="border-dashed bg-slate-50/80">
+          <FiCard className="flex min-h-[220px] flex-col border-dashed bg-slate-50/80 sm:min-h-[240px]">
             <h2 className="text-lg font-semibold text-slate-800">Create from lead</h2>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
               Best for website, phone, or social enquiries.
@@ -79,26 +57,18 @@ export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPag
             >
               Open CRM leads
             </button>
-          </EntryCardShell>
+          </FiCard>
         )}
 
-        {/* B. Create from booking */}
         {showCrmNav ? (
-          <Link
+          <FiQuickActionCard
+            title="Create from booking"
+            description="Best when the patient is ready to book a consultation or treatment."
             href={bookingsHref}
-            className="group flex min-h-[220px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200/90 hover:bg-sky-50/50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2 sm:min-h-[240px] sm:p-6"
-          >
-            <h2 className="text-lg font-semibold text-slate-900">Create from booking</h2>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
-              Best when the patient is ready to book a consultation or treatment.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-sky-700 group-hover:text-sky-800">
-              Create booking
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </span>
-          </Link>
+            openAffordanceLabel="Create booking"
+          />
         ) : (
-          <EntryCardShell className="border-dashed bg-slate-50/80">
+          <FiCard className="flex min-h-[220px] flex-col border-dashed bg-slate-50/80 sm:min-h-[240px]">
             <h2 className="text-lg font-semibold text-slate-800">Create from booking</h2>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
               Best when the patient is ready to book a consultation or treatment.
@@ -113,11 +83,10 @@ export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPag
             >
               Create booking
             </button>
-          </EntryCardShell>
+          </FiCard>
         )}
 
-        {/* C. Direct patient profile */}
-        <EntryCardShell className="border-dashed bg-slate-50/80">
+        <FiCard className="flex min-h-[220px] flex-col border-dashed bg-slate-50/80 sm:min-h-[240px]">
           <h2 className="text-lg font-semibold text-slate-800">Direct patient profile</h2>
           <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
             For walk-ins, existing patients, or clinical records that do not begin as a lead.
@@ -131,7 +100,7 @@ export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPag
           >
             Coming soon
           </button>
-        </EntryCardShell>
+        </FiCard>
       </div>
     </div>
   );

@@ -1,27 +1,15 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { FiCard } from "@/src/components/fi-design/FiCard";
+import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
+import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
 
 type NewBookingEntryPageProps = {
   tenantId: string;
   /** When false, CRM- and booking-board paths are shown disabled with guidance (mirrors CRM shell nav). */
   showCrmNav: boolean;
 };
-
-function WorkflowCardShell({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div
-      className={cn(
-        "flex min-h-[200px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:min-h-[220px] sm:p-6",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-}
 
 /**
  * Stage 1E: safe booking pathway launcher (UI only). No inserts or server actions.
@@ -45,16 +33,13 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
         </Link>
       </div>
 
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Book appointment</h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          Choose the safest way to book a consultation, treatment, or surgery-related appointment.
-        </p>
-      </header>
+      <FiPageHeader
+        title="Book appointment"
+        description="Choose the safest way to book a consultation, treatment, or surgery-related appointment."
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-        {/* A. Book from existing patient — coming soon */}
-        <WorkflowCardShell className="border-dashed bg-slate-50/80">
+        <FiCard className="flex min-h-[200px] flex-col border-dashed bg-slate-50/80 sm:min-h-[220px]">
           <h2 className="text-lg font-semibold text-slate-800">Book from existing patient</h2>
           <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
             Use this when the person already has a patient profile.
@@ -67,25 +52,17 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
           >
             Coming soon
           </button>
-        </WorkflowCardShell>
+        </FiCard>
 
-        {/* B. Book from lead */}
         {showCrmNav ? (
-          <Link
+          <FiQuickActionCard
+            title="Book from lead"
+            description="Use this when the appointment is connected to a new enquiry or sales pipeline."
             href={crmHref}
-            className="group flex min-h-[200px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200/90 hover:bg-sky-50/50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2 sm:min-h-[220px] sm:p-6"
-          >
-            <h2 className="text-lg font-semibold text-slate-900">Book from lead</h2>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
-              Use this when the appointment is connected to a new enquiry or sales pipeline.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-sky-700 group-hover:text-sky-800">
-              Open CRM leads
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </span>
-          </Link>
+            openAffordanceLabel="Open CRM leads"
+          />
         ) : (
-          <WorkflowCardShell className="border-dashed bg-slate-50/80">
+          <FiCard className="flex min-h-[200px] flex-col border-dashed bg-slate-50/80 sm:min-h-[220px]">
             <h2 className="text-lg font-semibold text-slate-800">Book from lead</h2>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
               Use this when the appointment is connected to a new enquiry or sales pipeline.
@@ -100,26 +77,18 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
             >
               Open CRM leads
             </button>
-          </WorkflowCardShell>
+          </FiCard>
         )}
 
-        {/* C. Create consultation booking */}
         {showCrmNav ? (
-          <Link
+          <FiQuickActionCard
+            title="Create consultation booking"
+            description="Use this for new consultations, assessments, or follow-up appointments."
             href={bookingsHref}
-            className="group flex min-h-[200px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200/90 hover:bg-sky-50/50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2 sm:min-h-[220px] sm:p-6"
-          >
-            <h2 className="text-lg font-semibold text-slate-900">Create consultation booking</h2>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
-              Use this for new consultations, assessments, or follow-up appointments.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-sky-700 group-hover:text-sky-800">
-              Open bookings
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </span>
-          </Link>
+            openAffordanceLabel="Open bookings"
+          />
         ) : (
-          <WorkflowCardShell className="border-dashed bg-slate-50/80">
+          <FiCard className="flex min-h-[200px] flex-col border-dashed bg-slate-50/80 sm:min-h-[220px]">
             <h2 className="text-lg font-semibold text-slate-800">Create consultation booking</h2>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
               Use this for new consultations, assessments, or follow-up appointments.
@@ -134,23 +103,15 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
             >
               Open bookings
             </button>
-          </WorkflowCardShell>
+          </FiCard>
         )}
 
-        {/* D. Surgery or treatment planning */}
-        <Link
+        <FiQuickActionCard
+          title="Surgery or treatment planning"
+          description="Use this when the appointment relates to an active surgical or treatment case."
           href={casesHref}
-          className="group flex min-h-[200px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200/90 hover:bg-sky-50/50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2 sm:min-h-[220px] sm:p-6"
-        >
-          <h2 className="text-lg font-semibold text-slate-900">Surgery or treatment planning</h2>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
-            Use this when the appointment relates to an active surgical or treatment case.
-          </p>
-          <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-sky-700 group-hover:text-sky-800">
-            Open cases
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </span>
-        </Link>
+          openAffordanceLabel="Open cases"
+        />
       </div>
     </div>
   );
