@@ -9,6 +9,8 @@ import {
   ensureDefaultPipelineStages,
   loadCrmActivityTimelineForLead,
   loadCrmLeadById,
+  loadCrmLeadCommunicationsForLead,
+  loadCrmLeadConversionState,
   loadCrmLeadNotesForLead,
   loadCrmLeadsShellPage,
   loadCrmMessagesForLead,
@@ -16,11 +18,13 @@ import {
   loadCrmTasksForLead,
 } from "./server";
 import type {
+  CrmLeadConversionState,
   CrmShellClinicOption,
   CrmShellLeadListPage,
   CrmShellOrgOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
+  FiCrmLeadCommunicationRow,
   FiCrmLeadNoteRow,
   FiCrmLeadRow,
   FiCrmMessageRow,
@@ -52,7 +56,9 @@ export type CrmLeadShellBundle = {
   tasks: FiCrmTaskRow[];
   notes: FiCrmNoteRow[];
   leadNotes: FiCrmLeadNoteRow[];
+  leadCommunications: FiCrmLeadCommunicationRow[];
   messages: FiCrmMessageRow[];
+  conversionState: CrmLeadConversionState | null;
 };
 
 export type CrmLeadShellDetailPageData = CrmLeadShellBundle & {
@@ -65,16 +71,27 @@ export async function loadCrmShellLeadBundle(tenantId: string, leadId: string): 
   const lid = leadId.trim();
   const lead = await loadCrmLeadById(lid, tenantId);
   if (!lead) {
-    return { lead: null, events: [], tasks: [], notes: [], leadNotes: [], messages: [] };
+    return {
+      lead: null,
+      events: [],
+      tasks: [],
+      notes: [],
+      leadNotes: [],
+      leadCommunications: [],
+      messages: [],
+      conversionState: null,
+    };
   }
-  const [events, tasks, notes, leadNotes, messages] = await Promise.all([
+  const [events, tasks, notes, leadNotes, leadCommunications, messages, conversionState] = await Promise.all([
     loadCrmActivityTimelineForLead(tenantId, lid, { limit: 80 }),
     loadCrmTasksForLead(tenantId, lid, { limit: 40 }),
     loadCrmNotesForLead(tenantId, lid, { limit: 40 }),
     loadCrmLeadNotesForLead(tenantId, lid, { limit: 80 }),
+    loadCrmLeadCommunicationsForLead(tenantId, lid, { limit: 80 }),
     loadCrmMessagesForLead(tenantId, lid, { limit: 40 }),
+    loadCrmLeadConversionState(tenantId, lid),
   ]);
-  return { lead, events, tasks, notes, leadNotes, messages };
+  return { lead, events, tasks, notes, leadNotes, leadCommunications, messages, conversionState };
 }
 
 export type CrmShellLeadsIndexResult = CrmShellLeadListPage & {

@@ -40,8 +40,20 @@ export type FiCrmLeadRow = {
   priority: string | null;
   summary: string | null;
   metadata: JsonObject;
+  converted_person_id: string | null;
+  converted_case_id: string | null;
+  converted_at: string | null;
+  converted_by_user_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+/** Lead + person/patient/case context for conversion UI (Stage 2L). */
+export type CrmLeadConversionState = {
+  lead: FiCrmLeadRow;
+  person: { id: string; metadata: Record<string, unknown> } | null;
+  patient: { id: string; person_id: string } | null;
+  case: { id: string; status: string } | null;
 };
 
 /** One row in the FI Admin CRM lead index list (Stage 2F). */
@@ -127,6 +139,27 @@ export type FiCrmLeadNoteRow = {
   note_body: string;
   note_visibility: string;
   is_pinned: boolean;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Lead contact log (`fi_crm_lead_communications`, Stage 2K). */
+export type FiCrmLeadCommunicationRow = {
+  id: string;
+  tenant_id: string;
+  lead_id: string;
+  actor_user_id: string | null;
+  communication_type: string;
+  direction: string;
+  outcome: string | null;
+  subject: string | null;
+  preview: string | null;
+  external_message_id: string | null;
+  external_thread_id: string | null;
+  contact_at: string;
+  next_follow_up_at: string | null;
+  metadata: JsonObject;
   archived_at: string | null;
   created_at: string;
   updated_at: string;

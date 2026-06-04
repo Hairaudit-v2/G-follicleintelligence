@@ -5,12 +5,14 @@
 
 export type {
   CrmPipelineScope,
+  CrmLeadConversionState,
   CrmShellClinicOption,
   CrmShellLeadListItem,
   CrmShellLeadListPage,
   CrmShellOrgOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
+  FiCrmLeadCommunicationRow,
   FiCrmLeadNoteRow,
   FiCrmLeadRow,
   FiCrmLeadStageHistoryRow,
@@ -97,3 +99,50 @@ export {
   type LeadNoteDetailComparableSnapshot,
   type LeadNoteDetailTrackedKey,
 } from "./crmLeadNoteChangedFields";
+export {
+  collectChangedLeadCommunicationDetailKeys,
+  leadCommunicationDetailSnapshotFromRowLike,
+  type LeadCommunicationDetailComparableSnapshot,
+  type LeadCommunicationDetailTrackedKey,
+} from "./crmLeadCommunicationChangedFields";
+export {
+  assertCrmLeadCommunicationDirectionAllowed,
+  assertCrmLeadCommunicationMetadataObject,
+  assertCrmLeadCommunicationOutcomeAllowed,
+  assertCrmLeadCommunicationPreviewBounded,
+  assertCrmLeadCommunicationSubjectBounded,
+  assertCrmLeadCommunicationTypeAllowed,
+  assertLeadCommunicationNotArchived,
+  CRM_LEAD_COMMUNICATION_DIRECTION_VALUES,
+  CRM_LEAD_COMMUNICATION_MAX_PREVIEW,
+  CRM_LEAD_COMMUNICATION_MAX_SUBJECT,
+  CRM_LEAD_COMMUNICATION_OUTCOME_VALUES,
+  CRM_LEAD_COMMUNICATION_TYPE_VALUES,
+  isCrmLeadCommunicationDirection,
+  isCrmLeadCommunicationOutcome,
+  isCrmLeadCommunicationType,
+  isLeadCommunicationOwnedByLeadTenant,
+  normaliseCrmLeadCommunicationOutcome,
+  sortCrmLeadCommunicationsForDisplay,
+  type CrmLeadCommunicationDirection,
+  type CrmLeadCommunicationOutcome,
+  type CrmLeadCommunicationType,
+} from "./crmLeadCommunicationPolicy";
+export {
+  CRM_LEAD_CONVERSION_MAX_NOTE,
+  CRM_LEAD_CONVERSION_SOURCE_SYSTEM,
+  assertCaseSeedAllowed,
+  assertConversionNoteBounded,
+  assertLeadNotYetConverted,
+  isLeadConversionRowForTenant,
+  type CrmLeadConversionMode,
+} from "./crmLeadConversionPolicy";
+export {
+  assertIdentityMatchesLeadPersonOnly,
+  assertNoAmbiguousPersonIdentityInTenant,
+  extractPersonIdentitySignals,
+  findPersonIdsWithEmailInTenant,
+  findPersonIdsWithPhoneDigitsInTenant,
+  normalizePhoneDigits,
+  type PersonIdentitySignals,
+} from "./crmLeadConversionIdentity";

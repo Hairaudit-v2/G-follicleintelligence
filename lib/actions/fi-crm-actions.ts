@@ -3,15 +3,19 @@
 import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
 import {
   crmAppendActivityBodySchema,
+  crmArchiveLeadCommunicationBodySchema,
   crmArchiveLeadNoteBodySchema,
   crmCompleteTaskBodySchema,
+  crmConvertLeadBodySchema,
   crmCreateLeadBodySchema,
+  crmCreateLeadCommunicationBodySchema,
   crmCreateLeadNoteBodySchema,
   crmCreateNoteBodySchema,
   crmCreateTaskBodySchema,
   crmMessagePreviewBodySchema,
   crmMoveLeadStageBodySchema,
   crmReopenTaskBodySchema,
+  crmUpdateLeadCommunicationBodySchema,
   crmUpdateLeadDetailsBodySchema,
   crmUpdateLeadNoteBodySchema,
   crmUpdateTaskBodySchema,
@@ -19,15 +23,19 @@ import {
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "@/src/lib/crm/messageBodyKeysPolicy";
 import {
   appendCrmActivityEvent,
+  archiveCrmLeadCommunication,
   archiveCrmLeadNote,
   completeCrmTask,
+  createCrmLeadCommunication,
   createCrmLeadNote,
   createCrmLeadWithPerson,
   createCrmMessagePreview,
   createCrmNoteForLead,
   createCrmTask,
+  executeCrmLeadConversion,
   moveCrmLeadToStage,
   reopenCrmTask,
+  updateCrmLeadCommunication,
   updateCrmLeadDetails,
   updateCrmLeadNote,
   updateCrmTask,
@@ -318,6 +326,104 @@ export async function archiveCrmLeadNoteAction(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
     const note = await archiveCrmLeadNote({ tenantId, leadId, noteId });
     return { ok: true, note };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function createCrmLeadCommunicationAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; communication: Awaited<ReturnType<typeof createCrmLeadCommunication>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmCreateLeadCommunicationBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const actorUserId = await tryResolveFiUserIdForTenant(tenantId, undefined);
+    const communication = await createCrmLeadCommunication({
+      tenantId,
+      leadId,
+      communicationType: parsed.communicationType,
+      direction: parsed.direction,
+      outcome: parsed.outcome,
+      subject: parsed.subject,
+      preview: parsed.preview,
+      externalMessageId: parsed.externalMessageId,
+      externalThreadId: parsed.externalThreadId,
+      contactAt: parsed.contactAt,
+      nextFollowUpAt: parsed.nextFollowUpAt,
+      metadata: parsed.metadata,
+      actorUserId,
+    });
+    return { ok: true, communication };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function updateCrmLeadCommunicationAction(
+  tenantId: string,
+  leadId: string,
+  communicationId: string,
+  body: unknown
+): Promise<{ ok: true; communication: Awaited<ReturnType<typeof updateCrmLeadCommunication>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmUpdateLeadCommunicationBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const communication = await updateCrmLeadCommunication({
+      tenantId,
+      leadId,
+      communicationId,
+      ...(parsed.communicationType !== undefined ? { communicationType: parsed.communicationType } : {}),
+      ...(parsed.direction !== undefined ? { direction: parsed.direction } : {}),
+      ...(parsed.outcome !== undefined ? { outcome: parsed.outcome } : {}),
+      ...(parsed.subject !== undefined ? { subject: parsed.subject } : {}),
+      ...(parsed.preview !== undefined ? { preview: parsed.preview } : {}),
+      ...(parsed.contactAt !== undefined ? { contactAt: parsed.contactAt } : {}),
+      ...(parsed.nextFollowUpAt !== undefined ? { nextFollowUpAt: parsed.nextFollowUpAt } : {}),
+      ...(parsed.metadata !== undefined ? { metadata: parsed.metadata } : {}),
+    });
+    return { ok: true, communication };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function archiveCrmLeadCommunicationAction(
+  tenantId: string,
+  leadId: string,
+  communicationId: string,
+  body: unknown
+): Promise<{ ok: true; communication: Awaited<ReturnType<typeof archiveCrmLeadCommunication>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmArchiveLeadCommunicationBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const communication = await archiveCrmLeadCommunication({ tenantId, leadId, communicationId });
+    return { ok: true, communication };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function convertCrmLeadAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; result: Awaited<ReturnType<typeof executeCrmLeadConversion>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmConvertLeadBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const convertedByUserId = await tryResolveFiUserIdForTenant(tenantId, undefined);
+    const result = await executeCrmLeadConversion({
+      tenantId,
+      leadId,
+      seedCase: parsed.seedCase ?? false,
+      caseType: parsed.caseType,
+      treatmentInterest: parsed.treatmentInterest,
+      conversionNote: parsed.conversionNote,
+      convertedByUserId,
+    });
+    return { ok: true, result };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

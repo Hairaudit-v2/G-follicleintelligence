@@ -48,4 +48,21 @@ export {
   type CreateCrmLeadNoteParams,
   type UpdateCrmLeadNoteParams,
 } from "./leadNotes";
+export {
+  archiveCrmLeadCommunication,
+  createCrmLeadCommunication,
+  loadCrmLeadCommunicationForLead,
+  loadCrmLeadCommunicationsForLead,
+  updateCrmLeadCommunication,
+  type CreateCrmLeadCommunicationParams,
+  type UpdateCrmLeadCommunicationParams,
+} from "./leadCommunications";
+export {
+  convertCrmLeadToPerson,
+  convertCrmLeadToPersonAndSeedCase,
+  executeCrmLeadConversion,
+  loadCrmLeadConversionState,
+  type ExecuteCrmLeadConversionParams,
+  type ExecuteCrmLeadConversionResult,
+} from "./leadConversion";
 export { createCrmMessagePreview, loadCrmMessagesForLead, type CreateCrmMessagePreviewParams } from "./messages";

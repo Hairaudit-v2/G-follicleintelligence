@@ -439,11 +439,15 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | POST | `…/crm/leads/[leadId]/notes` | Create **internal lead note** (`fi_crm_lead_notes`, Stage 2J). |
 | PATCH | `…/crm/leads/[leadId]/notes/[noteId]` | Update lead note (body / visibility / pinned). |
 | POST | `…/crm/leads/[leadId]/notes/[noteId]/archive` | Archive lead note. |
+| POST | `…/crm/leads/[leadId]/communications` | Create **contact log** entry (`fi_crm_lead_communications`, Stage 2K). |
+| PATCH | `…/crm/leads/[leadId]/communications/[communicationId]` | Update contact log entry (metadata/preview fields only). |
+| POST | `…/crm/leads/[leadId]/communications/[communicationId]/archive` | Archive contact log entry. |
+| POST | `…/crm/leads/[leadId]/convert` | Convert lead to foundation **patient** (+ optional **`fi_cases`** draft seed, Stage 2L). |
 | POST | `…/crm/leads/[leadId]/messages/preview` | Message preview only; rejects `body`, `content`, `html`, `text`, `fullbody`, etc. at top level and inside `preview`. |
 
 ### Server actions
 
-- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `updateCrmLeadDetailsAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `updateCrmTaskAction`, `completeCrmTaskAction`, `reopenCrmTaskAction`, `crmCreateNoteAction` (general `fi_crm_notes`), **`createCrmLeadNoteAction`**, **`updateCrmLeadNoteAction`**, **`archiveCrmLeadNoteAction`** (Stage 2J), `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
+- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `updateCrmLeadDetailsAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `updateCrmTaskAction`, `completeCrmTaskAction`, `reopenCrmTaskAction`, `crmCreateNoteAction` (general `fi_crm_notes`), **`createCrmLeadNoteAction`**, **`updateCrmLeadNoteAction`**, **`archiveCrmLeadNoteAction`** (Stage 2J), **`createCrmLeadCommunicationAction`**, **`updateCrmLeadCommunicationAction`**, **`archiveCrmLeadCommunicationAction`** (Stage 2K), **`convertCrmLeadAction`** (Stage 2L), `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
 
 ### Supporting modules
 
@@ -455,11 +459,11 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/crmHttp.ts` | JSON helpers + `extractAdminKeyFromRequest` for routes. |
 | `src/lib/crm/messageBodyKeysPolicy.ts` | Forbidden full-body keys (shared with `validation.ts`). |
 | `src/lib/crm/activity.ts` | `loadCrmActivityTimelineForLead` (+ existing append). |
-| `src/lib/crm/tasks.ts`, `notes.ts`, `leadNotes.ts`, `messages.ts` | `loadCrmTasksForLead`, `loadCrmNotesForLead`, `loadCrmLeadNotesForLead`, `loadCrmMessagesForLead`. |
+| `src/lib/crm/tasks.ts`, `notes.ts`, `leadNotes.ts`, `leadCommunications.ts`, `leadConversion.ts`, `messages.ts` | Task/note/communication loaders + **lead conversion** orchestration (`loadCrmLeadConversionState`, `executeCrmLeadConversion`). |
 
 ### Commands
 
-- Unit tests: `npm run test:unit` (`pure.test.ts`, `stage2d.test.ts`, `stage2g.test.ts`, `stage2h.test.ts`, `stage2i.test.ts`, `stage2j.test.ts`, `crmLeadListQuery.test.ts`).
+- Unit tests: `npm run test:unit` (`pure.test.ts`, `stage2d.test.ts`, `stage2g.test.ts`, `stage2h.test.ts`, `stage2i.test.ts`, `stage2j.test.ts`, `stage2k.test.ts`, `stage2l.test.ts`, `crmLeadListQuery.test.ts`).
 
 ### Checklist mapping (Stage 2D)
 
@@ -483,7 +487,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | Path | Purpose |
 |------|---------|
 | `/fi-admin/[tenantId]/crm` | Lead index (filters, sort, pagination), pipeline panel, lead UUID jump, **create-lead panel** (Stage 2G). |
-| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, **edit-details panel** (Stage 2H), pipeline recap, activity / **tasks workflow** (Stage 2I) / **internal lead notes workflow** (Stage 2J) / general notes / messages panels, mutation smoke (move stage, foundation note, message preview). |
+| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, **edit-details panel** (Stage 2H), **conversion panel** (Stage 2L), pipeline recap, activity / **tasks workflow** (Stage 2I) / **internal lead notes workflow** (Stage 2J) / **contact log workflow** (Stage 2K) / general notes / messages panels, mutation smoke (move stage, foundation note, message preview). |
 
 ### Access
 
@@ -498,7 +502,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle + **lead index** loaders (caller must assert first). |
 | `src/lib/crm/crmGatePolicy.ts` | `CRM_SHELL_NAV_ROLES_LOWER`, `isCrmShellNavRole`. |
 | `src/components/fi/crm/CrmDataPanels.tsx` | Read-only presentation (props only). |
-| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadEditPanel.tsx`, `CrmLeadTasksWorkflow.tsx`, `CrmLeadNotesWorkflow.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
+| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadEditPanel.tsx`, `CrmLeadConversionPanel.tsx`, `CrmLeadTasksWorkflow.tsx`, `CrmLeadNotesWorkflow.tsx`, `CrmLeadCommunicationsWorkflow.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
 
 ### Commands
 
@@ -720,6 +724,107 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 ### Tests
 
 - `src/lib/crm/stage2j.test.ts` — visibility, body, changed keys, archived guard, sort, scope helper, Zod (included in `npm run test:unit`).
+
+### Commands
+
+- `npm run lint`, `npm run build`, `npm run test:unit`.
+
+---
+
+## Stage 2K — CRM lead contact log / communications (implementation progress)
+
+**Goal (met):** On `/fi-admin/[tenantId]/crm/leads/[leadId]`, CRM writers maintain a **contact log** (`fi_crm_lead_communications`) via **`createCrmLeadCommunicationAction`**, **`updateCrmLeadCommunicationAction`**, **`archiveCrmLeadCommunicationAction`**, and REST **`POST/PATCH …/crm/leads/[leadId]/communications`** (+ **`POST …/communications/[communicationId]/archive`**). Entries are **metadata/preview only** (no full message bodies in Postgres). **Type** and **direction** are required allow-lists; **outcome** is optional allow-listed when present; **subject** / **preview** are length-bounded; **metadata** must be a JSON object; **`archived_at`** blocks edits. The client never sets **`tenant_id`**, **`lead_id`**, **`actor_user_id`**, timestamps, or **`archived_at`**. Activity kinds: **`lead_communication.created`** (id + type + direction only — no preview in detail), **`lead_communication.updated`** with **`{ changed_keys }`** only, **`lead_communication.archived`**. **`tryResolveFiUserIdForTenant`** supplies **`actor_user_id`** on create (session path).
+
+### Data
+
+| Table | Migration |
+|-------|-----------|
+| `fi_crm_lead_communications` | `supabase/migrations/20260609120001_fi_crm_lead_communications.sql` (RLS: authenticated SELECT; `service_role` INSERT/UPDATE/DELETE; partial unique on `(tenant_id, lead_id, external_message_id)` when set). |
+
+### Validation rules
+
+| Rule | Enforcement |
+|------|-------------|
+| Row belongs to lead + tenant | `loadCrmLeadCommunicationForLead` + `.eq` on `tenant_id`, `lead_id`, `id` |
+| Type / direction / outcome | Zod enums + `crmLeadCommunicationPolicy` |
+| Subject / preview length | Zod max + policy helpers |
+| Metadata | Zod + `assertCrmLeadCommunicationMetadataObject` |
+| Archived | `assertLeadCommunicationNotArchived` before update |
+| Actor | Optional `fi_users.id` from `tryResolveFiUserIdForTenant` only on create |
+
+### API / actions
+
+| Surface | Role |
+|---------|------|
+| `createCrmLeadCommunicationAction`, `updateCrmLeadCommunicationAction`, `archiveCrmLeadCommunicationAction` | Server actions (same gate as Stage 2D). |
+| `POST …/communications`, `PATCH …/communications/[communicationId]`, `POST …/communications/[communicationId]/archive` | REST (Zod + gate + optional actor resolution from Bearer/cookies on create). |
+
+### Pure modules (unit-tested)
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/crmLeadCommunicationPolicy.ts` | Type/direction/outcome allow-lists, subject/preview bounds, metadata object guard, archived guard, **`sortCrmLeadCommunicationsForDisplay`**, `isLeadCommunicationOwnedByLeadTenant`. |
+| `src/lib/crm/crmLeadCommunicationChangedFields.ts` | `collectChangedLeadCommunicationDetailKeys` / snapshots (tracked keys only). |
+
+### UI / loader
+
+| Path | Role |
+|------|------|
+| `src/components/fi/crm/CrmLeadCommunicationsWorkflow.tsx` | Create, list (newest first), type filter, inline edit, archive; copy explains later full-message phase. |
+| `src/lib/crm/crmShellLoaders.ts` | `loadCrmShellLeadBundle` includes **`leadCommunications`** via `loadCrmLeadCommunicationsForLead`. |
+
+### Tests
+
+- `src/lib/crm/stage2k.test.ts` — policy, changed keys, archived guard, sort, scope helper, Zod (included in `npm run test:unit`).
+
+### Commands
+
+- `npm run lint`, `npm run build`, `npm run test:unit`.
+
+---
+
+## Stage 2L — CRM lead conversion to patient + optional case seed (implementation progress)
+
+**Strategic note:** Stage 2L unlocks the next platform layer: **bookings**, **patient profile**, clinical details, images, surgery planning, and outcome tracking — by bridging `fi_crm_leads` to **`fi_patients`** / **`fi_cases`** without deleting CRM history.
+
+**Goal (met):** Authorised CRM writers convert a tenant lead to a foundation **patient** (`resolveOrCreatePatient` on the lead’s **`person_id`**) via **`convertCrmLeadAction`** and **`POST …/crm/leads/[leadId]/convert`**, with optional **draft** `fi_cases` shell via **`resolveOrCreateCaseFoundation`** (`source_system` + `source_case_id` = lead id, `status` = `draft`). Conversion columns on **`fi_crm_leads`**: **`converted_person_id`**, **`converted_case_id`**, **`converted_at`**, **`converted_by_user_id`** (server-resolved `fi_users` only). **One conversion per lead** until admin relinks (blocked when **`converted_at`** set). **Identity:** email/phone ambiguity across multiple **`fi_persons`** in the tenant throws a safe manual-resolution error; **`converted_by_user_id`** is never client-supplied. Activity: **`lead.converted_to_person`** and **`lead.case_seeded`** (only when a new case row is created) — **IDs + `conversion_mode` only** in `detail`.
+
+### Data
+
+| Piece | Migration / code |
+|-------|------------------|
+| `fi_crm_leads` conversion columns | `supabase/migrations/20260609130001_fi_crm_lead_conversion.sql` (indexes on tenant + converted ids/at). |
+
+### API / actions
+
+| Surface | Role |
+|---------|------|
+| `convertCrmLeadAction` | Server action (Stage 2D gate + `tryResolveFiUserIdForTenant` for `converted_by_user_id`). |
+| `POST …/crm/leads/[leadId]/convert` | REST; body: `crmConvertLeadBodySchema` (`seedCase`, optional `caseType` / `treatmentInterest`, optional `conversionNote` on lead metadata only). |
+
+### Pure modules (unit-tested)
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/crmLeadConversionPolicy.ts` | Once-per-lead guard, note length, case-seed preconditions, tenant/lead scope helper. |
+| `src/lib/crm/crmLeadConversionIdentity.ts` | Email/phone signal extraction, tenant person lookup, **no silent multi-match** (`assertIdentityMatchesLeadPersonOnly`). |
+
+### Server orchestration
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/leadConversion.ts` | `loadCrmLeadConversionState`, `executeCrmLeadConversion`, `convertCrmLeadToPerson`, `convertCrmLeadToPersonAndSeedCase` — uses `@/src/lib/fi/foundation/resolvePatient` + `resolveCaseFoundation`. |
+
+### UI / loader
+
+| Path | Role |
+|------|------|
+| `src/components/fi/crm/CrmLeadConversionPanel.tsx` | Convert CTA, optional draft case checkbox, post-conversion read-only summary. |
+| `src/lib/crm/crmShellLoaders.ts` | `loadCrmShellLeadBundle` includes **`conversionState`** via `loadCrmLeadConversionState`. |
+
+### Tests
+
+- `src/lib/crm/stage2l.test.ts` — policy, identity collision rules, activity detail key lists, convert Zod (included in `npm run test:unit`).
 
 ### Commands
 

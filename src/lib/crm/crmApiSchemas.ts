@@ -4,6 +4,14 @@ import {
   CRM_LEAD_DETAIL_PRIORITY_VALUES,
   CRM_LEAD_DETAIL_STATUS_VALUES,
 } from "./crmLeadDetailsPolicy";
+import {
+  CRM_LEAD_COMMUNICATION_DIRECTION_VALUES,
+  CRM_LEAD_COMMUNICATION_OUTCOME_VALUES,
+  CRM_LEAD_COMMUNICATION_TYPE_VALUES,
+  CRM_LEAD_COMMUNICATION_MAX_PREVIEW,
+  CRM_LEAD_COMMUNICATION_MAX_SUBJECT,
+} from "./crmLeadCommunicationPolicy";
+import { CRM_LEAD_CONVERSION_MAX_NOTE } from "./crmLeadConversionPolicy";
 import { CRM_LEAD_NOTE_VISIBILITY_VALUES } from "./crmLeadNotePolicy";
 import { CRM_TASK_ACTIVE_STATUS_VALUES, CRM_TASK_TYPE_VALUES } from "./crmTaskPolicy";
 import { normaliseOptionalLeadSource } from "./leadSourceMappingPolicy";
@@ -207,6 +215,129 @@ export const crmArchiveLeadNoteBodySchema = z
     adminKey: z.string().optional(),
   })
   .strict();
+
+const commTypeTuple = CRM_LEAD_COMMUNICATION_TYPE_VALUES as unknown as [string, ...string[]];
+const commDirTuple = CRM_LEAD_COMMUNICATION_DIRECTION_VALUES as unknown as [string, ...string[]];
+const commOutcomeTuple = CRM_LEAD_COMMUNICATION_OUTCOME_VALUES as unknown as [string, ...string[]];
+
+function refineContactAtString(val: string | null | undefined, ctx: z.RefinementCtx, path: (string | number)[]) {
+  if (val === undefined || val === null) return;
+  const s = String(val).trim();
+  if (!s) return;
+  if (Number.isNaN(Date.parse(s))) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid contact_at datetime.", path });
+  }
+}
+
+export const crmCreateLeadCommunicationBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    communicationType: z.enum(commTypeTuple),
+    direction: z.enum(commDirTuple),
+    outcome: z.union([z.enum(commOutcomeTuple), z.null()]).optional(),
+    subject: z.string().max(CRM_LEAD_COMMUNICATION_MAX_SUBJECT).optional().nullable(),
+    preview: z.string().max(CRM_LEAD_COMMUNICATION_MAX_PREVIEW).optional().nullable(),
+    externalMessageId: z.string().max(512).optional().nullable(),
+    externalThreadId: z.string().max(512).optional().nullable(),
+    contactAt: z.string().max(64).optional().nullable(),
+    nextFollowUpAt: z.string().max(64).optional().nullable(),
+    metadata: z.record(z.string(), z.any()).optional().nullable(),
+  })
+  .strict()
+  .superRefine((body, ctx) => {
+    refineContactAtString(body.contactAt ?? undefined, ctx, ["contactAt"]);
+    if (body.nextFollowUpAt !== undefined && body.nextFollowUpAt !== null) {
+      const s = String(body.nextFollowUpAt).trim();
+      if (s && Number.isNaN(Date.parse(s))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid next_follow_up_at datetime.",
+          path: ["nextFollowUpAt"],
+        });
+      }
+    }
+    if (body.metadata !== undefined && body.metadata !== null) {
+      if (typeof body.metadata !== "object" || Array.isArray(body.metadata)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "metadata must be a JSON object.", path: ["metadata"] });
+      }
+    }
+  });
+
+export const crmUpdateLeadCommunicationBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    communicationType: z.enum(commTypeTuple).optional(),
+    direction: z.enum(commDirTuple).optional(),
+    outcome: z.union([z.enum(commOutcomeTuple), z.null()]).optional(),
+    subject: z.string().max(CRM_LEAD_COMMUNICATION_MAX_SUBJECT).optional().nullable(),
+    preview: z.string().max(CRM_LEAD_COMMUNICATION_MAX_PREVIEW).optional().nullable(),
+    contactAt: z.string().max(64).optional(),
+    nextFollowUpAt: z.union([z.string().max(64), z.null()]).optional(),
+    metadata: z.record(z.string(), z.any()).optional().nullable(),
+  })
+  .strict()
+  .superRefine((body, ctx) => {
+    refineContactAtString(body.contactAt, ctx, ["contactAt"]);
+    if (body.nextFollowUpAt !== undefined && body.nextFollowUpAt !== null) {
+      const v = String(body.nextFollowUpAt).trim();
+      if (v && Number.isNaN(Date.parse(v))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid next_follow_up_at datetime.",
+          path: ["nextFollowUpAt"],
+        });
+      }
+    }
+    const keys = [
+      "communicationType",
+      "direction",
+      "outcome",
+      "subject",
+      "preview",
+      "contactAt",
+      "nextFollowUpAt",
+      "metadata",
+    ] as const;
+    const any = keys.some((k) => body[k] !== undefined);
+    if (!any) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Provide at least one field to update.",
+        path: ["communicationType"],
+      });
+    }
+    if (body.metadata !== undefined && body.metadata !== null) {
+      if (typeof body.metadata !== "object" || Array.isArray(body.metadata)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "metadata must be a JSON object.", path: ["metadata"] });
+      }
+    }
+  });
+
+export const crmArchiveLeadCommunicationBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+  })
+  .strict();
+
+export const crmConvertLeadBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    seedCase: z.boolean().optional(),
+    caseType: z.string().max(128).optional().nullable(),
+    treatmentInterest: z.string().max(512).optional().nullable(),
+    conversionNote: z.string().max(CRM_LEAD_CONVERSION_MAX_NOTE).optional().nullable(),
+  })
+  .strict()
+  .superRefine((body, ctx) => {
+    const wantsCaseFields = Boolean(body.caseType?.trim()) || Boolean(body.treatmentInterest?.trim());
+    if (wantsCaseFields && !body.seedCase) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "caseType and treatmentInterest require seedCase to be true.",
+        path: ["seedCase"],
+      });
+    }
+  });
 
 const previewRecordSchema = z
   .record(z.string(), z.any())

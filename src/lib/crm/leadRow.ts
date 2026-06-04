@@ -18,6 +18,10 @@ export function mapFiCrmLeadRow(row: Record<string, unknown>): FiCrmLeadRow {
       row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
         ? (row.metadata as Record<string, unknown>)
         : {},
+    converted_person_id: row.converted_person_id != null ? String(row.converted_person_id) : null,
+    converted_case_id: row.converted_case_id != null ? String(row.converted_case_id) : null,
+    converted_at: row.converted_at != null ? String(row.converted_at) : null,
+    converted_by_user_id: row.converted_by_user_id != null ? String(row.converted_by_user_id) : null,
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
   };
