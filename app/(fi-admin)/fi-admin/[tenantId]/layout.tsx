@@ -3,6 +3,7 @@ import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 const NEUTRAL_EFFECTIVE: EffectiveBranding = {
   brand_name: null,
@@ -30,6 +31,7 @@ export default async function TenantAdminLayout({
   params: Promise<{ tenantId: string }>;
 }) {
   const { tenantId } = await params;
+  await assertFiTenantPortalAccess(tenantId);
   const base = `/fi-admin/${tenantId}`;
   const showCrmNav = await getCrmShellNavAllowed(tenantId);
 

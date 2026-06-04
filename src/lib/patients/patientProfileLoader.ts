@@ -10,6 +10,8 @@ import type { PatientClinicalDetailsRow } from "./clinicalDetailsServer";
 import { loadPatientClinicalDetails } from "./clinicalDetailsServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
+import { buildPatientTimeline, mapActivityRowForTimeline } from "@/src/lib/patients/timeline/patientTimelineBuild";
+import type { PatientTimelineBuildResult } from "@/src/lib/patients/timeline/patientTimelineTypes";
 
 export type PatientProfilePerson = {
   id: string;
@@ -54,6 +56,9 @@ export type PatientProfileBookingCard = {
   title: string | null;
   lead_id: string | null;
   case_id: string | null;
+  created_at: string;
+  updated_at: string;
+  cancelled_at: string | null;
 };
 
 export type PatientProfileActivityItem = {
@@ -62,6 +67,7 @@ export type PatientProfileActivityItem = {
   activity_kind: string;
   title: string | null;
   lead_id: string;
+  case_id: string | null;
 };
 
 export type PatientClinicalDetailsProfileView = {
@@ -80,6 +86,7 @@ export type PatientProfileFoundationData = {
   cases: PatientProfileCaseCard[];
   bookings: { upcoming: PatientProfileBookingCard[]; past: PatientProfileBookingCard[] };
   activity: PatientProfileActivityItem[];
+  patientTimeline: PatientTimelineBuildResult;
   summary: ReturnType<typeof computePatientProfileSummaryMetrics>;
 };
 
@@ -296,7 +303,7 @@ export async function loadPatientProfile(
 
   const { data: bookingRows, error: be } = await supabase
     .from("fi_bookings")
-    .select("id, start_at, end_at, booking_status, booking_type, title, lead_id, case_id")
+    .select("id, start_at, end_at, booking_status, booking_type, title, lead_id, case_id, created_at, updated_at, cancelled_at")
     .eq("tenant_id", tid)
     .eq("patient_id", foundationPatientId)
     .order("start_at", { ascending: false });
@@ -311,6 +318,9 @@ export async function loadPatientProfile(
     title: (b as { title: string | null }).title != null ? String((b as { title: string | null }).title) : null,
     lead_id: (b as { lead_id: string | null }).lead_id != null ? String((b as { lead_id: string | null }).lead_id) : null,
     case_id: (b as { case_id: string | null }).case_id != null ? String((b as { case_id: string | null }).case_id) : null,
+    created_at: String((b as { created_at: string }).created_at),
+    updated_at: String((b as { updated_at: string }).updated_at),
+    cancelled_at: (b as { cancelled_at: string | null }).cancelled_at != null ? String((b as { cancelled_at: string | null }).cancelled_at) : null,
   }));
 
   const split = splitBookingsUpcomingPast(bookingsRaw);
@@ -323,7 +333,7 @@ export async function loadPatientProfile(
   if (leadIds.length === 0 && caseIds.length === 0) {
     const res = await supabase
       .from("fi_crm_activity_events")
-      .select("id, occurred_at, activity_kind, title, lead_id")
+      .select("id, occurred_at, activity_kind, title, lead_id, case_id, patient_id, detail")
       .eq("tenant_id", tid)
       .eq("patient_id", foundationPatientId)
       .order("occurred_at", { ascending: false })
@@ -336,7 +346,7 @@ export async function loadPatientProfile(
     if (caseIds.length) orParts.push(`case_id.in.(${caseIds.join(",")})`);
     const res = await supabase
       .from("fi_crm_activity_events")
-      .select("id, occurred_at, activity_kind, title, lead_id")
+      .select("id, occurred_at, activity_kind, title, lead_id, case_id, patient_id, detail")
       .eq("tenant_id", tid)
       .or(orParts.join(","))
       .order("occurred_at", { ascending: false })
@@ -347,15 +357,89 @@ export async function loadPatientProfile(
 
   if (ae) throw new Error(ae.message);
 
-  const activity: PatientProfileActivityItem[] = sortActivityEventsNewestFirst(
-    (actRows ?? []).map((a) => ({
-      id: String((a as { id: string }).id),
-      occurred_at: String((a as { occurred_at: string }).occurred_at),
-      activity_kind: String((a as { activity_kind: string }).activity_kind),
-      title: (a as { title: string | null }).title != null ? String((a as { title: string | null }).title) : null,
-      lead_id: String((a as { lead_id: string }).lead_id),
-    }))
-  ).slice(0, 80);
+  const activityMapped = (actRows ?? []).map((a) => ({
+    id: String((a as { id: string }).id),
+    occurred_at: String((a as { occurred_at: string }).occurred_at),
+    activity_kind: String((a as { activity_kind: string }).activity_kind),
+    title: (a as { title: string | null }).title != null ? String((a as { title: string | null }).title) : null,
+    lead_id: String((a as { lead_id: string }).lead_id),
+    case_id: (a as { case_id: string | null }).case_id != null ? String((a as { case_id: string | null }).case_id) : null,
+  }));
+
+  const activity: PatientProfileActivityItem[] = sortActivityEventsNewestFirst(activityMapped).slice(0, 80);
+
+  const timelineActivity = (actRows ?? []).slice(0, 120).map((a) => mapActivityRowForTimeline(a as Record<string, unknown>));
+
+  const timelineImages = [
+    ...patientImages.activeWithSignedUrls.map(({ image }) => ({
+      id: image.id,
+      image_category: image.image_category,
+      image_status: image.image_status,
+      caption: image.caption,
+      created_at: image.created_at,
+      archived_at: image.archived_at,
+    })),
+    ...patientImages.archived.map((image) => ({
+      id: image.id,
+      image_category: image.image_category,
+      image_status: image.image_status,
+      caption: image.caption,
+      created_at: image.created_at,
+      archived_at: image.archived_at,
+    })),
+  ];
+
+  const patientTimeline: PatientTimelineBuildResult = buildPatientTimeline(
+    {
+      tenantId: tid,
+      foundationPatientId,
+      patient: {
+        id: patient.id,
+        created_at: patient.created_at,
+        updated_at: patient.updated_at,
+        patient_status: patient.patient_status,
+      },
+      leads: leadsMapped.map((lead) => ({
+        id: lead.id,
+        created_at: lead.created_at,
+        updated_at: lead.updated_at,
+        status: lead.status,
+        converted_at: lead.converted_at,
+        converted_case_id: lead.converted_case_id,
+        current_stage_id: lead.current_stage_id,
+        stageLabel: lead.current_stage_id ? stageLabelById.get(lead.current_stage_id) ?? null : null,
+      })),
+      cases: cases.map((c) => ({
+        id: c.id,
+        status: c.status,
+        case_type: c.case_type,
+        created_at: c.created_at,
+        sourceLeadId: c.sourceLeadId,
+      })),
+      bookings: bookingsRaw.map((b) => ({
+        id: b.id,
+        booking_type: b.booking_type,
+        booking_status: b.booking_status,
+        title: b.title,
+        start_at: b.start_at,
+        lead_id: b.lead_id,
+        case_id: b.case_id,
+        created_at: b.created_at,
+        updated_at: b.updated_at,
+        cancelled_at: b.cancelled_at,
+      })),
+      activity: timelineActivity,
+      clinical: clinicalRow
+        ? {
+            patient_id: clinicalRow.patient_id,
+            created_at: clinicalRow.created_at,
+            updated_at: clinicalRow.updated_at,
+          }
+        : null,
+      images: timelineImages,
+    },
+    { hrefContext: { tenantId: tid }, limit: 100, offset: 0, sort: "newest_first" }
+  );
 
   const summary = computePatientProfileSummaryMetrics({
     leads: leadsMapped,
@@ -378,6 +462,7 @@ export async function loadPatientProfile(
       cases,
       bookings: split,
       activity,
+      patientTimeline,
       summary,
     },
   };

@@ -12,7 +12,12 @@ export function createBrowserClient(): SupabaseClient {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !anon) throw new Error("Missing Supabase env vars (NEXT_PUBLIC_*)");
-    _browserClient = createClient(url, anon);
+    _browserClient = createClient(url, anon, {
+      auth: {
+        detectSessionInUrl: true,
+        flowType: "pkce",
+      },
+    });
   }
   return _browserClient;
 }

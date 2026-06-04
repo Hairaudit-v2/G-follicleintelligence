@@ -24,6 +24,7 @@ export const SYSTEM_FEATURE_REGISTRY: readonly SystemFeatureEntry[] = [
   { id: "patients.profile", group: "Patients", label: "Profile" },
   { id: "patients.clinicalDetails", group: "Patients", label: "Clinical Details" },
   { id: "patients.images", group: "Patients", label: "Images" },
+  { id: "patients.treatmentTimeline", group: "Patients", label: "Treatment Timeline" },
   { id: "patients.hli", group: "Patients", label: "HLI" },
   { id: "hairaudit.core", group: "HairAudit", label: "HairAudit" },
   { id: "surgeryos.core", group: "SurgeryOS", label: "SurgeryOS" },
@@ -95,6 +96,13 @@ export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): R
         if (!patientProfileSchemaOk) return "planned";
         if (!patientImagesTable) return "partial";
         return "ready";
+      case "patients.treatmentTimeline": {
+        if (!patientProfileSchemaOk) return "planned";
+        const bookingsLayer = payload.bookings.tableExists;
+        const activityLayer = payload.activity.tableExists;
+        if (!bookingsLayer || !activityLayer || !patientImagesTable) return "partial";
+        return patientProfileHasRows ? "ready" : "partial";
+      }
       case "patients.hli":
         return "planned";
       case "hairaudit.core":

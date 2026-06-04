@@ -10,6 +10,7 @@ import { PatientLinkedLeadsCard } from "./PatientLinkedLeadsCard";
 import { PatientPersonDetailsCard } from "./PatientPersonDetailsCard";
 import { PatientProfileHeader } from "./PatientProfileHeader";
 import { PatientProfileSummaryCards } from "./PatientProfileSummaryCards";
+import { PatientTreatmentTimelineCard } from "./timeline/PatientTreatmentTimelineCard";
 
 export function PatientProfilePage({ tenantId, data }: { tenantId: string; data: PatientProfileFoundationData }) {
   return (
@@ -36,6 +37,8 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
       <PatientClinicalDetailsCard tenantId={tenantId} data={data} />
 
       <PatientImagesCard tenantId={tenantId} data={data} />
+
+      <PatientTreatmentTimelineCard patientTimeline={data.patientTimeline} patientImages={data.patientImages} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <PatientPersonDetailsCard data={data} />

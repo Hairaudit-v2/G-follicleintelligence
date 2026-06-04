@@ -1,4 +1,4 @@
-# Patient profile foundation (Stages 4A–4C)
+# Patient profile foundation (Stages 4A–4D)
 
 ## Purpose
 
@@ -6,7 +6,7 @@ Stage 4A establishes the **patient** (`fi_patients` + `fi_persons`) as the **lon
 
 **Stage 4B** adds the first **structured clinical summary** layer (`fi_patient_clinical_details`): bounded text fields plus JSON `clinical_flags` / `metadata` for staff-maintained context. This is **not** the HLI diagnostic engine, not surgery planning, and not imaging — it is a safe foundation that later modules (HLI, trichoscopy, HairAudit exports, SurgeryOS) can read without inventing ad-hoc columns on `fi_patients`.
 
-**Stage 4C** adds **private patient images** (`fi_patient_images` + Storage bucket `patient-images`): upload, categorise, caption / taken-at / metadata, view via signed URLs, and archive — without AI analysis, HairAudit, surgery workflows, or patient-facing galleries. See `docs/design/22-patient-images-foundation.md`.
+**Stage 4D** adds a **read-only treatment timeline** on the profile: a sanitised merge of leads, CRM activity, bookings, cases, clinical timestamps, imaging events, and patient-admin metadata bumps. It does **not** add a patient-native activity writer, timeline editing, or patient-facing views. See `docs/design/23-patient-treatment-timeline.md`.
 
 This layer aligns with the broader **digital twin** direction: a stable tenant-scoped identity and timeline spine that future clinical modules (trichoscopy, HLI scoring, HairAudit exports, SurgeryOS) will reference without duplicating person/patient primitives.
 
@@ -39,7 +39,7 @@ Migration: `20260612120001_fi_patient_clinical_details.sql`.
 | Create-on-first-save empty row | Blood analysis, AI diagnosis |
 | Tenant + patient integrity checks | HLI assessment engine, HairAudit integration |
 | PATCH + server action with CRM write gate | Surgery planning, prescriptions, medication ordering |
-| | Treatment timeline automation |
+| | **Patient-native** CRM-style activity automation (Stage 4D ships **read-only** profile timeline aggregation only — see `23-patient-treatment-timeline.md`) |
 
 ### Activity decision
 
@@ -97,7 +97,7 @@ Access gate: **`assertCrmShellPageAccess`** (same roles as CRM / Bookings / Cale
 | Loader | Responsibility |
 | --- | --- |
 | `src/lib/patients/patientDirectoryLoader.ts` | Paginated directory rows + counts (active cases, linked leads, latest booking). |
-| `src/lib/patients/patientProfileLoader.ts` | Foundation profile graph + summary metrics; legacy global anchor detection; **Stage 4B:** `clinicalDetails` bundle (`row` + `updatedByLabel`). **Stage 4C:** `patientImages` bundle (counts, active tiles with signed URLs, archived rows without URLs). |
+| `src/lib/patients/patientProfileLoader.ts` | Foundation profile graph + summary metrics; legacy global anchor detection; **Stage 4B:** `clinicalDetails` bundle (`row` + `updatedByLabel`). **Stage 4C:** `patientImages` bundle (counts, active tiles with signed URLs, archived rows without URLs). **Stage 4D:** `patientTimeline` (sanitised aggregated items, default latest 100). |
 
 ## Pure helpers
 
@@ -106,6 +106,7 @@ Access gate: **`assertCrmShellPageAccess`** (same roles as CRM / Bookings / Cale
 | `patientPolicy.ts` | Status allow-list, admin note max length, normalization. |
 | `patientDirectoryQuery.ts` | URL search-param parsing + href builders. |
 | `patientProfileSummary.ts` | Summary metrics, booking split, activity sort, linked lead counts. |
+| `src/lib/patients/timeline/*` (pure) | Timeline types, labels, filters, deterministic `buildPatientTimeline` (Stage 4D). |
 | `patientLabels.ts` | Status labels + `displayFromPersonMetadata`. |
 | `patientApiSchemas.ts` | Zod body for admin PATCH / server action. |
 | Stage 4B clinical modules | See **Stage 4B — clinical details foundation** above. |
@@ -116,7 +117,7 @@ Access gate: **`assertCrmShellPageAccess`** (same roles as CRM / Bookings / Cale
 Under `src/components/fi/patients/`:
 
 - `PatientDirectoryPage`, `PatientDirectoryFilters`, `PatientDirectoryTable`, `PatientDirectoryRow`, `PatientStatusBadge`
-- `PatientProfilePage`, `PatientProfileHeader`, `PatientProfileSummaryCards`, `PatientPersonDetailsCard`, `PatientLinkedLeadsCard`, `PatientBookingsCard`, `PatientCasesCard`, `PatientActivityCard`, `PatientAdminNotesCard`, **`PatientClinicalDetailsCard`**, **`PatientImagesCard`** (and `src/components/fi/patient-images/*` building blocks)
+- `PatientProfilePage`, `PatientProfileHeader`, `PatientProfileSummaryCards`, `PatientPersonDetailsCard`, `PatientLinkedLeadsCard`, `PatientBookingsCard`, `PatientCasesCard`, `PatientActivityCard`, `PatientAdminNotesCard`, **`PatientClinicalDetailsCard`**, **`PatientImagesCard`**, **`PatientTreatmentTimelineCard`** (`src/components/fi/patients/timeline/*`) (and `src/components/fi/patient-images/*` building blocks)
 
 ## Mutations & API
 
@@ -132,6 +133,8 @@ Under `src/components/fi/patients/`:
 `src/lib/patients/stage4b.test.ts` — clinical text limits, JSON object validation, `changed_keys`, strict schema, empty-row policy, tenant match helper, sparse PATCH merge.
 
 `src/lib/patientImages/stage4c.test.ts` — image policy (categories, MIME, size, metadata), paths, `changed_keys`, archived-edit guard, signed-URL descriptor shape.
+
+`src/lib/patients/stage4d.test.ts` — timeline build, sorting, sanitisation, filters, grouping, pagination flags.
 
 ## Intentionally deferred
 

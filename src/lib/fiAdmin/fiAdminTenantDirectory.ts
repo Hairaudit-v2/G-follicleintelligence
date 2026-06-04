@@ -2,6 +2,8 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { isFiOsCrossTenantDirectoryRole } from "@/src/lib/fiOs/fiOsRoles";
+import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 
 export type FiAdminTenantRow = { id: string; name: string; slug: string };
 
@@ -52,6 +54,11 @@ export async function resolveFiAdminTenantDirectory(request: Request): Promise<
   const authId = await resolveAuthUserId(request);
 
   if (authId) {
+    const os = await loadFiOsIdentity(authId);
+    if (os && isFiOsCrossTenantDirectoryRole(os.osRole)) {
+      const tenants = await loadAllTenants();
+      return { kind: "ok", tenants, devTenantListFallback: false };
+    }
     const tenants = await loadTenantsForAuthUser(authId);
     return { kind: "ok", tenants, devTenantListFallback: false };
   }

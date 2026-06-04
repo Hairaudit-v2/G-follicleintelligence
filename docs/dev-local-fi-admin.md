@@ -1,6 +1,11 @@
 # FI Admin — local development without login
 
-The FI Admin home page (`/fi-admin`) loads tenants from `GET /api/tenants`. In **production** (`NODE_ENV === 'production'`), you must be signed in with Supabase Auth and have at least one `fi_users` row (`auth_user_id` set to your auth user) so the API can return the tenants you belong to.
+Use the dedicated OS sign-in page: **`/follicle-intelligence/login`** (alias **`/fi-login`**). Production builds require a Supabase Auth session and FI staff provisioning (`fi_os_identities` and/or `fi_users`) before `/fi-admin` and tenant routes load.
+
+The FI Admin home page (`/fi-admin`) loads tenants from `GET /api/tenants`. In **production** (`NODE_ENV === 'production'`), you must be signed in with Supabase Auth. Tenant directory rules:
+
+- **`fi_os_identities.os_role`** in `fi_admin` or `fi_auditor`: all tenants (service-role read on the server).
+- **Otherwise**: only tenants linked via `fi_users` for your auth user.
 
 For **local development** when you have not configured login yet, you can opt in to a **read-only directory listing** of every row in `fi_tenants` using the service role on the server.
 
@@ -14,9 +19,9 @@ FI_ENABLE_DEV_ADMIN_ACCESS=true
 
 Requirements (all must hold):
 
-- `NODE_ENV` is **not** `'production'` (e.g. `next dev` defaults to `development`). **`next start`** (and most production hosts) set `NODE_ENV=production`, so the tenant-list bypass is **disabled** there — you must sign in with Supabase Auth and have `fi_users` membership, or use `next dev` locally instead of `next start`.
+- `NODE_ENV` is **not** `'production'` (e.g. `next dev` defaults to `development`). **`next start`** (and most production hosts) set `NODE_ENV=production`, so the tenant-list bypass is **disabled** there — you must sign in with Supabase Auth and have `fi_users` membership (or an OS role in `fi_os_identities` that grants cross-tenant directory access), or use `next dev` locally instead of `next start`.
 - `FI_ENABLE_DEV_ADMIN_ACCESS` is exactly `true` (after trim). Any other value is treated as off.
-- No authenticated Supabase user is resolved from the request — if you **are** logged in, the normal rule applies: only tenants linked via `fi_users` are returned.
+- No authenticated Supabase user is resolved from the request — if you **are** logged in, the normal directory rules apply: `fi_admin` / `fi_auditor` OS roles see all tenants; otherwise only tenants linked via `fi_users` are returned.
 
 ## Security
 

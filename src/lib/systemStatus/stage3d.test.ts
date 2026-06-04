@@ -147,8 +147,19 @@ describe("Stage 3D — system status & readiness", () => {
     assert.equal(clinical?.status, "ready");
     const images = rows.find((r) => r.id === "patients.images");
     assert.equal(images?.status, "ready");
+    const timeline = rows.find((r) => r.id === "patients.treatmentTimeline");
+    assert.equal(timeline?.status, "ready");
     const surgery = rows.find((r) => r.id === "surgeryos.core");
     assert.equal(surgery?.status, "planned");
+  });
+
+  it("feature inventory marks treatment timeline partial when bookings table missing", () => {
+    const snap = baseSnapshot();
+    snap.tablePresence.fi_bookings = false;
+    const p = assembleSystemStatusPayload(snap);
+    const rows = resolveFeatureInventoryStatuses(p);
+    const timeline = rows.find((r) => r.id === "patients.treatmentTimeline");
+    assert.equal(timeline?.status, "partial");
   });
 
   it("migration health unknown when metadata flag false", () => {

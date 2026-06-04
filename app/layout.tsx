@@ -2,9 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 
 import { JsonLd } from "@/components/seo/json-ld";
-import { HairEcosystemNav } from "@/components/layout/hair-ecosystem-nav";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { FiPortalChromeGate } from "@/components/layout/FiPortalChromeGate";
 import { getRootStructuredData } from "@/lib/structured-data";
 
 import "./globals.css";
@@ -61,10 +59,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="min-h-screen font-sans antialiased">
         <JsonLd data={getRootStructuredData(SITE_URL)} />
-        <HairEcosystemNav currentSite="follicleintelligence" />
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <FiPortalChromeGate>{children}</FiPortalChromeGate>
         <Analytics />
       </body>
     </html>
