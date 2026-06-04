@@ -104,7 +104,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
   const workspaceName = clinicLabel?.trim() || "Your clinic";
 
   const calendarHref = showCrmNav ? `${base}/calendar` : null;
-  const bookingsHref = showCrmNav ? `${base}/bookings` : null;
+  const newBookingLauncherHref = `${base}/bookings/new`;
   const crmHref = showCrmNav ? `${base}/crm` : null;
   const casesHref = `${base}/cases`;
   const newPatientHref = `${base}/patients/new`;
@@ -130,23 +130,12 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
-            {bookingsHref ? (
-              <Link
-                href={bookingsHref}
-                className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
-              >
-                New booking
-              </Link>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400"
-                title="Requires CRM workspace access"
-              >
-                New booking
-              </button>
-            )}
+            <Link
+              href={newBookingLauncherHref}
+              className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+            >
+              New booking
+            </Link>
             {crmHref ? (
               <Link
                 href={crmHref}
@@ -221,8 +210,8 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
               />
               <MainActionCard
                 title="Book appointment"
-                description="Open the bookings board"
-                href={bookingsHref}
+                description="Choose how to book — patient, lead, consultation, or case"
+                href={newBookingLauncherHref}
               />
               <MainActionCard
                 title="Create lead"

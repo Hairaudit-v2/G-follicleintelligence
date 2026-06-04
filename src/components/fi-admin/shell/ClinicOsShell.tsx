@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -22,6 +22,8 @@ import {
   resolveClinicOsShellNavItems,
   resolveClinicOsShellQuickActions,
 } from "@/src/lib/fiAdmin/clinicOsShellConfig";
+
+import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 
 import { ClinicOsShellCalendarBar } from "./ClinicOsShellCalendarBar";
 
@@ -57,17 +59,39 @@ function ComingSoonMenuRow({ label }: { label: string }) {
 }
 
 export function ClinicOsShell({
+  tenantId,
   base,
   showCrmNav,
   effective,
   children,
 }: {
+  tenantId: string;
   base: string;
   showCrmNav: boolean;
   effective: EffectiveBranding;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [kbdHint, setKbdHint] = useState("Ctrl+K");
+
+  useEffect(() => {
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+    const pf = typeof navigator !== "undefined" ? navigator.platform : "";
+    const apple = /Mac|iPhone|iPad|iPod/i.test(pf) || /Mac OS/.test(ua);
+    setKbdHint(apple ? "⌘K" : "Ctrl+K");
+  }, []);
+
+  useEffect(() => {
+    function onGlobalKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onGlobalKey);
+    return () => window.removeEventListener("keydown", onGlobalKey);
+  }, []);
   const navItems = resolveClinicOsShellNavItems(base, showCrmNav);
   const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav);
   const activeNavId = getClinicOsShellActiveNavId(pathname, base);
@@ -78,16 +102,6 @@ export function ClinicOsShell({
   const logoSrc = safeLogoUrlForImg(effective.logo_url);
   const clinicContextLabel =
     effective.clinic_display_name?.trim() || effective.brand_name?.trim() || "This clinic";
-
-  function preventSearchSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-  }
-
-  function onSearchKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-    }
-  }
 
   return (
     <div className="min-h-[min(100dvh,100vh)] bg-slate-50">
@@ -117,21 +131,20 @@ export function ClinicOsShell({
             ) : null}
 
             <div className="order-last flex w-full min-w-0 flex-1 basis-full items-center gap-2 pt-1 sm:order-none sm:basis-auto sm:pt-0 lg:max-w-md lg:pl-2">
-              <form className="w-full min-w-0" onSubmit={preventSearchSubmit} aria-label="Find patient or customer (preview)">
-                <label className="sr-only" htmlFor="clinic-os-global-search">
-                  Find patient or customer
-                </label>
-                <input
-                  id="clinic-os-global-search"
-                  type="search"
-                  name="clinic-os-global-search"
-                  autoComplete="off"
-                  enterKeyHint="search"
-                  placeholder="Find patient or customer"
-                  onKeyDown={onSearchKeyDown}
-                  className="h-9 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none ring-sky-400/20 placeholder:text-slate-400 focus:border-sky-400/50 focus:ring-2"
-                />
-              </form>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="flex h-9 w-full min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-left text-sm text-slate-800 outline-none ring-sky-400/20 transition hover:border-slate-300 hover:bg-slate-50/80 focus-visible:border-sky-400/50 focus-visible:ring-2"
+                aria-haspopup="dialog"
+                aria-expanded={searchOpen}
+                aria-label="Open workspace search"
+              >
+                <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                <span className="min-w-0 flex-1 truncate text-slate-400">Search patients, leads, bookings and cases</span>
+                <kbd className="hidden shrink-0 select-none rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-sans text-[10px] font-medium text-slate-500 sm:inline-block">
+                  {kbdHint}
+                </kbd>
+              </button>
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -215,6 +228,14 @@ export function ClinicOsShell({
       {showCalendarBar ? <ClinicOsShellCalendarBar clinicLabel={clinicContextLabel} /> : null}
 
       <div className="mx-auto max-w-[1600px] px-3 pb-8 pt-4 sm:px-4 lg:px-6">{children}</div>
+
+      <ClinicOsGlobalSearch
+        tenantId={tenantId}
+        base={base}
+        showCrmNav={showCrmNav}
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+      />
     </div>
   );
 }

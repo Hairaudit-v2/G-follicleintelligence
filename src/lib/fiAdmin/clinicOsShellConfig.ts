@@ -64,7 +64,7 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
 export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
   { id: "patient", label: "Patient", path: "patients/new", permissionHint: {} },
   { id: "lead", label: "Lead", path: "crm", permissionHint: { requiresCrmShellNav: true } },
-  { id: "booking", label: "Booking", path: "bookings", permissionHint: { requiresCrmShellNav: true } },
+  { id: "booking", label: "Booking", path: "bookings/new", permissionHint: { requiresCrmShellNav: true } },
   { id: "case", label: "Case", path: "cases/new", permissionHint: {} },
   { id: "task", label: "Task", path: "", permissionHint: {}, placeholder: true },
   { id: "message", label: "Message", path: "", permissionHint: {}, placeholder: true },
@@ -104,6 +104,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   const first = sub.split("/")[0] ?? "";
 
   if (first === "calendar") return "calendar";
+  if (first === "bookings") return "calendar";
   if (first === "patients") return "patients";
   if (first === "cases") return "cases";
   if (first === "crm") return "sales";

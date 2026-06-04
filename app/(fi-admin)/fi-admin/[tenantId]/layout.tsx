@@ -84,7 +84,7 @@ export default async function TenantAdminLayout({
   if (clinicOsShellEnabled) {
     return (
       <div style={buildBrandingCssVariables(effective)}>
-        <ClinicOsShell base={base} showCrmNav={showCrmNav} effective={effective}>
+        <ClinicOsShell tenantId={tenantId} base={base} showCrmNav={showCrmNav} effective={effective}>
           {mainSurface}
         </ClinicOsShell>
         <div className="mx-auto max-w-[1600px] px-3 sm:px-4 lg:px-6">{footer}</div>

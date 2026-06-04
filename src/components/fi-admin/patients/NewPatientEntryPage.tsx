@@ -26,7 +26,7 @@ function EntryCardShell({ children, className }: { children: ReactNode; classNam
 export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPageProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
   const crmHref = `${base}/crm`;
-  const bookingsHref = `${base}/bookings`;
+  const bookingsHref = `${base}/bookings/new`;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
