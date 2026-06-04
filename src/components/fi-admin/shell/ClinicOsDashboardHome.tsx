@@ -107,6 +107,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
   const bookingsHref = showCrmNav ? `${base}/bookings` : null;
   const crmHref = showCrmNav ? `${base}/crm` : null;
   const casesHref = `${base}/cases`;
+  const newPatientHref = `${base}/patients/new`;
 
   return (
     <div className="space-y-4">
@@ -215,9 +216,8 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <MainActionCard
                 title="Add new patient"
-                description="Register a patient in the directory"
-                href={null}
-                disabledReason="Coming soon"
+                description="Choose how to start — lead, booking, or profile"
+                href={newPatientHref}
               />
               <MainActionCard
                 title="Book appointment"

@@ -62,7 +62,7 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
 ];
 
 export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
-  { id: "patient", label: "Patient", path: "", permissionHint: { requiresCrmShellNav: true }, placeholder: true },
+  { id: "patient", label: "Patient", path: "patients/new", permissionHint: {} },
   { id: "lead", label: "Lead", path: "crm", permissionHint: { requiresCrmShellNav: true } },
   { id: "booking", label: "Booking", path: "bookings", permissionHint: { requiresCrmShellNav: true } },
   { id: "case", label: "Case", path: "cases/new", permissionHint: {} },
