@@ -51,4 +51,15 @@ export {
 } from "./crmLeadListQuery";
 export { leadTitleFromRow, personMetadataDisplayLabel } from "./crmLeadListDisplay";
 export { CRM_MUTATION_ROLES_LOWER, CRM_SHELL_NAV_ROLES_LOWER, isCrmMutationRole, isCrmShellNavRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+export {
+  CRM_LEAD_DETAIL_PRIORITY_VALUES,
+  CRM_LEAD_DETAIL_STATUS_VALUES,
+  collectChangedLeadDetailKeys,
+  leadDetailSnapshotsEqual,
+  parseCrmLeadAdminMetadataMergeJson,
+  parseCrmLeadMetadataJsonInput,
+  stableMetadataFingerprint,
+  type LeadDetailComparableSnapshot,
+  type LeadDetailTrackedKey,
+} from "./crmLeadDetailsPolicy";
 export { assertMessagePayloadHasNoForbiddenBodyKeys, FORBIDDEN_MESSAGE_BODY_KEYS_LOWER } from "./messageBodyKeysPolicy";

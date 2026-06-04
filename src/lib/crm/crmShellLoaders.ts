@@ -52,6 +52,12 @@ export type CrmLeadShellBundle = {
   messages: FiCrmMessageRow[];
 };
 
+export type CrmLeadShellDetailPageData = CrmLeadShellBundle & {
+  owners: CrmShellUserPickerOption[];
+  organisations: CrmShellOrgOption[];
+  clinics: CrmShellClinicOption[];
+};
+
 export async function loadCrmShellLeadBundle(tenantId: string, leadId: string): Promise<CrmLeadShellBundle> {
   const lid = leadId.trim();
   const lead = await loadCrmLeadById(lid, tenantId);
@@ -133,4 +139,19 @@ export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<
     };
   });
   return { organisations, clinics };
+}
+
+/** Lead detail page: bundle + owner/org/clinic pickers for the edit panel (Stage 2H). */
+export async function loadCrmShellLeadDetailPageData(tenantId: string, leadId: string): Promise<CrmLeadShellDetailPageData> {
+  const [bundle, owners, scope] = await Promise.all([
+    loadCrmShellLeadBundle(tenantId, leadId),
+    loadCrmShellUserPickerOptions(tenantId),
+    loadCrmShellScopePickerOptions(tenantId),
+  ]);
+  return {
+    ...bundle,
+    owners,
+    organisations: scope.organisations,
+    clinics: scope.clinics,
+  };
 }

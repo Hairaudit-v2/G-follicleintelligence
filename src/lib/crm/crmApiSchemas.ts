@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "./messageBodyKeysPolicy";
+import {
+  CRM_LEAD_DETAIL_PRIORITY_VALUES,
+  CRM_LEAD_DETAIL_STATUS_VALUES,
+} from "./crmLeadDetailsPolicy";
 import { normaliseOptionalLeadSource } from "./leadSourceMappingPolicy";
 
 const UUID = z.string().uuid();
@@ -145,9 +149,29 @@ export const crmPipelineStagesQuerySchema = z
   })
   .strict();
 
+const statusTuple = CRM_LEAD_DETAIL_STATUS_VALUES as unknown as [string, ...string[]];
+const priorityTuple = CRM_LEAD_DETAIL_PRIORITY_VALUES as unknown as [string, ...string[]];
+const nullOrUuid = z.union([UUID, z.null()]);
+
+/** PATCH /crm/leads/[leadId] — lead details only; never accepts stage fields (use move-stage). */
+export const crmUpdateLeadDetailsBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    summary: z.string().min(1, "Lead title / summary is required.").max(4000),
+    status: z.enum(statusTuple),
+    priority: z.union([z.enum(priorityTuple), z.null()]),
+    primaryOwnerUserId: nullOrUuid,
+    organisationId: nullOrUuid,
+    clinicId: nullOrUuid,
+    metadata: z.record(z.string(), z.any()).optional(),
+    adminMetadataMerge: z.record(z.string(), z.any()).optional(),
+  })
+  .strict();
+
 export type CrmCreateLeadBody = z.infer<typeof crmCreateLeadBodySchema>;
 export type CrmMoveLeadStageBody = z.infer<typeof crmMoveLeadStageBodySchema>;
 export type CrmAppendActivityBody = z.infer<typeof crmAppendActivityBodySchema>;
 export type CrmCreateTaskBody = z.infer<typeof crmCreateTaskBodySchema>;
 export type CrmCreateNoteBody = z.infer<typeof crmCreateNoteBodySchema>;
 export type CrmMessagePreviewBody = z.infer<typeof crmMessagePreviewBodySchema>;
+export type CrmUpdateLeadDetailsBody = z.infer<typeof crmUpdateLeadDetailsBodySchema>;

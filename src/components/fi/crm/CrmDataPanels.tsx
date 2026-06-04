@@ -89,6 +89,11 @@ export function CrmActivityPanel({ events }: { events: FiCrmActivityEventRow[] }
               <span className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-gray-700">{e.activity_kind}</span>
             </div>
             {e.title ? <p className="mt-0.5 font-medium text-gray-900">{e.title}</p> : null}
+            {"changed_keys" in e.detail && Array.isArray((e.detail as { changed_keys: unknown }).changed_keys) ? (
+              <p className="mt-0.5 text-xs text-gray-600">
+                Fields: {(e.detail as { changed_keys: string[] }).changed_keys.join(", ")}
+              </p>
+            ) : null}
           </li>
         ))}
       </ul>

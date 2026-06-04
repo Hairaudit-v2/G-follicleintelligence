@@ -8,6 +8,7 @@ import {
   crmCreateTaskBodySchema,
   crmMessagePreviewBodySchema,
   crmMoveLeadStageBodySchema,
+  crmUpdateLeadDetailsBodySchema,
 } from "@/src/lib/crm/crmApiSchemas";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "@/src/lib/crm/messageBodyKeysPolicy";
 import {
@@ -17,6 +18,7 @@ import {
   createCrmNoteForLead,
   createCrmTask,
   moveCrmLeadToStage,
+  updateCrmLeadDetails,
 } from "@/src/lib/crm/server";
 import { ZodError } from "zod";
 
@@ -208,6 +210,33 @@ export async function crmCreateMessagePreviewAction(
       preview: parsed.preview as Record<string, unknown>,
     });
     return { ok: true, message };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function updateCrmLeadDetailsAction(
+  tenantId: string,
+  leadId: string,
+  body: unknown
+): Promise<{ ok: true; lead: Awaited<ReturnType<typeof updateCrmLeadDetails>> } | { ok: false; error: string }> {
+  try {
+    const parsed = crmUpdateLeadDetailsBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const lead = await updateCrmLeadDetails({
+      tenantId,
+      leadId,
+      summary: parsed.summary,
+      status: parsed.status,
+      priority: parsed.priority,
+      primaryOwnerUserId: parsed.primaryOwnerUserId,
+      organisationId: parsed.organisationId,
+      clinicId: parsed.clinicId,
+      metadata: parsed.metadata,
+      adminMetadataMerge: parsed.adminMetadataMerge ?? null,
+      fiAdminKey: parsed.adminKey ?? null,
+    });
+    return { ok: true, lead };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

@@ -18,6 +18,7 @@ export {
   type CreateCrmLeadWithPersonResolutionParams,
   type CreateCrmLeadWithResolvedPersonParams,
 } from "./leads";
+export { updateCrmLeadDetails, type UpdateCrmLeadDetailsInput } from "./leadDetailsUpdate";
 export { loadCrmLeadsShellPage } from "./leadList";
 export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
 export { appendCrmActivityEvent, loadCrmActivityTimelineForLead, type AppendCrmActivityEventParams } from "./activity";

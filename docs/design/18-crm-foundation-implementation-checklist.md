@@ -428,6 +428,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 |--------|--------|---------|
 | GET | `…/crm/pipeline-stages` | Lazy-seed default stages for scope; returns `stages`. Query: `organisationId`, `clinicId`, `pipelineKey`. |
 | GET | `…/crm/leads/[leadId]` | Lead detail. |
+| PATCH | `…/crm/leads/[leadId]` | Update lead details (summary, status, priority, owner, org/clinic, metadata); **never** changes `current_stage_id` (Stage 2H). |
 | GET | `…/crm/leads/[leadId]/activity` | Activity timeline (`events`). Query: `limit`. |
 | GET | `…/crm/leads/[leadId]/previews` | Parallel `tasks`, `notes`, `messages` previews. |
 | POST | `…/crm/leads` | Create lead (+ person resolution). |
@@ -439,7 +440,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 
 ### Server actions
 
-- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `crmCreateNoteAction`, `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
+- `lib/actions/fi-crm-actions.ts`: `crmCreateLeadAction`, `updateCrmLeadDetailsAction`, `crmMoveLeadStageAction`, `crmAppendActivityAction`, `crmCreateTaskAction`, `crmCreateNoteAction`, `crmCreateMessagePreviewAction` — same Zod + gate ordering; mutations import **`@/src/lib/crm/server`** only for Supabase writes.
 
 ### Supporting modules
 
@@ -479,7 +480,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | Path | Purpose |
 |------|---------|
 | `/fi-admin/[tenantId]/crm` | Lead index (filters, sort, pagination), pipeline panel, lead UUID jump, **create-lead panel** (Stage 2G). |
-| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, pipeline recap, activity / tasks / notes / messages panels, mutation smoke (move stage, note, task, message preview). |
+| `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead summary, **edit-details panel** (Stage 2H), pipeline recap, activity / tasks / notes / messages panels, mutation smoke (move stage, note, task, message preview). |
 
 ### Access
 
@@ -494,7 +495,7 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 | `src/lib/crm/crmShellLoaders.ts` | Pipeline + lead bundle + **lead index** loaders (caller must assert first). |
 | `src/lib/crm/crmGatePolicy.ts` | `CRM_SHELL_NAV_ROLES_LOWER`, `isCrmShellNavRole`. |
 | `src/components/fi/crm/CrmDataPanels.tsx` | Read-only presentation (props only). |
-| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
+| `src/components/fi/crm/CrmLeadIdJump.tsx`, `CrmCreateLeadPanel.tsx`, `CrmLeadEditPanel.tsx`, `CrmLeadSmokeForms.tsx` | Client shell UI → server actions only. |
 
 ### Commands
 
@@ -576,6 +577,46 @@ These are **not** re-opened by Stage 1O locks but remain for later design/implem
 ### Tests
 
 - `src/lib/crm/stage2g.test.ts` — Zod + `leadSourceMappingPolicy` (included in `npm run test:unit`).
+
+### Commands
+
+- `npm run lint`, `npm run build`, `npm run test:unit`.
+
+---
+
+## Stage 2H — CRM lead detail edits (implementation progress)
+
+**Goal (met):** Authorised CRM writers can update **non-stage** lead fields on `/fi-admin/[tenantId]/crm/leads/[leadId]` via `updateCrmLeadDetailsAction` and `PATCH …/crm/leads/[leadId]`, with controlled status/priority enums, tenant-scoped owner/org/clinic validation, JSON metadata rules, and a **`lead.updated`** activity row whose `detail` lists **changed field names only** (`changed_keys`).
+
+### Editable fields
+
+| Column | Notes |
+|--------|--------|
+| `summary` | Required non-empty. |
+| `status` / `priority` | Allowed values enforced in Zod + `crmLeadDetailsPolicy` constants. |
+| `primary_owner_user_id` | Must reference `fi_users` for the same tenant (or null). |
+| `organisation_id` / `clinic_id` | Tenant-scoped; clinic must match selected org when both set. |
+| `metadata` | Full object replace from staff JSON; optional **FI-admin** shallow merge patch when `adminKey` matches `FI_ADMIN_API_KEY`. |
+
+### Explicitly out of scope
+
+- **`current_stage_id`** — only `crmMoveLeadStageAction` / `POST …/stage` may change stage.
+
+### Files
+
+| Path | Role |
+|------|------|
+| `src/lib/crm/leadDetailsUpdate.ts` | `updateCrmLeadDetails` service helper + activity append. |
+| `src/lib/crm/crmLeadDetailsPolicy.ts` | Pure enums, metadata JSON parsing, `collectChangedLeadDetailKeys`, stable metadata fingerprint. |
+| `src/lib/crm/crmApiSchemas.ts` | `crmUpdateLeadDetailsBodySchema` (strict — rejects stage keys). |
+| `lib/actions/fi-crm-actions.ts` | `updateCrmLeadDetailsAction`. |
+| `app/api/tenants/[tenantId]/crm/leads/[leadId]/route.ts` | `PATCH` handler. |
+| `src/lib/crm/crmShellLoaders.ts` | `loadCrmShellLeadDetailPageData` (bundle + owner/org/clinic pickers). |
+| `src/components/fi/crm/CrmLeadEditPanel.tsx` | Client edit form. |
+
+### Tests
+
+- `src/lib/crm/stage2h.test.ts` — policy + Zod (included in `npm run test:unit`).
 
 ### Commands
 

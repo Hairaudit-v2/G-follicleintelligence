@@ -7,9 +7,10 @@ import {
   CrmPipelinePanel,
   CrmTasksPanel,
 } from "@/src/components/fi/crm/CrmDataPanels";
+import { CrmLeadEditPanel } from "@/src/components/fi/crm/CrmLeadEditPanel";
 import { CrmLeadSmokeForms } from "@/src/components/fi/crm/CrmLeadSmokeForms";
 import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
-import { loadCrmShellLeadBundle, loadCrmShellPipelineStages } from "@/src/lib/crm/crmShellLoaders";
+import { loadCrmShellLeadDetailPageData, loadCrmShellPipelineStages } from "@/src/lib/crm/crmShellLoaders";
 
 export const metadata = {
   title: "CRM lead",
@@ -23,9 +24,9 @@ export default async function CrmLeadShellPage({
 }) {
   const { tenantId, leadId } = await params;
   const session = await assertCrmShellPageAccess(tenantId);
-  const [stages, bundle] = await Promise.all([loadCrmShellPipelineStages(tenantId), loadCrmShellLeadBundle(tenantId, leadId)]);
+  const [stages, detail] = await Promise.all([loadCrmShellPipelineStages(tenantId), loadCrmShellLeadDetailPageData(tenantId, leadId)]);
 
-  if (!bundle.lead) {
+  if (!detail.lead) {
     return (
       <div className="mx-auto max-w-3xl space-y-4 py-6">
         <h1 className="text-lg font-semibold text-gray-900">Lead not found</h1>
@@ -59,19 +60,27 @@ export default async function CrmLeadShellPage({
       </header>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <CrmLeadSummaryPanel lead={bundle.lead} />
+        <CrmLeadSummaryPanel lead={detail.lead} />
         <CrmPipelinePanel stages={stages} />
       </div>
 
-      <CrmActivityPanel events={bundle.events} />
+      <CrmLeadEditPanel
+        tenantId={tenantId}
+        lead={detail.lead}
+        owners={detail.owners}
+        organisations={detail.organisations}
+        clinics={detail.clinics}
+      />
+
+      <CrmActivityPanel events={detail.events} />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <CrmTasksPanel tasks={bundle.tasks} />
-        <CrmNotesPanel notes={bundle.notes} />
-        <CrmMessagesPanel messages={bundle.messages} />
+        <CrmTasksPanel tasks={detail.tasks} />
+        <CrmNotesPanel notes={detail.notes} />
+        <CrmMessagesPanel messages={detail.messages} />
       </div>
 
-      <CrmLeadSmokeForms tenantId={tenantId} leadId={bundle.lead.id} stages={stageOpts} fiUserId={session.fiUserId} />
+      <CrmLeadSmokeForms tenantId={tenantId} leadId={detail.lead.id} stages={stageOpts} fiUserId={session.fiUserId} />
     </div>
   );
 }
