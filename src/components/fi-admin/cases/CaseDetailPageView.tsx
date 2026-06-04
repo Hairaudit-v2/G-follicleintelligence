@@ -7,10 +7,12 @@ import { CaseImagesCard } from "./CaseImagesCard";
 import { CaseLinkedLeadCard } from "./CaseLinkedLeadCard";
 import { CaseLinkedPatientCard } from "./CaseLinkedPatientCard";
 import { CasePlanningNotesPanel } from "./CasePlanningNotesPanel";
+import { CasePostOpTrackingCard } from "./CasePostOpTrackingCard";
 import { CaseProcedureDayCard } from "./CaseProcedureDayCard";
 import { CaseSurgeryPlanningCard } from "./CaseSurgeryPlanningCard";
 import { CaseSummaryCard } from "./CaseSummaryCard";
 import type { CaseProcedureRow, FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
+import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 
 export function CaseDetailPageView({
@@ -19,6 +21,8 @@ export function CaseDetailPageView({
   surgeryPlan,
   procedureDay,
   teamUserOptions,
+  postOpTracking,
+  followUps,
   foundationRecord,
 }: {
   tenantId: string;
@@ -26,6 +30,8 @@ export function CaseDetailPageView({
   surgeryPlan: CaseSurgeryPlanRow | null;
   procedureDay: CaseProcedureRow | null;
   teamUserOptions: FiUserPickerOption[];
+  postOpTracking: CasePostOpTrackingRow | null;
+  followUps: CaseFollowUpRow[];
   foundationRecord: UniversalCaseRecordResult | null;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
@@ -49,9 +55,9 @@ export function CaseDetailPageView({
       <div>
         <h1 className="text-lg font-semibold text-gray-900">Treatment case</h1>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">
-          Tenant-scoped case profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning readiness, Stage 5C
-          procedure-day workflow, and case-level planning notes. Audit scoring and long-term outcome tracking stay out of
-          these stages.
+          Tenant-scoped case profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
+          day, Stage 5D post-op / outcome tracking, and case-level planning notes. HairAudit scoring, formal audit
+          grading, AI outcome scoring, and certification scoring are not part of this surface.
         </p>
       </div>
 
@@ -78,6 +84,14 @@ export function CaseDetailPageView({
         caseId={detail.id}
         procedure={procedureDay}
         teamUserOptions={teamUserOptions}
+      />
+
+      <CasePostOpTrackingCard
+        tenantId={tenantId}
+        caseId={detail.id}
+        tracking={postOpTracking}
+        followUps={followUps}
+        imageOptions={detail.images}
       />
 
       <div className="grid gap-4 lg:grid-cols-2">

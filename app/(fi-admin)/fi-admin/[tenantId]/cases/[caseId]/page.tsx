@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CaseDetailPageView } from "@/src/components/fi-admin/cases/CaseDetailPageView";
 import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
+import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
 import { loadFiUsersForProcedureTeamPicker, loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { loadUniversalCaseRecord } from "@/src/lib/fi/foundation/caseRecord";
@@ -33,11 +34,13 @@ export default async function CaseDetailRoutePage({
   const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
   if (te || !tenant) notFound();
 
-  const [detail, surgeryPlan, procedureDay, teamUserOptions] = await Promise.all([
+  const [detail, surgeryPlan, procedureDay, teamUserOptions, postOpTracking, followUps] = await Promise.all([
     loadCaseAdminDetail(tenantId, caseId),
     loadSurgeryPlanForCase(tenantId, caseId),
     loadProcedureDayForCase(tenantId, caseId),
     loadFiUsersForProcedureTeamPicker(tenantId),
+    loadPostOpTrackingForCase(tenantId, caseId),
+    loadFollowUpsForCase(tenantId, caseId),
   ]);
   if (!detail) notFound();
 
@@ -57,6 +60,8 @@ export default async function CaseDetailRoutePage({
       surgeryPlan={surgeryPlan}
       procedureDay={procedureDay}
       teamUserOptions={teamUserOptions}
+      postOpTracking={postOpTracking}
+      followUps={followUps}
       foundationRecord={foundationOk}
     />
   );

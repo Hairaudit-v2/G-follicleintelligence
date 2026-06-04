@@ -20,7 +20,7 @@ export function CaseProcedureDayCard({
           <h2 className="text-sm font-semibold text-gray-900">Procedure day workflow</h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5C: structured procedure-day record (timing, team, technique, counts, notes). This is not HairAudit
-            scoring, surgical audit grading, outcome tracking, or post-op workflow.
+            scoring or formal surgical audit grading — post-op and qualitative outcomes live in Stage 5D below.
           </p>
         </div>
         {procedure ? (
