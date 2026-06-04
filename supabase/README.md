@@ -17,8 +17,10 @@ Recent foundation-layer batches (after `20260324000010_fi_events_global_foundati
 | `20260605140014` | Compatibility views: `v_fi_patient_resolution`, `v_fi_case_foundation`, `v_fi_media_unified` |
 | `20260606100001` | `fi_organisation_source_ids` (organisation ↔ producer id mapping for Stage 1E helpers) |
 | `20260606120001` | `fi_tenant_settings`, `fi_organisation_settings`, `fi_clinic_settings` + RLS (Stage 1K branding / config foundation) |
+| `20260606140001` | CRM foundation tables (`fi_crm_*`) — additive DDL only; **no** pipeline seed |
+| `20260606150001` | CRM foundation RLS: tenant-member `SELECT` on all `fi_crm_*`; `service_role` INSERT/UPDATE/DELETE; **no** authenticated write policies (Stage 2B / checklist Phase 2) |
 
-Design reference: `docs/design/07-foundation-migration-specification.md`.
+Design reference: `docs/design/07-foundation-migration-specification.md`. CRM tables: `docs/design/17-crm-foundation-architecture.md`, `docs/design/18-crm-foundation-implementation-checklist.md`.
 
 ## Prerequisites
 

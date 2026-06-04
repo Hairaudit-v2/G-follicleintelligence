@@ -20,6 +20,10 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 | [12-universal-case-record](./12-universal-case-record.md) | Stage 1I: read-only universal case aggregate in FI Admin. |
 | [13-foundation-search-directory](./13-foundation-search-directory.md) | Stage 1J: tenant-scoped read-only foundation search and directory. |
 | [14-tenant-configuration-branding](./14-tenant-configuration-branding.md) | Stage 1K: tenant / organisation / clinic settings and branding cascade for white-label and future CRM. |
+| [15-configuration-admin-editing](./15-configuration-admin-editing.md) | Stage 1L: FI Admin–gated editing of tenant/org/clinic settings. |
+| [16-effective-branding-application](./16-effective-branding-application.md) | Stage 1M: apply effective branding in FI Admin layout and configuration preview. |
+| [17-crm-foundation-architecture](./17-crm-foundation-architecture.md) | Stage 1N: CRM foundation tables, ERD, timeline/HubSpot strategy, RLS, migration order (design only). |
+| [18-crm-foundation-implementation-checklist](./18-crm-foundation-implementation-checklist.md) | Stage 1O: locked decisions, phased implementation checklist, acceptance criteria (no code). |
 
 ## Design rule
 
