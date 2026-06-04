@@ -5,6 +5,9 @@ import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
 import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
 import { loadFiUsersForProcedureTeamPicker, loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
+import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
+import { buildCaseTimeline } from "@/src/lib/cases/caseTimelineBuild";
+import { loadCaseTimelineExtraSources } from "@/src/lib/cases/caseTimelineLoaders";
 import { loadUniversalCaseRecord } from "@/src/lib/fi/foundation/caseRecord";
 
 export const metadata = {
@@ -34,15 +37,37 @@ export default async function CaseDetailRoutePage({
   const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
   if (te || !tenant) notFound();
 
-  const [detail, surgeryPlan, procedureDay, teamUserOptions, postOpTracking, followUps] = await Promise.all([
-    loadCaseAdminDetail(tenantId, caseId),
-    loadSurgeryPlanForCase(tenantId, caseId),
-    loadProcedureDayForCase(tenantId, caseId),
-    loadFiUsersForProcedureTeamPicker(tenantId),
-    loadPostOpTrackingForCase(tenantId, caseId),
-    loadFollowUpsForCase(tenantId, caseId),
-  ]);
+  const [detail, surgeryPlan, procedureDay, teamUserOptions, postOpTracking, followUps, timelineExtra] =
+    await Promise.all([
+      loadCaseAdminDetail(tenantId, caseId),
+      loadSurgeryPlanForCase(tenantId, caseId),
+      loadProcedureDayForCase(tenantId, caseId),
+      loadFiUsersForProcedureTeamPicker(tenantId),
+      loadPostOpTrackingForCase(tenantId, caseId),
+      loadFollowUpsForCase(tenantId, caseId),
+      loadCaseTimelineExtraSources(tenantId, caseId),
+    ]);
   if (!detail) notFound();
+
+  const timelineItems = buildCaseTimeline({
+    tenantId,
+    caseId,
+    detail,
+    surgeryPlan,
+    procedureDay,
+    postOpTracking,
+    followUps,
+    extra: timelineExtra,
+  });
+
+  const readiness = buildCaseReadiness({
+    detail,
+    surgeryPlan,
+    procedureDay,
+    postOpTracking,
+    followUps,
+    timelineItems,
+  });
 
   const foundationParam = sp.foundation;
   const showFoundation =
@@ -62,6 +87,8 @@ export default async function CaseDetailRoutePage({
       teamUserOptions={teamUserOptions}
       postOpTracking={postOpTracking}
       followUps={followUps}
+      timelineItems={timelineItems}
+      readiness={readiness}
       foundationRecord={foundationOk}
     />
   );

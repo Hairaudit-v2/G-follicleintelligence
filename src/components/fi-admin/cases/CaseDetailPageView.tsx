@@ -8,12 +8,16 @@ import { CaseLinkedLeadCard } from "./CaseLinkedLeadCard";
 import { CaseLinkedPatientCard } from "./CaseLinkedPatientCard";
 import { CasePlanningNotesPanel } from "./CasePlanningNotesPanel";
 import { CasePostOpTrackingCard } from "./CasePostOpTrackingCard";
+import { CaseReadinessSummaryCard } from "./CaseReadinessSummaryCard";
 import { CaseProcedureDayCard } from "./CaseProcedureDayCard";
 import { CaseSurgeryPlanningCard } from "./CaseSurgeryPlanningCard";
 import { CaseSummaryCard } from "./CaseSummaryCard";
+import { CaseTimelineCard } from "./CaseTimelineCard";
 import type { CaseProcedureRow, FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
+import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
+import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
 
 export function CaseDetailPageView({
   tenantId,
@@ -23,6 +27,8 @@ export function CaseDetailPageView({
   teamUserOptions,
   postOpTracking,
   followUps,
+  timelineItems,
+  readiness,
   foundationRecord,
 }: {
   tenantId: string;
@@ -32,6 +38,8 @@ export function CaseDetailPageView({
   teamUserOptions: FiUserPickerOption[];
   postOpTracking: CasePostOpTrackingRow | null;
   followUps: CaseFollowUpRow[];
+  timelineItems: CaseTimelineItem[];
+  readiness: CaseReadinessReport;
   foundationRecord: UniversalCaseRecordResult | null;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
@@ -56,8 +64,9 @@ export function CaseDetailPageView({
         <h1 className="text-lg font-semibold text-gray-900">Treatment case</h1>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">
           Tenant-scoped case profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
-          day, Stage 5D post-op / outcome tracking, and case-level planning notes. HairAudit scoring, formal audit
-          grading, AI outcome scoring, and certification scoring are not part of this surface.
+          day, Stage 5D post-op / outcome tracking, Stage 5E unified timeline, Stage 5F readiness indicators, and
+          case-level planning notes. HairAudit
+          scoring, formal audit grading, AI outcome scoring, and certification scoring are not part of this surface.
         </p>
       </div>
 
@@ -76,6 +85,10 @@ export function CaseDetailPageView({
           partner_id: detail.partner_id,
         }}
       />
+
+      <CaseReadinessSummaryCard report={readiness} />
+
+      <CaseTimelineCard items={timelineItems} />
 
       <CaseSurgeryPlanningCard tenantId={tenantId} caseId={detail.id} plan={surgeryPlan} />
 
