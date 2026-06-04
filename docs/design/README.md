@@ -11,6 +11,8 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 | [03-event-ingestion-design](./03-event-ingestion-design.md) | Event schema, naming (e.g. hli.intake.submitted), ingest API, idempotency. |
 | [04-signal-normalization-model](./04-signal-normalization-model.md) | Shared signal vocabulary and normalized signal storage. |
 | [05-ai-integration-strategy](./05-ai-integration-strategy.md) | AI analysis, benchmarking, aggregation, white-label. |
+| [06-foundation-layer-architecture](./06-foundation-layer-architecture.md) | Unified foundation entities (organisations, clinics, persons, roles, patients, cases, timeline, media), ERD, migration plan, security, risks, conflicts with existing FI/HairAudit/HLI. |
+| [07-foundation-migration-specification](./07-foundation-migration-specification.md) | Stage 1B: ordered migration filenames, table definitions, compatibility, decisions, canonical IDs, RLS intent, views, dual-write, rollback, open questions. |
 
 ## Design rule
 
