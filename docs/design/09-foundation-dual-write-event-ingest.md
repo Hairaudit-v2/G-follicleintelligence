@@ -103,4 +103,5 @@ One curated row per meaningful ingest event type currently in the contract. `eve
 | Doc | Role |
 |-----|------|
 | [08-foundation-resolution-helpers](./08-foundation-resolution-helpers.md) | Underlying find-or-create semantics |
+| [10-foundation-integrity-dashboard](./10-foundation-integrity-dashboard.md) | Stage 1G: integrity metrics and optional manual backfill |
 | [03-event-ingestion-design](./03-event-ingestion-design.md) | Envelope lifecycle (contract unchanged) |

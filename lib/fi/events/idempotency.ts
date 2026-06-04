@@ -69,7 +69,8 @@ async function getExistingFiEventBySourceKeyWithClient(
   return (result.data as FiEventRow | null) ?? null;
 }
 
-async function getLatestFiEventLink(
+/** Latest fi_event_links row for an event (ingest resolution). Exported for foundation backfill. */
+export async function getLatestFiEventLink(
   supabase: SupabaseClient,
   eventId: string
 ): Promise<{

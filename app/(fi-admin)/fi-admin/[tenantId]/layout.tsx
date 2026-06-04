@@ -19,6 +19,9 @@ export default async function TenantAdminLayout({
         <Link href={`${base}/audit`} className="text-gray-600 hover:text-gray-900 underline">
           Audit queue
         </Link>
+        <Link href={`${base}/foundation-integrity`} className="text-gray-600 hover:text-gray-900 underline">
+          Foundation integrity
+        </Link>
       </nav>
       {children}
     </div>

@@ -15,6 +15,7 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 | [07-foundation-migration-specification](./07-foundation-migration-specification.md) | Stage 1B: ordered migration filenames, table definitions, compatibility, decisions, canonical IDs, RLS intent, views, dual-write, rollback, open questions. |
 | [08-foundation-resolution-helpers](./08-foundation-resolution-helpers.md) | Stage 1E: server-side `src/lib/fi/foundation` find-or-create helpers, idempotency, matching order, dual-write prep. |
 | [09-foundation-dual-write-event-ingest](./09-foundation-dual-write-event-ingest.md) | Stage 1F: dual-write from FI event ingest into foundation tables; wiring, mapping, idempotency, rollback. |
+| [10-foundation-integrity-dashboard](./10-foundation-integrity-dashboard.md) | Stage 1G: admin integrity metrics, views, optional manual backfill, duplicate-risk heuristics. |
 
 ## Design rule
 
