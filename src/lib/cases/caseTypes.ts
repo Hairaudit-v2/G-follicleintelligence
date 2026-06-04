@@ -1,7 +1,14 @@
 import { z } from "zod";
 
-/** Matches legacy `fi_cases.status` check constraint. */
-export const FI_CASE_STATUS_VALUES = ["draft", "submitted", "processing", "complete", "failed"] as const;
+/** Matches `fi_cases.status` check constraint (legacy pipeline + FI OS workflow). */
+export const FI_CASE_STATUS_VALUES = [
+  "draft",
+  "submitted",
+  "processing",
+  "complete",
+  "failed",
+  "consultation",
+] as const;
 
 export type FiCaseStatusValue = (typeof FI_CASE_STATUS_VALUES)[number];
 

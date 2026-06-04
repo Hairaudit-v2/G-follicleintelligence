@@ -64,9 +64,14 @@ export default async function CasesIndexRoutePage({
             certification scoring here.
           </p>
         </div>
-        <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-blue-600 hover:underline">
-          CRM
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link href={`/fi-admin/${tenantId}/cases/new`} className="text-sm font-medium text-blue-600 hover:underline">
+            Create case
+          </Link>
+          <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-blue-600 hover:underline">
+            CRM
+          </Link>
+        </div>
       </div>
 
       <CasesWorklistView
@@ -77,6 +82,7 @@ export default async function CasesIndexRoutePage({
         totalBeforeFilters={enriched.length}
         totalMatching={pagination.total}
         worklistQueryString={worklistQueryString}
+        firstCaseWizardHref={`/fi-admin/${tenantId}/cases/new`}
         pagination={{
           page: pagination.page,
           pageSize: pagination.pageSize,
