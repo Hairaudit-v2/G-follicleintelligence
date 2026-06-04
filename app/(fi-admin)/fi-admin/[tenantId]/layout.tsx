@@ -71,6 +71,9 @@ export default async function TenantAdminLayout({
             <Link href={`${base}/bookings`} className={navLink}>
               Bookings
             </Link>
+            <Link href={`${base}/calendar`} className={navLink}>
+              Calendar
+            </Link>
           </>
         ) : null}
       </nav>

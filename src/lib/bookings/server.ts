@@ -5,6 +5,7 @@ export {
   completeBooking,
   createBooking,
   loadBookingForTenant,
+  loadBookingsForCalendarOverlap,
   loadBookingsForCase,
   loadBookingsForLead,
   loadBookingsForOperatorView,
@@ -16,6 +17,7 @@ export {
   type CancelBookingParams,
   type CompleteBookingParams,
   type CreateBookingParams,
+  type LoadBookingsForCalendarOverlapParams,
   type LoadBookingsForOperatorViewParams,
   type UpdateBookingParams,
 } from "./bookings";

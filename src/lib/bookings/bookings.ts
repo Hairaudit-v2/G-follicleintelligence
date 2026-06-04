@@ -20,7 +20,11 @@ import {
   assertNonCancelledBookingMutable,
 } from "./bookingPolicy";
 import { sortBookingsByStartAt } from "./bookingTime";
-import { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
+import {
+  CALENDAR_VIEW_BOOKINGS_LIMIT,
+  DEFAULT_OPERATOR_BOOKINGS_LIMIT,
+  MAX_OPERATOR_BOOKINGS_LIMIT,
+} from "./operatorBookingConstants";
 import type { FiBookingRow } from "./types";
 
 export { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
@@ -293,6 +297,87 @@ export async function loadBookingsForOperatorView(
 
   if (error) throw new Error(error.message);
   return sortBookingsByStartAt(((data ?? []) as Record<string, unknown>[]).map(mapBookingRow));
+}
+
+const CALENDAR_BOOKING_SELECT =
+  "id, tenant_id, lead_id, person_id, patient_id, case_id, clinic_id, assigned_user_id, booking_type, booking_status, title, description, start_at, end_at, timezone, location, metadata, cancelled_at, cancelled_by_user_id, cancellation_reason";
+
+function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
+  const meta = row.metadata;
+  assertMetadataJsonObject(meta);
+  const startAt = String(row.start_at);
+  return {
+    id: String(row.id),
+    tenant_id: String(row.tenant_id),
+    lead_id: row.lead_id != null ? String(row.lead_id) : null,
+    person_id: row.person_id != null ? String(row.person_id) : null,
+    patient_id: row.patient_id != null ? String(row.patient_id) : null,
+    case_id: row.case_id != null ? String(row.case_id) : null,
+    clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+    assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
+    booking_type: String(row.booking_type),
+    booking_status: String(row.booking_status),
+    title: row.title != null ? String(row.title) : null,
+    description: row.description != null ? String(row.description) : null,
+    start_at: startAt,
+    end_at: String(row.end_at),
+    timezone: row.timezone != null ? String(row.timezone) : null,
+    location: row.location != null ? String(row.location) : null,
+    metadata: meta,
+    cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
+    cancelled_by_user_id: row.cancelled_by_user_id != null ? String(row.cancelled_by_user_id) : null,
+    cancellation_reason: row.cancellation_reason != null ? String(row.cancellation_reason) : null,
+    created_by_user_id: null,
+    created_at: startAt,
+    updated_at: startAt,
+  };
+}
+
+export type LoadBookingsForCalendarOverlapParams = Omit<LoadBookingsForOperatorViewParams, "limit"> & {
+  limit?: number;
+};
+
+/**
+ * Tenant-scoped bookings overlapping the visible range with optional filters.
+ * Uses a column subset (no created audit columns) for lighter calendar reads (Stage 3C).
+ */
+export async function loadBookingsForCalendarOverlap(
+  params: LoadBookingsForCalendarOverlapParams,
+  client?: SupabaseClient
+): Promise<FiBookingRow[]> {
+  const supabase: SupabaseClient = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(params.tenantId, "tenantId");
+  assertEndAfterStart(params.rangeStartIso, params.rangeEndIso);
+  const cap = params.limit ?? CALENDAR_VIEW_BOOKINGS_LIMIT;
+  const limit = Math.min(Math.max(cap, 1), MAX_OPERATOR_BOOKINGS_LIMIT);
+
+  let q = supabase
+    .from("fi_bookings")
+    .select(CALENDAR_BOOKING_SELECT)
+    .eq("tenant_id", tid)
+    .lt("start_at", params.rangeEndIso.trim())
+    .gt("end_at", params.rangeStartIso.trim());
+
+  if (params.status?.trim()) {
+    q = q.eq("booking_status", params.status.trim());
+  }
+  if (params.bookingType?.trim()) {
+    q = q.eq("booking_type", params.bookingType.trim());
+  }
+  if (params.assignedUserId?.trim()) {
+    q = q.eq("assigned_user_id", params.assignedUserId.trim());
+  }
+  if (params.clinicId?.trim()) {
+    q = q.eq("clinic_id", params.clinicId.trim());
+  }
+  if (!params.includeCancelled) {
+    q = q.neq("booking_status", "cancelled");
+  }
+
+  const { data, error } = await q.order("start_at", { ascending: true }).limit(limit);
+
+  if (error) throw new Error(error.message);
+  return sortBookingsByStartAt(((data ?? []) as Record<string, unknown>[]).map(mapCalendarBookingRow));
 }
 
 export async function loadBookingsForLead(

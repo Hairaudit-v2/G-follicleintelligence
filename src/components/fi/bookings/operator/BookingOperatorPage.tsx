@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { BookingsOperatorPageData } from "@/src/lib/bookings/bookingOperatorLoader";
@@ -26,8 +27,12 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
       <header className="space-y-2">
         <h1 className="text-lg font-semibold text-gray-900">Bookings</h1>
         <p className="text-sm text-gray-600">
-          Calendar view is coming next. This page is the operational booking list — filter, create, and complete work
-          without a visual calendar.
+          Use the{" "}
+          <Link className="text-blue-600 underline hover:text-blue-800" href={`/fi-admin/${tenantId}/calendar`}>
+            Calendar
+          </Link>{" "}
+          for week/day scheduling. This page is the operational booking list — filter, create, and complete work in a
+          dense table.
         </p>
         <p className="text-sm text-gray-600">
           Cancelled bookings are locked except for cancellation details (server policy); use the list to review reasons.

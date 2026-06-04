@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BOOKING_TYPES } from "@/src/lib/bookings";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
@@ -21,12 +21,15 @@ export function BookingQuickCreatePanel({
   clinics,
   adminKey,
   onCreated,
+  slotPrefill,
 }: {
   tenantId: string;
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
   onCreated: () => void;
+  /** When set (e.g. empty slot click), overwrites start/end datetime fields. */
+  slotPrefill?: { startIso: string; endIso: string } | null;
 }) {
   const def = useMemo(() => defaultRangeIso(), []);
   const [busy, setBusy] = useState(false);
@@ -41,6 +44,12 @@ export function BookingQuickCreatePanel({
   const [clinicId, setClinicId] = useState("");
   const [anchorKind, setAnchorKind] = useState<"lead" | "person" | "patient" | "case">("lead");
   const [anchorId, setAnchorId] = useState("");
+
+  useEffect(() => {
+    if (!slotPrefill) return;
+    setStartLocal(toDatetimeLocalValue(slotPrefill.startIso));
+    setEndLocal(toDatetimeLocalValue(slotPrefill.endIso));
+  }, [slotPrefill]);
 
   function withAdmin<T extends Record<string, unknown>>(body: T): T & { adminKey?: string } {
     if (adminKey.trim()) return { ...body, adminKey: adminKey.trim() };
