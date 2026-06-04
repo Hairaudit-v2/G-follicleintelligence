@@ -22,6 +22,7 @@ export const SYSTEM_FEATURE_REGISTRY: readonly SystemFeatureEntry[] = [
   { id: "bookings.operator", group: "Bookings", label: "Operator View" },
   { id: "bookings.calendar", group: "Bookings", label: "Calendar" },
   { id: "patients.profile", group: "Patients", label: "Profile" },
+  { id: "patients.clinicalDetails", group: "Patients", label: "Clinical Details" },
   { id: "patients.images", group: "Patients", label: "Images" },
   { id: "patients.hli", group: "Patients", label: "HLI" },
   { id: "hairaudit.core", group: "HairAudit", label: "HairAudit" },
@@ -61,6 +62,7 @@ export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): R
 
   const patientProfileSchemaOk = payload.patients.personsTable && payload.patients.patientsTable;
   const patientProfileHasRows = (payload.patients.patientsCount ?? 0) > 0;
+  const clinicalDetailsTable = payload.patients.clinicalDetailsTable;
 
   const resolve = (id: string): FeatureRolloutStatus => {
     switch (id) {
@@ -85,6 +87,9 @@ export function resolveFeatureInventoryStatuses(payload: SystemStatusPayload): R
       case "patients.profile":
         if (!patientProfileSchemaOk) return "planned";
         return patientProfileHasRows ? "ready" : "partial";
+      case "patients.clinicalDetails":
+        if (!patientProfileSchemaOk) return "planned";
+        return clinicalDetailsTable ? "ready" : "partial";
       case "patients.images":
       case "patients.hli":
         return "planned";

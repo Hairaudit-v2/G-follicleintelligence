@@ -20,6 +20,7 @@ function baseSnapshot(over: Partial<SystemStatusDbSnapshot> = {}): SystemStatusD
     "fi_bookings",
     "fi_persons",
     "fi_patients",
+    "fi_patient_clinical_details",
     "fi_cases",
     "fi_users",
     "fi_crm_activity_events",
@@ -138,6 +139,8 @@ describe("Stage 3D — system status & readiness", () => {
     assert.equal(hli?.status, "planned");
     const profile = rows.find((r) => r.id === "patients.profile");
     assert.equal(profile?.status, "ready");
+    const clinical = rows.find((r) => r.id === "patients.clinicalDetails");
+    assert.equal(clinical?.status, "ready");
     const surgery = rows.find((r) => r.id === "surgeryos.core");
     assert.equal(surgery?.status, "planned");
   });

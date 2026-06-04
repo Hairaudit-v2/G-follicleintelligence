@@ -4,6 +4,7 @@ import { PatientActivityCard } from "./PatientActivityCard";
 import { PatientAdminNotesCard } from "./PatientAdminNotesCard";
 import { PatientBookingsCard } from "./PatientBookingsCard";
 import { PatientCasesCard } from "./PatientCasesCard";
+import { PatientClinicalDetailsCard } from "./PatientClinicalDetailsCard";
 import { PatientLinkedLeadsCard } from "./PatientLinkedLeadsCard";
 import { PatientPersonDetailsCard } from "./PatientPersonDetailsCard";
 import { PatientProfileHeader } from "./PatientProfileHeader";
@@ -30,6 +31,8 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
       </p>
 
       <PatientProfileSummaryCards data={data} />
+
+      <PatientClinicalDetailsCard tenantId={tenantId} data={data} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <PatientPersonDetailsCard data={data} />

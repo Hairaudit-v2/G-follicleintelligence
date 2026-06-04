@@ -9,10 +9,42 @@ type TenantsJson =
   | { ok: true; tenants?: Tenant[]; devTenantListFallback?: boolean }
   | { ok: false; error?: string; code?: string };
 
+function authHelpBlock(code: string | undefined, message: string) {
+  if (code === "AUTH_REQUIRED") {
+    return (
+      <div className="mt-3 max-w-xl space-y-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+        <p>
+          <strong>Production mode</strong> (<code className="rounded bg-amber-100/80 px-1 text-xs">NODE_ENV=production</code>
+          , e.g. <code className="text-xs">next start</code>): FI Admin needs a Supabase Auth session. Sign in through your
+          app&apos;s auth flow, then ensure your user has an <code className="text-xs">fi_users</code> row for a tenant.
+        </p>
+        <p>
+          For <strong>local</strong> tenant picking <em>without</em> login, run <code className="text-xs">next dev</code>{" "}
+          (not <code className="text-xs">next start</code>) and set{" "}
+          <code className="text-xs">FI_ENABLE_DEV_ADMIN_ACCESS=true</code> in <code className="text-xs">.env.local</code> — see{" "}
+          <code className="text-xs">docs/dev-local-fi-admin.md</code> in this repository.
+        </p>
+      </div>
+    );
+  }
+  if (code === "AUTH_OR_DEV_FLAG_REQUIRED") {
+    return (
+      <div className="mt-3 max-w-xl space-y-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+        <p>{message}</p>
+        <p>
+          See <code className="text-xs">docs/dev-local-fi-admin.md</code> in the repo for details.
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function FiAdminPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | undefined>(undefined);
   const [devTenantListFallback, setDevTenantListFallback] = useState(false);
 
   useEffect(() => {
@@ -25,6 +57,7 @@ export default function FiAdminPage() {
               ? d.error
               : `Request failed (${r.status})`;
           setError(msg);
+          setErrorCode(!d.ok && "code" in d ? d.code : undefined);
           setTenants([]);
           setDevTenantListFallback(false);
           return;
@@ -32,9 +65,11 @@ export default function FiAdminPage() {
         setTenants(d.tenants ?? []);
         setDevTenantListFallback(Boolean(d.devTenantListFallback));
         setError(null);
+        setErrorCode(undefined);
       })
       .catch(() => {
         setError("Failed to load");
+        setErrorCode(undefined);
         setTenants([]);
         setDevTenantListFallback(false);
       })
@@ -42,7 +77,13 @@ export default function FiAdminPage() {
   }, []);
 
   if (loading) return <p className="text-gray-500">Loading tenants…</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (error)
+    return (
+      <div className="space-y-1">
+        <p className="text-red-600">{error}</p>
+        {authHelpBlock(errorCode, error)}
+      </div>
+    );
   if (tenants.length === 0)
     return (
       <div className="space-y-3">

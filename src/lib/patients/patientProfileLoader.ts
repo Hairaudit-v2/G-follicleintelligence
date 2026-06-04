@@ -6,6 +6,8 @@ import { mapFiCrmLeadRow } from "@/src/lib/crm/leadRow";
 import type { FiCrmLeadRow } from "@/src/lib/crm/types";
 import { computePatientProfileSummaryMetrics, sortActivityEventsNewestFirst, splitBookingsUpcomingPast } from "./patientProfileSummary";
 import { normalizePatientStatus, type PatientStatusValue } from "./patientPolicy";
+import type { PatientClinicalDetailsRow } from "./clinicalDetailsServer";
+import { loadPatientClinicalDetails } from "./clinicalDetailsServer";
 
 export type PatientProfilePerson = {
   id: string;
@@ -60,11 +62,17 @@ export type PatientProfileActivityItem = {
   lead_id: string;
 };
 
+export type PatientClinicalDetailsProfileView = {
+  row: PatientClinicalDetailsRow | null;
+  updatedByLabel: string | null;
+};
+
 export type PatientProfileFoundationData = {
   tenantId: string;
   foundationPatientId: string;
   patient: PatientProfilePatientRow;
   person: PatientProfilePerson;
+  clinicalDetails: PatientClinicalDetailsProfileView;
   leads: PatientProfileLeadCard[];
   cases: PatientProfileCaseCard[];
   bookings: { upcoming: PatientProfileBookingCard[]; past: PatientProfileBookingCard[] };
@@ -178,6 +186,21 @@ export async function loadPatientProfile(
   };
 
   const person = mapPerson(personRow as Record<string, unknown>);
+
+  const clinicalRow = await loadPatientClinicalDetails(tid, foundationPatientId, supabase);
+  let clinicalDetailsUpdatedByLabel: string | null = null;
+  if (clinicalRow?.updated_by_user_id) {
+    const { data: updater, error: ueUp } = await supabase
+      .from("fi_users")
+      .select("email")
+      .eq("tenant_id", tid)
+      .eq("id", clinicalRow.updated_by_user_id)
+      .maybeSingle();
+    if (!ueUp && updater) {
+      const em = String((updater as { email: string | null }).email ?? "").trim();
+      clinicalDetailsUpdatedByLabel = em || clinicalRow.updated_by_user_id.slice(0, 8);
+    }
+  }
 
   const { data: leadRows, error: le } = await supabase
     .from("fi_crm_leads")
@@ -345,6 +368,7 @@ export async function loadPatientProfile(
       foundationPatientId,
       patient,
       person,
+      clinicalDetails: { row: clinicalRow, updatedByLabel: clinicalDetailsUpdatedByLabel },
       leads,
       cases,
       bookings: split,

@@ -14,7 +14,7 @@ FI_ENABLE_DEV_ADMIN_ACCESS=true
 
 Requirements (all must hold):
 
-- `NODE_ENV` is **not** `'production'` (e.g. `next dev` defaults to `development`).
+- `NODE_ENV` is **not** `'production'` (e.g. `next dev` defaults to `development`). **`next start`** (and most production hosts) set `NODE_ENV=production`, so the tenant-list bypass is **disabled** there — you must sign in with Supabase Auth and have `fi_users` membership, or use `next dev` locally instead of `next start`.
 - `FI_ENABLE_DEV_ADMIN_ACCESS` is exactly `true` (after trim). Any other value is treated as off.
 - No authenticated Supabase user is resolved from the request — if you **are** logged in, the normal rule applies: only tenants linked via `fi_users` are returned.
 

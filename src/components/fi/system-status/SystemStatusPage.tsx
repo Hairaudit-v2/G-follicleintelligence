@@ -175,6 +175,10 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
           <div className="grid grid-cols-2 gap-2">
             <SystemStatusMetric label="fi_persons rows" value={fmt(data.patients.personsCount)} />
             <SystemStatusMetric label="fi_patients rows" value={fmt(data.patients.patientsCount)} />
+            <SystemStatusMetric
+              label="fi_patient_clinical_details"
+              value={data.patients.clinicalDetailsTable ? "present" : "missing"}
+            />
           </div>
         </SystemStatusCard>
       </SystemStatusSection>

@@ -26,6 +26,7 @@ export const SYSTEM_STATUS_CORE_TABLES = [
   "fi_bookings",
   "fi_persons",
   "fi_patients",
+  "fi_patient_clinical_details",
   "fi_cases",
   "fi_users",
 ] as const;
@@ -40,7 +41,7 @@ export type ReadinessScoreInput = {
  * Computes the **System Readiness Score** (0–100) for the FI OS tenant snapshot.
  *
  * **Weights (documented for operators):**
- * - **60% — Database core:** fraction of `SYSTEM_STATUS_CORE_TABLES` that exist in PostgREST (present / 9 × 60).
+ * - **60% — Database core:** fraction of `SYSTEM_STATUS_CORE_TABLES` that exist in PostgREST (present / 10 × 60).
  * - **25% — Module strip:** average traffic light where green = 1.0, amber = 0.55, red = 0.0, scaled to 25 points.
  * - **15% — Calendar route stack:** full points when the calendar surface is considered configured (Supabase env OK,
  *   `fi_bookings` present, and calendar loaders resolved at build time).
@@ -132,6 +133,7 @@ function buildCalendar(snap: SystemStatusDbSnapshot): CalendarSectionModel {
 function buildPatients(snap: SystemStatusDbSnapshot): PatientsSectionModel {
   const personsTable = Boolean(snap.tablePresence.fi_persons);
   const patientsTable = Boolean(snap.tablePresence.fi_patients);
+  const clinicalDetailsTable = Boolean(snap.tablePresence.fi_patient_clinical_details);
   const pc = snap.counts.persons;
   const pt = snap.counts.patients;
   const hasPersons = (pc ?? 0) > 0;
@@ -153,6 +155,7 @@ function buildPatients(snap: SystemStatusDbSnapshot): PatientsSectionModel {
   return {
     personsTable,
     patientsTable,
+    clinicalDetailsTable,
     personsCount: pc,
     patientsCount: pt,
     label,

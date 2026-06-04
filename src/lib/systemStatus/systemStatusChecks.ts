@@ -12,6 +12,7 @@ const TABLES_TO_PROBE = [
   "fi_bookings",
   "fi_persons",
   "fi_patients",
+  "fi_patient_clinical_details",
   "fi_cases",
   "fi_users",
   "fi_crm_activity_events",

@@ -6,8 +6,8 @@ export function PatientActivityCard({ tenantId, data }: { tenantId: string; data
     <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <h2 className="text-sm font-semibold text-gray-900">Activity</h2>
       <p className="mt-1 text-xs text-gray-500">
-        Read-only CRM activity tied to this patient&apos;s leads, cases, or explicit patient_id (no dedicated patient
-        activity stream in Stage 4A).
+        Read-only CRM activity tied to this patient&apos;s leads, cases, or explicit patient_id. Clinical detail edits
+        are not mirrored here — a patient-native activity stream remains deferred (Stage 4B).
       </p>
       {data.activity.length === 0 ? (
         <p className="mt-2 text-sm text-gray-600">No CRM activity rows matched.</p>

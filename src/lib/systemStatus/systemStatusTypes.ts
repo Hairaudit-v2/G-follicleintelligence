@@ -49,6 +49,7 @@ export type CalendarSectionModel = {
 export type PatientsSectionModel = {
   personsTable: boolean;
   patientsTable: boolean;
+  clinicalDetailsTable: boolean;
   personsCount: number | null;
   patientsCount: number | null;
   label: "Ready" | "Partial" | "Missing";
