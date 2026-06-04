@@ -1,8 +1,13 @@
 import Link from "next/link";
 import type { CasesIndexFilterOptions, CasesIndexQuery } from "@/src/lib/cases/casesIndexTypes";
 import { CASES_INDEX_NONE_VALUE } from "@/src/lib/cases/casesIndexTypes";
+import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
+import { casesWorklistReadinessFilterLabel } from "@/src/lib/cases/casesIndexFilters";
 import { POST_OP_STATUS_VALUES } from "@/src/lib/cases/postOpTypes";
 import { PROCEDURE_STATUS_VALUES } from "@/src/lib/cases/procedureDayTypes";
+import { postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
+import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
+import { surgeryPlanningStatusLabel } from "@/src/lib/cases/surgeryPlanningLabels";
 import { SURGERY_PLANNING_STATUS_VALUES } from "@/src/lib/cases/surgeryPlanningTypes";
 
 function mergeOptions(staticVals: readonly string[], fromRows: string[]): string[] {
@@ -26,6 +31,7 @@ export function CasesWorklistFilters({
 
   return (
     <form method="get" action={basePath} className="rounded border border-gray-200 bg-gray-50/80 p-4">
+      <input type="hidden" name="pageSize" value={String(query.pageSize)} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <label className="block text-xs font-medium text-gray-700 sm:col-span-2">
           Search
@@ -46,7 +52,7 @@ export function CasesWorklistFilters({
             <option value="">All</option>
             {filterOptions.statuses.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {fiCaseStatusLabel(s)}
               </option>
             ))}
           </select>
@@ -92,7 +98,7 @@ export function CasesWorklistFilters({
             <option value={CASES_INDEX_NONE_VALUE}>No surgery plan</option>
             {planningOpts.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {surgeryPlanningStatusLabel(s)}
               </option>
             ))}
           </select>
@@ -108,7 +114,7 @@ export function CasesWorklistFilters({
             <option value={CASES_INDEX_NONE_VALUE}>No procedure day</option>
             {procedureOpts.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {procedureStatusLabel(s)}
               </option>
             ))}
           </select>
@@ -124,7 +130,7 @@ export function CasesWorklistFilters({
             <option value={CASES_INDEX_NONE_VALUE}>No post-op row</option>
             {postOpOpts.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {postOpStatusLabel(s)}
               </option>
             ))}
           </select>
@@ -137,9 +143,9 @@ export function CasesWorklistFilters({
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="all">All</option>
-            <option value="ready">Ready</option>
-            <option value="in_progress">In progress</option>
-            <option value="needs_attention">Needs attention</option>
+            <option value="ready">{casesWorklistReadinessFilterLabel("ready")}</option>
+            <option value="in_progress">{casesWorklistReadinessFilterLabel("in_progress")}</option>
+            <option value="needs_attention">{casesWorklistReadinessFilterLabel("needs_attention")}</option>
           </select>
         </label>
         <label className="block text-xs font-medium text-gray-700">

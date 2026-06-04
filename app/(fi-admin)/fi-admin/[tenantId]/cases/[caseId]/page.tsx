@@ -9,6 +9,7 @@ import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
 import { buildCaseTimeline } from "@/src/lib/cases/caseTimelineBuild";
 import { loadCaseTimelineExtraSources } from "@/src/lib/cases/caseTimelineLoaders";
 import { loadUniversalCaseRecord } from "@/src/lib/fi/foundation/caseRecord";
+import { sanitizeFromCasesSearchParam } from "@/src/lib/cases/caseDetailFromCasesParam";
 
 export const metadata = {
   title: "Case",
@@ -69,6 +70,8 @@ export default async function CaseDetailRoutePage({
     timelineItems,
   });
 
+  const casesListReturnQuery = sanitizeFromCasesSearchParam(sp.fromCases);
+
   const foundationParam = sp.foundation;
   const showFoundation =
     foundationParam === "1" ||
@@ -90,6 +93,7 @@ export default async function CaseDetailRoutePage({
       timelineItems={timelineItems}
       readiness={readiness}
       foundationRecord={foundationOk}
+      casesListReturnQuery={casesListReturnQuery}
     />
   );
 }

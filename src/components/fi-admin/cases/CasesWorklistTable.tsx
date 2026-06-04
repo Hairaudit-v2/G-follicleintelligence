@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CaseWorklistRow, CasesWorklistReadinessBucket } from "@/src/lib/cases/casesIndexTypes";
+import { caseDetailPageHref } from "@/src/lib/cases/caseDetailFromCasesParam";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
@@ -12,7 +13,15 @@ function readinessToBadgeHealth(bucket: CasesWorklistReadinessBucket): CaseReadi
   return bucket;
 }
 
-export function CasesWorklistTable({ tenantId, rows }: { tenantId: string; rows: CaseWorklistRow[] }) {
+export function CasesWorklistTable({
+  tenantId,
+  rows,
+  worklistQueryString,
+}: {
+  tenantId: string;
+  rows: CaseWorklistRow[];
+  worklistQueryString?: string;
+}) {
   if (rows.length === 0) return null;
 
   return (
@@ -34,7 +43,7 @@ export function CasesWorklistTable({ tenantId, rows }: { tenantId: string; rows:
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-gray-100 hover:bg-gray-50/80">
               <td className="px-3 py-2">
-                <Link href={`/fi-admin/${tenantId}/cases/${r.id}`} className="font-medium text-blue-700 hover:underline">
+                <Link href={caseDetailPageHref(tenantId, r.id, worklistQueryString)} className="font-medium text-blue-700 hover:underline">
                   {r.external_id?.trim() ? r.external_id : `${r.id.slice(0, 8)}…`}
                 </Link>
                 <div className="text-xs text-gray-700">{r.person_label}</div>

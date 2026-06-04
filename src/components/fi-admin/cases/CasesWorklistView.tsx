@@ -1,7 +1,16 @@
 import type { CaseWorklistRow, CasesIndexFilterOptions, CasesIndexQuery } from "@/src/lib/cases/casesIndexTypes";
 import { CasesWorklistFilters } from "./CasesWorklistFilters";
 import { CasesWorklistMobileCards } from "./CasesWorklistMobileCards";
+import { CasesWorklistPagination } from "./CasesWorklistPagination";
 import { CasesWorklistTable } from "./CasesWorklistTable";
+
+export type CasesWorklistPaginationSummary = {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  rangeStart: number;
+  rangeEnd: number;
+};
 
 export function CasesWorklistView({
   tenantId,
@@ -9,12 +18,19 @@ export function CasesWorklistView({
   filterOptions,
   rows,
   totalBeforeFilters,
+  totalMatching,
+  pagination,
+  worklistQueryString,
 }: {
   tenantId: string;
   query: CasesIndexQuery;
   filterOptions: CasesIndexFilterOptions;
   rows: CaseWorklistRow[];
   totalBeforeFilters: number;
+  totalMatching: number;
+  pagination: CasesWorklistPaginationSummary;
+  /** Passed to case detail links as `fromCases` so “back to cases” can restore filters. */
+  worklistQueryString?: string;
 }) {
   const hasActiveFilters =
     !!query.q.trim() ||
@@ -26,17 +42,36 @@ export function CasesWorklistView({
     !!query.post_op_status ||
     query.readiness !== "all";
 
+  const allInTenantUnfiltered = totalMatching === totalBeforeFilters && !hasActiveFilters;
+
   return (
     <div className="space-y-4">
       <CasesWorklistFilters tenantId={tenantId} query={query} filterOptions={filterOptions} />
       <p className="text-xs text-gray-600">
-        Showing <span className="font-medium text-gray-900">{rows.length}</span> of{" "}
-        <span className="font-medium text-gray-900">{totalBeforeFilters}</span> cases
-        {hasActiveFilters ? " (filters applied)" : ""}.
+        {totalMatching === 0 ? (
+          <>No cases match the current filters.</>
+        ) : (
+          <>
+            Showing <span className="font-medium text-gray-900">{pagination.rangeStart}</span>–
+            <span className="font-medium text-gray-900">{pagination.rangeEnd}</span> of{" "}
+            <span className="font-medium text-gray-900">{totalMatching}</span> {allInTenantUnfiltered ? "cases" : "matching"}
+            {!allInTenantUnfiltered ? (
+              <>
+                {" "}
+                · <span className="font-medium text-gray-900">{totalBeforeFilters}</span> in this tenant
+              </>
+            ) : null}
+            {hasActiveFilters ? <span className="text-gray-500"> (filters applied)</span> : null}
+          </>
+        )}
       </p>
-      <CasesWorklistTable tenantId={tenantId} rows={rows} />
-      <CasesWorklistMobileCards tenantId={tenantId} rows={rows} />
-      {rows.length === 0 ? <p className="text-sm text-gray-500">No cases match the current filters.</p> : null}
+      {totalMatching > 0 ? (
+        <>
+          <CasesWorklistTable tenantId={tenantId} rows={rows} worklistQueryString={worklistQueryString} />
+          <CasesWorklistMobileCards tenantId={tenantId} rows={rows} worklistQueryString={worklistQueryString} />
+        </>
+      ) : null}
+      <CasesWorklistPagination tenantId={tenantId} query={query} totalMatching={totalMatching} />
     </div>
   );
 }

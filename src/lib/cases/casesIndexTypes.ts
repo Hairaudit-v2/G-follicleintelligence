@@ -10,6 +10,12 @@ export type CasesWorklistSort = "updated_desc" | "created_desc" | "procedure_dat
 
 export type CasesWorklistReadinessBucket = "ready" | "in_progress" | "needs_attention";
 
+export const CASES_INDEX_PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+
+export type CasesIndexPageSize = (typeof CASES_INDEX_PAGE_SIZE_OPTIONS)[number];
+
+export const CASES_INDEX_DEFAULT_PAGE_SIZE: CasesIndexPageSize = 50;
+
 export type CasesIndexQuery = {
   q: string;
   status: string;
@@ -20,6 +26,9 @@ export type CasesIndexQuery = {
   post_op_status: string;
   readiness: CasesWorklistReadinessBucket | "all";
   sort: CasesWorklistSort;
+  /** 1-based */
+  page: number;
+  pageSize: CasesIndexPageSize;
 };
 
 export type CasesIndexFilterOptions = {

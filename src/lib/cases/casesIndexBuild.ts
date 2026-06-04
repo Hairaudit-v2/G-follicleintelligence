@@ -2,7 +2,7 @@ import type { CaseAdminDetail, CaseBookingListItem, CaseImageListItem, CaseIndex
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
 import type { CasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
-import type { CaseWorklistRow, CasesIndexFilterOptions, CasesIndexQuery, CasesWorklistReadinessBucket } from "./casesIndexTypes";
+import type { CaseWorklistRow, CasesIndexFilterOptions, CasesIndexQuery, CasesIndexPageSize, CasesWorklistReadinessBucket } from "./casesIndexTypes";
 import { CASES_INDEX_NONE_VALUE } from "./casesIndexTypes";
 
 function stubBookings(n: number): CaseBookingListItem[] {
@@ -264,4 +264,28 @@ export function deriveCasesIndexFilterOptions(rows: CaseWorklistRow[]): CasesInd
     procedure_statuses: uniqSorted(proc),
     post_op_statuses: uniqSorted(post),
   };
+}
+
+export type CasesWorklistPageResult<T> = {
+  pageRows: T[];
+  total: number;
+  page: number;
+  pageSize: CasesIndexPageSize;
+  totalPages: number;
+  rangeStart: number;
+  rangeEnd: number;
+};
+
+/**
+ * Slices sorted+filtered rows for the current page (1-based). Clamps page to valid range.
+ */
+export function paginateCaseWorklistRows<T>(rows: T[], page: number, pageSize: CasesIndexPageSize): CasesWorklistPageResult<T> {
+  const total = rows.length;
+  const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize);
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const start = (safePage - 1) * pageSize;
+  const pageRows = rows.slice(start, start + pageSize);
+  const rangeStart = total === 0 ? 0 : start + 1;
+  const rangeEnd = total === 0 ? 0 : start + pageRows.length;
+  return { pageRows, total, page: safePage, pageSize, totalPages, rangeStart, rangeEnd };
 }

@@ -1,8 +1,12 @@
 import Link from "next/link";
 import type { CaseAdminDetail } from "@/src/lib/cases/caseLoaders";
+import { CASE_DETAIL_SECTION_IDS } from "@/src/lib/cases/caseDetailNavConstants";
 import { UniversalCaseRecord } from "@/src/components/fi/UniversalCaseRecord";
 import type { UniversalCaseRecordResult } from "@/src/lib/fi/foundation/caseRecord";
 import { CaseBookingsCard } from "./CaseBookingsCard";
+import { CaseDetailBackLink } from "./CaseDetailBackLink";
+import { CaseDetailSection } from "./CaseDetailSection";
+import { CaseDetailSectionNav } from "./CaseDetailSectionNav";
 import { CaseImagesCard } from "./CaseImagesCard";
 import { CaseLinkedLeadCard } from "./CaseLinkedLeadCard";
 import { CaseLinkedPatientCard } from "./CaseLinkedPatientCard";
@@ -19,6 +23,14 @@ import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders"
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
 
+function caseSelfQuery(casesListReturnQuery?: string, opts?: { foundation?: "1" }): string {
+  const p = new URLSearchParams();
+  if (opts?.foundation) p.set("foundation", opts.foundation);
+  if (casesListReturnQuery) p.set("fromCases", casesListReturnQuery);
+  const s = p.toString();
+  return s ? `?${s}` : "";
+}
+
 export function CaseDetailPageView({
   tenantId,
   detail,
@@ -30,6 +42,7 @@ export function CaseDetailPageView({
   timelineItems,
   readiness,
   foundationRecord,
+  casesListReturnQuery,
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
@@ -41,18 +54,19 @@ export function CaseDetailPageView({
   timelineItems: CaseTimelineItem[];
   readiness: CaseReadinessReport;
   foundationRecord: UniversalCaseRecordResult | null;
+  /** Sanitized cases worklist query string for “back to cases” and deep links. */
+  casesListReturnQuery?: string;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
+  const casePath = `/fi-admin/${tenantId}/cases/${detail.id}`;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
-      <p className="text-sm text-gray-600">
-        <Link href={`/fi-admin/${tenantId}/cases`} className="text-blue-600 hover:underline">
-          ← Cases
-        </Link>
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
+        <CaseDetailBackLink tenantId={tenantId} casesListReturnQuery={casesListReturnQuery} />
         {detail.leads.length ? (
           <>
-            <span className="mx-2 text-gray-300">·</span>
+            <span className="text-gray-300">·</span>
             <Link href={`/fi-admin/${tenantId}/crm`} className="text-blue-600 hover:underline">
               CRM
             </Link>
@@ -64,66 +78,92 @@ export function CaseDetailPageView({
         <h1 className="text-lg font-semibold text-gray-900">Treatment case</h1>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">
           Tenant-scoped case profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
-          day, Stage 5D post-op / outcome tracking, Stage 5E unified timeline, Stage 5F readiness indicators, and
-          case-level planning notes. HairAudit
-          scoring, formal audit grading, AI outcome scoring, and certification scoring are not part of this surface.
+          day, Stage 5D post-op / outcome tracking, Stage 5E unified timeline, Stage 5F readiness indicators, Stage 5G–5I
+          worklist navigation polish, and case-level planning notes. HairAudit scoring, formal audit grading, AI outcome
+          scoring, and certification scoring are not part of this surface.
         </p>
       </div>
 
-      <CaseSummaryCard
-        tenantId={tenantId}
-        initial={{
-          id: detail.id,
-          status: detail.status,
-          treatment_type: detail.treatment_type,
-          case_type: detail.case_type,
-          external_id: detail.external_id,
-          created_at: detail.created_at,
-          updated_at: detail.updated_at,
-          clinic_id: detail.clinic_id,
-          organisation_id: detail.organisation_id,
-          partner_id: detail.partner_id,
-        }}
-      />
+      <CaseDetailSectionNav />
 
-      <CaseReadinessSummaryCard report={readiness} />
+      <div className="space-y-8 lg:space-y-10">
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.summary}>
+          <CaseSummaryCard
+            tenantId={tenantId}
+            initial={{
+              id: detail.id,
+              status: detail.status,
+              treatment_type: detail.treatment_type,
+              case_type: detail.case_type,
+              external_id: detail.external_id,
+              created_at: detail.created_at,
+              updated_at: detail.updated_at,
+              clinic_id: detail.clinic_id,
+              organisation_id: detail.organisation_id,
+              partner_id: detail.partner_id,
+            }}
+          />
+        </CaseDetailSection>
 
-      <CaseTimelineCard items={timelineItems} />
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.readiness}>
+          <CaseReadinessSummaryCard report={readiness} />
+        </CaseDetailSection>
 
-      <CaseSurgeryPlanningCard tenantId={tenantId} caseId={detail.id} plan={surgeryPlan} />
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.timeline}>
+          <CaseTimelineCard items={timelineItems} />
+        </CaseDetailSection>
 
-      <CaseProcedureDayCard
-        tenantId={tenantId}
-        caseId={detail.id}
-        procedure={procedureDay}
-        teamUserOptions={teamUserOptions}
-      />
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.surgeryPlanning}>
+          <CaseSurgeryPlanningCard tenantId={tenantId} caseId={detail.id} plan={surgeryPlan} />
+        </CaseDetailSection>
 
-      <CasePostOpTrackingCard
-        tenantId={tenantId}
-        caseId={detail.id}
-        tracking={postOpTracking}
-        followUps={followUps}
-        imageOptions={detail.images}
-      />
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.procedureDay}>
+          <CaseProcedureDayCard
+            tenantId={tenantId}
+            caseId={detail.id}
+            procedure={procedureDay}
+            teamUserOptions={teamUserOptions}
+          />
+        </CaseDetailSection>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <CaseLinkedPatientCard tenantId={tenantId} patient={detail.patient} />
-        <CaseLinkedLeadCard tenantId={tenantId} leads={detail.leads} />
-        <CaseBookingsCard tenantId={tenantId} bookings={detail.bookings} />
-        <CaseImagesCard tenantId={tenantId} patientId={patientId} images={detail.images} />
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.postOp}>
+          <CasePostOpTrackingCard
+            tenantId={tenantId}
+            caseId={detail.id}
+            tracking={postOpTracking}
+            followUps={followUps}
+            imageOptions={detail.images}
+          />
+        </CaseDetailSection>
+
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+          <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.patient} className="min-w-0">
+            <CaseLinkedPatientCard tenantId={tenantId} patient={detail.patient} />
+          </CaseDetailSection>
+          <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.lead} className="min-w-0">
+            <CaseLinkedLeadCard tenantId={tenantId} leads={detail.leads} />
+          </CaseDetailSection>
+          <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.bookings} className="min-w-0">
+            <CaseBookingsCard tenantId={tenantId} bookings={detail.bookings} />
+          </CaseDetailSection>
+          <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.images} className="min-w-0">
+            <CaseImagesCard tenantId={tenantId} patientId={patientId} images={detail.images} />
+          </CaseDetailSection>
+        </div>
+
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.notes}>
+          <CasePlanningNotesPanel
+            tenantId={tenantId}
+            caseId={detail.id}
+            initialPlanningNotes={detail.planning_notes}
+            updatedAt={detail.updated_at}
+          />
+        </CaseDetailSection>
       </div>
-
-      <CasePlanningNotesPanel
-        tenantId={tenantId}
-        caseId={detail.id}
-        initialPlanningNotes={detail.planning_notes}
-        updatedAt={detail.updated_at}
-      />
 
       {!foundationRecord ? (
         <p className="text-xs text-gray-500">
-          <Link className="text-blue-600 hover:underline" href={`?foundation=1`}>
+          <Link className="text-blue-600 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery, { foundation: "1" })}`}>
             Load universal case record
           </Link>{" "}
           (read-only timeline, media, identifiers).
@@ -133,7 +173,7 @@ export function CaseDetailPageView({
       {foundationRecord ? (
         <div className="space-y-2">
           <p className="text-right text-xs">
-            <Link className="text-blue-600 hover:underline" href={`/fi-admin/${tenantId}/cases/${detail.id}`}>
+            <Link className="text-blue-600 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery)}`}>
               Hide foundation view
             </Link>
           </p>

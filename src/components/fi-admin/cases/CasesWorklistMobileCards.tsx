@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CaseWorklistRow, CasesWorklistReadinessBucket } from "@/src/lib/cases/casesIndexTypes";
+import { caseDetailPageHref } from "@/src/lib/cases/caseDetailFromCasesParam";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
@@ -12,7 +13,15 @@ function readinessToBadgeHealth(bucket: CasesWorklistReadinessBucket): CaseReadi
   return bucket;
 }
 
-export function CasesWorklistMobileCards({ tenantId, rows }: { tenantId: string; rows: CaseWorklistRow[] }) {
+export function CasesWorklistMobileCards({
+  tenantId,
+  rows,
+  worklistQueryString,
+}: {
+  tenantId: string;
+  rows: CaseWorklistRow[];
+  worklistQueryString?: string;
+}) {
   if (rows.length === 0) return null;
 
   return (
@@ -20,7 +29,7 @@ export function CasesWorklistMobileCards({ tenantId, rows }: { tenantId: string;
       {rows.map((r) => (
         <Link
           key={r.id}
-          href={`/fi-admin/${tenantId}/cases/${r.id}`}
+          href={caseDetailPageHref(tenantId, r.id, worklistQueryString)}
           className="block rounded border border-gray-200 bg-white p-3 shadow-sm hover:border-gray-300"
         >
           <div className="flex items-start justify-between gap-2">
