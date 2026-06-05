@@ -566,7 +566,7 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
 
   const assign = await resolveBookingStaffAssignment(supabase, tid, {
     assignedStaffId: params.assignedStaffId,
-    assignedUserId: params.assignedStaffId?.trim() ? null : params.assignedUserId,
+    assignedUserId: params.assignedUserId,
   });
   if (assign.assigned_user_id?.trim()) {
     await assertFiUserBelongsToTenant(supabase, tid, assign.assigned_user_id);
@@ -645,6 +645,20 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
 
   const beforeSnap = bookingDetailSnapshotFromRowLike(existing);
 
+  let next_staff = existing.assigned_staff_id;
+  let next_user = existing.assigned_user_id;
+  if (params.assignedStaffId !== undefined) {
+    const r = await resolveBookingStaffAssignment(supabase, tid, {
+      assignedStaffId: params.assignedStaffId,
+      assignedUserId: null,
+    });
+    next_staff = r.assigned_staff_id;
+    next_user = r.assigned_user_id;
+  } else if (params.assignedUserId !== undefined) {
+    next_staff = null;
+    next_user = params.assignedUserId?.trim() || null;
+  }
+
   const next: FiBookingRow = {
     ...existing,
     lead_id: params.leadId !== undefined ? (params.leadId?.trim() || null) : existing.lead_id,
@@ -665,7 +679,8 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
     location: params.location !== undefined ? (params.location?.trim() || null) : existing.location,
     metadata: params.metadata !== undefined ? params.metadata ?? {} : existing.metadata,
     clinic_id: params.clinicId !== undefined ? (params.clinicId?.trim() || null) : existing.clinic_id,
-    assigned_user_id: params.assignedUserId !== undefined ? (params.assignedUserId?.trim() || null) : existing.assigned_user_id,
+    assigned_staff_id: next_staff,
+    assigned_user_id: next_user,
   };
 
   assertMetadataJsonObject(next.metadata);
@@ -715,6 +730,7 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
       patient_id: next.patient_id,
       case_id: next.case_id,
       clinic_id: next.clinic_id,
+      assigned_staff_id: next.assigned_staff_id,
       assigned_user_id: next.assigned_user_id,
       booking_type: next.booking_type,
       booking_status: next.booking_status,
