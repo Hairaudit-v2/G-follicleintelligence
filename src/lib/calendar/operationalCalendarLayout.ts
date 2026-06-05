@@ -2,6 +2,9 @@
  * Pure layout helpers for FI Admin operational calendar (business-hour grid, clinic-local).
  */
 
+import { DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "@/src/lib/bookings/appointmentAvailability";
+import { isBookingCancelled } from "@/src/lib/bookings/bookingPolicy";
+
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import {
   isoFromLocalDayMinutes,
@@ -109,12 +112,19 @@ export function snapIsoToBusinessSlotUtc(iso: string, cfg: BusinessGridConfig, d
 export function bookingConflictsForOperationalCalendar(
   candidate: { id: string; start_at: string; end_at: string; assigned_user_id: string | null; clinic_id: string | null },
   others: FiBookingRow[],
-  opts?: { ignoreBookingId?: string; sameResourceColumnOverlapConflicts?: boolean }
+  opts?: {
+    ignoreBookingId?: string;
+    sameResourceColumnOverlapConflicts?: boolean;
+    /** Minutes padded around each existing booking when testing overlap (matches server availability). */
+    bufferMinutes?: number;
+  }
 ): FiBookingRow[] {
   const ignore = opts?.ignoreBookingId?.trim();
   const s = Date.parse(candidate.start_at);
   const e = Date.parse(candidate.end_at);
   if (!Number.isFinite(s) || !Number.isFinite(e) || e <= s) return [];
+
+  const bufferMs = Math.max(0, (opts?.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES) * 60_000);
 
   const candidateAsRow = candidate as FiBookingRow;
   const candCol = resourceColumnIdForBooking(candidateAsRow);
@@ -122,10 +132,11 @@ export function bookingConflictsForOperationalCalendar(
   const out: FiBookingRow[] = [];
   for (const o of others) {
     if (ignore && o.id === ignore) continue;
+    if (isBookingCancelled(o) || o.booking_status === "completed") continue;
     const os = Date.parse(o.start_at);
     const oe = Date.parse(o.end_at);
     if (!Number.isFinite(os) || !Number.isFinite(oe)) continue;
-    if (!(s < oe && e > os)) continue;
+    if (!(s < oe + bufferMs && e + bufferMs > os)) continue;
 
     const sameAssignee =
       candidate.assigned_user_id?.trim() &&

@@ -290,6 +290,18 @@ export function minutesFromLaneStart(laneStartMs: number, ms: number): number {
   return Math.max(0, (ms - laneStartMs) / 60_000);
 }
 
+/**
+ * Wall-clock minutes from local midnight (hour×60 + minute) for an instant in `timeZone`.
+ * Used when moving an appointment to another calendar day while keeping the same local time
+ * (e.g. month grid drag across days in Australia/Perth).
+ */
+export function localClockMinutesFromInstant(ms: number, timeZone: string): number | null {
+  if (!Number.isFinite(ms)) return null;
+  const tz = normalizeCalendarTimezone(timeZone);
+  const p = getZonedParts(ms, tz);
+  return p.hour * 60 + p.minute;
+}
+
 /** ISO from minutes offset within a lane (local day). */
 export function isoFromLaneMinutes(laneStartMs: number, minutesLocal: number): string {
   return new Date(laneStartMs + minutesLocal * 60_000).toISOString();

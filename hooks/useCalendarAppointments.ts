@@ -210,7 +210,16 @@ export function useCalendarAppointments(
       refresh();
       return { ok: true };
     },
-    [activeBookings, data.query.sampleMode, data.tenantId, markPending, options.useSampleData, patchBooking, refresh, replaceBooking]
+    [
+      activeBookings,
+      data.query.sampleMode,
+      data.tenantId,
+      markPending,
+      options.useSampleData,
+      patchBooking,
+      refresh,
+      replaceBooking,
+    ]
   );
 
   return {

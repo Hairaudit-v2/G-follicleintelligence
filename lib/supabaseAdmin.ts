@@ -6,7 +6,11 @@ export function supabaseAdmin(): SupabaseClient {
   if (!_client) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !key) throw new Error("Missing Supabase env vars");
+    if (!url || !key) {
+      throw new Error(
+        "Missing Supabase env vars (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY). For Next.js use .env.local at the repo root. For tsx scripts (e.g. provision), export them in the shell or rely on the script loading .env.local."
+      );
+    }
     _client = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
     });

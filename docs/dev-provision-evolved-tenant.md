@@ -10,7 +10,7 @@ Use this when standing up **local, staging, or production** so you have:
 
 ## Option A — Node script (recommended)
 
-From the repository root, with **`NEXT_PUBLIC_SUPABASE_URL`** and **`SUPABASE_SERVICE_ROLE_KEY`** set (same as `npm run dev`, e.g. `.env.local`):
+From the repository root, with **`NEXT_PUBLIC_SUPABASE_URL`** and **`SUPABASE_SERVICE_ROLE_KEY`** in **`.env.local`** (or `.env`) at the repo root — the provision script loads those files automatically; plain `tsx` does not, unlike `next dev`.
 
 ```bash
 npm run dev:provision:evolved
@@ -63,7 +63,15 @@ Placeholder items (Messages, Reports, Training) render disabled. **Sales / pipel
 2. **`update fi_users set auth_user_id = '<uuid>' where email = '...'`** for each operator you want to log in.
 3. Post-login behaviour and OS roles: **`docs/fi-os-access-production.md`**, **`src/lib/fiOs/fiOsRedirect.server.ts`**.
 
+## Testing drag-and-drop reschedule (Perth)
+
+After provisioning (`npm run dev:provision:evolved`) and signing in as a CRM operator for that tenant:
+
+1. Open **`/fi-admin/<tenantId>/calendar`** — the grid uses **`fi_tenant_settings.default_timezone`** (Perth for Evolved).
+2. Add **`?sample=1`** to merge demo appointments: drags update the Zustand store immediately; **real** booking ids still **`PATCH`** via `/api/tenants/<tenantId>/appointments/<id>` with optimistic UI and rollback on error.
+3. Drag within **week/day** columns or across **month** cells — client-side checks mirror server overlap rules including a **15-minute buffer**; conflicts show a toast and do not apply an optimistic move.
+
 ## Related
 
-- Local tenant list bypass: **`docs/dev-local-fi-admin.md`**
 - CRM pipeline defaults (code): **`src/lib/crm/pipelineSeedPayload.ts`**
+- Local tenant list bypass: **`docs/dev-local-fi-admin.md`**

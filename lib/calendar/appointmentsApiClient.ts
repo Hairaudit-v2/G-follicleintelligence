@@ -118,23 +118,40 @@ export type RescheduleAppointmentResult =
 export async function rescheduleCalendarAppointmentRequest(
   input: RescheduleAppointmentInput
 ): Promise<RescheduleAppointmentResult> {
-  const res = await fetch(
-    `${tenantAppointmentsBase(input.tenantId)}/${encodeURIComponent(input.appointmentId.trim())}`,
-    {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        startAt: input.startAt,
-        endAt: input.endAt,
-        provider: input.providerId,
-        clinicId: input.clinicId,
-        procedure: input.procedure,
-        metadata: input.metadata,
-      }),
-    }
-  );
-  const json = (await res.json()) as ApiOk<{ appointment: CalendarAppointment }> | ApiErr;
+  let res: Response;
+  try {
+    res = await fetch(
+      `${tenantAppointmentsBase(input.tenantId)}/${encodeURIComponent(input.appointmentId.trim())}`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          startAt: input.startAt,
+          endAt: input.endAt,
+          provider: input.providerId,
+          clinicId: input.clinicId,
+          procedure: input.procedure,
+          metadata: input.metadata,
+        }),
+      }
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Network error";
+    return { ok: false, error: msg };
+  }
+
+  let json: ApiOk<{ appointment: CalendarAppointment }> | ApiErr;
+  try {
+    json = (await res.json()) as ApiOk<{ appointment: CalendarAppointment }> | ApiErr;
+  } catch {
+    return {
+      ok: false,
+      error: res.status ? `Request failed (${res.status}).` : "Invalid response from server.",
+      isConflict: res.status === 409,
+    };
+  }
+
   if (res.ok && json.ok) {
     return { ok: true, appointment: json.appointment };
   }

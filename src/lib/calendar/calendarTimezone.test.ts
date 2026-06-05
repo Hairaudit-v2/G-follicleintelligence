@@ -4,6 +4,7 @@ import {
   addDaysToCalendarDate,
   calendarDateStringFromInstant,
   isoFromLocalDayMinutes,
+  localClockMinutesFromInstant,
   minutesFromLaneStart,
   resolveTenantCalendarTimezone,
   zonedMidnightUtcMs,
@@ -59,6 +60,24 @@ describe("calendarTimezone — Europe/London anchors", () => {
 
   it("addDays respects DST boundaries", () => {
     assert.equal(addDaysToCalendarDate("2026-03-28", 1, tz), "2026-03-29");
+  });
+});
+
+describe("calendarTimezone — Australia/Perth (Evolved tenant default)", () => {
+  const tz = "Australia/Perth";
+
+  it("localClockMinutesFromInstant matches noon wall time", () => {
+    const ms = Date.parse("2026-06-05T04:00:00.000Z");
+    assert.equal(localClockMinutesFromInstant(ms, tz), 12 * 60);
+  });
+
+  it("month-style cross-day move preserves local clock time", () => {
+    const origMs = Date.parse("2026-06-05T04:00:00.000Z");
+    const startMin = localClockMinutesFromInstant(origMs, tz)!;
+    const startIso = isoFromLocalDayMinutes("2026-06-10", startMin, tz);
+    assert.ok(startIso);
+    assert.equal(localClockMinutesFromInstant(Date.parse(startIso), tz), startMin);
+    assert.equal(calendarDateStringFromInstant(new Date(startIso), tz), "2026-06-10");
   });
 });
 

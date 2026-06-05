@@ -25,6 +25,7 @@ import {
 } from "@/components/calendar/AppointmentCard";
 import { CalendarToastProvider, useCalendarToast } from "@/components/calendar/CalendarToast";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
+import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
 import { fiCrmCalendarGridClassNames } from "@/lib/design-system";
 import {
   calendarPointerSensorOptions,
@@ -40,6 +41,7 @@ import {
   calendarDateStringFromInstant,
   DEFAULT_CALENDAR_TIMEZONE,
   isoFromLocalDayMinutes,
+  localClockMinutesFromInstant,
   minutesFromLaneStart,
   normalizeCalendarTimezone,
   parseCalendarDateString,
@@ -614,10 +616,17 @@ function MonthViewInner({
       let startMin = defaultWaitlistDropMinutes(gridConfig);
       if (!waitlistBookingId) {
         const origMs = Date.parse(booking.start_at);
-        if (Number.isFinite(origMs)) {
+        if (!Number.isFinite(origMs)) return;
+        const origDayKey = calendarDateStringFromInstant(new Date(origMs), gridConfig.timeZone);
+        if (origDayKey === dayKey) {
           startMin = minutesFromLaneStart(cell.startMs, origMs);
+        } else {
+          startMin =
+            localClockMinutesFromInstant(origMs, gridConfig.timeZone) ??
+            defaultWaitlistDropMinutes(gridConfig);
         }
       }
+      startMin = snapCalendarMinutes(startMin, gridConfig);
       const startIso = isoFromLocalDayMinutes(dayKey, startMin, gridConfig.timeZone);
       const endIso = isoFromLocalDayMinutes(dayKey, startMin + durationMin, gridConfig.timeZone);
       if (!startIso || !endIso) return;
