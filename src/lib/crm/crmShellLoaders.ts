@@ -20,7 +20,10 @@ import {
   loadCrmTasksForLead,
 } from "./server";
 import { loadReminderJobsForLead } from "@/src/lib/reminders/reminderJobs.server";
+import { loadPatientClinicalDetails, type PatientClinicalDetailsRow } from "@/src/lib/patients/clinicalDetailsServer";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
+import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
+import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type {
@@ -246,6 +249,60 @@ export type CrmLeadShellSlideOverPayload = {
   clinicalScalesSummary: string | null;
 };
 
+export type CrmShellRelatedLeadItem = {
+  id: string;
+  summary: string | null;
+  status: string;
+  current_stage_id: string | null;
+  stage_label: string | null;
+  updated_at: string;
+};
+
+/** Other leads for the same person (excludes `excludeLeadId`). For detail-page peek strip. */
+export async function loadCrmShellRelatedLeads(
+  tenantId: string,
+  personId: string,
+  excludeLeadId: string,
+  stages: FiCrmPipelineStageRow[],
+  limit = 12
+): Promise<CrmShellRelatedLeadItem[]> {
+  const tid = tenantId.trim();
+  const pid = personId.trim();
+  const exclude = excludeLeadId.trim();
+  if (!tid || !pid || !exclude) return [];
+
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_crm_leads")
+    .select("id, summary, status, current_stage_id, updated_at")
+    .eq("tenant_id", tid)
+    .eq("person_id", pid)
+    .neq("id", exclude)
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+
+  const stageById = new Map(stages.map((s) => [s.id, s.label]));
+  return (data ?? []).map((row) => {
+    const r = row as {
+      id: string;
+      summary: string | null;
+      status: string;
+      current_stage_id: string | null;
+      updated_at: string;
+    };
+    const stageId = r.current_stage_id != null ? String(r.current_stage_id) : null;
+    return {
+      id: String(r.id),
+      summary: r.summary != null ? String(r.summary) : null,
+      status: String(r.status),
+      current_stage_id: stageId,
+      stage_label: stageId ? (stageById.get(stageId) ?? null) : null,
+      updated_at: String(r.updated_at),
+    };
+  });
+}
+
 async function loadClinicalScalesSummaryForPatient(tenantId: string, patientId: string): Promise<string | null> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
@@ -287,4 +344,27 @@ export async function loadCrmShellLeadSlideOverPayload(
     pid ? loadClinicalScalesSummaryForPatient(tenantId, pid) : Promise.resolve(null),
   ]);
   return { detail, stages, stageHistory, reminderJobs, clinicalScalesSummary };
+}
+
+export type CrmLeadShellDetailPagePayload = CrmLeadShellSlideOverPayload & {
+  relatedLeads: CrmShellRelatedLeadItem[];
+  clinicalDetails: PatientClinicalDetailsRow | null;
+  patientImages: PatientImagesProfileBundle | null;
+};
+
+/** Full lead detail page: slide-over bundle + related leads + patient clinical + image gallery. */
+export async function loadCrmShellLeadDetailPagePayload(
+  tenantId: string,
+  leadId: string
+): Promise<CrmLeadShellDetailPagePayload | null> {
+  const base = await loadCrmShellLeadSlideOverPayload(tenantId, leadId);
+  if (!base?.detail.lead) return null;
+  const lead = base.detail.lead;
+  const pid = lead.patient_id?.trim() || null;
+  const [relatedLeads, clinicalDetails, patientImages] = await Promise.all([
+    loadCrmShellRelatedLeads(tenantId, lead.person_id, lead.id, base.stages),
+    pid ? loadPatientClinicalDetails(tenantId, pid) : Promise.resolve(null),
+    pid ? loadPatientImagesProfileBundle(tenantId, pid) : Promise.resolve(null),
+  ]);
+  return { ...base, relatedLeads, clinicalDetails, patientImages };
 }

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "./crmGate";
@@ -38,9 +39,10 @@ export async function getCrmShellNavAllowed(tenantId: string): Promise<boolean> 
 }
 
 /**
- * Enforce Stage 2E route gate: same roles as CRM shell nav. Redirects to tenant Cases if unauthorised.
+ * Enforce Stage 2E route gate (cached per request). Used by CRM layout and pages so auth is not loaded twice.
+ * Redirects to tenant Cases if unauthorised.
  */
-export async function assertCrmShellPageAccess(tenantId: string): Promise<CrmShellSession> {
+export const getCrmShellPageSession = cache(async (tenantId: string): Promise<CrmShellSession> => {
   const tid = tenantId.trim();
   if (!tid) redirect("/fi-admin");
 
@@ -55,6 +57,10 @@ export async function assertCrmShellPageAccess(tenantId: string): Promise<CrmShe
   }
 
   return { authUserId: authId, fiUserId: row.id, role: row.role };
+});
+
+export async function assertCrmShellPageAccess(tenantId: string): Promise<CrmShellSession> {
+  return getCrmShellPageSession(tenantId);
 }
 
 /**

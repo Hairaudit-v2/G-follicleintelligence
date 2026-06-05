@@ -23,19 +23,15 @@ export function CrmKanbanBoard({
   initialCards,
   total,
   truncated,
-  operatorFiUserId,
-  userRole,
 }: {
   tenantId: string;
   stages: FiCrmPipelineStageRow[];
   initialCards: CrmKanbanLeadCard[];
   total: number;
   truncated: boolean;
-  operatorFiUserId: string;
-  userRole: string;
 }) {
   const router = useRouter();
-  const { openLead } = useCrmLeadSlideOver();
+  const { openLead, operatorFiUserId, userRole } = useCrmLeadSlideOver();
   const [isPending, startTransition] = useTransition();
   const [cards, setCards] = useState<CrmKanbanLeadCard[]>(initialCards);
   const [dropStageId, setDropStageId] = useState<string | null>(null);

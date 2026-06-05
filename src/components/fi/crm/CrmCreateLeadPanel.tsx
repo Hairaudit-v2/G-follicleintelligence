@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { crmCreateLeadAction } from "@/lib/actions/fi-crm-actions";
 import type { CrmShellClinicOption, CrmShellOrgOption } from "@/src/lib/crm/types";
+import { useCrmLeadSlideOver } from "./LeadSlideOver";
 
 type OwnerOpt = { id: string; email: string | null };
 
@@ -36,17 +37,16 @@ type FieldKey = "summary" | "personId" | "personResolve" | "sourcePair" | "perso
 
 export function CrmCreateLeadPanel({
   tenantId,
-  defaultOwnerUserId,
   owners,
   organisations,
   clinics,
 }: {
   tenantId: string;
-  defaultOwnerUserId: string;
   owners: OwnerOpt[];
   organisations: CrmShellOrgOption[];
   clinics: CrmShellClinicOption[];
 }) {
+  const { operatorFiUserId: defaultOwnerUserId } = useCrmLeadSlideOver();
   const router = useRouter();
   const [personMode, setPersonMode] = useState<"resolve" | "link">("resolve");
   const [adminKey, setAdminKey] = useState("");

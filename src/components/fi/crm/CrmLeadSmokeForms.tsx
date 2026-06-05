@@ -7,6 +7,7 @@ import {
   crmCreateNoteAction,
   crmMoveLeadStageAction,
 } from "@/lib/actions/fi-crm-actions";
+import { useCrmLeadSlideOver } from "./LeadSlideOver";
 
 type StageOpt = { id: string; label: string; slug: string };
 
@@ -14,13 +15,12 @@ export function CrmLeadSmokeForms({
   tenantId,
   leadId,
   stages,
-  fiUserId,
 }: {
   tenantId: string;
   leadId: string;
   stages: StageOpt[];
-  fiUserId: string;
 }) {
+  const { operatorFiUserId: fiUserId } = useCrmLeadSlideOver();
   const router = useRouter();
   const [adminKey, setAdminKey] = useState("");
   const [toStageId, setToStageId] = useState(stages[0]?.id ?? "");

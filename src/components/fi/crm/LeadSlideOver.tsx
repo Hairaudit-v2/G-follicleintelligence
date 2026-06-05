@@ -17,33 +17,29 @@ import {
   CRM_LEAD_DETAIL_PRIORITY_VALUES,
   CRM_LEAD_DETAIL_STATUS_VALUES,
 } from "@/src/lib/crm/crmLeadDetailsPolicy";
-import { leadTitleFromRow, personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
+import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
 import type { CrmLeadShellSlideOverPayload } from "@/src/lib/crm/crmShellLoaders";
-import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
+import {
+  LeadActivityFeed,
+  LeadNotesSection,
+  LeadPersonHeader,
+  LeadQuickEditPanel,
+  LeadRemindersSection,
+  LeadStageSection,
+  LeadTasksSection,
+  crmLeadCardClass,
+} from "./shared";
 
-const card = "rounded border border-gray-200 bg-white p-3 shadow-sm";
+export type CrmShellOperatorContext = {
+  tenantId: string;
+  operatorFiUserId: string;
+  userRole: string;
+};
 
-function stageLabel(stageId: string | null, stages: FiCrmPipelineStageRow[]): string {
-  if (!stageId) return "—";
-  return stages.find((s) => s.id === stageId)?.label ?? `${stageId.slice(0, 8)}…`;
-}
-
-function statusSelectOptions(current: string): string[] {
-  const s = new Set<string>(CRM_LEAD_DETAIL_STATUS_VALUES);
-  const c = current.trim();
-  if (c) s.add(c);
-  return Array.from(s);
-}
-
-function prioritySelectOptions(current: string | null): string[] {
-  const s = new Set<string>(CRM_LEAD_DETAIL_PRIORITY_VALUES);
-  const c = (current ?? "").trim();
-  if (c) s.add(c);
-  return Array.from(s);
-}
-
-type SlideOverCtx = {
+type SlideOverCtx = CrmShellOperatorContext & {
+  /** Lead id currently shown in the slide-over drawer, if any. */
+  activeLeadId: string | null;
   openLead: (leadId: string) => void;
   close: () => void;
 };
@@ -75,7 +71,10 @@ export function CrmLeadSlideOverProvider({
   const openLead = useCallback((id: string) => setLeadId(id.trim()), []);
   const close = useCallback(() => setLeadId(null), []);
 
-  const value = useMemo(() => ({ openLead, close }), [openLead, close]);
+  const value = useMemo(
+    () => ({ tenantId, operatorFiUserId, userRole, activeLeadId: leadId, openLead, close }),
+    [tenantId, operatorFiUserId, userRole, leadId, openLead, close]
+  );
 
   return (
     <CrmLeadSlideOverContext.Provider value={value}>
@@ -188,34 +187,6 @@ export function LeadSlideOverPanel({
     if (!p) return "—";
     return personMetadataDisplayLabel(p.metadata);
   }, [payload?.detail.conversionState?.person]);
-
-  const openTasks = useMemo(() => {
-    const tasks = payload?.detail.tasks ?? [];
-    return tasks.filter((t) => t.completed_at == null);
-  }, [payload?.detail.tasks]);
-
-  const activityPreview = useMemo(() => (payload?.detail.events ?? []).slice(0, 8), [payload?.detail.events]);
-
-  const notesPreview = useMemo(() => {
-    const general = (payload?.detail.notes ?? []).map((n) => ({
-      id: n.id,
-      kind: "note" as const,
-      at: n.created_at,
-      text: n.body,
-    }));
-    const ln = (payload?.detail.leadNotes ?? [])
-      .filter((x) => x.archived_at == null)
-      .map((n) => ({ id: n.id, kind: "lead_note" as const, at: n.created_at, text: n.note_body }));
-    return [...general, ...ln].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 6);
-  }, [payload?.detail.leadNotes, payload?.detail.notes]);
-
-  const upcomingReminders = useMemo(() => {
-    const jobs = payload?.reminderJobs ?? [];
-    const now = Date.now();
-    return jobs
-      .filter((j) => j.status === "pending" && new Date(j.scheduled_at).getTime() >= now - 120_000)
-      .slice(0, 10);
-  }, [payload?.reminderJobs]);
 
   async function refreshPayload() {
     if (!leadId) return;
@@ -478,285 +449,73 @@ export function LeadSlideOverPanel({
 
           {!loading && lead && payload ? (
             <div className="space-y-4">
-              <section className={card}>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Person</h3>
-                <p className="font-medium text-gray-900">{personName}</p>
-                <p className="mt-1 text-xs text-gray-500">
-                  Lead: {leadTitleFromRow(lead.summary, lead.id)}
-                </p>
-                {payload.clinicalScalesSummary ? (
-                  <p className="mt-2 text-xs text-gray-800">{payload.clinicalScalesSummary}</p>
-                ) : (
-                  <p className="mt-2 text-xs text-gray-500">No linked patient clinical summary yet.</p>
-                )}
-                <dl className="mt-3 grid gap-1 text-xs text-gray-700">
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-gray-500">Status</dt>
-                    <dd>{lead.status}</dd>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-gray-500">Stage</dt>
-                    <dd>{stageLabel(lead.current_stage_id, stages)}</dd>
-                  </div>
-                </dl>
-              </section>
+              <LeadPersonHeader
+                personName={personName}
+                leadId={lead.id}
+                leadSummary={lead.summary}
+                clinicalScalesSummary={payload.clinicalScalesSummary}
+              />
 
-              {canMutate ? (
-                <section className={card}>
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Change stage</h3>
-                  <select
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                    value={lead.current_stage_id ?? ""}
-                    disabled={stageBusy}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (!v) return;
-                      void onStageChange(v);
-                    }}
-                  >
-                    <option value="">Select stage…</option>
-                    {stages.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                  {stageErr ? <p className="mt-1 text-xs text-red-700">{stageErr}</p> : null}
-                  <details className="mt-2">
-                    <summary className="cursor-pointer text-xs text-gray-600">Recent stage history</summary>
-                    <ul className="mt-2 max-h-40 space-y-2 overflow-y-auto text-xs text-gray-700">
-                      {(payload.stageHistory ?? []).slice(0, 12).map((h) => (
-                        <li key={h.id} className="border-l-2 border-gray-200 pl-2">
-                          <time className="text-gray-500">{h.changed_at}</time>
-                          <p>
-                            {stageLabel(h.from_stage_id, stages)} → {stageLabel(h.to_stage_id, stages)}
-                          </p>
-                          <p className="text-gray-500">{h.source}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                </section>
-              ) : (
-                <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                  Your role can view this lead but not change CRM data here.
-                </p>
-              )}
+              <LeadStageSection
+                lead={lead}
+                stages={stages}
+                stageHistory={payload.stageHistory ?? []}
+                canMutate={canMutate}
+                stageBusy={stageBusy}
+                stageErr={stageErr}
+                onStageChange={onStageChange}
+              />
 
-              {canMutate ? (
-                <section className={card}>
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Quick edit</h3>
-                  <form className="space-y-2" onSubmit={onSaveBasics}>
-                    <label className="block">
-                      <span className="text-xs font-medium text-gray-700">Summary</span>
-                      <textarea
-                        value={summary}
-                        onChange={(e) => setSummary(e.target.value)}
-                        rows={2}
-                        className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                      />
-                    </label>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <label className="block">
-                        <span className="text-xs font-medium text-gray-700">Status</span>
-                        <select
-                          value={status}
-                          onChange={(e) => setStatus(e.target.value)}
-                          className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                        >
-                          {statusSelectOptions(lead.status).map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="block">
-                        <span className="text-xs font-medium text-gray-700">Priority</span>
-                        <select
-                          value={priority}
-                          onChange={(e) => setPriority(e.target.value)}
-                          className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                        >
-                          <option value="">None</option>
-                          {prioritySelectOptions(lead.priority).map((p) => (
-                            <option key={p} value={p}>
-                              {p}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
-                    <label className="block">
-                      <span className="text-xs font-medium text-gray-700">Primary owner</span>
-                      <select
-                        value={ownerId}
-                        onChange={(e) => setOwnerId(e.target.value)}
-                        className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                      >
-                        <option value="">Unassigned</option>
-                        {payload.detail.owners.map((o) => (
-                          <option key={o.id} value={o.id}>
-                            {o.email ?? o.id}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    {detailErr ? <p className="text-xs text-red-700">{detailErr}</p> : null}
-                    <button
-                      type="submit"
-                      disabled={detailBusy}
-                      className="rounded bg-blue-700 px-3 py-1.5 text-white hover:bg-blue-800 disabled:opacity-50"
-                    >
-                      {detailBusy ? "Saving…" : "Save basics"}
-                    </button>
-                  </form>
-                </section>
-              ) : null}
+              <LeadQuickEditPanel
+                lead={lead}
+                owners={payload.detail.owners}
+                summary={summary}
+                status={status}
+                priority={priority}
+                ownerId={ownerId}
+                canMutate={canMutate}
+                busy={detailBusy}
+                error={detailErr}
+                onSummaryChange={setSummary}
+                onStatusChange={setStatus}
+                onPriorityChange={setPriority}
+                onOwnerIdChange={setOwnerId}
+                onSubmit={onSaveBasics}
+              />
 
-              <section className={card}>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Activity</h3>
-                {activityPreview.length === 0 ? (
-                  <p className="text-xs text-gray-600">No timeline events yet.</p>
-                ) : (
-                  <ul className="max-h-48 space-y-2 overflow-y-auto text-xs">
-                    {activityPreview.map((ev) => (
-                      <li key={ev.id} className="border-l-2 border-gray-100 pl-2">
-                        <span className="text-gray-500">{ev.occurred_at}</span>{" "}
-                        <span className="font-mono text-gray-600">{ev.activity_kind}</span>
-                        {ev.title ? <p className="font-medium text-gray-900">{ev.title}</p> : null}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
+              <LeadActivityFeed events={payload.detail.events ?? []} limit={8} />
 
-              <section className={card}>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Open tasks</h3>
-                {openTasks.length === 0 ? (
-                  <p className="text-xs text-gray-600">No open tasks.</p>
-                ) : (
-                  <ul className="space-y-2 text-xs">
-                    {openTasks.map((t) => (
-                      <li key={t.id} className="flex items-start justify-between gap-2 rounded border border-gray-100 p-2">
-                        <div>
-                          <p className="font-medium text-gray-900">{t.title}</p>
-                          <p className="text-gray-500">
-                            {t.task_type} · {t.status}
-                            {t.due_at ? ` · due ${t.due_at}` : ""}
-                          </p>
-                        </div>
-                        {canMutate ? (
-                          <button
-                            type="button"
-                            className="shrink-0 text-blue-700 hover:underline"
-                            onClick={() => void onCompleteTask(t.id)}
-                          >
-                            Done
-                          </button>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {canMutate ? (
-                  <form className="mt-3 flex flex-col gap-2 sm:flex-row" onSubmit={onAddTask}>
-                    <input
-                      value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
-                      placeholder="New task title"
-                      className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1.5 text-sm"
-                    />
-                    <button
-                      type="submit"
-                      disabled={taskBusy}
-                      className="rounded border border-gray-300 px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      Add
-                    </button>
-                  </form>
-                ) : null}
-                {taskErr ? <p className="mt-1 text-xs text-red-700">{taskErr}</p> : null}
-              </section>
+              <LeadTasksSection
+                tasks={payload.detail.tasks ?? []}
+                canMutate={canMutate}
+                taskTitle={taskTitle}
+                taskBusy={taskBusy}
+                taskErr={taskErr}
+                onTaskTitleChange={setTaskTitle}
+                onAddTask={onAddTask}
+                onCompleteTask={onCompleteTask}
+              />
 
-              <section className={card}>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</h3>
-                {notesPreview.length === 0 ? (
-                  <p className="text-xs text-gray-600">No notes yet.</p>
-                ) : (
-                  <ul className="mb-3 max-h-40 space-y-2 overflow-y-auto text-xs">
-                    {notesPreview.map((n) => (
-                      <li key={`${n.kind}-${n.id}`} className="rounded bg-gray-50 p-2">
-                        <span className="text-gray-500">{n.at}</span>{" "}
-                        <span className="text-gray-500">({n.kind})</span>
-                        <p className="whitespace-pre-wrap text-gray-800">{n.text}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {canMutate ? (
-                  <div className="space-y-3">
-                    <form onSubmit={onAddGeneralNote}>
-                      <p className="mb-1 text-xs font-medium text-gray-700">General CRM note</p>
-                      <textarea
-                        value={noteBody}
-                        onChange={(e) => setNoteBody(e.target.value)}
-                        rows={2}
-                        className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                        placeholder="Visible on lead (general notes)"
-                      />
-                      <button
-                        type="submit"
-                        disabled={noteBusy}
-                        className="mt-1 rounded border border-gray-300 px-3 py-1 text-xs hover:bg-gray-50 disabled:opacity-50"
-                      >
-                        Add general note
-                      </button>
-                    </form>
-                    <form onSubmit={onAddLeadNote}>
-                      <p className="mb-1 text-xs font-medium text-gray-700">Lead note</p>
-                      <textarea
-                        value={leadNoteBody}
-                        onChange={(e) => setLeadNoteBody(e.target.value)}
-                        rows={2}
-                        className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                        placeholder="Internal lead note"
-                      />
-                      <button
-                        type="submit"
-                        disabled={leadNoteBusy}
-                        className="mt-1 rounded border border-gray-300 px-3 py-1 text-xs hover:bg-gray-50 disabled:opacity-50"
-                      >
-                        Add lead note
-                      </button>
-                    </form>
-                  </div>
-                ) : null}
-                {(noteErr || leadNoteErr) ? (
-                  <p className="mt-1 text-xs text-red-700">{noteErr ?? leadNoteErr}</p>
-                ) : null}
-              </section>
+              <LeadNotesSection
+                notes={payload.detail.notes ?? []}
+                leadNotes={payload.detail.leadNotes ?? []}
+                canMutate={canMutate}
+                noteBody={noteBody}
+                leadNoteBody={leadNoteBody}
+                noteBusy={noteBusy}
+                leadNoteBusy={leadNoteBusy}
+                noteErr={noteErr}
+                leadNoteErr={leadNoteErr}
+                onNoteBodyChange={setNoteBody}
+                onLeadNoteBodyChange={setLeadNoteBody}
+                onAddGeneralNote={onAddGeneralNote}
+                onAddLeadNote={onAddLeadNote}
+              />
 
-              <section className={card}>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Upcoming reminders</h3>
-                {upcomingReminders.length === 0 ? (
-                  <p className="text-xs text-gray-600">No pending reminder jobs scheduled ahead for this lead.</p>
-                ) : (
-                  <ul className="space-y-2 text-xs">
-                    {upcomingReminders.map((j) => (
-                      <li key={j.id} className="flex flex-col rounded border border-gray-100 p-2">
-                        <span className="font-medium text-gray-900">{j.template_name || "Reminder"}</span>
-                        <span className="text-gray-600">
-                          {j.scheduled_at} · {j.status}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
+              <LeadRemindersSection reminderJobs={payload.reminderJobs ?? []} />
 
               {payload.detail.conversionState && !lead.converted_at ? (
-                <section className={card}>
+                <section className={crmLeadCardClass}>
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Convert to patient</h3>
                   <p className="mb-2 text-xs text-gray-600">
                     Creates the patient foundation from this lead when not yet converted.

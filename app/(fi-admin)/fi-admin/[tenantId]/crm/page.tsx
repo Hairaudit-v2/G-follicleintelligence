@@ -7,8 +7,7 @@ import { CrmLeadListFilters } from "@/src/components/fi/crm/CrmLeadListFilters";
 import { CrmLeadListPagination } from "@/src/components/fi/crm/CrmLeadListPagination";
 import { CrmLeadListTable } from "@/src/components/fi/crm/CrmLeadListTable";
 import { CrmPipelinePanel } from "@/src/components/fi/crm/CrmDataPanels";
-import { CrmLeadSlideOverProvider } from "@/src/components/fi/crm/LeadSlideOver";
-import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
+import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import {
   loadCrmShellLeadsBoardIndex,
   loadCrmShellLeadsIndex,
@@ -34,7 +33,7 @@ export default async function CrmShellPage({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const { tenantId } = await params;
-  const session = await assertCrmShellPageAccess(tenantId);
+  const session = await getCrmShellPageSession(tenantId);
   const sp = searchParams ?? {};
 
   const baseQuery = parseCrmLeadListQuery(sp);
@@ -55,8 +54,7 @@ export default async function CrmShellPage({
   const firstPageHref = buildCrmLeadListHref(tenantId, { ...parsedCrmLeadListToHrefQuery(query), page: 1 });
 
   return (
-    <CrmLeadSlideOverProvider tenantId={tenantId} operatorFiUserId={session.fiUserId} userRole={session.role}>
-      <div className={`mx-auto space-y-6 py-6 ${isBoard ? "max-w-[100rem] px-3 sm:px-4" : "max-w-6xl"}`}>
+    <div className={`mx-auto space-y-6 py-6 ${isBoard ? "max-w-[100rem] px-3 sm:px-4" : "max-w-6xl"}`}>
       <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-lg font-semibold text-gray-900">CRM — leads</h1>
@@ -100,8 +98,6 @@ export default async function CrmShellPage({
               initialCards={board.cards}
               total={board.total}
               truncated={board.truncated}
-              operatorFiUserId={session.fiUserId}
-              userRole={session.role}
             />
           )}
         </section>
@@ -151,12 +147,10 @@ export default async function CrmShellPage({
 
       <CrmCreateLeadPanel
         tenantId={tenantId}
-        defaultOwnerUserId={session.fiUserId}
         owners={owners}
         organisations={scope.organisations}
         clinics={scope.clinics}
       />
     </div>
-    </CrmLeadSlideOverProvider>
   );
 }
