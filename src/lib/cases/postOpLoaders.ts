@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { isSupabaseMissingRelationError } from "@/src/lib/supabase/missingRelationError";
 import type { FollowUpCheckpointValue } from "./postOpTypes";
 
 export type CasePostOpTrackingRow = {
@@ -62,7 +63,10 @@ export async function loadPostOpTrackingForCase(
     .eq("case_id", cid)
     .maybeSingle();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (isSupabaseMissingRelationError(error)) return null;
+    throw new Error(error.message);
+  }
   if (!row) return null;
 
   const r = row as Record<string, unknown>;
@@ -101,7 +105,10 @@ export async function loadFollowUpsForCase(
     .eq("case_id", cid)
     .order("checkpoint", { ascending: true });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (isSupabaseMissingRelationError(error)) return [];
+    throw new Error(error.message);
+  }
 
   return (rows ?? []).map((raw) => {
     const r = raw as Record<string, unknown>;

@@ -9,6 +9,7 @@ import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders"
 import { plannedZoneRowSchema, type PlannedZoneRow } from "@/src/lib/cases/surgeryPlanningTypes";
 import type { FollowUpCheckpointValue } from "@/src/lib/cases/postOpTypes";
 import { isFollowUpCheckpoint } from "@/src/lib/cases/postOpTypes";
+import { isSupabaseMissingRelationError } from "@/src/lib/supabase/missingRelationError";
 
 export type CasesIndexExtensionBundle = {
   plansByCaseId: Map<string, CaseSurgeryPlanRow>;
@@ -196,8 +197,8 @@ export async function loadCasesIndexExtensionBundle(
 
   if (pe) throw new Error(pe.message);
   if (prE) throw new Error(prE.message);
-  if (poE) throw new Error(poE.message);
-  if (fuE) throw new Error(fuE.message);
+  if (poE && !isSupabaseMissingRelationError(poE)) throw new Error(poE.message);
+  if (fuE && !isSupabaseMissingRelationError(fuE)) throw new Error(fuE.message);
   if (imgE) throw new Error(imgE.message);
   if (bkE) throw new Error(bkE.message);
 

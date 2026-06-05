@@ -18,7 +18,8 @@
     "supabase:db:reset": "npx supabase db reset",
     "supabase:migration:up": "npx supabase migration up",
     "supabase:migration:new": "npx supabase migration new",
-    "supabase:push:consultations": "node scripts/apply-fi-consultations-remote.mjs"
+    "supabase:push:consultations": "node scripts/apply-fi-consultations-remote.mjs",
+    "supabase:push:post-op-tracking": "node scripts/apply-fi-case-post-op-tracking-remote.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.16",
@@ -47,6 +48,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
     "eslint-config-prettier": "^10.1.8",
+    "pg": "^8.16.3",
     "postcss": "^8",
     "prettier": "^3.8.1",
     "tailwindcss": "^3.4.1",

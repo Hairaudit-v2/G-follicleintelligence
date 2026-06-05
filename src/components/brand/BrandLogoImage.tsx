@@ -17,6 +17,15 @@ type BrandLogoImageProps = {
   priority?: boolean;
 };
 
+function resolveNextImageLoading(
+  priority: boolean | undefined,
+  loading: "lazy" | "eager"
+): { priority: true } | { priority: false; loading: "lazy" | "eager" } | { loading: "lazy" | "eager" } {
+  if (priority) return { priority: true };
+  if (priority === false) return { priority: false, loading };
+  return { loading };
+}
+
 /**
  * Tenant / clinic logo via Next.js Image — local public imports or validated remote http(s) URLs.
  */
@@ -41,12 +50,13 @@ export function BrandLogoImage({
         width={width}
         height={height}
         className={className}
-        loading={loading}
-        priority={priority ?? true}
+        {...resolveNextImageLoading(priority ?? true, loading)}
         onError={() => setHide(true)}
       />
     );
   }
+
+  const fetchProps = resolveNextImageLoading(priority, loading);
 
   if (source.kind === "static") {
     return (
@@ -56,8 +66,7 @@ export function BrandLogoImage({
         width={width}
         height={height}
         className={className}
-        loading={loading}
-        priority={priority}
+        {...fetchProps}
         onError={() => setHide(true)}
       />
     );
@@ -70,8 +79,7 @@ export function BrandLogoImage({
       width={width}
       height={height}
       className={className}
-      loading={loading}
-      priority={priority}
+      {...fetchProps}
       unoptimized
       referrerPolicy="no-referrer"
       onError={() => setHide(true)}

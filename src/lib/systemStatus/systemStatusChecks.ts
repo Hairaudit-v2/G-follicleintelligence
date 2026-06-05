@@ -17,6 +17,8 @@ const TABLES_TO_PROBE = [
   "fi_patient_clinical_details",
   "fi_patient_images",
   "fi_cases",
+  "fi_case_post_op_tracking",
+  "fi_case_follow_ups",
   "fi_users",
   "fi_crm_activity_events",
 ] as const;

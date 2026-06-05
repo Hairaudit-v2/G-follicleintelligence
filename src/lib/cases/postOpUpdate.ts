@@ -3,7 +3,16 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { isSupabaseMissingRelationError } from "@/src/lib/supabase/missingRelationError";
 import type { FollowUpUpsertPatch, PostOpTrackingUpsertPatch } from "./postOpTypes";
+
+const POST_OP_MIGRATION_HINT =
+  "Post-op tables are not deployed yet. Run: npm run supabase:push:post-op-tracking (with SUPABASE_DB_PASSWORD set).";
+
+function throwPostOpDbError(error: { message?: string }): never {
+  if (isSupabaseMissingRelationError(error)) throw new Error(POST_OP_MIGRATION_HINT);
+  throw new Error(error.message ?? "Database error.");
+}
 
 async function assertPatientImageIdsBelongToCase(
   supabase: SupabaseClient,
@@ -54,7 +63,7 @@ export async function upsertPostOpTrackingForCase(params: UpsertPostOpTrackingPa
     .eq("tenant_id", tid)
     .eq("case_id", cid)
     .maybeSingle();
-  if (le) throw new Error(le.message);
+  if (le) throwPostOpDbError(le);
 
   const now = new Date().toISOString();
   const updatePayload: Record<string, unknown> = { updated_at: now };
@@ -86,7 +95,7 @@ export async function upsertPostOpTrackingForCase(params: UpsertPostOpTrackingPa
       .update(updatePayload)
       .eq("tenant_id", tid)
       .eq("case_id", cid);
-    if (ue) throw new Error(ue.message);
+    if (ue) throwPostOpDbError(ue);
     return;
   }
 
@@ -108,7 +117,7 @@ export async function upsertPostOpTrackingForCase(params: UpsertPostOpTrackingPa
   };
 
   const { error: ie } = await supabase.from("fi_case_post_op_tracking").insert(insertPayload);
-  if (ie) throw new Error(ie.message);
+  if (ie) throwPostOpDbError(ie);
 }
 
 export type UpsertFollowUpParams = {
@@ -153,7 +162,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
       .eq("case_id", cid)
       .eq("id", p.id)
       .maybeSingle();
-    if (re) throw new Error(re.message);
+    if (re) throwPostOpDbError(re);
     if (!row) throw new Error("Follow-up row not found for this patient.");
 
     const updatePayload: Record<string, unknown> = { updated_at: now };
@@ -164,7 +173,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
     if (p.notes !== undefined) updatePayload.notes = p.notes?.trim() ? p.notes.trim() : null;
 
     const { error: ue } = await supabase.from("fi_case_follow_ups").update(updatePayload).eq("tenant_id", tid).eq("case_id", cid).eq("id", p.id);
-    if (ue) throw new Error(ue.message);
+    if (ue) throwPostOpDbError(ue);
     return;
   }
 
@@ -177,7 +186,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
     .eq("case_id", cid)
     .eq("checkpoint", p.checkpoint)
     .maybeSingle();
-  if (be) throw new Error(be.message);
+  if (be) throwPostOpDbError(be);
 
   if (byCp?.id) {
     const updatePayload: Record<string, unknown> = {
@@ -195,7 +204,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
       .eq("tenant_id", tid)
       .eq("case_id", cid)
       .eq("id", String((byCp as { id: string }).id));
-    if (ue) throw new Error(ue.message);
+    if (ue) throwPostOpDbError(ue);
     return;
   }
 
@@ -216,7 +225,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
   };
 
   const { error: ie } = await supabase.from("fi_case_follow_ups").insert(insertPayload);
-  if (ie) throw new Error(ie.message);
+  if (ie) throwPostOpDbError(ie);
 }
 
 export type DeleteFollowUpParams = {
@@ -232,5 +241,5 @@ export async function deleteFollowUpForCase(params: DeleteFollowUpParams, client
   const fid = assertNonEmptyUuid(params.followUpId, "followUpId");
 
   const { error } = await supabase.from("fi_case_follow_ups").delete().eq("tenant_id", tid).eq("case_id", cid).eq("id", fid);
-  if (error) throw new Error(error.message);
+  if (error) throwPostOpDbError(error);
 }

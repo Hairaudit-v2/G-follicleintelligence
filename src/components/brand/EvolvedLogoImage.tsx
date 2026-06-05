@@ -14,18 +14,23 @@ export function EvolvedLogoImage({
   width = 180,
   height = 40,
   priority = true,
+  loading,
   className,
   ...rest
 }: EvolvedLogoImageProps) {
+  const fetchProps = priority
+    ? ({ priority: true } as const)
+    : ({ priority: false, loading: loading ?? "lazy" } as const);
+
   return (
     <Image
       src={PUBLIC_IMAGES.evolvedLogo}
       alt={alt}
       width={width}
       height={height}
-      priority={priority}
       className={className}
       {...rest}
+      {...fetchProps}
     />
   );
 }
