@@ -1,10 +1,17 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 import { AppointmentCardFromBooking } from "@/components/calendar/AppointmentCard";
+import { CalendarEmptyState } from "@/components/calendar/CalendarEmptyState";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { CalendarViewportRange } from "@/lib/calendar/virtualizeAppointments";
+import {
+  filterVisibleAppointmentIds,
+  shouldVirtualizeAppointments,
+} from "@/lib/calendar/virtualizeAppointments";
 import { cn } from "@/lib/utils";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -303,8 +310,16 @@ export type ProviderColumnProps = {
   draggable?: boolean;
   /** Allow vertical resize on appointment cards. */
   resizable?: boolean;
+  /** Full-width stacked column (mobile / tablet swipe). */
+  stacked?: boolean;
+  /** Larger drag targets for touch devices. */
+  touchFriendly?: boolean;
   onSelectAppointment?: (booking: FiBookingRow) => void;
   onResizeAppointment?: (booking: FiBookingRow, endIso: string) => void;
+  /** Shared vertical scroll viewport for virtualization. */
+  viewportRange?: CalendarViewportRange;
+  /** Keep dragged card mounted while virtualizing. */
+  pinnedAppointmentId?: string | null;
   bodyHeightPx?: number;
   minWidthPx?: number;
   className?: string;
@@ -324,8 +339,12 @@ export function ProviderColumn({
   droppable = false,
   draggable = false,
   resizable = false,
+  stacked = false,
+  touchFriendly = false,
   onSelectAppointment,
   onResizeAppointment,
+  viewportRange,
+  pinnedAppointmentId,
   bodyHeightPx: bodyHeightPxProp,
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
   className,
@@ -337,6 +356,20 @@ export function ProviderColumn({
     [appointments, lane, gridConfig]
   );
 
+  const virtualize = shouldVirtualizeAppointments(appointments.length);
+  const visibleIds = useMemo(() => {
+    if (!virtualize || !viewportRange) {
+      return new Set(appointments.map((a) => a.id));
+    }
+    return filterVisibleAppointmentIds(
+      overlapLayouts,
+      viewportRange,
+      pinnedAppointmentId ? [pinnedAppointmentId] : undefined
+    );
+  }, [appointments, overlapLayouts, pinnedAppointmentId, viewportRange, virtualize]);
+
+  const timedCount = overlapLayouts.size;
+
   const { setNodeRef, isOver } = useDroppable({
     id: providerColumnDropId(dayKey, id),
     disabled: !droppable,
@@ -346,11 +379,14 @@ export function ProviderColumn({
   return (
     <div
       className={cn(
-        "flex min-w-[var(--col-min)] flex-1 flex-col border-l border-slate-200/70 first:border-l-0 transition-colors",
+        "flex flex-col border-slate-200/70 transition-colors",
+        stacked
+          ? "min-w-full w-full flex-none border-b border-l-0 last:border-b-0"
+          : "min-w-[var(--col-min)] flex-1 border-l first:border-l-0",
         highlighted && "bg-sky-50/30 ring-1 ring-inset ring-sky-200/60",
         className
       )}
-      style={{ "--col-min": `${minWidthPx}px` } as React.CSSProperties}
+      style={{ "--col-min": stacked ? "100%" : `${minWidthPx}px` } as React.CSSProperties}
     >
       <ProviderColumnHeader name={name} role={role} photoUrl={photoUrl} highlighted={highlighted || isOver} />
 
@@ -366,30 +402,38 @@ export function ProviderColumn({
         <CurrentTimeLine dayKey={dayKey} gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
         <div className="relative" style={{ height: bodyHeightPx }}>
-          {appointments.map((booking) => {
-            const layout = overlapLayouts.get(booking.id);
-            if (!layout) return null;
-            const d = bookingDisplay[booking.id];
-            return (
-              <AppointmentCardFromBooking
-                key={booking.id}
-                booking={booking}
-                display={{
-                  anchorLabel: d?.anchorLabel,
-                  durationMin: d?.durationMin,
-                  providerName: name,
-                  roomName: booking.location,
-                }}
-                layout={layout}
-                draggable={draggable}
-                resizable={resizable}
-                onResizeEnd={
-                  onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined
-                }
-                onClick={onSelectAppointment ? () => onSelectAppointment(booking) : undefined}
-              />
-            );
-          })}
+          {timedCount === 0 ? (
+            <CalendarEmptyState preset="column" compact className="absolute inset-0" />
+          ) : (
+            <AnimatePresence initial={false}>
+              {appointments.map((booking) => {
+                const layout = overlapLayouts.get(booking.id);
+                if (!layout || !visibleIds.has(booking.id)) return null;
+                const d = bookingDisplay[booking.id];
+                return (
+                  <AppointmentCardFromBooking
+                    key={booking.id}
+                    booking={booking}
+                    display={{
+                      anchorLabel: d?.anchorLabel,
+                      durationMin: d?.durationMin,
+                      providerName: name,
+                      roomName: booking.location,
+                    }}
+                    layout={layout}
+                    draggable={draggable}
+                    resizable={resizable}
+                    touchFriendly={touchFriendly}
+                    animateEntry
+                    onResizeEnd={
+                      onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined
+                    }
+                    onClick={onSelectAppointment ? () => onSelectAppointment(booking) : undefined}
+                  />
+                );
+              })}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </div>

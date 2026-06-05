@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarDays, ChevronLeft, ChevronRight, MapPin, Users } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Keyboard, MapPin, Users } from "lucide-react";
 
 import {
   buildCalendarHref,
@@ -165,6 +165,18 @@ export function CalendarTopControls({
         >
           {canMutateBookings ? "Live" : "Read-only"}
         </span>
+
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("fi-calendar-toggle-shortcuts"))}
+          className="hidden items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900 sm:inline-flex"
+          aria-label="Keyboard shortcuts"
+          title="Keyboard shortcuts (?)"
+        >
+          <Keyboard className="h-3.5 w-3.5" aria-hidden />
+          <span className="hidden md:inline">Shortcuts</span>
+          <kbd className="rounded border border-slate-200 bg-slate-50 px-1 font-mono text-[10px]">?</kbd>
+        </button>
       </div>
 
       <p className="text-sm font-medium text-slate-700 lg:hidden">{rangeTitle}</p>

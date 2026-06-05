@@ -2,34 +2,20 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  Clock,
-  DoorOpen,
-  GripVertical,
-  Scissors,
-  Stethoscope,
-  Syringe,
-  UserRound,
-  Video,
-  type LucideIcon,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Clock, DoorOpen, GripVertical } from "lucide-react";
 import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { calendarPxPerMinute } from "@/components/calendar/ProviderColumn";
-import {
-  appointmentStatusBadgeClasses,
-  fiProcedureAccentClassNames,
-  fiProcedureFamilyLabels,
-  resolveProcedureFamily,
-  type FiProcedureFamily,
-} from "@/lib/design-system";
+import { appointmentStatusBadgeClasses } from "@/lib/design-system";
 import {
   durationMinutesFromPx,
   pxFromDurationMinutes,
 } from "@/lib/calendar/dndMath";
+import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
 import { cn } from "@/lib/utils";
 import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
@@ -80,7 +66,13 @@ export type AppointmentCardProps = {
   dimTerminal?: boolean;
   /** Drag overlay ghost — no grid positioning. */
   isDragPreview?: boolean;
+  /** Larger drag/resize handles for touch screens. */
+  touchFriendly?: boolean;
+  /** Subtle mount animation for grid cards. */
+  animateEntry?: boolean;
 };
+
+const MotionCard = motion.create(Card);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -121,18 +113,6 @@ function formatPrice(price: string | null | undefined, currency: string | null |
     }
   }
   return price.trim();
-}
-
-const procedureIconMap: Record<FiProcedureFamily, LucideIcon> = {
-  pre_surgery_consult: UserRound,
-  full_transplant: Scissors,
-  prp_session: Syringe,
-  follow_up_nurse_prp: Stethoscope,
-  virtual_zoom: Video,
-};
-
-function procedureIcon(family: FiProcedureFamily): LucideIcon {
-  return procedureIconMap[family];
 }
 
 function durationFromRange(startAt: string, endAt: string): number {
@@ -183,12 +163,14 @@ function ResizeHandle({
   startAt,
   baseHeightPx,
   isResizing,
+  touchFriendly,
 }: {
   onResizeEnd: (endIso: string) => void;
   onLiveHeightChange: (heightPx: number | null) => void;
   startAt: string;
   baseHeightPx: number;
   isResizing: boolean;
+  touchFriendly?: boolean;
 }) {
   const ppm = calendarPxPerMinute();
   const minHeightPx = pxFromDurationMinutes(15);
@@ -239,12 +221,17 @@ function ResizeHandle({
       aria-label="Resize appointment"
       onPointerDown={onPointerDown}
       className={cn(
-        "absolute inset-x-1 bottom-0 z-20 flex h-3 cursor-ns-resize items-center justify-center rounded-b-lg",
-        "opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100",
+        "absolute inset-x-1 bottom-0 z-20 flex cursor-ns-resize touch-none items-center justify-center rounded-b-lg",
+        touchFriendly ? "h-6 opacity-100" : "h-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100",
         isResizing && "opacity-100"
       )}
     >
-      <span className="h-1 w-8 rounded-full bg-slate-400/80 shadow-sm ring-1 ring-white/80 dark:bg-slate-500" />
+      <span
+        className={cn(
+          "rounded-full bg-slate-400/80 shadow-sm ring-1 ring-white/80 dark:bg-slate-500",
+          touchFriendly ? "h-1.5 w-12" : "h-1 w-8"
+        )}
+      />
     </button>
   );
 }
@@ -253,7 +240,7 @@ function ResizeHandle({
 // Component
 // ---------------------------------------------------------------------------
 
-export function AppointmentCard({
+function AppointmentCardInner({
   appointment,
   layout,
   draggable = false,
@@ -263,26 +250,20 @@ export function AppointmentCard({
   className,
   dimTerminal = true,
   isDragPreview = false,
+  touchFriendly = false,
+  animateEntry = false,
 }: AppointmentCardProps) {
-  const family = resolveProcedureFamily({
-    bookingType: appointment.procedureType,
-    isVirtual: appointment.isVirtual,
-  });
-  const ProcedureIcon = procedureIcon(family);
-  const accentClass = fiProcedureAccentClassNames[family];
-  const procedureLabel =
-    appointment.procedureLabel?.trim() || fiProcedureFamilyLabels[family] || appointment.procedureType;
+  const style = getAppointmentStyle(appointment);
+  const ProcedureIcon = style.icon;
+  const accentClass = style.accentClass;
+  const procedureLabel = style.procedureLabel;
   const durationMin = appointment.durationMin ?? durationFromRange(appointment.startAt, appointment.endAt);
   const timeLabel = formatTimeRange(appointment.startAt, appointment.endAt);
   const priceLabel = formatPrice(appointment.price, appointment.currency);
   const statusLabel = bookingStatusLabel(appointment.status);
   const statusClasses = appointmentStatusBadgeClasses(appointment.status);
 
-  const isTerminal =
-    dimTerminal &&
-    (appointment.status === "completed" ||
-      appointment.status === "cancelled" ||
-      appointment.status === "no_show");
+  const isTerminal = dimTerminal && style.isTerminal;
 
   const canDrag = draggable && !isTerminal && !isDragPreview;
   const canResize = resizable && !isTerminal && layout != null && Boolean(onResizeEnd) && !isDragPreview;
@@ -320,10 +301,15 @@ export function AppointmentCard({
   };
 
   const roomProvider = [appointment.room?.trim(), appointment.provider?.trim()].filter(Boolean).join(" · ");
+  const useMotion = animateEntry && layout != null && !isDragPreview;
+  const Shell = useMotion ? MotionCard : Card;
 
   return (
-    <Card
+    <Shell
       ref={setNodeRef}
+      initial={useMotion ? { opacity: 0, scale: 0.98, y: 2 } : false}
+      animate={useMotion ? { opacity: 1, scale: 1, y: 0 } : undefined}
+      transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
@@ -339,8 +325,10 @@ export function AppointmentCard({
       }
       style={dragStyle}
       className={cn(
-        "group relative overflow-hidden border-slate-200/90 bg-white/95 text-left shadow-sm backdrop-blur-sm transition-all duration-200 ease-out",
-        "hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md",
+        "group relative overflow-hidden text-left shadow-sm backdrop-blur-sm transition-all duration-200 ease-out",
+        layout ? cn(style.borderColor, style.backgroundTint, style.textColor, style.statusRing) : "border-slate-200/90 bg-white/95",
+        "hover:-translate-y-0.5 hover:shadow-md",
+        layout ? "hover:brightness-[1.02]" : "hover:border-slate-300",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1",
         "dark:border-slate-800 dark:bg-slate-950/95 dark:hover:border-slate-700 dark:hover:shadow-lg dark:hover:shadow-black/20",
         layout && !isDragPreview && (hasOverlapLayout ? "absolute z-[1]" : "absolute inset-x-1 z-[1]"),
@@ -362,23 +350,25 @@ export function AppointmentCard({
           type="button"
           aria-label="Drag appointment"
           className={cn(
-            "absolute left-0.5 top-1 z-20 flex h-5 w-4 cursor-grab items-center justify-center rounded text-slate-400",
-            "opacity-0 transition-opacity hover:text-slate-600 active:cursor-grabbing",
-            "group-hover:opacity-100 group-focus-within:opacity-100",
+            "absolute left-0.5 top-0.5 z-20 flex cursor-grab items-center justify-center rounded-md text-slate-400",
+            "touch-none transition-opacity hover:text-slate-600 active:cursor-grabbing",
+            touchFriendly
+              ? "fi-calendar-touch-target h-10 w-9 bg-white/80 opacity-100 shadow-sm ring-1 ring-slate-200/80"
+              : "h-5 w-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
             isDragging && "opacity-100"
           )}
           {...listeners}
           {...attributes}
           onClick={(e) => e.stopPropagation()}
         >
-          <GripVertical className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+          <GripVertical className={cn(touchFriendly ? "h-4 w-4" : "h-3.5 w-3.5")} strokeWidth={2} aria-hidden />
         </button>
       ) : null}
 
       <div
         className={cn(
           "flex h-full min-h-0 gap-2 pl-3 pr-2.5",
-          canDrag && "pl-5",
+          canDrag && (touchFriendly ? "pl-11" : "pl-5"),
           layout ? "py-1.5" : "p-3 sm:gap-3 sm:p-3.5",
           isCompact ? "items-center" : "items-start"
         )}
@@ -507,14 +497,17 @@ export function AppointmentCard({
           startAt={appointment.startAt}
           baseHeightPx={layout!.heightPx}
           isResizing={resizeHeightPx != null}
+          touchFriendly={touchFriendly}
         />
       ) : null}
-    </Card>
+    </Shell>
   );
 }
 
+export const AppointmentCard = React.memo(AppointmentCardInner);
+
 /** Convenience wrapper when you already have a `FiBookingRow`. */
-export function AppointmentCardFromBooking({
+export const AppointmentCardFromBooking = React.memo(function AppointmentCardFromBooking({
   booking,
   display,
   layout,
@@ -524,6 +517,8 @@ export function AppointmentCardFromBooking({
   onClick,
   className,
   isDragPreview,
+  touchFriendly,
+  animateEntry,
 }: {
   booking: FiBookingRow;
   display?: {
@@ -539,6 +534,8 @@ export function AppointmentCardFromBooking({
   onClick?: () => void;
   className?: string;
   isDragPreview?: boolean;
+  touchFriendly?: boolean;
+  animateEntry?: boolean;
 }) {
   const appointment = appointmentCardDataFromBooking(booking, display);
   const cancelled = isBookingCancelled(booking);
@@ -555,6 +552,8 @@ export function AppointmentCardFromBooking({
       className={className}
       dimTerminal={dimTerminal}
       isDragPreview={isDragPreview}
+      touchFriendly={touchFriendly}
+      animateEntry={animateEntry}
     />
   );
-}
+});

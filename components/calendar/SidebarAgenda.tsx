@@ -12,17 +12,16 @@ import {
   Plus,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { appointmentCardDataFromBooking } from "@/components/calendar/AppointmentCard";
 import { Button } from "@/components/ui/button";
-import {
-  fiProcedureAccentClassNames,
-  fiProcedureFamilyLabels,
-  resolveProcedureFamily,
-} from "@/lib/design-system";
+import { CalendarEmptyState } from "@/components/calendar/CalendarEmptyState";
+import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
+import { calendarSidebarsCollapsedByDefault } from "@/lib/calendar/calendarResponsive";
+import { useCalendarLayoutMode } from "@/hooks/useCalendarLayoutMode";
 import { cn } from "@/lib/utils";
-import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
+import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
@@ -173,13 +172,13 @@ function AgendaMiniCard({
   label: string;
   onClick?: () => void;
 }) {
-  const family = resolveProcedureFamily({
-    bookingType: booking.booking_type,
+  const appointmentStyle = getAppointmentStyle({
+    procedureType: booking.booking_type,
+    status: booking.booking_status,
     isVirtual: Boolean(booking.metadata?.is_virtual ?? booking.metadata?.virtual),
   });
-  const accent = fiProcedureAccentClassNames[family];
-  const procedure =
-    fiProcedureFamilyLabels[family] || bookingTypeLabel(booking.booking_type);
+  const accent = appointmentStyle.accentClass;
+  const procedure = appointmentStyle.procedureLabel;
 
   const className = cn(
     "group relative w-full overflow-hidden rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-left shadow-sm transition",
@@ -222,9 +221,13 @@ function WaitlistMiniCard({
   item: SidebarWaitlistItem;
   draggable: boolean;
 }) {
-  const family = resolveProcedureFamily({ bookingType: item.procedureType });
-  const accent = fiProcedureAccentClassNames[family];
-  const procedure = item.procedureLabel?.trim() || fiProcedureFamilyLabels[family] || bookingTypeLabel(item.procedureType);
+  const appointmentStyle = getAppointmentStyle({
+    procedureType: item.procedureType,
+    status: item.booking?.booking_status ?? "scheduled",
+    procedureLabel: item.procedureLabel,
+  });
+  const accent = appointmentStyle.accentClass;
+  const procedure = appointmentStyle.procedureLabel;
   const dragId = waitlistDragId(item.booking?.id ?? item.id);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -248,14 +251,14 @@ function WaitlistMiniCard({
     },
   });
 
-  const style = transform
+  const dragStyle = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={dragStyle}
       className={cn(
         "relative overflow-hidden rounded-xl border border-dashed border-slate-300/90 bg-slate-50/80 px-2.5 py-2 transition",
         draggable && "cursor-grab active:cursor-grabbing",
@@ -266,7 +269,7 @@ function WaitlistMiniCard({
       <span aria-hidden className={cn("absolute inset-y-2 left-0 w-1 rounded-full", accent)} />
       <div className="flex items-start gap-2 pl-2">
         {draggable ? (
-          <GripVertical className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />
+          <GripVertical className="fi-calendar-touch-target mt-0.5 h-4 w-4 shrink-0 text-slate-400 sm:h-3.5 sm:w-3.5" aria-hidden />
         ) : null}
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-semibold text-slate-900">{item.patientName}</p>
@@ -303,9 +306,12 @@ function AgendaSection({
         </span>
       </div>
       {count === 0 ? (
-        <p className="rounded-lg border border-dashed border-slate-200/80 bg-white/60 px-3 py-3 text-[11px] text-slate-500">
-          {emptyLabel}
-        </p>
+        <CalendarEmptyState
+          preset="agenda"
+          description={emptyLabel}
+          compact
+          className="rounded-lg border border-dashed border-slate-200/80 bg-white/60"
+        />
       ) : (
         <div className="space-y-2">{children}</div>
       )}
@@ -344,8 +350,17 @@ export function SidebarAgenda({
   onCollapsedChange,
   className,
 }: SidebarAgendaProps) {
-  const [collapsedUncontrolled, setCollapsedUncontrolled] = useState(defaultCollapsed);
+  const layoutMode = useCalendarLayoutMode();
+  const collapseByDefault = defaultCollapsed ?? calendarSidebarsCollapsedByDefault(layoutMode);
+  const [collapsedUncontrolled, setCollapsedUncontrolled] = useState(collapseByDefault);
   const collapsed = collapsedProp ?? collapsedUncontrolled;
+
+  useEffect(() => {
+    if (collapsedProp !== undefined || defaultCollapsed !== undefined) return;
+    if (calendarSidebarsCollapsedByDefault(layoutMode)) {
+      setCollapsedUncontrolled(true);
+    }
+  }, [collapsedProp, defaultCollapsed, layoutMode]);
 
   const setCollapsed = (next: boolean) => {
     if (collapsedProp === undefined) setCollapsedUncontrolled(next);
@@ -376,11 +391,13 @@ export function SidebarAgenda({
     </Button>
   );
 
+  const isMobileOverlay = !collapsed && layoutMode === "compact";
+
   if (collapsed) {
     return (
       <aside
         className={cn(
-          "flex w-14 shrink-0 flex-col items-center gap-3 border-r border-slate-200/80 bg-white py-4",
+          "flex w-12 shrink-0 flex-col items-center gap-3 border-r border-slate-200/80 bg-white py-3 sm:w-14 sm:py-4",
           className
         )}
         aria-label="Agenda sidebar"
@@ -420,13 +437,25 @@ export function SidebarAgenda({
   }
 
   return (
-    <aside
-      className={cn(
-        "flex w-[17.5rem] shrink-0 flex-col border-r border-slate-200/80 bg-[#fafbfc]",
-        className
-      )}
-      aria-label="Agenda sidebar"
-    >
+    <>
+      {isMobileOverlay ? (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-[1px] lg:hidden"
+          aria-label="Close agenda"
+          onClick={() => setCollapsed(true)}
+        />
+      ) : null}
+      <aside
+        className={cn(
+          "flex shrink-0 flex-col border-r border-slate-200/80 bg-[#fafbfc]",
+          isMobileOverlay
+            ? "fixed inset-y-0 left-0 z-40 w-[min(100vw-2.5rem,17.5rem)] shadow-2xl"
+            : "w-[min(100%,17.5rem)]",
+          className
+        )}
+        aria-label="Agenda sidebar"
+      >
       <div className="flex items-center justify-between gap-2 border-b border-slate-200/70 px-4 py-3">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Agenda</p>
@@ -480,9 +509,7 @@ export function SidebarAgenda({
             Patients awaiting a slot. Drag onto the calendar to schedule.
           </p>
           {waitlist.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-amber-200/70 bg-amber-50/40 px-3 py-3 text-[11px] text-amber-900/80">
-              Waitlist is empty.
-            </p>
+            <CalendarEmptyState preset="waitlist" compact className="rounded-lg border border-dashed border-amber-200/70 bg-amber-50/40" />
           ) : (
             <div className="space-y-2">
               {waitlist.map((item) => (
@@ -505,5 +532,6 @@ export function SidebarAgenda({
         </button>
       </div>
     </aside>
+    </>
   );
 }

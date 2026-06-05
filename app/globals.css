@@ -151,4 +151,45 @@ body {
   .fi-trust {
     color: rgb(224 196 129 / 92%);
   }
+
+  /* FI operational calendar — responsive grid tokens */
+  .fi-calendar-shell {
+    --fi-calendar-gutter: 44px;
+    --fi-calendar-col-min: 100%;
+  }
+
+  .fi-calendar-swipe-track {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    touch-action: pan-x pan-y;
+  }
+
+  .fi-calendar-swipe-slide {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .fi-calendar-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  @media (min-width: 768px) {
+    .fi-calendar-shell {
+      --fi-calendar-gutter: 52px;
+      --fi-calendar-col-min: min(100%, 280px);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .fi-calendar-shell {
+      --fi-calendar-gutter: 56px;
+      --fi-calendar-col-min: 196px;
+    }
+
+    .fi-calendar-swipe-track {
+      scroll-snap-type: none;
+      touch-action: auto;
+    }
+  }
 }

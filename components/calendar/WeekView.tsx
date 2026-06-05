@@ -4,6 +4,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  TouchSensor,
   pointerWithin,
   useSensor,
   useSensors,
@@ -11,10 +12,24 @@ import {
   type DragStartEvent,
   type Modifier,
 } from "@dnd-kit/core";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { AppointmentCard, type AppointmentCardData } from "@/components/calendar/AppointmentCard";
+import { CalendarColumnPager } from "@/components/calendar/CalendarColumnPager";
+import { CalendarEmptyState } from "@/components/calendar/CalendarEmptyState";
+import { CalendarKeyboardHints } from "@/components/calendar/CalendarKeyboardHints";
 import { CalendarToastProvider, useCalendarToast } from "@/components/calendar/CalendarToast";
+import { useCalendarKeyboardShortcuts } from "@/hooks/useCalendarKeyboardShortcuts";
+import { useCalendarLayoutMode } from "@/hooks/useCalendarLayoutMode";
+import { useScrollViewport } from "@/hooks/useScrollViewport";
+import { calendarShellVariants } from "@/lib/calendar/calendarMotion";
+import {
+  calendarPointerSensorOptions,
+  calendarTouchSensorOptions,
+  isSwipeCalendarLayout,
+} from "@/lib/calendar/calendarResponsive";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import {
   CALENDAR_COLUMN_MIN_WIDTH_PX,
@@ -32,7 +47,13 @@ import {
   minutesUtcFromEpoch,
 } from "@/lib/calendar/dndMath";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
-import { parseUtcCalendarDateString } from "@/src/lib/bookings/calendarQuery";
+import {
+  buildCalendarHref,
+  mergeCalendarHrefQuery,
+  parseUtcCalendarDateString,
+  type ParsedCalendarQuery,
+} from "@/src/lib/bookings/calendarQuery";
+import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { resourceColumnIdForBooking, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
@@ -40,8 +61,6 @@ import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
-
-const TIME_GUTTER_WIDTH_PX = 56;
 
 export type WeekViewRescheduleMeta = {
   assignedUserId?: string | null;
@@ -76,6 +95,12 @@ export type WeekViewProps = {
     endIso: string,
     meta?: WeekViewRescheduleMeta
   ) => Promise<{ ok: boolean; error?: string }>;
+  /** Enables keyboard navigation (N, T, arrows, 1–3). */
+  shortcuts?: {
+    tenantId: string;
+    query: ParsedCalendarQuery;
+    addAppointmentHref: string;
+  };
 };
 
 type CalendarColumn = {
@@ -120,11 +145,12 @@ function TimeGutter({ gridConfig, bodyHeightPx }: { gridConfig: BusinessGridConf
   for (let h = gridConfig.dayStartHourUtc; h < gridConfig.dayEndHourUtc; h++) hours.push(h);
 
   return (
-    <div
-      className="sticky left-0 z-20 shrink-0 border-r border-slate-200/80 bg-[#f8fafc]"
-      style={{ width: TIME_GUTTER_WIDTH_PX }}
-    >
-      <div style={{ height: CALENDAR_HEADER_HEIGHT_PX }} className="border-b border-slate-200/80" aria-hidden />
+    <div className="sticky left-0 z-20 w-[var(--fi-calendar-gutter,3.5rem)] shrink-0 self-start border-r border-slate-200/80 bg-[#f8fafc]">
+      <div
+        style={{ height: CALENDAR_HEADER_HEIGHT_PX }}
+        className="sticky top-0 z-20 border-b border-slate-200/80 bg-[#f8fafc]"
+        aria-hidden
+      />
       <div className="relative" style={{ height: bodyHeightPx }}>
         {hours.map((h) => (
           <div
@@ -163,15 +189,30 @@ function WeekViewInner({
   highlightedColumnId,
   onSelectBooking,
   onRescheduleBooking,
+  shortcuts,
 }: WeekViewProps) {
+  const router = useRouter();
   const bodyHeightPx = calendarGridBodyHeightPx(gridConfig);
   const [activeDrag, setActiveDrag] = useState<AppointmentCardData | null>(null);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [activeColumnIndex, setActiveColumnIndex] = useState(0);
+  const [showShortcutHints, setShowShortcutHints] = useState(false);
+  const swipeTrackRef = useRef<HTMLDivElement>(null);
+  const gridScrollRef = useRef<HTMLDivElement>(null);
+  const viewportRange = useScrollViewport(gridScrollRef);
+  const layoutMode = useCalendarLayoutMode();
+  const swipeLayout = isSwipeCalendarLayout(layoutMode);
   const { success, error: toastError } = useCalendarToast();
 
+  const scrollGridBy = useCallback((deltaPx: number) => {
+    gridScrollRef.current?.scrollBy({ top: deltaPx, behavior: "smooth" });
+  }, []);
+
+  const gridScrollStepPx = useMemo(() => calendarPxPerMinute() * CALENDAR_SNAP_MINUTES, []);
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 6 },
-    })
+    useSensor(PointerSensor, calendarPointerSensorOptions(layoutMode)),
+    useSensor(TouchSensor, calendarTouchSensorOptions())
   );
 
   const modifiers = useMemo(() => [snapToQuarterHourModifier()], []);
@@ -198,6 +239,108 @@ function WeekViewInner({
 
   const primaryLane = lanes[0];
 
+  useEffect(() => {
+    setActiveColumnIndex(0);
+  }, [view, lanes.length, resourceColumns.length]);
+
+  const scrollToColumn = useCallback(
+    (index: number) => {
+      const el = swipeTrackRef.current;
+      if (!el) return;
+      const clamped = Math.max(0, Math.min(index, columnsForView.length - 1));
+      el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
+      setActiveColumnIndex(clamped);
+    },
+    [columnsForView.length]
+  );
+
+  useEffect(() => {
+    const el = swipeTrackRef.current;
+    if (!el || !swipeLayout) return;
+
+    const onScroll = () => {
+      const width = el.clientWidth;
+      if (width <= 0) return;
+      const idx = Math.round(el.scrollLeft / width);
+      setActiveColumnIndex((prev) => (prev === idx ? prev : idx));
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [swipeLayout, columnsForView.length]);
+
+  useEffect(() => {
+    if (!swipeLayout || !highlightedColumnId) return;
+    const idx = columnsForView.findIndex((c) => c.id === highlightedColumnId);
+    if (idx >= 0) scrollToColumn(idx);
+  }, [columnsForView, highlightedColumnId, scrollToColumn, swipeLayout]);
+
+  useEffect(() => {
+    const el = gridScrollRef.current;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const laneKey = primaryLane?.dayKey;
+    if (!el || laneKey !== todayKey) return;
+
+    const nowMin = minutesUtcFromEpoch(Date.now());
+    const gridStart = gridConfig.dayStartHourUtc * 60;
+    const gridEnd = gridConfig.dayEndHourUtc * 60;
+    if (nowMin < gridStart || nowMin > gridEnd) return;
+
+    const top = (nowMin - gridStart) * calendarPxPerMinute();
+    const target = Math.max(0, top - el.clientHeight * 0.28);
+    el.scrollTo({ top: target, behavior: "auto" });
+  }, [gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc, primaryLane?.dayKey]);
+
+  const navigateCalendar = useCallback(
+    (patch: Parameters<typeof mergeCalendarHrefQuery>[1]) => {
+      if (!shortcuts) return;
+      router.push(buildCalendarHref(shortcuts.tenantId, mergeCalendarHrefQuery(shortcuts.query, patch)));
+    },
+    [router, shortcuts]
+  );
+
+  const keyboardActions = useMemo(
+    () => ({
+      onNewAppointment: shortcuts?.addAppointmentHref
+        ? () => router.push(shortcuts.addAppointmentHref)
+        : undefined,
+      onToday: shortcuts
+        ? () => navigateCalendar(calendarNavigationHelpers.goToToday())
+        : undefined,
+      onPreviousPeriod: shortcuts
+        ? () => navigateCalendar(calendarNavigationHelpers.previousPeriod(shortcuts.query))
+        : undefined,
+      onNextPeriod: shortcuts
+        ? () => navigateCalendar(calendarNavigationHelpers.nextPeriod(shortcuts.query))
+        : undefined,
+      onViewChange: shortcuts
+        ? (viewMode: "day" | "3day" | "week") => navigateCalendar({ view: viewMode })
+        : undefined,
+      onColumnPrevious: () => scrollToColumn(activeColumnIndex - 1),
+      onColumnNext: () => scrollToColumn(activeColumnIndex + 1),
+      onScrollGridUp: () => scrollGridBy(-gridScrollStepPx),
+      onScrollGridDown: () => scrollGridBy(gridScrollStepPx),
+      onToggleShortcutsHelp: () => setShowShortcutHints((v) => !v),
+    }),
+    [
+      activeColumnIndex,
+      gridScrollStepPx,
+      navigateCalendar,
+      router,
+      scrollGridBy,
+      scrollToColumn,
+      shortcuts,
+    ]
+  );
+
+  useCalendarKeyboardShortcuts(keyboardActions, Boolean(shortcuts));
+
+  useEffect(() => {
+    const toggle = () => setShowShortcutHints((v) => !v);
+    window.addEventListener("fi-calendar-toggle-shortcuts", toggle);
+    return () => window.removeEventListener("fi-calendar-toggle-shortcuts", toggle);
+  }, []);
+
   const rescheduleWithToast = useCallback(
     async (
       booking: FiBookingRow,
@@ -218,6 +361,7 @@ function WeekViewInner({
   );
 
   const onDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(String(event.active.id));
     const data = event.active.data.current;
     if (data?.appointment) {
       setActiveDrag(data.appointment as AppointmentCardData);
@@ -231,6 +375,7 @@ function WeekViewInner({
   const onDragEnd = useCallback(
     (event: DragEndEvent) => {
       setActiveDrag(null);
+      setActiveDragId(null);
       if (!canMutateBookings) return;
 
       const { active, over } = event;
@@ -291,15 +436,91 @@ function WeekViewInner({
     [rescheduleWithToast]
   );
 
-  const onDragCancel = useCallback(() => setActiveDrag(null), []);
+  const renderProviderColumn = useCallback(
+    (col: CalendarColumn) => {
+      const lane = usesProviderColumns(view) ? primaryLane! : lanes.find((l) => l.dayKey === col.dayKey);
+      if (!lane) return null;
+
+      const dayBookings = buckets[lane.dayKey] ?? [];
+      const colBookings = usesProviderColumns(view)
+        ? dayBookings.filter((b) => resourceColumnIdForBooking(b) === col.id)
+        : dayBookings;
+
+      return (
+        <ProviderColumn
+          key={`${col.dayKey}-${col.id}`}
+          id={col.id}
+          dayKey={lane.dayKey}
+          name={col.label}
+          role={col.subtitle}
+          photoUrl={col.photoUrl}
+          appointments={colBookings}
+          lane={lane}
+          gridConfig={gridConfig}
+          bookingDisplay={bookingDisplay}
+          bodyHeightPx={bodyHeightPx}
+          highlighted={usesProviderColumns(view) && highlightedColumnId === col.id}
+          droppable={canMutateBookings}
+          draggable={canMutateBookings}
+          resizable={canMutateBookings && layoutMode === "desktop"}
+          stacked={swipeLayout}
+          touchFriendly={layoutMode !== "desktop"}
+          viewportRange={viewportRange}
+          pinnedAppointmentId={activeDragId}
+          onSelectAppointment={onSelectBooking}
+          onResizeAppointment={onResizeAppointment}
+        />
+      );
+    },
+    [
+      activeDragId,
+      bodyHeightPx,
+      bookingDisplay,
+      buckets,
+      canMutateBookings,
+      gridConfig,
+      highlightedColumnId,
+      lanes,
+      layoutMode,
+      onResizeAppointment,
+      onSelectBooking,
+      primaryLane,
+      swipeLayout,
+      view,
+      viewportRange,
+    ]
+  );
+
+  const onDragCancel = useCallback(() => {
+    setActiveDrag(null);
+    setActiveDragId(null);
+  }, []);
+
+  const columnLabels = columnsForView.map((c) => c.label);
+  const columnSubtitles = columnsForView.map((c) => c.subtitle);
 
   if (usesProviderColumns(view) && !primaryLane) {
     return (
       <div
-        className="rounded-2xl border border-dashed border-slate-200 px-4 py-12 text-center text-sm text-slate-500"
+        className="rounded-2xl border border-dashed border-slate-200 px-4 py-12"
         style={{ backgroundColor: CALENDAR_GRID_BG }}
       >
-        No day selected.
+        <CalendarEmptyState preset="day" title="No day selected" description="Pick a date to load the schedule." />
+      </div>
+    );
+  }
+
+  if (columnsForView.length === 0) {
+    return (
+      <div
+        className="rounded-2xl border border-dashed border-slate-200 px-4 py-12"
+        style={{ backgroundColor: CALENDAR_GRID_BG }}
+      >
+        <CalendarEmptyState
+          preset="day"
+          title="No columns to display"
+          description="Adjust staff or location filters to see provider columns."
+        />
       </div>
     );
   }
@@ -313,48 +534,73 @@ function WeekViewInner({
       onDragEnd={onDragEnd}
       onDragCancel={onDragCancel}
     >
-      <div className="flex min-h-[32rem] overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/[0.04] lg:min-h-[calc(100dvh-13rem)]">
+      <motion.div
+        variants={calendarShellVariants}
+        initial="hidden"
+        animate="show"
+        className="fi-calendar-shell flex min-h-[min(32rem,72dvh)] flex-col overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/[0.04] md:min-h-[32rem] md:rounded-2xl lg:min-h-[calc(100dvh-13rem)]"
+      >
         {sidebar}
-        <div className="flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
-          <TimeGutter gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
-          <div className="flex min-w-0 flex-1">
-            {columnsForView.map((col) => {
-              const lane = usesProviderColumns(view) ? primaryLane! : lanes.find((l) => l.dayKey === col.dayKey);
-              if (!lane) return null;
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {swipeLayout ? (
+            <CalendarColumnPager
+              labels={columnLabels}
+              subtitles={columnSubtitles}
+              activeIndex={activeColumnIndex}
+              onSelect={scrollToColumn}
+            />
+          ) : null}
 
-              const dayBookings = buckets[lane.dayKey] ?? [];
-              const colBookings =
-                usesProviderColumns(view)
-                  ? dayBookings.filter((b) => resourceColumnIdForBooking(b) === col.id)
-                  : dayBookings;
+          <div
+            ref={gridScrollRef}
+            className="flex min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain"
+          >
+            <div className="flex min-h-min min-w-0 flex-1" style={{ height: bodyHeightPx }}>
+              <TimeGutter gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
-              return (
-                <ProviderColumn
-                  key={`${col.dayKey}-${col.id}`}
-                  id={col.id}
-                  dayKey={lane.dayKey}
-                  name={col.label}
-                  role={col.subtitle}
-                  photoUrl={col.photoUrl}
-                  appointments={colBookings}
-                  lane={lane}
-                  gridConfig={gridConfig}
-                  bookingDisplay={bookingDisplay}
-                  bodyHeightPx={bodyHeightPx}
-                  highlighted={usesProviderColumns(view) && highlightedColumnId === col.id}
-                  droppable={canMutateBookings}
-                  draggable={canMutateBookings}
-                  resizable={canMutateBookings}
-                  onSelectAppointment={onSelectBooking}
-                  onResizeAppointment={onResizeAppointment}
-                />
-              );
-            })}
+              {swipeLayout ? (
+                <div
+                  ref={swipeTrackRef}
+                  className="fi-calendar-swipe-track flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {columnsForView.map((col, i) => (
+                    <motion.div
+                      key={`${col.dayKey}-${col.id}-slide`}
+                      custom={i}
+                      initial={{ opacity: 0, x: 8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.16, delay: Math.min(i * 0.04, 0.12) }}
+                      className="fi-calendar-swipe-slide min-w-full max-w-full flex-shrink-0"
+                    >
+                      {renderProviderColumn(col)}
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
+                  {columnsForView.map((col, i) => (
+                    <motion.div
+                      key={`${col.dayKey}-${col.id}-wrap`}
+                      custom={i}
+                      initial={{ opacity: 0, x: 6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.16, delay: Math.min(i * 0.03, 0.1) }}
+                      className="flex min-w-0 flex-1"
+                    >
+                      {renderProviderColumn(col)}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
         {rightPanel}
-      </div>
+      </motion.div>
+
+      <CalendarKeyboardHints open={showShortcutHints} onClose={() => setShowShortcutHints(false)} />
 
       <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1)" }}>
         {activeDrag ? (

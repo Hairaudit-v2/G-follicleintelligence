@@ -264,18 +264,40 @@ export const fiProcedureBadgeClassNames: Record<FiProcedureFamily, string> = {
     "border-amber-200 bg-amber-50 text-amber-950 ring-1 ring-inset ring-amber-600/15 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-100 dark:ring-amber-400/20",
 };
 
+/** Calendar event border — per procedure family. */
+export const fiProcedureBorderClassNames: Record<FiProcedureFamily, string> = {
+  pre_surgery_consult: "border-indigo-300/80 dark:border-indigo-700/70",
+  full_transplant: "border-rose-300/80 dark:border-rose-700/70",
+  prp_session: "border-emerald-300/80 dark:border-emerald-700/70",
+  follow_up_nurse_prp: "border-sky-300/80 dark:border-sky-700/70",
+  virtual_zoom: "border-amber-300/80 dark:border-amber-700/70",
+};
+
+/** Calendar event background tint — per procedure family. */
+export const fiProcedureBackgroundTintClassNames: Record<FiProcedureFamily, string> = {
+  pre_surgery_consult: "bg-indigo-100/90 dark:bg-indigo-950/70",
+  full_transplant: "bg-rose-100/90 dark:bg-rose-950/70",
+  prp_session: "bg-emerald-100/90 dark:bg-emerald-950/70",
+  follow_up_nurse_prp: "bg-sky-100/90 dark:bg-sky-950/70",
+  virtual_zoom: "bg-amber-100/90 dark:bg-amber-950/70",
+};
+
+/** Calendar event foreground text — per procedure family. */
+export const fiProcedureTextClassNames: Record<FiProcedureFamily, string> = {
+  pre_surgery_consult: "text-indigo-950 dark:text-indigo-50",
+  full_transplant: "text-rose-950 dark:text-rose-50",
+  prp_session: "text-emerald-950 dark:text-emerald-50",
+  follow_up_nurse_prp: "text-sky-950 dark:text-sky-50",
+  virtual_zoom: "text-amber-950 dark:text-amber-50",
+};
+
 /** Calendar event block classes — higher contrast fill for time-grid chips. */
 export const fiProcedureEventClassNames: Record<FiProcedureFamily, string> = {
-  pre_surgery_consult:
-    "border-indigo-300/80 bg-indigo-100/90 text-indigo-950 dark:border-indigo-700/70 dark:bg-indigo-950/70 dark:text-indigo-50",
-  full_transplant:
-    "border-rose-300/80 bg-rose-100/90 text-rose-950 dark:border-rose-700/70 dark:bg-rose-950/70 dark:text-rose-50",
-  prp_session:
-    "border-emerald-300/80 bg-emerald-100/90 text-emerald-950 dark:border-emerald-700/70 dark:bg-emerald-950/70 dark:text-emerald-50",
-  follow_up_nurse_prp:
-    "border-sky-300/80 bg-sky-100/90 text-sky-950 dark:border-sky-700/70 dark:bg-sky-950/70 dark:text-sky-50",
-  virtual_zoom:
-    "border-amber-300/80 bg-amber-100/90 text-amber-950 dark:border-amber-700/70 dark:bg-amber-950/70 dark:text-amber-50",
+  pre_surgery_consult: `${fiProcedureBorderClassNames.pre_surgery_consult} ${fiProcedureBackgroundTintClassNames.pre_surgery_consult} ${fiProcedureTextClassNames.pre_surgery_consult}`,
+  full_transplant: `${fiProcedureBorderClassNames.full_transplant} ${fiProcedureBackgroundTintClassNames.full_transplant} ${fiProcedureTextClassNames.full_transplant}`,
+  prp_session: `${fiProcedureBorderClassNames.prp_session} ${fiProcedureBackgroundTintClassNames.prp_session} ${fiProcedureTextClassNames.prp_session}`,
+  follow_up_nurse_prp: `${fiProcedureBorderClassNames.follow_up_nurse_prp} ${fiProcedureBackgroundTintClassNames.follow_up_nurse_prp} ${fiProcedureTextClassNames.follow_up_nurse_prp}`,
+  virtual_zoom: `${fiProcedureBorderClassNames.virtual_zoom} ${fiProcedureBackgroundTintClassNames.virtual_zoom} ${fiProcedureTextClassNames.virtual_zoom}`,
 };
 
 /** Left-edge accent bar / dot for compact list rows. */

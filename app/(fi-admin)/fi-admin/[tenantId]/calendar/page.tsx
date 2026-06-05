@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
 import { OperationalCalendarPage } from "@/src/components/fi-admin/calendar/OperationalCalendarPage";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadOperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarLoader.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
@@ -26,10 +25,7 @@ export default async function TenantCalendarPage({
 
   await assertFiTenantPortalAccess(tenantId);
   const sp = (await searchParams) ?? {};
-  const [showCrmNav, data] = await Promise.all([
-    getCrmShellNavAllowed(tenantId),
-    loadOperationalCalendarPageData(tenantId.trim(), sp),
-  ]);
+  const data = await loadOperationalCalendarPageData(tenantId.trim(), sp);
 
-  return <OperationalCalendarPage data={data} showCrmNav={showCrmNav} />;
+  return <OperationalCalendarPage data={data} />;
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BarChart3, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Search } from "lucide-react";
 
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
+import { calendarSidebarsCollapsedByDefault } from "@/lib/calendar/calendarResponsive";
+import { useCalendarLayoutMode } from "@/hooks/useCalendarLayoutMode";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 import { cn } from "@/lib/utils";
@@ -81,11 +83,21 @@ export function CalendarRightPanel({
   onCollapsedChange?: (collapsed: boolean) => void;
   className?: string;
 }) {
-  const [collapsedUncontrolled, setCollapsedUncontrolled] = useState(defaultCollapsed);
+  const layoutMode = useCalendarLayoutMode();
+  const collapseByDefault = defaultCollapsed ?? calendarSidebarsCollapsedByDefault(layoutMode);
+  const [collapsedUncontrolled, setCollapsedUncontrolled] = useState(collapseByDefault);
   const [tab, setTab] = useState<PanelTab>("stats");
   const [localQ, setLocalQ] = useState(searchQuery ?? "");
 
   const collapsed = collapsedProp ?? collapsedUncontrolled;
+
+  useEffect(() => {
+    if (collapsedProp !== undefined || defaultCollapsed !== undefined) return;
+    if (calendarSidebarsCollapsedByDefault(layoutMode)) {
+      setCollapsedUncontrolled(true);
+    }
+  }, [collapsedProp, defaultCollapsed, layoutMode]);
+
   const setCollapsed = (v: boolean) => {
     if (collapsedProp === undefined) setCollapsedUncontrolled(v);
     onCollapsedChange?.(v);
@@ -110,6 +122,10 @@ export function CalendarRightPanel({
 
   function openGlobalSearch() {
     window.dispatchEvent(new Event(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT));
+  }
+
+  if (layoutMode === "compact") {
+    return null;
   }
 
   if (collapsed) {

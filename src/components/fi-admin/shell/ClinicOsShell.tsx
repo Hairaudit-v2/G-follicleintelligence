@@ -87,7 +87,7 @@ export function ClinicOsShell({
   const navItems = resolveClinicOsShellNavItems(base, showCrmNav);
   const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav);
   const activeNavId = getClinicOsShellActiveNavId(pathname, base);
-  const showCalendarBar = isClinicOsShellCalendarContextRoute(pathname, base);
+  const showCalendarBar = isClinicOsShellCalendarContextRoute();
 
   const accent = safeBrandingColourHex(effective.accent_colour, FI_ADMIN_NEUTRAL_ACCENT);
   const brandName = effective.brand_name?.trim() || "Follicle Intelligence";

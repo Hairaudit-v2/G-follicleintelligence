@@ -16,15 +16,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
 import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/BookingEditDrawer";
 
-import { OperationalCalendarMobileList } from "./OperationalCalendarMobileList";
-
-export function OperationalCalendarPage({
-  data,
-  showCrmNav: _showCrmNav,
-}: {
-  data: OperationalCalendarPageData;
-  showCrmNav: boolean;
-}) {
+export function OperationalCalendarPage({ data }: { data: OperationalCalendarPageData }) {
   const router = useRouter();
   const [drawer, setDrawer] = useState<FiBookingRow | null>(null);
   const [editing, setEditing] = useState<FiBookingRow | null>(null);
@@ -146,7 +138,7 @@ export function OperationalCalendarPage({
         </p>
       ) : null}
 
-      <div className="hidden min-h-0 flex-1 lg:flex">
+      <div className="flex min-h-0 flex-1 flex-col">
         <WeekView
           sidebar={
             <SidebarAgenda
@@ -180,15 +172,11 @@ export function OperationalCalendarPage({
           }
           onSelectBooking={(b) => setDrawer(b)}
           onRescheduleBooking={onRescheduleBooking}
-        />
-      </div>
-
-      <div className="lg:hidden">
-        <OperationalCalendarMobileList
-          lanes={data.lanes}
-          buckets={buckets}
-          bookingDisplay={data.bookingDisplay}
-          onSelectBooking={(b) => setDrawer(b)}
+          shortcuts={{
+            tenantId: data.tenantId,
+            query: data.query,
+            addAppointmentHref: `${base}/bookings/new`,
+          }}
         />
       </div>
 

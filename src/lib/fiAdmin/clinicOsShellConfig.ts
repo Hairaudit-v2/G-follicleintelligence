@@ -120,7 +120,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
 }
 
 /** Calendar page renders its own control bar — shell secondary row stays off. */
-export function isClinicOsShellCalendarContextRoute(_pathname: string, _base: string): boolean {
+export function isClinicOsShellCalendarContextRoute(): boolean {
   return false;
 }
 
