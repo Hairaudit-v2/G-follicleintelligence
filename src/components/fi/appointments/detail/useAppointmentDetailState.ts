@@ -114,7 +114,7 @@ export function useAppointmentDetailState(
     } else {
       setCompletionLeadOpts(null);
     }
-  }, [linkedLead?.id, booking.booking_type, payload.pipelineStages]);
+  }, [linkedLead, booking.booking_type, payload.pipelineStages]);
 
   const procedureLabel = useMemo(() => bookingTypeLabel(booking.booking_type), [booking.booking_type]);
 

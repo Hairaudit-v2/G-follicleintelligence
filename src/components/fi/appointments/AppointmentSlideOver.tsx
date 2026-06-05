@@ -396,15 +396,14 @@ export function AppointmentSlideOverPanel({
   const href = booking ? `/fi-admin/${tenantId}/appointments/${booking.id}` : "#";
 
   useEffect(() => {
-    const L = payload?.leadAnchor?.lead;
     const stages = payload?.pipelineStages ?? [];
-    const bType = payload?.booking?.booking_type;
-    if (L && stages.length && bType) {
-      setCompletionLeadOpts(defaultAppointmentCompletionLeadOpts(L, stages, bType));
+    const bType = booking?.booking_type;
+    if (lead && stages.length && bType) {
+      setCompletionLeadOpts(defaultAppointmentCompletionLeadOpts(lead, stages, bType));
     } else {
       setCompletionLeadOpts(null);
     }
-  }, [payload?.leadAnchor?.lead?.id, payload?.pipelineStages, payload?.booking?.booking_type]);
+  }, [lead, payload?.pipelineStages, booking?.booking_type]);
 
   async function refreshPayload() {
     if (!appointmentId) return;

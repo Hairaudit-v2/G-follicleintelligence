@@ -30,8 +30,8 @@ export function LeadBookNextAppointmentCard({
   const now = useMemo(() => new Date(groupingNowIso), [groupingNowIso]);
   const nextUpcoming = useMemo(() => pickNextUpcomingLeadBooking(bookings, now), [bookings, now]);
   const recommended = useMemo(
-    () => deriveRecommendedBookingTypeForLead({ lead, bookings, now }),
-    [lead, bookings, now]
+    () => deriveRecommendedBookingTypeForLead({ lead, bookings }),
+    [lead, bookings]
   );
 
   function openCreate() {

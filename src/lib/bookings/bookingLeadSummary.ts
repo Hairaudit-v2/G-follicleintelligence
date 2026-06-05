@@ -49,9 +49,7 @@ export type RecommendedBookingTypeResult = {
 export function deriveRecommendedBookingTypeForLead(opts: {
   lead: FiCrmLeadRow;
   bookings: FiBookingRow[];
-  now?: Date;
 }): RecommendedBookingTypeResult {
-  const now = opts.now ?? new Date();
   const sorted = sortBookingsByStartAt(opts.bookings);
   const completed = sorted.filter((b) => b.booking_status === "completed");
   const hasPatient = Boolean(opts.lead.patient_id?.trim());
