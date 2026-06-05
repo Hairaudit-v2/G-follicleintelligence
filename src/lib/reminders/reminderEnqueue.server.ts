@@ -15,6 +15,12 @@ import {
   templateTypeMatchesPreference,
   toBookingScheduleTrigger,
 } from "./remindersCore";
+import { isDeliveryChannelConfigured } from "./reminderDeliveryConfig";
+import { loadReminderDeliveryConfig } from "./reminderDeliveryConfig.server";
+import {
+  loadPatientReminderContact,
+  patientHasContactForTemplateType,
+} from "./reminderPatientContact.server";
 
 function bookingIsReminderEligible(row: FiBookingRow): boolean {
   if (row.booking_status === "cancelled" || row.booking_status === "completed" || row.booking_status === "no_show") {
@@ -67,6 +73,10 @@ export async function syncBookingReminderJobs(booking: FiBookingRow, client?: Su
       return;
     }
 
+    const deliveryCfg = loadReminderDeliveryConfig();
+    const contact = await loadPatientReminderContact(supabase, tid, patientId);
+    if (!contact) return;
+
     const templates = (await loadReminderTemplatesForTenant(tid, supabase)).filter((t) => {
       if (!t.is_active) return false;
       return toBookingScheduleTrigger(t.trigger_event) != null;
@@ -76,6 +86,8 @@ export async function syncBookingReminderJobs(booking: FiBookingRow, client?: Su
     const rows: Record<string, unknown>[] = [];
 
     for (const tpl of templates) {
+      if (!isDeliveryChannelConfigured(deliveryCfg, tpl.type)) continue;
+      if (!patientHasContactForTemplateType(contact, tpl.type)) continue;
       if (!templateTypeMatchesPreference(tpl.type, prefs.preferred_contact_method)) continue;
       const schedKey = toBookingScheduleTrigger(tpl.trigger_event);
       if (!schedKey) continue;
@@ -125,6 +137,10 @@ export async function syncLeadCreatedReminderJobs(lead: FiCrmLeadRow, client?: S
     const prefs = await loadPatientReminderPrefs(supabase, tid, patientId);
     if (!prefs?.consent) return;
 
+    const deliveryCfg = loadReminderDeliveryConfig();
+    const contact = await loadPatientReminderContact(supabase, tid, patientId);
+    if (!contact) return;
+
     const templates = (await loadReminderTemplatesForTenant(tid, supabase)).filter(
       (t) => t.is_active && t.trigger_event === "lead_created"
     );
@@ -133,6 +149,8 @@ export async function syncLeadCreatedReminderJobs(lead: FiCrmLeadRow, client?: S
     const rows: Record<string, unknown>[] = [];
 
     for (const tpl of templates) {
+      if (!isDeliveryChannelConfigured(deliveryCfg, tpl.type)) continue;
+      if (!patientHasContactForTemplateType(contact, tpl.type)) continue;
       if (!templateTypeMatchesPreference(tpl.type, prefs.preferred_contact_method)) continue;
       const scheduledAt = scheduledAtForImmediateTrigger(tpl.trigger_event, nowIso);
       if (!scheduledAt) continue;
@@ -173,6 +191,10 @@ export async function syncPostConsultReminderJobs(consultation: ConsultationRow,
     const prefs = await loadPatientReminderPrefs(supabase, tid, patientId);
     if (!prefs?.consent) return;
 
+    const deliveryCfg = loadReminderDeliveryConfig();
+    const contact = await loadPatientReminderContact(supabase, tid, patientId);
+    if (!contact) return;
+
     const templates = (await loadReminderTemplatesForTenant(tid, supabase)).filter(
       (t) => t.is_active && t.trigger_event === "post_consult"
     );
@@ -181,6 +203,8 @@ export async function syncPostConsultReminderJobs(consultation: ConsultationRow,
     const rows: Record<string, unknown>[] = [];
 
     for (const tpl of templates) {
+      if (!isDeliveryChannelConfigured(deliveryCfg, tpl.type)) continue;
+      if (!patientHasContactForTemplateType(contact, tpl.type)) continue;
       if (!templateTypeMatchesPreference(tpl.type, prefs.preferred_contact_method)) continue;
       const scheduledAt = scheduledAtForImmediateTrigger(tpl.trigger_event, nowIso);
       if (!scheduledAt) continue;

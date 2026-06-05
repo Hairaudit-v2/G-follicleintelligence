@@ -2,6 +2,17 @@
  * URL / search-param parsing for FI Admin booking calendar (Stage 3C). Pure.
  */
 
+import {
+  addDaysToCalendarDate,
+  addMonthsToCalendarDate,
+  calendarDateStringFromInstant,
+  DEFAULT_CALENDAR_TIMEZONE,
+  localMondayStartMsContaining,
+  normalizeCalendarTimezone,
+  parseCalendarDateString,
+  zonedMidnightUtcMs,
+  zonedNextDayUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import { isAllowedBookingStatus, isAllowedBookingType } from "./bookingPolicy";
 
 export type CalendarViewMode = "day" | "3day" | "week" | "month";
@@ -28,8 +39,10 @@ function tryParseIso(s: string): string | null {
 
 export type ParsedCalendarQuery = {
   view: CalendarViewMode;
-  /** UTC calendar anchor `YYYY-MM-DD` (day containing this instant at 00:00 UTC). */
+  /** Clinic-local calendar anchor `YYYY-MM-DD` (midnight boundary in {@link calendarTimezone}). */
   dateAnchor: string;
+  /** IANA timezone for calendar grid, navigation, and display. */
+  calendarTimezone: string;
   status: string | null;
   bookingType: string | null;
   assignedUserId: string | null;
@@ -80,17 +93,19 @@ function parseView(raw: string): CalendarViewMode {
 
 /**
  * Parse `searchParams` from the Next.js app router into a normalised calendar query.
- * Invalid `date` falls back to today (UTC). Invalid `view` falls back to `week`.
+ * Invalid `date` falls back to today in `calendarTimezone`. Invalid `view` falls back to `week`.
  */
 export function parseCalendarSearchParams(
   searchParams: Record<string, string | string[] | undefined>,
-  now: Date = new Date()
+  now: Date = new Date(),
+  opts?: { calendarTimezone?: string }
 ): ParsedCalendarQuery {
-  const today = utcCalendarDateStringFromDate(now);
+  const calendarTimezone = normalizeCalendarTimezone(opts?.calendarTimezone);
+  const today = calendarDateStringFromInstant(now, calendarTimezone);
   const view = parseView(firstString(searchParams.view));
 
   const dateRaw = firstString(searchParams.date).trim();
-  const dateAnchor = parseUtcCalendarDateString(dateRaw) ?? today;
+  const dateAnchor = parseCalendarDateString(dateRaw, calendarTimezone) ?? today;
 
   const statusRaw = firstString(searchParams.status).trim();
   const status = statusRaw && isAllowedBookingStatus(statusRaw) ? statusRaw : null;
@@ -113,6 +128,7 @@ export function parseCalendarSearchParams(
   return {
     view,
     dateAnchor,
+    calendarTimezone,
     status,
     bookingType,
     assignedUserId,
@@ -178,59 +194,68 @@ export function calendarRangeIsoForQuery(q: ParsedCalendarQuery): { rangeStartIs
 }
 
 export function calendarVisibleUtcRangeMs(q: ParsedCalendarQuery): { rangeStartMs: number; rangeEndMs: number } {
-  const anchor = parseUtcCalendarDateString(q.dateAnchor);
-  const ymd = anchor ?? utcCalendarDateStringFromDate(new Date());
-  const startMs = Date.UTC(
-    Number(ymd.slice(0, 4)),
-    Number(ymd.slice(5, 7)) - 1,
-    Number(ymd.slice(8, 10)),
-    0,
-    0,
-    0,
-    0
-  );
+  const tz = normalizeCalendarTimezone(q.calendarTimezone);
+  const anchor = parseCalendarDateString(q.dateAnchor, tz);
+  const ymd = anchor ?? calendarDateStringFromInstant(new Date(), tz);
+  const startMs = zonedMidnightUtcMs(ymd, tz);
+  if (startMs == null) {
+    return { rangeStartMs: Date.now(), rangeEndMs: Date.now() + 86400000 };
+  }
   if (q.view === "day") {
-    return { rangeStartMs: startMs, rangeEndMs: startMs + 86400000 };
+    const endMs = zonedNextDayUtcMs(ymd, tz) ?? startMs + 86400000;
+    return { rangeStartMs: startMs, rangeEndMs: endMs };
   }
   if (q.view === "3day") {
-    return { rangeStartMs: startMs, rangeEndMs: startMs + 3 * 86400000 };
+    const endYmd = addDaysToCalendarDate(ymd, 3, tz);
+    const endMs = zonedMidnightUtcMs(endYmd, tz) ?? startMs + 3 * 86400000;
+    return { rangeStartMs: startMs, rangeEndMs: endMs };
   }
   if (q.view === "month") {
-    return monthGridUtcRangeMs(q.dateAnchor);
+    return monthGridRangeMs(q.dateAnchor, tz);
   }
-  const mondayMs = utcMondayStartMsContaining(startMs);
+  const mondayMs = localMondayStartMsContaining(startMs, tz);
   return { rangeStartMs: mondayMs, rangeEndMs: mondayMs + 7 * 86400000 };
 }
 
-/** UTC range for the six-week month grid containing `dateAnchor`. */
+/** Local range for the six-week month grid containing `dateAnchor`. */
+export function monthGridRangeMs(dateAnchor: string, timeZone: string, now: Date = new Date()): {
+  rangeStartMs: number;
+  rangeEndMs: number;
+} {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const anchor = parseCalendarDateString(dateAnchor, tz) ?? calendarDateStringFromInstant(now, tz);
+  const anchorMs = zonedMidnightUtcMs(anchor, tz);
+  if (anchorMs == null) {
+    return { rangeStartMs: Date.now(), rangeEndMs: Date.now() + 42 * 86_400_000 };
+  }
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    year: "numeric",
+    month: "numeric",
+  })
+    .formatToParts(new Date(anchorMs))
+    .reduce<Record<string, string>>((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+  const year = Number(parts.year);
+  const monthIndex = Number(parts.month) - 1;
+  const firstYmd = `${year}-${String(monthIndex + 1).padStart(2, "0")}-01`;
+  const firstMs = zonedMidnightUtcMs(firstYmd, tz) ?? anchorMs;
+  const mondayMs = localMondayStartMsContaining(firstMs, tz);
+  return { rangeStartMs: mondayMs, rangeEndMs: mondayMs + 42 * 86_400_000 };
+}
+
+/** @deprecated Use {@link monthGridRangeMs} — kept for existing imports. */
 export function monthGridUtcRangeMs(dateAnchor: string, now: Date = new Date()): {
   rangeStartMs: number;
   rangeEndMs: number;
 } {
-  const anchor = parseUtcCalendarDateString(dateAnchor) ?? utcCalendarDateStringFromDate(now);
-  const anchorMs = Date.UTC(
-    Number(anchor.slice(0, 4)),
-    Number(anchor.slice(5, 7)) - 1,
-    Number(anchor.slice(8, 10)),
-    0,
-    0,
-    0,
-    0
-  );
-  const monthIndex = new Date(anchorMs).getUTCMonth();
-  const year = new Date(anchorMs).getUTCFullYear();
-  const firstOfMonthMs = Date.UTC(year, monthIndex, 1);
-  const dow = new Date(firstOfMonthMs).getUTCDay();
-  const mondayOffset = (dow + 6) % 7;
-  const gridStartMs = firstOfMonthMs - mondayOffset * 86_400_000;
-  return { rangeStartMs: gridStartMs, rangeEndMs: gridStartMs + 42 * 86_400_000 };
+  return monthGridRangeMs(dateAnchor, DEFAULT_CALENDAR_TIMEZONE, now);
 }
 
 export function addUtcMonthsToCalendarDate(ymd: string, deltaMonths: number): string {
-  const normalized = parseUtcCalendarDateString(ymd) ?? ymd.trim();
-  const y = Number(normalized.slice(0, 4));
-  const mo = Number(normalized.slice(5, 7)) - 1;
-  return utcCalendarDateStringFromDate(new Date(Date.UTC(y, mo + deltaMonths, 1)));
+  return addMonthsToCalendarDate(ymd, deltaMonths, DEFAULT_CALENDAR_TIMEZONE);
 }
 
 /** UTC Monday 00:00 of the week containing the given UTC calendar midnight. */

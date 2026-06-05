@@ -4,6 +4,7 @@ import {
   CALENDAR_TIME_SLOTS,
   calendarGridBodyHeightPx,
   calendarSlotHeightPx,
+  generateCalendarTimeSlots,
 } from "@/lib/calendar/time-slots";
 import { fiCrmCalendarGridClassNames } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,8 @@ export type BusinessTimeSlotGridProps = {
  * Always-visible 8 AM–6 PM slot grid (30-min increments).
  * Renders even when a column has zero appointments.
  */
-export function BusinessTimeSlotGrid({ bodyHeightPx, className }: BusinessTimeSlotGridProps) {
+export function BusinessTimeSlotGrid({ bodyHeightPx, className, timeZone = "UTC" }: BusinessTimeSlotGridProps & { timeZone?: string }) {
+  const slots = generateCalendarTimeSlots(timeZone);
   const slotH = calendarSlotHeightPx();
   const height = bodyHeightPx ?? calendarGridBodyHeightPx();
 
@@ -28,7 +30,7 @@ export function BusinessTimeSlotGrid({ bodyHeightPx, className }: BusinessTimeSl
       style={{ minHeight: height }}
       aria-hidden
     >
-      {CALENDAR_TIME_SLOTS.map((slot, i) => (
+      {slots.map((slot, i) => (
         <div
           key={slot.start}
           className={cn(
@@ -52,10 +54,13 @@ export function BusinessTimeSlotGrid({ bodyHeightPx, className }: BusinessTimeSl
 export function BusinessTimeGutter({
   bodyHeightPx,
   headerHeightPx = 56,
+  timeZone = "UTC",
 }: {
   bodyHeightPx?: number;
   headerHeightPx?: number;
+  timeZone?: string;
 }) {
+  const slots = generateCalendarTimeSlots(timeZone);
   const slotH = calendarSlotHeightPx();
   const height = bodyHeightPx ?? calendarGridBodyHeightPx();
 
@@ -72,7 +77,7 @@ export function BusinessTimeGutter({
         aria-hidden
       />
       <div className="relative" style={{ height }}>
-        {CALENDAR_TIME_SLOTS.filter((_, i) => i % 2 === 0).map((slot, hourIndex) => (
+        {slots.filter((_, i) => i % 2 === 0).map((slot, hourIndex) => (
           <div
             key={slot.start}
             className="absolute left-0 right-0 flex items-start justify-end pr-2 pt-1"

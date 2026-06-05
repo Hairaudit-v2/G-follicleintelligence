@@ -3,6 +3,8 @@
  * Ensures the grid always renders the full 8 AM–6 PM window, even with zero appointments.
  */
 
+import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+
 export type CalendarTimeSlot = {
   start: string;
   end: string;
@@ -17,31 +19,29 @@ export const CALENDAR_DAY_END_HOUR = 18;
 
 export const CALENDAR_SLOT_MINUTES = 30;
 
-const TIME_FORMAT: Intl.DateTimeFormatOptions = {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "UTC",
-};
-
-function formatUtcMinutes(totalMinutes: number): string {
+function formatLocalMinutes(totalMinutes: number, timeZone: string): string {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  return new Date(Date.UTC(2000, 0, 1, hours, minutes, 0)).toLocaleTimeString(undefined, TIME_FORMAT);
+  const tz = normalizeCalendarTimezone(timeZone);
+  return new Date(Date.UTC(2000, 0, 1, hours, minutes, 0)).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: tz === "UTC" ? "UTC" : tz,
+  });
 }
 
 /**
- * Build every 30-minute slot from 8:00 AM through 6:00 PM (20 slots).
- * `start` / `end` are localized short times; `label` is the slot range.
+ * Build every 30-minute slot from 8:00 AM through 6:00 PM (20 slots) in clinic-local time labels.
  */
-export function generateCalendarTimeSlots(): CalendarTimeSlot[] {
+export function generateCalendarTimeSlots(timeZone: string = "UTC"): CalendarTimeSlot[] {
   const startMinutes = CALENDAR_DAY_START_HOUR * 60;
   const endMinutes = CALENDAR_DAY_END_HOUR * 60;
   const slots: CalendarTimeSlot[] = [];
 
   for (let cursor = startMinutes; cursor < endMinutes; cursor += CALENDAR_SLOT_MINUTES) {
     const slotEnd = cursor + CALENDAR_SLOT_MINUTES;
-    const start = formatUtcMinutes(cursor);
-    const end = formatUtcMinutes(slotEnd);
+    const start = formatLocalMinutes(cursor, timeZone);
+    const end = formatLocalMinutes(slotEnd, timeZone);
     slots.push({
       start,
       end,
@@ -52,8 +52,8 @@ export function generateCalendarTimeSlots(): CalendarTimeSlot[] {
   return slots;
 }
 
-/** Precomputed slots — same window as {@link DEFAULT_BUSINESS_GRID} in operational layout. */
-export const CALENDAR_TIME_SLOTS: readonly CalendarTimeSlot[] = generateCalendarTimeSlots();
+/** Precomputed slots for UTC — same window as {@link DEFAULT_BUSINESS_GRID}. */
+export const CALENDAR_TIME_SLOTS: readonly CalendarTimeSlot[] = generateCalendarTimeSlots("UTC");
 
 /** Pixel height of one hour row in the CRM calendar grid. */
 export const CALENDAR_PX_PER_HOUR = 56;
@@ -73,7 +73,7 @@ export function calendarSlotCount(): number {
   return CALENDAR_TIME_SLOTS.length;
 }
 
-/** 0-based slot index for UTC minutes-from-midnight within the business window. */
+/** 0-based slot index for local minutes-from-midnight within the business window. */
 export function calendarSlotIndexFromMinutes(totalMinutes: number): number {
   const gridStart = CALENDAR_DAY_START_HOUR * 60;
   const rel = totalMinutes - gridStart;

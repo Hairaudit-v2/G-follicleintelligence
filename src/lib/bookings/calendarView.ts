@@ -1,24 +1,38 @@
 /**
- * Pure calendar grid helpers (Stage 3C) — UTC calendar lanes aligned with URL `date` anchor.
+ * Pure calendar grid helpers (Stage 3C) — clinic-local day lanes aligned with URL `date` anchor.
  */
 
+import {
+  addDaysToCalendarDate,
+  addMonthsToCalendarDate,
+  calendarDateStringFromInstant,
+  DEFAULT_CALENDAR_TIMEZONE,
+  formatWeekdayShort,
+  isoFromLocalDayMinutes,
+  localMondayStartMsContaining,
+  normalizeCalendarTimezone,
+  parseCalendarDateString,
+  zonedMidnightUtcMs,
+  zonedNextDayUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "./types";
 import {
   parseUtcCalendarDateString,
   utcCalendarDateStringFromDate,
   utcMondayStartMsContaining,
-  addUtcMonthsToCalendarDate,
   type ParsedCalendarQuery,
   type CalendarHrefQuery,
   type CalendarViewMode,
 } from "./calendarQuery";
 
 export type CalendarDayLane = {
-  /** UTC `YYYY-MM-DD` key for bucketing. */
+  /** Clinic-local `YYYY-MM-DD` key for bucketing. */
   dayKey: string;
   startMs: number;
   endMs: number;
-  /** Short weekday label (UTC) for headers. */
+  /** IANA timezone used to build this lane. */
+  timeZone: string;
+  /** Short weekday label in clinic timezone. */
   headingShortUtc: string;
 };
 
@@ -29,72 +43,97 @@ function utcMidnightMsFromYmd(ymd: string): number {
   return Date.UTC(y, mo, d, 0, 0, 0, 0);
 }
 
-function formatUtcWeekdayShort(ms: number): string {
-  return new Date(ms).toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" });
+function buildLane(dayKey: string, timeZone: string): CalendarDayLane | null {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const startMs = zonedMidnightUtcMs(dayKey, tz);
+  if (startMs == null) return null;
+  const endMs = zonedNextDayUtcMs(dayKey, tz) ?? startMs + 86400000;
+  return {
+    dayKey,
+    startMs,
+    endMs,
+    timeZone: tz,
+    headingShortUtc: formatWeekdayShort(startMs, tz),
+  };
 }
 
-/** Single UTC day lane for day view. */
-export function buildCalendarDay(dateAnchor: string): CalendarDayLane[] {
-  const ymd = parseUtcCalendarDateString(dateAnchor) ?? dateAnchor.trim();
-  const startMs = utcMidnightMsFromYmd(ymd);
-  const endMs = startMs + 86400000;
-  const key = utcCalendarDateStringFromDate(new Date(startMs));
-  return [{ dayKey: key, startMs, endMs, headingShortUtc: formatUtcWeekdayShort(startMs) }];
+/** Single clinic-local day lane for day view. */
+export function buildCalendarDay(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ymd = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
+  const lane = buildLane(ymd, tz);
+  return lane ? [lane] : [];
 }
 
-/** Three consecutive UTC day lanes starting at `dateAnchor`. */
-export function buildCalendarThreeDay(dateAnchor: string): CalendarDayLane[] {
-  const ymd = parseUtcCalendarDateString(dateAnchor) ?? dateAnchor.trim();
-  const startMs = utcMidnightMsFromYmd(ymd);
+/** Three consecutive clinic-local day lanes starting at `dateAnchor`. */
+export function buildCalendarThreeDay(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ymd = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
   const days: CalendarDayLane[] = [];
   for (let i = 0; i < 3; i++) {
-    const laneStart = startMs + i * 86400000;
-    const laneEnd = laneStart + 86400000;
-    const dayKey = utcCalendarDateStringFromDate(new Date(laneStart));
-    days.push({ dayKey, startMs: laneStart, endMs: laneEnd, headingShortUtc: formatUtcWeekdayShort(laneStart) });
+    const dayKey = addDaysToCalendarDate(ymd, i, tz);
+    const lane = buildLane(dayKey, tz);
+    if (lane) days.push(lane);
   }
   return days;
 }
 
-/** Monday→Sunday UTC lanes for the week containing `dateAnchor`. */
-export function buildCalendarWeek(dateAnchor: string): CalendarDayLane[] {
-  const ymd = parseUtcCalendarDateString(dateAnchor) ?? dateAnchor.trim();
-  const anchorStart = utcMidnightMsFromYmd(ymd);
-  const monday = utcMondayStartMsContaining(anchorStart);
+/** Monday→Sunday lanes for the week containing `dateAnchor` in clinic timezone. */
+export function buildCalendarWeek(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ymd = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
+  const anchorStart = zonedMidnightUtcMs(ymd, tz);
+  if (anchorStart == null) return [];
+  const monday = localMondayStartMsContaining(anchorStart, tz);
   const days: CalendarDayLane[] = [];
   for (let i = 0; i < 7; i++) {
-    const startMs = monday + i * 86400000;
-    const endMs = startMs + 86400000;
-    const dayKey = utcCalendarDateStringFromDate(new Date(startMs));
-    days.push({ dayKey, startMs, endMs, headingShortUtc: formatUtcWeekdayShort(startMs) });
+    const dayKey = calendarDateStringFromInstant(new Date(monday + i * 86400000), tz);
+    const lane = buildLane(dayKey, tz);
+    if (lane) days.push(lane);
   }
   return days;
 }
 
-export function buildCalendarLanesForView(view: CalendarViewMode, dateAnchor: string): CalendarDayLane[] {
-  if (view === "day") return buildCalendarDay(dateAnchor);
-  if (view === "3day") return buildCalendarThreeDay(dateAnchor);
-  if (view === "month") return buildCalendarMonth(dateAnchor);
-  return buildCalendarWeek(dateAnchor);
+export function buildCalendarLanesForView(
+  view: CalendarViewMode,
+  dateAnchor: string,
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): CalendarDayLane[] {
+  if (view === "day") return buildCalendarDay(dateAnchor, timeZone);
+  if (view === "3day") return buildCalendarThreeDay(dateAnchor, timeZone);
+  if (view === "month") return buildCalendarMonth(dateAnchor, timeZone);
+  return buildCalendarWeek(dateAnchor, timeZone);
 }
 
 /** Six-week Monday-start grid cells as day lanes (for month view bucketing). */
-export function buildCalendarMonth(dateAnchor: string): CalendarDayLane[] {
-  const anchor = parseUtcCalendarDateString(dateAnchor) ?? dateAnchor.trim();
-  const anchorMs = utcMidnightMsFromYmd(anchor);
-  const monthIndex = new Date(anchorMs).getUTCMonth();
-  const year = new Date(anchorMs).getUTCFullYear();
-  const firstOfMonthMs = Date.UTC(year, monthIndex, 1);
-  const dow = new Date(firstOfMonthMs).getUTCDay();
-  const mondayOffset = (dow + 6) % 7;
-  const gridStartMs = firstOfMonthMs - mondayOffset * 86_400_000;
+export function buildCalendarMonth(dateAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): CalendarDayLane[] {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const anchor = parseCalendarDateString(dateAnchor, tz) ?? dateAnchor.trim();
+  const anchorMs = zonedMidnightUtcMs(anchor, tz);
+  if (anchorMs == null) return [];
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    year: "numeric",
+    month: "numeric",
+  })
+    .formatToParts(new Date(anchorMs))
+    .reduce<Record<string, string>>((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+  const year = Number(parts.year);
+  const monthIndex = Number(parts.month) - 1;
+  const firstYmd = `${year}-${String(monthIndex + 1).padStart(2, "0")}-01`;
+  const firstMs = zonedMidnightUtcMs(firstYmd, tz) ?? anchorMs;
+  const gridStartMs = localMondayStartMsContaining(firstMs, tz);
   const lanes: CalendarDayLane[] = [];
 
   for (let i = 0; i < 42; i++) {
     const startMs = gridStartMs + i * 86_400_000;
-    const endMs = startMs + 86_400_000;
-    const dayKey = utcCalendarDateStringFromDate(new Date(startMs));
-    lanes.push({ dayKey, startMs, endMs, headingShortUtc: formatUtcWeekdayShort(startMs) });
+    const dayKey = calendarDateStringFromInstant(new Date(startMs), tz);
+    const lane = buildLane(dayKey, tz);
+    if (lane) lanes.push(lane);
   }
 
   return lanes;
@@ -137,9 +176,7 @@ export function bucketBookingsIntoCalendar(
 }
 
 export function addUtcDaysToCalendarDate(ymd: string, days: number): string {
-  const normalized = parseUtcCalendarDateString(ymd) ?? ymd.trim();
-  const ms = utcMidnightMsFromYmd(normalized) + days * 86400000;
-  return utcCalendarDateStringFromDate(new Date(ms));
+  return addDaysToCalendarDate(ymd, days, DEFAULT_CALENDAR_TIMEZONE);
 }
 
 function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
@@ -154,56 +191,70 @@ function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
 }
 
 /**
- * Navigation deltas for calendar toolbar (UTC date anchor).
- * Week view shifts by 7 days; day view by 1 day. `today` only sets `date`.
+ * Navigation deltas for calendar toolbar (clinic-local date anchor).
  */
 export const calendarNavigationHelpers = {
   previousPeriod(q: ParsedCalendarQuery): CalendarHrefQuery {
+    const tz = q.calendarTimezone;
     const step = calendarViewPeriodStepDays(q.view);
     if (step === "month") {
       return {
         view: q.view,
-        date: addUtcMonthsToCalendarDate(q.dateAnchor, -1),
+        date: addMonthsToCalendarDate(q.dateAnchor, -1, tz),
         ...filtersPatchFromQuery(q),
       };
     }
     return {
       view: q.view,
-      date: addUtcDaysToCalendarDate(q.dateAnchor, -step),
+      date: addDaysToCalendarDate(q.dateAnchor, -step, tz),
       ...filtersPatchFromQuery(q),
     };
   },
   nextPeriod(q: ParsedCalendarQuery): CalendarHrefQuery {
+    const tz = q.calendarTimezone;
     const step = calendarViewPeriodStepDays(q.view);
     if (step === "month") {
       return {
         view: q.view,
-        date: addUtcMonthsToCalendarDate(q.dateAnchor, 1),
+        date: addMonthsToCalendarDate(q.dateAnchor, 1, tz),
         ...filtersPatchFromQuery(q),
       };
     }
     return {
       view: q.view,
-      date: addUtcDaysToCalendarDate(q.dateAnchor, step),
+      date: addDaysToCalendarDate(q.dateAnchor, step, tz),
       ...filtersPatchFromQuery(q),
     };
   },
-  goToToday(now: Date = new Date()): Pick<CalendarHrefQuery, "date"> {
-    return { date: utcCalendarDateStringFromDate(now) };
+  goToToday(now: Date = new Date(), timeZone: string = DEFAULT_CALENDAR_TIMEZONE): Pick<CalendarHrefQuery, "date"> {
+    return { date: calendarDateStringFromInstant(now, timeZone) };
   },
 };
 
-/** One-hour UTC slot starting at `hour` (0–23) on `dayKey` (`YYYY-MM-DD`). */
-export function utcHourSlotIsoRange(dayKey: string, hour: number): { startIso: string; endIso: string } | null {
-  const ymd = parseUtcCalendarDateString(dayKey);
+/** One-hour slot starting at `hour` (local clinic hour) on `dayKey`. */
+export function utcHourSlotIsoRange(
+  dayKey: string,
+  hour: number,
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): { startIso: string; endIso: string } | null {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ymd = parseCalendarDateString(dayKey, tz);
   if (!ymd) return null;
   if (!Number.isInteger(hour) || hour < 0 || hour > 23) return null;
-  const y = Number(ymd.slice(0, 4));
-  const mo = Number(ymd.slice(5, 7)) - 1;
-  const d = Number(ymd.slice(8, 10));
-  const startMs = Date.UTC(y, mo, d, hour, 0, 0, 0);
-  const endMs = Date.UTC(y, mo, d, hour + 1, 0, 0, 0);
-  return { startIso: new Date(startMs).toISOString(), endIso: new Date(endMs).toISOString() };
+  const startMs = zonedMidnightUtcMs(ymd, tz);
+  if (startMs == null) return null;
+  if (tz === DEFAULT_CALENDAR_TIMEZONE) {
+    const y = Number(ymd.slice(0, 4));
+    const mo = Number(ymd.slice(5, 7)) - 1;
+    const d = Number(ymd.slice(8, 10));
+    const utcStart = Date.UTC(y, mo, d, hour, 0, 0, 0);
+    const utcEnd = Date.UTC(y, mo, d, hour + 1, 0, 0, 0);
+    return { startIso: new Date(utcStart).toISOString(), endIso: new Date(utcEnd).toISOString() };
+  }
+  const startIso = isoFromLocalDayMinutes(ymd, hour * 60, tz);
+  const endIso = isoFromLocalDayMinutes(ymd, (hour + 1) * 60, tz);
+  if (!startIso || !endIso) return null;
+  return { startIso, endIso };
 }
 
 export const CALENDAR_GRID_PX_PER_HOUR = 44;
@@ -211,8 +262,7 @@ export const CALENDAR_GRID_PX_PER_HOUR = 44;
 export const CALENDAR_DAY_COLUMN_HEIGHT_PX = 24 * CALENDAR_GRID_PX_PER_HOUR;
 
 /**
- * Vertical placement within a UTC calendar-day column (`lane` midnight bounds).
- * Returns pixel offsets using {@link CALENDAR_GRID_PX_PER_HOUR}.
+ * Vertical placement within a calendar-day column (`lane` midnight bounds).
  */
 export function layoutBookingUtcDayColumn(
   booking: FiBookingRow,
@@ -224,9 +274,7 @@ export function layoutBookingUtcDayColumn(
   const clampS = Math.max(s, lane.startMs);
   const clampE = Math.min(e, lane.endMs);
   if (clampE <= clampS) return null;
-  const start = new Date(clampS);
-  const minsFromMidnight =
-    start.getUTCHours() * 60 + start.getUTCMinutes() + start.getUTCSeconds() / 60 + start.getUTCMilliseconds() / 60000;
+  const minsFromMidnight = (clampS - lane.startMs) / 60000;
   const durMin = (clampE - clampS) / 60000;
   const topPx = (minsFromMidnight / 60) * CALENDAR_GRID_PX_PER_HOUR;
   const heightPx = Math.max((durMin / 60) * CALENDAR_GRID_PX_PER_HOUR, 22);

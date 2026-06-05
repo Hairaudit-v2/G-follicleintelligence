@@ -100,11 +100,21 @@ export type RescheduleAppointmentInput = {
   providerId?: string | null;
   clinicId?: string | null;
   procedure?: string;
+  metadata?: Record<string, unknown>;
 };
+
+export type RescheduleAppointmentResult =
+  | { ok: true; appointment: CalendarAppointment }
+  | {
+      ok: false;
+      error: string;
+      conflictingAppointmentId?: string | null;
+      isConflict?: boolean;
+    };
 
 export async function rescheduleCalendarAppointmentRequest(
   input: RescheduleAppointmentInput
-): Promise<CalendarAppointment> {
+): Promise<RescheduleAppointmentResult> {
   const res = await fetch(
     `${tenantAppointmentsBase(input.tenantId)}/${encodeURIComponent(input.appointmentId.trim())}`,
     {
@@ -117,12 +127,18 @@ export async function rescheduleCalendarAppointmentRequest(
         provider: input.providerId,
         clinicId: input.clinicId,
         procedure: input.procedure,
+        metadata: input.metadata,
       }),
     }
   );
   const json = (await res.json()) as ApiOk<{ appointment: CalendarAppointment }> | ApiErr;
-  if (!res.ok || !json.ok) {
-    throw new Error(!json.ok ? json.error : `Request failed (${res.status}).`);
+  if (res.ok && json.ok) {
+    return { ok: true, appointment: json.appointment };
   }
-  return json.appointment;
+  return {
+    ok: false,
+    error: !json.ok ? json.error : `Request failed (${res.status}).`,
+    conflictingAppointmentId: !json.ok ? json.conflictingAppointmentId ?? null : null,
+    isConflict: res.status === 409,
+  };
 }

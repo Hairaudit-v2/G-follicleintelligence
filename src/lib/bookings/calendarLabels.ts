@@ -2,6 +2,7 @@
  * Staff-facing strings and design-token class maps for the booking calendar (Stage 3C). Pure.
  */
 
+import { DEFAULT_CALENDAR_TIMEZONE, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { BOOKING_TYPES, type BookingType } from "./bookingPolicy";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { CalendarDayLane } from "./calendarView";
@@ -29,21 +30,27 @@ export function bookingTypeCalendarEventClasses(bookingType: string): string {
   return "border-border bg-muted text-muted-foreground";
 }
 
-export function calendarDayHeading(lane: CalendarDayLane): string {
+export function calendarDayHeading(lane: CalendarDayLane, timeZone?: string): string {
+  const tz = normalizeCalendarTimezone(timeZone ?? lane.timeZone);
   const d = new Date(lane.startMs);
-  const dayNum = d.getUTCDate();
-  const month = d.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" });
+  const dayNum = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(d);
+  const month = d.toLocaleDateString("en-GB", { month: "short", timeZone: tz });
   return `${lane.headingShortUtc} ${dayNum} ${month}`;
 }
 
-export function formatCalendarRangeTitle(view: CalendarViewMode, lanes: CalendarDayLane[]): string {
+export function formatCalendarRangeTitle(
+  view: CalendarViewMode,
+  lanes: CalendarDayLane[],
+  timeZone: string = DEFAULT_CALENDAR_TIMEZONE
+): string {
+  const tz = normalizeCalendarTimezone(timeZone);
   if (lanes.length === 0) return "Calendar";
   if (view === "month" && lanes.length > 0) {
     const anchorMs = lanes[14]?.startMs ?? lanes[0].startMs;
     return new Date(anchorMs).toLocaleDateString("en-GB", {
       month: "long",
       year: "numeric",
-      timeZone: "UTC",
+      timeZone: tz,
     });
   }
   if (view === "day") {
@@ -53,24 +60,33 @@ export function formatCalendarRangeTitle(view: CalendarViewMode, lanes: Calendar
       day: "numeric",
       month: "long",
       year: "numeric",
-      timeZone: "UTC",
+      timeZone: tz,
     });
   }
   if (view === "3day" && lanes.length > 0) {
     const start = new Date(lanes[0].startMs);
     const end = new Date(lanes[lanes.length - 1].endMs - 1);
-    return `${start.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })} – ${end.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}`;
+    return `${start.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: tz })} – ${end.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: tz })}`;
   }
   const a = lanes[0].startMs;
   const b = lanes[lanes.length - 1].endMs - 1;
   const start = new Date(a);
   const end = new Date(b);
-  const sameMonth =
-    start.getUTCMonth() === end.getUTCMonth() && start.getUTCFullYear() === end.getUTCFullYear();
+  const startParts = new Intl.DateTimeFormat("en-GB", { month: "numeric", year: "numeric", timeZone: tz }).formatToParts(start);
+  const endParts = new Intl.DateTimeFormat("en-GB", { month: "numeric", year: "numeric", timeZone: tz }).formatToParts(end);
+  const startMonth = startParts.find((p) => p.type === "month")?.value;
+  const endMonth = endParts.find((p) => p.type === "month")?.value;
+  const startYear = startParts.find((p) => p.type === "year")?.value;
+  const endYear = endParts.find((p) => p.type === "year")?.value;
+  const sameMonth = startMonth === endMonth && startYear === endYear;
+  const tzSuffix = tz === DEFAULT_CALENDAR_TIMEZONE ? " (UTC)" : "";
   if (sameMonth) {
-    return `${start.getUTCDate()}–${end.getUTCDate()} ${start.toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" })} ${start.getUTCFullYear()} (UTC)`;
+    const startDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(start);
+    const endDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(end);
+    const monthLabel = start.toLocaleDateString("en-GB", { month: "long", timeZone: tz });
+    return `${startDay}–${endDay} ${monthLabel} ${startYear}${tzSuffix}`;
   }
-  return `${start.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })} – ${end.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })} (UTC)`;
+  return `${start.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: tz })} – ${end.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: tz })}${tzSuffix}`;
 }
 
 export function bookingTypeCalendarLegendLabel(type: string): string {

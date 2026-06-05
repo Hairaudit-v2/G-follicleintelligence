@@ -178,6 +178,7 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
         assignees={data.assignees}
         clinics={data.clinics}
         adminKey=""
+        clinicCalendarTimezone={data.calendarTimezone}
         onClose={() => setEditing(null)}
         onSaved={refresh}
       />

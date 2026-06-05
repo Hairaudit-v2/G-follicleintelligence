@@ -31,14 +31,21 @@ import {
   calendarTouchSensorOptions,
 } from "@/lib/calendar/calendarResponsive";
 import { calendarShellVariants, staggerContainerVariants } from "@/lib/calendar/calendarMotion";
+import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
 import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
+import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { cn } from "@/lib/utils";
+import {
+  calendarDateStringFromInstant,
+  isoFromLocalDayMinutes,
+  minutesFromLaneStart,
+  parseCalendarDateString,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import {
   addUtcMonthsToCalendarDate,
   buildCalendarHref,
   mergeCalendarHrefQuery,
-  parseUtcCalendarDateString,
-  utcCalendarDateStringFromDate,
   type CalendarRoute,
   type ParsedCalendarQuery,
 } from "@/src/lib/bookings/calendarQuery";
@@ -107,7 +114,7 @@ export type MonthViewProps = {
     startIso: string,
     endIso: string,
     meta?: MonthViewRescheduleMeta
-  ) => Promise<{ ok: boolean; error?: string }>;
+  ) => Promise<CalendarRescheduleResult>;
   /** When set with `query`, day clicks and month nav use the calendar router. */
   tenantId?: string;
   query?: ParsedCalendarQuery;
@@ -131,30 +138,50 @@ export function monthDayDropId(dayKey: string): string {
   return `${MONTH_DAY_DROP_PREFIX}${dayKey}`;
 }
 
-export function parseMonthDayDropId(id: string): string | null {
+export function parseMonthDayDropId(id: string, timeZone?: string): string | null {
   if (!id.startsWith(MONTH_DAY_DROP_PREFIX)) return null;
   const dayKey = id.slice(MONTH_DAY_DROP_PREFIX.length).trim();
-  return parseUtcCalendarDateString(dayKey) ? dayKey : null;
+  return parseCalendarDateString(dayKey, timeZone ?? "UTC") ? dayKey : null;
 }
 
 /** Six-week Monday-start grid covering the month containing `monthAnchor`. */
-export function buildMonthGridCells(monthAnchor: string, now: Date = new Date()): MonthGridCell[] {
-  const todayKey = utcCalendarDateStringFromDate(now);
-  const anchor = parseUtcCalendarDateString(monthAnchor) ?? utcCalendarDateStringFromDate(now);
-  const anchorMs = utcMidnightMsFromYmd(anchor);
-  const monthIndex = new Date(anchorMs).getUTCMonth();
-  const year = new Date(anchorMs).getUTCFullYear();
-  const lanes = buildCalendarMonth(monthAnchor);
+export function buildMonthGridCells(monthAnchor: string, timeZone: string, now: Date = new Date()): MonthGridCell[] {
+  const tz = timeZone.trim() || "UTC";
+  const todayKey = calendarDateStringFromInstant(now, tz);
+  const anchor = parseCalendarDateString(monthAnchor, tz) ?? calendarDateStringFromInstant(now, tz);
+  const anchorMs = zonedMidnightUtcMs(anchor, tz) ?? Date.now();
+  const monthParts = new Intl.DateTimeFormat("en-US", { timeZone: tz, month: "numeric", year: "numeric" })
+    .formatToParts(new Date(anchorMs))
+    .reduce<Record<string, string>>((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+  const monthIndex = Number(monthParts.month) - 1;
+  const year = Number(monthParts.year);
+  const lanes = buildCalendarMonth(monthAnchor, tz);
 
   return lanes.map((lane) => {
-    const cellDate = new Date(lane.startMs);
-    const utcDow = cellDate.getUTCDay();
+    const cellParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+      weekday: "short",
+    })
+      .formatToParts(new Date(lane.startMs))
+      .reduce<Record<string, string>>((acc, p) => {
+        if (p.type !== "literal") acc[p.type] = p.value;
+        return acc;
+      }, {});
+    const cellMonth = Number(cellParts.month) - 1;
+    const cellYear = Number(cellParts.year);
+    const dow = cellParts.weekday;
     return {
       dayKey: lane.dayKey,
-      dayOfMonth: cellDate.getUTCDate(),
-      inCurrentMonth: cellDate.getUTCMonth() === monthIndex && cellDate.getUTCFullYear() === year,
+      dayOfMonth: Number(cellParts.day),
+      inCurrentMonth: cellMonth === monthIndex && cellYear === year,
       isToday: lane.dayKey === todayKey,
-      isWeekend: utcDow === 0 || utcDow === 6,
+      isWeekend: dow === "Sat" || dow === "Sun",
       startMs: lane.startMs,
       endMs: lane.endMs,
     };
@@ -192,32 +219,25 @@ export function bucketBookingsForMonthCells(
   return map;
 }
 
-export function formatMonthTitle(monthAnchor: string): string {
-  const anchor = parseUtcCalendarDateString(monthAnchor) ?? monthAnchor;
-  const ms = utcMidnightMsFromYmd(anchor);
+export function formatMonthTitle(monthAnchor: string, timeZone: string = "UTC"): string {
+  const anchor = parseCalendarDateString(monthAnchor, timeZone) ?? monthAnchor;
+  const ms = zonedMidnightUtcMs(anchor, timeZone) ?? Date.parse(`${anchor}T12:00:00Z`);
   return new Date(ms).toLocaleDateString("en-GB", {
     month: "long",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone,
   });
-}
-
-function isoFromDayMinutes(dayKey: string, minutesUtc: number): string | null {
-  const ymd = parseUtcCalendarDateString(dayKey);
-  if (!ymd) return null;
-  const mid = utcMidnightMsFromYmd(ymd);
-  return new Date(mid + minutesUtc * 60_000).toISOString();
 }
 
 function defaultWaitlistDropMinutes(cfg: BusinessGridConfig): number {
   return cfg.dayStartHourUtc * 60 + 60;
 }
 
-function formatPillTime(iso: string, timezone?: string | null): string {
+function formatPillTime(iso: string, timezone?: string | null, fallbackTz?: string): string {
   return new Date(iso).toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: timezone?.trim() || "UTC",
+    timeZone: timezone?.trim() || fallbackTz?.trim() || "UTC",
   });
 }
 
@@ -476,9 +496,15 @@ function MonthViewInner({
     useSensor(TouchSensor, calendarTouchSensorOptions())
   );
 
-  const cells = useMemo(() => buildMonthGridCells(monthAnchor), [monthAnchor]);
+  const cells = useMemo(
+    () => buildMonthGridCells(monthAnchor, gridConfig.timeZone),
+    [monthAnchor, gridConfig.timeZone]
+  );
   const buckets = useMemo(() => bucketBookingsForMonthCells(bookings, cells), [bookings, cells]);
-  const monthTitle = useMemo(() => formatMonthTitle(monthAnchor), [monthAnchor]);
+  const monthTitle = useMemo(
+    () => formatMonthTitle(monthAnchor, gridConfig.timeZone),
+    [monthAnchor, gridConfig.timeZone]
+  );
 
   const monthStats = useMemo(() => {
     let total = 0;
@@ -557,8 +583,11 @@ function MonthViewInner({
       const { active, over } = event;
       if (!over) return;
 
-      const dayKey = parseMonthDayDropId(String(over.id));
+      const dayKey = parseMonthDayDropId(String(over.id), gridConfig.timeZone);
       if (!dayKey) return;
+
+      const cell = cells.find((c) => c.dayKey === dayKey);
+      if (!cell) return;
 
       const waitlistBookingId = parseWaitlistDragId(String(active.id));
       const bookingId = waitlistBookingId ?? String(active.id);
@@ -577,12 +606,11 @@ function MonthViewInner({
       if (!waitlistBookingId) {
         const origMs = Date.parse(booking.start_at);
         if (Number.isFinite(origMs)) {
-          const d = new Date(origMs);
-          startMin = d.getUTCHours() * 60 + d.getUTCMinutes();
+          startMin = minutesFromLaneStart(cell.startMs, origMs);
         }
       }
-      const startIso = isoFromDayMinutes(dayKey, startMin);
-      const endIso = isoFromDayMinutes(dayKey, startMin + durationMin);
+      const startIso = isoFromLocalDayMinutes(dayKey, startMin, gridConfig.timeZone);
+      const endIso = isoFromLocalDayMinutes(dayKey, startMin + durationMin, gridConfig.timeZone);
       if (!startIso || !endIso) return;
 
       const meta: MonthViewRescheduleMeta | undefined = waitlistBookingId ? { clearWaitlist: true } : undefined;
@@ -591,10 +619,10 @@ function MonthViewInner({
       if (result.ok) {
         success(waitlistBookingId ? "Scheduled from waitlist" : "Appointment moved");
       } else {
-        toastError(result.error ?? "Could not update appointment");
+        toastError(rescheduleErrorMessage(result));
       }
     },
-    [bookings, canMutateBookings, gridConfig, onRescheduleBooking, success, toastError]
+    [bookings, canMutateBookings, cells, gridConfig, onRescheduleBooking, success, toastError]
   );
 
   return (

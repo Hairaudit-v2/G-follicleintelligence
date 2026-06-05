@@ -6,6 +6,11 @@ import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarL
 export const CALENDAR_SNAP_MINUTES = 15;
 export const CALENDAR_MIN_DURATION_MINUTES = 15;
 
+export function minutesFromLaneStart(laneStartMs: number, ms: number): number {
+  return Math.max(0, (ms - laneStartMs) / 60_000);
+}
+
+/** @deprecated Use {@link minutesFromLaneStart} with lane.startMs. */
 export function minutesUtcFromEpoch(ms: number): number {
   const d = new Date(ms);
   return d.getUTCHours() * 60 + d.getUTCMinutes();
@@ -35,7 +40,7 @@ export function durationMinutesFromPx(px: number): number {
   return snapDurationMinutes(px / calendarPxPerMinute());
 }
 
-/** Drop Y → snapped UTC minutes within the business-day grid. */
+/** Drop Y → snapped local minutes within the business-day grid. */
 export function dropMinutesFromDragEvent(
   event: DragEndEvent,
   cfg: BusinessGridConfig,

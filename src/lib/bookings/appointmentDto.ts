@@ -93,3 +93,25 @@ export function mapBookingToCalendarAppointment(row: FiBookingRow): CalendarAppo
 export function mapBookingsToCalendarAppointments(rows: FiBookingRow[]): CalendarAppointment[] {
   return rows.map(mapBookingToCalendarAppointment);
 }
+
+/** Merge server appointment DTO into an existing booking row (calendar optimistic sync). */
+export function mapCalendarAppointmentToBookingRow(
+  appt: CalendarAppointment,
+  existing: FiBookingRow
+): FiBookingRow {
+  return {
+    ...existing,
+    booking_type: appt.procedure,
+    booking_status: appt.status,
+    title: appt.title,
+    start_at: appt.startAt,
+    end_at: appt.endAt,
+    assigned_user_id: appt.providerId,
+    clinic_id: appt.clinicId,
+    location: appt.location,
+    timezone: appt.timezone,
+    metadata: appt.metadata,
+    cancelled_at: appt.cancelledAt,
+    updated_at: appt.updatedAt,
+  };
+}

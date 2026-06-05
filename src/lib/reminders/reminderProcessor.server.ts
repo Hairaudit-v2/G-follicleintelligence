@@ -10,7 +10,12 @@ import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import type { ReminderTriggerEvent } from "./reminderConstants";
+import { sendReminderDelivery } from "./reminderDelivery.server";
 import { renderReminderText, type ReminderMergeContext } from "./remindersCore";
+import {
+  loadPatientReminderContact,
+  patientHasContactForTemplateType,
+} from "./reminderPatientContact.server";
 import { loadReminderTemplateForTenant } from "./reminderTemplates.server";
 
 function truncate(s: string, max: number): string {
@@ -248,10 +253,51 @@ function isNonBookingReminderTrigger(t: ReminderTriggerEvent): boolean {
   return t === "lead_created" || t === "post_consult";
 }
 
+async function resolvePatientIdForJob(
+  supabase: SupabaseClient,
+  tenantId: string,
+  row: {
+    booking_id: string | null;
+    lead_id: string | null;
+    metadata: Record<string, unknown>;
+  }
+): Promise<string | null> {
+  const metaPid = row.metadata.patient_id;
+  if (typeof metaPid === "string" && metaPid.trim()) return metaPid.trim();
+
+  if (row.booking_id?.trim()) {
+    const booking = await loadBookingForTenant(tenantId, row.booking_id, supabase);
+    const pid = booking?.patient_id?.trim();
+    if (pid) return pid;
+  }
+
+  if (row.lead_id?.trim()) {
+    const { data: leadRow } = await supabase
+      .from("fi_crm_leads")
+      .select("patient_id")
+      .eq("tenant_id", tenantId.trim())
+      .eq("id", row.lead_id.trim())
+      .maybeSingle();
+    const pr = (leadRow as { patient_id?: string | null } | null)?.patient_id;
+    if (pr?.trim()) return pr.trim();
+  }
+
+  return null;
+}
+
+function isNonRetryableDeliveryError(message: string): boolean {
+  const m = message.toLowerCase();
+  return (
+    m.includes("no email on file") ||
+    m.includes("no valid phone on file") ||
+    m.includes("reminder body is empty")
+  );
+}
+
 /**
- * Picks due pending jobs, claims them, renders templates, stubs outbound send, logs to CRM when a lead is anchored.
+ * Picks due pending jobs, claims them, renders templates, sends via Resend/Twilio, logs to CRM when a lead is anchored.
  * One retry on failure (`attempt_count` 0 → 1 pending; second failure → `failed`).
- * Ineligible bookings → `cancelled` (no retry).
+ * Ineligible bookings or missing patient contact → `cancelled` (no retry).
  */
 export async function processReminderJobsOnce(opts?: {
   limit?: number;
@@ -338,9 +384,31 @@ export async function processReminderJobsOnce(opts?: {
       const body = renderReminderText(template.body, merge);
       const subject = template.subject ? renderReminderText(template.subject, merge) : null;
 
-      console.log(
-        `[fi_reminder_jobs] stub send tenant=${row.tenant_id} job=${row.id} type=${template.type} to=(patient channel TBD) body=${truncate(body, 160)}`
-      );
+      const patientId = await resolvePatientIdForJob(supabase, row.tenant_id, row);
+      if (!patientId) {
+        await finalizeJobCancelled(supabase, row.id, "Patient anchor missing; reminder not sent.", nowIso);
+        cancelled += 1;
+        continue;
+      }
+
+      const contact = await loadPatientReminderContact(supabase, row.tenant_id, patientId);
+      if (!contact || !patientHasContactForTemplateType(contact, template.type)) {
+        await finalizeJobCancelled(
+          supabase,
+          row.id,
+          `Patient has no ${template.type} contact on file; reminder not sent.`,
+          nowIso
+        );
+        cancelled += 1;
+        continue;
+      }
+
+      const delivery = await sendReminderDelivery({
+        type: template.type,
+        contact,
+        subject,
+        body,
+      });
 
       if (row.lead_id) {
         const preview = truncate(body, CRM_LEAD_COMMUNICATION_MAX_PREVIEW);
@@ -358,6 +426,8 @@ export async function processReminderJobsOnce(opts?: {
               job_id: row.id,
               booking_id: row.booking_id,
               trigger: template.trigger_event,
+              provider: delivery.provider,
+              external_id: delivery.externalId,
             },
           },
           supabase
@@ -371,6 +441,11 @@ export async function processReminderJobsOnce(opts?: {
       const msg = e instanceof Error ? e.message : String(e);
       const nextAttempt = row.attempt_count + 1;
       const doneIso = new Date().toISOString();
+      if (isNonRetryableDeliveryError(msg)) {
+        await finalizeJobCancelled(supabase, row.id, msg, doneIso);
+        cancelled += 1;
+        continue;
+      }
       if (nextAttempt >= 2) {
         const { error: fe } = await supabase
           .from("fi_reminder_jobs")

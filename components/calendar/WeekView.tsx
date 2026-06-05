@@ -45,8 +45,11 @@ import { BusinessTimeGutter } from "@/components/calendar/BusinessTimeSlotGrid";
 import {
   CALENDAR_SNAP_MINUTES,
   dropMinutesFromDragEvent,
-  minutesUtcFromEpoch,
+  minutesFromLaneStart,
 } from "@/lib/calendar/dndMath";
+import { isoFromLaneMinutes, calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
+import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import {
   buildCalendarHref,
@@ -95,7 +98,7 @@ export type WeekViewProps = {
     startIso: string,
     endIso: string,
     meta?: WeekViewRescheduleMeta
-  ) => Promise<{ ok: boolean; error?: string }>;
+  ) => Promise<CalendarRescheduleResult>;
   /** Enables keyboard navigation (N, T, arrows, 1–3). */
   shortcuts?: {
     tenantId: string;
@@ -118,21 +121,6 @@ function snapToQuarterHourModifier(): Modifier {
     ...transform,
     y: Math.round(transform.y / slotPx) * slotPx,
   });
-}
-
-function utcMidnightMs(dayKey: string): number | null {
-  const ymd = parseUtcCalendarDateString(dayKey);
-  if (!ymd) return null;
-  const y = Number(ymd.slice(0, 4));
-  const mo = Number(ymd.slice(5, 7)) - 1;
-  const d = Number(ymd.slice(8, 10));
-  return Date.UTC(y, mo, d, 0, 0, 0, 0);
-}
-
-function isoFromDayMinutes(dayKey: string, minutesUtc: number): string | null {
-  const mid = utcMidnightMs(dayKey);
-  if (mid == null) return null;
-  return new Date(mid + minutesUtc * 60_000).toISOString();
 }
 
 function assigneeFromColumn(column: CalendarColumn): WeekViewRescheduleMeta {
@@ -196,7 +184,7 @@ function WeekViewInner({
     }
     return lanes.map((lane) => ({
       id: lane.dayKey,
-      label: calendarDayHeading(lane),
+      label: calendarDayHeading(lane, gridConfig.timeZone),
       subtitle: "UTC",
       dayKey: lane.dayKey,
       photoUrl: null,
@@ -243,11 +231,12 @@ function WeekViewInner({
 
   useEffect(() => {
     const el = gridScrollRef.current;
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const laneKey = primaryLane?.dayKey;
-    if (!el || laneKey !== todayKey) return;
+    const lane = primaryLane;
+    if (!el || !lane) return;
+    const todayInTz = calendarDateStringFromInstant(new Date(), gridConfig.timeZone);
+    if (lane.dayKey !== todayInTz) return;
 
-    const nowMin = minutesUtcFromEpoch(Date.now());
+    const nowMin = minutesFromLaneStart(lane.startMs, Date.now());
     const gridStart = gridConfig.dayStartHourUtc * 60;
     const gridEnd = gridConfig.dayEndHourUtc * 60;
     if (nowMin < gridStart || nowMin > gridEnd) return;
@@ -255,7 +244,7 @@ function WeekViewInner({
     const top = (nowMin - gridStart) * calendarPxPerMinute();
     const target = Math.max(0, top - el.clientHeight * 0.28);
     el.scrollTo({ top: target, behavior: "auto" });
-  }, [gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc, primaryLane?.dayKey]);
+  }, [gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc, gridConfig.timeZone, primaryLane?.dayKey]);
 
   const navigateCalendar = useCallback(
     (patch: Parameters<typeof mergeCalendarHrefQuery>[1]) => {
@@ -319,7 +308,7 @@ function WeekViewInner({
       if (result.ok) {
         success(successMessage);
       } else {
-        toastError(result.error ?? "Could not update appointment");
+        toastError(rescheduleErrorMessage(result));
       }
       return result;
     },
@@ -372,14 +361,13 @@ function WeekViewInner({
         if (!Number.isFinite(origStartMs) || !Number.isFinite(origEndMs)) return;
 
         durationMs = Math.max(CALENDAR_SNAP_MINUTES * 60_000, origEndMs - origStartMs);
-        const origStartMin = minutesUtcFromEpoch(origStartMs);
+        const origStartMin = minutesFromLaneStart(lane.startMs, origStartMs);
         newStartMin = dropMinutesFromDragEvent(event, gridConfig, origStartMin);
       }
 
       const newEndMin = newStartMin + durationMs / 60_000;
-      const startIso = isoFromDayMinutes(drop.dayKey, newStartMin);
-      const endIso = isoFromDayMinutes(drop.dayKey, newEndMin);
-      if (!startIso || !endIso) return;
+      const startIso = isoFromLaneMinutes(lane.startMs, newStartMin);
+      const endIso = isoFromLaneMinutes(lane.startMs, newEndMin);
 
       const targetColumn = columnsForView.find((c) => c.id === drop.columnId && c.dayKey === drop.dayKey);
       const meta: WeekViewRescheduleMeta | undefined =
@@ -523,7 +511,11 @@ function WeekViewInner({
             className="flex min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain"
           >
             <div className="flex min-h-min min-w-0 flex-1" style={{ height: bodyHeightPx }}>
-              <BusinessTimeGutter bodyHeightPx={bodyHeightPx} headerHeightPx={CALENDAR_HEADER_HEIGHT_PX} />
+              <BusinessTimeGutter
+                bodyHeightPx={bodyHeightPx}
+                headerHeightPx={CALENDAR_HEADER_HEIGHT_PX}
+                timeZone={gridConfig.timeZone}
+              />
 
               {swipeLayout ? (
                 <div

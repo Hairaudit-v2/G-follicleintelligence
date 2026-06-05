@@ -23,6 +23,8 @@ export type OperationalCalendarResourceColumn = {
 export type OperationalCalendarPageData = {
   tenantId: string;
   query: ParsedCalendarQuery;
+  /** Effective IANA timezone for this calendar view. */
+  calendarTimezone: string;
   rangeStartIso: string;
   rangeEndIso: string;
   rangeTitle: string;

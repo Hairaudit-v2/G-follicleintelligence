@@ -10,10 +10,12 @@ import {
 import { calendarRangeIsoForQuery, parseCalendarSearchParams, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "@/src/lib/bookings/operatorBookingConstants";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { resolveTenantCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import {
   DEFAULT_BUSINESS_GRID,
   type BusinessGridConfig,
 } from "@/src/lib/calendar/operationalCalendarLayout";
+
 import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarPageData,
@@ -176,11 +178,15 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
   return { assignees, clinics, resourceColumns };
 }
 
-function parseGridFromTenantMetadata(metadata: unknown): BusinessGridConfig {
-  if (!metadata || typeof metadata !== "object") return DEFAULT_BUSINESS_GRID;
+function parseGridFromTenantMetadata(metadata: unknown, timeZone: string): BusinessGridConfig {
+  if (!metadata || typeof metadata !== "object") {
+    return { ...DEFAULT_BUSINESS_GRID, timeZone };
+  }
   const root = metadata as Record<string, unknown>;
   const raw = root.operational_calendar ?? root.calendar;
-  if (!raw || typeof raw !== "object") return DEFAULT_BUSINESS_GRID;
+  if (!raw || typeof raw !== "object") {
+    return { ...DEFAULT_BUSINESS_GRID, timeZone };
+  }
   const c = raw as Record<string, unknown>;
   let dayStart = Number(c.dayStartHourUtc);
   let dayEnd = Number(c.dayEndHourUtc);
@@ -194,19 +200,24 @@ function parseGridFromTenantMetadata(metadata: unknown): BusinessGridConfig {
     dayStartHourUtc: Math.floor(dayStart),
     dayEndHourUtc: Math.floor(dayEnd),
     slotMinutes: sm as 30 | 60,
+    timeZone,
   };
 }
 
-async function loadTenantCalendarGridConfig(tenantId: string): Promise<BusinessGridConfig> {
+async function loadTenantCalendarSettings(tenantId: string): Promise<{ gridConfig: BusinessGridConfig; calendarTimezone: string }> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_tenant_settings")
-    .select("metadata")
+    .select("default_timezone, metadata")
     .eq("tenant_id", tenantId.trim())
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) return DEFAULT_BUSINESS_GRID;
-  return parseGridFromTenantMetadata((data as { metadata: unknown }).metadata);
+  const row = data as { default_timezone?: string | null; metadata?: unknown } | null;
+  const calendarTimezone = resolveTenantCalendarTimezone(
+    row ? { default_timezone: row.default_timezone, metadata: row.metadata as Record<string, unknown> } : null
+  );
+  const gridConfig = parseGridFromTenantMetadata(row?.metadata, calendarTimezone);
+  return { gridConfig, calendarTimezone };
 }
 
 function applyStructuredFilters(rows: FiBookingRow[], q: ParsedCalendarQuery): FiBookingRow[] {
@@ -271,19 +282,22 @@ export async function loadOperationalCalendarPageData(
   searchParams: Record<string, string | string[] | undefined>
 ): Promise<OperationalCalendarPageData> {
   const tid = tenantId.trim();
-  const parsed = parseCalendarSearchParams(searchParams);
+  const calendarSettings = await loadTenantCalendarSettings(tid);
+  const parsed = parseCalendarSearchParams(searchParams, new Date(), {
+    calendarTimezone: calendarSettings.calendarTimezone,
+  });
   const viewRaw = Array.isArray(searchParams.view) ? searchParams.view[0] : searchParams.view;
   const query =
     typeof viewRaw === "string" && viewRaw.trim() ? parsed : { ...parsed, view: "day" as const };
-  const lanes = buildCalendarLanesForView(query.view, query.dateAnchor);
+  const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
-  const [rawBookings, resources, gridConfig, canMutateBookings] = await Promise.all([
+  const [rawBookings, resources, canMutateBookings] = await Promise.all([
     loadBookingsForTenantRange(tid, rangeStartIso, rangeEndIso),
     loadTenantStaffAndClinics(tid),
-    loadTenantCalendarGridConfig(tid),
     resolveCanMutateBookings(tid),
   ]);
+  const gridConfig = calendarSettings.gridConfig;
 
   const structured = applyStructuredFilters(rawBookings, query);
 
@@ -363,11 +377,12 @@ export async function loadOperationalCalendarPageData(
     buckets[lane.dayKey] = bucketsMap.get(lane.dayKey) ?? [];
   }
 
-  const rangeTitle = formatCalendarRangeTitle(query.view, lanes);
+  const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
 
   return {
     tenantId: tid,
     query,
+    calendarTimezone: query.calendarTimezone,
     rangeStartIso,
     rangeEndIso,
     rangeTitle,

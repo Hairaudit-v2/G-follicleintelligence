@@ -17,6 +17,7 @@ export function BookingEditDrawer({
   assignees,
   clinics,
   adminKey,
+  clinicCalendarTimezone,
   onClose,
   onSaved,
 }: {
@@ -26,6 +27,8 @@ export function BookingEditDrawer({
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
+  /** Tenant/clinic IANA timezone for datetime-local fields. */
+  clinicCalendarTimezone?: string | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -49,14 +52,14 @@ export function BookingEditDrawer({
     setBookingStatus(booking.booking_status);
     setTitle(booking.title ?? "");
     setDescription(booking.description ?? "");
-    setStartLocal(toDatetimeLocalValue(booking.start_at));
-    setEndLocal(toDatetimeLocalValue(booking.end_at));
-    setTimezone(booking.timezone ?? "");
+    setStartLocal(toDatetimeLocalValue(booking.start_at, clinicCalendarTimezone ?? booking.timezone));
+    setEndLocal(toDatetimeLocalValue(booking.end_at, clinicCalendarTimezone ?? booking.timezone));
+    setTimezone(booking.timezone ?? clinicCalendarTimezone ?? "");
     setLocation(booking.location ?? "");
     setAssignee(booking.assigned_user_id ?? "");
     setClinicId(booking.clinic_id ?? "");
     setFeedback(null);
-  }, [booking]);
+  }, [booking, clinicCalendarTimezone]);
 
   function withAdmin<T extends Record<string, unknown>>(body: T): T & { adminKey?: string } {
     if (adminKey.trim()) return { ...body, adminKey: adminKey.trim() };
@@ -78,8 +81,9 @@ export function BookingEditDrawer({
     setBusy(true);
     setFeedback(null);
     try {
-      const startIso = fromDatetimeLocalValue(startLocal);
-      const endIso = fromDatetimeLocalValue(endLocal);
+      const tz = clinicCalendarTimezone ?? (timezone.trim() || undefined);
+      const startIso = fromDatetimeLocalValue(startLocal, tz);
+      const endIso = fromDatetimeLocalValue(endLocal, tz);
       if (!startIso || !endIso) {
         setFeedback("Start and end times are required.");
         return;

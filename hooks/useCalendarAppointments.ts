@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { updateBookingAction } from "@/lib/actions/fi-booking-actions";
+import { rescheduleCalendarAppointmentRequest } from "@/lib/calendar/appointmentsApiClient";
 import {
   calendarAppointmentsSyncKey,
   useCalendarAppointmentsStore,
   type CalendarReschedulePatch,
 } from "@/lib/calendar/calendarAppointmentsStore";
+import { mapCalendarAppointmentToBookingRow } from "@/src/lib/bookings/appointmentDto";
 import {
   isSampleBookingId,
   mergeBookingsWithSamples,
@@ -28,6 +29,12 @@ export type CalendarRescheduleMeta = {
   clearWaitlist?: boolean;
 };
 
+export type CalendarRescheduleResult = {
+  ok: boolean;
+  error?: string;
+  conflictingAppointmentId?: string | null;
+};
+
 export type UseCalendarAppointmentsOptions = {
   /** Merge demo PRP / transplant / consult sample rows for testing. */
   useSampleData?: boolean;
@@ -43,7 +50,7 @@ export type UseCalendarAppointmentsResult = {
     startIso: string,
     endIso: string,
     meta?: CalendarRescheduleMeta
-  ) => Promise<{ ok: boolean; error?: string }>;
+  ) => Promise<CalendarRescheduleResult>;
   refresh: () => void;
 };
 
@@ -82,12 +89,14 @@ export function useCalendarAppointments(
     hydrate({
       tenantId: data.tenantId,
       syncKey,
+      calendarTimezone: data.calendarTimezone,
       bookings: mergedBookings,
       bookingDisplay: mergedDisplay,
     });
   }, [
     data.bookingDisplay,
     data.bookings,
+    data.calendarTimezone,
     data.query.dateAnchor,
     data.tenantId,
     hydrate,
@@ -117,7 +126,7 @@ export function useCalendarAppointments(
       startIso: string,
       endIso: string,
       meta?: CalendarRescheduleMeta
-    ): Promise<{ ok: boolean; error?: string }> => {
+    ): Promise<CalendarRescheduleResult> => {
       const assignedUserId =
         meta && "assignedUserId" in meta ? (meta.assignedUserId ?? null) : b.assigned_user_id;
       const clinicId = meta && "clinicId" in meta ? (meta.clinicId ?? null) : b.clinic_id;
@@ -164,31 +173,28 @@ export function useCalendarAppointments(
         return { ok: true };
       }
 
-      const r = await updateBookingAction(data.tenantId, b.id, {
-        leadId: b.lead_id,
-        personId: b.person_id,
-        patientId: b.patient_id,
-        caseId: b.case_id,
-        clinicId: clinicId,
-        assignedUserId: assignedUserId,
-        bookingType: b.booking_type,
-        bookingStatus: b.booking_status,
-        title: b.title,
-        description: b.description,
+      const r = await rescheduleCalendarAppointmentRequest({
+        tenantId: data.tenantId,
+        appointmentId: b.id,
         startAt: startIso,
         endAt: endIso,
-        timezone: b.timezone,
-        location: b.location,
-        metadata: nextMetadata,
+        providerId: assignedUserId,
+        clinicId: clinicId,
+        metadata: meta?.clearWaitlist ? nextMetadata : undefined,
       });
 
       markPending(b.id, false);
 
       if (!r.ok) {
         replaceBooking(b.id, snapshot);
-        return { ok: false, error: r.error };
+        return {
+          ok: false,
+          error: r.error,
+          conflictingAppointmentId: r.conflictingAppointmentId ?? null,
+        };
       }
 
+      replaceBooking(b.id, mapCalendarAppointmentToBookingRow(r.appointment, snapshot));
       refresh();
       return { ok: true };
     },

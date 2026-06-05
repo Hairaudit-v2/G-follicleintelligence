@@ -12,6 +12,7 @@ function todayUtcDayQuery(now: Date): ParsedCalendarQuery {
   return {
     view: "day",
     dateAnchor: utcCalendarDateStringFromDate(now),
+    calendarTimezone: "UTC",
     status: null,
     bookingType: null,
     assignedUserId: null,

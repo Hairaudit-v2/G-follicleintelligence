@@ -3,20 +3,30 @@
  */
 
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
-import { parseUtcCalendarDateString } from "@/src/lib/bookings/calendarQuery";
+import {
+  isoFromLocalDayMinutes,
+  localBusinessSlotIsoRange,
+  parseCalendarDateString,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 export type BusinessGridConfig = {
+  /** Clinic-local business day start hour (field name kept for DB compat). */
   dayStartHourUtc: number;
+  /** Clinic-local business day end hour (exclusive). */
   dayEndHourUtc: number;
   /** Vertical resolution for drag snap + grid lines. */
   slotMinutes: 30 | 60;
+  /** IANA timezone for grid hours and layout. */
+  timeZone: string;
 };
 
 export const DEFAULT_BUSINESS_GRID: BusinessGridConfig = {
   dayStartHourUtc: 8,
   dayEndHourUtc: 18,
   slotMinutes: 30,
+  timeZone: "UTC",
 };
 
 /** Pixel height of one hour row (matches legacy FI calendar density). */
@@ -32,22 +42,12 @@ export function businessGridBodyHeightPx(cfg: BusinessGridConfig): number {
   return hours * OPERATIONAL_CAL_PX_PER_HOUR;
 }
 
-function minutesUtcFromEpoch(ms: number): number {
-  const d = new Date(ms);
-  return d.getUTCHours() * 60 + d.getUTCMinutes() + d.getUTCSeconds() / 60 + d.getUTCMilliseconds() / 60000;
-}
-
-function utcMidnightMs(dayKey: string): number | null {
-  const ymd = parseUtcCalendarDateString(dayKey);
-  if (!ymd) return null;
-  const y = Number(ymd.slice(0, 4));
-  const mo = Number(ymd.slice(5, 7)) - 1;
-  const d = Number(ymd.slice(8, 10));
-  return Date.UTC(y, mo, d, 0, 0, 0, 0);
+function minutesFromLaneStart(laneStartMs: number, ms: number): number {
+  return Math.max(0, (ms - laneStartMs) / 60_000);
 }
 
 /**
- * Vertical placement within a lane, relative to business-hour window (UTC).
+ * Vertical placement within a lane, relative to business-hour window (clinic-local).
  * Returns null when the booking does not intersect the visible grid.
  */
 export function layoutBookingInBusinessDayUtc(
@@ -67,8 +67,8 @@ export function layoutBookingInBusinessDayUtc(
 
   const gridStartMin = cfg.dayStartHourUtc * 60;
   const gridEndMin = cfg.dayEndHourUtc * 60;
-  const startMin = minutesUtcFromEpoch(clampS);
-  const endMin = minutesUtcFromEpoch(clampE);
+  const startMin = minutesFromLaneStart(laneStart, clampS);
+  const endMin = minutesFromLaneStart(laneStart, clampE);
 
   const visStart = Math.max(startMin, gridStartMin);
   const visEnd = Math.min(endMin, gridEndMin);
@@ -80,25 +80,19 @@ export function layoutBookingInBusinessDayUtc(
   return { topPx, heightPx };
 }
 
-/** ISO range for the business slot at `slotIndex` (0-based) on `dayKey` (UTC). */
+/** ISO range for the business slot at `slotIndex` (0-based) on `dayKey` (clinic-local). */
 export function utcBusinessSlotIsoRange(
   dayKey: string,
   slotIndex: number,
   cfg: BusinessGridConfig
 ): { startIso: string; endIso: string } | null {
-  const mid = utcMidnightMs(dayKey);
-  if (mid == null || !Number.isInteger(slotIndex) || slotIndex < 0) return null;
-  const max = slotCount(cfg);
-  if (slotIndex >= max) return null;
-
-  const startMinUtc = cfg.dayStartHourUtc * 60 + slotIndex * cfg.slotMinutes;
-  const startMs = mid + startMinUtc * 60_000;
-  const endMs = startMs + cfg.slotMinutes * 60_000;
-  return { startIso: new Date(startMs).toISOString(), endIso: new Date(endMs).toISOString() };
+  return localBusinessSlotIsoRange(dayKey, slotIndex, cfg, cfg.timeZone);
 }
 
 export function snapIsoToBusinessSlotUtc(iso: string, cfg: BusinessGridConfig, dayKey: string): string | null {
-  const mid = utcMidnightMs(dayKey);
+  const parsed = parseCalendarDateString(dayKey, cfg.timeZone);
+  if (!parsed) return null;
+  const mid = zonedMidnightUtcMs(parsed, cfg.timeZone);
   if (mid == null) return null;
   const ms = Date.parse(iso);
   if (!Number.isFinite(ms)) return null;
@@ -109,7 +103,7 @@ export function snapIsoToBusinessSlotUtc(iso: string, cfg: BusinessGridConfig, d
   const clamped = Math.min(Math.max(relMin, gridStart), gridEnd - cfg.slotMinutes);
   const slotIdx = Math.round((clamped - gridStart) / cfg.slotMinutes);
   const snapped = gridStart + slotIdx * cfg.slotMinutes;
-  return new Date(mid + snapped * 60_000).toISOString();
+  return isoFromLocalDayMinutes(parsed, snapped, cfg.timeZone);
 }
 
 export function bookingConflictsForOperationalCalendar(

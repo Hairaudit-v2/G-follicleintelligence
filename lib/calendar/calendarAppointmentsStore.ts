@@ -3,11 +3,13 @@
 import { create } from "zustand";
 
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
+import { DEFAULT_CALENDAR_TIMEZONE } from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 export type CalendarAppointmentsHydrateInput = {
   tenantId: string;
   syncKey: string;
+  calendarTimezone: string;
   bookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
 };
@@ -23,6 +25,7 @@ export type CalendarReschedulePatch = {
 type CalendarAppointmentsState = {
   tenantId: string | null;
   syncKey: string | null;
+  calendarTimezone: string;
   bookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
   /** Booking ids currently awaiting server confirmation after optimistic move. */
@@ -38,11 +41,12 @@ type CalendarAppointmentsState = {
 export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((set, get) => ({
   tenantId: null,
   syncKey: null,
+  calendarTimezone: DEFAULT_CALENDAR_TIMEZONE,
   bookings: [],
   bookingDisplay: {},
   pendingIds: new Set(),
 
-  hydrate: ({ tenantId, syncKey, bookings, bookingDisplay }) => {
+  hydrate: ({ tenantId, syncKey, calendarTimezone, bookings, bookingDisplay }) => {
     const current = get();
     if (current.pendingIds.size > 0) {
       return;
@@ -50,6 +54,7 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
     set({
       tenantId,
       syncKey,
+      calendarTimezone,
       bookings,
       bookingDisplay,
       pendingIds: new Set(),
@@ -98,10 +103,12 @@ export function calendarAppointmentsSyncKey(data: {
   tenantId: string;
   rangeStartIso: string;
   rangeEndIso: string;
+  calendarTimezone: string;
   query: { view: string; dateAnchor: string };
 }): string {
   return [
     data.tenantId,
+    data.calendarTimezone,
     data.rangeStartIso,
     data.rangeEndIso,
     data.query.view,

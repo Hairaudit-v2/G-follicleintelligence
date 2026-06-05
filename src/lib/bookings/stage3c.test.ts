@@ -59,6 +59,7 @@ describe("Stage 3C — calendar query & URL", () => {
     const q = parseCalendarSearchParams({}, now);
     assert.equal(q.view, "week");
     assert.equal(q.dateAnchor, "2026-06-05");
+    assert.equal(q.calendarTimezone, "UTC");
     assert.equal(q.includeCancelled, false);
     assert.equal(q.search, null);
   });

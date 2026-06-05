@@ -55,10 +55,11 @@ export function calendarGridBodyHeightPx(_cfg: BusinessGridConfig): number {
   return timeSlotsGridHeightPx(CALENDAR_PX_PER_HOUR);
 }
 
-function minutesUtcFromEpoch(ms: number): number {
-  const d = new Date(ms);
-  return d.getUTCHours() * 60 + d.getUTCMinutes();
-}
+import {
+  calendarDateStringFromInstant,
+  minutesFromLaneStart as minutesFromLaneStartTz,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 
 export function providerColumnDropId(dayKey: string, columnId: string): string {
   return `drop:${dayKey}:${columnId}`;
@@ -87,8 +88,8 @@ export function layoutBookingInCalendarPx(
 
   const gridStartMin = cfg.dayStartHourUtc * 60;
   const gridEndMin = cfg.dayEndHourUtc * 60;
-  const startMin = minutesUtcFromEpoch(clampS);
-  const endMin = minutesUtcFromEpoch(clampE);
+  const startMin = minutesFromLaneStartTz(lane.startMs, clampS);
+  const endMin = minutesFromLaneStartTz(lane.startMs, clampE);
 
   const visStart = Math.max(startMin, gridStartMin);
   const visEnd = Math.min(endMin, gridEndMin);
@@ -117,8 +118,8 @@ function timedBookingsForColumn(
     const clampE = Math.min(e, lane.endMs);
     if (clampE <= clampS) continue;
 
-    const startMin = minutesUtcFromEpoch(clampS);
-    const endMin = minutesUtcFromEpoch(clampE);
+    const startMin = minutesFromLaneStartTz(lane.startMs, clampS);
+    const endMin = minutesFromLaneStartTz(lane.startMs, clampE);
     const visStart = Math.max(startMin, gridStart);
     const visEnd = Math.min(endMin, gridEnd);
     if (visEnd <= visStart) continue;
@@ -200,12 +201,17 @@ function CurrentTimeLine({
 
   useEffect(() => {
     function tick() {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = calendarDateStringFromInstant(new Date(), gridConfig.timeZone);
       if (dayKey !== today) {
         setNowTop(null);
         return;
       }
-      const nowMin = minutesUtcFromEpoch(Date.now());
+      const dayStart = zonedMidnightUtcMs(dayKey, gridConfig.timeZone);
+      if (dayStart == null) {
+        setNowTop(null);
+        return;
+      }
+      const nowMin = minutesFromLaneStartTz(dayStart, Date.now());
       const gridStart = gridConfig.dayStartHourUtc * 60;
       const gridEnd = gridConfig.dayEndHourUtc * 60;
       if (nowMin < gridStart || nowMin > gridEnd) {
@@ -217,7 +223,7 @@ function CurrentTimeLine({
     tick();
     const id = window.setInterval(tick, 60_000);
     return () => window.clearInterval(id);
-  }, [dayKey, gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc]);
+  }, [dayKey, gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc, gridConfig.timeZone]);
 
   if (nowTop == null || nowTop < 0 || nowTop > bodyHeightPx) return null;
 
@@ -376,7 +382,7 @@ export function ProviderColumn({
         )}
         style={{ minHeight: bodyHeightPx, backgroundColor: CALENDAR_GRID_BG }}
       >
-        <BusinessTimeSlotGrid bodyHeightPx={bodyHeightPx} />
+        <BusinessTimeSlotGrid bodyHeightPx={bodyHeightPx} timeZone={gridConfig.timeZone} />
         <CurrentTimeLine dayKey={dayKey} gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
         <div className="relative" style={{ height: bodyHeightPx }}>
