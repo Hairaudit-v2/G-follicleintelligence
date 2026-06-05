@@ -87,7 +87,6 @@ export function CasesWorklistFilters({
             type="search"
             defaultValue={query.q}
             placeholder="Person, case id, lead, treatment…"
-            aria-labelledby={FILTER_FIELDS.q.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           />
         </label>
@@ -101,7 +100,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.status.inputId}
             name="status"
             defaultValue={query.status}
-            aria-labelledby={FILTER_FIELDS.status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -122,7 +120,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.treatment_type.inputId}
             name="treatment_type"
             defaultValue={query.treatment_type}
-            aria-labelledby={FILTER_FIELDS.treatment_type.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -143,7 +140,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.case_type.inputId}
             name="case_type"
             defaultValue={query.case_type}
-            aria-labelledby={FILTER_FIELDS.case_type.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -164,7 +160,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.planning_status.inputId}
             name="planning_status"
             defaultValue={query.planning_status}
-            aria-labelledby={FILTER_FIELDS.planning_status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -186,7 +181,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.procedure_status.inputId}
             name="procedure_status"
             defaultValue={query.procedure_status}
-            aria-labelledby={FILTER_FIELDS.procedure_status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -208,7 +202,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.post_op_status.inputId}
             name="post_op_status"
             defaultValue={query.post_op_status}
-            aria-labelledby={FILTER_FIELDS.post_op_status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -230,7 +223,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.readiness.inputId}
             name="readiness"
             defaultValue={query.readiness}
-            aria-labelledby={FILTER_FIELDS.readiness.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="all">All</option>
@@ -249,7 +241,6 @@ export function CasesWorklistFilters({
             id={FILTER_FIELDS.sort.inputId}
             name="sort"
             defaultValue={query.sort}
-            aria-labelledby={FILTER_FIELDS.sort.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="updated_desc">Newest updated</option>

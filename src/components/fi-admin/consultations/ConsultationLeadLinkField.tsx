@@ -159,7 +159,6 @@ export function ConsultationLeadLinkField({
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                aria-labelledby={searchLabelId}
                 aria-describedby={searchHintId}
                 placeholder="Search…"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-sky-400/20 focus:border-sky-300 focus:ring-2"

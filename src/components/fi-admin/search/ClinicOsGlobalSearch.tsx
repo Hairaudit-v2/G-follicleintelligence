@@ -16,6 +16,7 @@ const RECENT_PLACEHOLDERS = [
 ];
 
 const CLINIC_OS_SEARCH_INPUT_ID = "clinic-os-global-search-query";
+const CLINIC_OS_SEARCH_LABEL_ID = "clinic-os-global-search-label";
 
 const FOCUSABLE_SELECTOR =
   'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
@@ -40,7 +41,7 @@ function useDebouncedValue<T>(value: T, ms: number): T {
 export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenChange }: ClinicOsGlobalSearchProps) {
   const tid = tenantId.trim();
   const titleId = useId();
-  const searchLabelId = useId();
+  const searchLabelId = CLINIC_OS_SEARCH_LABEL_ID;
   const searchInputId = CLINIC_OS_SEARCH_INPUT_ID;
   const dialogRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -265,7 +266,6 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              aria-labelledby={searchLabelId}
               onKeyDown={(e) => {
                 if (e.key !== "ArrowDown") return;
                 if (!data || flatResultHrefs.length === 0) return;

@@ -75,7 +75,6 @@ export function OperationalCalendarFilters({
             name="q"
             defaultValue={query.search ?? ""}
             placeholder="Patient, lead, title…"
-            aria-labelledby={FILTER_FIELDS.q.labelId}
             className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
             autoComplete="off"
           />
@@ -90,7 +89,6 @@ export function OperationalCalendarFilters({
             id={FILTER_FIELDS.type.inputId}
             name="type"
             defaultValue={query.bookingType ?? ""}
-            aria-labelledby={FILTER_FIELDS.type.labelId}
             className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">Any type</option>
@@ -111,7 +109,6 @@ export function OperationalCalendarFilters({
             id={FILTER_FIELDS.status.inputId}
             name="status"
             defaultValue={query.status ?? ""}
-            aria-labelledby={FILTER_FIELDS.status.labelId}
             className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">Any status</option>
@@ -132,7 +129,6 @@ export function OperationalCalendarFilters({
             id={FILTER_FIELDS.assignedUserId.inputId}
             name="assignedUserId"
             defaultValue={query.assignedUserId ?? ""}
-            aria-labelledby={FILTER_FIELDS.assignedUserId.labelId}
             className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">Anyone</option>
@@ -153,7 +149,6 @@ export function OperationalCalendarFilters({
             id={FILTER_FIELDS.clinicId.inputId}
             name="clinicId"
             defaultValue={query.clinicId ?? ""}
-            aria-labelledby={FILTER_FIELDS.clinicId.labelId}
             className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">Any site</option>
@@ -175,7 +170,6 @@ export function OperationalCalendarFilters({
             name="includeCancelled"
             value="1"
             defaultChecked={query.includeCancelled}
-            aria-labelledby={FILTER_FIELDS.includeCancelled.labelId}
           />
           {FILTER_FIELDS.includeCancelled.label}
         </label>

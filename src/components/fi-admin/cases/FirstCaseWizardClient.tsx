@@ -211,7 +211,6 @@ export function FirstCaseWizardClient({
               className={fieldClass}
               value={clinicId}
               onChange={(e) => setClinicId(e.target.value)}
-              aria-labelledby={WIZARD_FIELDS.clinic.labelId}
               required
             >
               <option value="">Choose a clinic…</option>
@@ -255,7 +254,6 @@ export function FirstCaseWizardClient({
                 className={fieldClass}
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                aria-labelledby={WIZARD_FIELDS.firstName.labelId}
                 autoComplete="given-name"
               />
             </label>
@@ -271,7 +269,6 @@ export function FirstCaseWizardClient({
                 className={fieldClass}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                aria-labelledby={WIZARD_FIELDS.lastName.labelId}
                 autoComplete="family-name"
               />
             </label>
@@ -285,7 +282,6 @@ export function FirstCaseWizardClient({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              aria-labelledby={WIZARD_FIELDS.email.labelId}
               autoComplete="email"
             />
           </label>
@@ -298,7 +294,6 @@ export function FirstCaseWizardClient({
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              aria-labelledby={WIZARD_FIELDS.phone.labelId}
               autoComplete="tel"
             />
           </label>
@@ -315,7 +310,6 @@ export function FirstCaseWizardClient({
               type="date"
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
-              aria-labelledby={WIZARD_FIELDS.dateOfBirth.labelId}
             />
           </label>
           <div className="flex justify-between gap-2 pt-2">
@@ -349,7 +343,6 @@ export function FirstCaseWizardClient({
               className={fieldClass}
               value={caseType}
               onChange={(e) => setCaseType(e.target.value)}
-              aria-labelledby={WIZARD_FIELDS.caseType.labelId}
               placeholder="e.g. test_case, fue_consult"
             />
           </label>
@@ -365,7 +358,6 @@ export function FirstCaseWizardClient({
               className={fieldClass}
               value={treatmentType}
               onChange={(e) => setTreatmentType(e.target.value)}
-              aria-labelledby={WIZARD_FIELDS.treatmentType.labelId}
               placeholder="e.g. hair_transplant, fue"
             />
           </label>
@@ -398,7 +390,6 @@ export function FirstCaseWizardClient({
                 autoComplete="off"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
-                aria-labelledby={WIZARD_FIELDS.adminKey.labelId}
                 placeholder="Optional — matches server FI_ADMIN_API_KEY"
               />
             </label>
