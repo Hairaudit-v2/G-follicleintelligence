@@ -24,6 +24,7 @@ import { CrmLeadDetailBreadcrumbs } from "./CrmLeadDetailBreadcrumbs";
 import { CrmLeadDetailTabNav } from "./CrmLeadDetailTabNav";
 import { LeadClinicalDetailsPanel } from "./LeadClinicalDetailsPanel";
 import { LeadOpportunityPanel } from "./LeadOpportunityPanel";
+import { LeadBookNextAppointmentCard } from "./LeadBookNextAppointmentCard";
 import { LeadOverviewStats } from "./LeadOverviewStats";
 import { LeadPhotoGalleryPanel } from "./LeadPhotoGalleryPanel";
 import { useCrmLeadDetailState } from "./useCrmLeadDetailState";
@@ -79,6 +80,12 @@ export function CrmLeadDetailPageView({
 
       {activeTab === "overview" ? (
         <div className="space-y-4">
+          <LeadBookNextAppointmentCard
+            tenantId={tenantId}
+            lead={lead}
+            bookings={payload.detail.leadBookings}
+            groupingNowIso={groupingNowIso}
+          />
           <LeadOverviewStats
             opportunity={state.opportunity}
             nextAction={state.nextAction}

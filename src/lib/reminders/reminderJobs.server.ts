@@ -128,6 +128,26 @@ export async function loadReminderJobsForBooking(
   });
 }
 
+/**
+ * Reminder jobs for an appointment: booking-scoped jobs plus lead-scoped jobs when `leadId` is set (deduped by id).
+ */
+export async function loadReminderJobsForAppointment(
+  tenantId: string,
+  bookingId: string,
+  leadId?: string | null,
+  client?: SupabaseClient
+): Promise<FiReminderJobWithTemplate[]> {
+  const bookingJobs = await loadReminderJobsForBooking(tenantId, bookingId, client);
+  const lid = leadId?.trim();
+  if (!lid) return bookingJobs;
+  const leadJobs = await loadReminderJobsForLead(tenantId, lid, client);
+  const byId = new Map<string, FiReminderJobWithTemplate>();
+  for (const j of [...bookingJobs, ...leadJobs]) byId.set(j.id, j);
+  return Array.from(byId.values()).sort(
+    (a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+  );
+}
+
 export async function loadReminderJobsForLead(
   tenantId: string,
   leadId: string,

@@ -1,0 +1,107 @@
+"use client";
+
+import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
+import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingTypeBadge";
+import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
+import type { FiBookingRow } from "@/src/lib/bookings/types";
+import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { useAppointmentSlideOverOptional } from "./AppointmentSlideOver";
+import { AppointmentSlideOverTrigger } from "./AppointmentSlideOverTrigger";
+
+function fmtTs(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
+}
+
+function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
+  if (!id) return "—";
+  const o = options.find((x) => x.id === id);
+  return o?.email?.trim() || id.slice(0, 8);
+}
+
+function clinicLabel(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
+  if (row.clinic_id) {
+    const c = clinics.find((x) => x.id === row.clinic_id);
+    return c?.display_name ?? row.clinic_id.slice(0, 8);
+  }
+  return row.location?.trim() || "—";
+}
+
+export function AppointmentListTable({
+  tenantId,
+  bookings,
+  assignees,
+  clinics,
+}: {
+  tenantId: string;
+  bookings: FiBookingRow[];
+  assignees: CrmShellUserPickerOption[];
+  clinics: CrmShellClinicOption[];
+}) {
+  const slide = useAppointmentSlideOverOptional();
+
+  if (bookings.length === 0) {
+    return (
+      <div className="rounded border border-gray-200 bg-white p-8 text-center text-sm text-gray-600">
+        No appointments in this range for the current filters.
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow-sm">
+      <table className="min-w-full divide-y divide-gray-200 text-sm">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">When</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Appointment</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Type</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Staff</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Clinic</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {bookings.map((row) => {
+            const href = `/fi-admin/${tenantId}/appointments/${row.id}`;
+            const title = row.title?.trim() || bookingTypeLabel(row.booking_type);
+            const when = `${fmtTs(row.start_at)} → ${fmtTs(row.end_at)}`;
+            const titleCell = slide ? (
+              <AppointmentSlideOverTrigger appointmentId={row.id} className="text-left font-medium text-blue-700 hover:underline">
+                {title}
+              </AppointmentSlideOverTrigger>
+            ) : (
+              <a href={href} className="font-medium text-blue-700 hover:underline">
+                {title}
+              </a>
+            );
+            return (
+              <tr
+                key={row.id}
+                className="hover:bg-gray-50"
+                onClick={(e) => {
+                  if (!slide) return;
+                  const t = e.target as HTMLElement;
+                  if (t.closest("button, a")) return;
+                  slide.openAppointment(row.id);
+                }}
+              >
+                <td className="whitespace-nowrap px-3 py-2 text-gray-600">{when}</td>
+                <td className="px-3 py-2">{titleCell}</td>
+                <td className="px-3 py-2">
+                  <BookingTypeBadge type={row.booking_type} />
+                </td>
+                <td className="px-3 py-2">
+                  <BookingStatusBadge status={row.booking_status} />
+                </td>
+                <td className="px-3 py-2 text-gray-700">{assigneeLabel(assignees, row.assigned_user_id)}</td>
+                <td className="px-3 py-2 text-gray-700">{clinicLabel(clinics, row)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}

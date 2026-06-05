@@ -35,7 +35,9 @@ export function LeadOverviewStats({
         {nextAction.atIso ? (
           <p className="mt-1 text-xs text-gray-500">{nextAction.atIso}</p>
         ) : (
-          <p className="mt-1 text-xs text-gray-500 capitalize">{nextAction.kind}</p>
+          <p className="mt-1 text-xs text-gray-500 capitalize">
+            {nextAction.kind === "appointment" ? "upcoming visit" : nextAction.kind}
+          </p>
         )}
       </div>
       <div className={crmLeadCardClass}>

@@ -66,8 +66,13 @@ export function useCrmLeadDetailState(
   );
 
   const nextAction = useMemo(
-    () => deriveCrmLeadNextAction(payload.detail.tasks, payload.reminderJobs),
-    [payload.detail.tasks, payload.reminderJobs]
+    () =>
+      deriveCrmLeadNextAction(
+        payload.detail.tasks,
+        payload.reminderJobs,
+        payload.detail.leadBookings
+      ),
+    [payload.detail.tasks, payload.reminderJobs, payload.detail.leadBookings]
   );
 
   const openTaskCount = useMemo(

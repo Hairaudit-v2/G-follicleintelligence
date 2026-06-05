@@ -2,9 +2,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CrmLeadDetailPageView } from "@/src/components/fi/crm/detail/CrmLeadDetailPageView";
+import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import { parseCrmLeadDetailTab } from "@/src/lib/crm/crmLeadDetailTabs";
 import { parseCrmLeadPreviewSearchParam } from "@/src/lib/crm/crmLeadPreviewQuery";
+import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmShellLeadDetailPagePayload } from "@/src/lib/crm/crmShellLoaders";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +34,7 @@ export default async function CrmLeadShellPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId, leadId } = await params;
+  const session = await getCrmShellPageSession(tenantId);
   const sp = (await searchParams) ?? {};
   const previewLeadId = parseCrmLeadPreviewSearchParam(sp.preview);
   const activeTab = parseCrmLeadDetailTab(sp.tab);
@@ -54,15 +57,24 @@ export default async function CrmLeadShellPage({
   const groupingNowIso = new Date().toISOString();
 
   return (
-    <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
-      <CrmLeadDetailPageView
-        tenantId={tenantId}
-        leadId={leadId}
-        initialPayload={payload}
-        activeTab={activeTab}
-        previewLeadId={previewLeadId}
-        groupingNowIso={groupingNowIso}
-      />
-    </Suspense>
+    <AppointmentSlideOverProvider
+      tenantId={tenantId}
+      operatorFiUserId={session.fiUserId}
+      userRole={session.role}
+      assignees={payload.detail.owners}
+      clinics={payload.detail.clinics}
+      existingBookings={payload.detail.leadBookings}
+    >
+      <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
+        <CrmLeadDetailPageView
+          tenantId={tenantId}
+          leadId={leadId}
+          initialPayload={payload}
+          activeTab={activeTab}
+          previewLeadId={previewLeadId}
+          groupingNowIso={groupingNowIso}
+        />
+      </Suspense>
+    </AppointmentSlideOverProvider>
   );
 }

@@ -63,3 +63,14 @@ export function formatCalendarRangeTitle(view: CalendarViewMode, lanes: Calendar
 export function bookingTypeCalendarLegendLabel(type: string): string {
   return bookingTypeLabel(type);
 }
+
+/** Status ring / accent for calendar chips (non-terminal emphasis). */
+export function bookingStatusCalendarAccent(status: string): string {
+  const s = status.trim();
+  if (s === "cancelled") return "ring-2 ring-red-300/80";
+  if (s === "completed") return "ring-2 ring-emerald-400/70";
+  if (s === "no_show") return "ring-2 ring-amber-400/80";
+  if (s === "arrived") return "ring-2 ring-primary/50";
+  if (s === "confirmed") return "ring-1 ring-primary/35";
+  return "";
+}

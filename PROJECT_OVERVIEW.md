@@ -4,7 +4,7 @@
 
 **Document purpose:** Establish a **baseline** for engineers and stakeholders: what exists today, how it is structured, and what remains for an MVP comparable to Salesforce + HubSpot + Timely in scope (not in vendor feature parity).
 
-**Last reviewed:** 2026-06-05 (CRM kanban MVP + `fi_crm_leads_shell_page` date filters).
+**Last reviewed:** 2026-06-05 (CRM lead detail tabs + Appointments/Bookings module audit).
 
 ---
 
@@ -106,6 +106,104 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | Calendar page | **Completed (ops)** | `/fi-admin/[tenantId]/calendar` — **week (Mon–Sun UTC) default** + **day** toggle; **business-hour grid** (slot size + hours from `fi_tenant_settings.metadata.operational_calendar` or defaults); **staff + site columns** on day view (`fi_users` + `fi_clinics`); bookings via **`loadBookingsForTenantRange`** (same overlap semantics as tenant dashboard agenda) with CRM-style filters + search (`q`); **drag-and-drop reschedule** (`updateBookingAction`) with **assignee/site conflict** hints; detail **drawer + full edit**; **mobile stacked list**. Legacy preview grid remains in `ClinicOsCalendarHome` (unused by route). |
 | Reminders / SMS / email cadence | **In progress (MVP)** | `fi_reminder_templates` + `fi_reminder_jobs` — triggers: `booking_created`, `booking_48h_before` / `booking_24h_before` (aliases `booking_48h`, `booking_24h`), **`post_consult`**, **`lead_created`**; job **`cancelled`** + **`error_log`**; **`entity_type`/`entity_id`/`patient_id` in `metadata`** for traceability. **Patient `reminder_consent` (default true for new rows)** + `preferred_contact_method`. Enqueue: **`syncBookingReminderJobs`** on booking create/update; **`syncLeadCreatedReminderJobs`** on lead create (patient consent); **`syncPostConsultReminderJobs`** when consultation is **Mark completed**. Pending jobs **cancelled** on reschedule (not deleted). Merge fields include **`{{norwood_summary}}`** (clinical scales). **Stub processor** `processReminderJobsOnce` (1× retry, skip/cancel ineligible bookings) + **`POST|GET /api/cron/fi-reminder-jobs`**. UI: **`/fi-admin/[tenantId]/settings/reminders`**, **dashboard upcoming reminders**, **booking edit drawer**, **operational calendar cards** + **mobile list** hints. CRM comms log on send when `lead_id` present. **Next:** Twilio/Resend, wire Vercel Cron, optional DB `entity_*` columns beyond metadata. |
 | Recurring appointments / rooms / chairs | **Partial** | Single booking rows with `clinic_id` + assignee; no recurrence or optimization engine. |
+
+### Appointments Module
+
+**Naming in repo:** There is **no** `src/components/fi/appointments/`, `src/lib/appointments/`, or `app/.../appointments/` tree. Scheduling for Evolved Hair Clinics is implemented as the **Bookings** module (`fi_bookings`, `src/lib/bookings/`, `src/components/fi/bookings/`). Product copy may say “appointments”; engineering should treat **bookings = appointments** unless a future alias layer is added.
+
+#### What's built
+
+| Layer | Location | Capability |
+| --- | --- | --- |
+| **Database** | `supabase/migrations/20260610120001_fi_bookings.sql` | `fi_bookings`: `start_at` / `end_at`, `booking_type`, `booking_status`, anchors to **lead / person / patient / case**, `clinic_id`, `assigned_user_id` (`fi_users`), `metadata` jsonb, cancellation audit columns. Indexes on tenant + time, status, type, anchors. RLS: tenant members **SELECT**; writes via **service role** (FI Admin). |
+| **Related entities** | `fi_reminder_jobs.booking_id`, `fi_patient_images.booking_id` | Reminder queue tied to bookings; images optionally scoped to a booking. **`fi_consultations` is separate** (no `booking_id`) — parallel “consult workspace” vs calendar event. |
+| **Domain / policy** | `src/lib/bookings/bookingPolicy.ts`, `bookingApiSchemas.ts`, `bookingChangedFields.ts`, `bookingTime.ts` | Allow-listed types: `consultation`, `prp`, `prf`, `mesotherapy`, `exosomes`, `surgery`, `review`, `follow_up`, `other`. Statuses: scheduled → confirmed → arrived → completed / cancelled / no_show. **Consultation-only** on unconverted leads. |
+| **Server mutations + loaders** | `src/lib/bookings/bookings.ts`, `server.ts` | `createBooking`, `updateBooking`, `cancelBooking`, `completeBooking`; overlap loaders (`loadBookingsForLead`, `loadBookingsForTenantRange`, `loadBookingsForOperatorView`, `loadBookingsForCalendarOverlap`). CRM **activity** on lead when `lead_id` set (`booking.created` / `updated` / `cancelled` / `completed`). |
+| **Server actions** | `lib/actions/fi-booking-actions.ts` | `createBookingAction`, `updateBookingAction`, `cancelBookingAction`, `completeBookingAction` (CRM write gate + optional FI Admin key). |
+| **HTTP API** | `app/api/tenants/[tenantId]/bookings/*` | List by range, create, patch, cancel, complete. |
+| **FI Admin routes** | `/fi-admin/[tenantId]/bookings`, `/bookings/new`, `/calendar` | Operator list + filters + quick-create (`BookingOperatorPage`); new booking entry page; **operational calendar** (week/day, UTC business grid from `fi_tenant_settings.metadata.operational_calendar`). |
+| **Calendar UI** | `src/components/fi/bookings/calendar/*`, `src/components/fi-admin/calendar/OperationalCalendarPage.tsx` | Drag-and-drop reschedule (`updateBookingAction`), staff + clinic columns (day view), filters, event drawer, **assignee/site conflict hints** on save. Clinical scale line on cards when patient linked. |
+| **Lead-scoped UI** | `src/components/fi/bookings/LeadBookingPanel.tsx`, `BookingCreatePanel`, `BookingSummaryCard` | On CRM lead detail **Overview** tab: list upcoming/past, create/edit/cancel/complete, default **1h** slot (`bookingFormUtils.defaultRangeIso`). |
+| **Edit drawer** | `src/components/fi/bookings/operator/BookingEditDrawer.tsx` | Full-field edit + **reminder jobs** list for that booking (used from operator + calendar flows). |
+| **Reminders** | `src/lib/reminders/reminderEnqueue.server.ts` (`syncBookingReminderJobs`) | Templates: `booking_created`, `booking_48h_before`, `booking_24h_before`; jobs cancelled on reschedule; merge fields include Norwood summary when patient present. |
+| **Other surfaces** | `CaseBookingsCard`, `PatientBookingsCard`, `DashboardTodayAgenda` | Bookings on case/patient; tenant home agenda reuses range loaders. |
+| **Tests** | `src/lib/bookings/stage3a.test.ts`, `stage3b.test.ts`, `stage3c.test.ts` | Policy, operator query, calendar bucketing. |
+| **Design doc** | `docs/design/19-booking-calendar-foundation.md` | Stage 3A/3B/3C checklist. |
+
+**Procedure types vs product language:** DB already includes **Consultation** (`consultation`), **Hair Transplant** (`surgery`), **Follow-up** (`follow_up`), plus **PRP** and related clinical types (`prp`, `prf`, `mesotherapy`, `exosomes`). There is **no** separate `procedure` catalog table — duration and defaults are **manual** `start_at`/`end_at` (default +1h in forms), not type-driven templates.
+
+**Staff / roles:** `assigned_user_id` → any `fi_users` row in tenant picker. **No** surgeon vs coordinator vs nurse role dimension on bookings; CRM gate uses `fi_admin` / `crm_operator` (and `admin` for mutations), not per-procedure eligibility.
+
+#### Gaps (Timely-style scheduling for hair clinics)
+
+| Gap | Current state | Target for Evolved |
+| --- | --- | --- |
+| **Type-driven durations** | Free-form end time; no `procedure_duration_minutes` catalog | Consultation 45–60m, FUE day-block for `surgery`, PRP 30m, etc., auto-fill end from type + override |
+| **Hair transplant naming** | UI label “Surgery” (`surgery`) | Product label “Hair transplant” / FUE variant; optional alias without breaking DB enum |
+| **Resource model** | One assignee + one clinic per row | Surgeon + assistant + room/chair; multi-resource or metadata array |
+| **Availability / working hours** | Business grid hours only (tenant metadata); **no** per-clinician availability or blocked time | Timely-style “who is free at 2pm Tuesday”; respect leave/lunch |
+| **Conflict enforcement** | **Hints** on calendar save (`bookingConflictsForOperationalCalendar`); not DB-excluded double-book | Hard block or soft warn with override reason |
+| **Recurrence / series** | Single rows only | PRP courses, post-op review series |
+| **Patient self-booking** | None | Public slot picker against availability |
+| **Consultation ↔ booking link** | `fi_consultations` and `fi_bookings` independent | Completing consult should optionally create/update linked booking; single timeline |
+| **Clinical / photo context in scheduler** | Calendar shows patient name + clinical scales line; no inline gallery | Norwood badge, before/after thumb, lead stage on event card and drawer |
+| **Timezone** | Field exists; grid documented as **UTC** | Clinic-local wall clock (Evolved UK timezones) |
+| **Room / chair inventory** | `clinic_id` only | Chair 1–N under clinic for day-view columns |
+| **No-show workflow** | Status `no_show` exists | Automated follow-up task + reminder template |
+| **Reporting** | None in-app | Utilisation by surgeon, type mix, no-show rate |
+
+#### Integration with CRM lead UI (new detail page + slide-over)
+
+| Surface | Today | Recommended next hooks |
+| --- | --- | --- |
+| **`CrmLeadDetailPageView` (Overview tab)** | `LeadBookingPanel` with full create/edit | Add **“Schedule”** CTA opening calendar deep-link `?leadId=` + next slot; show **next appointment** in overview stats (reuse `deriveCrmLeadNextAction`-style helper for bookings). |
+| **`LeadSlideOver`** | No bookings section | Compact **upcoming booking** row + “Open calendar” / “Book consultation” (prefill `consultation`, lead anchors). |
+| **Shared CRM components** | `src/components/fi/crm/shared/*` person/clinical only | Optional `LeadUpcomingBookingStrip` in `shared/` consuming `FiBookingRow[]`. |
+| **Payload loaders** | `loadCrmShellLeadDetailPagePayload` includes `detail.leadBookings` | Already sufficient; ensure slide-over bundle keeps `leadBookings` in sync after `router.refresh()`. |
+| **Conversion gate** | Only `consultation` before `converted_at` | Surface in booking UI when lead unconverted (already server-enforced). |
+| **Reminders** | Jobs keyed by `booking_id`; CRM comms when `lead_id` | Show on lead Timeline tab next to tasks; link from `LeadRemindersSection` to booking drawer. |
+
+#### Gap list (engineering backlog)
+
+1. **Procedure template service** — `booking_type` → default duration, title, color (extend `operatorBookingLabels` + tenant settings JSON).
+2. **Availability tables** — `fi_staff_availability` / `fi_clinic_hours` + overlap query used before create.
+3. **Unified appointment drawer** — merge `BookingEditDrawer` + clinical peek (patient scales, link to `CrmLeadDetailPageView` clinical tab).
+4. **Consultation sync** — optional `fi_consultations.booking_id` or pairing via `metadata.consultation_id`.
+5. **Route alias** — `/appointments` → `/bookings` for operator training (optional).
+6. **Slide-over + board** — next booking badge on `CrmLeadKanbanCard` from batch loader (kanban extras already have clinical lines).
+7. **Real timezone** — tenant/clinic TZ in calendar grid and datetime pickers.
+8. **Production reminders** — already stubbed; wire transport (see Scheduling row above).
+
+#### Recommended file structure (evolution, not mandatory rename)
+
+Keep **`fi_bookings`** and **`src/lib/bookings`** as the source of truth. Add product-facing aliases only where useful:
+
+```text
+src/lib/bookings/                    # keep — core domain (current)
+src/lib/appointments/                # optional thin re-export + Timely-specific helpers
+  index.ts                           # export * from '../bookings'
+  procedureTemplates.ts              # type → duration, labels, colors
+  availability.ts                    # free-busy queries
+  bookingLeadSummary.ts              # next/upcoming for CRM widgets
+
+src/components/fi/bookings/          # keep — all scheduling UI (current)
+src/components/fi/crm/shared/
+  LeadUpcomingBookingStrip.tsx       # optional — CRM + slide-over
+
+src/components/fi/appointments/       # optional — only if marketing wants separate folder
+  AppointmentQuickSchedule.tsx       # wrapper → BookingCreatePanel + templates
+
+app/(fi-admin)/fi-admin/[tenantId]/
+  bookings/                          # keep (operator list)
+  bookings/new/                      # keep
+  calendar/                          # keep (Timely-style grid)
+  appointments/                      # optional redirect → bookings
+
+docs/design/
+  20-appointments-timely-roadmap.md   # new — procedure catalog + availability spec
+```
+
+**Principle:** one table (`fi_bookings`), one mutation path (`fi-booking-actions` + `bookings.ts`), multiple views (list, calendar, lead panel, case/patient cards). New Timely features extend **loaders + policy**, not a second appointments table.
 
 ### Cases, surgery, post-op (clinical OS)
 
