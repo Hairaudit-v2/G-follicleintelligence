@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { createConsultationDraftAction, updateConsultationDraftAction } from "@/lib/actions/fi-consultation-actions";
+import { completeConsultationDraftAction, createConsultationDraftAction, updateConsultationDraftAction } from "@/lib/actions/fi-consultation-actions";
 import { ConsultationOsAssessmentPanel } from "@/src/components/fi-admin/consultations/ConsultationOsAssessmentPanel";
 import { ConsultationLeadLinkField } from "@/src/components/fi-admin/consultations/ConsultationLeadLinkField";
 import { ConsultationPatientLinkField } from "@/src/components/fi-admin/consultations/ConsultationPatientLinkField";
@@ -204,6 +204,7 @@ export function ConsultationOsWorkspace({
 
   const [busyCreate, setBusyCreate] = useState(false);
   const [busySave, setBusySave] = useState(false);
+  const [busyComplete, setBusyComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveOk, setSaveOk] = useState(false);
 
@@ -388,13 +389,30 @@ export function ConsultationOsWorkspace({
     markManualSaveSucceeded,
   ]);
 
+  const onCompleteConsultation = useCallback(async () => {
+    if (mode !== "edit" || !consultationId?.trim()) return;
+    setError(null);
+    setBusyComplete(true);
+    try {
+      const res = await completeConsultationDraftAction(tenantId, consultationId.trim(), withAdmin({}));
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setStatus("completed");
+      router.refresh();
+    } finally {
+      setBusyComplete(false);
+    }
+  }, [mode, consultationId, tenantId, withAdmin, router]);
+
   const headerTitle = mode === "create" ? "New consultation" : "Consultation workspace";
   const headerDescription =
     mode === "create"
       ? "Early ConsultationOS workflow: choose a type, capture notes in the panels, then create a server-backed draft."
       : "Early ConsultationOS workflow: edit fields locally; drafts autosave while status is draft or in progress, and you can still use Save draft at any time.";
 
-  const displaySaving = busySave || autosaveSaving;
+  const displaySaving = busySave || autosaveSaving || busyComplete;
   const subtleSaveLabel = (() => {
     if (displaySaving) return "Saving…";
     if (error?.trim()) return "Save failed";
@@ -422,15 +440,25 @@ export function ConsultationOsWorkspace({
                 {busyCreate ? "Creating…" : "Create draft consultation"}
               </button>
             ) : canEdit ? (
-              <div className="flex flex-col items-stretch gap-1 sm:items-end">
-                <button
-                  type="button"
-                  onClick={() => void onSaveDraft()}
-                  disabled={busySave}
-                  className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {busySave ? "Saving…" : "Save draft"}
-                </button>
+              <div className="flex flex-col items-stretch gap-2 sm:items-end">
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => void onSaveDraft()}
+                    disabled={busySave || busyComplete}
+                    className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {busySave ? "Saving…" : "Save draft"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void onCompleteConsultation()}
+                    disabled={busyComplete || busySave}
+                    className="inline-flex items-center justify-center rounded-lg border border-emerald-600/40 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-950 shadow-sm transition hover:bg-emerald-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-emerald-500/35 dark:bg-emerald-950/50 dark:text-emerald-50 dark:hover:bg-emerald-900/60"
+                  >
+                    {busyComplete ? "Completing…" : "Mark completed"}
+                  </button>
+                </div>
                 <p className="text-right text-xs font-medium text-slate-500" aria-live="polite">
                   {subtleSaveLabel}
                 </p>

@@ -164,6 +164,7 @@ export function CalendarWeekView({
                       anchorLabel: "Booking",
                       scalesSummary: null,
                       durationMin: 30,
+                      reminderHint: null,
                     };
                     return (
                       <BookingCalendarCard
@@ -222,6 +223,7 @@ export function CalendarWeekView({
                     anchorLabel: "Booking",
                     scalesSummary: null,
                     durationMin: 30,
+                    reminderHint: null,
                   };
                   return (
                     <BookingCalendarCard

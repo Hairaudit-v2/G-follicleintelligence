@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { createConsultationDraft, updateConsultationDraft } from "@/src/lib/consultations/consultationMutations.server";
+import { completeConsultationDraft, createConsultationDraft, updateConsultationDraft } from "@/src/lib/consultations/consultationMutations.server";
 import {
+  consultationCompleteBodySchema,
   consultationCreateDraftBodySchema,
   consultationUpsertBodySchema,
 } from "@/src/lib/consultations/consultationTypes";
@@ -64,6 +65,27 @@ export async function updateConsultationDraftAction(
       ...patch,
       updatedByFiUserId: fiUserId,
     });
+
+    const tid = tenantId.trim();
+    const cid = consultationId.trim();
+    revalidatePath(`/fi-admin/${tid}/consultations`);
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function completeConsultationDraftAction(
+  tenantId: string,
+  consultationId: string,
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = consultationCompleteBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    await completeConsultationDraft(tenantId, consultationId, { updatedByFiUserId: fiUserId });
 
     const tid = tenantId.trim();
     const cid = consultationId.trim();

@@ -8,6 +8,8 @@ import { CRM_LEAD_COMMUNICATION_MAX_PREVIEW } from "@/src/lib/crm/crmLeadCommuni
 import { createCrmLeadCommunication } from "@/src/lib/crm/leadCommunications";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
+import type { ReminderTriggerEvent } from "./reminderConstants";
 import { renderReminderText, type ReminderMergeContext } from "./remindersCore";
 import { loadReminderTemplateForTenant } from "./reminderTemplates.server";
 
@@ -15,6 +17,34 @@ function truncate(s: string, max: number): string {
   const t = s.trim();
   if (t.length <= max) return t;
   return `${t.slice(0, max - 1)}…`;
+}
+
+async function appendClinicalSummaryToContext(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string,
+  ctx: ReminderMergeContext
+): Promise<void> {
+  const { data } = await supabase
+    .from("fi_patient_clinical_details")
+    .select("norwood_scale, ludwig_scale, hairline_pattern, primary_concern")
+    .eq("tenant_id", tenantId.trim())
+    .eq("patient_id", patientId.trim())
+    .maybeSingle();
+  const r = data as {
+    norwood_scale?: string | null;
+    ludwig_scale?: string | null;
+    hairline_pattern?: string | null;
+    primary_concern?: string | null;
+  } | null;
+  if (!r) return;
+  const summary = formatClinicalScalesSummary({
+    norwood_scale: r.norwood_scale ?? null,
+    ludwig_scale: r.ludwig_scale ?? null,
+    hairline_pattern: r.hairline_pattern ?? null,
+    primary_concern: r.primary_concern ?? null,
+  });
+  if (summary?.trim()) ctx.norwood_summary = summary;
 }
 
 async function buildMergeContext(
@@ -30,11 +60,11 @@ async function buildMergeContext(
   if (booking.clinic_id?.trim()) {
     const { data } = await supabase
       .from("fi_clinics")
-      .select("name")
+      .select("display_name")
       .eq("tenant_id", tenantId.trim())
       .eq("id", booking.clinic_id.trim())
       .maybeSingle();
-    const name = (data as { name?: string } | null)?.name?.trim();
+    const name = (data as { display_name?: string } | null)?.display_name?.trim();
     if (name) ctx.clinic_name = name;
   }
 
@@ -53,6 +83,7 @@ async function buildMergeContext(
   }
 
   if (booking.patient_id?.trim()) {
+    await appendClinicalSummaryToContext(supabase, tenantId, booking.patient_id.trim(), ctx);
     const { data: pat } = await supabase
       .from("fi_patients")
       .select("person_id")
@@ -80,39 +111,152 @@ async function buildMergeContext(
   return ctx;
 }
 
+async function buildMergeContextForLeadAnchoredJob(
+  supabase: SupabaseClient,
+  tenantId: string,
+  params: {
+    leadId: string | null;
+    personId: string | null;
+    patientId: string | null;
+  },
+  trigger: ReminderTriggerEvent
+): Promise<ReminderMergeContext> {
+  const ctx: ReminderMergeContext = {
+    booking_title: trigger === "post_consult" ? "Consultation follow-up" : "Your enquiry",
+    booking_type: trigger === "post_consult" ? "consultation" : "crm_lead",
+    booking_time: trigger === "post_consult" ? "Following your recent consultation" : "Recent activity with our team",
+  };
+
+  if (params.leadId?.trim()) {
+    const { data: lead } = await supabase
+      .from("fi_crm_leads")
+      .select("summary, clinic_id")
+      .eq("tenant_id", tenantId.trim())
+      .eq("id", params.leadId.trim())
+      .maybeSingle();
+    const lr = lead as { summary?: string | null; clinic_id?: string | null } | null;
+    if (lr?.summary?.trim()) ctx.patient_name = lr.summary.trim();
+    if (lr?.clinic_id?.trim()) {
+      const { data: cl } = await supabase
+        .from("fi_clinics")
+        .select("display_name")
+        .eq("tenant_id", tenantId.trim())
+        .eq("id", lr.clinic_id.trim())
+        .maybeSingle();
+      const cn = (cl as { display_name?: string } | null)?.display_name?.trim();
+      if (cn) ctx.clinic_name = cn;
+    }
+  }
+
+  if (!ctx.patient_name?.trim() && params.personId?.trim()) {
+    const { data: person } = await supabase
+      .from("fi_persons")
+      .select("metadata")
+      .eq("tenant_id", tenantId.trim())
+      .eq("id", params.personId.trim())
+      .maybeSingle();
+    const meta = (person as { metadata?: Record<string, unknown> } | null)?.metadata;
+    const label = personMetadataDisplayLabel(meta ?? {});
+    if (label.trim()) ctx.patient_name = label;
+  }
+
+  if (params.patientId?.trim()) {
+    await appendClinicalSummaryToContext(supabase, tenantId, params.patientId.trim(), ctx);
+  }
+
+  if (!ctx.patient_name?.trim()) ctx.patient_name = "Patient";
+
+  return ctx;
+}
+
+async function finalizeJobSent(
+  supabase: SupabaseClient,
+  jobId: string,
+  doneIso: string
+): Promise<void> {
+  const { error: ue } = await supabase
+    .from("fi_reminder_jobs")
+    .update({
+      status: "sent",
+      delivered_at: doneIso,
+      error_log: null,
+      updated_at: doneIso,
+    })
+    .eq("id", jobId)
+    .eq("status", "processing");
+  if (ue) throw new Error(ue.message);
+}
+
+async function finalizeJobCancelled(
+  supabase: SupabaseClient,
+  jobId: string,
+  reason: string,
+  doneIso: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("fi_reminder_jobs")
+    .update({
+      status: "cancelled",
+      error_log: truncate(reason, 2000),
+      updated_at: doneIso,
+    })
+    .eq("id", jobId)
+    .eq("status", "processing");
+  if (error) console.error("[finalizeJobCancelled]", error.message);
+}
+
 async function claimReminderJob(
   supabase: SupabaseClient,
   jobId: string
-): Promise<{ id: string; tenant_id: string; template_id: string; booking_id: string | null; lead_id: string | null; attempt_count: number } | null> {
+): Promise<{
+  id: string;
+  tenant_id: string;
+  template_id: string;
+  booking_id: string | null;
+  lead_id: string | null;
+  person_id: string | null;
+  attempt_count: number;
+  metadata: Record<string, unknown>;
+} | null> {
   const nowIso = new Date().toISOString();
   const { data, error } = await supabase
     .from("fi_reminder_jobs")
     .update({ status: "processing", last_attempt_at: nowIso, updated_at: nowIso })
     .eq("id", jobId)
     .eq("status", "pending")
-    .select("id, tenant_id, template_id, booking_id, lead_id, attempt_count")
+    .select("id, tenant_id, template_id, booking_id, lead_id, person_id, attempt_count, metadata")
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   const row = data as Record<string, unknown>;
+  const rawMeta = row.metadata;
+  const metadata =
+    rawMeta && typeof rawMeta === "object" && !Array.isArray(rawMeta) ? (rawMeta as Record<string, unknown>) : {};
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
     template_id: String(row.template_id),
     booking_id: row.booking_id != null ? String(row.booking_id) : null,
     lead_id: row.lead_id != null ? String(row.lead_id) : null,
+    person_id: row.person_id != null ? String(row.person_id) : null,
     attempt_count: Number(row.attempt_count ?? 0),
+    metadata,
   };
+}
+
+function isNonBookingReminderTrigger(t: ReminderTriggerEvent): boolean {
+  return t === "lead_created" || t === "post_consult";
 }
 
 /**
  * Picks due pending jobs, claims them, renders templates, stubs outbound send, logs to CRM when a lead is anchored.
  * One retry on failure (`attempt_count` 0 → 1 pending; second failure → `failed`).
+ * Ineligible bookings → `cancelled` (no retry).
  */
 export async function processReminderJobsOnce(opts?: {
   limit?: number;
   client?: SupabaseClient;
-}): Promise<{ claimed: number; sent: number; failed: number; retried: number }> {
+}): Promise<{ claimed: number; sent: number; failed: number; retried: number; cancelled: number }> {
   const supabase = opts?.client ?? supabaseAdmin();
   const limit = Math.min(Math.max(opts?.limit ?? 25, 1), 100);
   const nowIso = new Date().toISOString();
@@ -131,6 +275,7 @@ export async function processReminderJobsOnce(opts?: {
   let failed = 0;
   let retried = 0;
   let claimed = 0;
+  let cancelled = 0;
 
   for (const raw of due ?? []) {
     const jobId = String((raw as { id: string }).id);
@@ -143,18 +288,56 @@ export async function processReminderJobsOnce(opts?: {
       const template = await loadReminderTemplateForTenant(row.tenant_id, row.template_id, supabase);
       if (!template) throw new Error("Template missing.");
 
-      if (!row.booking_id) throw new Error("Booking anchor missing.");
-      const booking = await loadBookingForTenant(row.tenant_id, row.booking_id, supabase);
-      if (!booking) throw new Error("Booking missing.");
-      if (booking.booking_status === "cancelled" || booking.booking_status === "completed") {
-        throw new Error(`Booking is ${booking.booking_status}; skip.`);
+      let merge: ReminderMergeContext;
+
+      if (!row.booking_id && isNonBookingReminderTrigger(template.trigger_event)) {
+        let resolvedPatientId: string | null = null;
+        if (row.lead_id?.trim()) {
+          const { data: leadRow } = await supabase
+            .from("fi_crm_leads")
+            .select("patient_id")
+            .eq("tenant_id", row.tenant_id.trim())
+            .eq("id", row.lead_id.trim())
+            .maybeSingle();
+          const pr = (leadRow as { patient_id?: string | null } | null)?.patient_id;
+          if (pr?.trim()) resolvedPatientId = pr.trim();
+        }
+        const metaPid = row.metadata.patient_id;
+        if (!resolvedPatientId && typeof metaPid === "string" && metaPid.trim()) {
+          resolvedPatientId = metaPid.trim();
+        }
+
+        merge = await buildMergeContextForLeadAnchoredJob(
+          supabase,
+          row.tenant_id,
+          {
+            leadId: row.lead_id,
+            personId: row.person_id,
+            patientId: resolvedPatientId,
+          },
+          template.trigger_event
+        );
+      } else {
+        if (!row.booking_id) throw new Error("Booking anchor missing for this template.");
+        const booking = await loadBookingForTenant(row.tenant_id, row.booking_id, supabase);
+        if (!booking) throw new Error("Booking missing.");
+        if (booking.booking_status === "cancelled" || booking.booking_status === "completed") {
+          await finalizeJobCancelled(
+            supabase,
+            row.id,
+            `Booking is ${booking.booking_status}; reminder not sent.`,
+            nowIso
+          );
+          cancelled += 1;
+          continue;
+        }
+
+        merge = await buildMergeContext(supabase, row.tenant_id, booking);
       }
 
-      const merge = await buildMergeContext(supabase, row.tenant_id, booking);
       const body = renderReminderText(template.body, merge);
       const subject = template.subject ? renderReminderText(template.subject, merge) : null;
 
-      // Stub transport (Twilio / ESP integration deferred).
       console.log(
         `[fi_reminder_jobs] stub send tenant=${row.tenant_id} job=${row.id} type=${template.type} to=(patient channel TBD) body=${truncate(body, 160)}`
       );
@@ -170,24 +353,19 @@ export async function processReminderJobsOnce(opts?: {
             outcome: null,
             subject: subject ? truncate(subject, 200) : null,
             preview,
-            metadata: { source: "fi_reminder_jobs", job_id: row.id, booking_id: row.booking_id },
+            metadata: {
+              source: "fi_reminder_jobs",
+              job_id: row.id,
+              booking_id: row.booking_id,
+              trigger: template.trigger_event,
+            },
           },
           supabase
         );
       }
 
       const doneIso = new Date().toISOString();
-      const { error: ue } = await supabase
-        .from("fi_reminder_jobs")
-        .update({
-          status: "sent",
-          delivered_at: doneIso,
-          error: null,
-          updated_at: doneIso,
-        })
-        .eq("id", row.id)
-        .eq("status", "processing");
-      if (ue) throw new Error(ue.message);
+      await finalizeJobSent(supabase, row.id, doneIso);
       sent += 1;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -198,7 +376,7 @@ export async function processReminderJobsOnce(opts?: {
           .from("fi_reminder_jobs")
           .update({
             status: "failed",
-            error: truncate(msg, 2000),
+            error_log: truncate(msg, 2000),
             attempt_count: nextAttempt,
             updated_at: doneIso,
           })
@@ -211,7 +389,7 @@ export async function processReminderJobsOnce(opts?: {
           .from("fi_reminder_jobs")
           .update({
             status: "pending",
-            error: truncate(msg, 2000),
+            error_log: truncate(msg, 2000),
             attempt_count: nextAttempt,
             updated_at: doneIso,
           })
@@ -223,5 +401,5 @@ export async function processReminderJobsOnce(opts?: {
     }
   }
 
-  return { claimed, sent, failed, retried };
+  return { claimed, sent, failed, retried, cancelled };
 }

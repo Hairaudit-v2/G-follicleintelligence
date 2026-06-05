@@ -26,7 +26,7 @@ export type FiReminderJobRow = {
   attempt_count: number;
   last_attempt_at: string | null;
   delivered_at: string | null;
-  error: string | null;
+  error_log: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;

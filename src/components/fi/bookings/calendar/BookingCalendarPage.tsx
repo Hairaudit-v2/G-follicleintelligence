@@ -116,7 +116,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       <BookingEditDrawer
         tenantId={tenantId}
         booking={editing}
-        reminderJobs={[]}
+        reminderJobs={editing ? data.reminderJobsByBookingId[editing.id] ?? [] : []}
         assignees={assignees}
         clinics={clinics}
         adminKey={adminKey}

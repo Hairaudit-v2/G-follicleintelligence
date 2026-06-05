@@ -46,6 +46,9 @@ export function OperationalCalendarMobileList({
                         {d?.scalesSummary ? (
                           <span className="text-xs text-slate-700 dark:text-slate-300">{d.scalesSummary}</span>
                         ) : null}
+                        {d?.reminderHint ? (
+                          <span className="text-[11px] font-medium text-sky-800 dark:text-sky-300">{d.reminderHint}</span>
+                        ) : null}
                       </button>
                     </li>
                   );

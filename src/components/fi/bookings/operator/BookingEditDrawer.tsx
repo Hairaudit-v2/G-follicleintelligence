@@ -293,6 +293,9 @@ export function BookingEditDrawer({
                     <span className="w-full text-gray-600 sm:w-auto">
                       {j.status} · scheduled {new Date(j.scheduled_at).toLocaleString()}
                     </span>
+                    {j.error_log?.trim() && (j.status === "failed" || j.status === "cancelled") ? (
+                      <span className="w-full text-[11px] text-amber-800">{j.error_log}</span>
+                    ) : null}
                   </li>
                 ))}
               </ul>

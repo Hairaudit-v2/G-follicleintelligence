@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { loadConsultationForTenant } from "./consultationLoaders.server";
 import { syncConsultationMedicalHairLossToPatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsConsultationSync";
+import { syncPostConsultReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import {
   CONSULTATION_EDITABLE_STATUSES,
   type ConsultationCreateDraftBody,
@@ -221,5 +222,46 @@ export async function updateConsultationDraft(
     });
   }
 
+  return loaded;
+}
+
+/**
+ * One-way transition to `completed` (outside draft autosave). Enqueues `post_consult` reminder templates when eligible.
+ */
+export async function completeConsultationDraft(
+  tenantId: string,
+  consultationId: string,
+  opts?: { updatedByFiUserId?: string | null }
+): Promise<ConsultationRow> {
+  const tid = tenantId.trim();
+  const cid = consultationId.trim();
+  if (!tid || !cid) throw new Error("tenantId and consultationId are required.");
+
+  const existing = await loadConsultationForTenant(tid, cid);
+  if (!existing) throw new Error("Consultation not found.");
+  if (!isEditableStatus(existing.status)) {
+    throw new Error("Only draft or in-progress consultations can be marked completed.");
+  }
+
+  const nowIso = new Date().toISOString();
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_consultations")
+    .update({
+      status: "completed",
+      updated_at: nowIso,
+      updated_by: opts?.updatedByFiUserId ?? null,
+    })
+    .eq("tenant_id", tid)
+    .eq("id", cid)
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Update failed.");
+
+  const loaded = await loadConsultationForTenant(tid, cid);
+  if (!loaded) throw new Error("Could not load consultation after completion.");
+  await syncPostConsultReminderJobs(loaded, supabase);
   return loaded;
 }

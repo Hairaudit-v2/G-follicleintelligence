@@ -4,7 +4,10 @@ import {
   bookingStartsAfterNow,
   renderReminderText,
   scheduledAtForBookingTrigger,
+  scheduledAtForImmediateTrigger,
   templateTypeMatchesPreference,
+  toBookingScheduleTrigger,
+  formatNextReminderHint,
 } from "./remindersCore";
 
 describe("remindersCore — bookingStartsAfterNow", () => {
@@ -28,6 +31,13 @@ describe("remindersCore — template rendering", () => {
     const out = renderReminderText("{{patient_name}} / {{unknown}}", { patient_name: "Pat" });
     assert.equal(out, "Pat / {{unknown}}");
   });
+
+  it("renders norwood_summary token", () => {
+    const out = renderReminderText("Clinical: {{norwood_summary}}", {
+      norwood_summary: "Norwood IV · Ludwig I",
+    });
+    assert.equal(out, "Clinical: Norwood IV · Ludwig I");
+  });
 });
 
 describe("remindersCore — scheduling helpers", () => {
@@ -49,6 +59,44 @@ describe("remindersCore — scheduling helpers", () => {
       nowIso: now,
     });
     assert.equal(t, now);
+  });
+
+  it("toBookingScheduleTrigger maps shorthand offsets", () => {
+    assert.equal(toBookingScheduleTrigger("booking_48h"), "booking_48h_before");
+    assert.equal(toBookingScheduleTrigger("booking_24h"), "booking_24h_before");
+    assert.equal(toBookingScheduleTrigger("post_consult"), null);
+  });
+
+  it("scheduledAtForImmediateTrigger covers lead and post-consult", () => {
+    const now = "2026-06-01T08:00:00.000Z";
+    assert.equal(scheduledAtForImmediateTrigger("lead_created", now), now);
+    assert.equal(scheduledAtForImmediateTrigger("post_consult", now), now);
+    assert.equal(scheduledAtForImmediateTrigger("booking_created", now), null);
+  });
+
+  it("formatNextReminderHint picks earliest pending job", () => {
+    const hint = formatNextReminderHint([
+      {
+        scheduled_at: "2026-06-10T10:00:00.000Z",
+        status: "sent",
+        template_name: "Old",
+        template_type: "email",
+      },
+      {
+        scheduled_at: "2026-06-09T08:00:00.000Z",
+        status: "pending",
+        template_name: "Sooner",
+        template_type: "sms",
+      },
+      {
+        scheduled_at: "2026-06-08T08:00:00.000Z",
+        status: "pending",
+        template_name: "Earlier",
+        template_type: "email",
+      },
+    ]);
+    assert.ok(hint?.includes("Earlier"));
+    assert.ok(hint?.includes("email"));
   });
 
   it("templateTypeMatchesPreference respects patient preference", () => {

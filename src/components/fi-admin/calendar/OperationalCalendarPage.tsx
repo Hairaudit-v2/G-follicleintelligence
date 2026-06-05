@@ -254,7 +254,7 @@ export function OperationalCalendarPage({
       <BookingEditDrawer
         tenantId={data.tenantId}
         booking={editing}
-        reminderJobs={[]}
+        reminderJobs={editing ? data.reminderJobsByBookingId[editing.id] ?? [] : []}
         assignees={data.assignees}
         clinics={data.clinics}
         adminKey=""

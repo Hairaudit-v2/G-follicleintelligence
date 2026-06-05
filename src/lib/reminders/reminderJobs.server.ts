@@ -30,7 +30,12 @@ function mapJobRow(row: Record<string, unknown>): FiReminderJobRow {
     attempt_count: Number(row.attempt_count ?? 0),
     last_attempt_at: row.last_attempt_at != null ? String(row.last_attempt_at) : null,
     delivered_at: row.delivered_at != null ? String(row.delivered_at) : null,
-    error: row.error != null ? String(row.error) : null,
+    error_log:
+      row.error_log != null
+        ? String(row.error_log)
+        : row.error != null
+          ? String(row.error)
+          : null,
     metadata: assertMetadataObject(row.metadata),
     created_at: String(row.created_at),
     updated_at: String(row.updated_at),
@@ -66,15 +71,26 @@ async function loadTemplatesByIds(
   return out;
 }
 
-export async function deletePendingReminderJobsForBooking(
+export async function cancelPendingReminderJobsForBooking(
   tenantId: string,
   bookingId: string,
+  reason: string,
   client?: SupabaseClient
 ): Promise<void> {
   const supabase = client ?? supabaseAdmin();
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const bid = assertNonEmptyUuid(bookingId, "bookingId");
-  const { error } = await supabase.from("fi_reminder_jobs").delete().eq("tenant_id", tid).eq("booking_id", bid).eq("status", "pending");
+  const nowIso = new Date().toISOString();
+  const { error } = await supabase
+    .from("fi_reminder_jobs")
+    .update({
+      status: "cancelled",
+      error_log: reason.slice(0, 2000),
+      updated_at: nowIso,
+    })
+    .eq("tenant_id", tid)
+    .eq("booking_id", bid)
+    .eq("status", "pending");
   if (error) throw new Error(error.message);
 }
 

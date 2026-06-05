@@ -3,17 +3,18 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import type { FiCrmLeadRow } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes";
 import { loadReminderTemplatesForTenant } from "./reminderTemplates.server";
-import { deletePendingReminderJobsForBooking } from "./reminderJobs.server";
-import { scheduledAtForBookingTrigger, templateTypeMatchesPreference, bookingStartsAfterNow } from "./remindersCore";
-import type { ReminderTriggerEvent } from "./reminderConstants";
-
-const BOOKING_TRIGGERS: ReminderTriggerEvent[] = [
-  "booking_created",
-  "booking_48h_before",
-  "booking_24h_before",
-];
+import { cancelPendingReminderJobsForBooking } from "./reminderJobs.server";
+import {
+  bookingStartsAfterNow,
+  scheduledAtForBookingTrigger,
+  scheduledAtForImmediateTrigger,
+  templateTypeMatchesPreference,
+  toBookingScheduleTrigger,
+} from "./remindersCore";
 
 function bookingIsReminderEligible(row: FiBookingRow): boolean {
   if (row.booking_status === "cancelled" || row.booking_status === "completed" || row.booking_status === "no_show") {
@@ -52,7 +53,7 @@ export async function syncBookingReminderJobs(booking: FiBookingRow, client?: Su
     const tid = assertNonEmptyUuid(booking.tenant_id, "tenantId");
     const bid = assertNonEmptyUuid(booking.id, "bookingId");
 
-    await deletePendingReminderJobsForBooking(tid, bid, supabase);
+    await cancelPendingReminderJobsForBooking(tid, bid, "superseded_by_resync", supabase);
 
     if (!bookingIsReminderEligible(booking)) return;
 
@@ -66,17 +67,20 @@ export async function syncBookingReminderJobs(booking: FiBookingRow, client?: Su
       return;
     }
 
-    const templates = (await loadReminderTemplatesForTenant(tid, supabase)).filter(
-      (t) => t.is_active && BOOKING_TRIGGERS.includes(t.trigger_event)
-    );
+    const templates = (await loadReminderTemplatesForTenant(tid, supabase)).filter((t) => {
+      if (!t.is_active) return false;
+      return toBookingScheduleTrigger(t.trigger_event) != null;
+    });
 
     const nowIso = new Date().toISOString();
     const rows: Record<string, unknown>[] = [];
 
     for (const tpl of templates) {
       if (!templateTypeMatchesPreference(tpl.type, prefs.preferred_contact_method)) continue;
+      const schedKey = toBookingScheduleTrigger(tpl.trigger_event);
+      if (!schedKey) continue;
       const scheduledAt = scheduledAtForBookingTrigger({
-        trigger: tpl.trigger_event,
+        trigger: schedKey,
         bookingStartIso: booking.start_at,
         nowIso,
       });
@@ -91,7 +95,7 @@ export async function syncBookingReminderJobs(booking: FiBookingRow, client?: Su
         scheduled_at: scheduledAt,
         status: "pending",
         attempt_count: 0,
-        metadata: {},
+        metadata: { entity_type: "booking", entity_id: bid, patient_id: patientId },
         created_at: nowIso,
         updated_at: nowIso,
       });
@@ -104,5 +108,107 @@ export async function syncBookingReminderJobs(booking: FiBookingRow, client?: Su
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[syncBookingReminderJobs]", msg);
+  }
+}
+
+/**
+ * Enqueues `lead_created` templates once per new lead when the linked patient has reminder consent.
+ */
+export async function syncLeadCreatedReminderJobs(lead: FiCrmLeadRow, client?: SupabaseClient): Promise<void> {
+  try {
+    const supabase = client ?? supabaseAdmin();
+    const tid = assertNonEmptyUuid(lead.tenant_id, "tenantId");
+    const lid = assertNonEmptyUuid(lead.id, "leadId");
+    const patientId = lead.patient_id?.trim();
+    if (!patientId) return;
+
+    const prefs = await loadPatientReminderPrefs(supabase, tid, patientId);
+    if (!prefs?.consent) return;
+
+    const templates = (await loadReminderTemplatesForTenant(tid, supabase)).filter(
+      (t) => t.is_active && t.trigger_event === "lead_created"
+    );
+
+    const nowIso = new Date().toISOString();
+    const rows: Record<string, unknown>[] = [];
+
+    for (const tpl of templates) {
+      if (!templateTypeMatchesPreference(tpl.type, prefs.preferred_contact_method)) continue;
+      const scheduledAt = scheduledAtForImmediateTrigger(tpl.trigger_event, nowIso);
+      if (!scheduledAt) continue;
+      rows.push({
+        tenant_id: tid,
+        template_id: tpl.id,
+        booking_id: null,
+        person_id: lead.person_id?.trim() || null,
+        lead_id: lid,
+        scheduled_at: scheduledAt,
+        status: "pending",
+        attempt_count: 0,
+        metadata: { entity_type: "lead", entity_id: lid, patient_id: patientId },
+        created_at: nowIso,
+        updated_at: nowIso,
+      });
+    }
+
+    if (!rows.length) return;
+    const { error } = await supabase.from("fi_reminder_jobs").insert(rows);
+    if (error) throw new Error(error.message);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[syncLeadCreatedReminderJobs]", msg);
+  }
+}
+
+/**
+ * Fires `post_consult` templates when a consultation is marked completed (patient consent required).
+ */
+export async function syncPostConsultReminderJobs(consultation: ConsultationRow, client?: SupabaseClient): Promise<void> {
+  try {
+    const supabase = client ?? supabaseAdmin();
+    const tid = assertNonEmptyUuid(consultation.tenant_id, "tenantId");
+    const patientId = consultation.patient_id?.trim();
+    if (!patientId) return;
+
+    const prefs = await loadPatientReminderPrefs(supabase, tid, patientId);
+    if (!prefs?.consent) return;
+
+    const templates = (await loadReminderTemplatesForTenant(tid, supabase)).filter(
+      (t) => t.is_active && t.trigger_event === "post_consult"
+    );
+
+    const nowIso = new Date().toISOString();
+    const rows: Record<string, unknown>[] = [];
+
+    for (const tpl of templates) {
+      if (!templateTypeMatchesPreference(tpl.type, prefs.preferred_contact_method)) continue;
+      const scheduledAt = scheduledAtForImmediateTrigger(tpl.trigger_event, nowIso);
+      if (!scheduledAt) continue;
+      rows.push({
+        tenant_id: tid,
+        template_id: tpl.id,
+        booking_id: null,
+        person_id: consultation.person_id?.trim() || null,
+        lead_id: consultation.lead_id?.trim() || null,
+        scheduled_at: scheduledAt,
+        status: "pending",
+        attempt_count: 0,
+        metadata: {
+          entity_type: "consultation",
+          entity_id: consultation.id,
+          consultation_id: consultation.id,
+          patient_id: patientId,
+        },
+        created_at: nowIso,
+        updated_at: nowIso,
+      });
+    }
+
+    if (!rows.length) return;
+    const { error } = await supabase.from("fi_reminder_jobs").insert(rows);
+    if (error) throw new Error(error.message);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[syncPostConsultReminderJobs]", msg);
   }
 }

@@ -3,11 +3,14 @@ import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 
 export type OperationalCalendarBookingDisplay = {
   anchorLabel: string;
   scalesSummary: string | null;
   durationMin: number;
+  /** Next pending/processing reminder for this booking, if any. */
+  reminderHint: string | null;
 };
 
 export type OperationalCalendarResourceColumn = {
@@ -33,4 +36,6 @@ export type OperationalCalendarPageData = {
   gridConfig: BusinessGridConfig;
   listTruncated: boolean;
   canMutateBookings: boolean;
+  /** Serialized map for edit drawer + calendar hints. */
+  reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
 };

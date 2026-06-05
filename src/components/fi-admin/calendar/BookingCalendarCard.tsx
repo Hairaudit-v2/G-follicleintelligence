@@ -20,7 +20,7 @@ export function BookingCalendarCard({
   onDragStart,
 }: {
   booking: FiBookingRow;
-  display: { anchorLabel: string; scalesSummary: string | null; durationMin: number };
+  display: { anchorLabel: string; scalesSummary: string | null; durationMin: number; reminderHint?: string | null };
   layout: { topPx: number; heightPx: number };
   draggable: boolean;
   onClick: () => void;
@@ -57,6 +57,11 @@ export function BookingCalendarCard({
       <div className="mt-0.5 text-[10px] opacity-90">{display.durationMin} min</div>
       {display.scalesSummary ? (
         <div className="mt-0.5 line-clamp-2 text-[10px] font-medium leading-snug text-slate-800/95">{display.scalesSummary}</div>
+      ) : null}
+      {display.reminderHint ? (
+        <div className="mt-0.5 line-clamp-2 text-[9px] font-medium leading-snug text-sky-800/95 dark:text-sky-200/90">
+          {display.reminderHint}
+        </div>
       ) : null}
     </button>
   );

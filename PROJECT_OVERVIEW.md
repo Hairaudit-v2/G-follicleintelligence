@@ -104,7 +104,7 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | Bookings table | **Completed** | `fi_bookings` — types (consultation, surgery, follow_up, …), status, anchors to lead/person/patient/case, assignee, clinic. |
 | Bookings operator UI | **Completed** | List + new booking flows under `/bookings`. |
 | Calendar page | **Completed (ops)** | `/fi-admin/[tenantId]/calendar` — **week (Mon–Sun UTC) default** + **day** toggle; **business-hour grid** (slot size + hours from `fi_tenant_settings.metadata.operational_calendar` or defaults); **staff + site columns** on day view (`fi_users` + `fi_clinics`); bookings via **`loadBookingsForTenantRange`** (same overlap semantics as tenant dashboard agenda) with CRM-style filters + search (`q`); **drag-and-drop reschedule** (`updateBookingAction`) with **assignee/site conflict** hints; detail **drawer + full edit**; **mobile stacked list**. Legacy preview grid remains in `ClinicOsCalendarHome` (unused by route). |
-| Reminders / SMS / email cadence | **In progress (MVP)** | `fi_reminder_templates` + `fi_reminder_jobs` with tenant-scoped templates (`booking_created`, `booking_48h_before`, `booking_24h_before`, `lead_created` placeholder), **patient `reminder_consent` + `preferred_contact_method`**, enqueue on **booking create/update/cancel/complete** (`syncBookingReminderJobs`), **stub processor** `processReminderJobsOnce` + **`POST|GET /api/cron/fi-reminder-jobs`** (`FI_REMINDER_CRON_SECRET`). UI: **`/fi-admin/[tenantId]/settings/reminders`**, dashboard **Upcoming reminders** strip, booking drawer queue. CRM contact log on send when `lead_id` present. **Next:** Twilio/SendGrid, pg_cron or Vercel Cron config, lead-triggered jobs. |
+| Reminders / SMS / email cadence | **In progress (MVP)** | `fi_reminder_templates` + `fi_reminder_jobs` — triggers: `booking_created`, `booking_48h_before` / `booking_24h_before` (aliases `booking_48h`, `booking_24h`), **`post_consult`**, **`lead_created`**; job **`cancelled`** + **`error_log`**; **`entity_type`/`entity_id`/`patient_id` in `metadata`** for traceability. **Patient `reminder_consent` (default true for new rows)** + `preferred_contact_method`. Enqueue: **`syncBookingReminderJobs`** on booking create/update; **`syncLeadCreatedReminderJobs`** on lead create (patient consent); **`syncPostConsultReminderJobs`** when consultation is **Mark completed**. Pending jobs **cancelled** on reschedule (not deleted). Merge fields include **`{{norwood_summary}}`** (clinical scales). **Stub processor** `processReminderJobsOnce` (1× retry, skip/cancel ineligible bookings) + **`POST|GET /api/cron/fi-reminder-jobs`**. UI: **`/fi-admin/[tenantId]/settings/reminders`**, **dashboard upcoming reminders**, **booking edit drawer**, **operational calendar cards** + **mobile list** hints. CRM comms log on send when `lead_id` present. **Next:** Twilio/Resend, wire Vercel Cron, optional DB `entity_*` columns beyond metadata. |
 | Recurring appointments / rooms / chairs | **Partial** | Single booking rows with `clinic_id` + assignee; no recurrence or optimization engine. |
 
 ### Cases, surgery, post-op (clinical OS)
@@ -133,7 +133,7 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | Geography of care | `fi_organisations`, `fi_clinics`, settings tables (`fi_tenant_settings`, …) |
 | People & patients | `fi_persons`, `fi_person_roles`, `fi_patients`, `fi_patient_source_ids`, `fi_patient_clinical_details`, `fi_patient_images` |
 | CRM | `fi_crm_pipeline_stages`, `fi_crm_leads`, `fi_crm_lead_stage_history`, `fi_crm_activity_events`, notes, tasks, communications (see migrations `fi_crm_*`) |
-| Scheduling | `fi_bookings` |
+| Scheduling | `fi_bookings`, `fi_reminder_templates`, `fi_reminder_jobs` |
 | Clinical record | `fi_cases`, `fi_intakes`, `fi_consultations`, `fi_case_surgery_plans`, `fi_case_procedures`, `fi_case_post_op_tracking`, `fi_timeline_events`, `fi_media_assets` |
 | Legacy / AI audit | `fi_global_cases`, `fi_reports`, model runs, signals, uploads (older `202502*` migrations) |
 
@@ -144,7 +144,7 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 1. **Pipeline UX** — **MVP kanban** is live under `/fi-admin/[tenantId]/crm?view=board` (drag between columns, refresh, filters). Deeper sales analytics (velocity, forecasting) remain future work.
 2. **Marketing automation** — No lead scoring beyond manual fields, no sequences, no landing-page → CRM attribution loop inside this repo at product level.
 3. **Scheduling depth** — Bookings are **flat events**; missing **clinician/resource calendars**, **recurrence**, **waitlists**, and **patient self-booking** tied to real-time availability.
-4. **Engagement & reminders** — No first-class **SMS/email reminder** system, delivery logs, or consent tracking in schema (communications tables are staff-centric CRM logs).
+4. **Engagement & reminders** — **MVP queue + templates** are in place (`fi_reminder_templates`, `fi_reminder_jobs`, cron processor stub); first-class **SMS/ESP delivery**, patient-facing consent UX polish, and **no-show analytics** remain.
 5. **Trichoscopy / surgical planning math** — Norwood/Ludwig are **structured on patients**; **graft calculators** and imaging-linked trichoscopy workflows are not standardized in-app.
 6. **Reporting** — Data is **analytics-ready** (stage history, bookings timestamps); **in-app BI** (conversion rates, stage dwell, no-show rates) is largely **unbuilt**.
 7. **Security consistency** — Internal docs flag APIs that trust **`tenant_id` query params** without mirroring layout-level checks; closing this gap is essential before externalizing APIs.
@@ -162,7 +162,7 @@ Prioritized for **Evolved Hair Clinics daily operations** while preserving the s
 | **P1** | **Calendar week view + filters** — clinicians, rooms, booking types | Closes the gap to Timely for front desk; reuses `fi_bookings`. |
 | **P1** | **Tenant CRM dashboard widgets** — stale leads, stage dwell, tasks due (uses board + history) | Complements the new kanban as the exec snapshot (`docs/design/19-fi-os-current-state-and-dashboard-roadmap.md`). |
 | **P1** | **Norwood reporting / cohort views** | Structured scale exists; add saved views / exports for clinical ops. |
-| **P2** | **Reminder job + templates** — queue table or edge functions + Twilio/SendGrid | Turns bookings into reliable revenue capture. |
+| **P2** | **Production reminders** — Twilio/SendGrid, delivery receipts, Vercel Cron | MVP queue + templates + merge fields exist; wire real transport and monitor `fi_reminder_jobs`. |
 | **P2** | **Funnel metrics page** — SQL views or materialized summaries from `fi_crm_lead_stage_history` | Uses existing append-only history; small win for leadership. |
 | **P3** | **Marketing automation MVP** — static segments + manual bulk tasks (not full HubSpot) | Avoids over-engineering; pairs with CRM tasks. |
 

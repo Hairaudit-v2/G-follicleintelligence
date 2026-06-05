@@ -60,6 +60,7 @@ export const placeholderSampleContextSchema = z.object({
   clinic_name: z.string().optional(),
   booking_title: z.string().optional(),
   booking_type: z.string().optional(),
+  norwood_summary: z.string().optional(),
 });
 
 export type PlaceholderSampleContext = z.infer<typeof placeholderSampleContextSchema>;

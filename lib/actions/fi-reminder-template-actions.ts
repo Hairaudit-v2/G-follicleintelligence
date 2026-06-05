@@ -108,6 +108,7 @@ export async function previewReminderTemplateAction(
       clinic_name: "Evolved Hair Clinic",
       booking_title: "Consultation",
       booking_type: "consultation",
+      norwood_summary: "Norwood IIIa · Temple recession",
     };
     const renderedBody = renderReminderText(parsed.body, sample);
     const renderedSubject = parsed.subject != null ? renderReminderText(parsed.subject, sample) : null;

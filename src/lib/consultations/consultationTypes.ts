@@ -132,6 +132,15 @@ export const consultationUpsertBodySchema = z
 
 export type ConsultationUpsertBody = z.infer<typeof consultationUpsertBodySchema>;
 
+/** Mark consultation completed (terminal transition from draft / in-progress). */
+export const consultationCompleteBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+  })
+  .strict();
+
+export type ConsultationCompleteBody = z.infer<typeof consultationCompleteBodySchema>;
+
 /** @deprecated alias — prefer `consultationUpsertBodySchema` */
 export const consultationUpdateDraftBodySchema = consultationUpsertBodySchema;
 export type ConsultationUpdateDraftBody = ConsultationUpsertBody;

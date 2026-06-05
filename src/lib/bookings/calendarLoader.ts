@@ -12,6 +12,8 @@ import { buildCalendarLanesForView, bucketBookingsIntoCalendar, type CalendarDay
 import { loadBookingsForCalendarOverlap } from "./bookings";
 import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "./operatorBookingConstants";
 import type { FiBookingRow } from "./types";
+import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
+import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 
 export type CalendarResources = {
   assignees: CrmShellUserPickerOption[];
@@ -32,6 +34,8 @@ export type CalendarViewData = {
   listTruncated: boolean;
   /** Human-readable UTC range heading for the toolbar. */
   rangeTitle: string;
+  /** For booking edit drawer when legacy calendar UI is wired. */
+  reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
 };
 
 export async function loadCalendarResources(tenantId: string): Promise<CalendarResources> {
@@ -94,6 +98,15 @@ export async function loadCalendarViewData(
 
   const rangeTitle = formatCalendarRangeTitle(query.view, lanes);
 
+  const reminderMap = await loadReminderJobsForBookings(
+    tid,
+    bookings.map((b) => b.id)
+  );
+  const reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]> = {};
+  for (const b of bookings) {
+    reminderJobsByBookingId[b.id] = reminderMap.get(b.id) ?? [];
+  }
+
   return {
     tenantId: tid,
     query,
@@ -106,5 +119,6 @@ export async function loadCalendarViewData(
     clinics: resources.clinics,
     listTruncated,
     rangeTitle,
+    reminderJobsByBookingId,
   };
 }

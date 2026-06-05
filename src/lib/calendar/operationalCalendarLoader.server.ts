@@ -29,6 +29,9 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
+import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
+import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";
+import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 
 function readPatientLabel(metadata: Record<string, unknown> | null | undefined): string | null {
   if (!metadata || typeof metadata !== "object") return null;
@@ -311,6 +314,7 @@ export async function loadOperationalCalendarPageData(
       anchorLabel: anchorLabelForRow(row, patientLabels, leadTitles),
       scalesSummary,
       durationMin,
+      reminderHint: null,
     };
   }
 
@@ -334,6 +338,21 @@ export async function loadOperationalCalendarPageData(
 
   const listTruncated = searched.length > CALENDAR_VIEW_BOOKINGS_LIMIT;
   const bookings = searched.slice(0, CALENDAR_VIEW_BOOKINGS_LIMIT);
+
+  const reminderMap = await loadReminderJobsForBookings(
+    tid,
+    bookings.map((b) => b.id)
+  );
+  const reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]> = {};
+  for (const b of bookings) {
+    const jobs = reminderMap.get(b.id) ?? [];
+    reminderJobsByBookingId[b.id] = jobs;
+    const hint = formatNextReminderHint(jobs);
+    const prev = bookingDisplay[b.id];
+    if (prev) {
+      bookingDisplay[b.id] = { ...prev, reminderHint: hint };
+    }
+  }
 
   const bucketsMap = bucketBookingsIntoCalendar(bookings, lanes);
   const buckets: Record<string, FiBookingRow[]> = {};
@@ -359,5 +378,6 @@ export async function loadOperationalCalendarPageData(
     gridConfig,
     listTruncated,
     canMutateBookings,
+    reminderJobsByBookingId,
   };
 }

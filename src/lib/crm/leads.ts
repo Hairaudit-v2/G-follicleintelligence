@@ -5,8 +5,9 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { ResolvePersonInput } from "@/src/lib/fi/foundation/types";
 import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
 import { appendCrmActivityEvent } from "./activity";
-import { ensureDefaultPipelineStages, getEntryPipelineStage } from "./pipeline";
 import { appendCrmLeadStageHistory } from "./stageHistory";
+import { ensureDefaultPipelineStages, getEntryPipelineStage } from "./pipeline";
+import { syncLeadCreatedReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import type { CrmPipelineScope, FiCrmLeadRow } from "./types";
 import { CRM_DEFAULT_PERSON_SOURCE_SYSTEM } from "./types";
 import { organisationBelongsToTenant, clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
@@ -222,6 +223,8 @@ export async function createCrmLeadWithPerson(
     },
     supabase
   );
+
+  await syncLeadCreatedReminderJobs(lead, supabase);
 
   return lead;
 }
