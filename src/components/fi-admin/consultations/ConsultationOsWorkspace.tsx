@@ -1,5 +1,6 @@
 "use client";
 
+import type { FocusEvent } from "react";
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,10 @@ import { ConsultationOsQuotePanel } from "@/src/components/fi-admin/consultation
 import { ConsultationOsRecommendationsPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRecommendationsPanel";
 import { ConsultationOsRegenerativeAssessmentPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRegenerativeAssessmentPanel";
 import { LabeledTextInput, LabeledTextarea } from "@/src/components/fi-admin/consultations/consultationOsPreviewFields";
+import {
+  stableConsultationPayloadSignature,
+  useConsultationAutosave,
+} from "@/src/components/fi-admin/consultations/useConsultationAutosave";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiSection } from "@/src/components/fi-design/FiSection";
@@ -246,6 +251,38 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
     quoteData,
   ]);
 
+  const payloadWatch = useMemo(() => stableConsultationPayloadSignature(buildPayload()), [buildPayload]);
+
+  const autosaveEnabled = mode === "edit" && Boolean(consultationId?.trim()) && canEdit;
+
+  const {
+    beginManualSave,
+    markManualSaveSucceeded,
+    flushOnBlur,
+    autosaveSaving,
+    persistStatus,
+    autosaveWarning,
+  } = useConsultationAutosave({
+    enabled: autosaveEnabled,
+    tenantId,
+    consultationId: consultationId ?? "",
+    getPayload: buildPayload,
+    withAdmin,
+    blockAutoschedule: busySave,
+    payloadWatch,
+    debounceMs: 2000,
+  });
+
+  const handleEditorBlurCapture = useCallback(
+    (e: FocusEvent<HTMLDivElement>) => {
+      if (!autosaveEnabled) return;
+      const rt = e.relatedTarget as Node | null;
+      if (rt && e.currentTarget.contains(rt)) return;
+      flushOnBlur();
+    },
+    [autosaveEnabled, flushOnBlur]
+  );
+
   const onCreateDraft = useCallback(async () => {
     setError(null);
     setSaveOk(false);
@@ -269,6 +306,7 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
     if (mode !== "edit" || !consultationId?.trim()) return;
     setError(null);
     setSaveOk(false);
+    beginManualSave();
     setBusySave(true);
     try {
       const res = await updateConsultationDraftAction(tenantId, consultationId.trim(), withAdmin(buildPayload()));
@@ -276,18 +314,37 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
         setError(res.error);
         return;
       }
+      markManualSaveSucceeded();
       setSaveOk(true);
       router.refresh();
     } finally {
       setBusySave(false);
     }
-  }, [mode, consultationId, tenantId, withAdmin, buildPayload, router]);
+  }, [
+    mode,
+    consultationId,
+    tenantId,
+    withAdmin,
+    buildPayload,
+    router,
+    beginManualSave,
+    markManualSaveSucceeded,
+  ]);
 
   const headerTitle = mode === "create" ? "New consultation" : "Consultation workspace";
   const headerDescription =
     mode === "create"
       ? "Early ConsultationOS workflow: choose a type, capture notes in the panels, then create a server-backed draft."
-      : "Early ConsultationOS workflow: edit fields locally and use Save draft to persist (manual save only).";
+      : "Early ConsultationOS workflow: edit fields locally; drafts autosave while status is draft or in progress, and you can still use Save draft at any time.";
+
+  const displaySaving = busySave || autosaveSaving;
+  const subtleSaveLabel = (() => {
+    if (displaySaving) return "Saving…";
+    if (error?.trim()) return "Save failed";
+    if (persistStatus === "failed") return "Save failed";
+    if (persistStatus === "unsaved") return "Unsaved changes";
+    return "Saved";
+  })();
 
   return (
     <div className="space-y-5">
@@ -308,14 +365,24 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
                 {busyCreate ? "Creating…" : "Create draft consultation"}
               </button>
             ) : canEdit ? (
-              <button
-                type="button"
-                onClick={() => void onSaveDraft()}
-                disabled={busySave}
-                className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {busySave ? "Saving…" : "Save draft"}
-              </button>
+              <div className="flex flex-col items-stretch gap-1 sm:items-end">
+                <button
+                  type="button"
+                  onClick={() => void onSaveDraft()}
+                  disabled={busySave}
+                  className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {busySave ? "Saving…" : "Save draft"}
+                </button>
+                <p className="text-right text-xs font-medium text-slate-500" aria-live="polite">
+                  {subtleSaveLabel}
+                </p>
+                {autosaveWarning?.trim() && !error?.trim() ? (
+                  <p className="max-w-xs text-right text-xs leading-snug text-amber-800" role="status">
+                    Autosave could not complete: {autosaveWarning}
+                  </p>
+                ) : null}
+              </div>
             ) : (
               <span className="text-xs font-medium text-slate-500">Read-only (not draft / in progress)</span>
             )
@@ -335,8 +402,9 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
         role="status"
         className="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-3 text-sm text-amber-950"
       >
-        <strong className="font-semibold">Early workflow.</strong> ConsultationOS is under active development. There is
-        no autosave, AI summary, voice dictation, quote automation, case conversion, or calendar integration in this stage.
+        <strong className="font-semibold">Early workflow.</strong> ConsultationOS is under active development. Drafts
+        autosave on this page when status is draft or in progress; there is no AI summary, voice dictation, quote
+        automation, case conversion, or calendar integration in this stage.
       </div>
 
       {error ? (
@@ -351,7 +419,8 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
         </div>
       ) : null}
 
-      <FiCard className="space-y-3">
+      <div onBlurCapture={handleEditorBlurCapture}>
+        <FiCard className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Optional break-glass access</p>
         <label htmlFor="cos-admin-key" className="block text-xs text-slate-600">
           FI Admin API key (only if your account does not have CRM write access)
@@ -517,6 +586,7 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
             <ConsultationOsQuotePanel values={quoteData} onFieldChange={onQuoteFieldChange} disabled={!canEdit} />
           ) : null}
         </div>
+      </div>
       </div>
     </div>
   );
