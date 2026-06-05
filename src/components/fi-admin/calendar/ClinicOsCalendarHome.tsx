@@ -1,37 +1,151 @@
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import { FiCalendarBlock } from "@/src/components/fi-design/FiCalendarBlock";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
 import { FiSection } from "@/src/components/fi-design/FiSection";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
+import { cn } from "@/lib/utils";
 
-const DAY_START_HOUR = 7;
+/** Calendar body starts at 8:00; last slot ends at 6:00pm (18:00). */
+const DAY_START_HOUR = 8;
 const DAY_END_HOUR = 18;
-const TOTAL_MINUTES = (DAY_END_HOUR - DAY_START_HOUR) * 60;
+const HOUR_COUNT = DAY_END_HOUR - DAY_START_HOUR;
+const TOTAL_MINUTES = HOUR_COUNT * 60;
+const HOUR_ROW_PX = 44;
+const GRID_BODY_PX = HOUR_COUNT * HOUR_ROW_PX;
 
-type PlaceholderEvent = {
-  id: string;
-  title: string;
-  startMin: number;
-  durationMin: number;
-  tone: "consult" | "treatment" | "surgery" | "followup";
+const RESOURCE_COLUMNS = [
+  { id: "doctor", label: "Doctor" },
+  { id: "consultant", label: "Consultant" },
+  { id: "nursePrp", label: "Nurse PRP" },
+  { id: "surgeryRoom", label: "Surgery Room" },
+] as const;
+
+type ColumnId = (typeof RESOURCE_COLUMNS)[number]["id"];
+
+type PreviewTone = "consult" | "treatment" | "surgery" | "followup" | "planning";
+
+const toneClass: Record<PreviewTone, string> = {
+  consult: "border-sky-200 bg-sky-50/95 text-sky-950 ring-1 ring-sky-100",
+  treatment: "border-violet-200 bg-violet-50/95 text-violet-950 ring-1 ring-violet-100",
+  surgery: "border-amber-200 bg-amber-50/95 text-amber-950 ring-1 ring-amber-100",
+  followup: "border-emerald-200 bg-emerald-50/95 text-emerald-950 ring-1 ring-emerald-100",
+  planning: "border-indigo-200 bg-indigo-50/95 text-indigo-950 ring-1 ring-indigo-100",
 };
 
-const PLACEHOLDER_EVENTS: PlaceholderEvent[] = [
-  { id: "1", title: "Consultation", startMin: 9 * 60 - DAY_START_HOUR * 60, durationMin: 60, tone: "consult" },
-  { id: "2", title: "PRP / Treatment", startMin: 11 * 60 - DAY_START_HOUR * 60, durationMin: 90, tone: "treatment" },
-  { id: "3", title: "Surgery planning", startMin: 13 * 60 - DAY_START_HOUR * 60, durationMin: 60, tone: "surgery" },
-  { id: "4", title: "Follow-up", startMin: 15 * 60 + 30 - DAY_START_HOUR * 60, durationMin: 30, tone: "followup" },
+type PlaceholderAppointment = {
+  id: string;
+  title: string;
+  patientName: string;
+  /** Minutes from 8:00am (0 = 8:00am). */
+  startMin: number;
+  durationMin: number;
+  column: ColumnId;
+  tone: PreviewTone;
+};
+
+const PLACEHOLDER_APPOINTMENTS: PlaceholderAppointment[] = [
+  {
+    id: "a1",
+    title: "Consultation",
+    patientName: "Sample · Jordan Lee",
+    startMin: 30,
+    durationMin: 30,
+    column: "doctor",
+    tone: "consult",
+  },
+  {
+    id: "a2",
+    title: "Follow-up",
+    patientName: "Sample · Priya N.",
+    startMin: 60,
+    durationMin: 30,
+    column: "nursePrp",
+    tone: "followup",
+  },
+  {
+    id: "a3",
+    title: "PRP Treatment",
+    patientName: "Sample · Marcus Chen",
+    startMin: 120,
+    durationMin: 60,
+    column: "nursePrp",
+    tone: "treatment",
+  },
+  {
+    id: "a4",
+    title: "Hair Transplant Planning",
+    patientName: "Sample · Elena Rossi",
+    startMin: 210,
+    durationMin: 60,
+    column: "consultant",
+    tone: "planning",
+  },
+  {
+    id: "a5",
+    title: "Surgery Review",
+    patientName: "Sample · David Okafor",
+    startMin: 330,
+    durationMin: 45,
+    column: "surgeryRoom",
+    tone: "surgery",
+  },
+  {
+    id: "a6",
+    title: "Follow-up",
+    patientName: "Sample · Ana Müller",
+    startMin: 450,
+    durationMin: 30,
+    column: "doctor",
+    tone: "followup",
+  },
 ];
 
-const HOUR_ROWS = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR }, (_, i) => DAY_START_HOUR + i);
+const HOUR_ROWS = Array.from({ length: HOUR_COUNT }, (_, i) => DAY_START_HOUR + i);
 
 function formatHourLabel(h: number): string {
   const d = new Date();
   d.setHours(h, 0, 0, 0);
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(d);
+}
+
+function formatClockFromDayStart(startMin: number): string {
+  const total = DAY_START_HOUR * 60 + startMin;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(d);
+}
+
+function formatTimeRange(startMin: number, durationMin: number): string {
+  const endMin = startMin + durationMin;
+  return `${formatClockFromDayStart(startMin)} – ${formatClockFromDayStart(endMin)}`;
+}
+
+function PreviewAppointmentBlock({ appt }: { appt: PlaceholderAppointment }) {
+  const topPct = (appt.startMin / TOTAL_MINUTES) * 100;
+  const heightPct = (appt.durationMin / TOTAL_MINUTES) * 100;
+  return (
+    <div
+      role="listitem"
+      className={cn(
+        "absolute left-0.5 right-0.5 overflow-hidden rounded-md border px-1.5 py-1 shadow-sm",
+        toneClass[appt.tone]
+      )}
+      style={{
+        top: `${topPct}%`,
+        height: `${heightPct}%`,
+        minHeight: "2.75rem",
+      }}
+    >
+      <p className="text-[11px] font-semibold leading-tight tracking-tight">{appt.title}</p>
+      <p className="mt-0.5 truncate text-[10px] font-medium text-slate-700/95">{appt.patientName}</p>
+      <p className="mt-0.5 text-[10px] tabular-nums text-slate-600">{formatTimeRange(appt.startMin, appt.durationMin)}</p>
+      <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Preview only</p>
+    </div>
+  );
 }
 
 function PlaceholderChip({ label }: { label: string }) {
@@ -54,12 +168,11 @@ type ClinicOsCalendarHomeProps = {
 };
 
 /**
- * Clinic OS calendar landing (Stage 1G): day-style shell with placeholder appointments only.
+ * Clinic OS calendar landing: Timely-style multi-column day preview only (Stage 1J).
  * No live bookings, mutations, or calendar data wiring.
  */
 export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarHomeProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
-  const dayColumnMinHeight = 528;
 
   return (
     <div className="space-y-4">
@@ -88,47 +201,68 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
           headingId="clinic-os-day-calendar-heading"
           contentClassName="mt-0 border-t border-slate-100 pt-3"
         >
-          <div className="flex gap-0 overflow-x-auto">
-            <div
-              className="flex w-14 shrink-0 flex-col border-r border-slate-200 pr-2 text-right text-xs text-slate-500 sm:w-16"
-              style={{ minHeight: dayColumnMinHeight }}
-            >
-              {HOUR_ROWS.map((h) => (
-                <div
-                  key={h}
-                  className="flex h-12 shrink-0 items-start justify-end pt-0.5 font-medium tabular-nums text-slate-500"
-                >
-                  {formatHourLabel(h)}
-                </div>
-              ))}
-            </div>
+          <p className="mb-3 rounded-lg border border-sky-200/90 bg-sky-50 px-3 py-2 text-sm leading-snug text-sky-950">
+            This is a preview calendar. Live booking data will be connected in a later stage.
+          </p>
 
-            <div className="relative min-w-[200px] flex-1" style={{ minHeight: dayColumnMinHeight }}>
-              <div className="absolute inset-0 flex flex-col">
-                {HOUR_ROWS.map((h) => (
-                  <div key={h} className="h-12 shrink-0 border-b border-slate-100" />
+          <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+            <div className="inline-block min-w-[720px] w-max max-w-none align-top lg:min-w-[760px]">
+              <div
+                className="grid border-b border-slate-200 bg-slate-50/90 text-xs font-semibold text-slate-700"
+                style={{
+                  gridTemplateColumns: `3.5rem repeat(${RESOURCE_COLUMNS.length}, minmax(6.5rem, 1fr))`,
+                }}
+              >
+                <div className="border-r border-slate-200 px-1 py-2" aria-hidden />
+                {RESOURCE_COLUMNS.map((col) => (
+                  <div
+                    key={col.id}
+                    className="border-r border-slate-200 px-2 py-2 text-center last:border-r-0 sm:px-2.5"
+                  >
+                    {col.label}
+                  </div>
                 ))}
               </div>
 
               <div
-                className="absolute left-0 right-2 top-0 sm:right-3"
-                style={{ height: dayColumnMinHeight }}
+                className="grid border-b border-slate-200 bg-white"
+                style={{
+                  gridTemplateColumns: `3.5rem repeat(${RESOURCE_COLUMNS.length}, minmax(6.5rem, 1fr))`,
+                  minHeight: GRID_BODY_PX,
+                }}
                 role="list"
-                aria-label="Sample appointments for layout preview"
+                aria-label="Sample multi-column schedule for layout preview"
               >
-                {PLACEHOLDER_EVENTS.map((ev) => {
-                  const topPct = (ev.startMin / TOTAL_MINUTES) * 100;
-                  const heightPct = (ev.durationMin / TOTAL_MINUTES) * 100;
-                  return (
-                    <FiCalendarBlock
-                      key={ev.id}
-                      title={ev.title}
-                      tone={ev.tone}
-                      placeholder
-                      style={{ top: `${topPct}%`, height: `${heightPct}%`, minHeight: "2.25rem" }}
-                    />
-                  );
-                })}
+                <div className="relative border-r border-slate-200">
+                  {HOUR_ROWS.map((h) => (
+                    <div
+                      key={h}
+                      className="border-b border-slate-100 pr-1.5 pt-0.5 text-right text-[11px] font-medium tabular-nums text-slate-500 last:border-b-0"
+                      style={{ height: HOUR_ROW_PX }}
+                    >
+                      {formatHourLabel(h)}
+                    </div>
+                  ))}
+                </div>
+
+                {RESOURCE_COLUMNS.map((col) => (
+                  <div
+                    key={col.id}
+                    className="relative border-r border-slate-100 bg-slate-50/20 last:border-r-0"
+                    style={{ minHeight: GRID_BODY_PX }}
+                  >
+                    <div className="pointer-events-none absolute inset-0 flex flex-col">
+                      {HOUR_ROWS.map((h) => (
+                        <div key={h} className="shrink-0 border-b border-slate-100/90" style={{ height: HOUR_ROW_PX }} />
+                      ))}
+                    </div>
+                    <div className="relative z-[1]" style={{ height: GRID_BODY_PX }}>
+                      {PLACEHOLDER_APPOINTMENTS.filter((a) => a.column === col.id).map((appt) => (
+                        <PreviewAppointmentBlock key={appt.id} appt={appt} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -176,8 +310,8 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
             <div className="space-y-1.5">
               <PlaceholderChip label="All staff" />
               <PlaceholderChip label="Doctor" />
-              <PlaceholderChip label="Nurse" />
               <PlaceholderChip label="Consultant" />
+              <PlaceholderChip label="Nurse PRP" />
             </div>
           </FiSection>
 
