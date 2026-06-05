@@ -32,6 +32,8 @@ import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
+import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 
 function readPatientLabel(metadata: Record<string, unknown> | null | undefined): string | null {
   if (!metadata || typeof metadata !== "object") return null;
@@ -254,10 +256,11 @@ export async function loadOperationalCalendarPageData(
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
-  const [rawBookings, resources, canMutateBookings] = await Promise.all([
+  const [rawBookings, resources, canMutateBookings, services] = await Promise.all([
     loadBookingsForTenantRange(tid, rangeStartIso, rangeEndIso),
     loadTenantStaffAndClinics(tid),
     resolveCanMutateBookings(tid),
+    loadFiServicesForTenant(tid),
   ]);
   const gridConfig = calendarSettings.gridConfig;
 
@@ -289,11 +292,15 @@ export async function loadOperationalCalendarPageData(
         })
       : null;
 
+    const cat = serviceForBookingType(services, row.booking_type);
     bookingDisplay[row.id] = {
       anchorLabel: anchorLabelForRow(row, patientLabels, leadTitles),
       scalesSummary,
       durationMin,
       reminderHint: null,
+      procedureCatalogName: cat?.name ?? null,
+      procedureCatalogHex: cat?.color ?? null,
+      suggestedPrice: cat != null ? cat.base_price : null,
     };
   }
 
@@ -360,5 +367,6 @@ export async function loadOperationalCalendarPageData(
     listTruncated,
     canMutateBookings,
     reminderJobsByBookingId,
+    services,
   };
 }

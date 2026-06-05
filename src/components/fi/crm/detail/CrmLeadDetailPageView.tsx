@@ -20,8 +20,9 @@ import {
   LeadStageSection,
   LeadTasksSection,
 } from "../shared";
-import { CrmLeadDetailBreadcrumbs } from "./CrmLeadDetailBreadcrumbs";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { CrmLeadDetailTabNav } from "./CrmLeadDetailTabNav";
+import { CrmLeadDetailBreadcrumbs } from "./CrmLeadDetailBreadcrumbs";
 import { LeadClinicalDetailsPanel } from "./LeadClinicalDetailsPanel";
 import { LeadOpportunityPanel } from "./LeadOpportunityPanel";
 import { LeadBookNextAppointmentCard } from "./LeadBookNextAppointmentCard";
@@ -36,6 +37,7 @@ export function CrmLeadDetailPageView({
   activeTab,
   previewLeadId,
   groupingNowIso,
+  services = [],
 }: {
   tenantId: string;
   leadId: string;
@@ -43,6 +45,7 @@ export function CrmLeadDetailPageView({
   activeTab: CrmLeadDetailTabId;
   previewLeadId?: string;
   groupingNowIso: string;
+  services?: FiServiceRow[];
 }) {
   const state = useCrmLeadDetailState(tenantId, leadId, initialPayload);
   const { payload, lead, personName } = state;
@@ -124,6 +127,7 @@ export function CrmLeadDetailPageView({
             clinicOptions={payload.detail.clinics}
             groupingNowIso={groupingNowIso}
             calendarTimezone={payload.calendarTimezone}
+            services={services}
           />
         </div>
       ) : null}

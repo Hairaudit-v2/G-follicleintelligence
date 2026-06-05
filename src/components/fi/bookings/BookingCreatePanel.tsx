@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { createBookingAction, updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BOOKING_TYPES } from "@/src/lib/bookings";
-import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentProcedureDefaults";
+import { serviceForBookingType, formatPriceAud, defaultProcedureDurationMinutes } from "@/src/lib/bookings/servicesCatalog";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellClinicOption, CrmShellUserPickerOption, FiCrmLeadRow } from "@/src/lib/crm/types";
@@ -26,6 +27,7 @@ export function BookingCreatePanel({
   clinicOptions,
   adminKey,
   calendarTimezone,
+  services = [],
   onCancelEdit,
   onSuccess,
 }: {
@@ -38,6 +40,8 @@ export function BookingCreatePanel({
   adminKey: string;
   /** Tenant default from `fi_tenant_settings.default_timezone`. */
   calendarTimezone?: string | null;
+  /** Tenant procedure catalog — drives default duration / end time. */
+  services?: FiServiceRow[];
   onCancelEdit: () => void;
   onSuccess: () => void;
 }) {
@@ -70,13 +74,15 @@ export function BookingCreatePanel({
     return Array.from(u);
   }, [bookingType]);
 
+  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
+
   function wallClockTz(): string | null {
     return clinicTz || timezone.trim() || null;
   }
 
   function onProcedureTypeChange(nextType: string) {
     setBookingType(nextType);
-    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, wallClockTz());
+    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, wallClockTz(), services);
     if (nextEnd) setEndLocal(nextEnd);
   }
 
@@ -197,8 +203,11 @@ export function BookingCreatePanel({
             />
             {converted ? (
               <p className="mt-1 text-[11px] text-gray-500">
-                Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType)} min (end updates
-                when you change type).
+                Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min (end
+                updates when you change type).
+                {selectedCatalog && selectedCatalog.base_price > 0 ? (
+                  <> Suggested price: {formatPriceAud(selectedCatalog.base_price)}.</>
+                ) : null}
               </p>
             ) : null}
           </label>

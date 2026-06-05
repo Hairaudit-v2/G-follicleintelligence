@@ -10,6 +10,7 @@ import { loadPatientDetailPayload } from "@/src/lib/patients/patientDetailLoader
 import { parsePatientDetailTab } from "@/src/lib/patients/patientDetailTabs";
 import { parsePatientPreviewSearchParam } from "@/src/lib/patients/patientPreviewQuery";
 import { loadPatientProfile } from "@/src/lib/patients/patientProfileLoader";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -66,6 +67,8 @@ export default async function PatientProfileRoutePage({
   const payload = await loadPatientDetailPayload(tenantId, patientId);
   if (!payload) notFound();
 
+  const services = await loadFiServicesForTenant(tenantId.trim());
+
   return (
     <AppointmentSlideOverProvider
       tenantId={tenantId}
@@ -75,6 +78,7 @@ export default async function PatientProfileRoutePage({
       clinics={payload.clinics}
       existingBookings={payload.bookingRows}
       calendarTimezone={payload.calendarTimezone}
+      services={services}
     >
       <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
         <PatientDetailPageView

@@ -4,6 +4,7 @@ import { PatientSlideOverProvider } from "@/src/components/fi/patients/PatientSl
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { getBookingsOperatorPageSession } from "@/src/lib/crm/crmShellAccess";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +17,11 @@ type PatientsShellLayoutProps = {
 export default async function PatientsShellLayout({ children, params }: PatientsShellLayoutProps) {
   const { tenantId } = await params;
   const session = await getBookingsOperatorPageSession(tenantId);
-  const [assignees, scope, calendarSettings] = await Promise.all([
+  const [assignees, scope, calendarSettings, services] = await Promise.all([
     loadCrmShellStaffPickerOptions(tenantId),
     loadCrmShellScopePickerOptions(tenantId),
     loadTenantOperationalCalendarSettings(tenantId),
+    loadFiServicesForTenant(tenantId),
   ]);
 
   return (
@@ -36,6 +38,7 @@ export default async function PatientsShellLayout({ children, params }: Patients
         clinics={scope.clinics}
         existingBookings={[]}
         calendarTimezone={calendarSettings.calendarTimezone}
+        services={services}
       >
         {children}
       </AppointmentSlideOverProvider>

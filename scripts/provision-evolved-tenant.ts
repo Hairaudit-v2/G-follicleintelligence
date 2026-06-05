@@ -146,6 +146,49 @@ const SEED_STAFF_WORKING_HOURS = {
   },
 };
 
+/** Default procedure catalog rows (Perth tenant); upserted by `booking_type` when set. */
+const SEED_SERVICES: {
+  name: string;
+  duration_minutes: number;
+  base_price: number;
+  color: string;
+  category: string;
+  booking_type: "consultation" | "prp" | "surgery" | "follow_up";
+}[] = [
+  {
+    name: "Consultation",
+    duration_minutes: 30,
+    base_price: 0,
+    color: "#0ea5e9",
+    category: "Clinical",
+    booking_type: "consultation",
+  },
+  {
+    name: "PRP",
+    duration_minutes: 60,
+    base_price: 0,
+    color: "#22c55e",
+    category: "Treatment",
+    booking_type: "prp",
+  },
+  {
+    name: "Hair Transplant",
+    duration_minutes: 480,
+    base_price: 0,
+    color: "#a855f7",
+    category: "Surgery",
+    booking_type: "surgery",
+  },
+  {
+    name: "Follow-up",
+    duration_minutes: 20,
+    base_price: 0,
+    color: "#f97316",
+    category: "Clinical",
+    booking_type: "follow_up",
+  },
+];
+
 async function main(): Promise<void> {
   const slug = (process.env.FI_EVOLVED_TENANT_SLUG ?? DEFAULT_SLUG).trim() || DEFAULT_SLUG;
   const name = (process.env.FI_EVOLVED_TENANT_NAME ?? DEFAULT_NAME).trim() || DEFAULT_NAME;
@@ -301,6 +344,45 @@ async function main(): Promise<void> {
     console.log("Seed fi_staff rows already present (matched by email).");
   }
 
+  let servicesUpserted = 0;
+  for (const s of SEED_SERVICES) {
+    const { data: existingSvc, error: svcExErr } = await supabase
+      .from("fi_services")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("booking_type", s.booking_type)
+      .maybeSingle();
+    if (svcExErr) throw new Error(svcExErr.message);
+
+    const payload = {
+      tenant_id: tenantId,
+      name: s.name,
+      duration_minutes: s.duration_minutes,
+      base_price: s.base_price,
+      color: s.color,
+      category: s.category,
+      is_active: true,
+      booking_type: s.booking_type,
+      updated_at: now,
+    };
+
+    if (existingSvc?.id) {
+      const { error: svcUpErr } = await supabase
+        .from("fi_services")
+        .update(payload)
+        .eq("id", String((existingSvc as { id: string }).id));
+      if (svcUpErr) throw new Error(svcUpErr.message);
+    } else {
+      const { error: svcInsErr } = await supabase.from("fi_services").insert({
+        ...payload,
+        created_at: now,
+      });
+      if (svcInsErr) throw new Error(svcInsErr.message);
+    }
+    servicesUpserted += 1;
+    console.log(`Upserted fi_services: ${s.name} (${s.booking_type}, ${s.duration_minutes} min)`);
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -314,6 +396,7 @@ async function main(): Promise<void> {
         templatesInserted,
         usersInserted,
         staffInserted,
+        servicesCatalogRows: servicesUpserted,
         clinicOsNav:
           "Clinic OS shell: Dashboard, Calendar, Patients, Consultations, Cases, Sales (CRM when role is crm_operator or fi_admin); link auth.users to fi_users for sign-in.",
       },

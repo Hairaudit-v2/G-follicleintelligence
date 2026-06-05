@@ -20,6 +20,7 @@ import {
   pxFromDurationMinutes,
 } from "@/lib/calendar/dndMath";
 import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
+import { bookingCalendarChipSurface } from "@/src/lib/bookings/calendarLabels";
 import { cn } from "@/lib/utils";
 import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
@@ -46,6 +47,8 @@ export type AppointmentCardData = {
   status: string;
   isVirtual?: boolean;
   avatarUrl?: string | null;
+  /** Hex from `fi_services` for calendar chip tint. */
+  procedureCatalogColor?: string | null;
 };
 
 export type AppointmentCardLayout = {
@@ -154,6 +157,9 @@ export function appointmentCardDataFromBooking(
     durationMin?: number;
     providerName?: string | null;
     roomName?: string | null;
+    procedureCatalogName?: string | null;
+    procedureCatalogHex?: string | null;
+    suggestedPrice?: number | null;
   }
 ): AppointmentCardData {
   const invoice = parseAppointmentInvoicePreview(booking);
@@ -174,6 +180,8 @@ export function appointmentCardDataFromBooking(
     status: booking.booking_status,
     isVirtual,
     avatarUrl: typeof meta.avatar_url === "string" ? meta.avatar_url : null,
+    procedureLabel: display?.procedureCatalogName?.trim() || undefined,
+    procedureCatalogColor: display?.procedureCatalogHex?.trim() || null,
   };
 }
 
@@ -314,6 +322,7 @@ function AppointmentCardInner({
   calendarTimezone,
 }: AppointmentCardProps) {
   const style = getAppointmentStyle(appointment);
+  const catalog = bookingCalendarChipSurface(appointment.procedureType, appointment.procedureCatalogColor ?? null);
   const darkProcedure = crmDarkProcedureClasses(style.procedureFamily);
   const ProcedureIcon = style.icon;
   const procedureLabel = style.procedureLabel;
@@ -347,6 +356,7 @@ function AppointmentCardInner({
           top: layout.topPx,
           height: displayHeightPx,
           minHeight: 48,
+          ...(catalog.chipStyle ?? {}),
           ...(hasOverlapLayout
             ? {
                 left: `calc(${layout.leftPct}% + 2px)`,
@@ -397,7 +407,11 @@ function AppointmentCardInner({
         "dark:border-[#1e2937] dark:bg-[#0f172a]/95 dark:shadow-black/30",
         "dark:hover:shadow-lg",
         PROCEDURE_HOVER_GLOW[style.procedureFamily],
-        layout && cn(style.borderColor, style.backgroundTint, style.textColor, style.statusRing),
+        layout &&
+          cn(
+            catalog.chipStyle ? catalog.toneClasses : cn(style.borderColor, style.backgroundTint, style.textColor),
+            style.statusRing
+          ),
         layout && !isDragPreview && (hasOverlapLayout ? "absolute z-[1]" : "absolute inset-x-1 z-[1]"),
         isDragging && "scale-[1.02] opacity-90 shadow-xl ring-2 ring-sky-400/35",
         isDragPreview && "w-full rotate-[0.5deg] shadow-2xl ring-2 ring-sky-400/30 dark:shadow-black/50",
@@ -611,6 +625,9 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
     durationMin?: number;
     providerName?: string | null;
     roomName?: string | null;
+    procedureCatalogName?: string | null;
+    procedureCatalogHex?: string | null;
+    suggestedPrice?: number | null;
   };
   layout?: AppointmentCardLayout;
   draggable?: boolean;

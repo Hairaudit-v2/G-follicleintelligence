@@ -19,6 +19,8 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.dashboard?.disabled, false);
   assert.equal(byId.calendar?.href, `${base}/calendar`);
   assert.equal(byId.patients?.href, `${base}/patients`);
+  assert.equal(byId.staff?.href, `${base}/staff`);
+  assert.equal(byId.services?.href, `${base}/services`);
   assert.equal(byId.consultations?.href, `${base}/consultations`);
   assert.equal(byId.cases?.href, `${base}/cases`);
   assert.equal(byId.audit?.href, `${base}/audit`);
@@ -59,6 +61,7 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/calendar`, base), "calendar");
   assert.equal(getClinicOsShellActiveNavId(`${base}/bookings/new`, base), "calendar");
   assert.equal(getClinicOsShellActiveNavId(`${base}/patients/p-1`, base), "patients");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/services`, base), "services");
   assert.equal(getClinicOsShellActiveNavId(`${base}/configuration`, base), "setup");
 });
 

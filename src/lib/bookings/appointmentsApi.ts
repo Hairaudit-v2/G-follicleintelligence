@@ -10,10 +10,12 @@ import {
 import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "./appointmentAvailability";
 import { loadStaffFiUserIdMap, resolveBookingStaffAssignment } from "@/src/lib/staff/staff.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import {
-  endIsoFromStartAndProcedure,
   defaultProcedureDurationMinutes,
-} from "./appointmentProcedureDefaults";
+  endIsoFromStartAndProcedure,
+  servicesByBookingType,
+} from "./servicesCatalog";
 import {
   mapBookingToCalendarAppointment,
   mapBookingsToCalendarAppointments,
@@ -183,7 +185,8 @@ export async function createCalendarAppointment(
 ): Promise<CalendarAppointment> {
   const procedure = params.procedure.trim();
   const startAt = params.startAt.trim();
-  const endAt = params.endAt?.trim() || endIsoFromStartAndProcedure(startAt, procedure);
+  const catalog = servicesByBookingType(await loadFiServicesForTenant(params.tenantId));
+  const endAt = params.endAt?.trim() || endIsoFromStartAndProcedure(startAt, procedure, catalog);
 
   const supabase = supabaseAdmin();
   const assign = await resolveBookingStaffAssignment(supabase, params.tenantId, {
@@ -272,18 +275,23 @@ export async function rescheduleCalendarAppointment(
   const existing = await loadBookingForTenant(params.tenantId, params.appointmentId);
   if (!existing) throw new Error("Appointment not found.");
 
+  const catalog = servicesByBookingType(await loadFiServicesForTenant(params.tenantId));
   const nextStart = params.startAt?.trim() ?? existing.start_at;
   const procedure = params.procedure?.trim() ?? existing.booking_type;
   let nextEnd = params.endAt?.trim();
 
   if (!nextEnd) {
-    if (params.startAt && !params.endAt) {
+    const procedureChanged =
+      Boolean(params.procedure?.trim()) && params.procedure!.trim() !== existing.booking_type.trim();
+    if (procedureChanged) {
+      nextEnd = endIsoFromStartAndProcedure(nextStart, procedure, catalog);
+    } else if (params.startAt && !params.endAt) {
       const durationMs =
         new Date(existing.end_at).getTime() - new Date(existing.start_at).getTime();
       const durationMin =
         Number.isFinite(durationMs) && durationMs > 0
           ? Math.round(durationMs / 60_000)
-          : defaultProcedureDurationMinutes(procedure);
+          : defaultProcedureDurationMinutes(procedure, catalog);
       nextEnd = new Date(Date.parse(nextStart) + durationMin * 60_000).toISOString();
     } else {
       nextEnd = existing.end_at;

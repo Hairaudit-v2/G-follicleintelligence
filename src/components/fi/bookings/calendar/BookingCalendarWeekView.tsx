@@ -11,6 +11,7 @@ import {
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCalendarEventCard } from "./BookingCalendarEventCard";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -19,12 +20,14 @@ export function BookingCalendarWeekView({
   lanes,
   buckets,
   assignees,
+  services = [],
   onSelectBooking,
   onEmptySlot,
 }: {
   lanes: CalendarDayLane[];
   buckets: Record<string, FiBookingRow[]>;
   assignees: CrmShellUserPickerOption[];
+  services?: FiServiceRow[];
   onSelectBooking: (b: FiBookingRow) => void;
   onEmptySlot: (dayKey: string, hour: number) => void;
 }) {
@@ -76,6 +79,7 @@ export function BookingCalendarWeekView({
                       assignees={assignees}
                       layout={layout}
                       calendarTimezone={lane.timeZone}
+                      services={services}
                       onClick={() => onSelectBooking(b)}
                     />
                   );

@@ -2,7 +2,8 @@ import {
   fromDatetimeLocalValueInTimezone,
   toDatetimeLocalValueInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
-import { endIsoFromStartAndProcedure } from "@/src/lib/bookings/appointmentProcedureDefaults";
+import { endIsoFromStartAndProcedure } from "@/src/lib/bookings/servicesCatalog";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export function toDatetimeLocalValue(iso: string, timeZone?: string | null): string {
   if (timeZone?.trim()) return toDatetimeLocalValueInTimezone(iso, timeZone);
@@ -23,17 +24,18 @@ export function fromDatetimeLocalValue(local: string, timeZone?: string | null):
 
 /**
  * Computes `datetime-local` end value from current start + procedure type, using
- * {@link endIsoFromStartAndProcedure} (Evolved Hair default slot lengths).
+ * {@link endIsoFromStartAndProcedure} and the tenant `fi_services` catalog when provided.
  */
 export function endLocalFromStartLocalAndProcedure(
   startLocal: string,
   procedure: string,
-  timeZone?: string | null
+  timeZone?: string | null,
+  services?: FiServiceRow[] | null
 ): string | null {
   const startIso = fromDatetimeLocalValue(startLocal, timeZone);
   if (!startIso) return null;
   try {
-    const endIso = endIsoFromStartAndProcedure(startIso, procedure);
+    const endIso = endIsoFromStartAndProcedure(startIso, procedure, services ?? undefined);
     return toDatetimeLocalValue(endIso, timeZone);
   } catch {
     return null;

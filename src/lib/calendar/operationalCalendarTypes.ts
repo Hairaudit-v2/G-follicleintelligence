@@ -4,6 +4,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type OperationalCalendarBookingDisplay = {
   anchorLabel: string;
@@ -11,6 +12,10 @@ export type OperationalCalendarBookingDisplay = {
   durationMin: number;
   /** Next pending/processing reminder for this booking, if any. */
   reminderHint: string | null;
+  /** Display name from `fi_services` when the row maps to this booking's `booking_type`. */
+  procedureCatalogName?: string | null;
+  procedureCatalogHex?: string | null;
+  suggestedPrice?: number | null;
 };
 
 export type OperationalCalendarResourceColumn = {
@@ -43,4 +48,6 @@ export type OperationalCalendarPageData = {
   canMutateBookings: boolean;
   /** Serialized map for edit drawer + calendar hints. */
   reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
+  /** Tenant procedure catalog — durations, prices, colours for booking UI. */
+  services: FiServiceRow[];
 };

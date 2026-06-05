@@ -7,8 +7,10 @@ import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import { quickCallInConsultationAction } from "@/lib/actions/fi-quick-call-in-actions";
 import { fromDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
+import { activeBookableServices, formatPriceAud, serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { QUICK_CALL_IN_DEFAULT_TIMEZONE, dispatchCrmKanbanRefresh } from "@/src/lib/calendar/quickCallInConstants";
 import { localNowForDatetimePicker, nextQuarterHourLocalString } from "@/src/lib/calendar/quickCallInDatetime";
 
@@ -33,6 +35,8 @@ export type QuickCallInBookingModalProps = {
   clinics?: CrmShellClinicOption[];
   assignees?: CrmShellUserPickerOption[];
   adminKey?: string;
+  /** Tenant procedure catalog — drives procedure labels and suggested pricing. */
+  services?: FiServiceRow[];
   /** After server success — parent may optimistically update calendar, open slide-over, etc. */
   onCreated?: (payload: { booking: FiBookingRow; leadId: string }) => void;
   /** Open appointment slide-over when provider is present (optional). */
@@ -50,6 +54,7 @@ export function QuickCallInBookingModal({
   clinics = [],
   assignees = [],
   adminKey = "",
+  services = [],
   onCreated,
   onOpenBooking,
 }: QuickCallInBookingModalProps) {
@@ -87,6 +92,9 @@ export function QuickCallInBookingModal({
   }, [open, resetDefaults]);
 
   const startIso = useMemo(() => fromDatetimeLocalValue(localStart, tz), [localStart, tz]);
+
+  const bookable = useMemo(() => activeBookableServices(services), [services]);
+  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -245,18 +253,27 @@ export function QuickCallInBookingModal({
             </label>
 
             <label className="block text-sm">
-              <span className="font-medium text-slate-800">Procedure</span>
+              <span className="font-medium text-slate-800">Service / procedure</span>
               <select
                 className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 value={bookingType}
                 onChange={(e) => setBookingType(e.target.value)}
               >
-                {BOOKING_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {procedureLabel(t)}
-                  </option>
-                ))}
+                {bookable.length > 0
+                  ? bookable.map((s) => (
+                      <option key={s.id} value={s.booking_type ?? ""}>
+                        {s.name} ({s.duration_minutes} min)
+                      </option>
+                    ))
+                  : BOOKING_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {procedureLabel(t)}
+                      </option>
+                    ))}
               </select>
+              {selectedCatalog && selectedCatalog.base_price > 0 ? (
+                <p className="mt-1 text-xs text-slate-600">Suggested price: {formatPriceAud(selectedCatalog.base_price)}</p>
+              ) : null}
             </label>
 
             {clinics.length > 0 ? (

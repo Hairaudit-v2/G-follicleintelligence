@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 import {
+  bookingCalendarChipSurface,
   bookingStatusCalendarAccent,
-  bookingTypeCalendarEventClasses,
   bookingTypeCalendarLegendLabel,
   calendarDayHeading,
 } from "@/src/lib/bookings/calendarLabels";
@@ -33,6 +33,8 @@ import { formatTimeRangeInTimezone } from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
+import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { useAppointmentSlideOver } from "./AppointmentSlideOver";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -48,6 +50,7 @@ function DraggableCalendarEvent({
   lane,
   layout,
   assignees,
+  services,
   canDrag,
   allBookings,
   tenantId,
@@ -59,6 +62,7 @@ function DraggableCalendarEvent({
   lane: CalendarDayLane;
   layout: { topPx: number; heightPx: number };
   assignees: CrmShellUserPickerOption[];
+  services: FiServiceRow[];
   canDrag: boolean;
   allBookings: FiBookingRow[];
   tenantId: string;
@@ -71,7 +75,8 @@ function DraggableCalendarEvent({
   const startTopRef = useRef(layout.topPx);
 
   const topPx = dragTop ?? layout.topPx;
-  const tone = bookingTypeCalendarEventClasses(booking.booking_type);
+  const svc = serviceForBookingType(services, booking.booking_type);
+  const chip = bookingCalendarChipSurface(booking.booking_type, svc?.color);
   const statusRing = bookingStatusCalendarAccent(booking.booking_status);
   const range = formatTimeRangeInTimezone(booking.start_at, booking.end_at, lane.timeZone);
 
@@ -159,18 +164,18 @@ function DraggableCalendarEvent({
       onPointerDown={onPointerDown}
       className={cn(
         "absolute left-1 right-1 z-[1] overflow-hidden rounded border px-1.5 py-1 text-left text-xs shadow-sm transition hover:z-[2] hover:brightness-110",
-        tone,
+        chip.toneClasses,
         statusRing,
         dragging && "z-[5] ring-2 ring-primary opacity-90",
         canDrag && !terminal && "cursor-grab active:cursor-grabbing"
       )}
-      style={{ top: topPx, height: layout.heightPx }}
+      style={{ top: topPx, height: layout.heightPx, ...(chip.chipStyle ?? {}) }}
       title={canDrag && !terminal ? "Drag to reschedule (UTC)" : undefined}
     >
       <div className="truncate font-medium leading-tight">{booking.title?.trim() || "Appointment"}</div>
       <div className="mt-0.5 flex flex-wrap items-center gap-1">
         <span className="truncate text-[10px] font-medium uppercase tracking-wide opacity-90">
-          {bookingTypeCalendarLegendLabel(booking.booking_type)}
+          {svc?.name?.trim() || bookingTypeCalendarLegendLabel(booking.booking_type)}
         </span>
         <BookingStatusBadge status={booking.booking_status} />
       </div>
@@ -195,7 +200,8 @@ export function AppointmentCalendar({
     setLocalBookings(data.bookings);
   }, [data.bookings]);
 
-  const { tenantId, query, lanes, assignees, listTruncated, rangeTitle } = data;
+  const { tenantId, query, lanes, assignees, listTruncated, rangeTitle, services } = data;
+  const catalog = services ?? [];
 
   const buckets = useMemo(() => {
     const map: Record<string, FiBookingRow[]> = {};
@@ -325,11 +331,16 @@ export function AppointmentCalendar({
       ) : null}
 
       <div className="flex flex-wrap gap-2 text-[10px] text-gray-600">
-        {BOOKING_TYPES.map((t) => (
-          <span key={t} className={cn("rounded border px-1.5 py-0.5", bookingTypeCalendarEventClasses(t))}>
-            {bookingTypeCalendarLegendLabel(t)}
-          </span>
-        ))}
+        {BOOKING_TYPES.map((t) => {
+          const row = serviceForBookingType(catalog, t);
+          const chip = bookingCalendarChipSurface(t, row?.color);
+          const label = row?.name?.trim() || bookingTypeCalendarLegendLabel(t);
+          return (
+            <span key={t} className={cn("rounded border px-1.5 py-0.5", chip.toneClasses)} style={chip.chipStyle}>
+              {label}
+            </span>
+          );
+        })}
       </div>
 
       <div className="flex w-full overflow-x-auto rounded border border-gray-200 bg-white">
@@ -377,6 +388,7 @@ export function AppointmentCalendar({
                         lane={lane}
                         layout={layout}
                         assignees={assignees}
+                        services={catalog}
                         canDrag
                         allBookings={localBookings}
                         tenantId={tenantId}

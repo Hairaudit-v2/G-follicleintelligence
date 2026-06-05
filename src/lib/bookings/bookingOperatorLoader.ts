@@ -17,6 +17,8 @@ import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderType
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { loadBookingsForOperatorView } from "./bookings";
 import type { FiBookingRow } from "./types";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type { ParsedOperatorBookingQuery } from "./operatorBookingQuery";
 
@@ -39,6 +41,7 @@ export type BookingsOperatorPageData = {
   groupingNowIso: string;
   /** IANA timezone from `fi_tenant_settings.default_timezone` for labels and forms. */
   calendarTimezone: string;
+  services: FiServiceRow[];
 };
 
 function maxIso(a: string, b: string): string {
@@ -75,7 +78,7 @@ export async function loadBookingsOperatorPageData(
     includeCancelled: query.includeCancelled,
   });
 
-  const [summaryRows, assignees, scope, reminderMap] = await Promise.all([
+  const [summaryRows, assignees, scope, reminderMap, services] = await Promise.all([
     loadBookingsForOperatorView({
       tenantId: tid,
       rangeStartIso: summaryStartIso,
@@ -89,6 +92,7 @@ export async function loadBookingsOperatorPageData(
       tid,
       bookings.map((b) => b.id)
     ),
+    loadFiServicesForTenant(tid),
   ]);
 
   const summaryCounts = computeOperatorBookingSummaryCounts(summaryRows, {
@@ -114,5 +118,6 @@ export async function loadBookingsOperatorPageData(
     listTruncated: bookings.length >= DEFAULT_OPERATOR_BOOKINGS_LIMIT,
     groupingNowIso: now.toISOString(),
     calendarTimezone,
+    services,
   };
 }

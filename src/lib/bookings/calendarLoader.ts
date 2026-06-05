@@ -15,6 +15,7 @@ import type { FiBookingRow } from "./types";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type CalendarResources = {
   assignees: CrmShellUserPickerOption[];
@@ -37,6 +38,8 @@ export type CalendarViewData = {
   rangeTitle: string;
   /** For booking edit drawer when legacy calendar UI is wired. */
   reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
+  /** Injected by {@link loadAppointmentsPageData} (replaces placeholder from {@link loadCalendarViewData}). */
+  services: FiServiceRow[];
 };
 
 export async function loadCalendarResources(tenantId: string): Promise<CalendarResources> {
@@ -120,5 +123,6 @@ export async function loadCalendarViewData(
     listTruncated,
     rangeTitle,
     reminderJobsByBookingId,
+    services: [] as FiServiceRow[],
   };
 }

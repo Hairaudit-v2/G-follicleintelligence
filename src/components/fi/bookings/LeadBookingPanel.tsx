@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { isBookingUpcoming, sortBookingsByStartAt } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption, FiCrmLeadRow } from "@/src/lib/crm/types";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCreatePanel } from "./BookingCreatePanel";
 import { BookingSummaryCard } from "./BookingSummaryCard";
 
@@ -18,6 +19,7 @@ export function LeadBookingPanel({
   clinicOptions,
   groupingNowIso,
   calendarTimezone,
+  services = [],
 }: {
   tenantId: string;
   lead: FiCrmLeadRow;
@@ -26,6 +28,7 @@ export function LeadBookingPanel({
   clinicOptions: CrmShellClinicOption[];
   groupingNowIso: string;
   calendarTimezone?: string | null;
+  services?: FiServiceRow[];
 }) {
   const router = useRouter();
   const [adminKey, setAdminKey] = useState("");
@@ -83,6 +86,7 @@ export function LeadBookingPanel({
         clinicOptions={clinicOptions}
         adminKey={adminKey}
         calendarTimezone={calendarTimezone}
+        services={services}
         onCancelEdit={() => setEditing(null)}
         onSuccess={() => {
           setEditing(null);

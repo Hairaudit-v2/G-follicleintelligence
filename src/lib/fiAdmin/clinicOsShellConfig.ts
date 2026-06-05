@@ -58,6 +58,7 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
   /** Patients home is tenant-wide; CRM-gated shortcuts live on the page. */
   { id: "patients", label: "Patients", path: "patients", permissionHint: {} },
   { id: "staff", label: "Staff", path: "staff", permissionHint: {} },
+  { id: "services", label: "Services", path: "services", permissionHint: {} },
   { id: "consultations", label: "Consultations", path: "consultations", permissionHint: {} },
   { id: "cases", label: "Cases", path: "cases", permissionHint: {} },
   { id: "messages", label: "Messages", path: "", permissionHint: {}, placeholder: true },
@@ -115,6 +116,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "bookings") return "calendar";
   if (first === "patients") return "patients";
   if (first === "staff") return "staff";
+  if (first === "services") return "services";
   if (first === "consultations") return "consultations";
   if (first === "cases") return "cases";
   if (first === "crm") return "sales";

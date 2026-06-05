@@ -8,6 +8,7 @@ import { parseAppointmentDetailTab } from "@/src/lib/bookings/appointmentDetailT
 import { parseAppointmentPreviewSearchParam } from "@/src/lib/bookings/appointmentPreviewQuery";
 import { loadAppointmentShellDetailPagePayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import { getBookingsOperatorPageSession } from "@/src/lib/crm/crmShellAccess";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,10 @@ export default async function AppointmentDetailRoutePage({
   const sp = (await searchParams) ?? {};
   const previewAppointmentId = parseAppointmentPreviewSearchParam(sp.preview);
   const activeTab = parseAppointmentDetailTab(sp.tab);
-  const payload = await loadAppointmentShellDetailPagePayload(tenantId, appointmentId);
+  const [payload, services] = await Promise.all([
+    loadAppointmentShellDetailPagePayload(tenantId, appointmentId),
+    loadFiServicesForTenant(tenantId.trim()),
+  ]);
 
   if (!payload) {
     return (
@@ -62,6 +66,7 @@ export default async function AppointmentDetailRoutePage({
       clinics={payload.clinics}
       existingBookings={[payload.booking]}
       calendarTimezone={payload.calendarTimezone}
+      services={services}
     >
       <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
         <AppointmentDetailPageView

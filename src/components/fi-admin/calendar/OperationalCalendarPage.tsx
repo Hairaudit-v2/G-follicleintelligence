@@ -24,6 +24,7 @@ export function OperationalCalendarPage({
       clinics={data.clinics}
       existingBookings={data.bookings}
       calendarTimezone={data.calendarTimezone}
+      services={data.services}
     >
       {page}
     </AppointmentSlideOverProvider>

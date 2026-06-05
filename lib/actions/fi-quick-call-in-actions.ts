@@ -7,7 +7,8 @@ import { createCrmLeadWithPerson } from "@/src/lib/crm/leads";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
 import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
-import { endIsoFromStartAndProcedure } from "@/src/lib/bookings/appointmentProcedureDefaults";
+import { endIsoFromStartAndProcedure, servicesByBookingType } from "@/src/lib/bookings/servicesCatalog";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { BOOKING_TYPES, isAllowedBookingType } from "@/src/lib/bookings/bookingPolicy";
 import { createBooking } from "@/src/lib/bookings/server";
 
@@ -62,7 +63,8 @@ export async function quickCallInConsultationAction(
     const bookingType = (parsed.bookingType ?? "consultation").trim();
     if (!isAllowedBookingType(bookingType)) throw new Error("Invalid procedure type.");
 
-    const endAt = endIsoFromStartAndProcedure(parsed.startAt.trim(), bookingType);
+    const catalog = servicesByBookingType(await loadFiServicesForTenant(tenantId.trim()));
+    const endAt = endIsoFromStartAndProcedure(parsed.startAt.trim(), bookingType, catalog);
     const tz = (parsed.calendarTimezone ?? "Australia/Perth").trim() || "Australia/Perth";
 
     const displayName = `${parsed.firstName.trim()} ${parsed.surname.trim()}`.trim();

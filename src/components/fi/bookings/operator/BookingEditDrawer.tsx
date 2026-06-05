@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BOOKING_TYPES, isBookingCancelled } from "@/src/lib/bookings";
-import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentProcedureDefaults";
+import {
+  defaultProcedureDurationMinutes,
+  formatPriceAud,
+  serviceForBookingType,
+} from "@/src/lib/bookings/servicesCatalog";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
@@ -24,6 +29,7 @@ export function BookingEditDrawer({
   clinics,
   adminKey,
   clinicCalendarTimezone,
+  services = [],
   onClose,
   onSaved,
 }: {
@@ -35,6 +41,7 @@ export function BookingEditDrawer({
   adminKey: string;
   /** Tenant/clinic IANA timezone for datetime-local fields. */
   clinicCalendarTimezone?: string | null;
+  services?: FiServiceRow[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -78,6 +85,8 @@ export function BookingEditDrawer({
     return Array.from(u);
   }, [bookingType]);
 
+  const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
+
   const datetimeTz = useMemo(
     () => clinicCalendarTimezone ?? (timezone.trim() || undefined),
     [clinicCalendarTimezone, timezone]
@@ -85,7 +94,7 @@ export function BookingEditDrawer({
 
   function onProcedureTypeChange(nextType: string) {
     setBookingType(nextType);
-    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, datetimeTz);
+    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, datetimeTz, services);
     if (nextEnd) setEndLocal(nextEnd);
   }
 
@@ -245,8 +254,11 @@ export function BookingEditDrawer({
                   className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
                 />
                 <p className="mt-1 text-[11px] text-gray-500">
-                  Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType)} min (end updates
-                  when you change type).
+                  Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min
+                  (end updates when you change type).
+                  {selectedCatalog && selectedCatalog.base_price > 0 ? (
+                    <> Suggested price: {formatPriceAud(selectedCatalog.base_price)}.</>
+                  ) : null}
                 </p>
               </label>
               <label className="block text-xs font-medium text-gray-700">

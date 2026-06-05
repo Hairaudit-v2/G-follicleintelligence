@@ -78,6 +78,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
         lanes={lanes}
         buckets={buckets}
         assignees={assignees}
+        services={data.services}
         onSelectBooking={(b) => setDrawer(b)}
         onEmptySlot={(dayKey, hour) => {
           const slot = utcHourSlotIsoRange(dayKey, hour, query.calendarTimezone);
@@ -95,6 +96,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
           clinics={clinics}
           adminKey={adminKey}
           calendarTimezone={query.calendarTimezone}
+          services={data.services}
           slotPrefill={slotPrefill}
           onCreated={() => {
             setSlotPrefill(null);
@@ -123,6 +125,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
         clinics={clinics}
         adminKey={adminKey}
         clinicCalendarTimezone={query.calendarTimezone}
+        services={data.services}
         onClose={() => setEditing(null)}
         onSaved={refresh}
       />

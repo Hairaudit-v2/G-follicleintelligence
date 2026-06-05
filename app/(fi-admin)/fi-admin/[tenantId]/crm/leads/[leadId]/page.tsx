@@ -8,6 +8,7 @@ import { parseCrmLeadDetailTab } from "@/src/lib/crm/crmLeadDetailTabs";
 import { parseCrmLeadPreviewSearchParam } from "@/src/lib/crm/crmLeadPreviewQuery";
 import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmShellLeadDetailPagePayload } from "@/src/lib/crm/crmShellLoaders";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export const dynamic = "force-dynamic";
 
@@ -38,9 +39,11 @@ export default async function CrmLeadShellPage({
   const sp = (await searchParams) ?? {};
   const previewLeadId = parseCrmLeadPreviewSearchParam(sp.preview);
   const activeTab = parseCrmLeadDetailTab(sp.tab);
-  const payload = await loadCrmShellLeadDetailPagePayload(tenantId, leadId);
-
-  if (!payload?.detail.lead) {
+  const [payload, services] = await Promise.all([
+    loadCrmShellLeadDetailPagePayload(tenantId, leadId),
+    loadFiServicesForTenant(tenantId.trim()),
+  ]);
+  if (!payload) {
     return (
       <div className="mx-auto max-w-3xl space-y-4 py-6">
         <h1 className="text-lg font-semibold text-gray-900">Lead not found</h1>
@@ -65,6 +68,7 @@ export default async function CrmLeadShellPage({
       clinics={payload.detail.clinics}
       existingBookings={payload.detail.leadBookings}
       calendarTimezone={payload.calendarTimezone}
+      services={services}
     >
       <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
         <CrmLeadDetailPageView
@@ -74,6 +78,7 @@ export default async function CrmLeadShellPage({
           activeTab={activeTab}
           previewLeadId={previewLeadId}
           groupingNowIso={groupingNowIso}
+          services={services}
         />
       </Suspense>
     </AppointmentSlideOverProvider>

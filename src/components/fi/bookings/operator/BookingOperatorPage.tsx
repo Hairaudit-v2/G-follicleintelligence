@@ -20,7 +20,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
     router.refresh();
   }
 
-  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinics, summaryCounts, summaryTruncated, listTruncated, calendarTimezone } = data;
+  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinics, summaryCounts, summaryTruncated, listTruncated, calendarTimezone, services } = data;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
@@ -103,6 +103,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
           clinics={clinics}
           adminKey={adminKey}
           calendarTimezone={calendarTimezone}
+          services={services}
           onCreated={refresh}
         />
       </div>
@@ -115,6 +116,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
         clinics={clinics}
         adminKey={adminKey}
         clinicCalendarTimezone={calendarTimezone}
+        services={services}
         onClose={() => setEditing(null)}
         onSaved={refresh}
       />

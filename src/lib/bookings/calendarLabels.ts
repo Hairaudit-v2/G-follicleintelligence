@@ -23,11 +23,47 @@ const BOOKING_TYPE_EVENT_CLASSES: Record<BookingType, string> = {
 
 const TYPE_SET = new Set<string>(BOOKING_TYPES);
 
-/** Event chip colours: one semantic tone per known booking type. */
-export function bookingTypeCalendarEventClasses(bookingType: string): string {
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace("#", "").trim();
+  const full =
+    h.length === 3
+      ? `${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}`
+      : h.length === 6
+        ? h
+        : "000000";
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+const CATALOG_HEX = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
+
+export type BookingCalendarChipSurface = {
+  /** Tailwind classes for text/border (theme tokens or neutral). */
+  toneClasses: string;
+  /** Optional inline chip tint when tenant catalog supplies a hex colour. */
+  chipStyle?: { backgroundColor: string; borderColor: string };
+};
+
+/** Event chip colours: tenant catalog hex overrides tint; otherwise semantic tone per booking type. */
+export function bookingCalendarChipSurface(bookingType: string, catalogColor?: string | null): BookingCalendarChipSurface {
   const t = bookingType.trim();
-  if (TYPE_SET.has(t)) return BOOKING_TYPE_EVENT_CLASSES[t as BookingType];
-  return "border-border bg-muted text-muted-foreground";
+  const hex = catalogColor?.trim();
+  if (hex && CATALOG_HEX.test(hex)) {
+    const border = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+    return {
+      toneClasses: "border-slate-300/80 text-slate-900",
+      chipStyle: { borderColor: border, backgroundColor: hexToRgba(border, 0.2) },
+    };
+  }
+  if (TYPE_SET.has(t)) return { toneClasses: BOOKING_TYPE_EVENT_CLASSES[t as BookingType] };
+  return { toneClasses: "border-border bg-muted text-muted-foreground" };
+}
+
+/** @deprecated Prefer {@link bookingCalendarChipSurface} for catalog-aware tint. */
+export function bookingTypeCalendarEventClasses(bookingType: string): string {
+  return bookingCalendarChipSurface(bookingType).toneClasses;
 }
 
 export function calendarDayHeading(lane: CalendarDayLane, timeZone?: string): string {

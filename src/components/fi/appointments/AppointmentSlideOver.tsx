@@ -37,6 +37,7 @@ import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCre
 import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
 import { AppointmentCreateSlideOver } from "./AppointmentCreateSlideOver";
 import {
@@ -108,6 +109,7 @@ export function AppointmentSlideOverProvider({
   clinics = [],
   existingBookings = [],
   calendarTimezone = DEFAULT_CALENDAR_TIMEZONE,
+  services = [],
 }: {
   tenantId: string;
   operatorFiUserId: string;
@@ -119,6 +121,8 @@ export function AppointmentSlideOverProvider({
   existingBookings?: FiBookingRow[];
   /** Tenant clinic IANA zone for datetime-local fields in create / slide-over. */
   calendarTimezone?: string;
+  /** Procedure catalog for create flow (durations, prices). */
+  services?: FiServiceRow[];
 }) {
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
   const [createPrefill, setCreatePrefill] = useState<AppointmentCreatePrefill | null>(null);
@@ -180,6 +184,7 @@ export function AppointmentSlideOverProvider({
         clinics={clinics}
         existingBookings={existingBookings}
         calendarTimezone={calendarTimezone}
+        services={services}
         onCreated={(id) => {
           setCreatePrefill(null);
           setAppointmentId(id);
@@ -201,6 +206,7 @@ function AppointmentSlideOverShell({
   clinics,
   existingBookings,
   calendarTimezone,
+  services,
   onCreated,
 }: {
   tenantId: string;
@@ -214,6 +220,7 @@ function AppointmentSlideOverShell({
   clinics: CrmShellClinicOption[];
   existingBookings: FiBookingRow[];
   calendarTimezone: string;
+  services: FiServiceRow[];
   onCreated: (bookingId: string) => void;
 }) {
   if (!open) return null;
@@ -250,6 +257,7 @@ function AppointmentSlideOverShell({
               clinics={clinics}
               existingBookings={existingBookings}
               tenantCalendarTimezone={calendarTimezone}
+              services={services}
               onClose={onClose}
               onCreated={onCreated}
             />

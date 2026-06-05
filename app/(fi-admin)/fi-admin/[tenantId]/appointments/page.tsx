@@ -41,6 +41,7 @@ export default async function AppointmentsOperatorRoutePage({
       clinics={data.operator.clinics}
       existingBookings={existingBookings}
       calendarTimezone={data.operator.calendarTimezone}
+      services={data.services}
     >
       <Suspense fallback={<div className="mx-auto max-w-7xl animate-pulse space-y-4 py-6" aria-busy="true" />}>
         <AppointmentsPage data={data} />

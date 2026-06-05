@@ -435,6 +435,9 @@ export function ProviderColumn({
                       durationMin: d?.durationMin,
                       providerName: name,
                       roomName: booking.location,
+                      procedureCatalogName: d?.procedureCatalogName,
+                      procedureCatalogHex: d?.procedureCatalogHex,
+                      suggestedPrice: d?.suggestedPrice,
                     }}
                     layout={layout}
                     draggable={draggable}

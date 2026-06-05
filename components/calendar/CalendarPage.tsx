@@ -235,6 +235,7 @@ export function CalendarPage({
         clinics={data.clinics}
         adminKey=""
         clinicCalendarTimezone={data.calendarTimezone}
+        services={data.services}
         onClose={() => setEditing(null)}
         onSaved={refresh}
       />
@@ -266,6 +267,7 @@ export function CalendarPage({
             initialAssignedUserId={callInPrefill.assignedUserId ?? null}
             clinics={data.clinics}
             assignees={data.assignees}
+            services={data.services}
             onCreated={({ booking }) => {
               upsertBooking(booking);
               refresh();
