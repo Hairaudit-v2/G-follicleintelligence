@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGate";
+import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
+import { loadPatientSlideOverPayload, type PatientSlideOverPayload } from "@/src/lib/patients/patientSlideOverLoader";
 import { patientImageArchiveBodySchema, patientImagePatchBodySchema } from "@/src/lib/patientImages/patientImageApiSchemas";
 import { archivePatientImage, updatePatientImageDetails } from "@/src/lib/patientImages/patientImagesServer";
 import { patientClinicalDetailsPatchBodySchema } from "@/src/lib/patients/clinicalDetailsApiSchemas";
@@ -127,6 +130,27 @@ export async function archivePatientImageAction(
     revalidatePath(`/fi-admin/${tenantId.trim()}/patients`);
     revalidatePath(`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`);
     return { ok: true, changed_keys: result.changed_keys };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const patientSlideOverLoadSchema = z.object({
+  tenantId: z.string().min(1),
+  patientId: z.string().min(1),
+});
+
+export async function loadPatientSlideOverBundleAction(
+  tenantId: string,
+  patientId: string
+): Promise<{ ok: true; data: PatientSlideOverPayload } | { ok: false; error: string }> {
+  try {
+    const parsed = patientSlideOverLoadSchema.parse({ tenantId, patientId });
+    const session = await getCrmShellSessionIfAllowed(parsed.tenantId);
+    if (!session) return { ok: false, error: "Not authorised for this tenant workspace." };
+    const data = await loadPatientSlideOverPayload(parsed.tenantId, parsed.patientId);
+    if (!data) return { ok: false, error: "Patient not found." };
+    return { ok: true, data };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

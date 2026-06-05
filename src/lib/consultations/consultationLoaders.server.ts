@@ -280,6 +280,51 @@ async function resolveConsultationLinkIndexMaps(
   return { patientLabelById, leadTitleById };
 }
 
+/** Consultations linked to a foundation patient (or same person when patient_id unset). */
+export async function loadConsultationsForPatient(
+  tenantId: string,
+  patientId: string,
+  personId: string,
+  limit = 40
+): Promise<ConsultationIndexRow[]> {
+  const tid = tenantId.trim();
+  const pid = patientId.trim();
+  const perId = personId.trim();
+  if (!tid || !pid) return [];
+
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_consultations")
+    .select("*")
+    .eq("tenant_id", tid)
+    .or(`patient_id.eq.${pid},person_id.eq.${perId}`)
+    .order("updated_at", { ascending: false })
+    .limit(Math.min(limit, 100));
+  if (error) throw new Error(error.message);
+  if (!Array.isArray(data)) return [];
+
+  const rows = data.map((row) => mapRow(row as Record<string, unknown>));
+  const subjectById = await resolveConsultationSubjectLines(tid, rows);
+  const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
+  return rows.map((r) => {
+    const patient_display_name = r.patient_id?.trim()
+      ? patientLabelById.get(r.patient_id.trim()) ?? `Patient ${r.patient_id.trim().slice(0, 8)}…`
+      : null;
+    const lead_display_name = r.lead_id?.trim()
+      ? leadTitleById.get(r.lead_id.trim()) ?? `Lead ${r.lead_id.trim().slice(0, 8)}…`
+      : null;
+    const link_headline = patient_display_name ?? lead_display_name ?? "Unlinked";
+    return {
+      ...r,
+      consultation_type_label: consultationTypeLabel(r.consultation_type),
+      subject_line: subjectById.get(r.id) ?? link_headline,
+      patient_display_name,
+      lead_display_name,
+      link_headline,
+    };
+  });
+}
+
 export async function listConsultationsForTenant(
   tenantId: string,
   options: ListConsultationsOptions = {}
