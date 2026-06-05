@@ -48,6 +48,18 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
 
   hydrate: ({ tenantId, syncKey, calendarTimezone, bookings, bookingDisplay }) => {
     const current = get();
+    const navigatedAway = current.syncKey != null && current.syncKey !== syncKey;
+    if (navigatedAway) {
+      set({
+        tenantId,
+        syncKey,
+        calendarTimezone,
+        bookings,
+        bookingDisplay,
+        pendingIds: new Set(),
+      });
+      return;
+    }
     if (current.pendingIds.size > 0) {
       return;
     }

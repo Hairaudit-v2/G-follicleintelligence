@@ -33,6 +33,8 @@ export type CalendarRescheduleResult = {
   ok: boolean;
   error?: string;
   conflictingAppointmentId?: string | null;
+  /** Server returned HTTP 409 (double-book / overlap). */
+  isConflict?: boolean;
 };
 
 export type UseCalendarAppointmentsOptions = {
@@ -78,7 +80,7 @@ export function useCalendarAppointments(
   const storeSyncKey = useCalendarAppointmentsStore((s) => s.syncKey);
 
   useEffect(() => {
-    const useSamples = options.useSampleData ?? false;
+    const useSamples = Boolean(options.useSampleData || data.query.sampleMode);
     const mergedBookings = useSamples
       ? mergeBookingsWithSamples(data.bookings, data.tenantId, data.query.dateAnchor)
       : data.bookings;
@@ -100,6 +102,7 @@ export function useCalendarAppointments(
     data.query.dateAnchor,
     data.tenantId,
     hydrate,
+    data.query.sampleMode,
     options.useSampleData,
     syncKey,
   ]);
@@ -131,6 +134,7 @@ export function useCalendarAppointments(
         meta && "assignedUserId" in meta ? (meta.assignedUserId ?? null) : b.assigned_user_id;
       const clinicId = meta && "clinicId" in meta ? (meta.clinicId ?? null) : b.clinic_id;
 
+      const useSamples = Boolean(options.useSampleData || data.query.sampleMode);
       const conflicts = bookingConflictsForOperationalCalendar(
         {
           id: b.id,
@@ -140,12 +144,19 @@ export function useCalendarAppointments(
           clinic_id: clinicId,
         },
         activeBookings,
-        { ignoreBookingId: b.id }
+        {
+          ignoreBookingId: b.id,
+          sameResourceColumnOverlapConflicts: useSamples,
+        }
       );
       if (conflicts.length) {
+        const first = conflicts[0];
+        const label = first.title?.trim() || first.id.slice(0, 8);
         return {
           ok: false,
-          error: `Scheduling conflict: overlaps ${conflicts.length} booking(s) for the same clinician or site.`,
+          error: `Scheduling conflict — overlaps "${label}" in this column or site.`,
+          conflictingAppointmentId: first.id,
+          isConflict: true,
         };
       }
 
@@ -191,6 +202,7 @@ export function useCalendarAppointments(
           ok: false,
           error: r.error,
           conflictingAppointmentId: r.conflictingAppointmentId ?? null,
+          isConflict: Boolean(r.isConflict),
         };
       }
 
@@ -198,7 +210,7 @@ export function useCalendarAppointments(
       refresh();
       return { ok: true };
     },
-    [activeBookings, data.tenantId, markPending, patchBooking, refresh, replaceBooking]
+    [activeBookings, data.query.sampleMode, data.tenantId, markPending, options.useSampleData, patchBooking, refresh, replaceBooking]
   );
 
   return {

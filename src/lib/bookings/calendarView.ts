@@ -187,6 +187,7 @@ function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
     clinicId: q.clinicId ?? undefined,
     includeCancelled: q.includeCancelled ? true : undefined,
     q: q.search?.trim() ? q.search.trim() : undefined,
+    sample: q.sampleMode ? true : undefined,
   };
 }
 

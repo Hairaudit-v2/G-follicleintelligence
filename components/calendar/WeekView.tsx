@@ -99,6 +99,8 @@ export type WeekViewProps = {
     endIso: string,
     meta?: WeekViewRescheduleMeta
   ) => Promise<CalendarRescheduleResult>;
+  /** Booking ids with in-flight PATCH after optimistic reschedule. */
+  pendingAppointmentIds?: ReadonlySet<string>;
   /** Enables keyboard navigation (N, T, arrows, 1–3). */
   shortcuts?: {
     tenantId: string;
@@ -143,6 +145,7 @@ function WeekViewInner({
   highlightedColumnId,
   onSelectBooking,
   onRescheduleBooking,
+  pendingAppointmentIds,
   shortcuts,
 }: WeekViewProps) {
   const router = useRouter();
@@ -421,6 +424,7 @@ function WeekViewInner({
           touchFriendly={layoutMode !== "desktop"}
           viewportRange={viewportRange}
           pinnedAppointmentId={activeDragId}
+          pendingAppointmentIds={pendingAppointmentIds}
           onSelectAppointment={onSelectBooking}
           onResizeAppointment={onResizeAppointment}
         />
@@ -438,6 +442,7 @@ function WeekViewInner({
       layoutMode,
       onResizeAppointment,
       onSelectBooking,
+      pendingAppointmentIds,
       primaryLane,
       swipeLayout,
       view,

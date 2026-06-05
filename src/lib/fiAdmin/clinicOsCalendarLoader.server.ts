@@ -19,6 +19,7 @@ function todayUtcDayQuery(now: Date): ParsedCalendarQuery {
     clinicId: null,
     includeCancelled: false,
     search: null,
+    sampleMode: false,
   };
 }
 

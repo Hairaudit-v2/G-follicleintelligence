@@ -14,7 +14,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
@@ -121,6 +121,8 @@ export type MonthViewProps = {
   onNavigateDay?: (dayKey: string) => void;
   onNavigateMonth?: (dateAnchor: string) => void;
   calendarRoute?: CalendarRoute;
+  /** Booking ids awaiting PATCH after optimistic reschedule. */
+  pendingAppointmentIds?: ReadonlySet<string>;
 };
 
 // ---------------------------------------------------------------------------
@@ -288,11 +290,13 @@ function MonthAppointmentPill({
   booking,
   label,
   draggable,
+  isPendingSave,
   onSelect,
 }: {
   booking: FiBookingRow;
   label: string;
   draggable: boolean;
+  isPendingSave?: boolean;
   onSelect: () => void;
 }) {
   const meta = booking.metadata ?? {};
@@ -307,7 +311,7 @@ function MonthAppointmentPill({
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: booking.id,
-    disabled: !draggable,
+    disabled: !draggable || isPendingSave,
     data: {
       type: "appointment",
       appointment: appointmentCardDataFromBooking(booking, { anchorLabel: label }),
@@ -318,7 +322,8 @@ function MonthAppointmentPill({
     <button
       ref={setNodeRef}
       type="button"
-      {...(draggable ? { ...listeners, ...attributes } : {})}
+      aria-busy={isPendingSave || undefined}
+      {...(draggable && !isPendingSave ? { ...listeners, ...attributes } : {})}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -331,9 +336,13 @@ function MonthAppointmentPill({
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40",
         appointmentStyle.borderColor,
         appointmentStyle.backgroundTint,
-        isDragging && "z-10 scale-[1.02] opacity-80 shadow-lg ring-2 ring-sky-400/30"
+        isDragging && "z-10 scale-[1.02] opacity-80 shadow-lg ring-2 ring-sky-400/30",
+        isPendingSave && "opacity-75 ring-2 ring-amber-400/35"
       )}
     >
+      {isPendingSave ? (
+        <Loader2 className="absolute right-1 top-1 h-3 w-3 shrink-0 animate-spin text-amber-200" aria-hidden />
+      ) : null}
       <span aria-hidden className={cn("h-4 w-0.5 shrink-0 rounded-full", appointmentStyle.accentClass)} />
       <Icon className={cn("h-3 w-3 shrink-0 opacity-80", appointmentStyle.textColor)} strokeWidth={2} aria-hidden />
       <span className="min-w-0 flex-1 truncate">
@@ -353,6 +362,7 @@ function MonthDayCell({
   resourceColumns,
   droppable,
   draggableAppointments,
+  pendingAppointmentIds,
   onDayClick,
   onSelectBooking,
 }: {
@@ -362,6 +372,7 @@ function MonthDayCell({
   resourceColumns: OperationalCalendarResourceColumn[];
   droppable: boolean;
   draggableAppointments: boolean;
+  pendingAppointmentIds?: ReadonlySet<string>;
   onDayClick: (dayKey: string) => void;
   onSelectBooking: (b: FiBookingRow) => void;
 }) {
@@ -439,6 +450,7 @@ function MonthDayCell({
               booking={booking}
               label={label}
               draggable={draggableAppointments}
+              isPendingSave={pendingAppointmentIds?.has(booking.id)}
               onSelect={() => onSelectBooking(booking)}
             />
           );
@@ -486,6 +498,7 @@ function MonthViewInner({
   onNavigateDay,
   onNavigateMonth,
   calendarRoute = "fi-admin",
+  pendingAppointmentIds,
 }: MonthViewProps) {
   const router = useRouter();
   const { success, error: toastError } = useCalendarToast();
@@ -713,6 +726,7 @@ function MonthViewInner({
                   resourceColumns={resourceColumns}
                   droppable={canMutateBookings}
                   draggableAppointments={canMutateBookings}
+                  pendingAppointmentIds={pendingAppointmentIds}
                   onDayClick={openDay}
                   onSelectBooking={onSelectBooking}
                 />

@@ -1,68 +1,69 @@
-# Dev: provision Evolved tenant (UK) + reminder templates
+# Provision Evolved Hair Clinics tenant (AU + Clinic OS)
 
-Use this when standing up a **local or staging** database so FI Admin has a canonical **Evolved Hair Clinics** row, **UK (Europe/London)** defaults, and starter **`fi_reminder_templates`**.
+Use this when standing up **local, staging, or production** so you have:
 
-## One command (recommended)
+- **`fi_tenants`** — org display name is `name` (there is no `org_name` column); canonical slug `evolved`.
+- **`fi_tenant_settings`** — `default_timezone = Australia/Perth`, brand colours, support email.
+- **`fi_crm_pipeline_stages`** — default `hair_restoration_default` funnel (same slugs/labels as app lazy-seed).
+- **`fi_reminder_templates`** — three email templates: **24h** (`booking_24h_before`), **48h** (`booking_48h_before`), **post-consult** (`post_consult`).
+- **`fi_users`** — three `crm_operator` seed rows (null `auth_user_id` until you link Supabase Auth).
 
-From the repository root, with **`NEXT_PUBLIC_SUPABASE_URL`** and **`SUPABASE_SERVICE_ROLE_KEY`** set (same as `npm run dev` — typically via `.env.local`):
+## Option A — Node script (recommended)
+
+From the repository root, with **`NEXT_PUBLIC_SUPABASE_URL`** and **`SUPABASE_SERVICE_ROLE_KEY`** set (same as `npm run dev`, e.g. `.env.local`):
 
 ```bash
 npm run dev:provision:evolved
 ```
 
+Source: **`scripts/provision-evolved-tenant.ts`**
+
 Optional environment overrides:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `FI_EVOLVED_TENANT_SLUG` | `evolved` | `fi_tenants.slug` (lowercase, URL-safe) |
-| `FI_EVOLVED_TENANT_NAME` | `Evolved Hair Clinics` | `fi_tenants.name` and `fi_tenant_settings.brand_name` |
+| `FI_EVOLVED_TENANT_SLUG` | `evolved` | `fi_tenants.slug` |
+| `FI_EVOLVED_TENANT_NAME` | `Evolved Hair Clinics` | `fi_tenants.name` + `fi_tenant_settings.brand_name` |
+| `FI_EVOLVED_DEFAULT_TIMEZONE` | `Australia/Perth` | `fi_tenant_settings.default_timezone` |
 
-The script is **idempotent**:
+Idempotency:
 
-- Reuses an existing tenant with the same **slug** (no duplicate slug insert).
-- **Upserts** `fi_tenant_settings` for `default_timezone = Europe/London` and branding.
-- **Skips** reminder inserts if the tenant already has **any** `fi_reminder_templates` rows (delete templates first if you want a full re-seed).
+- Reuses tenant by **slug**.
+- **Upserts** `fi_tenant_settings`.
+- Inserts CRM stages only when the tenant has **no** default-scope rows for `hair_restoration_default`.
+- Inserts reminder templates only when the tenant has **zero** templates (delete templates first to re-seed).
+- Inserts each seed **`fi_users`** row only if that **email** is not already present for the tenant.
 
-After provisioning, link your Supabase Auth user to the tenant if you need signed-in access (see checklist below).
+## Option B — Raw SQL (staging / prod / SQL Editor)
 
-## Manual checklist (Supabase SQL Editor or `psql`)
+Run the full script (single transaction):
 
-Use this when you cannot run Node locally but have SQL access.
+**`docs/sql/provision-evolved-hair-clinics-tenant.sql`**
 
-1. **Create or confirm tenant**
+Adjust slug/name literals in that file if you use a non-`evolved` slug.
 
-   ```sql
-   insert into fi_tenants (name, slug)
-   values ('Evolved Hair Clinics', 'evolved')
-   on conflict (slug) do update
-     set name = excluded.name, updated_at = now()
-   returning id;
-   ```
+## Clinic OS shell + navigation
 
-   Note the returned **`id`** as `tenant_id` for the next steps.
+The FI Admin tenant layout uses **`ClinicOsShell`** (`app/(fi-admin)/fi-admin/[tenantId]/layout.tsx`). Primary tabs are defined in **`src/lib/fiAdmin/clinicOsShellConfig.ts`**:
 
-2. **UK timezone + brand on `fi_tenant_settings`**
+| Tab | Route under `/fi-admin/[tenantId]/` | Notes |
+|-----|-------------------------------------|--------|
+| Dashboard | `/fi-admin/[tenantId]` | Home |
+| Calendar | `calendar` | Operational calendar |
+| Patients | `patients` | Patient directory |
+| Consultations | `consultations` | |
+| Cases | `cases` | Clinical / hair-audit cases |
+| Sales | `crm` | **Enabled** when `getCrmShellNavAllowed` is true — roles **`fi_admin`** or **`crm_operator`** on `fi_users` |
 
-   ```sql
-   insert into fi_tenant_settings (tenant_id, brand_name, default_timezone)
-   values ('<TENANT_UUID>', 'Evolved Hair Clinics', 'Europe/London')
-   on conflict (tenant_id) do update
-     set brand_name = excluded.brand_name,
-         default_timezone = excluded.default_timezone,
-         updated_at = now();
-   ```
+Placeholder items (Messages, Reports, Training) render disabled. **Sales / pipeline** requires a CRM shell role; seed `fi_users` with `crm_operator` and set **`auth_user_id`** to your `auth.users.id` so the operator can sign in.
 
-3. **Seed reminder templates** (only if none exist yet for that tenant)
+## After provisioning
 
-   Insert rows into `fi_reminder_templates` with valid `type` (`sms` | `email`) and `trigger_event` (see migration `fi_reminder_templates_and_jobs` / `fi_reminders_post_consult_cancelled_error_log`). Merge placeholders supported in app code: `{{patient_name}}`, `{{booking_time}}`, `{{clinic_name}}`, etc. (see `src/lib/reminders/remindersCore.ts`).
-
-4. **Optional: FI OS access**
-
-   - Insert **`fi_users`** linking your `auth.users.id` to `tenant_id` with an appropriate `role`.
-   - Or add **`fi_os_identities`** for platform roles (see `docs/fi-os-access-production.md`).
+1. Create Supabase **Auth** users for real testers (or use magic link).
+2. **`update fi_users set auth_user_id = '<uuid>' where email = '...'`** for each operator you want to log in.
+3. Post-login behaviour and OS roles: **`docs/fi-os-access-production.md`**, **`src/lib/fiOs/fiOsRedirect.server.ts`**.
 
 ## Related
 
-- Production access, redirects, and **`GET /api/tenants`** rules: **`docs/fi-os-access-production.md`**
 - Local tenant list bypass: **`docs/dev-local-fi-admin.md`**
-- Post-login redirect for tenant members: **`src/lib/fiOs/fiOsRedirect.server.ts`** (defaults to **`/fi-admin/[tenantId]/cases`**)
+- CRM pipeline defaults (code): **`src/lib/crm/pipelineSeedPayload.ts`**

@@ -55,7 +55,7 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
   /** Patients home is tenant-wide; CRM-gated shortcuts live on the page. */
   { id: "patients", label: "Patients", path: "patients", permissionHint: {} },
   { id: "consultations", label: "Consultations", path: "consultations", permissionHint: {} },
-  { id: "cases", label: "Patients", path: "cases", permissionHint: {} },
+  { id: "cases", label: "Cases", path: "cases", permissionHint: {} },
   { id: "messages", label: "Messages", path: "", permissionHint: {}, placeholder: true },
   { id: "sales", label: "Sales", path: "crm", permissionHint: { requiresCrmShellNav: true } },
   { id: "reports", label: "Reports", path: "", permissionHint: {}, placeholder: true },

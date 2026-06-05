@@ -48,7 +48,11 @@ export function OperationalCalendarFilters({
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
 }) {
-  const action = buildCalendarHref(tenantId, { view: query.view, date: query.dateAnchor });
+  const action = buildCalendarHref(tenantId, {
+    view: query.view,
+    date: query.dateAnchor,
+    sample: query.sampleMode ? true : undefined,
+  });
 
   return (
     <form
@@ -62,6 +66,7 @@ export function OperationalCalendarFilters({
       </h2>
       <input type="hidden" name="view" value={query.view} />
       <input type="hidden" name="date" value={query.dateAnchor} />
+      {query.sampleMode ? <input type="hidden" name="sample" value="1" /> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <label
           id={FILTER_FIELDS.q.labelId}
@@ -182,7 +187,11 @@ export function OperationalCalendarFilters({
           Apply
         </button>
         <a
-          href={buildCalendarHref(tenantId, { view: query.view, date: query.dateAnchor })}
+          href={buildCalendarHref(tenantId, {
+            view: query.view,
+            date: query.dateAnchor,
+            sample: query.sampleMode ? true : undefined,
+          })}
           className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
         >
           Reset

@@ -3,7 +3,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { motion } from "framer-motion";
-import { Clock, DoorOpen, GripVertical, UserRound } from "lucide-react";
+import { Clock, DoorOpen, GripVertical, Loader2, UserRound } from "lucide-react";
 import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -74,6 +74,8 @@ export type AppointmentCardProps = {
   touchFriendly?: boolean;
   /** Subtle mount animation for grid cards. */
   animateEntry?: boolean;
+  /** Saving server state after optimistic move — dims card and blocks drag. */
+  isPendingSave?: boolean;
 };
 
 const MotionCard = motion.create(Card);
@@ -304,6 +306,7 @@ function AppointmentCardInner({
   isDragPreview = false,
   touchFriendly = false,
   animateEntry = false,
+  isPendingSave = false,
 }: AppointmentCardProps) {
   const style = getAppointmentStyle(appointment);
   const darkProcedure = crmDarkProcedureClasses(style.procedureFamily);
@@ -315,8 +318,8 @@ function AppointmentCardInner({
 
   const isTerminal = dimTerminal && style.isTerminal;
 
-  const canDrag = draggable && !isTerminal && !isDragPreview;
-  const canResize = resizable && !isTerminal && layout != null && Boolean(onResizeEnd) && !isDragPreview;
+  const canDrag = draggable && !isTerminal && !isDragPreview && !isPendingSave;
+  const canResize = resizable && !isTerminal && layout != null && Boolean(onResizeEnd) && !isDragPreview && !isPendingSave;
   const [resizeHeightPx, setResizeHeightPx] = React.useState<number | null>(null);
   const displayHeightPx = resizeHeightPx ?? layout?.heightPx;
 
@@ -394,6 +397,7 @@ function AppointmentCardInner({
         isDragging && "scale-[1.02] opacity-90 shadow-xl ring-2 ring-sky-400/35",
         isDragPreview && "w-full rotate-[0.5deg] shadow-2xl ring-2 ring-sky-400/30 dark:shadow-black/50",
         isTerminal && "opacity-55 saturate-[0.8]",
+        isPendingSave && "opacity-80 ring-2 ring-amber-400/35",
         !layout && "w-full",
         className
       )}
@@ -407,6 +411,17 @@ function AppointmentCardInner({
           "group-hover:shadow-[2px_0_14px_-2px] group-hover:shadow-current/40"
         )}
       />
+
+      {isPendingSave ? (
+        <div
+          className="absolute right-1.5 top-1.5 z-30 flex items-center gap-1 rounded-md border border-amber-500/35 bg-amber-950/80 px-1.5 py-0.5 text-[9px] font-semibold text-amber-100 shadow-sm"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-3 w-3 shrink-0 animate-spin" aria-hidden />
+          Saving
+        </div>
+      ) : null}
 
       {canDrag ? (
         <button
@@ -582,6 +597,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   isDragPreview,
   touchFriendly,
   animateEntry,
+  isPendingSave,
 }: {
   booking: FiBookingRow;
   display?: {
@@ -599,6 +615,8 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   isDragPreview?: boolean;
   touchFriendly?: boolean;
   animateEntry?: boolean;
+  /** Awaiting PATCH confirmation after optimistic reschedule. */
+  isPendingSave?: boolean;
 }) {
   const appointment = appointmentCardDataFromBooking(booking, display);
   const cancelled = isBookingCancelled(booking);
@@ -617,6 +635,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
       isDragPreview={isDragPreview}
       touchFriendly={touchFriendly}
       animateEntry={animateEntry}
+      isPendingSave={isPendingSave}
     />
   );
 });

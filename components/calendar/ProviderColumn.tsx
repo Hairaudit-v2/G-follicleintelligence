@@ -306,6 +306,8 @@ export type ProviderColumnProps = {
   viewportRange?: CalendarViewportRange;
   /** Keep dragged card mounted while virtualizing. */
   pinnedAppointmentId?: string | null;
+  /** Booking ids awaiting PATCH after optimistic reschedule. */
+  pendingAppointmentIds?: ReadonlySet<string> | null;
   bodyHeightPx?: number;
   minWidthPx?: number;
   className?: string;
@@ -331,6 +333,7 @@ export function ProviderColumn({
   onResizeAppointment,
   viewportRange,
   pinnedAppointmentId,
+  pendingAppointmentIds,
   bodyHeightPx: bodyHeightPxProp,
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
   className,
@@ -391,6 +394,7 @@ export function ProviderColumn({
                 const layout = overlapLayouts.get(booking.id);
                 if (!layout || !visibleIds.has(booking.id)) return null;
                 const d = bookingDisplay[booking.id];
+                const isPendingSave = Boolean(pendingAppointmentIds?.has(booking.id));
                 return (
                   <AppointmentCardFromBooking
                     key={booking.id}
@@ -406,6 +410,7 @@ export function ProviderColumn({
                     resizable={resizable}
                     touchFriendly={touchFriendly}
                     animateEntry
+                    isPendingSave={isPendingSave}
                     onResizeEnd={
                       onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined
                     }

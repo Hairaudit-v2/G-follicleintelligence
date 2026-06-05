@@ -109,12 +109,15 @@ export function snapIsoToBusinessSlotUtc(iso: string, cfg: BusinessGridConfig, d
 export function bookingConflictsForOperationalCalendar(
   candidate: { id: string; start_at: string; end_at: string; assigned_user_id: string | null; clinic_id: string | null },
   others: FiBookingRow[],
-  opts?: { ignoreBookingId?: string }
+  opts?: { ignoreBookingId?: string; sameResourceColumnOverlapConflicts?: boolean }
 ): FiBookingRow[] {
   const ignore = opts?.ignoreBookingId?.trim();
   const s = Date.parse(candidate.start_at);
   const e = Date.parse(candidate.end_at);
   if (!Number.isFinite(s) || !Number.isFinite(e) || e <= s) return [];
+
+  const candidateAsRow = candidate as FiBookingRow;
+  const candCol = resourceColumnIdForBooking(candidateAsRow);
 
   const out: FiBookingRow[] = [];
   for (const o of others) {
@@ -132,8 +135,15 @@ export function bookingConflictsForOperationalCalendar(
       candidate.clinic_id?.trim() &&
       o.clinic_id?.trim() &&
       candidate.clinic_id.trim() === o.clinic_id.trim();
+    const sameResourceColumn =
+      Boolean(opts?.sameResourceColumnOverlapConflicts) &&
+      candCol === resourceColumnIdForBooking(o) &&
+      candCol !== "unassigned";
 
-    if (sameAssignee || sameClinic) out.push(o);
+    const unassignedOverlap =
+      Boolean(opts?.sameResourceColumnOverlapConflicts) && candCol === "unassigned" && resourceColumnIdForBooking(o) === "unassigned";
+
+    if (sameAssignee || sameClinic || sameResourceColumn || unassignedOverlap) out.push(o);
   }
   return out;
 }

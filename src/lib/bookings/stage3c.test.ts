@@ -62,6 +62,12 @@ describe("Stage 3C — calendar query & URL", () => {
     assert.equal(q.calendarTimezone, "UTC");
     assert.equal(q.includeCancelled, false);
     assert.equal(q.search, null);
+    assert.equal(q.sampleMode, false);
+  });
+
+  it("parses sample=1 as sampleMode", () => {
+    const q = parseCalendarSearchParams({ sample: "1" }, new Date("2026-06-01T00:00:00.000Z"));
+    assert.equal(q.sampleMode, true);
   });
 
   it("parses search q param", () => {
@@ -91,6 +97,15 @@ describe("Stage 3C — calendar query & URL", () => {
     assert.equal(merged.date, "2026-06-09");
     assert.equal(merged.view, "week");
     assert.equal(merged.type, "surgery");
+  });
+
+  it("mergeCalendarHrefQuery preserves sample=1 when navigating", () => {
+    const now = new Date("2026-06-01T00:00:00.000Z");
+    const q = parseCalendarSearchParams({ sample: "1", type: "prp" }, now);
+    const merged = mergeCalendarHrefQuery(q, calendarNavigationHelpers.goToToday(new Date("2026-06-09T00:00:00.000Z")));
+    assert.equal(merged.date, "2026-06-09");
+    assert.equal(merged.sample, true);
+    assert.equal(merged.type, "prp");
   });
 
   it("parseCalendarRangeOverride accepts valid start/end override", () => {

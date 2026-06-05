@@ -29,7 +29,6 @@ export default async function DashboardCalendarPage({
 
   await assertFiTenantPortalAccess(tenantId);
   const data = await loadOperationalCalendarPageData(tenantId, sp);
-  const useSampleData = firstParam(sp.sample).trim() === "1";
 
-  return <CalendarPage data={data} route="dashboard" useSampleData={useSampleData} />;
+  return <CalendarPage data={data} route="dashboard" />;
 }

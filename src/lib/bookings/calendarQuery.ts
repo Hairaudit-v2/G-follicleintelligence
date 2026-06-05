@@ -50,6 +50,8 @@ export type ParsedCalendarQuery = {
   includeCancelled: boolean;
   /** Substring match against title, type, patient/lead label (server-side). */
   search: string | null;
+  /** `?sample=1` — merge demo appointments and stricter overlap hints for drag-and-drop testing. */
+  sampleMode: boolean;
 };
 
 const UUID_RE =
@@ -125,6 +127,8 @@ export function parseCalendarSearchParams(
   const searchRaw = firstString(searchParams.q).trim();
   const search = searchRaw.length > 120 ? searchRaw.slice(0, 120) : searchRaw || null;
 
+  const sampleMode = parseBoolParam(searchParams.sample);
+
   return {
     view,
     dateAnchor,
@@ -135,6 +139,7 @@ export function parseCalendarSearchParams(
     clinicId,
     includeCancelled,
     search,
+    sampleMode,
   };
 }
 
@@ -147,6 +152,8 @@ export type CalendarHrefQuery = {
   clinicId?: string;
   includeCancelled?: boolean;
   q?: string;
+  /** When true, append `sample=1` for demo calendar rows. */
+  sample?: boolean;
 };
 
 export function buildCalendarHref(
@@ -166,6 +173,7 @@ export function buildCalendarHref(
   if (q.clinicId?.trim()) sp.set("clinicId", q.clinicId.trim());
   if (q.includeCancelled) sp.set("includeCancelled", "1");
   if (q.q?.trim()) sp.set("q", q.q.trim());
+  if (q.sample) sp.set("sample", "1");
   const qs = sp.toString();
   return qs ? `${base}?${qs}` : base;
 }
@@ -181,6 +189,7 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
     clinicId: patch.clinicId !== undefined ? patch.clinicId : current.clinicId ?? undefined,
     includeCancelled: patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
     q: patch.q !== undefined ? patch.q : current.search ?? undefined,
+    sample: patch.sample !== undefined ? patch.sample : current.sampleMode ? true : undefined,
   };
 }
 

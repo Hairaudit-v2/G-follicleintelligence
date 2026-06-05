@@ -30,7 +30,10 @@ const viewMotion = {
 export type CalendarPageProps = {
   data: OperationalCalendarPageData;
   route?: CalendarRoute;
-  /** Append demo consult / PRP / transplant rows (`?sample=1`). */
+  /**
+   * Force-merge demo appointments (overrides URL).
+   * Normally use `?sample=1` on the calendar URL — parsed into {@link OperationalCalendarPageData.query.sampleMode}.
+   */
   useSampleData?: boolean;
 };
 
@@ -39,9 +42,11 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
   const [drawer, setDrawer] = useState<FiBookingRow | null>(null);
   const [editing, setEditing] = useState<FiBookingRow | null>(null);
 
-  const { bookings, bookingDisplay, buckets, rescheduleBooking, refresh } = useCalendarAppointments(
+  const sampleMode = Boolean(useSampleData || data.query.sampleMode);
+
+  const { bookings, bookingDisplay, buckets, rescheduleBooking, refresh, pendingIds } = useCalendarAppointments(
     data,
-    { useSampleData }
+    { useSampleData: sampleMode }
   );
 
   const base = `/fi-admin/${data.tenantId.trim()}`;
@@ -93,12 +98,13 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
         route={route}
       />
 
-      {useSampleData ? (
+      {sampleMode ? (
         <p
           className="border-b border-sky-500/25 bg-sky-950/35 px-4 py-2 text-xs font-medium text-sky-200"
           role="status"
         >
-          Demo mode — sample consults, PRP, and transplant appointments merged. Drag-and-drop updates locally.
+          Demo mode — sample consults, PRP, and transplant appointments merged. Drag-and-drop updates locally; real
+          bookings PATCH to the server with optimistic UI and rollback on error.
         </p>
       ) : null}
 
@@ -126,6 +132,7 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
                 canMutateBookings={data.canMutateBookings}
                 onSelectBooking={(b) => setDrawer(b)}
                 onRescheduleBooking={rescheduleBooking}
+                pendingAppointmentIds={pendingIds}
                 tenantId={data.tenantId}
                 query={data.query}
                 calendarRoute={route}
@@ -149,6 +156,7 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
                 }
                 onSelectBooking={(b) => setDrawer(b)}
                 onRescheduleBooking={rescheduleBooking}
+                pendingAppointmentIds={pendingIds}
                 shortcuts={{
                   tenantId: data.tenantId,
                   query: data.query,

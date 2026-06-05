@@ -21,12 +21,17 @@ export function BookingCalendarFilters({
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
 }) {
-  const action = buildCalendarHref(tenantId, { view: query.view, date: query.dateAnchor });
+  const action = buildCalendarHref(tenantId, {
+    view: query.view,
+    date: query.dateAnchor,
+    sample: query.sampleMode ? true : undefined,
+  });
 
   return (
     <form method="get" action={action} className="space-y-3 rounded border border-gray-200 bg-white p-4">
       <input type="hidden" name="view" value={query.view} />
       <input type="hidden" name="date" value={query.dateAnchor} />
+      {query.sampleMode ? <input type="hidden" name="sample" value="1" /> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <label className="block text-xs font-medium text-gray-700">
           Type
@@ -98,7 +103,11 @@ export function BookingCalendarFilters({
           Apply filters
         </button>
         <a
-          href={buildCalendarHref(tenantId, { view: query.view, date: query.dateAnchor })}
+          href={buildCalendarHref(tenantId, {
+            view: query.view,
+            date: query.dateAnchor,
+            sample: query.sampleMode ? true : undefined,
+          })}
           className="inline-flex items-center rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50"
         >
           Reset filters

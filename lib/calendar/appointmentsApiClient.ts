@@ -1,5 +1,8 @@
 /**
  * Browser client for calendar appointment API routes.
+ *
+ * PATCH reschedule: `PATCH /api/tenants/{tenantId}/appointments/{appointmentId}`
+ * (see `app/api/tenants/[tenantId]/appointments/[appointmentId]/route.ts`).
  */
 
 import type { CalendarAppointment } from "@/src/lib/bookings/appointmentDto";

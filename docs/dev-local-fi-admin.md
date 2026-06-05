@@ -38,3 +38,7 @@ When the dev fallback is active, `/fi-admin` shows an amber banner:
 **Development access: no authenticated FI user session.**
 
 So it is obvious you are not using a real FI user session.
+
+## Operational calendar — demo rows (`?sample=1`)
+
+On **`/fi-admin/{tenantId}/calendar?sample=1`** (or the same query on the dashboard calendar), the UI merges fixed **sample** consult / PRP / transplant bookings (IDs prefixed with `sample-`) for drag-and-drop testing. Sample rows update **only in the browser**; real tenant bookings still **PATCH** to `/api/tenants/{tenantId}/appointments/{id}` with optimistic moves, conflict toasts, and rollback on error. Navigation (prev/next week, filters) keeps `sample=1` when present.
