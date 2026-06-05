@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 
 import { createConsultationDraftAction, updateConsultationDraftAction } from "@/lib/actions/fi-consultation-actions";
 import { ConsultationOsAssessmentPanel } from "@/src/components/fi-admin/consultations/ConsultationOsAssessmentPanel";
+import { ConsultationLeadLinkField } from "@/src/components/fi-admin/consultations/ConsultationLeadLinkField";
+import { ConsultationPatientLinkField } from "@/src/components/fi-admin/consultations/ConsultationPatientLinkField";
 import { ConsultationOsBeardDesignPanel } from "@/src/components/fi-admin/consultations/ConsultationOsBeardDesignPanel";
 import { ConsultationOsBodyHairPanel } from "@/src/components/fi-admin/consultations/ConsultationOsBodyHairPanel";
 import { ConsultationOsBrowDesignPanel } from "@/src/components/fi-admin/consultations/ConsultationOsBrowDesignPanel";
@@ -26,6 +28,9 @@ import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiSection } from "@/src/components/fi-design/FiSection";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
+import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
+import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
+import type { ConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import {
   CONSULTATION_TYPE_DEFINITIONS,
   DEFAULT_CONSULTATION_TYPE_ID,
@@ -105,6 +110,10 @@ export type ConsultationOsWorkspaceProps = {
   mode: "create" | "edit";
   consultationId?: string;
   initialRow?: ConsultationRow | null;
+  /** Resolved labels for linked patient / lead (edit page server-load). */
+  initialWorkspaceDisplay?: ConsultationWorkspaceDisplay | null;
+  /** When false, lead linking UI is hidden (CRM shell not available). */
+  showCrmNav?: boolean;
 };
 
 function renderMainSection(
@@ -142,7 +151,14 @@ function renderMainSection(
   }
 }
 
-export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initialRow }: ConsultationOsWorkspaceProps) {
+export function ConsultationOsWorkspace({
+  tenantId,
+  mode,
+  consultationId,
+  initialRow,
+  initialWorkspaceDisplay = null,
+  showCrmNav = false,
+}: ConsultationOsWorkspaceProps) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId.trim()}`;
   const patientsHref = `${base}/patients`;
@@ -176,6 +192,15 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
   const [quoteData, setQuoteData] = useState<Record<ConsultationQuoteDataKey, string>>(() =>
     mode === "edit" && initialRow ? initQuoteFromRow(initialRow.quote_data) : emptyQuote()
   );
+
+  const [linkedPatientId, setLinkedPatientId] = useState<string | null>(() => initialRow?.patient_id?.trim() ?? null);
+  const [linkedPersonId, setLinkedPersonId] = useState<string | null>(() => initialRow?.person_id?.trim() ?? null);
+  const [linkedLeadId, setLinkedLeadId] = useState<string | null>(() => initialRow?.lead_id?.trim() ?? null);
+  const [linkedPatientLabel, setLinkedPatientLabel] = useState<string | null>(
+    () => initialWorkspaceDisplay?.patientName ?? null
+  );
+  const [linkedLeadLabel, setLinkedLeadLabel] = useState<string | null>(() => initialWorkspaceDisplay?.leadName ?? null);
+  const [linkedLeadStage, setLinkedLeadStage] = useState<string | null>(() => initialWorkspaceDisplay?.leadStage ?? null);
 
   const [busyCreate, setBusyCreate] = useState(false);
   const [busySave, setBusySave] = useState(false);
@@ -221,6 +246,30 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
     []
   );
 
+  const onLinkPatientHit = useCallback((hit: ConsultationLinkSearchPatientHit) => {
+    setLinkedPatientId(hit.id);
+    setLinkedPersonId(hit.person_id);
+    setLinkedPatientLabel(hit.name);
+  }, []);
+
+  const onClearPatient = useCallback(() => {
+    setLinkedPatientId(null);
+    setLinkedPersonId(null);
+    setLinkedPatientLabel(null);
+  }, []);
+
+  const onLinkLeadHit = useCallback((hit: ConsultationLinkSearchLeadHit) => {
+    setLinkedLeadId(hit.id);
+    setLinkedLeadLabel(hit.name);
+    setLinkedLeadStage(hit.stageLabel);
+  }, []);
+
+  const onClearLead = useCallback(() => {
+    setLinkedLeadId(null);
+    setLinkedLeadLabel(null);
+    setLinkedLeadStage(null);
+  }, []);
+
   const buildPayload = useCallback(() => {
     const structuredPayload: Record<string, unknown> = {};
     for (const k of CONSULTATION_STRUCTURED_SECTION_KEYS) {
@@ -239,6 +288,9 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
       live_notes: liveNotes.trim() === "" ? null : liveNotes,
       recommendation_notes: recommendationNotes.trim() === "" ? null : recommendationNotes,
       quote_data: quotePayload,
+      patient_id: linkedPatientId,
+      person_id: linkedPersonId,
+      lead_id: linkedLeadId,
     };
   }, [
     consultationTypeId,
@@ -249,6 +301,9 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
     liveNotes,
     recommendationNotes,
     quoteData,
+    linkedPatientId,
+    linkedPersonId,
+    linkedLeadId,
   ]);
 
   const payloadWatch = useMemo(() => stableConsultationPayloadSignature(buildPayload()), [buildPayload]);
@@ -288,10 +343,12 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
     setSaveOk(false);
     setBusyCreate(true);
     try {
-      const res = await createConsultationDraftAction(
-        tenantId,
-        withAdmin({ consultation_type: consultationTypeId })
-      );
+      const createBody: Record<string, unknown> = { consultation_type: consultationTypeId };
+      if (linkedPatientId?.trim()) createBody.patient_id = linkedPatientId.trim();
+      else if (linkedPersonId?.trim()) createBody.person_id = linkedPersonId.trim();
+      if (linkedLeadId?.trim()) createBody.lead_id = linkedLeadId.trim();
+
+      const res = await createConsultationDraftAction(tenantId, withAdmin(createBody));
       if (!res.ok) {
         setError(res.error);
         return;
@@ -300,7 +357,7 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
     } finally {
       setBusyCreate(false);
     }
-  }, [tenantId, consultationTypeId, withAdmin, router, base]);
+  }, [tenantId, consultationTypeId, withAdmin, router, base, linkedPatientId, linkedPersonId, linkedLeadId]);
 
   const onSaveDraft = useCallback(async () => {
     if (mode !== "edit" || !consultationId?.trim()) return;
@@ -396,6 +453,20 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
             </Link>
           }
         />
+        {linkedPatientId || linkedLeadId ? (
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4" aria-label="Linked records">
+            {linkedPatientId ? (
+              <FiStatusBadge tone="info" appearance="pill">
+                Patient linked
+              </FiStatusBadge>
+            ) : null}
+            {linkedLeadId ? (
+              <FiStatusBadge tone="info" appearance="pill">
+                Lead linked
+              </FiStatusBadge>
+            ) : null}
+          </div>
+        ) : null}
       </FiCard>
 
       <div
@@ -421,19 +492,19 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
 
       <div onBlurCapture={handleEditorBlurCapture}>
         <FiCard className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Optional break-glass access</p>
-        <label htmlFor="cos-admin-key" className="block text-xs text-slate-600">
-          FI Admin API key (only if your account does not have CRM write access)
-        </label>
-        <input
-          id="cos-admin-key"
-          type="password"
-          autoComplete="off"
-          value={adminKey}
-          onChange={(e) => setAdminKey(e.target.value)}
-          className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
-        />
-      </FiCard>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Optional break-glass access</p>
+          <label htmlFor="cos-admin-key" className="block text-xs text-slate-600">
+            FI Admin API key (only if your account does not have CRM write access)
+          </label>
+          <input
+            id="cos-admin-key"
+            type="password"
+            autoComplete="off"
+            value={adminKey}
+            onChange={(e) => setAdminKey(e.target.value)}
+            className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
+          />
+        </FiCard>
 
       <FiCard className="space-y-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -481,6 +552,80 @@ export function ConsultationOsWorkspace({ tenantId, mode, consultationId, initia
             </div>
           </div>
         ) : null}
+      </FiCard>
+
+      <FiCard>
+        <FiSection
+          title="Linked records"
+          description="Optional foundation patient and CRM lead anchors for this consultation."
+          headingId="consultation-os-linked-heading"
+        >
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <ConsultationPatientLinkField
+              tenantId={tenantId}
+              disabled={!canEdit}
+              patientId={linkedPatientId}
+              patientLabel={linkedPatientLabel}
+              onLinkPatient={onLinkPatientHit}
+              onClearPatient={onClearPatient}
+            />
+            {showCrmNav ? (
+              <ConsultationLeadLinkField
+                tenantId={tenantId}
+                disabled={!canEdit}
+                leadId={linkedLeadId}
+                leadLabel={linkedLeadLabel}
+                leadStage={linkedLeadStage}
+                onLinkLead={onLinkLeadHit}
+                onClearLead={onClearLead}
+              />
+            ) : (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Lead</p>
+                <p className="text-sm text-slate-600">CRM lead linking requires Sales (CRM) access for this user.</p>
+              </div>
+            )}
+          </div>
+          <dl className="mt-6 grid grid-cols-1 gap-3 border-t border-slate-100 pt-6 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Patient</dt>
+              <dd className="mt-1 font-medium text-slate-900">{linkedPatientLabel?.trim() || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Lead</dt>
+              <dd className="mt-1 font-medium text-slate-900">
+                {linkedLeadLabel?.trim() ? (
+                  <>
+                    {linkedLeadLabel.trim()}
+                    {linkedLeadStage?.trim() ? (
+                      <span className="mt-0.5 block text-xs font-normal text-slate-500">{linkedLeadStage.trim()}</span>
+                    ) : null}
+                  </>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Consultant</dt>
+              <dd className="mt-1 font-medium text-slate-900">{consultantName.trim() || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Date</dt>
+              <dd className="mt-1 font-medium text-slate-900">
+                {consultationDate.trim() && /^\d{4}-\d{2}-\d{2}$/.test(consultationDate.trim())
+                  ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
+                      new Date(`${consultationDate.trim()}T12:00:00`)
+                    )
+                  : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</dt>
+              <dd className="mt-1 font-medium text-slate-900">{formatStatusLabel(status)}</dd>
+            </div>
+          </dl>
+        </FiSection>
       </FiCard>
 
       <FiSection

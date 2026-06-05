@@ -51,7 +51,9 @@ export async function loadPatientTimelineSources(
 
   const { data: clinicalRow } = await supabase
     .from("fi_patient_clinical_details")
-    .select("patient_id, created_at, updated_at")
+    .select(
+      "patient_id, created_at, updated_at, norwood_scale, ludwig_scale, hairline_pattern, primary_concern"
+    )
     .eq("tenant_id", tid)
     .eq("patient_id", pid)
     .maybeSingle();
@@ -194,6 +196,18 @@ export async function loadPatientTimelineSources(
         patient_id: String((clinicalRow as { patient_id: string }).patient_id),
         created_at: String((clinicalRow as { created_at: string }).created_at),
         updated_at: String((clinicalRow as { updated_at: string }).updated_at),
+        norwood_scale: (clinicalRow as { norwood_scale?: string | null }).norwood_scale != null
+          ? String((clinicalRow as { norwood_scale: string | null }).norwood_scale)
+          : null,
+        ludwig_scale: (clinicalRow as { ludwig_scale?: string | null }).ludwig_scale != null
+          ? String((clinicalRow as { ludwig_scale: string | null }).ludwig_scale)
+          : null,
+        hairline_pattern: (clinicalRow as { hairline_pattern?: string | null }).hairline_pattern != null
+          ? String((clinicalRow as { hairline_pattern: string | null }).hairline_pattern)
+          : null,
+        primary_concern: (clinicalRow as { primary_concern?: string | null }).primary_concern != null
+          ? String((clinicalRow as { primary_concern: string | null }).primary_concern)
+          : null,
       }
     : null;
 

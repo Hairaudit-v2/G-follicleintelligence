@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { ConsultationOsEditPage } from "@/src/components/fi-admin/consultations/ConsultationOsEditPage";
-import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
+import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { loadConsultationForTenant, loadConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
@@ -24,7 +25,20 @@ export default async function ConsultationOsEditRoutePage({
   const row = await loadConsultationForTenant(tenantId, consultationId);
   if (!row) notFound();
 
+  const tid = tenantId.trim();
+  const cid = consultationId.trim();
+  const [showCrmNav, initialWorkspaceDisplay] = await Promise.all([
+    getCrmShellNavAllowed(tid),
+    loadConsultationWorkspaceDisplay(tid, row),
+  ]);
+
   return (
-    <ConsultationOsEditPage tenantId={tenantId.trim()} consultationId={consultationId.trim()} initialRow={row} />
+    <ConsultationOsEditPage
+      tenantId={tid}
+      consultationId={cid}
+      initialRow={row}
+      initialWorkspaceDisplay={initialWorkspaceDisplay}
+      showCrmNav={showCrmNav}
+    />
   );
 }

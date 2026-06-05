@@ -2,6 +2,6 @@
 
 import { ConsultationOsWorkspace } from "@/src/components/fi-admin/consultations/ConsultationOsWorkspace";
 
-export function ConsultationOsCreatePage({ tenantId }: { tenantId: string }) {
-  return <ConsultationOsWorkspace tenantId={tenantId} mode="create" />;
+export function ConsultationOsCreatePage({ tenantId, showCrmNav }: { tenantId: string; showCrmNav: boolean }) {
+  return <ConsultationOsWorkspace tenantId={tenantId} mode="create" showCrmNav={showCrmNav} />;
 }

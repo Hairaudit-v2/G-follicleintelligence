@@ -11,6 +11,10 @@ export const CLINICAL_DETAIL_FIELD_LABELS: Record<EditableClinicalDetailKey, str
   contraindications: "Contraindications",
   scalp_conditions: "Scalp conditions",
   previous_hair_treatments: "Previous hair treatments",
+  norwood_scale: "Norwood scale",
+  ludwig_scale: "Ludwig scale",
+  hairline_pattern: "Hairline pattern",
+  primary_concern: "Primary concern",
   clinical_flags: "Clinical flags (JSON)",
   metadata: "Metadata (JSON)",
 };

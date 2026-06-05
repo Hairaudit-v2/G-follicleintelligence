@@ -21,15 +21,16 @@ This layer aligns with the broader **digital twin** direction: a stable tenant-s
 | `patient_id` | FK → `fi_patients`, **unique per `(tenant_id, patient_id)`** |
 | `person_id` | Nullable FK → `fi_persons`; **always aligned server-side** with the patient’s `person_id` on write |
 | Text columns | Bounded clinical summary fields (see policy constants); all nullable |
+| `norwood_scale`, `ludwig_scale`, `hairline_pattern`, `primary_concern` | Structured Hamilton–Norwood / Ludwig / pattern / primary concern (see `hairLossScales.ts` + migration `20260620120001_fi_patient_clinical_scales.sql`) |
 | `clinical_flags`, `metadata` | JSONB objects only (`{}` default); CHECK constraints |
 | `created_by_user_id`, `updated_by_user_id` | Optional FK → `fi_users`; set **only server-side** from the signed-in tenant member when available |
 | `created_at`, `updated_at` | Server-maintained timestamps on write |
 
-Indexes: `(tenant_id, patient_id)`, `(tenant_id, person_id)`, `(tenant_id, updated_at desc)`.
+Indexes: `(tenant_id, patient_id)`, `(tenant_id, person_id)`, `(tenant_id, updated_at desc)`, partial `(tenant_id, norwood_scale)`, `(tenant_id, ludwig_scale)` for reporting.
 
 RLS: **authenticated** tenant members may **SELECT**; **INSERT/UPDATE/DELETE** are intended for **service role** (API routes using `supabaseAdmin`), matching other foundation write patterns.
 
-Migration: `20260612120001_fi_patient_clinical_details.sql`.
+Migration: `20260612120001_fi_patient_clinical_details.sql`; scales / pattern columns: `20260620120001_fi_patient_clinical_scales.sql`.
 
 ### Clinical summary vs deferred
 

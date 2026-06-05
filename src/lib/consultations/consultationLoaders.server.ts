@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 
 import { CONSULTATION_TYPE_DEFINITIONS } from "./consultationTypeConfig";
@@ -32,6 +33,20 @@ function mapRow(raw: Record<string, unknown>): ConsultationRow {
     updated_at: String(raw.updated_at),
     archived_at: raw.archived_at == null ? null : String(raw.archived_at),
   };
+}
+
+function readPatientMetadataLabel(metadata: unknown): string | null {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;
+  const m = metadata as Record<string, unknown>;
+  const dn = m.display_name;
+  const pn = m.patient_name;
+  if (typeof dn === "string" && dn.trim()) return dn.trim();
+  if (typeof pn === "string" && pn.trim()) return pn.trim();
+  return null;
+}
+
+function consultationTypeLabel(id: ConsultationTypeId): string {
+  return CONSULTATION_TYPE_DEFINITIONS.find((d) => d.id === id)?.label ?? id;
 }
 
 export async function loadConsultationForTenant(
@@ -65,20 +80,67 @@ export type ListConsultationsOptions = {
 export type ConsultationIndexRow = ConsultationRow & {
   consultation_type_label: string;
   subject_line: string;
+  patient_display_name: string | null;
+  lead_display_name: string | null;
+  link_headline: string;
 };
 
-function consultationTypeLabel(id: ConsultationTypeId): string {
-  return CONSULTATION_TYPE_DEFINITIONS.find((d) => d.id === id)?.label ?? id;
-}
+export type ConsultationWorkspaceDisplay = {
+  patientName: string | null;
+  leadName: string | null;
+  leadStage: string | null;
+};
 
-function readPatientMetadataLabel(metadata: unknown): string | null {
-  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;
-  const m = metadata as Record<string, unknown>;
-  const dn = m.display_name;
-  const pn = m.patient_name;
-  if (typeof dn === "string" && dn.trim()) return dn.trim();
-  if (typeof pn === "string" && pn.trim()) return pn.trim();
-  return null;
+/** Labels for linked patient / CRM lead on the consultation workspace shell. */
+export async function loadConsultationWorkspaceDisplay(
+  tenantId: string,
+  row: ConsultationRow
+): Promise<ConsultationWorkspaceDisplay> {
+  const tid = tenantId.trim();
+  const supabase = supabaseAdmin();
+
+  let patientName: string | null = null;
+  if (row.patient_id?.trim()) {
+    const { data, error } = await supabase
+      .from("fi_patients")
+      .select("metadata")
+      .eq("tenant_id", tid)
+      .eq("id", row.patient_id.trim())
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const lab = data ? readPatientMetadataLabel((data as { metadata: unknown }).metadata) : null;
+    patientName = lab ?? `Patient ${row.patient_id.trim().slice(0, 8)}…`;
+  }
+
+  let leadName: string | null = null;
+  let leadStage: string | null = null;
+  if (row.lead_id?.trim()) {
+    const lid = row.lead_id.trim();
+    const { data, error } = await supabase
+      .from("fi_crm_leads")
+      .select("id, summary, current_stage_id")
+      .eq("tenant_id", tid)
+      .eq("id", lid)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (data) {
+      const lr = data as { id: string; summary: string | null; current_stage_id: string | null };
+      leadName = leadTitleFromRow(lr.summary, lr.id);
+      if (lr.current_stage_id?.trim()) {
+        const { data: st, error: se } = await supabase
+          .from("fi_crm_pipeline_stages")
+          .select("label")
+          .eq("tenant_id", tid)
+          .eq("id", lr.current_stage_id.trim())
+          .maybeSingle();
+        if (!se && st) {
+          leadStage = String((st as { label: string | null }).label ?? "").trim() || null;
+        }
+      }
+    }
+  }
+
+  return { patientName, leadName, leadStage };
 }
 
 async function resolveConsultationSubjectLines(
@@ -171,6 +233,53 @@ async function resolveConsultationSubjectLines(
   return out;
 }
 
+async function resolveConsultationLinkIndexMaps(
+  tenantId: string,
+  rows: ConsultationRow[]
+): Promise<{ patientLabelById: Map<string, string>; leadTitleById: Map<string, string> }> {
+  const patientLabelById = new Map<string, string>();
+  const leadTitleById = new Map<string, string>();
+  const tid = tenantId.trim();
+  if (!tid || rows.length === 0) return { patientLabelById, leadTitleById };
+
+  const patientIds = new Set<string>();
+  const leadIds = new Set<string>();
+  for (const r of rows) {
+    if (r.patient_id?.trim()) patientIds.add(r.patient_id.trim());
+    if (r.lead_id?.trim()) leadIds.add(r.lead_id.trim());
+  }
+
+  const supabase = supabaseAdmin();
+  if (patientIds.size > 0) {
+    const { data: pats, error: pe } = await supabase
+      .from("fi_patients")
+      .select("id, metadata")
+      .eq("tenant_id", tid)
+      .in("id", Array.from(patientIds));
+    if (pe) throw new Error(pe.message);
+    for (const raw of pats ?? []) {
+      const pr = raw as { id: string; metadata: unknown };
+      const lab = readPatientMetadataLabel(pr.metadata);
+      if (lab) patientLabelById.set(String(pr.id), lab);
+    }
+  }
+
+  if (leadIds.size > 0) {
+    const { data: leads, error: le } = await supabase
+      .from("fi_crm_leads")
+      .select("id, summary")
+      .eq("tenant_id", tid)
+      .in("id", Array.from(leadIds));
+    if (le) throw new Error(le.message);
+    for (const raw of leads ?? []) {
+      const lr = raw as { id: string; summary: string | null };
+      leadTitleById.set(String(lr.id), leadTitleFromRow(lr.summary, String(lr.id)));
+    }
+  }
+
+  return { patientLabelById, leadTitleById };
+}
+
 export async function listConsultationsForTenant(
   tenantId: string,
   options: ListConsultationsOptions = {}
@@ -193,9 +302,22 @@ export async function listConsultationsForTenant(
   if (!Array.isArray(data)) return [];
   const rows = data.map((row) => mapRow(row as Record<string, unknown>));
   const subjectById = await resolveConsultationSubjectLines(tid, rows);
-  return rows.map((r) => ({
-    ...r,
-    consultation_type_label: consultationTypeLabel(r.consultation_type),
-    subject_line: subjectById.get(r.id) ?? "Unlinked consultation",
-  }));
+  const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
+  return rows.map((r) => {
+    const patient_display_name = r.patient_id?.trim()
+      ? patientLabelById.get(r.patient_id.trim()) ?? `Patient ${r.patient_id.trim().slice(0, 8)}…`
+      : null;
+    const lead_display_name = r.lead_id?.trim()
+      ? leadTitleById.get(r.lead_id.trim()) ?? `Lead ${r.lead_id.trim().slice(0, 8)}…`
+      : null;
+    const link_headline = patient_display_name ?? lead_display_name ?? "Unlinked";
+    return {
+      ...r,
+      consultation_type_label: consultationTypeLabel(r.consultation_type),
+      subject_line: subjectById.get(r.id) ?? link_headline,
+      patient_display_name,
+      lead_display_name,
+      link_headline,
+    };
+  });
 }

@@ -27,6 +27,10 @@ export type PatientClinicalDetailsRow = {
   contraindications: string | null;
   scalp_conditions: string | null;
   previous_hair_treatments: string | null;
+  norwood_scale: string | null;
+  ludwig_scale: string | null;
+  hairline_pattern: string | null;
+  primary_concern: string | null;
   clinical_flags: Record<string, unknown>;
   metadata: Record<string, unknown>;
   created_by_user_id: string | null;
@@ -52,6 +56,10 @@ function rowToPayload(row: PatientClinicalDetailsRow): EditableClinicalDetailsPa
     contraindications: row.contraindications,
     scalp_conditions: row.scalp_conditions,
     previous_hair_treatments: row.previous_hair_treatments,
+    norwood_scale: row.norwood_scale,
+    ludwig_scale: row.ludwig_scale,
+    hairline_pattern: row.hairline_pattern,
+    primary_concern: row.primary_concern,
     clinical_flags: row.clinical_flags,
     metadata: row.metadata,
   });
@@ -77,6 +85,10 @@ function mapRow(data: Record<string, unknown>): PatientClinicalDetailsRow {
     contraindications: data.contraindications != null ? String(data.contraindications) : null,
     scalp_conditions: data.scalp_conditions != null ? String(data.scalp_conditions) : null,
     previous_hair_treatments: data.previous_hair_treatments != null ? String(data.previous_hair_treatments) : null,
+    norwood_scale: data.norwood_scale != null ? String(data.norwood_scale) : null,
+    ludwig_scale: data.ludwig_scale != null ? String(data.ludwig_scale) : null,
+    hairline_pattern: data.hairline_pattern != null ? String(data.hairline_pattern) : null,
+    primary_concern: data.primary_concern != null ? String(data.primary_concern) : null,
     clinical_flags: mapFlags(data.clinical_flags),
     metadata: mapFlags(data.metadata),
     created_by_user_id: data.created_by_user_id != null ? String(data.created_by_user_id) : null,
@@ -108,6 +120,10 @@ function payloadToInsertColumns(
     contraindications: payload.contraindications,
     scalp_conditions: payload.scalp_conditions,
     previous_hair_treatments: payload.previous_hair_treatments,
+    norwood_scale: payload.norwood_scale,
+    ludwig_scale: payload.ludwig_scale,
+    hairline_pattern: payload.hairline_pattern,
+    primary_concern: payload.primary_concern,
     clinical_flags: payload.clinical_flags,
     metadata: payload.metadata,
     created_by_user_id: actingUserId,
@@ -134,6 +150,10 @@ function payloadToUpdateColumns(
     contraindications: payload.contraindications,
     scalp_conditions: payload.scalp_conditions,
     previous_hair_treatments: payload.previous_hair_treatments,
+    norwood_scale: payload.norwood_scale,
+    ludwig_scale: payload.ludwig_scale,
+    hairline_pattern: payload.hairline_pattern,
+    primary_concern: payload.primary_concern,
     clinical_flags: payload.clinical_flags,
     metadata: payload.metadata,
     updated_by_user_id: actingUserId,

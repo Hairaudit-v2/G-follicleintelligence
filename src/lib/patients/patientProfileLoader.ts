@@ -434,6 +434,10 @@ export async function loadPatientProfile(
             patient_id: clinicalRow.patient_id,
             created_at: clinicalRow.created_at,
             updated_at: clinicalRow.updated_at,
+            norwood_scale: clinicalRow.norwood_scale,
+            ludwig_scale: clinicalRow.ludwig_scale,
+            hairline_pattern: clinicalRow.hairline_pattern,
+            primary_concern: clinicalRow.primary_concern,
           }
         : null,
       images: timelineImages,

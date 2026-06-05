@@ -1,4 +1,5 @@
 import { buildCalendarHref } from "@/src/lib/bookings/calendarQuery";
+import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { crmActivityTimelineTitle } from "./patientTimelineLabels";
 import { sortPatientTimelineItems } from "./patientTimelineFilters";
 import type {
@@ -231,6 +232,13 @@ export function buildPatientTimeline(
 
   if (bundle.clinical) {
     const row = bundle.clinical;
+    const scaleSummary =
+      formatClinicalScalesSummary({
+        norwood_scale: row.norwood_scale,
+        ludwig_scale: row.ludwig_scale,
+        hairline_pattern: row.hairline_pattern,
+        primary_concern: row.primary_concern,
+      }) ?? "Structured fields captured";
     items.push({
       id: `clinical_created:${row.patient_id}`,
       occurred_at: row.created_at,
@@ -241,7 +249,7 @@ export function buildPatientTimeline(
       source_id: row.patient_id,
       severity: null,
       href: null,
-      metadata_summary: "Structured fields captured",
+      metadata_summary: scaleSummary,
       is_sensitive: false,
     });
     if (row.updated_at !== row.created_at) {
@@ -255,7 +263,7 @@ export function buildPatientTimeline(
         source_id: row.patient_id,
         severity: null,
         href: null,
-        metadata_summary: "Structured fields revised",
+        metadata_summary: scaleSummary,
         is_sensitive: false,
       });
     }

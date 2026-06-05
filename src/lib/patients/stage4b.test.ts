@@ -44,6 +44,23 @@ describe("Stage 4B — patient clinical details foundation (pure)", () => {
     assert.equal((n as Record<string, unknown>).bogus, undefined);
   });
 
+  it("normalizeEditableClinicalDetailsPayload rejects invalid norwood_scale", () => {
+    assert.throws(() =>
+      normalizeEditableClinicalDetailsPayload({
+        norwood_scale: "bogus",
+      })
+    );
+  });
+
+  it("patientClinicalDetailsPatchBodySchema accepts scale patch", () => {
+    const ok = patientClinicalDetailsPatchBodySchema.safeParse({
+      norwood_scale: "IV",
+      ludwig_scale: null,
+      hairline_pattern: "receding",
+    });
+    assert.equal(ok.success, true);
+  });
+
   it("clinicalDetailsChangedKeys lists only changed keys", () => {
     const a = normalizeEditableClinicalDetailsPayload({});
     const b = normalizeEditableClinicalDetailsPayload({

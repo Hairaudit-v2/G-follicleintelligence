@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { ClinicalHairLossScaleFields } from "@/src/components/fi/patients/ClinicalHairLossScaleFields";
 import { updatePatientClinicalDetailsAction } from "@/lib/actions/fi-patient-actions";
 import { CLINICAL_DETAIL_FIELD_LABELS } from "@/src/lib/patients/clinicalDetailsLabels";
+import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 
 function textFromRow(v: string | null | undefined) {
@@ -28,6 +30,10 @@ function parseJsonObjectField(raw: string, label: string): Record<string, unknow
 function buildFormFromRow(data: PatientProfileFoundationData) {
   const row = data.clinicalDetails.row;
   return {
+    norwood_scale: textFromRow(row?.norwood_scale),
+    ludwig_scale: textFromRow(row?.ludwig_scale),
+    hairline_pattern: textFromRow(row?.hairline_pattern),
+    primary_concern: textFromRow(row?.primary_concern),
     primary_hair_concern: textFromRow(row?.primary_hair_concern),
     treatment_interest: textFromRow(row?.treatment_interest),
     hair_loss_duration: textFromRow(row?.hair_loss_duration),
@@ -67,6 +73,16 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
 
   const row = data.clinicalDetails.row;
 
+  const scalesSummary = useMemo(() => {
+    if (!row) return null;
+    return formatClinicalScalesSummary({
+      norwood_scale: row.norwood_scale,
+      ludwig_scale: row.ludwig_scale,
+      hairline_pattern: row.hairline_pattern,
+      primary_concern: row.primary_concern,
+    });
+  }, [row]);
+
   return (
     <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <h2 className="text-sm font-semibold text-gray-900">Clinical details</h2>
@@ -74,6 +90,12 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
         These details are a structured clinical summary only. Full diagnostics, blood analysis, images, HLI assessments
         and treatment planning will be added in later stages.
       </p>
+      {scalesSummary ? (
+        <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-50/90 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-800">Pattern summary</p>
+          <p className="mt-1 text-sm font-medium text-indigo-950">{scalesSummary}</p>
+        </div>
+      ) : null}
       {row?.updated_at ? (
         <p className="mt-2 text-xs text-gray-600">
           Last updated:{" "}
@@ -90,6 +112,18 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
       )}
 
       <div className="mt-4 space-y-3">
+        <ClinicalHairLossScaleFields
+          values={{
+            norwood_scale: form.norwood_scale,
+            ludwig_scale: form.ludwig_scale,
+            hairline_pattern: form.hairline_pattern,
+            primary_concern: form.primary_concern,
+          }}
+          onFieldChange={(key, value) => setForm((f) => ({ ...f, [key]: value }))}
+          disabled={pending}
+          primaryConcernLabel={CLINICAL_DETAIL_FIELD_LABELS.primary_concern}
+        />
+
         <label className="block text-xs font-medium text-gray-700">
           {CLINICAL_DETAIL_FIELD_LABELS.primary_hair_concern}
           <textarea
@@ -229,6 +263,10 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
                 const metadata = parseJsonObjectField(form.metadata, "Metadata");
                 const nz = (s: string) => (s.trim() ? s : null);
                 const res = await updatePatientClinicalDetailsAction(tenantId, data.foundationPatientId, {
+                  norwood_scale: nz(form.norwood_scale),
+                  ludwig_scale: nz(form.ludwig_scale),
+                  hairline_pattern: nz(form.hairline_pattern),
+                  primary_concern: nz(form.primary_concern),
                   primary_hair_concern: nz(form.primary_hair_concern),
                   treatment_interest: nz(form.treatment_interest),
                   hair_loss_duration: nz(form.hair_loss_duration),

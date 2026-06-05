@@ -33,9 +33,13 @@ export async function createConsultationDraftAction(
       consultation_type: parsed.consultation_type,
       adminKey: parsed.adminKey,
       createdByFiUserId: fiUserId,
+      patient_id: parsed.patient_id,
+      person_id: parsed.person_id,
+      lead_id: parsed.lead_id,
     });
 
     const tid = tenantId.trim();
+    revalidatePath(`/fi-admin/${tid}/consultations`);
     revalidatePath(`/fi-admin/${tid}/consultations/new`);
     revalidatePath(`/fi-admin/${tid}/consultations/${row.id}`);
     return { ok: true, consultationId: row.id };
@@ -63,6 +67,7 @@ export async function updateConsultationDraftAction(
 
     const tid = tenantId.trim();
     const cid = consultationId.trim();
+    revalidatePath(`/fi-admin/${tid}/consultations`);
     revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
     return { ok: true };
   } catch (e) {

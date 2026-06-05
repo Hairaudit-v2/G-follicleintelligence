@@ -87,10 +87,20 @@ export type ConsultationEditableStatus = (typeof CONSULTATION_EDITABLE_STATUSES)
 
 export const consultationEditableStatusSchema = z.enum(CONSULTATION_EDITABLE_STATUSES);
 
-export const consultationCreateDraftBodySchema = z.object({
-  adminKey: z.string().optional(),
-  consultation_type: consultationTypeIdSchema,
-});
+const optionalUuid = z.string().uuid();
+
+export const consultationCreateDraftBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    consultation_type: consultationTypeIdSchema,
+    /** Optional foundation patient link (`fi_patients.id`). */
+    patient_id: optionalUuid.optional(),
+    /** Optional person link (`fi_persons.id`) when no patient is selected. */
+    person_id: optionalUuid.optional(),
+    /** Optional CRM lead link (`fi_crm_leads.id`). */
+    lead_id: optionalUuid.optional(),
+  })
+  .strict();
 
 export type ConsultationCreateDraftBody = z.infer<typeof consultationCreateDraftBodySchema>;
 
@@ -98,6 +108,8 @@ export type ConsultationCreateDraftBody = z.infer<typeof consultationCreateDraft
  * Manual save / patch payload (MVP). Server actions use this for `updateConsultationDraft`.
  * (Named “upsert” in roadmap docs; row insert is separate `consultationCreateDraftBodySchema`.)
  */
+const uuidOrNull = z.union([z.string().uuid(), z.null()]);
+
 export const consultationUpsertBodySchema = z
   .object({
     adminKey: z.string().optional(),
@@ -112,6 +124,9 @@ export const consultationUpsertBodySchema = z
     live_notes: z.string().nullable().optional(),
     recommendation_notes: z.string().nullable().optional(),
     quote_data: consultationQuoteDataSchema.optional(),
+    patient_id: uuidOrNull.optional(),
+    person_id: uuidOrNull.optional(),
+    lead_id: uuidOrNull.optional(),
   })
   .strict();
 

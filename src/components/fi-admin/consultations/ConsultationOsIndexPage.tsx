@@ -125,8 +125,16 @@ export function ConsultationOsIndexPage({ tenantId, rows, activeStatus }: Consul
                     <p className="text-sm font-semibold text-slate-900">{row.consultation_type_label}</p>
                     <FiStatusBadge tone={statusTone(row.status)}>{STATUS_ROW_LABEL[row.status]}</FiStatusBadge>
                   </div>
-                  <p className="text-sm text-slate-700">{row.subject_line}</p>
+                  <p className="text-sm font-medium text-slate-800">{row.link_headline}</p>
                   <dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-xs text-slate-500 sm:grid-cols-2">
+                    <div>
+                      <dt className="inline font-medium text-slate-600">Patient: </dt>
+                      <dd className="inline">{row.patient_display_name ?? "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-medium text-slate-600">Lead: </dt>
+                      <dd className="inline">{row.lead_display_name ?? "—"}</dd>
+                    </div>
                     <div>
                       <dt className="inline font-medium text-slate-600">Consultation date: </dt>
                       <dd className="inline">{formatIsoDate(row.consultation_date)}</dd>
@@ -157,8 +165,8 @@ export function ConsultationOsIndexPage({ tenantId, rows, activeStatus }: Consul
 
       <FiCard>
         <p className="text-sm leading-relaxed text-slate-600">
-          ConsultationOS currently supports manual draft creation and saving. Autosave, AI summary, quote generation and
-          case conversion are planned next.
+          ConsultationOS currently supports manual draft creation, saving, and optional patient / CRM lead linking.
+          Autosave, AI summary, quote generation and case conversion are planned next.
         </p>
       </FiCard>
     </div>

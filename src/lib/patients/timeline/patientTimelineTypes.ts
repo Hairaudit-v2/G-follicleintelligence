@@ -96,6 +96,10 @@ export type PatientTimelineClinicalInput = {
   patient_id: string;
   created_at: string;
   updated_at: string;
+  norwood_scale: string | null;
+  ludwig_scale: string | null;
+  hairline_pattern: string | null;
+  primary_concern: string | null;
 };
 
 export type PatientTimelinePatientInput = {

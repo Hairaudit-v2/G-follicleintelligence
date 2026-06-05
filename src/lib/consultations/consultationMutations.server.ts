@@ -3,6 +3,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { loadConsultationForTenant } from "./consultationLoaders.server";
+import { syncConsultationMedicalHairLossToPatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsConsultationSync";
 import {
   CONSULTATION_EDITABLE_STATUSES,
   type ConsultationCreateDraftBody,
@@ -21,6 +22,40 @@ function normalizeDateInput(v: string | null | undefined): string | null {
   return v;
 }
 
+async function assertFoundationPatient(tenantId: string, patientId: string): Promise<{ id: string; person_id: string }> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const pid = patientId.trim();
+  const { data, error } = await supabase
+    .from("fi_patients")
+    .select("id, person_id")
+    .eq("tenant_id", tid)
+    .eq("id", pid)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Patient not found for this tenant.");
+  const row = data as { id: string; person_id: string };
+  return { id: String(row.id), person_id: String(row.person_id) };
+}
+
+async function assertPersonInTenant(tenantId: string, personId: string): Promise<void> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const id = personId.trim();
+  const { data, error } = await supabase.from("fi_persons").select("id").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Person not found for this tenant.");
+}
+
+async function assertLeadInTenant(tenantId: string, leadId: string): Promise<void> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const id = leadId.trim();
+  const { data, error } = await supabase.from("fi_crm_leads").select("id").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Lead not found for this tenant.");
+}
+
 export type CreateConsultationDraftInput = ConsultationCreateDraftBody & {
   createdByFiUserId?: string | null;
 };
@@ -35,8 +70,7 @@ export async function createConsultationDraft(
   const typeParse = consultationTypeIdSchema.safeParse(input.consultation_type);
   if (!typeParse.success) throw new Error(typeParse.error.errors[0]?.message ?? "Invalid consultation_type.");
 
-  const supabase = supabaseAdmin();
-  const insertRow = {
+  const insertRow: Record<string, unknown> = {
     tenant_id: tid,
     consultation_type: typeParse.data,
     status: "draft" as const,
@@ -46,6 +80,21 @@ export async function createConsultationDraft(
     updated_by: input.createdByFiUserId ?? null,
   };
 
+  if (input.patient_id?.trim()) {
+    const p = await assertFoundationPatient(tid, input.patient_id);
+    insertRow.patient_id = p.id;
+    insertRow.person_id = p.person_id;
+  } else if (input.person_id?.trim()) {
+    await assertPersonInTenant(tid, input.person_id);
+    insertRow.person_id = input.person_id.trim();
+  }
+
+  if (input.lead_id?.trim()) {
+    await assertLeadInTenant(tid, input.lead_id);
+    insertRow.lead_id = input.lead_id.trim();
+  }
+
+  const supabase = supabaseAdmin();
   const { data, error } = await supabase.from("fi_consultations").insert(insertRow).select("*").single();
   if (error) throw new Error(error.message);
   if (!data || typeof data !== "object") throw new Error("Insert failed.");
@@ -115,6 +164,36 @@ export async function updateConsultationDraft(
     updatePayload.quote_data = patch.quote_data;
   }
 
+  if (patch.lead_id !== undefined) {
+    if (patch.lead_id === null) {
+      updatePayload.lead_id = null;
+    } else {
+      await assertLeadInTenant(tid, patch.lead_id);
+      updatePayload.lead_id = patch.lead_id.trim();
+    }
+  }
+
+  let patientBranchSetPerson = false;
+  if (patch.patient_id !== undefined) {
+    if (patch.patient_id === null) {
+      updatePayload.patient_id = null;
+    } else {
+      const p = await assertFoundationPatient(tid, patch.patient_id);
+      updatePayload.patient_id = p.id;
+      updatePayload.person_id = p.person_id;
+      patientBranchSetPerson = true;
+    }
+  }
+
+  if (patch.person_id !== undefined && !patientBranchSetPerson) {
+    if (patch.person_id === null) {
+      updatePayload.person_id = null;
+    } else {
+      await assertPersonInTenant(tid, patch.person_id);
+      updatePayload.person_id = patch.person_id.trim();
+    }
+  }
+
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_consultations")
@@ -129,5 +208,18 @@ export async function updateConsultationDraft(
 
   const loaded = await loadConsultationForTenant(tid, cid);
   if (!loaded) throw new Error("Could not load consultation after update.");
+
+  if ((patch.structured_data !== undefined || patch.patient_id !== undefined) && loaded.patient_id?.trim()) {
+    const sd =
+      loaded.structured_data && typeof loaded.structured_data === "object" && !Array.isArray(loaded.structured_data)
+        ? (loaded.structured_data as Record<string, unknown>)
+        : {};
+    await syncConsultationMedicalHairLossToPatientClinicalDetails({
+      tenantId: tid,
+      patientId: loaded.patient_id,
+      structuredData: sd,
+    });
+  }
+
   return loaded;
 }

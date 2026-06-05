@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CLINICAL_DETAILS_TEXT_MAX, isJsonObjectRecord } from "./clinicalDetailsPolicy";
+import { HAIRLINE_PATTERN_VALUES, LUDWIG_SCALE_VALUES, NORWOOD_SCALE_VALUES } from "./hairLossScales";
 
 const jsonObjectSchema = z
   .unknown()
@@ -33,6 +34,32 @@ function boundedText(max: number, field: string) {
     });
 }
 
+function preprocessEmptyStringToNull(v: unknown): unknown {
+  if (v === "") return null;
+  return v;
+}
+
+function optionalNorwoodScale() {
+  return z.preprocess(
+    preprocessEmptyStringToNull,
+    z.union([z.null(), z.enum(NORWOOD_SCALE_VALUES as unknown as [string, ...string[]])]).optional()
+  );
+}
+
+function optionalLudwigScale() {
+  return z.preprocess(
+    preprocessEmptyStringToNull,
+    z.union([z.null(), z.enum(LUDWIG_SCALE_VALUES as unknown as [string, ...string[]])]).optional()
+  );
+}
+
+function optionalHairlinePattern() {
+  return z.preprocess(
+    preprocessEmptyStringToNull,
+    z.union([z.null(), z.enum(HAIRLINE_PATTERN_VALUES as unknown as [string, ...string[]])]).optional()
+  );
+}
+
 export const patientClinicalDetailsPatchBodySchema = z
   .object({
     adminKey: z.string().optional(),
@@ -52,6 +79,10 @@ export const patientClinicalDetailsPatchBodySchema = z
       CLINICAL_DETAILS_TEXT_MAX.previous_hair_treatments,
       "previous_hair_treatments"
     ),
+    norwood_scale: optionalNorwoodScale(),
+    ludwig_scale: optionalLudwigScale(),
+    hairline_pattern: optionalHairlinePattern(),
+    primary_concern: boundedText(CLINICAL_DETAILS_TEXT_MAX.primary_concern, "primary_concern"),
     clinical_flags: jsonObjectSchema,
     metadata: jsonObjectSchema,
   })

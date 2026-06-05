@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ConsultationOsCreatePage } from "@/src/components/fi-admin/consultations/ConsultationOsCreatePage";
+import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
@@ -16,5 +17,7 @@ export default async function ConsultationOsNewRoutePage({ params }: { params: P
 
   await assertFiTenantPortalAccess(tenantId);
 
-  return <ConsultationOsCreatePage tenantId={tenantId} />;
+  const showCrmNav = await getCrmShellNavAllowed(tenantId.trim());
+
+  return <ConsultationOsCreatePage tenantId={tenantId.trim()} showCrmNav={showCrmNav} />;
 }

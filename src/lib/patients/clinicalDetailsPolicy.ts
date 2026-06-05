@@ -2,6 +2,8 @@
  * Pure policy for Stage 4B patient clinical details: bounds, JSON object shape, editable keys.
  */
 
+import { isHairlinePatternValue, isLudwigScaleValue, isNorwoodScaleValue } from "./hairLossScales";
+
 export const CLINICAL_DETAILS_TEXT_MAX: Record<string, number> = {
   primary_hair_concern: 300,
   treatment_interest: 300,
@@ -13,6 +15,10 @@ export const CLINICAL_DETAILS_TEXT_MAX: Record<string, number> = {
   contraindications: 1500,
   scalp_conditions: 1500,
   previous_hair_treatments: 1500,
+  norwood_scale: 16,
+  ludwig_scale: 8,
+  hairline_pattern: 40,
+  primary_concern: 500,
 } as const;
 
 export const EDITABLE_CLINICAL_DETAIL_TEXT_KEYS = [
@@ -26,6 +32,10 @@ export const EDITABLE_CLINICAL_DETAIL_TEXT_KEYS = [
   "contraindications",
   "scalp_conditions",
   "previous_hair_treatments",
+  "norwood_scale",
+  "ludwig_scale",
+  "hairline_pattern",
+  "primary_concern",
 ] as const;
 
 export type EditableClinicalDetailTextKey = (typeof EDITABLE_CLINICAL_DETAIL_TEXT_KEYS)[number];
@@ -49,6 +59,10 @@ export type EditableClinicalDetailsPayload = {
   contraindications: string | null;
   scalp_conditions: string | null;
   previous_hair_treatments: string | null;
+  norwood_scale: string | null;
+  ludwig_scale: string | null;
+  hairline_pattern: string | null;
+  primary_concern: string | null;
   clinical_flags: Record<string, unknown>;
   metadata: Record<string, unknown>;
 };
@@ -105,6 +119,10 @@ export function normalizeEditableClinicalDetailsPayload(input: Record<string, un
     contraindications: null,
     scalp_conditions: null,
     previous_hair_treatments: null,
+    norwood_scale: null,
+    ludwig_scale: null,
+    hairline_pattern: null,
+    primary_concern: null,
     clinical_flags: {},
     metadata: {},
   };
@@ -114,6 +132,16 @@ export function normalizeEditableClinicalDetailsPayload(input: Record<string, un
     const raw = input[key];
     const norm = normalizeClinicalTextInput(raw == null ? null : String(raw));
     out[key] = assertClinicalTextWithinBounds(key, norm);
+  }
+
+  if (out.norwood_scale != null && !isNorwoodScaleValue(out.norwood_scale)) {
+    throw new Error("Invalid norwood_scale.");
+  }
+  if (out.ludwig_scale != null && !isLudwigScaleValue(out.ludwig_scale)) {
+    throw new Error("Invalid ludwig_scale.");
+  }
+  if (out.hairline_pattern != null && !isHairlinePatternValue(out.hairline_pattern)) {
+    throw new Error("Invalid hairline_pattern.");
   }
 
   if ("clinical_flags" in input) {

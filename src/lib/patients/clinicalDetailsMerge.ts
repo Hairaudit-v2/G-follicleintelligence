@@ -19,6 +19,10 @@ export function mergeClinicalDetailsPatch(
     "contraindications",
     "scalp_conditions",
     "previous_hair_treatments",
+    "norwood_scale",
+    "ludwig_scale",
+    "hairline_pattern",
+    "primary_concern",
     "clinical_flags",
     "metadata",
   ] as const;

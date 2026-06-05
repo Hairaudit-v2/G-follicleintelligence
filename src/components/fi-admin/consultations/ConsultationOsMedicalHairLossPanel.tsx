@@ -1,5 +1,6 @@
 import { FiSection } from "@/src/components/fi-design/FiSection";
 
+import { ClinicalHairLossScaleFields } from "@/src/components/fi/patients/ClinicalHairLossScaleFields";
 import { LabeledTextInput, type ConsultationOsSectionBinder } from "./consultationOsPreviewFields";
 
 const FIELDS = [
@@ -14,7 +15,18 @@ const FIELDS = [
 export function ConsultationOsMedicalHairLossPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Hair loss (medical)" headingId="consultation-os-med-hair-loss-heading">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="space-y-4">
+        <ClinicalHairLossScaleFields
+          values={{
+            norwood_scale: values.norwood_scale ?? "",
+            ludwig_scale: values.ludwig_scale ?? "",
+            hairline_pattern: values.hairline_pattern ?? "",
+            primary_concern: values.primary_concern ?? "",
+          }}
+          onFieldChange={onFieldChange}
+          disabled={disabled}
+        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {FIELDS.map((f) => (
           <LabeledTextInput
             key={f.key}
@@ -25,6 +37,7 @@ export function ConsultationOsMedicalHairLossPanel({ values, onFieldChange, disa
             disabled={disabled}
           />
         ))}
+        </div>
       </div>
     </FiSection>
   );
