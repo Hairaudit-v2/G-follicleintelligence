@@ -1,7 +1,7 @@
 import "server-only";
 
-import { loadCrmShellScopePickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import type { CrmShellClinicOption, CrmShellStaffPickerOption } from "@/src/lib/crm/types";
 import {
   calendarRangeIsoForQuery,
   parseCalendarSearchParams,
@@ -17,7 +17,7 @@ import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.se
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 
 export type CalendarResources = {
-  assignees: CrmShellUserPickerOption[];
+  assignees: CrmShellStaffPickerOption[];
   clinics: CrmShellClinicOption[];
 };
 
@@ -30,7 +30,7 @@ export type CalendarViewData = {
   bookings: FiBookingRow[];
   /** Day key → bookings for client grid (serialisable). */
   buckets: Record<string, FiBookingRow[]>;
-  assignees: CrmShellUserPickerOption[];
+  assignees: CrmShellStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   listTruncated: boolean;
   /** Human-readable range heading for the toolbar (clinic-local when tenant timezone is set). */
@@ -41,10 +41,7 @@ export type CalendarViewData = {
 
 export async function loadCalendarResources(tenantId: string): Promise<CalendarResources> {
   const tid = tenantId.trim();
-  const [assignees, scope] = await Promise.all([
-    loadCrmShellUserPickerOptions(tid),
-    loadCrmShellScopePickerOptions(tid),
-  ]);
+  const [assignees, scope] = await Promise.all([loadCrmShellStaffPickerOptions(tid), loadCrmShellScopePickerOptions(tid)]);
   return { assignees, clinics: scope.clinics };
 }
 
@@ -61,7 +58,8 @@ export async function loadCalendarBookings(
     rangeEndIso,
     status: query.status,
     bookingType: query.bookingType,
-    assignedUserId: query.assignedUserId,
+    assignedStaffId: query.staffId,
+    assignedUserId: query.staffId ? null : query.assignedUserId,
     clinicId: query.clinicId,
     includeCancelled: query.includeCancelled,
   });

@@ -232,6 +232,7 @@ describe("Stage 4A — patient profile foundation (pure)", () => {
         patient_id: "pat1",
         case_id: null,
         clinic_id: null,
+        assigned_staff_id: null,
         assigned_user_id: null,
         booking_type: "consultation",
         booking_status: "completed",

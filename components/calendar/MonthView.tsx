@@ -557,7 +557,7 @@ function MonthViewInner({
         );
       }
     },
-    [calendarRoute, monthAnchor, onNavigateMonth, query, router, tenantId]
+    [calendarRoute, gridConfig.timeZone, monthAnchor, onNavigateMonth, query, router, tenantId]
   );
 
   const openDay = useCallback(

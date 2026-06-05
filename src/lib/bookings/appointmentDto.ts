@@ -27,6 +27,8 @@ export type CalendarAppointment = {
   startAt: string;
   endAt: string;
   durationMinutes: number;
+  /** `fi_staff.id` when set; calendar column assignment. */
+  assignedStaffId: string | null;
   providerId: string | null;
   clinicId: string | null;
   location: string | null;
@@ -68,6 +70,7 @@ export function mapBookingToCalendarAppointment(row: FiBookingRow): CalendarAppo
     startAt: row.start_at,
     endAt: row.end_at,
     durationMinutes: bookingDurationMinutes(row),
+    assignedStaffId: row.assigned_staff_id,
     providerId: row.assigned_user_id,
     clinicId: row.clinic_id,
     location: row.location,
@@ -106,6 +109,7 @@ export function mapCalendarAppointmentToBookingRow(
     title: appt.title,
     start_at: appt.startAt,
     end_at: appt.endAt,
+    assigned_staff_id: appt.assignedStaffId ?? null,
     assigned_user_id: appt.providerId,
     clinic_id: appt.clinicId,
     location: appt.location,

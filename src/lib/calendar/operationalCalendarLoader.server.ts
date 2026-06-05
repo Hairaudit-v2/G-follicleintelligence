@@ -25,7 +25,7 @@ export type {
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption, CrmShellStaffPickerOption } from "@/src/lib/crm/types";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";

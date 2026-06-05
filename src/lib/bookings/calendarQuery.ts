@@ -46,6 +46,8 @@ export type ParsedCalendarQuery = {
   status: string | null;
   bookingType: string | null;
   assignedUserId: string | null;
+  /** `fi_staff.id` filter (calendar / bookings). */
+  staffId: string | null;
   clinicId: string | null;
   includeCancelled: boolean;
   /** Substring match against title, type, patient/lead label (server-side). */
@@ -118,6 +120,9 @@ export function parseCalendarSearchParams(
   const assignedRaw = firstString(searchParams.assignedUserId).trim();
   const assignedUserId = assignedRaw && isUuid(assignedRaw) ? assignedRaw : null;
 
+  const staffRaw = firstString(searchParams.staffId).trim();
+  const staffId = staffRaw && isUuid(staffRaw) ? staffRaw : null;
+
   const clinicRaw = firstString(searchParams.clinicId).trim();
   const clinicId = clinicRaw && isUuid(clinicRaw) ? clinicRaw : null;
 
@@ -136,6 +141,7 @@ export function parseCalendarSearchParams(
     status,
     bookingType,
     assignedUserId,
+    staffId,
     clinicId,
     includeCancelled,
     search,
@@ -149,6 +155,7 @@ export type CalendarHrefQuery = {
   status?: string;
   type?: string;
   assignedUserId?: string;
+  staffId?: string;
   clinicId?: string;
   includeCancelled?: boolean;
   q?: string;
@@ -170,6 +177,7 @@ export function buildCalendarHref(
   if (q.status?.trim()) sp.set("status", q.status.trim());
   if (q.type?.trim()) sp.set("type", q.type.trim());
   if (q.assignedUserId?.trim()) sp.set("assignedUserId", q.assignedUserId.trim());
+  if (q.staffId?.trim()) sp.set("staffId", q.staffId.trim());
   if (q.clinicId?.trim()) sp.set("clinicId", q.clinicId.trim());
   if (q.includeCancelled) sp.set("includeCancelled", "1");
   if (q.q?.trim()) sp.set("q", q.q.trim());
@@ -186,6 +194,7 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
     status: patch.status !== undefined ? patch.status : current.status ?? undefined,
     type: patch.type !== undefined ? patch.type : current.bookingType ?? undefined,
     assignedUserId: patch.assignedUserId !== undefined ? patch.assignedUserId : current.assignedUserId ?? undefined,
+    staffId: patch.staffId !== undefined ? patch.staffId : current.staffId ?? undefined,
     clinicId: patch.clinicId !== undefined ? patch.clinicId : current.clinicId ?? undefined,
     includeCancelled: patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
     q: patch.q !== undefined ? patch.q : current.search ?? undefined,

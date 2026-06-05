@@ -49,7 +49,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
     const { date, appointments } = await listCalendarAppointments({
       tenantId,
       date: query.date,
-      providerId: query.provider,
+      staffId: query.staff,
+      providerId: query.staff ? null : query.provider,
       procedure: query.procedure,
       clinicId: query.clinicId,
       includeCancelled: query.includeCancelled,
@@ -58,6 +59,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
     return crmJsonOk({
       date,
       providerId: query.provider ?? null,
+      staffId: query.staff ?? null,
       appointments,
     });
   } catch (e) {
@@ -76,7 +78,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
     const parsed = appointmentCreateBodySchema.parse(body);
     const createdByUserId = await tryResolveFiUserIdForTenant(tenantId, req);
-    const providerId = resolveProviderId(parsed);
+    const providerId = parsed.staffId?.trim() ? undefined : resolveProviderId(parsed);
     const procedureMeta = procedureDetailsToMetadata(parsed.procedureDetails);
 
     const appointment = await createCalendarAppointment({
@@ -84,6 +86,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       procedure: parsed.procedure,
       startAt: parsed.startAt,
       endAt: parsed.endAt,
+      ...(parsed.staffId !== undefined ? { assignedStaffId: parsed.staffId } : {}),
       providerId: providerId ?? null,
       clinicId: parsed.clinicId ?? null,
       leadId: parsed.leadId ?? null,

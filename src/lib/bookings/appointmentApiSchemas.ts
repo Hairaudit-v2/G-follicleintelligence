@@ -42,6 +42,7 @@ export const appointmentListQuerySchema = z
       .min(1, "date is required (YYYY-MM-DD).")
       .refine((v) => parseUtcCalendarDateString(v) != null, "date must be YYYY-MM-DD."),
     provider: optionalUuid,
+    staff: optionalUuid,
     procedure: procedureSchema.optional().nullable(),
     clinicId: optionalUuid,
     includeCancelled: z.boolean().optional(),
@@ -50,12 +51,14 @@ export const appointmentListQuerySchema = z
 
 export function parseAppointmentListQuery(searchParams: URLSearchParams): z.infer<typeof appointmentListQuerySchema> {
   const providerRaw = searchParams.get("provider") ?? searchParams.get("providerId") ?? searchParams.get("assignedUserId");
+  const staffRaw = searchParams.get("staff") ?? searchParams.get("staffId");
   const procedureRaw =
     searchParams.get("procedure") ?? searchParams.get("type") ?? searchParams.get("bookingType");
 
   return appointmentListQuerySchema.parse({
     date: searchParams.get("date") ?? "",
     provider: providerRaw?.trim() || null,
+    staff: staffRaw?.trim() || null,
     procedure: procedureRaw?.trim() || null,
     clinicId: searchParams.get("clinicId")?.trim() || null,
     includeCancelled: parseBoolParam(searchParams.get("includeCancelled")),
@@ -72,6 +75,7 @@ export const appointmentCreateBodySchema = z
     provider: optionalUuid,
     providerId: optionalUuid,
     assignedUserId: optionalUuid,
+    staffId: optionalUuid,
     clinicId: optionalUuid,
     leadId: optionalUuid,
     personId: optionalUuid,
@@ -110,6 +114,7 @@ export const appointmentRescheduleBodySchema = z
     provider: optionalUuid,
     providerId: optionalUuid,
     assignedUserId: optionalUuid,
+    staffId: optionalUuid,
     clinicId: optionalUuid,
     procedure: procedureSchema.optional(),
     status: z.enum(BOOKING_STATUS_NON_TERMINAL).optional(),
@@ -127,6 +132,7 @@ export const appointmentRescheduleBodySchema = z
       val.provider !== undefined ||
       val.providerId !== undefined ||
       val.assignedUserId !== undefined ||
+      val.staffId !== undefined ||
       val.clinicId !== undefined ||
       val.procedure != null ||
       val.status != null ||

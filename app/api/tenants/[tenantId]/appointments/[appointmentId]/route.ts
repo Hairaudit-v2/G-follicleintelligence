@@ -44,7 +44,7 @@ export async function PATCH(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
 
     const parsed = appointmentRescheduleBodySchema.parse(body);
-    const providerId = resolveProviderId(parsed);
+    const providerId = parsed.staffId !== undefined ? undefined : resolveProviderId(parsed);
     const procedureMeta = procedureDetailsToMetadata(parsed.procedureDetails);
 
     const appointment = await rescheduleCalendarAppointment({
@@ -52,6 +52,7 @@ export async function PATCH(
       appointmentId,
       startAt: parsed.startAt,
       endAt: parsed.endAt,
+      assignedStaffId: parsed.staffId,
       providerId,
       clinicId: parsed.clinicId,
       procedure: parsed.procedure,

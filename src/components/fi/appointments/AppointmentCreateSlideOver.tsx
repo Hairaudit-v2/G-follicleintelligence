@@ -12,13 +12,15 @@ import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentP
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCreateTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption, CrmShellStaffPickerOption } from "@/src/lib/crm/types";
+import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
 import {
   endLocalFromStartLocalAndProcedure,
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
 } from "@/src/components/fi/bookings/bookingFormUtils";
 import { appointmentCardClass } from "./shared";
+import { staffPickerUserMap } from "./staffPickerMap";
 
 export function AppointmentCreateSlideOver({
   tenantId,
@@ -31,7 +33,7 @@ export function AppointmentCreateSlideOver({
 }: {
   tenantId: string;
   prefill: AppointmentCreatePrefill;
-  assignees: CrmShellUserPickerOption[];
+  assignees: CrmShellStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   existingBookings: FiBookingRow[];
   onClose: () => void;
@@ -46,7 +48,9 @@ export function AppointmentCreateSlideOver({
   const [title, setTitle] = useState(prefill.title ?? "");
   const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(prefill.startIso));
   const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(prefill.endIso));
-  const [assignee, setAssignee] = useState(prefill.assignedUserId ?? "");
+  const staffIdToUserId = useMemo(() => staffPickerUserMap(assignees), [assignees]);
+
+  const [assignee, setAssignee] = useState(prefill.assignedStaffId ?? prefill.assignedUserId ?? "");
   const [clinicId, setClinicId] = useState(prefill.clinicId ?? "");
   const [location, setLocation] = useState("");
 
@@ -55,7 +59,7 @@ export function AppointmentCreateSlideOver({
     setTitle(prefill.title ?? "");
     setStartLocal(toDatetimeLocalValue(prefill.startIso));
     setEndLocal(toDatetimeLocalValue(prefill.endIso));
-    setAssignee(prefill.assignedUserId ?? "");
+    setAssignee(prefill.assignedStaffId ?? prefill.assignedUserId ?? "");
     setClinicId(prefill.clinicId ?? "");
     setError(null);
   }, [prefill]);
@@ -80,11 +84,14 @@ export function AppointmentCreateSlideOver({
       setAvailabilityHint("Set valid start and end times to check availability.");
       return false;
     }
+    const staffId = assignee.trim() || null;
     const r = checkAppointmentAvailability({
       candidateStartIso: startIso,
       candidateEndIso: endIso,
-      assignedUserId: assignee.trim() || null,
+      candidateStaffId: staffId,
+      candidateUserId: null,
       existing: existingBookings,
+      staffIdToUserId,
       bufferMinutes: DEFAULT_APPOINTMENT_BUFFER_MINUTES,
     });
     if (!r.ok) {
@@ -104,11 +111,14 @@ export function AppointmentCreateSlideOver({
       setError("Start and end times are required.");
       return;
     }
+    const staffId = assignee.trim() || null;
     const avail = checkAppointmentAvailability({
       candidateStartIso: startIso,
       candidateEndIso: endIso,
-      assignedUserId: assignee.trim() || null,
+      candidateStaffId: staffId,
+      candidateUserId: null,
       existing: existingBookings,
+      staffIdToUserId,
       bufferMinutes: DEFAULT_APPOINTMENT_BUFFER_MINUTES,
     });
     if (!avail.ok) {
@@ -135,7 +145,8 @@ export function AppointmentCreateSlideOver({
         title: title.trim() || null,
         startAt: startIso,
         endAt: endIso,
-        assignedUserId: assignee.trim() || null,
+        assignedStaffId: assignee.trim() || null,
+        assignedUserId: null,
         clinicId: clinicId.trim() || null,
         location: location.trim() || null,
         timezone: null,
@@ -228,7 +239,7 @@ export function AppointmentCreateSlideOver({
             <option value="">Unassigned</option>
             {assignees.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.email?.trim() || u.id.slice(0, 8)}
+                {staffOptionPrimaryLabel(u)}
               </option>
             ))}
           </select>

@@ -30,7 +30,13 @@ function baseRow(
     Partial<
       Pick<
         FiBookingRow,
-        "location" | "assigned_user_id" | "clinic_id" | "metadata" | "description" | "timezone"
+        | "location"
+        | "assigned_staff_id"
+        | "assigned_user_id"
+        | "clinic_id"
+        | "metadata"
+        | "description"
+        | "timezone"
       >
     >
 ): FiBookingRow {
@@ -43,6 +49,7 @@ function baseRow(
     patient_id: null,
     case_id: null,
     clinic_id: partial.clinic_id ?? null,
+    assigned_staff_id: partial.assigned_staff_id ?? null,
     assigned_user_id: partial.assigned_user_id ?? null,
     booking_type: partial.booking_type,
     booking_status: partial.booking_status,

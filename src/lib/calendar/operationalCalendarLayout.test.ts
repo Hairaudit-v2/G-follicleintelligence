@@ -15,6 +15,7 @@ function row(p: Partial<FiBookingRow> & Pick<FiBookingRow, "id" | "start_at" | "
     patient_id: null,
     case_id: null,
     clinic_id: null,
+    assigned_staff_id: null,
     assigned_user_id: null,
     booking_type: "consultation",
     booking_status: "scheduled",

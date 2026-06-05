@@ -245,7 +245,7 @@ function WeekViewInner({
     const top = (nowMin - gridStart) * calendarPxPerMinute();
     const target = Math.max(0, top - el.clientHeight * 0.28);
     el.scrollTo({ top: target, behavior: "auto" });
-  }, [gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc, gridConfig.timeZone, primaryLane?.dayKey]);
+  }, [gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc, gridConfig.timeZone, primaryLane]);
 
   const navigateCalendar = useCallback(
     (patch: Parameters<typeof mergeCalendarHrefQuery>[1]) => {

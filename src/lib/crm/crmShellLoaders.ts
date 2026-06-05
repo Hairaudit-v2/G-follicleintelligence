@@ -33,6 +33,7 @@ import type {
   CrmShellClinicOption,
   CrmShellLeadListPage,
   CrmShellOrgOption,
+  CrmShellStaffPickerOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
   FiCrmLeadCommunicationRow,
@@ -194,6 +195,37 @@ export async function loadCrmShellUserPickerOptions(tenantId: string): Promise<C
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as { id: string; email: string | null }[];
   return rows.map((r) => ({ id: String(r.id), email: r.email != null ? String(r.email) : null }));
+}
+
+export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<CrmShellStaffPickerOption[]> {
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id")
+    .eq("tenant_id", tenantId.trim())
+    .eq("is_active", true)
+    .order("full_name", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((raw) => {
+    const r = raw as {
+      id: string;
+      full_name: string;
+      staff_role: string;
+      email: string | null;
+      mobile: string | null;
+      calendar_color: string | null;
+      fi_user_id: string | null;
+    };
+    return {
+      id: String(r.id),
+      full_name: String(r.full_name ?? "").trim() || "Staff",
+      staff_role: String(r.staff_role ?? "consultant").trim() || "consultant",
+      email: r.email != null ? String(r.email) : null,
+      mobile: r.mobile != null ? String(r.mobile) : null,
+      calendar_color: r.calendar_color != null ? String(r.calendar_color) : null,
+      fi_user_id: r.fi_user_id != null ? String(r.fi_user_id) : null,
+    };
+  });
 }
 
 export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<{

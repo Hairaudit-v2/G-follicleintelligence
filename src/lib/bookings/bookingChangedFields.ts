@@ -14,6 +14,7 @@ export type BookingDetailComparableSnapshot = {
   timezone: string | null;
   location: string | null;
   clinic_id: string | null;
+  assigned_staff_id: string | null;
   assigned_user_id: string | null;
   lead_id: string | null;
   person_id: string | null;
@@ -49,6 +50,7 @@ export function bookingDetailSnapshotFromRowLike(row: FiBookingRow): BookingDeta
     timezone: normText(row.timezone),
     location: normText(row.location),
     clinic_id: normUuid(row.clinic_id),
+    assigned_staff_id: normUuid(row.assigned_staff_id),
     assigned_user_id: normUuid(row.assigned_user_id),
     lead_id: normUuid(row.lead_id),
     person_id: normUuid(row.person_id),
@@ -68,6 +70,7 @@ const TRACKED: (keyof BookingDetailComparableSnapshot)[] = [
   "timezone",
   "location",
   "clinic_id",
+  "assigned_staff_id",
   "assigned_user_id",
   "lead_id",
   "person_id",

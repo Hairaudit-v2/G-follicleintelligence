@@ -13,6 +13,7 @@ function booking(partial: Partial<FiBookingRow> & { id: string; start_at: string
     patient_id: null,
     case_id: null,
     clinic_id: null,
+    assigned_staff_id: null,
     assigned_user_id: null,
     booking_type: partial.booking_type ?? "consultation",
     booking_status: partial.booking_status ?? "scheduled",

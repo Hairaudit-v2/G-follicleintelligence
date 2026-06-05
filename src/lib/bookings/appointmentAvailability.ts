@@ -3,6 +3,42 @@ import type { FiBookingRow } from "./types";
 
 export const DEFAULT_APPOINTMENT_BUFFER_MINUTES = 15;
 
+export type BookingAssigneeIdentity =
+  | { kind: "unassigned" }
+  | { kind: "staff"; staffId: string; linkedUserId: string | null }
+  | { kind: "user"; userId: string };
+
+export function bookingAssigneeIdentity(
+  row: FiBookingRow,
+  staffIdToUserId: Map<string, string | null>
+): BookingAssigneeIdentity {
+  const sid = row.assigned_staff_id?.trim() || null;
+  const uid = row.assigned_user_id?.trim() || null;
+  if (sid) {
+    const linked = staffIdToUserId.has(sid) ? staffIdToUserId.get(sid) ?? null : null;
+    return { kind: "staff", staffId: sid, linkedUserId: linked?.trim() || null };
+  }
+  if (uid) return { kind: "user", userId: uid };
+  return { kind: "unassigned" };
+}
+
+export function bookingAssigneeIdentitiesMatch(
+  a: BookingAssigneeIdentity,
+  b: BookingAssigneeIdentity
+): boolean {
+  if (a.kind === "unassigned" && b.kind === "unassigned") return true;
+  if (a.kind === "unassigned" || b.kind === "unassigned") return false;
+  if (a.kind === "staff" && b.kind === "staff") return a.staffId === b.staffId;
+  if (a.kind === "staff" && b.kind === "user") {
+    return Boolean(a.linkedUserId && a.linkedUserId === b.userId);
+  }
+  if (a.kind === "user" && b.kind === "staff") {
+    return Boolean(b.linkedUserId && b.linkedUserId === a.userId);
+  }
+  if (a.kind === "user" && b.kind === "user") return a.userId === b.userId;
+  return false;
+}
+
 export type AppointmentAvailabilityResult =
   | { ok: true }
   | { ok: false; message: string; conflictingBookingId: string | null };
@@ -18,14 +54,17 @@ function overlapsWithBuffer(
 }
 
 /**
- * Checks whether a candidate slot conflicts with existing bookings for the same assignee (or all staff when unassigned).
+ * Checks whether a candidate slot conflicts with existing bookings for the same assignee
+ * (staff id, linked fi_users, or legacy user-only rows). Unassigned overlaps only unassigned.
  * Applies buffer time before/after each existing booking.
  */
 export function checkAppointmentAvailability(args: {
   candidateStartIso: string;
   candidateEndIso: string;
-  assignedUserId: string | null;
+  candidateStaffId: string | null;
+  candidateUserId: string | null;
   existing: FiBookingRow[];
+  staffIdToUserId: Map<string, string | null>;
   excludeBookingId?: string | null;
   bufferMinutes?: number;
 }): AppointmentAvailabilityResult {
@@ -36,16 +75,25 @@ export function checkAppointmentAvailability(args: {
   }
 
   const bufferMs = Math.max(0, (args.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES) * 60_000);
-  const assignee = args.assignedUserId?.trim() || null;
   const exclude = args.excludeBookingId?.trim() || null;
+
+  const sid = args.candidateStaffId?.trim() || null;
+  const uid = args.candidateUserId?.trim() || null;
+  const candidateIdentity: BookingAssigneeIdentity = sid
+    ? {
+        kind: "staff",
+        staffId: sid,
+        linkedUserId: args.staffIdToUserId.get(sid)?.trim() || null,
+      }
+    : uid
+      ? { kind: "user", userId: uid }
+      : { kind: "unassigned" };
 
   for (const b of args.existing) {
     if (exclude && b.id === exclude) continue;
     if (isBookingCancelled(b) || b.booking_status === "completed") continue;
-    const bAssignee = b.assigned_user_id?.trim() || null;
-    if (assignee && bAssignee && assignee !== bAssignee) continue;
-    if (assignee && !bAssignee) continue;
-    if (!assignee && bAssignee) continue;
+    const bIdentity = bookingAssigneeIdentity(b, args.staffIdToUserId);
+    if (!bookingAssigneeIdentitiesMatch(candidateIdentity, bIdentity)) continue;
 
     const bStart = Date.parse(b.start_at);
     const bEnd = Date.parse(b.end_at);

@@ -111,11 +111,14 @@ function DraggableCalendarEvent({
       const newStartIso = new Date(newStartMs).toISOString();
       const newEndIso = new Date(newStartMs + durationMs).toISOString();
 
+      const staffId = booking.assigned_staff_id?.trim() || null;
       const avail = checkAppointmentAvailability({
         candidateStartIso: newStartIso,
         candidateEndIso: newEndIso,
-        assignedUserId: booking.assigned_user_id,
+        candidateStaffId: staffId,
+        candidateUserId: staffId ? null : booking.assigned_user_id?.trim() || null,
         existing: allBookings,
+        staffIdToUserId: new Map(),
         excludeBookingId: booking.id,
         bufferMinutes: DEFAULT_APPOINTMENT_BUFFER_MINUTES,
       });

@@ -8,6 +8,8 @@ import {
   updateBooking,
 } from "./bookings";
 import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "./appointmentAvailability";
+import { loadStaffFiUserIdMap, resolveBookingStaffAssignment } from "@/src/lib/staff/staff.server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   endIsoFromStartAndProcedure,
   defaultProcedureDurationMinutes,
@@ -51,6 +53,8 @@ export type ListCalendarAppointmentsParams = {
   tenantId: string;
   date: string;
   providerId?: string | null;
+  /** `fi_staff.id` — takes precedence over `providerId` when both are set. */
+  staffId?: string | null;
   procedure?: string | null;
   clinicId?: string | null;
   includeCancelled?: boolean;
@@ -67,7 +71,8 @@ export async function listCalendarAppointments(
     tenantId: params.tenantId,
     rangeStartIso,
     rangeEndIso,
-    assignedUserId: params.providerId?.trim() || null,
+    assignedStaffId: params.staffId?.trim() || null,
+    assignedUserId: params.staffId?.trim() ? null : params.providerId?.trim() || null,
     bookingType: params.procedure?.trim() || null,
     clinicId: params.clinicId?.trim() || null,
     includeCancelled: params.includeCancelled ?? false,
@@ -76,11 +81,21 @@ export async function listCalendarAppointments(
   return { date, appointments: mapBookingsToCalendarAppointments(rows) };
 }
 
+function collectStaffIdsForAvailability(rows: FiBookingRow[], candidateStaffId: string | null): string[] {
+  const s = new Set<string>();
+  if (candidateStaffId?.trim()) s.add(candidateStaffId.trim());
+  for (const b of rows) {
+    if (b.assigned_staff_id?.trim()) s.add(b.assigned_staff_id.trim());
+  }
+  return Array.from(s);
+}
+
 async function assertSlotAvailable(args: {
   tenantId: string;
   startAt: string;
   endAt: string;
-  assignedUserId: string | null;
+  candidateStaffId: string | null;
+  candidateUserId: string | null;
   excludeBookingId?: string | null;
 }): Promise<void> {
   const { rangeStartIso, rangeEndIso } = utcCalendarDayRangeIso(
@@ -98,15 +113,19 @@ async function assertSlotAvailable(args: {
     tenantId: args.tenantId,
     rangeStartIso: padStart,
     rangeEndIso: padEnd,
-    assignedUserId: args.assignedUserId,
     includeCancelled: false,
   });
+
+  const staffIds = collectStaffIdsForAvailability(existing, args.candidateStaffId);
+  const staffIdToUserId = await loadStaffFiUserIdMap(args.tenantId, staffIds, supabaseAdmin());
 
   const result = checkAppointmentAvailability({
     candidateStartIso: args.startAt,
     candidateEndIso: args.endAt,
-    assignedUserId: args.assignedUserId,
+    candidateStaffId: args.candidateStaffId,
+    candidateUserId: args.candidateUserId,
     existing,
+    staffIdToUserId,
     excludeBookingId: args.excludeBookingId,
     bufferMinutes: DEFAULT_APPOINTMENT_BUFFER_MINUTES,
   });
@@ -140,6 +159,8 @@ export type CreateCalendarAppointmentParams = {
   procedure: string;
   startAt: string;
   endAt?: string;
+  /** `fi_staff.id` (preferred assignee for conflicts + display). */
+  assignedStaffId?: string | null;
   providerId?: string | null;
   clinicId?: string | null;
   leadId?: string | null;
@@ -163,14 +184,20 @@ export async function createCalendarAppointment(
   const procedure = params.procedure.trim();
   const startAt = params.startAt.trim();
   const endAt = params.endAt?.trim() || endIsoFromStartAndProcedure(startAt, procedure);
-  const providerId = params.providerId?.trim() || null;
+
+  const supabase = supabaseAdmin();
+  const assign = await resolveBookingStaffAssignment(supabase, params.tenantId, {
+    assignedStaffId: params.assignedStaffId,
+    assignedUserId: params.providerId,
+  });
 
   if (!params.skipAvailabilityCheck) {
     await assertSlotAvailable({
       tenantId: params.tenantId,
       startAt,
       endAt,
-      assignedUserId: providerId,
+      candidateStaffId: assign.assigned_staff_id,
+      candidateUserId: assign.assigned_user_id,
     });
   }
 
@@ -184,7 +211,8 @@ export async function createCalendarAppointment(
     patientId: params.patientId ?? null,
     caseId: params.caseId ?? null,
     clinicId: params.clinicId ?? null,
-    assignedUserId: providerId,
+    assignedStaffId: assign.assigned_staff_id,
+    assignedUserId: assign.assigned_user_id,
     bookingType: procedure,
     title: params.title?.trim() || defaultTitle,
     description: params.description ?? null,
@@ -206,7 +234,6 @@ export async function createCalendarAppointment(
       patientId: row.patient_id,
       caseId: row.case_id,
       clinicId: row.clinic_id,
-      assignedUserId: row.assigned_user_id,
       bookingType: row.booking_type,
       bookingStatus: desiredStatus,
       title: row.title,
@@ -227,6 +254,7 @@ export type RescheduleCalendarAppointmentParams = {
   appointmentId: string;
   startAt?: string;
   endAt?: string;
+  assignedStaffId?: string | null;
   providerId?: string | null;
   clinicId?: string | null;
   procedure?: string;
@@ -262,15 +290,28 @@ export async function rescheduleCalendarAppointment(
     }
   }
 
-  const providerId =
-    params.providerId !== undefined ? params.providerId?.trim() || null : existing.assigned_user_id;
+  const supabase = supabaseAdmin();
+  let nextStaff = existing.assigned_staff_id;
+  let nextUser = existing.assigned_user_id;
+  if (params.assignedStaffId !== undefined) {
+    const r = await resolveBookingStaffAssignment(supabase, params.tenantId, {
+      assignedStaffId: params.assignedStaffId,
+      assignedUserId: null,
+    });
+    nextStaff = r.assigned_staff_id;
+    nextUser = r.assigned_user_id;
+  } else if (params.providerId !== undefined) {
+    nextStaff = null;
+    nextUser = params.providerId?.trim() || null;
+  }
 
   if (!params.skipAvailabilityCheck) {
     await assertSlotAvailable({
       tenantId: params.tenantId,
       startAt: nextStart,
       endAt: nextEnd,
-      assignedUserId: providerId,
+      candidateStaffId: nextStaff,
+      candidateUserId: nextUser,
       excludeBookingId: existing.id,
     });
   }
@@ -280,7 +321,7 @@ export async function rescheduleCalendarAppointment(
     metadata = mergeCreateMetadata(metadata, params.procedureMetadataPatch);
   }
 
-  const updated = await updateBooking({
+  const updatePayload: Parameters<typeof updateBooking>[0] = {
     tenantId: params.tenantId,
     bookingId: params.appointmentId,
     leadId: existing.lead_id,
@@ -288,7 +329,6 @@ export async function rescheduleCalendarAppointment(
     patientId: existing.patient_id,
     caseId: existing.case_id,
     clinicId: params.clinicId !== undefined ? params.clinicId : existing.clinic_id,
-    assignedUserId: providerId,
     bookingType: params.procedure ?? undefined,
     bookingStatus: params.status ?? undefined,
     title: params.title !== undefined ? params.title : existing.title,
@@ -298,7 +338,14 @@ export async function rescheduleCalendarAppointment(
     timezone: existing.timezone,
     location: params.location !== undefined ? params.location : existing.location,
     metadata,
-  });
+  };
+  if (params.assignedStaffId !== undefined) {
+    updatePayload.assignedStaffId = params.assignedStaffId;
+  } else if (params.providerId !== undefined) {
+    updatePayload.assignedUserId = params.providerId?.trim() || null;
+  }
+
+  const updated = await updateBooking(updatePayload);
 
   return mapBookingToCalendarAppointment(updated);
 }
