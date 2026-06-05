@@ -56,3 +56,17 @@ export async function assertCrmShellPageAccess(tenantId: string): Promise<CrmShe
 
   return { authUserId: authId, fiUserId: row.id, role: row.role };
 }
+
+/**
+ * Same membership check as {@link assertCrmShellPageAccess} without redirect — for server actions
+ * and other callers that need an explicit null when unauthorised.
+ */
+export async function getCrmShellSessionIfAllowed(tenantId: string): Promise<CrmShellSession | null> {
+  const tid = tenantId.trim();
+  if (!tid) return null;
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return null;
+  const row = await loadFiUserRow(tid, authId);
+  if (!row || !isCrmShellNavRole(row.role)) return null;
+  return { authUserId: authId, fiUserId: row.id, role: row.role };
+}

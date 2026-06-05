@@ -11,7 +11,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadPipelineStages } from "@/src/lib/crm/pipeline";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { loadUpcomingReminderJobsForTenantRange } from "@/src/lib/reminders/reminderJobs.server";
+import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 
 /** Days in current pipeline stage before a lead appears on the dashboard stale list. */
 export const DEFAULT_STALE_LEAD_STAGE_DAYS = 7;
@@ -110,9 +110,17 @@ const dashboardReminderItemSchema = z.object({
   status: z.string(),
   templateName: z.string(),
   templateType: z.string(),
-  bookingId: z.string().uuid(),
+  bookingId: z.string().uuid().nullable(),
   bookingTitle: z.string().nullable(),
-  bookingStartAt: z.string(),
+  bookingStartAt: z.string().nullable(),
+  bookingTimezone: z.string().nullable(),
+  leadId: z.string().uuid().nullable(),
+  patientId: z.string().uuid().nullable(),
+  recipientLabel: z.string(),
+  clinicalSummaryLine: z.string().nullable(),
+  bookingAssigneeFiUserId: z.string().uuid().nullable(),
+  leadPrimaryOwnerFiUserId: z.string().uuid().nullable(),
+  detailHref: z.string(),
 });
 
 export type DashboardReminderItem = z.infer<typeof dashboardReminderItemSchema>;
@@ -431,6 +439,17 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
   });
 }
 
+const UPCOMING_REMINDER_ROW_CAP = 10;
+const UPCOMING_REMINDER_HORIZON_DAYS = 7;
+
+async function loadUpcomingReminders(tenantId: string, now: Date): Promise<DashboardReminderItem[]> {
+  const raw = await loadOperationalDashboardReminderJobs(tenantId, now, {
+    horizonDays: UPCOMING_REMINDER_HORIZON_DAYS,
+    limit: UPCOMING_REMINDER_ROW_CAP,
+  });
+  return raw.map((r) => dashboardReminderItemSchema.parse(r));
+}
+
 /**
  * Tenant-scoped operational snapshot for the FI Admin home dashboard (service role).
  */
@@ -451,14 +470,12 @@ export async function loadTenantOperationalDashboard(
   if (!tenantRes.data) throw new Error("Tenant not found");
   const tenantName = String((tenantRes.data as { name?: string }).name ?? "").trim() || tid;
 
-  const agendaRange = computeOperationalAgendaUtcRange(now);
-
   const [agenda, staleLeads, tasksDue, quickStats, upcomingReminders] = await Promise.all([
     loadAgendaBookings(tid, now),
     loadStaleLeads(tid, staleDays, now),
     loadTasksDue(tid, viewerFiUserId, now),
     loadQuickStats(tid, now),
-    loadUpcomingReminderJobsForTenantRange(tid, agendaRange.startIso, agendaRange.endIso, 24),
+    loadUpcomingReminders(tid, now),
   ]);
 
   return tenantOperationalDashboardSchema.parse({

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CrmShellLeadListItem } from "@/src/lib/crm/types";
 import { leadTitleFromRow, personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
+import { useCrmLeadSlideOverOptional } from "./LeadSlideOver";
 
 function fmtTs(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -16,6 +17,7 @@ export function CrmLeadListTable({
   tenantId: string;
   items: CrmShellLeadListItem[];
 }) {
+  const slide = useCrmLeadSlideOverOptional();
   return (
     <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow-sm">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -36,12 +38,29 @@ export function CrmLeadListTable({
             const href = `/fi-admin/${tenantId}/crm/leads/${row.lead.id}`;
             const personLabel = row.person ? personMetadataDisplayLabel(row.person.metadata) : "—";
             const patientBit = row.patient ? ` · Patient ${row.patient.id.slice(0, 8)}…` : "";
+            const title = leadTitleFromRow(row.lead.summary, row.lead.id);
             return (
               <tr key={row.lead.id} className="hover:bg-gray-50">
                 <td className="px-3 py-2">
-                  <Link href={href} className="font-medium text-blue-700 hover:underline">
-                    {leadTitleFromRow(row.lead.summary, row.lead.id)}
-                  </Link>
+                  {slide ? (
+                    <button
+                      type="button"
+                      className="text-left font-medium text-blue-700 hover:underline"
+                      onClick={(e) => {
+                        if (e.ctrlKey || e.metaKey) {
+                          window.open(href, "_blank", "noopener,noreferrer");
+                          return;
+                        }
+                        slide.openLead(row.lead.id);
+                      }}
+                    >
+                      {title}
+                    </button>
+                  ) : (
+                    <Link href={href} className="font-medium text-blue-700 hover:underline">
+                      {title}
+                    </Link>
+                  )}
                 </td>
                 <td className="px-3 py-2 text-gray-700">
                   {personLabel}

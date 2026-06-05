@@ -80,8 +80,8 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | Leads (`fi_crm_leads`) + person anchor | **Completed** | Lead tied to `fi_persons`; optional `patient_id`, `case_id`, stage, owner. |
 | Stage history (analytics-ready) | **Completed** | `fi_crm_lead_stage_history` append-only. |
 | Lead list + filters + pagination | **Completed** | `/fi-admin/[tenantId]/crm` — table view with search, owner, stage, **updated date range**, sort, page size. |
-| **Kanban / board by stage (MVP)** | **Completed** | List \| Board toggle; columns = tenant pipeline stages; drag or menu move → `crmMoveLeadStageAction` / `moveCrmLeadToStage` (history + activity); clinical/Norwood hints, overdue tasks, high-priority badge; responsive column stack. |
-| Lead detail (notes, tasks, comms, activity) | **Completed / evolving** | Rich workflows in `src/components/fi/crm/*`; APIs under `/api/tenants/.../crm/leads/[leadId]/*`. |
+| **Kanban / board by stage (MVP)** | **Completed** | List \| Board toggle; columns = tenant pipeline stages; drag or menu move → `crmMoveLeadStageAction` / `moveCrmLeadToStage` (history + activity); clinical/Norwood hints, overdue tasks, high-priority badge; responsive column stack. **Lead slide-over:** `CrmLeadSlideOverProvider` + `LeadSlideOver` / `crmLoadLeadSlideOverBundleAction` — quick preview (person, `formatClinicalScalesSummary`, stage + history, activity, tasks, notes, upcoming reminders, basics edit, convert); card click opens drawer; long-press / ⋯ menu / ⌘-click → full page; list title row opens drawer. |
+| Lead detail (notes, tasks, comms, activity) | **Completed / evolving** | Rich workflows in `src/components/fi/crm/*`; APIs under `/api/tenants/.../crm/leads/[leadId]/*`. Slide-over reuses the same loaders/actions; full page remains source of truth for deep workflows. |
 | Lead → patient/case conversion | **Completed** | Policy-driven conversion (`crmLeadConversionPolicy`, API route `convert`). |
 | Sequences / marketing automation | **Missing** | No workflow engine, enrollments, or send-time scheduling. |
 | Email provider / webhooks | **Missing** | Communications are modeled in CRM tables/UI; full ESP integration is not evidenced as first-class. |
@@ -141,10 +141,10 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 
 ## Obvious Gaps for a Hair Clinic CRM
 
-1. **Pipeline UX** — **MVP kanban** is live under `/fi-admin/[tenantId]/crm?view=board` (drag between columns, refresh, filters). Deeper sales analytics (velocity, forecasting) remain future work.
+1. **Pipeline UX** — **MVP kanban** is live under `/fi-admin/[tenantId]/crm?view=board` (drag between columns, refresh, filters) plus **lead slide-over** for fast triage without leaving the board. Deeper sales analytics (velocity, forecasting) remain future work.
 2. **Marketing automation** — No lead scoring beyond manual fields, no sequences, no landing-page → CRM attribution loop inside this repo at product level.
 3. **Scheduling depth** — Bookings are **flat events**; missing **clinician/resource calendars**, **recurrence**, **waitlists**, and **patient self-booking** tied to real-time availability.
-4. **Engagement & reminders** — **MVP queue + templates** are in place (`fi_reminder_templates`, `fi_reminder_jobs`, cron processor stub); first-class **SMS/ESP delivery**, patient-facing consent UX polish, and **no-show analytics** remain.
+4. **Engagement & reminders** — **MVP queue + templates** are in place (`fi_reminder_templates`, `fi_reminder_jobs`, cron processor stub). **Tenant home** includes an **Upcoming reminders** widget (`loadUpcomingReminders` / `loadOperationalDashboardReminderJobs`): next **7 days**, cap **10** rows, **My vs All** (booking assignee + lead primary owner), **mark sent / cancel / reschedule** server actions with optimistic UI, **clinical scales** line on patient-linked rows, and deep links to patient/lead/case. First-class **SMS/ESP delivery**, patient-facing consent UX polish, and **no-show analytics** remain.
 5. **Trichoscopy / surgical planning math** — Norwood/Ludwig are **structured on patients**; **graft calculators** and imaging-linked trichoscopy workflows are not standardized in-app.
 6. **Reporting** — Data is **analytics-ready** (stage history, bookings timestamps); **in-app BI** (conversion rates, stage dwell, no-show rates) is largely **unbuilt**.
 7. **Security consistency** — Internal docs flag APIs that trust **`tenant_id` query params** without mirroring layout-level checks; closing this gap is essential before externalizing APIs.

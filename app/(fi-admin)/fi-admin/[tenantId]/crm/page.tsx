@@ -7,6 +7,7 @@ import { CrmLeadListFilters } from "@/src/components/fi/crm/CrmLeadListFilters";
 import { CrmLeadListPagination } from "@/src/components/fi/crm/CrmLeadListPagination";
 import { CrmLeadListTable } from "@/src/components/fi/crm/CrmLeadListTable";
 import { CrmPipelinePanel } from "@/src/components/fi/crm/CrmDataPanels";
+import { CrmLeadSlideOverProvider } from "@/src/components/fi/crm/LeadSlideOver";
 import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
 import {
   loadCrmShellLeadsBoardIndex,
@@ -54,7 +55,8 @@ export default async function CrmShellPage({
   const firstPageHref = buildCrmLeadListHref(tenantId, { ...parsedCrmLeadListToHrefQuery(query), page: 1 });
 
   return (
-    <div className={`mx-auto space-y-6 py-6 ${isBoard ? "max-w-[100rem] px-3 sm:px-4" : "max-w-6xl"}`}>
+    <CrmLeadSlideOverProvider tenantId={tenantId} operatorFiUserId={session.fiUserId} userRole={session.role}>
+      <div className={`mx-auto space-y-6 py-6 ${isBoard ? "max-w-[100rem] px-3 sm:px-4" : "max-w-6xl"}`}>
       <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-lg font-semibold text-gray-900">CRM — leads</h1>
@@ -155,5 +157,6 @@ export default async function CrmShellPage({
         clinics={scope.clinics}
       />
     </div>
+    </CrmLeadSlideOverProvider>
   );
 }

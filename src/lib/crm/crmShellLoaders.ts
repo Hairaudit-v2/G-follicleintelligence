@@ -13,11 +13,15 @@ import {
   loadCrmLeadCommunicationsForLead,
   loadCrmLeadConversionState,
   loadCrmLeadNotesForLead,
+  loadCrmLeadStageHistory,
   loadCrmLeadsShellPage,
   loadCrmMessagesForLead,
   loadCrmNotesForLead,
   loadCrmTasksForLead,
 } from "./server";
+import { loadReminderJobsForLead } from "@/src/lib/reminders/reminderJobs.server";
+import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
+import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type {
   CrmKanbanLeadCard,
@@ -30,6 +34,7 @@ import type {
   FiCrmLeadCommunicationRow,
   FiCrmLeadNoteRow,
   FiCrmLeadRow,
+  FiCrmLeadStageHistoryRow,
   FiCrmMessageRow,
   FiCrmNoteRow,
   FiCrmPipelineStageRow,
@@ -231,4 +236,55 @@ export async function loadCrmShellLeadDetailPageData(tenantId: string, leadId: s
     organisations: scope.organisations,
     clinics: scope.clinics,
   };
+}
+
+export type CrmLeadShellSlideOverPayload = {
+  detail: CrmLeadShellDetailPageData;
+  stages: FiCrmPipelineStageRow[];
+  stageHistory: FiCrmLeadStageHistoryRow[];
+  reminderJobs: FiReminderJobWithTemplate[];
+  clinicalScalesSummary: string | null;
+};
+
+async function loadClinicalScalesSummaryForPatient(tenantId: string, patientId: string): Promise<string | null> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const pid = patientId.trim();
+  const { data, error } = await supabase
+    .from("fi_patient_clinical_details")
+    .select("norwood_scale, ludwig_scale, hairline_pattern, primary_concern, primary_hair_concern")
+    .eq("tenant_id", tid)
+    .eq("patient_id", pid)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+  const r = data as Record<string, unknown>;
+  const primaryConcern = r.primary_concern != null ? String(r.primary_concern) : null;
+  const primaryHair = r.primary_hair_concern != null ? String(r.primary_hair_concern) : null;
+  return formatClinicalScalesSummary({
+    norwood_scale: r.norwood_scale != null ? String(r.norwood_scale) : null,
+    ludwig_scale: r.ludwig_scale != null ? String(r.ludwig_scale) : null,
+    hairline_pattern: r.hairline_pattern != null ? String(r.hairline_pattern) : null,
+    primary_concern: primaryConcern ?? primaryHair,
+  });
+}
+
+/**
+ * CRM lead slide-over: detail bundle + pipeline + stage history + reminder jobs + clinical summary (when patient linked).
+ * Call only after {@link assertCrmShellPageAccess} or equivalent gate.
+ */
+export async function loadCrmShellLeadSlideOverPayload(
+  tenantId: string,
+  leadId: string
+): Promise<CrmLeadShellSlideOverPayload | null> {
+  const detail = await loadCrmShellLeadDetailPageData(tenantId, leadId);
+  if (!detail.lead) return null;
+  const pid = detail.lead.patient_id?.trim() || null;
+  const [stages, stageHistory, reminderJobs, clinicalScalesSummary] = await Promise.all([
+    loadCrmShellPipelineStages(tenantId),
+    loadCrmLeadStageHistory(tenantId, leadId),
+    loadReminderJobsForLead(tenantId, leadId),
+    pid ? loadClinicalScalesSummaryForPatient(tenantId, pid) : Promise.resolve(null),
+  ]);
+  return { detail, stages, stageHistory, reminderJobs, clinicalScalesSummary };
 }

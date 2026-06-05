@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { Activity, AlertCircle, GripVertical, MoreHorizontal } from "lucide-react";
 import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
@@ -30,6 +32,8 @@ function fmtRelative(iso: string): string {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
+const LONG_PRESS_MS = 520;
+
 export function CrmLeadKanbanCard({
   tenantId,
   card,
@@ -37,6 +41,7 @@ export function CrmLeadKanbanCard({
   canMutate,
   onRequestMove,
   disabled,
+  onOpenPreview,
 }: {
   tenantId: string;
   card: CrmKanbanLeadCard;
@@ -44,17 +49,71 @@ export function CrmLeadKanbanCard({
   canMutate: boolean;
   onRequestMove: (leadId: string, toStageId: string) => void;
   disabled: boolean;
+  onOpenPreview?: (leadId: string) => void;
 }) {
+  const router = useRouter();
   const href = `/fi-admin/${tenantId}/crm/leads/${card.lead.id}`;
   const name = card.person ? personMetadataDisplayLabel(card.person.metadata) : "—";
   const nwShort = getNorwoodShortLabel(card.norwoodScale);
   const subtitle = card.primaryConcernLine ?? card.clinicalSummaryLine ?? card.lead.summary?.trim() ?? null;
   const ownerLabel = card.owner?.email ?? card.lead.primary_owner_user_id?.slice(0, 8) ?? "—";
 
+  const longPressArmed = useRef(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function clearLongPressTimer() {
+    if (longPressTimer.current != null) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }
+
   function onDragStart(e: React.DragEvent) {
     e.dataTransfer.setData("text/lead-id", card.lead.id);
     e.dataTransfer.effectAllowed = "move";
   }
+
+  function openFullPage() {
+    router.push(href);
+  }
+
+  function handleMainPointerDown() {
+    if (!onOpenPreview || disabled) return;
+    longPressArmed.current = false;
+    clearLongPressTimer();
+    longPressTimer.current = setTimeout(() => {
+      longPressTimer.current = null;
+      longPressArmed.current = true;
+      openFullPage();
+    }, LONG_PRESS_MS);
+  }
+
+  function handleMainPointerUpCancel() {
+    clearLongPressTimer();
+  }
+
+  function handleMainClick(e: React.MouseEvent) {
+    if (!onOpenPreview || disabled) return;
+    if (longPressArmed.current) {
+      longPressArmed.current = false;
+      return;
+    }
+    if (e.ctrlKey || e.metaKey) {
+      window.open(href, "_blank", "noopener,noreferrer");
+      return;
+    }
+    e.preventDefault();
+    onOpenPreview(card.lead.id);
+  }
+
+  function handleAuxClick(e: React.MouseEvent) {
+    if (e.button === 1) {
+      e.preventDefault();
+      window.open(href, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  const mainInteractive = Boolean(onOpenPreview) && !disabled;
 
   return (
     <motion.div layout layoutId={`kanban-${card.lead.id}`} className="touch-manipulation">
@@ -67,6 +126,7 @@ export function CrmLeadKanbanCard({
           {canMutate ? (
             <button
               type="button"
+              data-kanban-interactive
               draggable
               onDragStart={onDragStart}
               disabled={disabled}
@@ -76,12 +136,33 @@ export function CrmLeadKanbanCard({
               <GripVertical className="h-4 w-4" />
             </button>
           ) : null}
-          <div className="min-w-0 flex-1 p-2.5">
+          <div
+            className={`min-w-0 flex-1 p-2.5 ${mainInteractive ? "cursor-pointer" : ""}`}
+            role={mainInteractive ? "button" : undefined}
+            tabIndex={mainInteractive ? 0 : undefined}
+            onPointerDown={handleMainPointerDown}
+            onPointerUp={handleMainPointerUpCancel}
+            onPointerLeave={handleMainPointerUpCancel}
+            onPointerCancel={handleMainPointerUpCancel}
+            onClick={handleMainClick}
+            onAuxClick={handleAuxClick}
+            onKeyDown={(e) => {
+              if (!mainInteractive || !onOpenPreview) return;
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onOpenPreview(card.lead.id);
+              }
+            }}
+          >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <Link href={href} className="block font-medium text-blue-700 hover:underline">
-                  {name}
-                </Link>
+                {onOpenPreview ? (
+                  <span className="block font-medium text-blue-700">{name}</span>
+                ) : (
+                  <Link href={href} className="block font-medium text-blue-700 hover:underline">
+                    {name}
+                  </Link>
+                )}
                 <p className="truncate text-xs text-gray-500">{leadTitleFromRow(card.lead.summary, card.lead.id)}</p>
               </div>
               {nwShort ? (
@@ -110,7 +191,7 @@ export function CrmLeadKanbanCard({
             <p className="mt-1 truncate text-[11px] text-gray-500">Owner: {ownerLabel}</p>
           </div>
           {canMutate ? (
-            <div className="flex shrink-0 flex-col border-l border-gray-100">
+            <div className="flex shrink-0 flex-col border-l border-gray-100" data-kanban-interactive>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -123,6 +204,10 @@ export function CrmLeadKanbanCard({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
+                  <DropdownMenuItem asChild className="cursor-pointer text-sm">
+                    <Link href={href}>Open full page</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuLabel className="text-xs">Move to stage</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {stages.map((s) => (

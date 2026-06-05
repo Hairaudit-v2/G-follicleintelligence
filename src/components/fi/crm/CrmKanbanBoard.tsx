@@ -9,6 +9,7 @@ import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
 import type { CrmKanbanLeadCard } from "@/src/lib/crm/types";
 import type { CrmShellLeadListItem } from "@/src/lib/crm/types";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { useCrmLeadSlideOver } from "./LeadSlideOver";
 import { CrmKanbanColumn } from "./CrmKanbanColumn";
 import { CrmLeadKanbanCard } from "./CrmLeadKanbanCard";
 
@@ -34,6 +35,7 @@ export function CrmKanbanBoard({
   userRole: string;
 }) {
   const router = useRouter();
+  const { openLead } = useCrmLeadSlideOver();
   const [isPending, startTransition] = useTransition();
   const [cards, setCards] = useState<CrmKanbanLeadCard[]>(initialCards);
   const [dropStageId, setDropStageId] = useState<string | null>(null);
@@ -191,6 +193,7 @@ export function CrmKanbanBoard({
                   canMutate={canMutate}
                   onRequestMove={handleMove}
                   disabled={isPending}
+                  onOpenPreview={openLead}
                 />
               ))}
               {colCards.length === 0 ? (
@@ -218,6 +221,7 @@ export function CrmKanbanBoard({
                 canMutate={canMutate}
                 onRequestMove={handleMove}
                 disabled={isPending}
+                onOpenPreview={openLead}
               />
             ))}
             <p className="text-[11px] text-gray-500">Assign a pipeline stage from the lead detail page.</p>

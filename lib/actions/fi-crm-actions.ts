@@ -40,7 +40,9 @@ import {
   updateCrmLeadNote,
   updateCrmTask,
 } from "@/src/lib/crm/server";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
+import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
+import { loadCrmShellLeadSlideOverPayload, type CrmLeadShellSlideOverPayload } from "@/src/lib/crm/crmShellLoaders";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -475,6 +477,27 @@ export async function updateCrmLeadDetailsAction(
       fiAdminKey: parsed.adminKey ?? null,
     });
     return { ok: true, lead };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const crmLeadSlideOverLoadSchema = z.object({
+  tenantId: z.string().uuid(),
+  leadId: z.string().uuid(),
+});
+
+export async function crmLoadLeadSlideOverBundleAction(
+  tenantId: string,
+  leadId: string
+): Promise<{ ok: true; data: CrmLeadShellSlideOverPayload } | { ok: false; error: string }> {
+  try {
+    const parsed = crmLeadSlideOverLoadSchema.parse({ tenantId, leadId });
+    const session = await getCrmShellSessionIfAllowed(parsed.tenantId);
+    if (!session) return { ok: false, error: "Not signed in or CRM access denied for this tenant." };
+    const data = await loadCrmShellLeadSlideOverPayload(parsed.tenantId, parsed.leadId);
+    if (!data) return { ok: false, error: "Lead not found." };
+    return { ok: true, data };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

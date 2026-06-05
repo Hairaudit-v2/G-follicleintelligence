@@ -57,8 +57,8 @@ export function FiTenantOperationalHome(props: {
 
       <DashboardUpcomingReminders
         tenantId={data.tenantId}
-        agendaRange={data.agendaRange}
         items={data.upcomingReminders}
+        viewerFiUserId={data.viewerFiUserId}
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
