@@ -33,7 +33,6 @@ import type {
   CrmShellClinicOption,
   CrmShellLeadListPage,
   CrmShellOrgOption,
-  CrmShellStaffPickerOption,
   CrmShellUserPickerOption,
   FiCrmActivityEventRow,
   FiCrmLeadCommunicationRow,
@@ -78,6 +77,8 @@ export type CrmLeadShellBundle = {
 
 export type CrmLeadShellDetailPageData = CrmLeadShellBundle & {
   owners: CrmShellUserPickerOption[];
+  /** Active `fi_staff` for appointment create / availability hints. */
+  staffDirectory: CrmShellUserPickerOption[];
   organisations: CrmShellOrgOption[];
   clinics: CrmShellClinicOption[];
 };
@@ -197,11 +198,11 @@ export async function loadCrmShellUserPickerOptions(tenantId: string): Promise<C
   return rows.map((r) => ({ id: String(r.id), email: r.email != null ? String(r.email) : null }));
 }
 
-export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<CrmShellStaffPickerOption[]> {
+export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<CrmShellUserPickerOption[]> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff")
-    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id")
+    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id, default_timezone, working_hours")
     .eq("tenant_id", tenantId.trim())
     .eq("is_active", true)
     .order("full_name", { ascending: true });
@@ -215,15 +216,23 @@ export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<
       mobile: string | null;
       calendar_color: string | null;
       fi_user_id: string | null;
+      default_timezone: string | null;
+      working_hours: Record<string, unknown> | null;
     };
+    const wh =
+      r.working_hours && typeof r.working_hours === "object" && !Array.isArray(r.working_hours)
+        ? (r.working_hours as Record<string, unknown>)
+        : null;
     return {
       id: String(r.id),
-      full_name: String(r.full_name ?? "").trim() || "Staff",
-      staff_role: String(r.staff_role ?? "consultant").trim() || "consultant",
       email: r.email != null ? String(r.email) : null,
+      full_name: String(r.full_name ?? "").trim() || null,
+      staff_role: String(r.staff_role ?? "consultant").trim() || "consultant",
       mobile: r.mobile != null ? String(r.mobile) : null,
       calendar_color: r.calendar_color != null ? String(r.calendar_color) : null,
       fi_user_id: r.fi_user_id != null ? String(r.fi_user_id) : null,
+      default_timezone: r.default_timezone != null ? String(r.default_timezone).trim() || null : null,
+      working_hours: wh,
     };
   });
 }
@@ -261,14 +270,16 @@ export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<
 
 /** Lead detail page: bundle + owner/org/clinic pickers for the edit panel (Stage 2H). */
 export async function loadCrmShellLeadDetailPageData(tenantId: string, leadId: string): Promise<CrmLeadShellDetailPageData> {
-  const [bundle, owners, scope] = await Promise.all([
+  const [bundle, owners, staffDirectory, scope] = await Promise.all([
     loadCrmShellLeadBundle(tenantId, leadId),
     loadCrmShellUserPickerOptions(tenantId),
+    loadCrmShellStaffPickerOptions(tenantId),
     loadCrmShellScopePickerOptions(tenantId),
   ]);
   return {
     ...bundle,
     owners,
+    staffDirectory,
     organisations: scope.organisations,
     clinics: scope.clinics,
   };

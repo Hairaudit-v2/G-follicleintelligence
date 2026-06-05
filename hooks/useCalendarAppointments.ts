@@ -15,6 +15,7 @@ import {
   mergeBookingsWithSamples,
   mergeDisplayWithSamples,
 } from "@/lib/calendar/sampleAppointments";
+import { staffPickerUserMap } from "@/src/components/fi/appointments/staffPickerMap";
 import { bucketBookingsIntoCalendar } from "@/src/lib/bookings/calendarView";
 import { bookingConflictsForOperationalCalendar } from "@/src/lib/calendar/operationalCalendarLayout";
 import type {
@@ -25,6 +26,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 export type CalendarRescheduleMeta = {
   assignedUserId?: string | null;
+  assignedStaffId?: string | null;
   clinicId?: string | null;
   clearWaitlist?: boolean;
 };
@@ -125,6 +127,8 @@ export function useCalendarAppointments(
     router.refresh();
   }, [router]);
 
+  const staffIdToUserId = useMemo(() => staffPickerUserMap(data.staffDirectory), [data.staffDirectory]);
+
   const rescheduleBooking = useCallback(
     async (
       b: FiBookingRow,
@@ -132,9 +136,23 @@ export function useCalendarAppointments(
       endIso: string,
       meta?: CalendarRescheduleMeta
     ): Promise<CalendarRescheduleResult> => {
-      const assignedUserId =
-        meta && "assignedUserId" in meta ? (meta.assignedUserId ?? null) : b.assigned_user_id;
-      const clinicId = meta && "clinicId" in meta ? (meta.clinicId ?? null) : b.clinic_id;
+      let nextStaffId = b.assigned_staff_id;
+      let nextUserId = b.assigned_user_id;
+      let nextClinicId = b.clinic_id;
+
+      if (meta) {
+        if (Object.prototype.hasOwnProperty.call(meta, "assignedStaffId")) {
+          const sid = meta.assignedStaffId?.trim() || null;
+          nextStaffId = sid;
+          nextUserId = sid ? staffIdToUserId.get(sid) ?? null : null;
+        } else if (Object.prototype.hasOwnProperty.call(meta, "assignedUserId")) {
+          nextUserId = meta.assignedUserId?.trim() || null;
+          nextStaffId = null;
+        }
+        if (Object.prototype.hasOwnProperty.call(meta, "clinicId")) {
+          nextClinicId = meta.clinicId?.trim() || null;
+        }
+      }
 
       const useSamples = Boolean(options.useSampleData || data.query.sampleMode);
       const conflicts = bookingConflictsForOperationalCalendar(
@@ -142,13 +160,15 @@ export function useCalendarAppointments(
           id: b.id,
           start_at: startIso,
           end_at: endIso,
-          assigned_user_id: assignedUserId,
-          clinic_id: clinicId,
+          assigned_staff_id: nextStaffId,
+          assigned_user_id: nextUserId,
+          clinic_id: nextClinicId,
         },
         activeBookings,
         {
           ignoreBookingId: b.id,
           sameResourceColumnOverlapConflicts: useSamples,
+          staffIdToUserId,
         }
       );
       if (conflicts.length) {
@@ -173,8 +193,9 @@ export function useCalendarAppointments(
       const patch: CalendarReschedulePatch = {
         start_at: startIso,
         end_at: endIso,
-        assigned_user_id: assignedUserId,
-        clinic_id: clinicId,
+        assigned_staff_id: nextStaffId,
+        assigned_user_id: nextUserId,
+        clinic_id: nextClinicId,
         metadata: nextMetadata,
       };
 
@@ -186,15 +207,28 @@ export function useCalendarAppointments(
         return { ok: true };
       }
 
-      const r = await rescheduleCalendarAppointmentRequest({
+      const req: Parameters<typeof rescheduleCalendarAppointmentRequest>[0] = {
         tenantId: data.tenantId,
         appointmentId: b.id,
         startAt: startIso,
         endAt: endIso,
-        providerId: assignedUserId,
-        clinicId: clinicId,
         metadata: meta?.clearWaitlist ? nextMetadata : undefined,
-      });
+      };
+      if (meta && Object.prototype.hasOwnProperty.call(meta, "assignedStaffId")) {
+        req.staffId = nextStaffId;
+      }
+      if (
+        meta &&
+        Object.prototype.hasOwnProperty.call(meta, "assignedUserId") &&
+        !Object.prototype.hasOwnProperty.call(meta, "assignedStaffId")
+      ) {
+        req.providerId = nextUserId ?? null;
+      }
+      if (meta && Object.prototype.hasOwnProperty.call(meta, "clinicId")) {
+        req.clinicId = nextClinicId ?? undefined;
+      }
+
+      const r = await rescheduleCalendarAppointmentRequest(req);
 
       markPending(b.id, false);
 
@@ -214,6 +248,7 @@ export function useCalendarAppointments(
     },
     [
       activeBookings,
+      data.staffDirectory,
       data.query.sampleMode,
       data.tenantId,
       markPending,
@@ -221,6 +256,7 @@ export function useCalendarAppointments(
       patchBooking,
       refresh,
       replaceBooking,
+      staffIdToUserId,
     ]
   );
 

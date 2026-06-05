@@ -66,6 +66,8 @@ import type {
 
 export type WeekViewRescheduleMeta = {
   assignedUserId?: string | null;
+  /** `fi_staff.id` — when set (including `null`), drives staff + linked user on the server. */
+  assignedStaffId?: string | null;
   clinicId?: string | null;
   /** Clear waitlist flag when scheduling from the sidebar waitlist. */
   clearWaitlist?: boolean;
@@ -124,9 +126,19 @@ function snapToQuarterHourModifier(): Modifier {
 }
 
 function assigneeFromColumn(column: CalendarColumn): WeekViewRescheduleMeta {
-  if (column.id.startsWith("u:")) return { assignedUserId: column.id.slice(2), clinicId: null };
-  if (column.id.startsWith("c:")) return { assignedUserId: null, clinicId: column.id.slice(2) };
-  return { assignedUserId: null, clinicId: null };
+  if (column.id.startsWith("s:")) {
+    return { assignedStaffId: column.id.slice(2) };
+  }
+  if (column.id.startsWith("u:")) {
+    return { assignedUserId: column.id.slice(2), clinicId: null };
+  }
+  if (column.id.startsWith("c:")) {
+    return { assignedStaffId: null, clinicId: column.id.slice(2) };
+  }
+  if (column.id === "unassigned") {
+    return { assignedStaffId: null, clinicId: null };
+  }
+  return {};
 }
 
 function WeekViewInner({

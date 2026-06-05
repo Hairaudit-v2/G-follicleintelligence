@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { PatientSlideOverProvider } from "@/src/components/fi/patients/PatientSlideOver";
-import { loadCrmShellScopePickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 
 export const dynamic = "force-dynamic";
@@ -15,9 +16,10 @@ type PatientsShellLayoutProps = {
 export default async function PatientsShellLayout({ children, params }: PatientsShellLayoutProps) {
   const { tenantId } = await params;
   const session = await getCrmShellPageSession(tenantId);
-  const [assignees, scope] = await Promise.all([
-    loadCrmShellUserPickerOptions(tenantId),
+  const [assignees, scope, calendarSettings] = await Promise.all([
+    loadCrmShellStaffPickerOptions(tenantId),
     loadCrmShellScopePickerOptions(tenantId),
+    loadTenantOperationalCalendarSettings(tenantId),
   ]);
 
   return (
@@ -33,6 +35,7 @@ export default async function PatientsShellLayout({ children, params }: Patients
         assignees={assignees}
         clinics={scope.clinics}
         existingBookings={[]}
+        calendarTimezone={calendarSettings.calendarTimezone}
       >
         {children}
       </AppointmentSlideOverProvider>

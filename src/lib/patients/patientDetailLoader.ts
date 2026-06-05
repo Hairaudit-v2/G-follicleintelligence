@@ -3,7 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadConsultationsForPatient } from "@/src/lib/consultations/consultationLoaders.server";
-import { loadCrmShellScopePickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import {
@@ -53,8 +54,10 @@ export type PatientDetailPayload = {
   lifetimeValueLabel: string;
   bookingRows: FiBookingRow[];
   groupingNowIso: string;
-  assignees: Awaited<ReturnType<typeof loadCrmShellUserPickerOptions>>;
+  assignees: Awaited<ReturnType<typeof loadCrmShellStaffPickerOptions>>;
   clinics: Awaited<ReturnType<typeof loadCrmShellScopePickerOptions>>["clinics"];
+  /** Tenant clinic clock for booking forms. */
+  calendarTimezone: string;
 };
 
 function buildTreatmentPlanSummary(
@@ -134,12 +137,13 @@ export async function loadPatientDetailPayload(
 
   const personLeadHistory = await loadPatientPersonLeadHistory(supabase, tid, personId, pid);
 
-  const [personCrmActivity, consultationsRaw, bookingRows, assignees, scope] = await Promise.all([
+  const [personCrmActivity, consultationsRaw, bookingRows, assignees, scope, calendarSettings] = await Promise.all([
     loadPersonCrmActivityForLeads(supabase, tid, pid, personLeadHistory),
     loadConsultationsForPatient(tid, pid, personId),
     loadPatientBookingRows(supabase, tid, pid),
-    loadCrmShellUserPickerOptions(tid),
+    loadCrmShellStaffPickerOptions(tid),
     loadCrmShellScopePickerOptions(tid),
+    loadTenantOperationalCalendarSettings(tid),
   ]);
 
   const bookingLikes: PatientDirectoryBookingLike[] = bookingRows.map((b) => ({
@@ -183,5 +187,6 @@ export async function loadPatientDetailPayload(
     groupingNowIso: nowIso,
     assignees,
     clinics: scope.clinics,
+    calendarTimezone: calendarSettings.calendarTimezone,
   };
 }

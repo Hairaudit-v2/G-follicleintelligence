@@ -8,5 +8,7 @@ export type AppointmentCreatePrefill = {
   startIso: string;
   endIso: string;
   assignedUserId: string | null;
+  /** `fi_staff.id` when known (scheduling). */
+  assignedStaffId?: string | null;
   clinicId: string | null;
 };

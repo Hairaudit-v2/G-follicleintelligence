@@ -61,9 +61,10 @@ export default async function CrmLeadShellPage({
       tenantId={tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
-      assignees={payload.detail.owners}
+      assignees={payload.detail.staffDirectory}
       clinics={payload.detail.clinics}
       existingBookings={payload.detail.leadBookings}
+      calendarTimezone={payload.calendarTimezone}
     >
       <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
         <CrmLeadDetailPageView

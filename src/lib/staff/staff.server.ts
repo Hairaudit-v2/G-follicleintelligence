@@ -156,3 +156,101 @@ export async function resolveBookingStaffAssignment(
   const uid = params.assignedUserId?.trim() || null;
   return { assigned_staff_id: null, assigned_user_id: uid };
 }
+
+export type FiStaffUpsertInput = {
+  full_name: string;
+  staff_role?: string;
+  email?: string | null;
+  mobile?: string | null;
+  default_timezone?: string | null;
+  working_hours?: Record<string, unknown>;
+  is_active?: boolean;
+  calendar_color?: string | null;
+  fi_user_id?: string | null;
+};
+
+async function assertFiUserBelongsToTenant(
+  supabase: SupabaseClient,
+  tenantId: string,
+  fiUserId: string
+): Promise<void> {
+  const tid = tenantId.trim();
+  const uid = fiUserId.trim();
+  const { data, error } = await supabase
+    .from("fi_users")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", uid)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("fi_user_id must be a fi_users row in this tenant.");
+}
+
+export async function insertFiStaff(
+  tenantId: string,
+  input: FiStaffUpsertInput,
+  client?: SupabaseClient
+): Promise<FiStaffRow> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const fiUserId = input.fi_user_id?.trim() || null;
+  if (fiUserId) await assertFiUserBelongsToTenant(supabase, tid, fiUserId);
+
+  const wh =
+    input.working_hours && typeof input.working_hours === "object" && !Array.isArray(input.working_hours)
+      ? input.working_hours
+      : {};
+  const payload = {
+    tenant_id: tid,
+    full_name: input.full_name.trim(),
+    staff_role: (input.staff_role ?? "consultant").trim() || "consultant",
+    email: input.email?.trim() || null,
+    mobile: input.mobile?.trim() || null,
+    default_timezone: input.default_timezone?.trim() || null,
+    working_hours: wh,
+    is_active: input.is_active !== false,
+    calendar_color: input.calendar_color?.trim() || null,
+    fi_user_id: fiUserId,
+  };
+
+  const { data, error } = await supabase.from("fi_staff").insert(payload).select("*").single();
+  if (error) throw new Error(error.message);
+  return mapStaffRow(data as Record<string, unknown>);
+}
+
+export async function updateFiStaff(
+  tenantId: string,
+  staffId: string,
+  patch: Partial<FiStaffUpsertInput>,
+  client?: SupabaseClient
+): Promise<FiStaffRow> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const sid = assertNonEmptyUuid(staffId, "staffId");
+  await assertFiStaffBelongsToTenant(supabase, tid, sid);
+
+  const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (patch.full_name !== undefined) row.full_name = String(patch.full_name ?? "").trim() || "Staff";
+  if (patch.staff_role !== undefined) row.staff_role = String(patch.staff_role ?? "consultant").trim() || "consultant";
+  if (patch.email !== undefined) row.email = patch.email?.trim() || null;
+  if (patch.mobile !== undefined) row.mobile = patch.mobile?.trim() || null;
+  if (patch.default_timezone !== undefined) row.default_timezone = patch.default_timezone?.trim() || null;
+  if (patch.working_hours !== undefined) {
+    const wh =
+      patch.working_hours && typeof patch.working_hours === "object" && !Array.isArray(patch.working_hours)
+        ? patch.working_hours
+        : {};
+    row.working_hours = wh;
+  }
+  if (patch.is_active !== undefined) row.is_active = Boolean(patch.is_active);
+  if (patch.calendar_color !== undefined) row.calendar_color = patch.calendar_color?.trim() || null;
+  if (patch.fi_user_id !== undefined) {
+    const fiUserId = patch.fi_user_id?.trim() || null;
+    if (fiUserId) await assertFiUserBelongsToTenant(supabase, tid, fiUserId);
+    row.fi_user_id = fiUserId;
+  }
+
+  const { data, error } = await supabase.from("fi_staff").update(row).eq("tenant_id", tid).eq("id", sid).select("*").single();
+  if (error) throw new Error(error.message);
+  return mapStaffRow(data as Record<string, unknown>);
+}

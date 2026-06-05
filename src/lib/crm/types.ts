@@ -198,17 +198,19 @@ export type FiCrmMessageRow = {
 };
 
 /** FI Admin CRM shell: tenant user row for owner filter dropdown (Stage 2F). */
-export type CrmShellUserPickerOption = { id: string; email: string | null };
-
-/** Clinic OS: schedulable staff row for booking / calendar pickers (`fi_staff`). */
-export type CrmShellStaffPickerOption = {
+export type CrmShellUserPickerOption = {
   id: string;
-  full_name: string;
-  staff_role: string;
   email: string | null;
-  mobile: string | null;
-  calendar_color: string | null;
-  fi_user_id: string | null;
+  /** When row is from `fi_staff` (scheduling pickers). */
+  full_name?: string | null;
+  staff_role?: string | null;
+  mobile?: string | null;
+  calendar_color?: string | null;
+  fi_user_id?: string | null;
+  /** Staff IANA zone for interpreting `working_hours` (optional). */
+  default_timezone?: string | null;
+  /** `fi_staff.working_hours` — e.g. `{ weekly: { mon: { start, end, enabled } } }`. */
+  working_hours?: Record<string, unknown> | null;
 };
 
 /** FI Admin CRM shell: organisation row for lead scope picker (Stage 2G). */

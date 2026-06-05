@@ -61,6 +61,7 @@ export default async function AppointmentDetailRoutePage({
       assignees={payload.assignees}
       clinics={payload.clinics}
       existingBookings={[payload.booking]}
+      calendarTimezone={payload.calendarTimezone}
     >
       <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
         <AppointmentDetailPageView

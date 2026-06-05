@@ -2,7 +2,11 @@
  * Pure layout helpers for FI Admin operational calendar (business-hour grid, clinic-local).
  */
 
-import { DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "@/src/lib/bookings/appointmentAvailability";
+import {
+  bookingAssigneeIdentity,
+  bookingAssigneeIdentitiesMatch,
+  DEFAULT_APPOINTMENT_BUFFER_MINUTES,
+} from "@/src/lib/bookings/appointmentAvailability";
 import { isBookingCancelled } from "@/src/lib/bookings/bookingPolicy";
 
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
@@ -110,13 +114,14 @@ export function snapIsoToBusinessSlotUtc(iso: string, cfg: BusinessGridConfig, d
 }
 
 export function bookingConflictsForOperationalCalendar(
-  candidate: { id: string; start_at: string; end_at: string; assigned_user_id: string | null; clinic_id: string | null },
+  candidate: Pick<FiBookingRow, "id" | "start_at" | "end_at" | "assigned_staff_id" | "assigned_user_id" | "clinic_id">,
   others: FiBookingRow[],
   opts?: {
     ignoreBookingId?: string;
     sameResourceColumnOverlapConflicts?: boolean;
     /** Minutes padded around each existing booking when testing overlap (matches server availability). */
     bufferMinutes?: number;
+    staffIdToUserId?: Map<string, string | null>;
   }
 ): FiBookingRow[] {
   const ignore = opts?.ignoreBookingId?.trim();
@@ -125,9 +130,10 @@ export function bookingConflictsForOperationalCalendar(
   if (!Number.isFinite(s) || !Number.isFinite(e) || e <= s) return [];
 
   const bufferMs = Math.max(0, (opts?.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES) * 60_000);
+  const staffMap = opts?.staffIdToUserId ?? new Map<string, string | null>();
 
-  const candidateAsRow = candidate as FiBookingRow;
-  const candCol = resourceColumnIdForBooking(candidateAsRow);
+  const candCol = resourceColumnIdForBooking(candidate as FiBookingRow);
+  const candIdentity = bookingAssigneeIdentity(candidate as FiBookingRow, staffMap);
 
   const out: FiBookingRow[] = [];
   for (const o of others) {
@@ -138,10 +144,7 @@ export function bookingConflictsForOperationalCalendar(
     if (!Number.isFinite(os) || !Number.isFinite(oe)) continue;
     if (!(s < oe + bufferMs && e + bufferMs > os)) continue;
 
-    const sameAssignee =
-      candidate.assigned_user_id?.trim() &&
-      o.assigned_user_id?.trim() &&
-      candidate.assigned_user_id.trim() === o.assigned_user_id.trim();
+    const sameAssignee = bookingAssigneeIdentitiesMatch(candIdentity, bookingAssigneeIdentity(o, staffMap));
     const sameClinic =
       candidate.clinic_id?.trim() &&
       o.clinic_id?.trim() &&
@@ -159,8 +162,9 @@ export function bookingConflictsForOperationalCalendar(
   return out;
 }
 
-/** Maps a booking to a resource column id (`u:…`, `c:…`, or `unassigned`) for day view. */
+/** Maps a booking to a resource column id (`s:…`, `u:…`, `c:…`, or `unassigned`) for day view. */
 export function resourceColumnIdForBooking(b: FiBookingRow): string {
+  if (b.assigned_staff_id?.trim()) return `s:${b.assigned_staff_id.trim()}`;
   if (b.assigned_user_id?.trim()) return `u:${b.assigned_user_id.trim()}`;
   if (b.clinic_id?.trim()) return `c:${b.clinic_id.trim()}`;
   return "unassigned";

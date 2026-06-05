@@ -15,7 +15,7 @@ export type OperationalCalendarBookingDisplay = {
 
 export type OperationalCalendarResourceColumn = {
   id: string;
-  kind: "fi_user" | "clinic" | "unassigned";
+  kind: "fi_staff" | "fi_user" | "clinic" | "unassigned";
   label: string;
   subtitle: string | null;
 };
@@ -32,7 +32,10 @@ export type OperationalCalendarPageData = {
   buckets: Record<string, FiBookingRow[]>;
   bookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
+  /** `fi_users` — booking drawers, quick call-in, and legacy user pickers. */
   assignees: CrmShellUserPickerOption[];
+  /** Active `fi_staff` — day columns, staff URL filter, overlap map (`staffId` → `fi_user_id`). */
+  staffDirectory: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   resourceColumns: OperationalCalendarResourceColumn[];
   gridConfig: BusinessGridConfig;

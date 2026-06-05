@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarX, ClipboardList, Percent, UserPlus } from "lucide-react";
+import { CalendarX, ClipboardList, Percent, UserPlus, Users } from "lucide-react";
 
 import type { TenantQuickStats } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { DashboardCard, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
@@ -23,10 +23,10 @@ export function DashboardQuickStats(props: {
         id="dash-stats-heading"
         kicker="Snapshot"
         title="Quick stats"
-        description="Counts for this tenant: new leads this calendar week (UTC), conversion from recent terminal stage moves, open consultations, and today's no-shows."
+        description={`Counts for this tenant: new leads this calendar week (UTC), conversion from recent terminal stage moves, open consultations, today's no-shows (UTC day), and distinct staff with clinic-local bookings today.`}
         className="mb-4"
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           label="New leads (week)"
           value={stats.newLeadsThisWeek}
@@ -43,7 +43,12 @@ export function DashboardQuickStats(props: {
           icon={<ClipboardList size={ICON} strokeWidth={1.75} />}
         />
         <StatCard
-          label="Today's no-shows"
+          label="Staff on duty (today)"
+          value={stats.staffOnDutyToday}
+          icon={<Users size={ICON} strokeWidth={1.75} />}
+        />
+        <StatCard
+          label={"Today's no-shows"}
           value={stats.todaysNoShows}
           icon={<CalendarX size={ICON} strokeWidth={1.75} />}
         />
@@ -58,7 +63,14 @@ export function DashboardQuickStats(props: {
         <Link className="text-[#22C1FF] underline-offset-2 hover:underline" href={`/fi-admin/${tenantId}/crm`}>
           CRM
         </Link>{" "}
-        for detail.
+        for detail.{" "}
+        <Link className="text-[#22C1FF] underline-offset-2 hover:underline" href={`/fi-admin/${tenantId}/staff`}>
+          Staff
+        </Link>{" "}
+        lists schedulable team. No-shows use the UTC calendar day; staff-on-duty counts distinct assignees with bookings
+        starting today in the tenant IANA timezone (
+        <code className="rounded bg-slate-800/60 px-1 text-[11px]">fi_tenant_settings.default_timezone</code>
+        ).
       </p>
     </DashboardCard>
   );

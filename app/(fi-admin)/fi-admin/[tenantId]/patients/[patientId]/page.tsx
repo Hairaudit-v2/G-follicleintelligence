@@ -74,6 +74,7 @@ export default async function PatientProfileRoutePage({
       assignees={payload.assignees}
       clinics={payload.clinics}
       existingBookings={payload.bookingRows}
+      calendarTimezone={payload.calendarTimezone}
     >
       <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
         <PatientDetailPageView

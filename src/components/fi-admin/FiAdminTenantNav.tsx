@@ -32,6 +32,7 @@ function buildNavItems(base: string, showCrmNav: boolean): NavItem[] {
   if (showCrmNav) {
     items.push(
       { href: `${base}/patients`, label: "Patients" },
+      { href: `${base}/staff`, label: "Staff" },
       { href: `${base}/crm`, label: "CRM" },
       { href: `${base}/bookings`, label: "Bookings" },
       { href: `${base}/calendar`, label: "Calendar" },

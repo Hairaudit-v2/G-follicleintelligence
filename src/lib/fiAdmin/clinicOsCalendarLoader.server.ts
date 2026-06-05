@@ -16,6 +16,7 @@ function todayUtcDayQuery(now: Date): ParsedCalendarQuery {
     status: null,
     bookingType: null,
     assignedUserId: null,
+    staffId: null,
     clinicId: null,
     includeCancelled: false,
     search: null,

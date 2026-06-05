@@ -3,6 +3,8 @@ import "server-only";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { calendarDateStringFromInstant, zonedMidnightUtcMs, zonedNextDayUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { CRM_TASK_ACTIVE_STATUS_VALUES } from "@/src/lib/crm/crmTaskPolicy";
@@ -101,6 +103,7 @@ const quickStatsSchema = z.object({
   conversionClosedLast30d: z.number().int().nonnegative(),
   openConsultations: z.number().int().nonnegative(),
   todaysNoShows: z.number().int().nonnegative(),
+  staffOnDutyToday: z.number().int().nonnegative(),
 });
 
 export type TenantQuickStats = z.infer<typeof quickStatsSchema>;
@@ -372,6 +375,14 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
   const dayStart = utcDayStart(now).toISOString();
   const dayEnd = addHours(utcDayStart(now), 24).toISOString();
 
+  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
+  const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
+  const localDayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone);
+  const localDayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone);
+  const localStartIso =
+    localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart;
+  const localEndIso = localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd;
+
   const stages = await loadPipelineStages(
     { tenantId: tid, organisationId: null, clinicId: null, pipelineKey: DEFAULT_CRM_PIPELINE_KEY },
     supabase
@@ -385,6 +396,7 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
     terminalHistRes,
     consultRes,
     noShowRes,
+    staffBookingsRes,
   ] = await Promise.all([
     supabase
       .from("fi_crm_leads")
@@ -412,12 +424,26 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
       .eq("booking_status", "no_show")
       .gte("start_at", dayStart)
       .lt("start_at", dayEnd),
+    supabase
+      .from("fi_bookings")
+      .select("assigned_staff_id")
+      .eq("tenant_id", tid)
+      .in("booking_status", ["scheduled", "confirmed", "arrived"])
+      .gte("start_at", localStartIso)
+      .lt("start_at", localEndIso)
+      .not("assigned_staff_id", "is", null),
   ]);
 
   if (newLeadsRes.error) throw new Error(newLeadsRes.error.message);
   if (consultRes.error) throw new Error(consultRes.error.message);
   if (noShowRes.error) throw new Error(noShowRes.error.message);
   if (terminalHistRes.error) throw new Error(terminalHistRes.error.message);
+  if (staffBookingsRes.error) throw new Error(staffBookingsRes.error.message);
+
+  const staffRows = (staffBookingsRes.data ?? []) as { assigned_staff_id: string | null }[];
+  const staffOnDutyToday = new Set(
+    staffRows.map((r) => r.assigned_staff_id?.trim()).filter((x): x is string => Boolean(x))
+  ).size;
 
   const hist = (terminalHistRes.data ?? []) as { lead_id: string; to_stage_id: string; changed_at: string }[];
   const lastOutcome = new Map<string, { to: string; at: string }>();
@@ -444,6 +470,7 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
     conversionClosedLast30d: closed,
     openConsultations: consultRes.count ?? 0,
     todaysNoShows: noShowRes.count ?? 0,
+    staffOnDutyToday,
   });
 }
 

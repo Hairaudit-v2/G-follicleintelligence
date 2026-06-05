@@ -109,7 +109,7 @@ export function CalendarPage({
         tenantId={data.tenantId}
         query={data.query}
         rangeTitle={data.rangeTitle}
-        assignees={data.assignees}
+        staffDirectory={data.staffDirectory}
         clinics={data.clinics}
         canMutateBookings={data.canMutateBookings}
         route={route}
@@ -169,7 +169,11 @@ export function CalendarPage({
                 canMutateBookings={data.canMutateBookings}
                 bookings={bookings}
                 highlightedColumnId={
-                  data.query.assignedUserId ? `u:${data.query.assignedUserId}` : null
+                  data.query.staffId
+                    ? `s:${data.query.staffId}`
+                    : data.query.assignedUserId
+                      ? `u:${data.query.assignedUserId}`
+                      : null
                 }
                 onSelectBooking={(b) => setDrawer(b)}
                 onRescheduleBooking={rescheduleBooking}

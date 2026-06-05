@@ -17,6 +17,7 @@ export type CalendarAppointmentsHydrateInput = {
 export type CalendarReschedulePatch = {
   start_at: string;
   end_at: string;
+  assigned_staff_id?: string | null;
   assigned_user_id?: string | null;
   clinic_id?: string | null;
   metadata?: FiBookingRow["metadata"];
@@ -83,6 +84,8 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
               ...b,
               start_at: patch.start_at,
               end_at: patch.end_at,
+              assigned_staff_id:
+                patch.assigned_staff_id !== undefined ? patch.assigned_staff_id : b.assigned_staff_id,
               assigned_user_id:
                 patch.assigned_user_id !== undefined ? patch.assigned_user_id : b.assigned_user_id,
               clinic_id: patch.clinic_id !== undefined ? patch.clinic_id : b.clinic_id,

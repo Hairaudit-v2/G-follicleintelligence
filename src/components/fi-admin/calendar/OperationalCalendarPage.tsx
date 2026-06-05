@@ -20,9 +20,10 @@ export function OperationalCalendarPage({
       tenantId={data.tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
-      assignees={data.assignees}
+      assignees={data.staffDirectory}
       clinics={data.clinics}
       existingBookings={data.bookings}
+      calendarTimezone={data.calendarTimezone}
     >
       {page}
     </AppointmentSlideOverProvider>

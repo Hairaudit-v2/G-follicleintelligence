@@ -13,6 +13,7 @@ import {
 } from "@/src/lib/bookings/calendarQuery";
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
 import { cn } from "@/lib/utils";
 
 const VIEW_OPTIONS: { id: CalendarViewMode; label: string }[] = [
@@ -26,7 +27,7 @@ export function CalendarTopControls({
   tenantId,
   query,
   rangeTitle,
-  assignees,
+  staffDirectory,
   clinics,
   canMutateBookings,
   route = "fi-admin",
@@ -34,7 +35,8 @@ export function CalendarTopControls({
   tenantId: string;
   query: ParsedCalendarQuery;
   rangeTitle: string;
-  assignees: CrmShellUserPickerOption[];
+  /** Active staff (`fi_staff.id`) for the staff URL filter — not the same as booking user assignees. */
+  staffDirectory: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   canMutateBookings: boolean;
   route?: CalendarRoute;
@@ -132,14 +134,19 @@ export function CalendarTopControls({
           <Users className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
           <span className="sr-only">Staff filter</span>
           <select
-            value={query.assignedUserId ?? ""}
-            onChange={(e) => navigate({ assignedUserId: e.target.value || undefined })}
+            value={query.staffId ?? ""}
+            onChange={(e) =>
+              navigate({
+                staffId: e.target.value || undefined,
+                assignedUserId: undefined,
+              })
+            }
             className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-slate-200 outline-none sm:max-w-[11rem] [color-scheme:dark]"
           >
             <option value="">All staff</option>
-            {assignees.map((a) => (
+            {staffDirectory.map((a) => (
               <option key={a.id} value={a.id}>
-                {a.email?.trim() || a.id.slice(0, 8)}
+                {staffOptionPrimaryLabel(a)}
               </option>
             ))}
           </select>

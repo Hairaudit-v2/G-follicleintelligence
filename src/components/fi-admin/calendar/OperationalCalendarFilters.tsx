@@ -9,6 +9,7 @@ import {
   allBookingTypeOptions,
 } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
 
 const FILTER_HEADING_ID = "operational-calendar-filters-heading";
 
@@ -20,10 +21,10 @@ const FILTER_FIELDS = {
     labelId: "operational-calendar-filter-status-label",
     label: "Status",
   },
-  assignedUserId: {
-    inputId: "operational-calendar-filter-clinician",
-    labelId: "operational-calendar-filter-clinician-label",
-    label: "Clinician",
+  staffId: {
+    inputId: "operational-calendar-filter-staff",
+    labelId: "operational-calendar-filter-staff-label",
+    label: "Staff",
   },
   clinicId: {
     inputId: "operational-calendar-filter-clinic",
@@ -40,12 +41,12 @@ const FILTER_FIELDS = {
 export function OperationalCalendarFilters({
   tenantId,
   query,
-  assignees,
+  staffDirectory,
   clinics,
 }: {
   tenantId: string;
   query: ParsedCalendarQuery;
-  assignees: CrmShellUserPickerOption[];
+  staffDirectory: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
 }) {
   const action = buildCalendarHref(tenantId, {
@@ -67,7 +68,7 @@ export function OperationalCalendarFilters({
       <input type="hidden" name="view" value={query.view} />
       <input type="hidden" name="date" value={query.dateAnchor} />
       {query.sampleMode ? <input type="hidden" name="sample" value="1" /> : null}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
         <label
           id={FILTER_FIELDS.q.labelId}
           htmlFor={FILTER_FIELDS.q.inputId}
@@ -125,21 +126,21 @@ export function OperationalCalendarFilters({
           </select>
         </label>
         <label
-          id={FILTER_FIELDS.assignedUserId.labelId}
-          htmlFor={FILTER_FIELDS.assignedUserId.inputId}
+          id={FILTER_FIELDS.staffId.labelId}
+          htmlFor={FILTER_FIELDS.staffId.inputId}
           className="block text-xs font-medium text-slate-700 dark:text-slate-300"
         >
-          {FILTER_FIELDS.assignedUserId.label}
+          {FILTER_FIELDS.staffId.label}
           <select
-            id={FILTER_FIELDS.assignedUserId.inputId}
-            name="assignedUserId"
-            defaultValue={query.assignedUserId ?? ""}
+            id={FILTER_FIELDS.staffId.inputId}
+            name="staffId"
+            defaultValue={query.staffId ?? ""}
             className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
-            <option value="">Anyone</option>
-            {assignees.map((u) => (
+            <option value="">All staff</option>
+            {staffDirectory.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.email?.trim() || u.id.slice(0, 8)}
+                {staffOptionPrimaryLabel(u)}
               </option>
             ))}
           </select>

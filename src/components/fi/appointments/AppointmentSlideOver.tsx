@@ -20,6 +20,7 @@ import {
   createCrmLeadNoteAction,
 } from "@/lib/actions/fi-crm-actions";
 import { defaultRangeIso, fromDatetimeLocalValue, toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
+import { DEFAULT_CALENDAR_TIMEZONE } from "@/src/lib/calendar/calendarTimezone";
 import {
   LeadActivityFeed,
   LeadNotesSection,
@@ -81,8 +82,8 @@ export function useAppointmentSlideOverOptional(): SlideOverCtx | null {
   return useContext(AppointmentSlideOverContext);
 }
 
-const defaultCreatePrefill = (): AppointmentCreatePrefill => {
-  const r = defaultRangeIso();
+const defaultCreatePrefillBase = (calendarTimezone: string): AppointmentCreatePrefill => {
+  const r = defaultRangeIso(calendarTimezone);
   return {
     leadId: null,
     personId: null,
@@ -93,6 +94,7 @@ const defaultCreatePrefill = (): AppointmentCreatePrefill => {
     startIso: r.start,
     endIso: r.end,
     assignedUserId: null,
+    assignedStaffId: null,
     clinicId: null,
   };
 };
@@ -105,6 +107,7 @@ export function AppointmentSlideOverProvider({
   assignees = [],
   clinics = [],
   existingBookings = [],
+  calendarTimezone = DEFAULT_CALENDAR_TIMEZONE,
 }: {
   tenantId: string;
   operatorFiUserId: string;
@@ -114,6 +117,8 @@ export function AppointmentSlideOverProvider({
   clinics?: CrmShellClinicOption[];
   /** Bookings in the visible range — used for availability + drag checks in calendar. */
   existingBookings?: FiBookingRow[];
+  /** Tenant clinic IANA zone for datetime-local fields in create / slide-over. */
+  calendarTimezone?: string;
 }) {
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
   const [createPrefill, setCreatePrefill] = useState<AppointmentCreatePrefill | null>(null);
@@ -123,18 +128,21 @@ export function AppointmentSlideOverProvider({
     setAppointmentId(id.trim());
   }, []);
 
-  const openCreateAppointment = useCallback((prefill?: Partial<AppointmentCreatePrefill>) => {
-    setAppointmentId(null);
-    const base = defaultCreatePrefill();
-    setCreatePrefill({
-      ...base,
-      ...prefill,
-      leadId: prefill?.leadId !== undefined ? prefill.leadId : base.leadId,
-      personId: prefill?.personId !== undefined ? prefill.personId : base.personId,
-      patientId: prefill?.patientId !== undefined ? prefill.patientId : base.patientId,
-      caseId: prefill?.caseId !== undefined ? prefill.caseId : base.caseId,
-    });
-  }, []);
+  const openCreateAppointment = useCallback(
+    (prefill?: Partial<AppointmentCreatePrefill>) => {
+      setAppointmentId(null);
+      const base = defaultCreatePrefillBase(calendarTimezone);
+      setCreatePrefill({
+        ...base,
+        ...prefill,
+        leadId: prefill?.leadId !== undefined ? prefill.leadId : base.leadId,
+        personId: prefill?.personId !== undefined ? prefill.personId : base.personId,
+        patientId: prefill?.patientId !== undefined ? prefill.patientId : base.patientId,
+        caseId: prefill?.caseId !== undefined ? prefill.caseId : base.caseId,
+      });
+    },
+    [calendarTimezone]
+  );
 
   const close = useCallback(() => {
     setAppointmentId(null);
@@ -171,6 +179,7 @@ export function AppointmentSlideOverProvider({
         assignees={assignees}
         clinics={clinics}
         existingBookings={existingBookings}
+        calendarTimezone={calendarTimezone}
         onCreated={(id) => {
           setCreatePrefill(null);
           setAppointmentId(id);
@@ -191,6 +200,7 @@ function AppointmentSlideOverShell({
   assignees,
   clinics,
   existingBookings,
+  calendarTimezone,
   onCreated,
 }: {
   tenantId: string;
@@ -203,6 +213,7 @@ function AppointmentSlideOverShell({
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   existingBookings: FiBookingRow[];
+  calendarTimezone: string;
   onCreated: (bookingId: string) => void;
 }) {
   if (!open) return null;
@@ -238,6 +249,7 @@ function AppointmentSlideOverShell({
               assignees={assignees}
               clinics={clinics}
               existingBookings={existingBookings}
+              tenantCalendarTimezone={calendarTimezone}
               onClose={onClose}
               onCreated={onCreated}
             />
@@ -271,10 +283,10 @@ function syncProcedureForm(payload: AppointmentSlideOverPayload) {
   };
 }
 
-function syncScheduleForm(booking: AppointmentSlideOverPayload["booking"]) {
+function syncScheduleForm(booking: AppointmentSlideOverPayload["booking"], calendarTimezone: string) {
   return {
-    startLocal: toDatetimeLocalValue(booking.start_at),
-    endLocal: toDatetimeLocalValue(booking.end_at),
+    startLocal: toDatetimeLocalValue(booking.start_at, calendarTimezone),
+    endLocal: toDatetimeLocalValue(booking.end_at, calendarTimezone),
     bookingStatus: booking.booking_status,
   };
 }
@@ -371,7 +383,7 @@ export function AppointmentSlideOverPanel({
       setSurgeonUserId(proc.surgeonUserId);
       setConsultantUserId(proc.consultantUserId);
       setTechUserId(proc.techUserId);
-      const sched = syncScheduleForm(r.data.booking);
+      const sched = syncScheduleForm(r.data.booking, r.data.calendarTimezone);
       setStartLocal(sched.startLocal);
       setEndLocal(sched.endLocal);
       setBookingStatus(sched.bookingStatus);
@@ -418,7 +430,7 @@ export function AppointmentSlideOverPanel({
       setSurgeonUserId(proc.surgeonUserId);
       setConsultantUserId(proc.consultantUserId);
       setTechUserId(proc.techUserId);
-      const sched = syncScheduleForm(r.data.booking);
+      const sched = syncScheduleForm(r.data.booking, r.data.calendarTimezone);
       setStartLocal(sched.startLocal);
       setEndLocal(sched.endLocal);
       setBookingStatus(sched.bookingStatus);
@@ -431,9 +443,11 @@ export function AppointmentSlideOverPanel({
 
   async function onRescheduleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!booking || !canMutate || isBookingCancelled(booking) || booking.booking_status === "completed") return;
-    const startIso = fromDatetimeLocalValue(startLocal);
-    const endIso = fromDatetimeLocalValue(endLocal);
+    if (!booking || !payload || !canMutate || isBookingCancelled(booking) || booking.booking_status === "completed")
+      return;
+    const tz = payload.calendarTimezone;
+    const startIso = fromDatetimeLocalValue(startLocal, tz);
+    const endIso = fromDatetimeLocalValue(endLocal, tz);
     if (!startIso || !endIso) {
       setRescheduleErr("Start and end times are required.");
       return;

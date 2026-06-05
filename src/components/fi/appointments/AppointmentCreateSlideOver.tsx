@@ -12,7 +12,8 @@ import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentP
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCreateTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { CrmShellClinicOption, CrmShellStaffPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { buildStaffBookingAvailabilityHint } from "@/src/lib/staff/staffWeeklyHours";
 import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
 import {
   endLocalFromStartLocalAndProcedure,
@@ -28,14 +29,17 @@ export function AppointmentCreateSlideOver({
   assignees,
   clinics,
   existingBookings,
+  tenantCalendarTimezone,
   onClose,
   onCreated,
 }: {
   tenantId: string;
   prefill: AppointmentCreatePrefill;
-  assignees: CrmShellStaffPickerOption[];
+  assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   existingBookings: FiBookingRow[];
+  /** Tenant clinic clock — `datetime-local` values are interpreted in this IANA zone. */
+  tenantCalendarTimezone: string;
   onClose: () => void;
   onCreated: (bookingId: string) => void;
 }) {
@@ -46,23 +50,44 @@ export function AppointmentCreateSlideOver({
 
   const [bookingType, setBookingType] = useState(prefill.bookingType || "consultation");
   const [title, setTitle] = useState(prefill.title ?? "");
-  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(prefill.startIso));
-  const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(prefill.endIso));
+  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(prefill.startIso, tenantCalendarTimezone));
+  const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(prefill.endIso, tenantCalendarTimezone));
   const staffIdToUserId = useMemo(() => staffPickerUserMap(assignees), [assignees]);
 
   const [assignee, setAssignee] = useState(prefill.assignedStaffId ?? prefill.assignedUserId ?? "");
   const [clinicId, setClinicId] = useState(prefill.clinicId ?? "");
   const [location, setLocation] = useState("");
 
+  const selectedStaff = useMemo(
+    () => assignees.find((a) => a.id === assignee.trim()) ?? null,
+    [assignees, assignee]
+  );
+
+  const staffScheduleHint = useMemo(() => {
+    if (!assignee.trim()) {
+      return "Select staff to see usual weekly hours (wall times use their default timezone, or Australia/Perth when unset).";
+    }
+    if (!selectedStaff) return "Staff hours unavailable for this selection.";
+    const startIso = fromDatetimeLocalValue(startLocal, tenantCalendarTimezone);
+    const endIso = fromDatetimeLocalValue(endLocal, tenantCalendarTimezone);
+    return buildStaffBookingAvailabilityHint({
+      staffDefaultTimezone: selectedStaff.default_timezone,
+      workingHours: selectedStaff.working_hours ?? null,
+      tenantCalendarTimezone,
+      candidateStartIso: startIso,
+      candidateEndIso: endIso,
+    });
+  }, [assignee, selectedStaff, startLocal, endLocal, tenantCalendarTimezone]);
+
   useEffect(() => {
     setBookingType(prefill.bookingType || "consultation");
     setTitle(prefill.title ?? "");
-    setStartLocal(toDatetimeLocalValue(prefill.startIso));
-    setEndLocal(toDatetimeLocalValue(prefill.endIso));
+    setStartLocal(toDatetimeLocalValue(prefill.startIso, tenantCalendarTimezone));
+    setEndLocal(toDatetimeLocalValue(prefill.endIso, tenantCalendarTimezone));
     setAssignee(prefill.assignedStaffId ?? prefill.assignedUserId ?? "");
     setClinicId(prefill.clinicId ?? "");
     setError(null);
-  }, [prefill]);
+  }, [prefill, tenantCalendarTimezone]);
 
   const typeOptions = useMemo(() => {
     const u = new Set<string>([...BOOKING_TYPES]);
@@ -72,14 +97,14 @@ export function AppointmentCreateSlideOver({
 
   function onProcedureTypeChange(nextType: string) {
     setBookingType(nextType);
-    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, undefined);
+    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, tenantCalendarTimezone);
     if (nextEnd) setEndLocal(nextEnd);
     setAvailabilityHint(null);
   }
 
   function runAvailabilityCheck(): boolean {
-    const startIso = fromDatetimeLocalValue(startLocal);
-    const endIso = fromDatetimeLocalValue(endLocal);
+    const startIso = fromDatetimeLocalValue(startLocal, tenantCalendarTimezone);
+    const endIso = fromDatetimeLocalValue(endLocal, tenantCalendarTimezone);
     if (!startIso || !endIso) {
       setAvailabilityHint("Set valid start and end times to check availability.");
       return false;
@@ -105,8 +130,8 @@ export function AppointmentCreateSlideOver({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const startIso = fromDatetimeLocalValue(startLocal);
-    const endIso = fromDatetimeLocalValue(endLocal);
+    const startIso = fromDatetimeLocalValue(startLocal, tenantCalendarTimezone);
+    const endIso = fromDatetimeLocalValue(endLocal, tenantCalendarTimezone);
     if (!startIso || !endIso) {
       setError("Start and end times are required.");
       return;
@@ -169,8 +194,9 @@ export function AppointmentCreateSlideOver({
       <section className={appointmentCardClass}>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">New appointment</h3>
         <p className="mt-1 text-xs text-gray-600">
-          Pre-filled from your current context. Availability uses a {DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute buffer
-          around existing bookings for the selected staff member.
+          Pre-filled from your current context. Start/end use the clinic timezone ({tenantCalendarTimezone}).
+          Availability uses a {DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute buffer around existing bookings for the
+          selected staff member.
         </p>
       </section>
 
@@ -243,6 +269,7 @@ export function AppointmentCreateSlideOver({
               </option>
             ))}
           </select>
+          <p className="mt-1 text-[11px] leading-snug text-gray-600">{staffScheduleHint}</p>
         </label>
         <label className="block text-xs text-gray-600">
           Clinic

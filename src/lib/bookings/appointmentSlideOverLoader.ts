@@ -1,10 +1,11 @@
 import "server-only";
 
 import { loadSurgeryPlanForCase, type CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import {
   loadCrmShellPipelineStages,
   loadCrmShellScopePickerOptions,
-  loadCrmShellUserPickerOptions,
+  loadCrmShellStaffPickerOptions,
 } from "@/src/lib/crm/crmShellLoaders";
 import {
   loadCrmActivityTimelineForLead,
@@ -76,6 +77,8 @@ export type AppointmentSlideOverPayload = {
   /** Pipeline stages when the booking is linked to a lead (completion workflow). */
   pipelineStages: FiCrmPipelineStageRow[];
   timeline: AppointmentSlideOverTimeline;
+  /** IANA zone for datetime-local fields (tenant clinic clock). */
+  calendarTimezone: string;
 };
 
 export type AppointmentShellRelatedAppointmentItem = {
@@ -131,6 +134,7 @@ export async function loadAppointmentSlideOverPayload(
   const [
     assignees,
     scope,
+    calendarSettings,
     reminderJobs,
     lead,
     conversionState,
@@ -141,8 +145,9 @@ export async function loadAppointmentSlideOverPayload(
     patientImages,
     surgeryPlan,
   ] = await Promise.all([
-    loadCrmShellUserPickerOptions(tid),
+    loadCrmShellStaffPickerOptions(tid),
     loadCrmShellScopePickerOptions(tid),
+    loadTenantOperationalCalendarSettings(tid),
     loadReminderJobsForAppointment(tid, booking.id, leadId),
     leadId ? loadCrmLeadById(leadId, tid) : Promise.resolve(null),
     leadId ? loadCrmLeadConversionState(tid, leadId) : Promise.resolve(null),
@@ -176,6 +181,7 @@ export async function loadAppointmentSlideOverPayload(
     booking,
     assignees,
     clinics: scope.clinics,
+    calendarTimezone: calendarSettings.calendarTimezone,
     reminderJobs,
     clinicalScalesSummary,
     clinicalLine: clinicalLineFromDetails(clinicalDetails),

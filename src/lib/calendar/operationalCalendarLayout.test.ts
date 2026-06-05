@@ -46,6 +46,7 @@ describe("bookingConflictsForOperationalCalendar", () => {
       id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
       start_at: "2026-06-10T02:10:00.000Z",
       end_at: "2026-06-10T02:40:00.000Z",
+      assigned_staff_id: null,
       assigned_user_id: PROVIDER,
       clinic_id: null,
     };
@@ -68,6 +69,7 @@ describe("bookingConflictsForOperationalCalendar", () => {
       id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
       start_at: "2026-06-10T01:30:00.000Z",
       end_at: "2026-06-10T02:30:00.000Z",
+      assigned_staff_id: null,
       assigned_user_id: PROVIDER,
       clinic_id: null,
     };

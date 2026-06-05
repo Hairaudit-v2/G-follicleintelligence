@@ -100,7 +100,10 @@ export type RescheduleAppointmentInput = {
   appointmentId: string;
   startAt?: string;
   endAt?: string;
+  /** Linked `fi_users.id` when not using `staffId`. */
   providerId?: string | null;
+  /** `fi_staff.id` — set or clear (`null`) assignment; when present, server resolves linked user. */
+  staffId?: string | null;
   clinicId?: string | null;
   procedure?: string;
   metadata?: Record<string, unknown>;
@@ -130,6 +133,7 @@ export async function rescheduleCalendarAppointmentRequest(
           startAt: input.startAt,
           endAt: input.endAt,
           provider: input.providerId,
+          staffId: input.staffId,
           clinicId: input.clinicId,
           procedure: input.procedure,
           metadata: input.metadata,

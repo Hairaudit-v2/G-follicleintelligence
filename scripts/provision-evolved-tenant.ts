@@ -97,6 +97,55 @@ const SEED_CRM_USERS: { email: string; role: string }[] = [
   { email: "evolved.crm.seed3@follicleintelligence.local", role: "crm_operator" },
 ];
 
+const SEED_STAFF: {
+  full_name: string;
+  staff_role: string;
+  email: string;
+  mobile: string | null;
+  calendar_color: string;
+}[] = [
+  {
+    full_name: "Dr. Jordan Blake",
+    staff_role: "surgeon",
+    email: "surgeon.seed@follicleintelligence.local",
+    mobile: "+61 400 100 001",
+    calendar_color: "#0ea5e9",
+  },
+  {
+    full_name: "Sam Patel",
+    staff_role: "consultant",
+    email: "consultant.seed@follicleintelligence.local",
+    mobile: "+61 400 100 002",
+    calendar_color: "#22c55e",
+  },
+  {
+    full_name: "Riley Nguyen",
+    staff_role: "nurse",
+    email: "nurse.seed@follicleintelligence.local",
+    mobile: "+61 400 100 003",
+    calendar_color: "#a855f7",
+  },
+  {
+    full_name: "Alex Morgan",
+    staff_role: "admin",
+    email: "clinic.admin.seed@follicleintelligence.local",
+    mobile: null,
+    calendar_color: "#f97316",
+  },
+];
+
+const SEED_STAFF_WORKING_HOURS = {
+  weekly: {
+    mon: { enabled: true, start: "08:30", end: "17:30" },
+    tue: { enabled: true, start: "08:30", end: "17:30" },
+    wed: { enabled: true, start: "08:30", end: "17:30" },
+    thu: { enabled: true, start: "08:30", end: "17:30" },
+    fri: { enabled: true, start: "08:30", end: "17:30" },
+    sat: { enabled: false },
+    sun: { enabled: false },
+  },
+};
+
 async function main(): Promise<void> {
   const slug = (process.env.FI_EVOLVED_TENANT_SLUG ?? DEFAULT_SLUG).trim() || DEFAULT_SLUG;
   const name = (process.env.FI_EVOLVED_TENANT_NAME ?? DEFAULT_NAME).trim() || DEFAULT_NAME;
@@ -220,6 +269,38 @@ async function main(): Promise<void> {
     console.log("Seed fi_users rows already present (matched by email).");
   }
 
+  let staffInserted = 0;
+  for (const s of SEED_STAFF) {
+    const { data: existingStaff, error: stExErr } = await supabase
+      .from("fi_staff")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("email", s.email)
+      .maybeSingle();
+    if (stExErr) throw new Error(stExErr.message);
+    if (existingStaff?.id) continue;
+    const { error: stInsErr } = await supabase.from("fi_staff").insert({
+      tenant_id: tenantId,
+      full_name: s.full_name,
+      staff_role: s.staff_role,
+      email: s.email,
+      mobile: s.mobile,
+      default_timezone: defaultTimezone,
+      working_hours: SEED_STAFF_WORKING_HOURS,
+      is_active: true,
+      calendar_color: s.calendar_color,
+      fi_user_id: null,
+      created_at: now,
+      updated_at: now,
+    });
+    if (stInsErr) throw new Error(stInsErr.message);
+    staffInserted += 1;
+    console.log(`Inserted fi_staff seed: ${s.full_name} (${s.staff_role})`);
+  }
+  if (staffInserted === 0) {
+    console.log("Seed fi_staff rows already present (matched by email).");
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -232,6 +313,7 @@ async function main(): Promise<void> {
         stagesSeeded,
         templatesInserted,
         usersInserted,
+        staffInserted,
         clinicOsNav:
           "Clinic OS shell: Dashboard, Calendar, Patients, Consultations, Cases, Sales (CRM when role is crm_operator or fi_admin); link auth.users to fi_users for sign-in.",
       },

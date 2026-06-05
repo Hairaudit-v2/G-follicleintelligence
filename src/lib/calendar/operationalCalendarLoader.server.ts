@@ -25,8 +25,8 @@ export type {
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
-import type { CrmShellClinicOption, CrmShellStaffPickerOption } from "@/src/lib/crm/types";
-import { loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { loadCrmShellStaffPickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
@@ -119,19 +119,16 @@ async function loadClinicalDetailsMap(tenantId: string, patientIds: string[]): P
   return out;
 }
 
-function humanizeRole(role: string | null | undefined): string {
-  const t = String(role ?? "member").trim().toLowerCase().replace(/_/g, " ");
-  return t.replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 async function loadTenantStaffAndClinics(tenantId: string): Promise<{
-  assignees: CrmShellStaffPickerOption[];
+  assignees: CrmShellUserPickerOption[];
+  staffDirectory: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   resourceColumns: OperationalCalendarResourceColumn[];
   staffUserByStaffId: Map<string, string | null>;
 }> {
   const tid = tenantId.trim();
-  const [staffAssignees, clinicsRes] = await Promise.all([
+  const [userAssignees, staffDirectory, clinicsRes] = await Promise.all([
+    loadCrmShellUserPickerOptions(tid),
     loadCrmShellStaffPickerOptions(tid),
     supabaseAdmin()
       .from("fi_clinics")
@@ -142,7 +139,7 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
   if (clinicsRes.error) throw new Error(clinicsRes.error.message);
 
   const staffUserByStaffId = new Map<string, string | null>();
-  for (const s of staffAssignees) {
+  for (const s of staffDirectory) {
     staffUserByStaffId.set(s.id, s.fi_user_id?.trim() || null);
   }
 
@@ -156,7 +153,7 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
   });
 
   const resourceColumns: OperationalCalendarResourceColumn[] = [
-    ...staffAssignees.map((s) => ({
+    ...staffDirectory.map((s) => ({
       id: `s:${String(s.id)}`,
       kind: "fi_staff" as const,
       label: staffOptionPrimaryLabel(s),
@@ -171,7 +168,7 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
     { id: "unassigned", kind: "unassigned" as const, label: "Unassigned", subtitle: "No staff column" },
   ];
 
-  return { assignees: staffAssignees, clinics, resourceColumns, staffUserByStaffId };
+  return { assignees: userAssignees, staffDirectory, clinics, resourceColumns, staffUserByStaffId };
 }
 
 function applyStructuredFilters(
@@ -356,6 +353,7 @@ export async function loadOperationalCalendarPageData(
     bookings,
     bookingDisplay,
     assignees: resources.assignees,
+    staffDirectory: resources.staffDirectory,
     clinics: resources.clinics,
     resourceColumns: resources.resourceColumns,
     gridConfig,
