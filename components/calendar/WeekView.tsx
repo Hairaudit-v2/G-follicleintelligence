@@ -314,7 +314,7 @@ function WeekViewInner({
         ? () => navigateCalendar(calendarNavigationHelpers.nextPeriod(shortcuts.query))
         : undefined,
       onViewChange: shortcuts
-        ? (viewMode: "day" | "3day" | "week") => navigateCalendar({ view: viewMode })
+        ? (viewMode: "day" | "3day" | "week" | "month") => navigateCalendar({ view: viewMode })
         : undefined,
       onColumnPrevious: () => scrollToColumn(activeColumnIndex - 1),
       onColumnNext: () => scrollToColumn(activeColumnIndex + 1),
@@ -538,7 +538,7 @@ function WeekViewInner({
         variants={calendarShellVariants}
         initial="hidden"
         animate="show"
-        className="fi-calendar-shell flex min-h-[min(32rem,72dvh)] flex-col overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/[0.04] md:min-h-[32rem] md:rounded-2xl lg:min-h-[calc(100dvh-13rem)]"
+        className="fi-calendar-shell flex min-h-[min(32rem,72dvh)] flex-col overflow-hidden rounded-xl border border-[#1e2937] bg-[#0f172a] shadow-sm shadow-black/30 ring-1 ring-white/[0.04] md:min-h-[32rem] md:rounded-2xl lg:min-h-[calc(100dvh-13rem)]"
       >
         {sidebar}
 

@@ -4,7 +4,9 @@
 
 import { isAllowedBookingStatus, isAllowedBookingType } from "./bookingPolicy";
 
-export type CalendarViewMode = "day" | "3day" | "week";
+export type CalendarViewMode = "day" | "3day" | "week" | "month";
+
+export type CalendarRoute = "fi-admin" | "dashboard";
 
 function firstString(v: string | string[] | undefined): string {
   if (v == null) return "";
@@ -72,6 +74,7 @@ function parseView(raw: string): CalendarViewMode {
   const v = raw.trim().toLowerCase();
   if (v === "day") return "day";
   if (v === "3day" || v === "3-day" || v === "three_day") return "3day";
+  if (v === "month") return "month";
   return "week";
 }
 
@@ -130,9 +133,15 @@ export type CalendarHrefQuery = {
   q?: string;
 };
 
-export function buildCalendarHref(tenantId: string, q: CalendarHrefQuery): string {
-  const base = `/fi-admin/${tenantId.trim()}/calendar`;
+export function buildCalendarHref(
+  tenantId: string,
+  q: CalendarHrefQuery,
+  opts?: { route?: CalendarRoute }
+): string {
+  const route = opts?.route ?? "fi-admin";
+  const base = route === "dashboard" ? "/dashboard/calendar" : `/fi-admin/${tenantId.trim()}/calendar`;
   const sp = new URLSearchParams();
+  if (route === "dashboard") sp.set("tenantId", tenantId.trim());
   if (q.view && q.view !== "week") sp.set("view", q.view);
   if (q.date?.trim()) sp.set("date", q.date.trim());
   if (q.status?.trim()) sp.set("status", q.status.trim());
@@ -186,8 +195,42 @@ export function calendarVisibleUtcRangeMs(q: ParsedCalendarQuery): { rangeStartM
   if (q.view === "3day") {
     return { rangeStartMs: startMs, rangeEndMs: startMs + 3 * 86400000 };
   }
+  if (q.view === "month") {
+    return monthGridUtcRangeMs(q.dateAnchor);
+  }
   const mondayMs = utcMondayStartMsContaining(startMs);
   return { rangeStartMs: mondayMs, rangeEndMs: mondayMs + 7 * 86400000 };
+}
+
+/** UTC range for the six-week month grid containing `dateAnchor`. */
+export function monthGridUtcRangeMs(dateAnchor: string, now: Date = new Date()): {
+  rangeStartMs: number;
+  rangeEndMs: number;
+} {
+  const anchor = parseUtcCalendarDateString(dateAnchor) ?? utcCalendarDateStringFromDate(now);
+  const anchorMs = Date.UTC(
+    Number(anchor.slice(0, 4)),
+    Number(anchor.slice(5, 7)) - 1,
+    Number(anchor.slice(8, 10)),
+    0,
+    0,
+    0,
+    0
+  );
+  const monthIndex = new Date(anchorMs).getUTCMonth();
+  const year = new Date(anchorMs).getUTCFullYear();
+  const firstOfMonthMs = Date.UTC(year, monthIndex, 1);
+  const dow = new Date(firstOfMonthMs).getUTCDay();
+  const mondayOffset = (dow + 6) % 7;
+  const gridStartMs = firstOfMonthMs - mondayOffset * 86_400_000;
+  return { rangeStartMs: gridStartMs, rangeEndMs: gridStartMs + 42 * 86_400_000 };
+}
+
+export function addUtcMonthsToCalendarDate(ymd: string, deltaMonths: number): string {
+  const normalized = parseUtcCalendarDateString(ymd) ?? ymd.trim();
+  const y = Number(normalized.slice(0, 4));
+  const mo = Number(normalized.slice(5, 7)) - 1;
+  return utcCalendarDateStringFromDate(new Date(Date.UTC(y, mo + deltaMonths, 1)));
 }
 
 /** UTC Monday 00:00 of the week containing the given UTC calendar midnight. */

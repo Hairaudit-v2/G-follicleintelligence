@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export type CalendarViewMode = "day" | "3day" | "week";
+export type CalendarViewMode = "day" | "3day" | "week" | "month";
 
 export type CalendarKeyboardActions = {
   onNewAppointment?: () => void;
@@ -93,6 +93,12 @@ export function useCalendarKeyboardShortcuts(actions: CalendarKeyboardActions, e
       if (key === "3") {
         e.preventDefault();
         actions.onViewChange?.("week");
+        return;
+      }
+
+      if (key === "4") {
+        e.preventDefault();
+        actions.onViewChange?.("month");
       }
     };
 

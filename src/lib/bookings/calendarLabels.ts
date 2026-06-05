@@ -38,6 +38,14 @@ export function calendarDayHeading(lane: CalendarDayLane): string {
 
 export function formatCalendarRangeTitle(view: CalendarViewMode, lanes: CalendarDayLane[]): string {
   if (lanes.length === 0) return "Calendar";
+  if (view === "month" && lanes.length > 0) {
+    const anchorMs = lanes[14]?.startMs ?? lanes[0].startMs;
+    return new Date(anchorMs).toLocaleDateString("en-GB", {
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+  }
   if (view === "day") {
     const d = new Date(lanes[0].startMs);
     return d.toLocaleDateString("en-GB", {

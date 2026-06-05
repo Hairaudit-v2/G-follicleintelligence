@@ -7,6 +7,7 @@ import {
   parseUtcCalendarDateString,
   utcCalendarDateStringFromDate,
   utcMondayStartMsContaining,
+  addUtcMonthsToCalendarDate,
   type ParsedCalendarQuery,
   type CalendarHrefQuery,
   type CalendarViewMode,
@@ -73,12 +74,36 @@ export function buildCalendarWeek(dateAnchor: string): CalendarDayLane[] {
 export function buildCalendarLanesForView(view: CalendarViewMode, dateAnchor: string): CalendarDayLane[] {
   if (view === "day") return buildCalendarDay(dateAnchor);
   if (view === "3day") return buildCalendarThreeDay(dateAnchor);
+  if (view === "month") return buildCalendarMonth(dateAnchor);
   return buildCalendarWeek(dateAnchor);
 }
 
-export function calendarViewPeriodStepDays(view: CalendarViewMode): number {
+/** Six-week Monday-start grid cells as day lanes (for month view bucketing). */
+export function buildCalendarMonth(dateAnchor: string): CalendarDayLane[] {
+  const anchor = parseUtcCalendarDateString(dateAnchor) ?? dateAnchor.trim();
+  const anchorMs = utcMidnightMsFromYmd(anchor);
+  const monthIndex = new Date(anchorMs).getUTCMonth();
+  const year = new Date(anchorMs).getUTCFullYear();
+  const firstOfMonthMs = Date.UTC(year, monthIndex, 1);
+  const dow = new Date(firstOfMonthMs).getUTCDay();
+  const mondayOffset = (dow + 6) % 7;
+  const gridStartMs = firstOfMonthMs - mondayOffset * 86_400_000;
+  const lanes: CalendarDayLane[] = [];
+
+  for (let i = 0; i < 42; i++) {
+    const startMs = gridStartMs + i * 86_400_000;
+    const endMs = startMs + 86_400_000;
+    const dayKey = utcCalendarDateStringFromDate(new Date(startMs));
+    lanes.push({ dayKey, startMs, endMs, headingShortUtc: formatUtcWeekdayShort(startMs) });
+  }
+
+  return lanes;
+}
+
+export function calendarViewPeriodStepDays(view: CalendarViewMode): number | "month" {
   if (view === "day") return 1;
   if (view === "3day") return 3;
+  if (view === "month") return "month";
   return 7;
 }
 
@@ -134,18 +159,32 @@ function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
  */
 export const calendarNavigationHelpers = {
   previousPeriod(q: ParsedCalendarQuery): CalendarHrefQuery {
-    const delta = -calendarViewPeriodStepDays(q.view);
+    const step = calendarViewPeriodStepDays(q.view);
+    if (step === "month") {
+      return {
+        view: q.view,
+        date: addUtcMonthsToCalendarDate(q.dateAnchor, -1),
+        ...filtersPatchFromQuery(q),
+      };
+    }
     return {
       view: q.view,
-      date: addUtcDaysToCalendarDate(q.dateAnchor, delta),
+      date: addUtcDaysToCalendarDate(q.dateAnchor, -step),
       ...filtersPatchFromQuery(q),
     };
   },
   nextPeriod(q: ParsedCalendarQuery): CalendarHrefQuery {
-    const delta = calendarViewPeriodStepDays(q.view);
+    const step = calendarViewPeriodStepDays(q.view);
+    if (step === "month") {
+      return {
+        view: q.view,
+        date: addUtcMonthsToCalendarDate(q.dateAnchor, 1),
+        ...filtersPatchFromQuery(q),
+      };
+    }
     return {
       view: q.view,
-      date: addUtcDaysToCalendarDate(q.dateAnchor, delta),
+      date: addUtcDaysToCalendarDate(q.dateAnchor, step),
       ...filtersPatchFromQuery(q),
     };
   },
