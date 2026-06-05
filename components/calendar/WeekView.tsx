@@ -4,14 +4,18 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  pointerWithin,
   useSensor,
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  type Modifier,
 } from "@dnd-kit/core";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 
-import { type AppointmentCardData } from "@/components/calendar/AppointmentCard";
+import { AppointmentCard, type AppointmentCardData } from "@/components/calendar/AppointmentCard";
+import { CalendarToastProvider, useCalendarToast } from "@/components/calendar/CalendarToast";
+import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import {
   CALENDAR_COLUMN_MIN_WIDTH_PX,
   CALENDAR_GRID_BG,
@@ -22,6 +26,11 @@ import {
   calendarPxPerMinute,
   parseProviderColumnDropId,
 } from "@/components/calendar/ProviderColumn";
+import {
+  CALENDAR_SNAP_MINUTES,
+  dropMinutesFromDragEvent,
+  minutesUtcFromEpoch,
+} from "@/lib/calendar/dndMath";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import { parseUtcCalendarDateString } from "@/src/lib/bookings/calendarQuery";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
@@ -32,16 +41,25 @@ import type {
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
 
-const SNAP_MINUTES = 15;
 const TIME_GUTTER_WIDTH_PX = 56;
 
 export type WeekViewRescheduleMeta = {
   assignedUserId?: string | null;
   clinicId?: string | null;
+  /** Clear waitlist flag when scheduling from the sidebar waitlist. */
+  clearWaitlist?: boolean;
 };
 
+function usesProviderColumns(view: string): boolean {
+  return view === "day";
+}
+
 export type WeekViewProps = {
-  view: "day" | "week";
+  /** Left agenda sidebar — must render inside this DndContext (e.g. SidebarAgenda). */
+  sidebar?: ReactNode;
+  /** Right insights panel — rendered inside DndContext sibling to grid. */
+  rightPanel?: ReactNode;
+  view: "day" | "3day" | "week";
   lanes: CalendarDayLane[];
   buckets: Record<string, FiBookingRow[]>;
   gridConfig: BusinessGridConfig;
@@ -68,6 +86,14 @@ type CalendarColumn = {
   photoUrl?: string | null;
 };
 
+function snapToQuarterHourModifier(): Modifier {
+  const slotPx = calendarPxPerMinute() * CALENDAR_SNAP_MINUTES;
+  return ({ transform }) => ({
+    ...transform,
+    y: Math.round(transform.y / slotPx) * slotPx,
+  });
+}
+
 function utcMidnightMs(dayKey: string): number | null {
   const ymd = parseUtcCalendarDateString(dayKey);
   if (!ymd) return null;
@@ -81,20 +107,6 @@ function isoFromDayMinutes(dayKey: string, minutesUtc: number): string | null {
   const mid = utcMidnightMs(dayKey);
   if (mid == null) return null;
   return new Date(mid + minutesUtc * 60_000).toISOString();
-}
-
-function minutesUtcFromEpoch(ms: number): number {
-  const d = new Date(ms);
-  return d.getUTCHours() * 60 + d.getUTCMinutes();
-}
-
-function snapMinutes(minutes: number, cfg: BusinessGridConfig): number {
-  const gridStart = cfg.dayStartHourUtc * 60;
-  const gridEnd = cfg.dayEndHourUtc * 60;
-  const clamped = Math.min(Math.max(minutes, gridStart), gridEnd - SNAP_MINUTES);
-  const rel = clamped - gridStart;
-  const snapped = Math.round(rel / SNAP_MINUTES) * SNAP_MINUTES + gridStart;
-  return Math.min(snapped, gridEnd - SNAP_MINUTES);
 }
 
 function assigneeFromColumn(column: CalendarColumn): WeekViewRescheduleMeta {
@@ -137,7 +149,9 @@ function TimeGutter({ gridConfig, bodyHeightPx }: { gridConfig: BusinessGridConf
   );
 }
 
-export function WeekView({
+function WeekViewInner({
+  sidebar,
+  rightPanel,
   view,
   lanes,
   buckets,
@@ -152,15 +166,18 @@ export function WeekView({
 }: WeekViewProps) {
   const bodyHeightPx = calendarGridBodyHeightPx(gridConfig);
   const [activeDrag, setActiveDrag] = useState<AppointmentCardData | null>(null);
+  const { success, error: toastError } = useCalendarToast();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+      activationConstraint: { distance: 6 },
     })
   );
 
+  const modifiers = useMemo(() => [snapToQuarterHourModifier()], []);
+
   const columnsForView = useMemo((): CalendarColumn[] => {
-    if (view === "day" && lanes[0]) {
+    if (usesProviderColumns(view) && lanes[0]) {
       const dayKey = lanes[0].dayKey;
       return resourceColumns.map((col) => ({
         id: col.id,
@@ -181,9 +198,32 @@ export function WeekView({
 
   const primaryLane = lanes[0];
 
+  const rescheduleWithToast = useCallback(
+    async (
+      booking: FiBookingRow,
+      startIso: string,
+      endIso: string,
+      meta?: WeekViewRescheduleMeta,
+      successMessage = "Appointment updated"
+    ) => {
+      const result = await onRescheduleBooking(booking, startIso, endIso, meta);
+      if (result.ok) {
+        success(successMessage);
+      } else {
+        toastError(result.error ?? "Could not update appointment");
+      }
+      return result;
+    },
+    [onRescheduleBooking, success, toastError]
+  );
+
   const onDragStart = useCallback((event: DragStartEvent) => {
     const data = event.active.data.current;
-    if (data?.type === "appointment" && data.appointment) {
+    if (data?.appointment) {
+      setActiveDrag(data.appointment as AppointmentCardData);
+      return;
+    }
+    if (data?.type === "waitlist" && data.appointment) {
       setActiveDrag(data.appointment as AppointmentCardData);
     }
   }, []);
@@ -193,43 +233,67 @@ export function WeekView({
       setActiveDrag(null);
       if (!canMutateBookings) return;
 
-      const { active, over, delta } = event;
+      const { active, over } = event;
       if (!over) return;
 
       const drop = parseProviderColumnDropId(String(over.id));
       if (!drop) return;
 
-      const booking = bookings.find((b) => b.id === String(active.id));
+      const waitlistBookingId = parseWaitlistDragId(String(active.id));
+      const booking = bookings.find((b) => b.id === (waitlistBookingId ?? String(active.id)));
       if (!booking) return;
 
       const lane = lanes.find((l) => l.dayKey === drop.dayKey);
       if (!lane) return;
 
-      const origStartMs = Date.parse(booking.start_at);
-      const origEndMs = Date.parse(booking.end_at);
-      if (!Number.isFinite(origStartMs) || !Number.isFinite(origEndMs)) return;
+      let newStartMin: number;
+      let durationMs: number;
 
-      const durationMs = Math.max(SNAP_MINUTES * 60_000, origEndMs - origStartMs);
-      const origStartMin = minutesUtcFromEpoch(origStartMs);
-      const deltaMin = delta.y / calendarPxPerMinute();
-      const newStartMin = snapMinutes(origStartMin + deltaMin, gridConfig);
+      if (waitlistBookingId) {
+        const waitData = active.data.current as { item?: { durationMin?: number } } | undefined;
+        const durMin = Math.max(CALENDAR_SNAP_MINUTES, waitData?.item?.durationMin ?? 30);
+        durationMs = durMin * 60_000;
+        const fallbackStart = gridConfig.dayStartHourUtc * 60 + 60;
+        newStartMin = dropMinutesFromDragEvent(event, gridConfig, fallbackStart);
+      } else {
+        const origStartMs = Date.parse(booking.start_at);
+        const origEndMs = Date.parse(booking.end_at);
+        if (!Number.isFinite(origStartMs) || !Number.isFinite(origEndMs)) return;
+
+        durationMs = Math.max(CALENDAR_SNAP_MINUTES * 60_000, origEndMs - origStartMs);
+        const origStartMin = minutesUtcFromEpoch(origStartMs);
+        newStartMin = dropMinutesFromDragEvent(event, gridConfig, origStartMin);
+      }
+
       const newEndMin = newStartMin + durationMs / 60_000;
-
       const startIso = isoFromDayMinutes(drop.dayKey, newStartMin);
       const endIso = isoFromDayMinutes(drop.dayKey, newEndMin);
       if (!startIso || !endIso) return;
 
       const targetColumn = columnsForView.find((c) => c.id === drop.columnId && c.dayKey === drop.dayKey);
-      const meta = view === "day" && targetColumn ? assigneeFromColumn(targetColumn) : undefined;
+      const meta: WeekViewRescheduleMeta | undefined =
+        usesProviderColumns(view) && targetColumn
+          ? { ...assigneeFromColumn(targetColumn), clearWaitlist: Boolean(waitlistBookingId) }
+          : waitlistBookingId
+            ? { clearWaitlist: true }
+            : undefined;
 
-      void onRescheduleBooking(booking, startIso, endIso, meta);
+      const message = waitlistBookingId ? "Scheduled from waitlist" : "Appointment moved";
+      void rescheduleWithToast(booking, startIso, endIso, meta, message);
     },
-    [bookings, canMutateBookings, columnsForView, gridConfig, lanes, onRescheduleBooking, view]
+    [bookings, canMutateBookings, columnsForView, gridConfig, lanes, rescheduleWithToast, view]
+  );
+
+  const onResizeAppointment = useCallback(
+    (booking: FiBookingRow, endIso: string) => {
+      void rescheduleWithToast(booking, booking.start_at, endIso, undefined, "Duration updated");
+    },
+    [rescheduleWithToast]
   );
 
   const onDragCancel = useCallback(() => setActiveDrag(null), []);
 
-  if (view === "day" && !primaryLane) {
+  if (usesProviderColumns(view) && !primaryLane) {
     return (
       <div
         className="rounded-2xl border border-dashed border-slate-200 px-4 py-12 text-center text-sm text-slate-500"
@@ -241,19 +305,27 @@ export function WeekView({
   }
 
   return (
-    <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
-      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/[0.04]">
-        <div className="flex overflow-x-auto overscroll-x-contain">
+    <DndContext
+      sensors={sensors}
+      collisionDetection={pointerWithin}
+      modifiers={modifiers}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragCancel={onDragCancel}
+    >
+      <div className="flex min-h-[32rem] overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/[0.04] lg:min-h-[calc(100dvh-13rem)]">
+        {sidebar}
+        <div className="flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
           <TimeGutter gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
           <div className="flex min-w-0 flex-1">
             {columnsForView.map((col) => {
-              const lane = view === "day" ? primaryLane! : lanes.find((l) => l.dayKey === col.dayKey);
+              const lane = usesProviderColumns(view) ? primaryLane! : lanes.find((l) => l.dayKey === col.dayKey);
               if (!lane) return null;
 
               const dayBookings = buckets[lane.dayKey] ?? [];
               const colBookings =
-                view === "day"
+                usesProviderColumns(view)
                   ? dayBookings.filter((b) => resourceColumnIdForBooking(b) === col.id)
                   : dayBookings;
 
@@ -270,32 +342,38 @@ export function WeekView({
                   gridConfig={gridConfig}
                   bookingDisplay={bookingDisplay}
                   bodyHeightPx={bodyHeightPx}
-                  highlighted={view === "day" && highlightedColumnId === col.id}
+                  highlighted={usesProviderColumns(view) && highlightedColumnId === col.id}
                   droppable={canMutateBookings}
                   draggable={canMutateBookings}
+                  resizable={canMutateBookings}
                   onSelectAppointment={onSelectBooking}
+                  onResizeAppointment={onResizeAppointment}
                 />
               );
             })}
           </div>
         </div>
+        {rightPanel}
       </div>
 
-      <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.18, 0.67, 0.6, 1)" }}>
+      <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1)" }}>
         {activeDrag ? (
           <div
-            className="w-[var(--col-min)] max-w-[220px] rotate-[0.5deg] opacity-95 shadow-xl"
+            className="pointer-events-none w-[var(--col-min)] max-w-[220px]"
             style={{ "--col-min": `${CALENDAR_COLUMN_MIN_WIDTH_PX}px` } as React.CSSProperties}
           >
-            <div className="pointer-events-none rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
-              <p className="truncate text-sm font-semibold text-slate-900">{activeDrag.patientName}</p>
-              <p className="mt-0.5 truncate text-xs text-slate-500">
-                {activeDrag.procedureLabel ?? activeDrag.procedureType}
-              </p>
-            </div>
+            <AppointmentCard appointment={activeDrag} isDragPreview draggable={false} />
           </div>
         ) : null}
       </DragOverlay>
     </DndContext>
+  );
+}
+
+export function WeekView(props: WeekViewProps) {
+  return (
+    <CalendarToastProvider>
+      <WeekViewInner {...props} />
+    </CalendarToastProvider>
   );
 }

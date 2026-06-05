@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   Clock,
   DoorOpen,
+  GripVertical,
   Scissors,
   Stethoscope,
   Syringe,
@@ -17,6 +18,7 @@ import * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { calendarPxPerMinute } from "@/components/calendar/ProviderColumn";
 import {
   appointmentStatusBadgeClasses,
   fiProcedureAccentClassNames,
@@ -24,6 +26,10 @@ import {
   resolveProcedureFamily,
   type FiProcedureFamily,
 } from "@/lib/design-system";
+import {
+  durationMinutesFromPx,
+  pxFromDurationMinutes,
+} from "@/lib/calendar/dndMath";
 import { cn } from "@/lib/utils";
 import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
@@ -65,10 +71,15 @@ export type AppointmentCardProps = {
   /** Absolute positioning for time-grid calendar columns. */
   layout?: AppointmentCardLayout;
   draggable?: boolean;
+  /** Enable bottom-edge resize (grid columns only). */
+  resizable?: boolean;
+  onResizeEnd?: (endIso: string) => void;
   onClick?: () => void;
   className?: string;
   /** When true, dims cancelled / completed cards. */
   dimTerminal?: boolean;
+  /** Drag overlay ghost — no grid positioning. */
+  isDragPreview?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -163,6 +174,82 @@ export function appointmentCardDataFromBooking(
 }
 
 // ---------------------------------------------------------------------------
+// Resize handle
+// ---------------------------------------------------------------------------
+
+function ResizeHandle({
+  onResizeEnd,
+  onLiveHeightChange,
+  startAt,
+  baseHeightPx,
+  isResizing,
+}: {
+  onResizeEnd: (endIso: string) => void;
+  onLiveHeightChange: (heightPx: number | null) => void;
+  startAt: string;
+  baseHeightPx: number;
+  isResizing: boolean;
+}) {
+  const ppm = calendarPxPerMinute();
+  const minHeightPx = pxFromDurationMinutes(15);
+
+  const finishResize = React.useCallback(
+    (heightPx: number) => {
+      const durationMin = durationMinutesFromPx(heightPx);
+      const startMs = Date.parse(startAt);
+      if (!Number.isFinite(startMs)) return;
+      onResizeEnd(new Date(startMs + durationMin * 60_000).toISOString());
+      onLiveHeightChange(null);
+    },
+    [onLiveHeightChange, onResizeEnd, startAt]
+  );
+
+  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const startY = e.clientY;
+    const originHeight = baseHeightPx;
+    const el = e.currentTarget;
+    el.setPointerCapture(e.pointerId);
+
+    const onMove = (ev: PointerEvent) => {
+      const dy = ev.clientY - startY;
+      const raw = Math.max(minHeightPx, originHeight + dy);
+      onLiveHeightChange(pxFromDurationMinutes(raw / ppm));
+    };
+
+    const onUp = (ev: PointerEvent) => {
+      el.releasePointerCapture(ev.pointerId);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
+      const dy = ev.clientY - startY;
+      const raw = Math.max(minHeightPx, originHeight + dy);
+      finishResize(pxFromDurationMinutes(raw / ppm));
+    };
+
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointercancel", onUp);
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label="Resize appointment"
+      onPointerDown={onPointerDown}
+      className={cn(
+        "absolute inset-x-1 bottom-0 z-20 flex h-3 cursor-ns-resize items-center justify-center rounded-b-lg",
+        "opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100",
+        isResizing && "opacity-100"
+      )}
+    >
+      <span className="h-1 w-8 rounded-full bg-slate-400/80 shadow-sm ring-1 ring-white/80 dark:bg-slate-500" />
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -170,9 +257,12 @@ export function AppointmentCard({
   appointment,
   layout,
   draggable = false,
+  resizable = false,
+  onResizeEnd,
   onClick,
   className,
   dimTerminal = true,
+  isDragPreview = false,
 }: AppointmentCardProps) {
   const family = resolveProcedureFamily({
     bookingType: appointment.procedureType,
@@ -194,22 +284,27 @@ export function AppointmentCard({
       appointment.status === "cancelled" ||
       appointment.status === "no_show");
 
-  const isCompact = layout ? layout.heightPx < 72 : false;
-  const isMedium = layout ? layout.heightPx >= 72 && layout.heightPx < 110 : false;
+  const canDrag = draggable && !isTerminal && !isDragPreview;
+  const canResize = resizable && !isTerminal && layout != null && Boolean(onResizeEnd) && !isDragPreview;
+  const [resizeHeightPx, setResizeHeightPx] = React.useState<number | null>(null);
+  const displayHeightPx = resizeHeightPx ?? layout?.heightPx;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: appointment.id,
-    disabled: !draggable || isTerminal,
+    disabled: !canDrag,
     data: { type: "appointment", appointment },
   });
+
+  const isCompact = layout ? layout.heightPx < 72 : false;
+  const isMedium = layout ? layout.heightPx >= 72 && layout.heightPx < 110 : false;
 
   const hasOverlapLayout = layout?.leftPct != null && layout?.widthPct != null;
 
   const dragStyle: React.CSSProperties = {
-    ...(layout
+    ...(layout && !isDragPreview
       ? {
           top: layout.topPx,
-          height: layout.heightPx,
+          height: displayHeightPx,
           minHeight: 48,
           ...(hasOverlapLayout
             ? {
@@ -229,7 +324,6 @@ export function AppointmentCard({
   return (
     <Card
       ref={setNodeRef}
-      {...(draggable && !isTerminal ? { ...listeners, ...attributes } : {})}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
@@ -249,9 +343,9 @@ export function AppointmentCard({
         "hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1",
         "dark:border-slate-800 dark:bg-slate-950/95 dark:hover:border-slate-700 dark:hover:shadow-lg dark:hover:shadow-black/20",
-        layout && (hasOverlapLayout ? "absolute z-[1]" : "absolute inset-x-1 z-[1]"),
-        layout && draggable && !isTerminal && "cursor-grab active:cursor-grabbing",
+        layout && !isDragPreview && (hasOverlapLayout ? "absolute z-[1]" : "absolute inset-x-1 z-[1]"),
         isDragging && "scale-[1.02] opacity-90 shadow-lg ring-2 ring-sky-400/30",
+        isDragPreview && "w-full rotate-[0.5deg] shadow-xl ring-2 ring-sky-400/25",
         isTerminal && "opacity-60 saturate-[0.85]",
         !layout && "w-full",
         className
@@ -263,9 +357,28 @@ export function AppointmentCard({
         className={cn("absolute inset-y-0 left-0 w-1 rounded-l-xl", accentClass)}
       />
 
+      {canDrag ? (
+        <button
+          type="button"
+          aria-label="Drag appointment"
+          className={cn(
+            "absolute left-0.5 top-1 z-20 flex h-5 w-4 cursor-grab items-center justify-center rounded text-slate-400",
+            "opacity-0 transition-opacity hover:text-slate-600 active:cursor-grabbing",
+            "group-hover:opacity-100 group-focus-within:opacity-100",
+            isDragging && "opacity-100"
+          )}
+          {...listeners}
+          {...attributes}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+        </button>
+      ) : null}
+
       <div
         className={cn(
           "flex h-full min-h-0 gap-2 pl-3 pr-2.5",
+          canDrag && "pl-5",
           layout ? "py-1.5" : "p-3 sm:gap-3 sm:p-3.5",
           isCompact ? "items-center" : "items-start"
         )}
@@ -386,6 +499,16 @@ export function AppointmentCard({
           ) : null}
         </div>
       </div>
+
+      {canResize && onResizeEnd ? (
+        <ResizeHandle
+          onResizeEnd={onResizeEnd}
+          onLiveHeightChange={setResizeHeightPx}
+          startAt={appointment.startAt}
+          baseHeightPx={layout!.heightPx}
+          isResizing={resizeHeightPx != null}
+        />
+      ) : null}
     </Card>
   );
 }
@@ -396,8 +519,11 @@ export function AppointmentCardFromBooking({
   display,
   layout,
   draggable,
+  resizable,
+  onResizeEnd,
   onClick,
   className,
+  isDragPreview,
 }: {
   booking: FiBookingRow;
   display?: {
@@ -408,8 +534,11 @@ export function AppointmentCardFromBooking({
   };
   layout?: AppointmentCardLayout;
   draggable?: boolean;
+  resizable?: boolean;
+  onResizeEnd?: (endIso: string) => void;
   onClick?: () => void;
   className?: string;
+  isDragPreview?: boolean;
 }) {
   const appointment = appointmentCardDataFromBooking(booking, display);
   const cancelled = isBookingCancelled(booking);
@@ -420,9 +549,12 @@ export function AppointmentCardFromBooking({
       appointment={appointment}
       layout={layout}
       draggable={draggable && !dimTerminal}
+      resizable={resizable && !dimTerminal}
+      onResizeEnd={onResizeEnd}
       onClick={onClick}
       className={className}
       dimTerminal={dimTerminal}
+      isDragPreview={isDragPreview}
     />
   );
 }

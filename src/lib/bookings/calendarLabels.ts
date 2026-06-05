@@ -48,6 +48,11 @@ export function formatCalendarRangeTitle(view: CalendarViewMode, lanes: Calendar
       timeZone: "UTC",
     });
   }
+  if (view === "3day" && lanes.length > 0) {
+    const start = new Date(lanes[0].startMs);
+    const end = new Date(lanes[lanes.length - 1].endMs - 1);
+    return `${start.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })} – ${end.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}`;
+  }
   const a = lanes[0].startMs;
   const b = lanes[lanes.length - 1].endMs - 1;
   const start = new Date(a);

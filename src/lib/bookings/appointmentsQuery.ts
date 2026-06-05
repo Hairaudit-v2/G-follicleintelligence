@@ -2,7 +2,7 @@
  * URL parsing for `/fi-admin/[tenantId]/appointments` (Calendar | List | Today tabs).
  */
 
-import { parseCalendarSearchParams, type ParsedCalendarQuery } from "./calendarQuery";
+import { parseCalendarSearchParams, type CalendarViewMode, type ParsedCalendarQuery } from "./calendarQuery";
 import { parseOperatorBookingSearchParams, type ParsedOperatorBookingQuery } from "./operatorBookingQuery";
 import { defaultRangeIso } from "@/src/components/fi/bookings/bookingFormUtils";
 import type { AppointmentCreatePrefill } from "./appointmentCreateTypes";
@@ -106,7 +106,7 @@ function parseBool(s: string): boolean {
 
 export type AppointmentsHrefQuery = {
   tab?: AppointmentsTab;
-  view?: "day" | "week";
+  view?: CalendarViewMode;
   date?: string;
   start?: string;
   end?: string;

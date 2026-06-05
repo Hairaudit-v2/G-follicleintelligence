@@ -41,6 +41,20 @@ export function buildCalendarDay(dateAnchor: string): CalendarDayLane[] {
   return [{ dayKey: key, startMs, endMs, headingShortUtc: formatUtcWeekdayShort(startMs) }];
 }
 
+/** Three consecutive UTC day lanes starting at `dateAnchor`. */
+export function buildCalendarThreeDay(dateAnchor: string): CalendarDayLane[] {
+  const ymd = parseUtcCalendarDateString(dateAnchor) ?? dateAnchor.trim();
+  const startMs = utcMidnightMsFromYmd(ymd);
+  const days: CalendarDayLane[] = [];
+  for (let i = 0; i < 3; i++) {
+    const laneStart = startMs + i * 86400000;
+    const laneEnd = laneStart + 86400000;
+    const dayKey = utcCalendarDateStringFromDate(new Date(laneStart));
+    days.push({ dayKey, startMs: laneStart, endMs: laneEnd, headingShortUtc: formatUtcWeekdayShort(laneStart) });
+  }
+  return days;
+}
+
 /** Monday→Sunday UTC lanes for the week containing `dateAnchor`. */
 export function buildCalendarWeek(dateAnchor: string): CalendarDayLane[] {
   const ymd = parseUtcCalendarDateString(dateAnchor) ?? dateAnchor.trim();
@@ -57,7 +71,15 @@ export function buildCalendarWeek(dateAnchor: string): CalendarDayLane[] {
 }
 
 export function buildCalendarLanesForView(view: CalendarViewMode, dateAnchor: string): CalendarDayLane[] {
-  return view === "day" ? buildCalendarDay(dateAnchor) : buildCalendarWeek(dateAnchor);
+  if (view === "day") return buildCalendarDay(dateAnchor);
+  if (view === "3day") return buildCalendarThreeDay(dateAnchor);
+  return buildCalendarWeek(dateAnchor);
+}
+
+export function calendarViewPeriodStepDays(view: CalendarViewMode): number {
+  if (view === "day") return 1;
+  if (view === "3day") return 3;
+  return 7;
 }
 
 /** Bookings overlapping each lane (`start_at < lane.end` and `end_at > lane.start`). */
@@ -112,7 +134,7 @@ function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
  */
 export const calendarNavigationHelpers = {
   previousPeriod(q: ParsedCalendarQuery): CalendarHrefQuery {
-    const delta = q.view === "day" ? -1 : -7;
+    const delta = -calendarViewPeriodStepDays(q.view);
     return {
       view: q.view,
       date: addUtcDaysToCalendarDate(q.dateAnchor, delta),
@@ -120,7 +142,7 @@ export const calendarNavigationHelpers = {
     };
   },
   nextPeriod(q: ParsedCalendarQuery): CalendarHrefQuery {
-    const delta = q.view === "day" ? 1 : 7;
+    const delta = calendarViewPeriodStepDays(q.view);
     return {
       view: q.view,
       date: addUtcDaysToCalendarDate(q.dateAnchor, delta),

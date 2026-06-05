@@ -4,7 +4,7 @@
 
 import { isAllowedBookingStatus, isAllowedBookingType } from "./bookingPolicy";
 
-export type CalendarViewMode = "day" | "week";
+export type CalendarViewMode = "day" | "3day" | "week";
 
 function firstString(v: string | string[] | undefined): string {
   if (v == null) return "";
@@ -71,6 +71,7 @@ export function parseUtcCalendarDateString(ymd: string): string | null {
 function parseView(raw: string): CalendarViewMode {
   const v = raw.trim().toLowerCase();
   if (v === "day") return "day";
+  if (v === "3day" || v === "3-day" || v === "three_day") return "3day";
   return "week";
 }
 
@@ -181,6 +182,9 @@ export function calendarVisibleUtcRangeMs(q: ParsedCalendarQuery): { rangeStartM
   );
   if (q.view === "day") {
     return { rangeStartMs: startMs, rangeEndMs: startMs + 86400000 };
+  }
+  if (q.view === "3day") {
+    return { rangeStartMs: startMs, rangeEndMs: startMs + 3 * 86400000 };
   }
   const mondayMs = utcMondayStartMsContaining(startMs);
   return { rangeStartMs: mondayMs, rangeEndMs: mondayMs + 7 * 86400000 };

@@ -301,7 +301,10 @@ export type ProviderColumnProps = {
   droppable?: boolean;
   /** Allow dragging appointment cards within the parent DndContext. */
   draggable?: boolean;
+  /** Allow vertical resize on appointment cards. */
+  resizable?: boolean;
   onSelectAppointment?: (booking: FiBookingRow) => void;
+  onResizeAppointment?: (booking: FiBookingRow, endIso: string) => void;
   bodyHeightPx?: number;
   minWidthPx?: number;
   className?: string;
@@ -320,7 +323,9 @@ export function ProviderColumn({
   highlighted = false,
   droppable = false,
   draggable = false,
+  resizable = false,
   onSelectAppointment,
+  onResizeAppointment,
   bodyHeightPx: bodyHeightPxProp,
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
   className,
@@ -377,6 +382,10 @@ export function ProviderColumn({
                 }}
                 layout={layout}
                 draggable={draggable}
+                resizable={resizable}
+                onResizeEnd={
+                  onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined
+                }
                 onClick={onSelectAppointment ? () => onSelectAppointment(booking) : undefined}
               />
             );

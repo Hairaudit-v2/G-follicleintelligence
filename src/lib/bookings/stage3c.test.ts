@@ -15,6 +15,7 @@ import {
   addUtcDaysToCalendarDate,
   bucketBookingsIntoCalendar,
   buildCalendarDay,
+  buildCalendarThreeDay,
   buildCalendarWeek,
   calendarNavigationHelpers,
   layoutBookingUtcDayColumn,
@@ -137,6 +138,20 @@ describe("Stage 3C — visible range & week boundaries (UTC)", () => {
     const lanes = buildCalendarDay("2026-06-10");
     assert.equal(lanes.length, 1);
     assert.equal(lanes[0].dayKey, "2026-06-10");
+  });
+
+  it("3day view covers three UTC days from anchor", () => {
+    const q = parseCalendarSearchParams({ view: "3day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"));
+    const { rangeStartMs, rangeEndMs } = calendarVisibleUtcRangeMs(q);
+    assert.equal(rangeEndMs - rangeStartMs, 3 * 86400000);
+    assert.equal(new Date(rangeStartMs).toISOString(), "2026-06-10T00:00:00.000Z");
+  });
+
+  it("buildCalendarThreeDay returns three consecutive lanes", () => {
+    const lanes = buildCalendarThreeDay("2026-06-10");
+    assert.equal(lanes.length, 3);
+    assert.equal(lanes[0].dayKey, "2026-06-10");
+    assert.equal(lanes[2].dayKey, "2026-06-12");
   });
 });
 

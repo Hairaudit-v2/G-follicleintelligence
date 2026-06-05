@@ -119,13 +119,9 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   return null;
 }
 
-/** True when the shell should show the calendar-only secondary context row (UI placeholders). */
-export function isClinicOsShellCalendarContextRoute(pathname: string, base: string): boolean {
-  const nb = normalizeBase(base);
-  const np = normalizePath(pathname);
-  if (!np.startsWith(nb) || np === nb) return false;
-  const rest = np.slice(nb.length);
-  return rest === "/calendar" || rest.startsWith("/calendar/");
+/** Calendar page renders its own control bar — shell secondary row stays off. */
+export function isClinicOsShellCalendarContextRoute(_pathname: string, _base: string): boolean {
+  return false;
 }
 
 export function resolveClinicOsShellNavItems(base: string, showCrmNav: boolean): ResolvedClinicOsShellNavItem[] {

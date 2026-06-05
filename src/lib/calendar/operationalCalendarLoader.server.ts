@@ -271,7 +271,10 @@ export async function loadOperationalCalendarPageData(
   searchParams: Record<string, string | string[] | undefined>
 ): Promise<OperationalCalendarPageData> {
   const tid = tenantId.trim();
-  const query = parseCalendarSearchParams(searchParams);
+  const parsed = parseCalendarSearchParams(searchParams);
+  const viewRaw = Array.isArray(searchParams.view) ? searchParams.view[0] : searchParams.view;
+  const query =
+    typeof viewRaw === "string" && viewRaw.trim() ? parsed : { ...parsed, view: "day" as const };
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
