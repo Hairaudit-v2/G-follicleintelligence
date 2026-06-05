@@ -59,6 +59,12 @@ describe("Stage 3C — calendar query & URL", () => {
     assert.equal(q.view, "week");
     assert.equal(q.dateAnchor, "2026-06-05");
     assert.equal(q.includeCancelled, false);
+    assert.equal(q.search, null);
+  });
+
+  it("parses search q param", () => {
+    const q = parseCalendarSearchParams({ q: "Jordan" }, new Date("2026-06-01T00:00:00.000Z"));
+    assert.equal(q.search, "Jordan");
   });
 
   it("buildCalendarHref preserves filters and omits default week view", () => {

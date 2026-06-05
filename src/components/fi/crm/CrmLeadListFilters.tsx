@@ -17,9 +17,11 @@ export function CrmLeadListFilters({
   query: ParsedCrmLeadListQuery;
 }) {
   const action = `/fi-admin/${tenantId}/crm`;
+  const clearHref = query.view === "board" ? `${action}?view=board` : action;
 
   return (
     <form method="get" action={action} className="space-y-3 rounded border border-gray-200 bg-gray-50 p-4">
+      {query.view === "board" ? <input type="hidden" name="view" value="board" /> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <label className="block text-xs font-medium text-gray-700">
           Stage
@@ -99,6 +101,24 @@ export function CrmLeadListFilters({
             ))}
           </select>
         </label>
+        <label className="block text-xs font-medium text-gray-700">
+          Updated from
+          <input
+            name="updatedFrom"
+            type="date"
+            defaultValue={query.updatedAtMin ? query.updatedAtMin.slice(0, 10) : ""}
+            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          />
+        </label>
+        <label className="block text-xs font-medium text-gray-700">
+          Updated to
+          <input
+            name="updatedTo"
+            type="date"
+            defaultValue={query.updatedAtMax ? query.updatedAtMax.slice(0, 10) : ""}
+            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          />
+        </label>
       </div>
       <label className="block text-xs font-medium text-gray-700">
         Search (summary or person name / email hint)
@@ -114,7 +134,7 @@ export function CrmLeadListFilters({
         <button type="submit" className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">
           Apply filters
         </button>
-        <a href={action} className="text-sm text-blue-600 hover:underline">
+        <a href={clearHref} className="text-sm text-blue-600 hover:underline">
           Clear filters
         </a>
       </div>

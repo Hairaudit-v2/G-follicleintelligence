@@ -20,6 +20,7 @@ Recent foundation-layer batches (after `20260324000010_fi_events_global_foundati
 | `20260606140001` | CRM foundation tables (`fi_crm_*`) — additive DDL only; **no** pipeline seed |
 | `20260606150001` | CRM foundation RLS: tenant-member `SELECT` on all `fi_crm_*`; `service_role` INSERT/UPDATE/DELETE; **no** authenticated write policies (Stage 2B / checklist Phase 2) |
 | `20260607130001` | CRM Stage 2F: `fi_crm_leads_shell_page` RPC for tenant-scoped lead index (filters, search, sort, pagination); **`service_role` execute only** |
+| `20260621120001` | CRM: extend `fi_crm_leads_shell_page` with optional `p_updated_at_min` / `p_updated_at_max` on `fi_crm_leads.updated_at` (list + board filters) |
 
 Design reference: `docs/design/07-foundation-migration-specification.md`. CRM tables: `docs/design/17-crm-foundation-architecture.md`, `docs/design/18-crm-foundation-implementation-checklist.md`.
 

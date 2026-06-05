@@ -70,6 +70,19 @@ export type CrmShellLeadListPage = {
   total: number;
 };
 
+/** Kanban card row = shell list item plus batch-enriched CRM / clinical signals. */
+export type CrmKanbanLeadCard = CrmShellLeadListItem & {
+  clinicalSummaryLine: string | null;
+  norwoodScale: string | null;
+  ludwigScale: string | null;
+  primaryConcernLine: string | null;
+  daysInStage: number | null;
+  stageEnteredAtIso: string | null;
+  lastActivityAtIso: string;
+  overdueTaskCount: number;
+  isHighValue: boolean;
+};
+
 export type FiCrmLeadStageHistoryRow = {
   id: string;
   tenant_id: string;

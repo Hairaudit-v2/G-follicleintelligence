@@ -60,6 +60,8 @@ describe("Stage 4A — patient profile foundation (pure)", () => {
   it("patient admin patch schema requires at least one field", () => {
     const ok = patientAdminPatchBodySchema.safeParse({ patient_status: "inactive" });
     assert.equal(ok.success, true);
+    const okReminder = patientAdminPatchBodySchema.safeParse({ reminder_consent: true });
+    assert.equal(okReminder.success, true);
     const bad = patientAdminPatchBodySchema.safeParse({});
     assert.equal(bad.success, false);
   });

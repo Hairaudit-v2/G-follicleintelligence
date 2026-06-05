@@ -69,6 +69,8 @@ export async function loadCrmLeadsShellPage(
     p_sort: parsed.sort,
     p_limit: parsed.pageSize,
     p_offset: offset,
+    p_updated_at_min: parsed.updatedAtMin,
+    p_updated_at_max: parsed.updatedAtMax,
   });
 
   if (error) throw new Error(error.message);

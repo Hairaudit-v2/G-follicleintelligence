@@ -11,6 +11,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadPipelineStages } from "@/src/lib/crm/pipeline";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { loadUpcomingReminderJobsForTenantRange } from "@/src/lib/reminders/reminderJobs.server";
 
 /** Days in current pipeline stage before a lead appears on the dashboard stale list. */
 export const DEFAULT_STALE_LEAD_STAGE_DAYS = 7;
@@ -28,6 +29,13 @@ function utcDayStart(d: Date): Date {
 
 function addHours(d: Date, hours: number): Date {
   return new Date(d.getTime() + hours * 3_600_000);
+}
+
+/** Same UTC window as the home dashboard agenda (midnight UTC today → +72h). */
+export function computeOperationalAgendaUtcRange(now: Date): { startIso: string; endIso: string } {
+  const dayStart = utcDayStart(now);
+  const rangeEnd = addHours(dayStart, 72);
+  return { startIso: dayStart.toISOString(), endIso: rangeEnd.toISOString() };
 }
 
 function mondayStartUtc(d: Date): Date {
@@ -96,6 +104,19 @@ const quickStatsSchema = z.object({
 
 export type TenantQuickStats = z.infer<typeof quickStatsSchema>;
 
+const dashboardReminderItemSchema = z.object({
+  jobId: z.string().uuid(),
+  scheduled_at: z.string(),
+  status: z.string(),
+  templateName: z.string(),
+  templateType: z.string(),
+  bookingId: z.string().uuid(),
+  bookingTitle: z.string().nullable(),
+  bookingStartAt: z.string(),
+});
+
+export type DashboardReminderItem = z.infer<typeof dashboardReminderItemSchema>;
+
 export const tenantOperationalDashboardSchema = z.object({
   tenantId: z.string().uuid(),
   tenantName: z.string(),
@@ -106,6 +127,7 @@ export const tenantOperationalDashboardSchema = z.object({
     follow_up: z.array(dashboardBookingItemSchema),
     other: z.array(dashboardBookingItemSchema),
   }),
+  upcomingReminders: z.array(dashboardReminderItemSchema),
   staleLeads: z.array(staleLeadItemSchema),
   staleLeadThresholdDays: z.number().int().positive(),
   tasksDue: z.array(taskDueItemSchema),
@@ -148,10 +170,7 @@ async function loadAgendaBookings(tenantId: string, now: Date): Promise<{
   range: { startIso: string; endIso: string };
   byBucket: Record<AgendaBucket, DashboardBookingItem[]>;
 }> {
-  const dayStart = utcDayStart(now);
-  const rangeEnd = addHours(dayStart, 72);
-  const rangeStartIso = dayStart.toISOString();
-  const rangeEndIso = rangeEnd.toISOString();
+  const { startIso: rangeStartIso, endIso: rangeEndIso } = computeOperationalAgendaUtcRange(now);
 
   const raw = await loadBookingsForTenantRange(tenantId, rangeStartIso, rangeEndIso);
 
@@ -432,11 +451,14 @@ export async function loadTenantOperationalDashboard(
   if (!tenantRes.data) throw new Error("Tenant not found");
   const tenantName = String((tenantRes.data as { name?: string }).name ?? "").trim() || tid;
 
-  const [agenda, staleLeads, tasksDue, quickStats] = await Promise.all([
+  const agendaRange = computeOperationalAgendaUtcRange(now);
+
+  const [agenda, staleLeads, tasksDue, quickStats, upcomingReminders] = await Promise.all([
     loadAgendaBookings(tid, now),
     loadStaleLeads(tid, staleDays, now),
     loadTasksDue(tid, viewerFiUserId, now),
     loadQuickStats(tid, now),
+    loadUpcomingReminderJobsForTenantRange(tid, agendaRange.startIso, agendaRange.endIso, 24),
   ]);
 
   return tenantOperationalDashboardSchema.parse({
@@ -444,6 +466,7 @@ export async function loadTenantOperationalDashboard(
     tenantName,
     agendaRange: agenda.range,
     agendaByBucket: agenda.byBucket,
+    upcomingReminders,
     staleLeads,
     staleLeadThresholdDays: staleDays,
     tasksDue,

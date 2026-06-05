@@ -11,6 +11,8 @@ import {
 } from "./operatorBookingQuery";
 import { computeOperatorBookingSummaryCounts, type OperatorBookingSummaryCounts } from "./operatorBookingSummary";
 import { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
+import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
+import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadBookingsForOperatorView } from "./bookings";
 import type { FiBookingRow } from "./types";
 
@@ -23,6 +25,8 @@ export type BookingsOperatorPageData = {
   tenantId: string;
   query: ParsedOperatorBookingQuery;
   bookings: FiBookingRow[];
+  /** Serialized map: booking id → reminder jobs (pending/sent/failed). */
+  reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   summaryCounts: OperatorBookingSummaryCounts;
@@ -53,17 +57,18 @@ export async function loadBookingsOperatorPageData(
   const tomorrowStartIso = addUtcDays(startOfUtcDayFromDate(now), 1).toISOString();
   const summaryEndIso = maxIso(query.endIso, tomorrowStartIso);
 
-  const [bookings, summaryRows, assignees, scope] = await Promise.all([
-    loadBookingsForOperatorView({
-      tenantId: tid,
-      rangeStartIso: query.startIso,
-      rangeEndIso: query.endIso,
-      status: query.status,
-      bookingType: query.bookingType,
-      assignedUserId: query.assignedUserId,
-      clinicId: query.clinicId,
-      includeCancelled: query.includeCancelled,
-    }),
+  const bookings = await loadBookingsForOperatorView({
+    tenantId: tid,
+    rangeStartIso: query.startIso,
+    rangeEndIso: query.endIso,
+    status: query.status,
+    bookingType: query.bookingType,
+    assignedUserId: query.assignedUserId,
+    clinicId: query.clinicId,
+    includeCancelled: query.includeCancelled,
+  });
+
+  const [summaryRows, assignees, scope, reminderMap] = await Promise.all([
     loadBookingsForOperatorView({
       tenantId: tid,
       rangeStartIso: summaryStartIso,
@@ -73,6 +78,10 @@ export async function loadBookingsOperatorPageData(
     }),
     loadCrmShellUserPickerOptions(tid),
     loadCrmShellScopePickerOptions(tid),
+    loadReminderJobsForBookings(
+      tid,
+      bookings.map((b) => b.id)
+    ),
   ]);
 
   const summaryCounts = computeOperatorBookingSummaryCounts(summaryRows, {
@@ -81,10 +90,16 @@ export async function loadBookingsOperatorPageData(
     dayEndMs,
   });
 
+  const reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]> = {};
+  for (const [k, v] of Array.from(reminderMap.entries())) {
+    reminderJobsByBookingId[k] = v;
+  }
+
   return {
     tenantId: tid,
     query,
     bookings,
+    reminderJobsByBookingId,
     assignees,
     clinics: scope.clinics,
     summaryCounts,

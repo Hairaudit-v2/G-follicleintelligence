@@ -8,8 +8,9 @@ import {
 } from "./crmLeadListQuery";
 
 describe("crmLeadListQuery", () => {
-  it("defaults sort and pagination", () => {
+  it("defaults sort, pagination, and list view", () => {
     const q = parseCrmLeadListQuery({});
+    assert.equal(q.view, "list");
     assert.equal(q.sort, "updated_at_desc");
     assert.equal(q.page, 1);
     assert.equal(q.pageSize, 25);
@@ -40,6 +41,29 @@ describe("crmLeadListQuery", () => {
   it("crmLeadListHasActiveFilters", () => {
     assert.equal(crmLeadListHasActiveFilters(parseCrmLeadListQuery({})), false);
     assert.equal(crmLeadListHasActiveFilters(parseCrmLeadListQuery({ search: "x" })), true);
+  });
+
+  it("parses board view and updated date range", () => {
+    const q = parseCrmLeadListQuery({
+      view: "board",
+      updatedFrom: "2026-01-15",
+      updatedTo: "2026-01-20",
+    });
+    assert.equal(q.view, "board");
+    assert.equal(q.updatedAtMin, "2026-01-15T00:00:00.000Z");
+    assert.equal(q.updatedAtMax, "2026-01-20T23:59:59.999Z");
+  });
+
+  it("buildCrmLeadListHref includes view and dates", () => {
+    const q = parseCrmLeadListQuery({
+      view: "board",
+      updatedFrom: "2026-02-01",
+      updatedTo: "2026-02-02",
+    });
+    const href = buildCrmLeadListHref("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", parsedCrmLeadListToHrefQuery(q));
+    assert.ok(href.includes("view=board"));
+    assert.ok(href.includes("updatedFrom="));
+    assert.ok(href.includes("updatedTo="));
   });
 
   it("buildCrmLeadListHref roundtrip", () => {

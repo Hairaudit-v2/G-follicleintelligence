@@ -19,6 +19,7 @@ import {
   assertMetadataJsonObject,
   assertNonCancelledBookingMutable,
 } from "./bookingPolicy";
+import { syncBookingReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import { sortBookingsByStartAt } from "./bookingTime";
 import {
   CALENDAR_VIEW_BOOKINGS_LIMIT,
@@ -575,6 +576,8 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
     );
   }
 
+  await syncBookingReminderJobs(row, supabase);
+
   return row;
 }
 
@@ -710,6 +713,8 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
     );
   }
 
+  await syncBookingReminderJobs(updated, supabase);
+
   return updated;
 }
 
@@ -768,6 +773,8 @@ export async function cancelBooking(params: CancelBookingParams, client?: Supaba
     );
   }
 
+  await syncBookingReminderJobs(row, supabase);
+
   return row;
 }
 
@@ -819,6 +826,8 @@ export async function completeBooking(params: CompleteBookingParams, client?: Su
       supabase
     );
   }
+
+  await syncBookingReminderJobs(row, supabase);
 
   return row;
 }

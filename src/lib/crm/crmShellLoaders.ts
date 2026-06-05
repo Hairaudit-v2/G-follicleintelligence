@@ -20,6 +20,7 @@ import {
 } from "./server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type {
+  CrmKanbanLeadCard,
   CrmLeadConversionState,
   CrmShellClinicOption,
   CrmShellLeadListPage,
@@ -36,6 +37,7 @@ import type {
 } from "./types";
 import { DEFAULT_CRM_PIPELINE_KEY } from "./types";
 import { attachSearchPattern, parseCrmLeadListQuery, type ParsedCrmLeadListQuery } from "./crmLeadListQuery";
+import { enrichCrmKanbanCards } from "./crmKanbanExtras.server";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
@@ -104,6 +106,17 @@ export type CrmShellLeadsIndexResult = CrmShellLeadListPage & {
   query: ParsedCrmLeadListQuery;
 };
 
+const CRM_BOARD_PAGE_SIZE = 100;
+const CRM_BOARD_MAX_PAGES = 25;
+
+export type CrmShellLeadsBoardIndexResult = {
+  cards: CrmKanbanLeadCard[];
+  total: number;
+  truncated: boolean;
+  query: ParsedCrmLeadListQuery;
+};
+
+
 /**
  * Lead index for CRM shell home: lazy default pipeline seed + paginated list (Stage 2F).
  */
@@ -123,6 +136,43 @@ export async function loadCrmShellLeadsIndex(
   });
   const page = await loadCrmLeadsShellPage(tid, parsed);
   return { ...page, query: parsed };
+}
+
+/**
+ * Kanban: all matching leads (up to CRM_BOARD_PAGE_SIZE * CRM_BOARD_MAX_PAGES) with card enrichment.
+ */
+export async function loadCrmShellLeadsBoardIndex(
+  tenantId: string,
+  searchParams: Record<string, string | string[] | undefined>
+): Promise<CrmShellLeadsBoardIndexResult> {
+  const tid = tenantId.trim();
+  const base = parseCrmLeadListQuery(searchParams);
+  const esc = base.searchRaw ? escapeIlikePattern(base.searchRaw) : null;
+  const parsedBase = attachSearchPattern(base, esc);
+  await ensureDefaultPipelineStages({
+    tenantId: tid,
+    organisationId: null,
+    clinicId: null,
+    pipelineKey: DEFAULT_CRM_PIPELINE_KEY,
+  });
+
+  const collected: CrmShellLeadListPage["items"] = [];
+  let total = 0;
+  for (let pageNum = 1; pageNum <= CRM_BOARD_MAX_PAGES; pageNum++) {
+    const parsed: ParsedCrmLeadListQuery = {
+      ...parsedBase,
+      page: pageNum,
+      pageSize: CRM_BOARD_PAGE_SIZE,
+    };
+    const page = await loadCrmLeadsShellPage(tid, parsed);
+    total = page.total;
+    collected.push(...page.items);
+    if (collected.length >= total || page.items.length < CRM_BOARD_PAGE_SIZE) break;
+  }
+
+  const truncated = collected.length < total;
+  const cards = await enrichCrmKanbanCards(tid, collected);
+  return { cards, total, truncated, query: parsedBase };
 }
 
 export async function loadCrmShellUserPickerOptions(tenantId: string): Promise<CrmShellUserPickerOption[]> {

@@ -20,7 +20,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
     router.refresh();
   }
 
-  const { tenantId, query, bookings, assignees, clinics, summaryCounts, summaryTruncated, listTruncated } = data;
+  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinics, summaryCounts, summaryTruncated, listTruncated } = data;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
@@ -109,6 +109,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
       <BookingEditDrawer
         tenantId={tenantId}
         booking={editing}
+        reminderJobs={editing ? reminderJobsByBookingId[editing.id] ?? [] : []}
         assignees={assignees}
         clinics={clinics}
         adminKey={adminKey}

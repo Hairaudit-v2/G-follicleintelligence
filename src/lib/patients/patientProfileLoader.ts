@@ -6,6 +6,13 @@ import { mapFiCrmLeadRow } from "@/src/lib/crm/leadRow";
 import type { FiCrmLeadRow } from "@/src/lib/crm/types";
 import { computePatientProfileSummaryMetrics, sortActivityEventsNewestFirst, splitBookingsUpcomingPast } from "./patientProfileSummary";
 import { normalizePatientStatus, type PatientStatusValue } from "./patientPolicy";
+
+function normalizePreferredContact(raw: unknown): "email" | "sms" | "both" | null {
+  if (raw == null) return null;
+  const t = String(raw).trim().toLowerCase();
+  if (t === "email" || t === "sms" || t === "both") return t;
+  return null;
+}
 import type { PatientClinicalDetailsRow } from "./clinicalDetailsServer";
 import { loadPatientClinicalDetails } from "./clinicalDetailsServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
@@ -28,6 +35,8 @@ export type PatientProfilePatientRow = {
   metadata: Record<string, unknown>;
   admin_note: string | null;
   patient_status: PatientStatusValue;
+  reminder_consent: boolean;
+  preferred_contact_method: "email" | "sms" | "both" | null;
   created_at: string;
   updated_at: string;
 };
@@ -161,7 +170,7 @@ export async function loadPatientProfile(
 
   const { data: patRow, error: pe } = await supabase
     .from("fi_patients")
-    .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
+    .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, reminder_consent, preferred_contact_method, created_at, updated_at")
     .eq("tenant_id", tid)
     .eq("id", foundationPatientId)
     .maybeSingle();
@@ -191,6 +200,8 @@ export async function loadPatientProfile(
         : {},
     admin_note: pr.admin_note != null ? String(pr.admin_note) : null,
     patient_status: normalizePatientStatus(pr.patient_status != null ? String(pr.patient_status) : undefined),
+    reminder_consent: Boolean(pr.reminder_consent),
+    preferred_contact_method: normalizePreferredContact(pr.preferred_contact_method),
     created_at: String(pr.created_at),
     updated_at: String(pr.updated_at),
   };

@@ -11,9 +11,26 @@ export function PatientAdminNotesCard({ tenantId, data }: { tenantId: string; da
   const [msg, setMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  const [reminderConsent, setReminderConsent] = useState(Boolean(data.patient.reminder_consent));
+  const [preferredContact, setPreferredContact] = useState<string>(data.patient.preferred_contact_method ?? "");
+
   const dirty = useMemo(() => {
-    return note !== (data.patient.admin_note ?? "") || status !== data.patient.patient_status;
-  }, [note, status, data.patient.admin_note, data.patient.patient_status]);
+    return (
+      note !== (data.patient.admin_note ?? "") ||
+      status !== data.patient.patient_status ||
+      reminderConsent !== Boolean(data.patient.reminder_consent) ||
+      (preferredContact || "") !== (data.patient.preferred_contact_method ?? "")
+    );
+  }, [
+    note,
+    status,
+    reminderConsent,
+    preferredContact,
+    data.patient.admin_note,
+    data.patient.patient_status,
+    data.patient.reminder_consent,
+    data.patient.preferred_contact_method,
+  ]);
 
   return (
     <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
@@ -33,6 +50,31 @@ export function PatientAdminNotesCard({ tenantId, data }: { tenantId: string; da
               {s}
             </option>
           ))}
+        </select>
+      </label>
+      <label className="mt-3 flex items-start gap-2 text-xs font-medium text-gray-700">
+        <input
+          type="checkbox"
+          className="mt-0.5"
+          checked={reminderConsent}
+          onChange={(e) => setReminderConsent(e.target.checked)}
+        />
+        <span>
+          Reminder consent — allow automated booking reminders (email/SMS) when templates exist and the booking has a
+          patient anchor.
+        </span>
+      </label>
+      <label className="mt-3 block text-xs font-medium text-gray-700">
+        Preferred reminder channel
+        <select
+          className="mt-1 block w-full max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          value={preferredContact}
+          onChange={(e) => setPreferredContact(e.target.value)}
+        >
+          <option value="">No preference (all channels)</option>
+          <option value="email">Email only</option>
+          <option value="sms">SMS only</option>
+          <option value="both">Email and SMS</option>
         </select>
       </label>
       <label className="mt-3 block text-xs font-medium text-gray-700">
@@ -55,6 +97,9 @@ export function PatientAdminNotesCard({ tenantId, data }: { tenantId: string; da
             const res = await updatePatientAdminDetailsAction(tenantId, data.foundationPatientId, {
               patient_status: status,
               admin_note: note,
+              reminder_consent: reminderConsent,
+              preferred_contact_method:
+                preferredContact === "" ? null : (preferredContact as "email" | "sms" | "both"),
             });
             if (!res.ok) {
               setMsg(res.error);

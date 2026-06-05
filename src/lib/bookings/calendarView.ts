@@ -102,6 +102,7 @@ function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
     assignedUserId: q.assignedUserId ?? undefined,
     clinicId: q.clinicId ?? undefined,
     includeCancelled: q.includeCancelled ? true : undefined,
+    q: q.search?.trim() ? q.search.trim() : undefined,
   };
 }
 

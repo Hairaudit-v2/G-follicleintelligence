@@ -33,6 +33,8 @@ export type ParsedCalendarQuery = {
   assignedUserId: string | null;
   clinicId: string | null;
   includeCancelled: boolean;
+  /** Substring match against title, type, patient/lead label (server-side). */
+  search: string | null;
 };
 
 const UUID_RE =
@@ -101,6 +103,9 @@ export function parseCalendarSearchParams(
   let includeCancelled = parseBoolParam(searchParams.includeCancelled);
   if (status === "cancelled") includeCancelled = true;
 
+  const searchRaw = firstString(searchParams.q).trim();
+  const search = searchRaw.length > 120 ? searchRaw.slice(0, 120) : searchRaw || null;
+
   return {
     view,
     dateAnchor,
@@ -109,6 +114,7 @@ export function parseCalendarSearchParams(
     assignedUserId,
     clinicId,
     includeCancelled,
+    search,
   };
 }
 
@@ -120,6 +126,7 @@ export type CalendarHrefQuery = {
   assignedUserId?: string;
   clinicId?: string;
   includeCancelled?: boolean;
+  q?: string;
 };
 
 export function buildCalendarHref(tenantId: string, q: CalendarHrefQuery): string {
@@ -132,6 +139,7 @@ export function buildCalendarHref(tenantId: string, q: CalendarHrefQuery): strin
   if (q.assignedUserId?.trim()) sp.set("assignedUserId", q.assignedUserId.trim());
   if (q.clinicId?.trim()) sp.set("clinicId", q.clinicId.trim());
   if (q.includeCancelled) sp.set("includeCancelled", "1");
+  if (q.q?.trim()) sp.set("q", q.q.trim());
   const qs = sp.toString();
   return qs ? `${base}?${qs}` : base;
 }
@@ -146,6 +154,7 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
     assignedUserId: patch.assignedUserId !== undefined ? patch.assignedUserId : current.assignedUserId ?? undefined,
     clinicId: patch.clinicId !== undefined ? patch.clinicId : current.clinicId ?? undefined,
     includeCancelled: patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
+    q: patch.q !== undefined ? patch.q : current.search ?? undefined,
   };
 }
 

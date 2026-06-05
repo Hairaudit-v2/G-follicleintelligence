@@ -5,6 +5,7 @@
 
 export type {
   CrmPipelineScope,
+  CrmKanbanLeadCard,
   CrmLeadConversionState,
   CrmShellClinicOption,
   CrmShellLeadListItem,
@@ -50,6 +51,7 @@ export {
   parsedCrmLeadListToHrefQuery,
   type CrmLeadListHrefQuery,
   type CrmLeadListSort,
+  type CrmLeadListViewMode,
   type ParsedCrmLeadListQuery,
 } from "./crmLeadListQuery";
 export { leadTitleFromRow, personMetadataDisplayLabel } from "./crmLeadListDisplay";

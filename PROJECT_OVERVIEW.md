@@ -4,7 +4,7 @@
 
 **Document purpose:** Establish a **baseline** for engineers and stakeholders: what exists today, how it is structured, and what remains for an MVP comparable to Salesforce + HubSpot + Timely in scope (not in vendor feature parity).
 
-**Last reviewed:** 2026-06-05 (repository snapshot).
+**Last reviewed:** 2026-06-05 (CRM kanban MVP + `fi_crm_leads_shell_page` date filters).
 
 ---
 
@@ -20,7 +20,7 @@ The codebase deliberately combines:
 
 It is **not** a thin CRUD wrapper: there is substantial domain logic (CRM gates, lead conversion, case/clinical extensions, event ingestion, HairAudit flows) and **design documentation** under `docs/design/` that tracks staged delivery.
 
-**Honest positioning:** Core **CRM list + lead detail + tasks/notes/comms**, **patient profiles**, **bookings**, and **case/surgery/post-op** structures are **in place**. A **Salesforce-style kanban**, **HubSpot-grade marketing automation**, and **Timely-grade scheduling** (resources, recurrence, reminders, patient self-serve) are **largely missing or early**. Security posture is **layered** but some legacy FI APIs and audit endpoints need tightening (called out in internal design audits).
+**Honest positioning:** Core **CRM list + board (kanban) + lead detail + tasks/notes/comms**, **patient profiles**, **bookings**, and **case/surgery/post-op** structures are **in place**. **HubSpot-grade marketing automation**, and **Timely-grade scheduling** (resources, recurrence, reminders, patient self-serve) are **largely missing or early**. Security posture is **layered** but some legacy FI APIs and audit endpoints need tightening (called out in internal design audits).
 
 ---
 
@@ -79,10 +79,10 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | Pipeline stages (`fi_crm_pipeline_stages`) | **Completed** | Tenant-scoped stages; lazy seeding pattern per design docs. |
 | Leads (`fi_crm_leads`) + person anchor | **Completed** | Lead tied to `fi_persons`; optional `patient_id`, `case_id`, stage, owner. |
 | Stage history (analytics-ready) | **Completed** | `fi_crm_lead_stage_history` append-only. |
-| Lead list + filters + pagination | **Completed** | `/fi-admin/[tenantId]/crm` — table-driven, not kanban. |
+| Lead list + filters + pagination | **Completed** | `/fi-admin/[tenantId]/crm` — table view with search, owner, stage, **updated date range**, sort, page size. |
+| **Kanban / board by stage (MVP)** | **Completed** | List \| Board toggle; columns = tenant pipeline stages; drag or menu move → `crmMoveLeadStageAction` / `moveCrmLeadToStage` (history + activity); clinical/Norwood hints, overdue tasks, high-priority badge; responsive column stack. |
 | Lead detail (notes, tasks, comms, activity) | **Completed / evolving** | Rich workflows in `src/components/fi/crm/*`; APIs under `/api/tenants/.../crm/leads/[leadId]/*`. |
 | Lead → patient/case conversion | **Completed** | Policy-driven conversion (`crmLeadConversionPolicy`, API route `convert`). |
-| **Kanban / board by stage** | **Missing** | Pipeline stages render as a **sidebar panel**, not a drag-and-drop board. |
 | Sequences / marketing automation | **Missing** | No workflow engine, enrollments, or send-time scheduling. |
 | Email provider / webhooks | **Missing** | Communications are modeled in CRM tables/UI; full ESP integration is not evidenced as first-class. |
 
@@ -94,7 +94,7 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | Patient directory + profile | **Completed** | Gated CRM shell; clinical details, images, timeline, linked leads. |
 | Structured clinical summary | **Completed** | `fi_patient_clinical_details` — hair concern, meds, allergies, family history, etc. |
 | Patient images (private bucket) | **Completed** | `fi_patient_images` with categories including **`before` / `after`**, consult, post_op, etc.; APIs for upload/archive. |
-| **Norwood / Ludwig scale fields** | **Missing** | No dedicated schema or UI references located (search: norwood). |
+| **Norwood / Ludwig scale fields** | **Completed** | `fi_patient_clinical_details` + patient profile / consultation medical panel; surfaced on CRM kanban cards when linked patient has clinical rows. |
 | Universal timeline | **Completed / evolving** | Timeline filters and types in `src/lib/patients/timeline/*`. |
 
 ### Scheduling (Timely direction)
@@ -103,9 +103,9 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | --- | --- | --- |
 | Bookings table | **Completed** | `fi_bookings` — types (consultation, surgery, follow_up, …), status, anchors to lead/person/patient/case, assignee, clinic. |
 | Bookings operator UI | **Completed** | List + new booking flows under `/bookings`. |
-| Calendar page | **In progress** | `/calendar` — **read-oriented** “today” style view (`ClinicOsCalendarHome`, `loadClinicOsCalendarTodayReadOnly`); not full multi-day resource scheduling. |
-| Reminders / SMS / email cadence | **Missing** | No patient reminder engine evidenced as first-class. |
-| Recurring appointments / rooms / chairs | **Missing** | Single booking rows; no recurrence or resource optimization. |
+| Calendar page | **Completed (ops)** | `/fi-admin/[tenantId]/calendar` — **week (Mon–Sun UTC) default** + **day** toggle; **business-hour grid** (slot size + hours from `fi_tenant_settings.metadata.operational_calendar` or defaults); **staff + site columns** on day view (`fi_users` + `fi_clinics`); bookings via **`loadBookingsForTenantRange`** (same overlap semantics as tenant dashboard agenda) with CRM-style filters + search (`q`); **drag-and-drop reschedule** (`updateBookingAction`) with **assignee/site conflict** hints; detail **drawer + full edit**; **mobile stacked list**. Legacy preview grid remains in `ClinicOsCalendarHome` (unused by route). |
+| Reminders / SMS / email cadence | **In progress (MVP)** | `fi_reminder_templates` + `fi_reminder_jobs` with tenant-scoped templates (`booking_created`, `booking_48h_before`, `booking_24h_before`, `lead_created` placeholder), **patient `reminder_consent` + `preferred_contact_method`**, enqueue on **booking create/update/cancel/complete** (`syncBookingReminderJobs`), **stub processor** `processReminderJobsOnce` + **`POST|GET /api/cron/fi-reminder-jobs`** (`FI_REMINDER_CRON_SECRET`). UI: **`/fi-admin/[tenantId]/settings/reminders`**, dashboard **Upcoming reminders** strip, booking drawer queue. CRM contact log on send when `lead_id` present. **Next:** Twilio/SendGrid, pg_cron or Vercel Cron config, lead-triggered jobs. |
+| Recurring appointments / rooms / chairs | **Partial** | Single booking rows with `clinic_id` + assignee; no recurrence or optimization engine. |
 
 ### Cases, surgery, post-op (clinical OS)
 
@@ -141,11 +141,11 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 
 ## Obvious Gaps for a Hair Clinic CRM
 
-1. **Pipeline UX** — Deal stages exist in SQL and power filters, but there is **no kanban** or drag-and-drop stage management for daily sales huddles.
+1. **Pipeline UX** — **MVP kanban** is live under `/fi-admin/[tenantId]/crm?view=board` (drag between columns, refresh, filters). Deeper sales analytics (velocity, forecasting) remain future work.
 2. **Marketing automation** — No lead scoring beyond manual fields, no sequences, no landing-page → CRM attribution loop inside this repo at product level.
 3. **Scheduling depth** — Bookings are **flat events**; missing **clinician/resource calendars**, **recurrence**, **waitlists**, and **patient self-booking** tied to real-time availability.
 4. **Engagement & reminders** — No first-class **SMS/email reminder** system, delivery logs, or consent tracking in schema (communications tables are staff-centric CRM logs).
-5. **Trichoscopy / Norwood / surgical planning math** — Clinical narrative fields exist; **structured classification** (e.g. Norwood) and **graft calculators** are not standardized in DB/UI.
+5. **Trichoscopy / surgical planning math** — Norwood/Ludwig are **structured on patients**; **graft calculators** and imaging-linked trichoscopy workflows are not standardized in-app.
 6. **Reporting** — Data is **analytics-ready** (stage history, bookings timestamps); **in-app BI** (conversion rates, stage dwell, no-show rates) is largely **unbuilt**.
 7. **Security consistency** — Internal docs flag APIs that trust **`tenant_id` query params** without mirroring layout-level checks; closing this gap is essential before externalizing APIs.
 
@@ -159,9 +159,9 @@ Prioritized for **Evolved Hair Clinics daily operations** while preserving the s
 | --- | --- | --- |
 | **P0** | **Tenant home dashboard** — today’s appointments, stale leads, tasks due | Replaces “land on cases” default with actionable clinic ops (`docs/design/19-fi-os-current-state-and-dashboard-roadmap.md` aligns). |
 | **P0** | **Harden tenant-scoped APIs** — unify `assertFiTenantPortalAccess` / CRM gates on every `/api/tenants/...` and legacy FI audit list | Reduces breach risk; unlocks safe mobile / third-party consumers. |
-| **P1** | **Kanban (minimum viable)** — columns = `fi_crm_pipeline_stages`, cards = leads, drag updates stage via existing stage API | Delivers Salesforce-like daily workflow without new backend concepts. |
 | **P1** | **Calendar week view + filters** — clinicians, rooms, booking types | Closes the gap to Timely for front desk; reuses `fi_bookings`. |
-| **P1** | **Norwood (or Hamilton-Norwood) + hairline pattern** as structured fields | **In progress / shipped:** columns on `fi_patient_clinical_details`, Zod, patient profile + consultation medical panel + timeline summary; reporting views next. |
+| **P1** | **Tenant CRM dashboard widgets** — stale leads, stage dwell, tasks due (uses board + history) | Complements the new kanban as the exec snapshot (`docs/design/19-fi-os-current-state-and-dashboard-roadmap.md`). |
+| **P1** | **Norwood reporting / cohort views** | Structured scale exists; add saved views / exports for clinical ops. |
 | **P2** | **Reminder job + templates** — queue table or edge functions + Twilio/SendGrid | Turns bookings into reliable revenue capture. |
 | **P2** | **Funnel metrics page** — SQL views or materialized summaries from `fi_crm_lead_stage_history` | Uses existing append-only history; small win for leadership. |
 | **P3** | **Marketing automation MVP** — static segments + manual bulk tasks (not full HubSpot) | Avoids over-engineering; pairs with CRM tasks. |

@@ -34,6 +34,8 @@ export async function updatePatientAdminDetailsAction(
       patientId,
       patient_status: parsed.patient_status,
       admin_note: parsed.admin_note,
+      reminder_consent: parsed.reminder_consent,
+      preferred_contact_method: parsed.preferred_contact_method,
     });
 
     revalidatePath(`/fi-admin/${tenantId.trim()}/patients`);

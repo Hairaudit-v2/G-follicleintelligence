@@ -10,6 +10,8 @@ const TABLES_TO_PROBE = [
   "fi_crm_lead_notes",
   "fi_crm_lead_communications",
   "fi_bookings",
+  "fi_reminder_templates",
+  "fi_reminder_jobs",
   "fi_persons",
   "fi_patients",
   "fi_patient_clinical_details",

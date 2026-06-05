@@ -26,6 +26,7 @@ function buildNavItems(base: string, showCrmNav: boolean): NavItem[] {
     { href: `${base}/audit`, label: "Audit queue" },
     { href: `${base}/directory`, label: "Directory" },
     { href: `${base}/configuration`, label: "Configuration" },
+    { href: `${base}/settings/reminders`, label: "Reminders" },
     { href: `${base}/foundation-integrity`, label: "Foundation integrity" },
   ];
   if (showCrmNav) {

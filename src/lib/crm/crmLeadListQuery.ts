@@ -15,7 +15,11 @@ export const CRM_LEAD_LIST_SORTS = [
 
 export type CrmLeadListSort = (typeof CRM_LEAD_LIST_SORTS)[number];
 
+export type CrmLeadListViewMode = "list" | "board";
+
 export type ParsedCrmLeadListQuery = {
+  /** Primary CRM index layout: table vs kanban (default list). */
+  view: CrmLeadListViewMode;
   stageId: string | null;
   status: string | null;
   priority: string | null;
@@ -26,6 +30,10 @@ export type ParsedCrmLeadListQuery = {
   sort: CrmLeadListSort;
   page: number;
   pageSize: number;
+  /** Inclusive lower bound on `fi_crm_leads.updated_at` (timestamptz ISO), from `updatedFrom` URL day. */
+  updatedAtMin: string | null;
+  /** Inclusive upper bound end-of-day on `fi_crm_leads.updated_at`, from `updatedTo` URL day. */
+  updatedAtMax: string | null;
 };
 
 function firstString(v: string | string[] | undefined): string | undefined {
@@ -58,6 +66,21 @@ export function parseCrmLeadListQuery(
 
   const searchRaw = (get("search") ?? "").trim().slice(0, 200);
 
+  const viewRaw = (get("view") ?? "list").trim().toLowerCase();
+  const view: CrmLeadListViewMode = viewRaw === "board" ? "board" : "list";
+
+  const updatedFromRaw = (get("updatedFrom") ?? "").trim();
+  const updatedToRaw = (get("updatedTo") ?? "").trim();
+  /** HTML date input `YYYY-MM-DD` → start of UTC day for min, end of UTC day for max. */
+  let updatedAtMin: string | null = null;
+  let updatedAtMax: string | null = null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(updatedFromRaw)) {
+    updatedAtMin = `${updatedFromRaw}T00:00:00.000Z`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(updatedToRaw)) {
+    updatedAtMax = `${updatedToRaw}T23:59:59.999Z`;
+  }
+
   const sortRaw = (get("sort") ?? "updated_at_desc").trim().toLowerCase();
   const sort = (CRM_LEAD_LIST_SORTS as readonly string[]).includes(sortRaw)
     ? (sortRaw as CrmLeadListSort)
@@ -71,6 +94,7 @@ export function parseCrmLeadListQuery(
   const pageSize = Number.isFinite(pageSizeNum) ? Math.min(100, Math.max(1, pageSizeNum)) : 25;
 
   return {
+    view,
     stageId,
     status,
     priority,
@@ -80,6 +104,8 @@ export function parseCrmLeadListQuery(
     sort,
     page: pageNum,
     pageSize,
+    updatedAtMin,
+    updatedAtMax,
   };
 }
 
@@ -107,11 +133,14 @@ export function crmLeadListHasActiveFilters(parsed: ParsedCrmLeadListQuery): boo
     parsed.searchRaw.trim() ||
     parsed.sort !== "updated_at_desc" ||
     parsed.page > 1 ||
-    parsed.pageSize !== 25
+    parsed.pageSize !== 25 ||
+    parsed.updatedAtMin ||
+    parsed.updatedAtMax
   );
 }
 
 export type CrmLeadListHrefQuery = Partial<{
+  view: CrmLeadListViewMode;
   stage: string;
   status: string;
   priority: string;
@@ -120,10 +149,13 @@ export type CrmLeadListHrefQuery = Partial<{
   sort: CrmLeadListSort;
   page: number;
   pageSize: number;
+  updatedFrom: string;
+  updatedTo: string;
 }>;
 
 export function parsedCrmLeadListToHrefQuery(q: ParsedCrmLeadListQuery): CrmLeadListHrefQuery {
   return {
+    view: q.view === "board" ? "board" : undefined,
     stage: q.stageId ?? undefined,
     status: q.status ?? undefined,
     priority: q.priority ?? undefined,
@@ -132,11 +164,14 @@ export function parsedCrmLeadListToHrefQuery(q: ParsedCrmLeadListQuery): CrmLead
     sort: q.sort,
     page: q.page,
     pageSize: q.pageSize,
+    updatedFrom: q.updatedAtMin ? q.updatedAtMin.slice(0, 10) : undefined,
+    updatedTo: q.updatedAtMax ? q.updatedAtMax.slice(0, 10) : undefined,
   };
 }
 
 export function buildCrmLeadListHref(tenantId: string, q: CrmLeadListHrefQuery): string {
   const sp = new URLSearchParams();
+  if (q.view === "board") sp.set("view", "board");
   if (q.stage?.trim()) sp.set("stage", q.stage.trim());
   if (q.status?.trim()) sp.set("status", q.status.trim());
   if (q.priority?.trim()) sp.set("priority", q.priority.trim());
@@ -145,6 +180,8 @@ export function buildCrmLeadListHref(tenantId: string, q: CrmLeadListHrefQuery):
   if (q.sort && q.sort !== "updated_at_desc") sp.set("sort", q.sort);
   if (q.page != null && q.page > 1) sp.set("page", String(q.page));
   if (q.pageSize != null && q.pageSize !== 25) sp.set("pageSize", String(q.pageSize));
+  if (q.updatedFrom?.trim()) sp.set("updatedFrom", q.updatedFrom.trim());
+  if (q.updatedTo?.trim()) sp.set("updatedTo", q.updatedTo.trim());
   const qs = sp.toString();
   return qs ? `/fi-admin/${tenantId.trim()}/crm?${qs}` : `/fi-admin/${tenantId.trim()}/crm`;
 }

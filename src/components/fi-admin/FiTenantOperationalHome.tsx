@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DashboardTodayAgenda } from "@/src/components/fi-admin/dashboard/DashboardTodayAgenda";
+import { DashboardUpcomingReminders } from "@/src/components/fi-admin/dashboard/DashboardUpcomingReminders";
 import { DashboardStaleLeads } from "@/src/components/fi-admin/dashboard/DashboardStaleLeads";
 import { DashboardTasksDue } from "@/src/components/fi-admin/dashboard/DashboardTasksDue";
 import { DashboardQuickStats } from "@/src/components/fi-admin/dashboard/DashboardQuickStats";
@@ -53,6 +54,12 @@ export function FiTenantOperationalHome(props: {
       </DashboardCard>
 
       <DashboardTodayAgenda tenantId={data.tenantId} agendaRange={data.agendaRange} agendaByBucket={data.agendaByBucket} />
+
+      <DashboardUpcomingReminders
+        tenantId={data.tenantId}
+        agendaRange={data.agendaRange}
+        items={data.upcomingReminders}
+      />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <DashboardStaleLeads

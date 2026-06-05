@@ -116,6 +116,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       <BookingEditDrawer
         tenantId={tenantId}
         booking={editing}
+        reminderJobs={[]}
         assignees={assignees}
         clinics={clinics}
         adminKey={adminKey}
