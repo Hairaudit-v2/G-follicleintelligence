@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+import { fiSurfaceVariantClassNames, type FiSurfaceVariant } from "./fiDesignTokens";
+
 export type FiQuickActionCardProps = {
   title: string;
   description: string;
@@ -17,10 +19,15 @@ export type FiQuickActionCardProps = {
   showOpenAffordance?: boolean;
   /** Label before the arrow on linked cards (default “Open”). */
   openAffordanceLabel?: string;
+  /** Outer surface for the interactive card; default matches historical white tile. */
+  surfaceVariant?: FiSurfaceVariant;
 };
 
-const shell =
-  "flex flex-col rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/35 sm:p-5";
+const SURFACE_WITH_BUILTIN_PADDING = new Set<FiSurfaceVariant>(["clinicLight", "auditDark"]);
+
+function isDarkSurface(surfaceVariant: FiSurfaceVariant): boolean {
+  return surfaceVariant === "darkGlass" || surfaceVariant === "auditDark";
+}
 
 function CardBody({
   title,
@@ -35,6 +42,7 @@ function CardBody({
   showOpenAffordance,
   isLink,
   openAffordanceLabel,
+  openRowClass,
 }: {
   title: string;
   description: string;
@@ -48,6 +56,7 @@ function CardBody({
   showOpenAffordance: boolean;
   isLink: boolean;
   openAffordanceLabel: string;
+  openRowClass: string;
 }) {
   return (
     <>
@@ -70,7 +79,7 @@ function CardBody({
         </span>
       ) : null}
       {isLink && showOpenAffordance ? (
-        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-sky-700">
+        <span className={cn("mt-4 inline-flex items-center gap-1 text-sm font-semibold", openRowClass)}>
           {openAffordanceLabel}{" "}
           <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
         </span>
@@ -93,18 +102,44 @@ export function FiQuickActionCard({
   className,
   showOpenAffordance,
   openAffordanceLabel = "Open",
+  surfaceVariant = "clinicLight",
 }: FiQuickActionCardProps) {
   const isLink = Boolean(href?.trim()) && !disabled;
   const showComingSoon = !isLink && !disabledReason && !badge;
   const openRow = showOpenAffordance !== false;
+  const dark = isDarkSurface(surfaceVariant);
+  const surface = fiSurfaceVariantClassNames[surfaceVariant];
+  const padWhenNeeded =
+    !SURFACE_WITH_BUILTIN_PADDING.has(surfaceVariant) ? "p-4 sm:p-5" : undefined;
+
+  const linkSurfaceHover =
+    surfaceVariant === "clinicLight"
+      ? "hover:border-sky-200/80 hover:bg-sky-50/40"
+      : surfaceVariant === "crmLight"
+        ? "hover:border-sky-200/80 hover:bg-sky-50/40"
+        : surfaceVariant === "darkGlass"
+          ? "hover:border-white/[0.12] hover:bg-[#141C33]/90"
+          : surfaceVariant === "auditDark"
+            ? "hover:border-emerald-500/30 hover:bg-slate-900/80"
+            : surfaceVariant === "plain"
+              ? "hover:border-slate-300 hover:bg-slate-50/80"
+              : undefined;
+
+  const linkTitleClass = dark ? "text-[#F8FAFC]" : "text-slate-900";
+  const linkDescClass = dark ? "text-[#94A3B8]" : "text-slate-600";
+  const linkIconClass = dark ? "text-[#22C1FF]" : "text-sky-600";
+  const linkOpenRowClass = dark ? "text-sky-300" : "text-sky-700";
 
   if (isLink) {
     return (
       <Link
         href={href!}
         className={cn(
-          shell,
-          "min-h-[200px] border-slate-200 bg-white shadow-sm hover:border-sky-200/80 hover:bg-sky-50/40 sm:min-h-[220px]",
+          "flex flex-col text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/35",
+          "min-h-[200px] sm:min-h-[220px]",
+          surface,
+          padWhenNeeded,
+          linkSurfaceHover,
           className
         )}
       >
@@ -115,12 +150,13 @@ export function FiQuickActionCard({
           badge={badge}
           disabledReason={disabledReason}
           showComingSoon={showComingSoon}
-          titleClass="text-slate-900"
-          descClass="text-slate-600"
-          iconClass="text-sky-600"
+          titleClass={linkTitleClass}
+          descClass={linkDescClass}
+          iconClass={linkIconClass}
           showOpenAffordance={openRow}
           isLink
           openAffordanceLabel={openAffordanceLabel}
+          openRowClass={linkOpenRowClass}
         />
       </Link>
     );
@@ -129,7 +165,7 @@ export function FiQuickActionCard({
   return (
     <div
       className={cn(
-        shell,
+        "flex flex-col rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/35 sm:p-5",
         "min-h-[200px] cursor-not-allowed border-dashed border-slate-200 bg-slate-50/80 text-slate-500 shadow-none sm:min-h-[220px]",
         className
       )}
@@ -149,6 +185,7 @@ export function FiQuickActionCard({
         showOpenAffordance={false}
         isLink={false}
         openAffordanceLabel={openAffordanceLabel}
+        openRowClass="text-sky-700"
       />
     </div>
   );

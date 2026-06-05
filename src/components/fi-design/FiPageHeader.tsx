@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { fiPageHeaderVariantClassNames, type FiPageHeaderVariant } from "./fiDesignTokens";
+
 export type FiPageHeaderProps = {
   eyebrow?: string;
   title: string;
@@ -13,6 +15,8 @@ export type FiPageHeaderProps = {
   className?: string;
   /** Optional `id` for the `<h1>` (landmark labelling). */
   titleId?: string;
+  /** Typography + tone family; default preserves historical Clinic OS light header. */
+  variant?: FiPageHeaderVariant;
 };
 
 /**
@@ -27,27 +31,28 @@ export function FiPageHeader({
   leading,
   className,
   titleId,
+  variant = "clinicLight",
 }: FiPageHeaderProps) {
   const hasActions = primaryAction != null || secondaryAction != null;
+  const t = fiPageHeaderVariantClassNames[variant];
 
   return (
     <div className={cn("flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between", className)}>
       <div className="flex min-w-0 flex-1 flex-wrap items-start gap-3">
         {leading ? <div className="shrink-0">{leading}</div> : null}
-        <div className="min-w-0 flex-1 space-y-1">
-          {eyebrow ? (
-            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">{eyebrow}</p>
-          ) : null}
-          <h1 id={titleId} className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+        <div className={cn("flex-1", t.root)}>
+          {eyebrow ? <p className={t.eyebrow}>{eyebrow}</p> : null}
+          <h1 id={titleId} className={t.title}>
             {title}
           </h1>
-          {description ? (
-            <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">{description}</p>
-          ) : null}
+          {description ? <p className={t.description}>{description}</p> : null}
         </div>
       </div>
       {hasActions ? (
-        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">{secondaryAction}{primaryAction}</div>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+          {secondaryAction}
+          {primaryAction}
+        </div>
       ) : null}
     </div>
   );

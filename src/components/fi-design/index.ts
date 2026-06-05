@@ -1,3 +1,4 @@
+export type { FiDensity, FiPageHeaderVariant, FiSurfaceVariant } from "./fiDesignTokens";
 export { FiCalendarBlock, type FiCalendarBlockProps, type FiCalendarTone } from "./FiCalendarBlock";
 export { FiCard, type FiCardProps } from "./FiCard";
 export { FiCaseCard, type FiCaseCardProps } from "./FiCaseCard";
@@ -8,4 +9,4 @@ export { FiPageHeader, type FiPageHeaderProps } from "./FiPageHeader";
 export { FiPatientCard, type FiPatientCardProps } from "./FiPatientCard";
 export { FiQuickActionCard, type FiQuickActionCardProps } from "./FiQuickActionCard";
 export { FiSection, type FiSectionProps } from "./FiSection";
-export { FiStatusBadge, type FiStatusBadgeProps } from "./FiStatusBadge";
+export { FiStatusBadge, type FiStatusBadgeProps, type FiStatusBadgeTone } from "./FiStatusBadge";

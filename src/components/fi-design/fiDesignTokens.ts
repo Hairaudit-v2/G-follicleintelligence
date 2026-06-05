@@ -43,6 +43,19 @@ export const fiBadgeIntentClassNames = {
 export type FiBadgeIntent = keyof typeof fiBadgeIntentClassNames;
 
 /**
+ * `FiStatusBadge` default “chip” shape — bordered `rounded-md` (distinct from ring-based `fiBadgeIntentClassNames` pills).
+ */
+export const fiStatusBadgeChipToneClassNames = {
+  neutral: "border-slate-200 bg-slate-100 text-slate-700",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  warning: "border-amber-200 bg-amber-50 text-amber-950",
+  danger: "border-red-200 bg-red-50 text-red-900",
+  info: "border-sky-200 bg-sky-50 text-sky-900",
+} as const;
+
+export type FiStatusBadgeChipTone = keyof typeof fiStatusBadgeChipToneClassNames;
+
+/**
  * Page header typography / rhythm — per variant, keyed by semantic part.
  * Compose on wrappers you already use (`header`, `div.min-w-0`, etc.).
  */
