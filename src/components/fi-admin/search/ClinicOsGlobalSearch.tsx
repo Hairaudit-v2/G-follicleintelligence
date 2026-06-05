@@ -15,6 +15,8 @@ const RECENT_PLACEHOLDERS = [
   { name: "Sofia Martins", meta: "Consultation · preview" },
 ];
 
+const CLINIC_OS_SEARCH_INPUT_ID = "clinic-os-global-search-query";
+
 const FOCUSABLE_SELECTOR =
   'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
 
@@ -39,7 +41,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
   const tid = tenantId.trim();
   const titleId = useId();
   const searchLabelId = useId();
-  const searchInputId = useId();
+  const searchInputId = CLINIC_OS_SEARCH_INPUT_ID;
   const dialogRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -259,6 +261,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
             <input
               ref={searchInputRef}
               id={searchInputId}
+              name={searchInputId}
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}

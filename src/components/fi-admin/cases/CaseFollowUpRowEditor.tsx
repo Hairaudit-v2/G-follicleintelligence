@@ -12,6 +12,8 @@ import {
   type FollowUpStatusValue,
 } from "@/src/lib/cases/postOpTypes";
 
+import { caseFormField } from "./caseFormFieldProps";
+
 function todayYmd(): string {
   const d = new Date();
   const p = (n: number) => String(n).padStart(2, "0");
@@ -75,6 +77,12 @@ export function CaseFollowUpRowEditor({
     setLinkedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
+  const followUpField = (suffix: string) => caseFormField(`follow-up-${checkpoint}-${suffix}`);
+  const scheduledDateField = followUpField("scheduled-date");
+  const completedDateField = followUpField("completed-date");
+  const followUpStatusField = followUpField("status");
+  const notesField = followUpField("notes");
+
   return (
     <div className="rounded border border-gray-100 bg-gray-50/80 p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -89,18 +97,20 @@ export function CaseFollowUpRowEditor({
       </div>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={scheduledDateField.id} className="block text-xs font-medium text-gray-700">
           Scheduled date
           <input
+            {...scheduledDateField}
             type="date"
             value={scheduledDate}
             onChange={(e) => setScheduledDate(e.target.value)}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={completedDateField.id} className="block text-xs font-medium text-gray-700">
           Completed date
           <input
+            {...completedDateField}
             type="date"
             value={completedDate}
             onChange={(e) => setCompletedDate(e.target.value)}
@@ -109,9 +119,10 @@ export function CaseFollowUpRowEditor({
         </label>
       </div>
 
-      <label className="mt-2 block text-xs font-medium text-gray-700">
+      <label htmlFor={followUpStatusField.id} className="mt-2 block text-xs font-medium text-gray-700">
         Follow-up status
         <select
+          {...followUpStatusField}
           value={followUpStatus}
           onChange={(e) => setFollowUpStatus(e.target.value)}
           className="mt-1 block w-full max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
@@ -124,9 +135,10 @@ export function CaseFollowUpRowEditor({
         </select>
       </label>
 
-      <label className="mt-2 block text-xs font-medium text-gray-700">
+      <label htmlFor={notesField.id} className="mt-2 block text-xs font-medium text-gray-700">
         Notes
         <textarea
+          {...notesField}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
@@ -140,9 +152,12 @@ export function CaseFollowUpRowEditor({
           <p className="mt-1 text-xs text-gray-500">No case images on file — upload via case images first.</p>
         ) : (
           <ul className="mt-1 max-h-32 space-y-1 overflow-y-auto text-xs">
-            {imageOptions.map((img) => (
+            {imageOptions.map((img) => {
+              const linkedImageField = caseFormField(`follow-up-${checkpoint}-linked-${img.id}`);
+              return (
               <li key={img.id} className="flex items-start gap-2">
                 <input
+                  {...linkedImageField}
                   type="checkbox"
                   checked={linkedIds.includes(img.id)}
                   onChange={() => toggleImage(img.id)}
@@ -154,7 +169,8 @@ export function CaseFollowUpRowEditor({
                   {img.caption ? ` — ${img.caption.slice(0, 60)}${img.caption.length > 60 ? "…" : ""}` : null}
                 </span>
               </li>
-            ))}
+            );
+            })}
           </ul>
         )}
       </fieldset>

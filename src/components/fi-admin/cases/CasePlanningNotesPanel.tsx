@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { updateCaseProfileAction } from "@/lib/actions/fi-case-actions";
 import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 
+import { caseFormField } from "./caseFormFieldProps";
+
+const PLANNING_NOTES_FIELD = caseFormField("planning-notes");
+
 export function CasePlanningNotesPanel({
   tenantId,
   caseId,
@@ -35,7 +39,11 @@ export function CasePlanningNotesPanel({
       <p className="mt-1 text-xs text-gray-500">
         High-level coordination and clinical intent — not graft counts or surgical audit scoring (Stage 5B+).
       </p>
+      <label htmlFor={PLANNING_NOTES_FIELD.id} className="sr-only">
+        Planning notes
+      </label>
       <textarea
+        {...PLANNING_NOTES_FIELD}
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         rows={8}

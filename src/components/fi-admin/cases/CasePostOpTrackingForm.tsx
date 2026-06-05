@@ -6,6 +6,19 @@ import { upsertCasePostOpTrackingAction } from "@/lib/actions/fi-case-post-op-ac
 import type { CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import { POST_OP_STATUS_VALUES, isPostOpStatus } from "@/src/lib/cases/postOpTypes";
 
+import { caseFormField } from "./caseFormFieldProps";
+
+const POST_OP_FIELDS = {
+  postOpStatus: caseFormField("post-op-status"),
+  instructionsGiven: caseFormField("post-op-instructions-given"),
+  aftercareNotes: caseFormField("post-op-aftercare-notes"),
+  donorRecovery: caseFormField("post-op-donor-recovery"),
+  recipientRecovery: caseFormField("post-op-recipient-recovery"),
+  complicationNotes: caseFormField("post-op-complication-notes"),
+  outcomeNotes: caseFormField("post-op-outcome-notes"),
+  satisfaction: caseFormField("post-op-satisfaction"),
+} as const;
+
 function satOrNull(s: string): number | null {
   const t = s.trim();
   if (!t) return null;
@@ -82,9 +95,10 @@ export function CasePostOpTrackingForm({
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={POST_OP_FIELDS.postOpStatus.id} className="block text-xs font-medium text-gray-700">
           Post-op status
           <select
+            {...POST_OP_FIELDS.postOpStatus}
             value={postOpStatus}
             onChange={(e) => setPostOpStatus(e.target.value)}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
@@ -97,8 +111,9 @@ export function CasePostOpTrackingForm({
             ))}
           </select>
         </label>
-        <label className="flex items-end gap-2 text-xs font-medium text-gray-700">
+        <label htmlFor={POST_OP_FIELDS.instructionsGiven.id} className="flex items-end gap-2 text-xs font-medium text-gray-700">
           <input
+            {...POST_OP_FIELDS.instructionsGiven}
             type="checkbox"
             checked={instructionsGiven}
             onChange={(e) => setInstructionsGiven(e.target.checked)}
@@ -108,45 +123,50 @@ export function CasePostOpTrackingForm({
         </label>
       </div>
 
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.aftercareNotes.id} className="block text-xs font-medium text-gray-700">
         Medication / aftercare notes
         <textarea
+          {...POST_OP_FIELDS.aftercareNotes}
           value={aftercareNotes}
           onChange={(e) => setAftercareNotes(e.target.value)}
           rows={3}
           className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.donorRecovery.id} className="block text-xs font-medium text-gray-700">
         Donor recovery notes
         <textarea
+          {...POST_OP_FIELDS.donorRecovery}
           value={donorRecovery}
           onChange={(e) => setDonorRecovery(e.target.value)}
           rows={2}
           className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.recipientRecovery.id} className="block text-xs font-medium text-gray-700">
         Recipient recovery notes
         <textarea
+          {...POST_OP_FIELDS.recipientRecovery}
           value={recipientRecovery}
           onChange={(e) => setRecipientRecovery(e.target.value)}
           rows={2}
           className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.complicationNotes.id} className="block text-xs font-medium text-gray-700">
         Complication notes
         <textarea
+          {...POST_OP_FIELDS.complicationNotes}
           value={complicationNotes}
           onChange={(e) => setComplicationNotes(e.target.value)}
           rows={2}
           className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.outcomeNotes.id} className="block text-xs font-medium text-gray-700">
         Outcome notes (early / qualitative)
         <textarea
+          {...POST_OP_FIELDS.outcomeNotes}
           value={outcomeNotes}
           onChange={(e) => setOutcomeNotes(e.target.value)}
           rows={3}
@@ -154,9 +174,10 @@ export function CasePostOpTrackingForm({
         />
       </label>
 
-      <label className="block max-w-xs text-xs font-medium text-gray-700">
+      <label htmlFor={POST_OP_FIELDS.satisfaction.id} className="block max-w-xs text-xs font-medium text-gray-700">
         Patient satisfaction (1–10, optional)
         <input
+          {...POST_OP_FIELDS.satisfaction}
           inputMode="numeric"
           value={satisfaction}
           onChange={(e) => setSatisfaction(e.target.value)}

@@ -2,6 +2,10 @@
 
 import type { FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
 
+import { caseFormField } from "./caseFormFieldProps";
+
+const TEAM_MEMBER_SELECT = caseFormField("procedure-team-add-member");
+
 export function CaseProcedureTeamPanel({
   teamIds,
   userOptions,
@@ -28,7 +32,11 @@ export function CaseProcedureTeamPanel({
       <h3 className="text-xs font-semibold text-gray-800">Team members (fi_users)</h3>
       <p className="text-xs text-gray-500">Nurses and additional staff on the procedure record (surgeon is set separately).</p>
       <div className="flex flex-wrap gap-2">
+        <label htmlFor={TEAM_MEMBER_SELECT.id} className="sr-only">
+          Add team member
+        </label>
         <select
+          {...TEAM_MEMBER_SELECT}
           className="max-w-md rounded border border-gray-300 bg-white px-2 py-1 text-sm"
           defaultValue=""
           onChange={(e) => {

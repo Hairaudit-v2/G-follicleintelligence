@@ -73,7 +73,7 @@ export function CasesWorklistFilters({
       <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-gray-900">
         Filter and search cases
       </h2>
-      <input type="hidden" name="pageSize" value={String(query.pageSize)} />
+      <input type="hidden" id="cases-worklist-filter-page-size" name="pageSize" value={String(query.pageSize)} />
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <label
           id={FILTER_FIELDS.q.labelId}

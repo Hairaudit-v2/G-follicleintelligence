@@ -6,6 +6,14 @@ import { updateCaseProfileAction } from "@/lib/actions/fi-case-actions";
 import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 import { FI_CASE_STATUS_VALUES, isFiCaseStatus } from "@/src/lib/cases/caseTypes";
 
+import { caseFormField } from "./caseFormFieldProps";
+
+const SUMMARY_FIELDS = {
+  status: caseFormField("summary-status"),
+  treatmentType: caseFormField("summary-treatment-type"),
+  caseType: caseFormField("summary-case-type"),
+} as const;
+
 export type CaseSummaryCardModel = {
   id: string;
   status: string;
@@ -90,9 +98,10 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
       </dl>
 
       <div className="mt-6 space-y-3 border-t border-gray-100 pt-4">
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SUMMARY_FIELDS.status.id} className="block text-xs font-medium text-gray-700">
           Case status
           <select
+            {...SUMMARY_FIELDS.status}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             className="mt-1 block w-full max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
@@ -109,18 +118,20 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SUMMARY_FIELDS.treatmentType.id} className="block text-xs font-medium text-gray-700">
           Treatment type
           <input
+            {...SUMMARY_FIELDS.treatmentType}
             value={treatmentType}
             onChange={(e) => setTreatmentType(e.target.value)}
             className="mt-1 block w-full max-w-md rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
             placeholder="e.g. FUE, consultation pathway…"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SUMMARY_FIELDS.caseType.id} className="block text-xs font-medium text-gray-700">
           Case type
           <input
+            {...SUMMARY_FIELDS.caseType}
             value={caseType}
             onChange={(e) => setCaseType(e.target.value)}
             className="mt-1 block w-full max-w-md rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"

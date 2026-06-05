@@ -17,15 +17,19 @@ const WIZARD_STEP_HEADING_IDS = {
 } as const;
 
 const WIZARD_FIELDS = {
-  clinic: { inputId: "first-case-wizard-clinic", labelId: "first-case-wizard-clinic-label" },
-  firstName: { inputId: "first-case-wizard-first-name", labelId: "first-case-wizard-first-name-label" },
-  lastName: { inputId: "first-case-wizard-last-name", labelId: "first-case-wizard-last-name-label" },
-  email: { inputId: "first-case-wizard-email", labelId: "first-case-wizard-email-label" },
-  phone: { inputId: "first-case-wizard-phone", labelId: "first-case-wizard-phone-label" },
-  dateOfBirth: { inputId: "first-case-wizard-dob", labelId: "first-case-wizard-dob-label" },
-  caseType: { inputId: "first-case-wizard-case-type", labelId: "first-case-wizard-case-type-label" },
-  treatmentType: { inputId: "first-case-wizard-treatment-type", labelId: "first-case-wizard-treatment-type-label" },
-  adminKey: { inputId: "first-case-wizard-admin-key", labelId: "first-case-wizard-admin-key-label" },
+  clinic: { inputId: "first-case-wizard-clinic", name: "clinic_id", labelId: "first-case-wizard-clinic-label" },
+  firstName: { inputId: "first-case-wizard-first-name", name: "first_name", labelId: "first-case-wizard-first-name-label" },
+  lastName: { inputId: "first-case-wizard-last-name", name: "last_name", labelId: "first-case-wizard-last-name-label" },
+  email: { inputId: "first-case-wizard-email", name: "email", labelId: "first-case-wizard-email-label" },
+  phone: { inputId: "first-case-wizard-phone", name: "phone", labelId: "first-case-wizard-phone-label" },
+  dateOfBirth: { inputId: "first-case-wizard-dob", name: "date_of_birth", labelId: "first-case-wizard-dob-label" },
+  caseType: { inputId: "first-case-wizard-case-type", name: "case_type", labelId: "first-case-wizard-case-type-label" },
+  treatmentType: {
+    inputId: "first-case-wizard-treatment-type",
+    name: "treatment_type",
+    labelId: "first-case-wizard-treatment-type-label",
+  },
+  adminKey: { inputId: "first-case-wizard-admin-key", name: "admin_key", labelId: "first-case-wizard-admin-key-label" },
 } as const;
 
 export function FirstCaseWizardClient({
@@ -203,6 +207,7 @@ export function FirstCaseWizardClient({
             Clinic
             <select
               id={WIZARD_FIELDS.clinic.inputId}
+              name={WIZARD_FIELDS.clinic.name}
               className={fieldClass}
               value={clinicId}
               onChange={(e) => setClinicId(e.target.value)}
@@ -246,6 +251,7 @@ export function FirstCaseWizardClient({
               First name
               <input
                 id={WIZARD_FIELDS.firstName.inputId}
+                name={WIZARD_FIELDS.firstName.name}
                 className={fieldClass}
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -261,6 +267,7 @@ export function FirstCaseWizardClient({
               Last name
               <input
                 id={WIZARD_FIELDS.lastName.inputId}
+                name={WIZARD_FIELDS.lastName.name}
                 className={fieldClass}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
@@ -273,6 +280,7 @@ export function FirstCaseWizardClient({
             Email
             <input
               id={WIZARD_FIELDS.email.inputId}
+              name={WIZARD_FIELDS.email.name}
               className={fieldClass}
               type="email"
               value={email}
@@ -285,6 +293,7 @@ export function FirstCaseWizardClient({
             Phone
             <input
               id={WIZARD_FIELDS.phone.inputId}
+              name={WIZARD_FIELDS.phone.name}
               className={fieldClass}
               type="tel"
               value={phone}
@@ -301,6 +310,7 @@ export function FirstCaseWizardClient({
             Date of birth <span className="text-gray-400">(optional)</span>
             <input
               id={WIZARD_FIELDS.dateOfBirth.inputId}
+              name={WIZARD_FIELDS.dateOfBirth.name}
               className={fieldClass}
               type="date"
               value={dateOfBirth}
@@ -335,6 +345,7 @@ export function FirstCaseWizardClient({
             Case type
             <input
               id={WIZARD_FIELDS.caseType.inputId}
+              name={WIZARD_FIELDS.caseType.name}
               className={fieldClass}
               value={caseType}
               onChange={(e) => setCaseType(e.target.value)}
@@ -350,6 +361,7 @@ export function FirstCaseWizardClient({
             Treatment type
             <input
               id={WIZARD_FIELDS.treatmentType.inputId}
+              name={WIZARD_FIELDS.treatmentType.name}
               className={fieldClass}
               value={treatmentType}
               onChange={(e) => setTreatmentType(e.target.value)}
@@ -380,6 +392,7 @@ export function FirstCaseWizardClient({
               FI admin API key
               <input
                 id={WIZARD_FIELDS.adminKey.inputId}
+                name={WIZARD_FIELDS.adminKey.name}
                 className={fieldClass}
                 type="password"
                 autoComplete="off"

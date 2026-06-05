@@ -10,6 +10,20 @@ import {
   type PlannedZoneRow,
 } from "@/src/lib/cases/surgeryPlanningTypes";
 import { CasePlannedZonesPanel } from "./CasePlannedZonesPanel";
+import { caseFormField } from "./caseFormFieldProps";
+
+const SURGERY_PLAN_FIELDS = {
+  planningStatus: caseFormField("surgery-plan-status"),
+  summary: caseFormField("surgery-plan-summary"),
+  procedureType: caseFormField("surgery-plan-procedure-type"),
+  sessionType: caseFormField("surgery-plan-session-type"),
+  graftsMin: caseFormField("surgery-plan-grafts-min"),
+  graftsMax: caseFormField("surgery-plan-grafts-max"),
+  donorNotes: caseFormField("surgery-plan-donor-notes"),
+  recipientNotes: caseFormField("surgery-plan-recipient-notes"),
+  medNotes: caseFormField("surgery-plan-med-notes"),
+  planningNotes: caseFormField("surgery-plan-planning-notes"),
+} as const;
 
 function numOrNull(s: string): number | null {
   const t = s.trim();
@@ -92,9 +106,10 @@ export function CaseSurgeryPlanningForm({
 
   return (
     <div className="space-y-4">
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.planningStatus.id} className="block text-xs font-medium text-gray-700">
         Planning status
         <select
+          {...SURGERY_PLAN_FIELDS.planningStatus}
           value={planningStatus}
           onChange={(e) => setPlanningStatus(e.target.value)}
           className="mt-1 block w-full max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
@@ -108,9 +123,10 @@ export function CaseSurgeryPlanningForm({
         </select>
       </label>
 
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.summary.id} className="block text-xs font-medium text-gray-700">
         Surgical plan summary
         <textarea
+          {...SURGERY_PLAN_FIELDS.summary}
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
@@ -120,18 +136,20 @@ export function CaseSurgeryPlanningForm({
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.procedureType.id} className="block text-xs font-medium text-gray-700">
           Planned procedure type
           <input
+            {...SURGERY_PLAN_FIELDS.procedureType}
             value={procedureType}
             onChange={(e) => setProcedureType(e.target.value)}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
             placeholder="e.g. FUE, FUT"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.sessionType.id} className="block text-xs font-medium text-gray-700">
           Planned session type
           <input
+            {...SURGERY_PLAN_FIELDS.sessionType}
             value={sessionType}
             onChange={(e) => setSessionType(e.target.value)}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
@@ -141,9 +159,10 @@ export function CaseSurgeryPlanningForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMin.id} className="block text-xs font-medium text-gray-700">
           Estimated grafts (min)
           <input
+            {...SURGERY_PLAN_FIELDS.graftsMin}
             inputMode="numeric"
             value={graftsMin}
             onChange={(e) => setGraftsMin(e.target.value)}
@@ -151,9 +170,10 @@ export function CaseSurgeryPlanningForm({
             placeholder="Optional"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label htmlFor={SURGERY_PLAN_FIELDS.graftsMax.id} className="block text-xs font-medium text-gray-700">
           Estimated grafts (max)
           <input
+            {...SURGERY_PLAN_FIELDS.graftsMax}
             inputMode="numeric"
             value={graftsMax}
             onChange={(e) => setGraftsMax(e.target.value)}
@@ -165,36 +185,40 @@ export function CaseSurgeryPlanningForm({
 
       <CasePlannedZonesPanel zones={zones} onChange={setZones} />
 
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.donorNotes.id} className="block text-xs font-medium text-gray-700">
         Donor strategy notes
         <textarea
+          {...SURGERY_PLAN_FIELDS.donorNotes}
           value={donorNotes}
           onChange={(e) => setDonorNotes(e.target.value)}
           rows={3}
           className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.recipientNotes.id} className="block text-xs font-medium text-gray-700">
         Recipient strategy notes
         <textarea
+          {...SURGERY_PLAN_FIELDS.recipientNotes}
           value={recipientNotes}
           onChange={(e) => setRecipientNotes(e.target.value)}
           rows={3}
           className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.medNotes.id} className="block text-xs font-medium text-gray-700">
         Medication / prep notes
         <textarea
+          {...SURGERY_PLAN_FIELDS.medNotes}
           value={medNotes}
           onChange={(e) => setMedNotes(e.target.value)}
           rows={3}
           className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="block text-xs font-medium text-gray-700">
+      <label htmlFor={SURGERY_PLAN_FIELDS.planningNotes.id} className="block text-xs font-medium text-gray-700">
         Detailed planning notes (surgery plan)
         <textarea
+          {...SURGERY_PLAN_FIELDS.planningNotes}
           value={planningNotes}
           onChange={(e) => setPlanningNotes(e.target.value)}
           rows={4}

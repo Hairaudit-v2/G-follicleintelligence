@@ -2,6 +2,8 @@
 
 import type { PlannedZoneRow } from "@/src/lib/cases/surgeryPlanningTypes";
 
+import { caseFormField } from "./caseFormFieldProps";
+
 export function CasePlannedZonesPanel({
   zones,
   onChange,
@@ -31,20 +33,25 @@ export function CasePlannedZonesPanel({
         <p className="text-xs text-gray-400">No zones yet.</p>
       ) : (
         <ul className="space-y-2">
-          {zones.map((z, i) => (
+          {zones.map((z, i) => {
+            const keyField = caseFormField(`planned-zone-${i}-key`);
+            const labelField = caseFormField(`planned-zone-${i}-label`);
+            return (
             <li key={i} className="flex flex-wrap items-end gap-2 rounded border border-gray-100 bg-gray-50/80 p-2">
-              <label className="text-xs text-gray-600">
+              <label htmlFor={keyField.id} className="text-xs text-gray-600">
                 Key
                 <input
+                  {...keyField}
                   value={z.key}
                   onChange={(e) => updateAt(i, { key: e.target.value })}
                   className="mt-0.5 block w-36 rounded border border-gray-300 px-2 py-1 text-sm"
                   placeholder="hairline"
                 />
               </label>
-              <label className="min-w-[8rem] flex-1 text-xs text-gray-600">
+              <label htmlFor={labelField.id} className="min-w-[8rem] flex-1 text-xs text-gray-600">
                 Label
                 <input
+                  {...labelField}
                   value={z.label ?? ""}
                   onChange={(e) => updateAt(i, { label: e.target.value || null })}
                   className="mt-0.5 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
@@ -59,7 +66,8 @@ export function CasePlannedZonesPanel({
                 Remove
               </button>
             </li>
-          ))}
+          );
+          })}
         </ul>
       )}
     </div>
