@@ -2,9 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
-import { updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import { CalendarRightPanel } from "@/components/calendar/CalendarRightPanel";
 import { CalendarTopControls } from "@/components/calendar/CalendarTopControls";
@@ -16,12 +15,11 @@ import {
   mergeCalendarHrefQuery,
   type CalendarRoute,
 } from "@/src/lib/bookings/calendarQuery";
-import { bucketBookingsIntoCalendar } from "@/src/lib/bookings/calendarView";
-import { bookingConflictsForOperationalCalendar } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { OperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
 import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/BookingEditDrawer";
+import { useCalendarAppointments } from "@/hooks/useCalendarAppointments";
 
 const viewMotion = {
   initial: { opacity: 0, y: 10 },
@@ -32,105 +30,22 @@ const viewMotion = {
 export type CalendarPageProps = {
   data: OperationalCalendarPageData;
   route?: CalendarRoute;
+  /** Append demo consult / PRP / transplant rows (`?sample=1`). */
+  useSampleData?: boolean;
 };
 
-export function CalendarPage({ data, route = "fi-admin" }: CalendarPageProps) {
+export function CalendarPage({ data, route = "fi-admin", useSampleData = false }: CalendarPageProps) {
   const router = useRouter();
   const [drawer, setDrawer] = useState<FiBookingRow | null>(null);
   const [editing, setEditing] = useState<FiBookingRow | null>(null);
-  const [bookings, setBookings] = useState(data.bookings);
 
-  useEffect(() => {
-    setBookings(data.bookings);
-  }, [data.bookings, data.rangeStartIso, data.rangeEndIso, data.query.dateAnchor, data.query.view]);
-
-  const buckets = useMemo(() => {
-    const m = bucketBookingsIntoCalendar(bookings, data.lanes);
-    const out: Record<string, FiBookingRow[]> = {};
-    for (const lane of data.lanes) {
-      out[lane.dayKey] = m.get(lane.dayKey) ?? [];
-    }
-    return out;
-  }, [bookings, data.lanes]);
-
-  const refresh = useCallback(() => {
-    router.refresh();
-  }, [router]);
+  const { bookings, bookingDisplay, buckets, rescheduleBooking, refresh } = useCalendarAppointments(
+    data,
+    { useSampleData }
+  );
 
   const base = `/fi-admin/${data.tenantId.trim()}`;
   const isMonthView = data.query.view === "month";
-
-  const onRescheduleBooking = useCallback(
-    async (
-      b: FiBookingRow,
-      startIso: string,
-      endIso: string,
-      meta?: { assignedUserId?: string | null; clinicId?: string | null; clearWaitlist?: boolean }
-    ) => {
-      const assignedUserId =
-        meta && "assignedUserId" in meta ? (meta.assignedUserId ?? null) : b.assigned_user_id;
-      const clinicId = meta && "clinicId" in meta ? (meta.clinicId ?? null) : b.clinic_id;
-
-      const conflicts = bookingConflictsForOperationalCalendar(
-        {
-          id: b.id,
-          start_at: startIso,
-          end_at: endIso,
-          assigned_user_id: assignedUserId,
-          clinic_id: clinicId,
-        },
-        bookings,
-        { ignoreBookingId: b.id }
-      );
-      if (conflicts.length) {
-        const msg = `Scheduling conflict: overlaps ${conflicts.length} booking(s) for the same clinician or site.`;
-        return { ok: false as const, error: msg };
-      }
-
-      const snapshot = { ...b };
-      setBookings((rows) =>
-        rows.map((x) =>
-          x.id === b.id
-            ? { ...x, start_at: startIso, end_at: endIso, assigned_user_id: assignedUserId, clinic_id: clinicId }
-            : x
-        )
-      );
-
-      const nextMetadata = { ...(b.metadata ?? {}) };
-      if (meta?.clearWaitlist) {
-        delete nextMetadata.waitlist;
-        delete nextMetadata.on_waitlist;
-        delete nextMetadata.waitlist_notes;
-      }
-
-      const r = await updateBookingAction(data.tenantId, b.id, {
-        leadId: b.lead_id,
-        personId: b.person_id,
-        patientId: b.patient_id,
-        caseId: b.case_id,
-        clinicId: clinicId,
-        assignedUserId: assignedUserId,
-        bookingType: b.booking_type,
-        bookingStatus: b.booking_status,
-        title: b.title,
-        description: b.description,
-        startAt: startIso,
-        endAt: endIso,
-        timezone: b.timezone,
-        location: b.location,
-        metadata: nextMetadata,
-      });
-
-      if (!r.ok) {
-        setBookings((rows) => rows.map((x) => (x.id === b.id ? snapshot : x)));
-        return { ok: false as const, error: r.error };
-      }
-
-      refresh();
-      return { ok: true as const };
-    },
-    [bookings, data.tenantId, refresh]
-  );
 
   const onSearchSubmit = useCallback(
     (q: string) => {
@@ -148,7 +63,7 @@ export function CalendarPage({ data, route = "fi-admin" }: CalendarPageProps) {
   const sidebar = (
     <SidebarAgenda
       bookings={bookings}
-      bookingDisplay={data.bookingDisplay}
+      bookingDisplay={bookingDisplay}
       addAppointmentHref={`${base}/bookings/new`}
       onSelectBooking={(b) => setDrawer(b)}
       draggableWaitlist={data.canMutateBookings}
@@ -159,7 +74,7 @@ export function CalendarPage({ data, route = "fi-admin" }: CalendarPageProps) {
   const rightPanel = (
     <CalendarRightPanel
       bookings={bookings}
-      bookingDisplay={data.bookingDisplay}
+      bookingDisplay={bookingDisplay}
       dayKeyUtc={data.query.dateAnchor}
       searchQuery={data.query.search ?? ""}
       onSearchSubmit={onSearchSubmit}
@@ -177,6 +92,15 @@ export function CalendarPage({ data, route = "fi-admin" }: CalendarPageProps) {
         canMutateBookings={data.canMutateBookings}
         route={route}
       />
+
+      {useSampleData ? (
+        <p
+          className="border-b border-sky-500/25 bg-sky-950/35 px-4 py-2 text-xs font-medium text-sky-200"
+          role="status"
+        >
+          Demo mode — sample consults, PRP, and transplant appointments merged. Drag-and-drop updates locally.
+        </p>
+      ) : null}
 
       {data.listTruncated ? (
         <p
@@ -196,12 +120,12 @@ export function CalendarPage({ data, route = "fi-admin" }: CalendarPageProps) {
                 rightPanel={rightPanel}
                 monthAnchor={data.query.dateAnchor}
                 bookings={bookings}
-                bookingDisplay={data.bookingDisplay}
+                bookingDisplay={bookingDisplay}
                 resourceColumns={data.resourceColumns}
                 gridConfig={data.gridConfig}
                 canMutateBookings={data.canMutateBookings}
                 onSelectBooking={(b) => setDrawer(b)}
-                onRescheduleBooking={onRescheduleBooking}
+                onRescheduleBooking={rescheduleBooking}
                 tenantId={data.tenantId}
                 query={data.query}
                 calendarRoute={route}
@@ -216,7 +140,7 @@ export function CalendarPage({ data, route = "fi-admin" }: CalendarPageProps) {
                 lanes={data.lanes}
                 buckets={buckets}
                 gridConfig={data.gridConfig}
-                bookingDisplay={data.bookingDisplay}
+                bookingDisplay={bookingDisplay}
                 resourceColumns={data.resourceColumns}
                 canMutateBookings={data.canMutateBookings}
                 bookings={bookings}
@@ -224,7 +148,7 @@ export function CalendarPage({ data, route = "fi-admin" }: CalendarPageProps) {
                   data.query.assignedUserId ? `u:${data.query.assignedUserId}` : null
                 }
                 onSelectBooking={(b) => setDrawer(b)}
-                onRescheduleBooking={onRescheduleBooking}
+                onRescheduleBooking={rescheduleBooking}
                 shortcuts={{
                   tenantId: data.tenantId,
                   query: data.query,

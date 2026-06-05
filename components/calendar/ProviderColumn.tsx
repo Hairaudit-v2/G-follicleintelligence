@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 import { AppointmentCardFromBooking } from "@/components/calendar/AppointmentCard";
-import { CalendarEmptyState } from "@/components/calendar/CalendarEmptyState";
+import { BusinessTimeSlotGrid } from "@/components/calendar/BusinessTimeSlotGrid";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { CalendarViewportRange } from "@/lib/calendar/virtualizeAppointments";
 import {
@@ -13,6 +13,7 @@ import {
   shouldVirtualizeAppointments,
 } from "@/lib/calendar/virtualizeAppointments";
 import { cn } from "@/lib/utils";
+import { calendarGridBodyHeightPx as timeSlotsGridHeightPx } from "@/lib/calendar/time-slots";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
@@ -22,7 +23,7 @@ import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/opera
 // Shared calendar grid tokens (used by WeekView + ProviderColumn)
 // ---------------------------------------------------------------------------
 
-export const CALENDAR_GRID_BG = "#f8fafc";
+export const CALENDAR_GRID_BG = "#0f172a";
 export const CALENDAR_PX_PER_HOUR = 56;
 export const CALENDAR_GRID_LINE_MINUTES = 30;
 export const CALENDAR_HEADER_HEIGHT_PX = 56;
@@ -50,8 +51,8 @@ export function calendarPxPerMinute(): number {
   return CALENDAR_PX_PER_HOUR / 60;
 }
 
-export function calendarGridBodyHeightPx(cfg: BusinessGridConfig): number {
-  return Math.max(1, cfg.dayEndHourUtc - cfg.dayStartHourUtc) * CALENDAR_PX_PER_HOUR;
+export function calendarGridBodyHeightPx(_cfg: BusinessGridConfig): number {
+  return timeSlotsGridHeightPx(CALENDAR_PX_PER_HOUR);
 }
 
 function minutesUtcFromEpoch(ms: number): number {
@@ -186,27 +187,6 @@ function providerInitials(name: string): string {
 // Internal grid primitives
 // ---------------------------------------------------------------------------
 
-function TimeSlotGrid({ gridConfig, bodyHeightPx }: { gridConfig: BusinessGridConfig; bodyHeightPx: number }) {
-  const slotH = CALENDAR_PX_PER_HOUR * (CALENDAR_GRID_LINE_MINUTES / 60);
-  const count = ((gridConfig.dayEndHourUtc - gridConfig.dayStartHourUtc) * 60) / CALENDAR_GRID_LINE_MINUTES;
-
-  return (
-    <div className="pointer-events-none absolute inset-0" aria-hidden>
-      {Array.from({ length: count }, (_, i) => (
-        <div
-          key={i}
-          className={cn(
-            "absolute left-0 right-0 border-t",
-            i % 2 === 0 ? "border-slate-200/70" : "border-slate-100/90"
-          )}
-          style={{ top: i * slotH, height: slotH }}
-        />
-      ))}
-      <div className="absolute inset-x-0 border-t border-slate-200/70" style={{ top: bodyHeightPx - 1 }} />
-    </div>
-  );
-}
-
 function CurrentTimeLine({
   dayKey,
   gridConfig,
@@ -265,22 +245,22 @@ export function ProviderColumnHeader({
   return (
     <div
       className={cn(
-        "sticky top-0 z-10 flex items-center gap-2.5 border-b px-3 backdrop-blur-sm transition-colors",
+        "sticky top-0 z-10 flex items-center gap-2.5 border-b border-[#1e2937] px-3 backdrop-blur-sm transition-colors",
         highlighted
-          ? "border-sky-200/80 bg-sky-50/90 ring-1 ring-inset ring-sky-300/50"
-          : "border-slate-200/80 bg-white/95"
+          ? "bg-sky-950/40 ring-1 ring-inset ring-sky-400/30"
+          : "bg-[#0f172a]/95"
       )}
       style={{ height: CALENDAR_HEADER_HEIGHT_PX }}
     >
-      <Avatar className="h-8 w-8 shrink-0 ring-1 ring-slate-200/80">
+      <Avatar className="h-8 w-8 shrink-0 ring-1 ring-[#1e2937]">
         {photoUrl ? <AvatarImage src={photoUrl} alt={name} /> : null}
-        <AvatarFallback className="bg-slate-100 text-[10px] font-semibold text-slate-700">
+        <AvatarFallback className="bg-slate-800 text-[10px] font-semibold text-slate-300">
           {providerInitials(name)}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold tracking-tight text-slate-900">{name}</p>
-        {role ? <p className="truncate text-[11px] font-medium text-slate-500">{role}</p> : null}
+        <p className="truncate text-sm font-semibold tracking-tight text-slate-100">{name}</p>
+        {role ? <p className="truncate text-[11px] font-medium text-slate-400">{role}</p> : null}
       </div>
     </div>
   );
@@ -368,8 +348,6 @@ export function ProviderColumn({
     );
   }, [appointments, overlapLayouts, pinnedAppointmentId, viewportRange, virtualize]);
 
-  const timedCount = overlapLayouts.size;
-
   const { setNodeRef, isOver } = useDroppable({
     id: providerColumnDropId(dayKey, id),
     disabled: !droppable,
@@ -379,11 +357,11 @@ export function ProviderColumn({
   return (
     <div
       className={cn(
-        "flex flex-col border-slate-200/70 transition-colors",
+        "flex flex-col border-[#1e2937]/80 transition-colors",
         stacked
           ? "min-w-full w-full flex-none border-b border-l-0 last:border-b-0"
           : "min-w-[var(--col-min)] flex-1 border-l first:border-l-0",
-        highlighted && "bg-sky-50/30 ring-1 ring-inset ring-sky-200/60",
+        highlighted && "bg-sky-950/20 ring-1 ring-inset ring-sky-400/25",
         className
       )}
       style={{ "--col-min": stacked ? "100%" : `${minWidthPx}px` } as React.CSSProperties}
@@ -394,19 +372,16 @@ export function ProviderColumn({
         ref={setNodeRef}
         className={cn(
           "relative flex-1 transition-colors",
-          isOver && "bg-sky-50/70 ring-1 ring-inset ring-sky-300/45"
+          isOver && "bg-sky-950/30 ring-1 ring-inset ring-sky-400/30"
         )}
         style={{ minHeight: bodyHeightPx, backgroundColor: CALENDAR_GRID_BG }}
       >
-        <TimeSlotGrid gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
+        <BusinessTimeSlotGrid bodyHeightPx={bodyHeightPx} />
         <CurrentTimeLine dayKey={dayKey} gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
         <div className="relative" style={{ height: bodyHeightPx }}>
-          {timedCount === 0 ? (
-            <CalendarEmptyState preset="column" compact className="absolute inset-0" />
-          ) : (
-            <AnimatePresence initial={false}>
-              {appointments.map((booking) => {
+          <AnimatePresence initial={false}>
+            {appointments.map((booking) => {
                 const layout = overlapLayouts.get(booking.id);
                 if (!layout || !visibleIds.has(booking.id)) return null;
                 const d = bookingDisplay[booking.id];
@@ -432,8 +407,7 @@ export function ProviderColumn({
                   />
                 );
               })}
-            </AnimatePresence>
-          )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

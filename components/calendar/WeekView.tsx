@@ -41,6 +41,7 @@ import {
   calendarPxPerMinute,
   parseProviderColumnDropId,
 } from "@/components/calendar/ProviderColumn";
+import { BusinessTimeGutter } from "@/components/calendar/BusinessTimeSlotGrid";
 import {
   CALENDAR_SNAP_MINUTES,
   dropMinutesFromDragEvent,
@@ -138,41 +139,6 @@ function assigneeFromColumn(column: CalendarColumn): WeekViewRescheduleMeta {
   if (column.id.startsWith("u:")) return { assignedUserId: column.id.slice(2), clinicId: null };
   if (column.id.startsWith("c:")) return { assignedUserId: null, clinicId: column.id.slice(2) };
   return { assignedUserId: null, clinicId: null };
-}
-
-function TimeGutter({ gridConfig, bodyHeightPx }: { gridConfig: BusinessGridConfig; bodyHeightPx: number }) {
-  const hours: number[] = [];
-  for (let h = gridConfig.dayStartHourUtc; h < gridConfig.dayEndHourUtc; h++) hours.push(h);
-
-  return (
-    <div className="sticky left-0 z-20 w-[var(--fi-calendar-gutter,3.5rem)] shrink-0 self-start border-r border-slate-200/80 bg-[#f8fafc]">
-      <div
-        style={{ height: CALENDAR_HEADER_HEIGHT_PX }}
-        className="sticky top-0 z-20 border-b border-slate-200/80 bg-[#f8fafc]"
-        aria-hidden
-      />
-      <div className="relative" style={{ height: bodyHeightPx }}>
-        {hours.map((h) => (
-          <div
-            key={h}
-            className="absolute left-0 right-0 flex items-start justify-end pr-2 pt-1"
-            style={{
-              top: (h - gridConfig.dayStartHourUtc) * CALENDAR_PX_PER_HOUR,
-              height: CALENDAR_PX_PER_HOUR,
-            }}
-          >
-            <span className="text-[11px] font-medium tabular-nums tracking-tight text-slate-500">
-              {new Date(Date.UTC(2000, 0, 1, h, 0, 0)).toLocaleTimeString(undefined, {
-                hour: "numeric",
-                minute: "2-digit",
-                timeZone: "UTC",
-              })}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 function WeekViewInner({
@@ -557,7 +523,7 @@ function WeekViewInner({
             className="flex min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain"
           >
             <div className="flex min-h-min min-w-0 flex-1" style={{ height: bodyHeightPx }}>
-              <TimeGutter gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
+              <BusinessTimeGutter bodyHeightPx={bodyHeightPx} headerHeightPx={CALENDAR_HEADER_HEIGHT_PX} />
 
               {swipeLayout ? (
                 <div

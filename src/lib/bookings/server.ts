@@ -13,7 +13,6 @@ export {
   loadBookingsForPerson,
   loadBookingsForTenantRange,
   updateBooking,
-  type BookingAnchorInput,
   type CancelBookingParams,
   type CompleteBookingParams,
   type CreateBookingParams,
