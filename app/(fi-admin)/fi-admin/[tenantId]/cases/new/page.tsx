@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { FirstCaseWizardClient } from "@/src/components/fi-admin/cases/FirstCaseWizardClient";
 
 export const metadata = {
-  title: "New case",
+  title: "New patient",
   robots: { index: false, follow: false },
 };
 
@@ -33,7 +33,7 @@ export default async function FirstCaseWizardPage({ params }: { params: Promise<
       <div className="mx-auto max-w-2xl py-6">
         <p className="text-sm text-red-600">Could not load clinics for this tenant.</p>
         <Link href={`/fi-admin/${tenantId}/cases`} className="mt-2 inline-block text-sm text-blue-600 hover:underline">
-          Back to cases
+          Back to patients
         </Link>
       </div>
     );

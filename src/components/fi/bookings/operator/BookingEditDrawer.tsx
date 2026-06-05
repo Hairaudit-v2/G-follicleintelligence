@@ -158,7 +158,7 @@ export function BookingEditDrawer({
                 {booking.lead_id ? `Lead ${booking.lead_id.slice(0, 8)}… ` : ""}
                 {booking.person_id ? `Person ${booking.person_id.slice(0, 8)}… ` : ""}
                 {booking.patient_id ? `Patient ${booking.patient_id.slice(0, 8)}… ` : ""}
-                {booking.case_id ? `Case ${booking.case_id.slice(0, 8)}…` : ""}
+                {booking.case_id ? `Patient ${booking.case_id.slice(0, 8)}…` : ""}
                 {!booking.lead_id && !booking.person_id && !booking.patient_id && !booking.case_id ? "—" : ""}
               </div>
               <label className="block text-xs font-medium text-gray-700">

@@ -404,8 +404,8 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
               />
               <FiQuickActionCard
                 className="min-h-0 py-3 sm:min-h-0"
-                title="Open cases"
-                description="Clinical cases and worklists"
+                title="Open patients"
+                description="Clinical patients and worklists"
                 href={`${base}/cases`}
                 showOpenAffordance={false}
               />

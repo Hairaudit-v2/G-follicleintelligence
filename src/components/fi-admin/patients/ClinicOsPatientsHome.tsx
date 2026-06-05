@@ -30,7 +30,7 @@ export function ClinicOsPatientsHome({ tenantId, showCrmNav, clinicOsShellEnable
       <FiPageHeader
         eyebrow="Clinic OS"
         title="Patients"
-        description="Find patients, start new enquiries, and move quickly into bookings, cases and follow-ups."
+        description="Find patients, start new enquiries, and move quickly into bookings, clinical patients and follow-ups."
         primaryAction={
           <Link
             href={`${base}/patients/new`}
@@ -46,7 +46,7 @@ export function ClinicOsPatientsHome({ tenantId, showCrmNav, clinicOsShellEnable
           <FiCard>
             <h2 className="text-sm font-semibold text-slate-900">Find a patient</h2>
             <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              Search by name, phone, email or case number.
+              Search by name, phone, email or patient number.
             </p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               {clinicOsShellEnabled ? (
@@ -104,8 +104,8 @@ export function ClinicOsPatientsHome({ tenantId, showCrmNav, clinicOsShellEnable
                 openAffordanceLabel="Open CRM"
               />
               <FiQuickActionCard
-                title="Open active cases"
-                description="Clinical cases and worklists for this tenant."
+                title="Open active patients"
+                description="Clinical patients and worklists for this tenant."
                 href={`${base}/cases`}
               />
               <FiQuickActionCard title="Follow-ups" description="Due tasks and recall lists (preview)." />

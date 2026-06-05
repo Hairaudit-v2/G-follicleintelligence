@@ -1,7 +1,7 @@
 import type { CaseReadinessHealth, CaseReadinessSectionKey } from "./caseReadinessTypes";
 
 const SECTION_TITLES: Record<CaseReadinessSectionKey, string> = {
-  case_profile: "Case profile",
+  case_profile: "Patient profile",
   surgery_planning: "Surgery planning",
   procedure_day: "Procedure day",
   post_op: "Post-op tracking",

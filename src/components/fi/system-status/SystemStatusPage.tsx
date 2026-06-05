@@ -187,8 +187,8 @@ export function SystemStatusPage({ data }: { data: SystemStatusPayload }) {
         </SystemStatusCard>
       </SystemStatusSection>
 
-      <SystemStatusSection id="cases" title="6. Cases" description="Hair audit / intake cases (`fi_cases.status` buckets).">
-        <SystemStatusCard title="Cases">
+      <SystemStatusSection id="cases" title="6. Patients" description="Hair audit / intake patients (`fi_cases.status` buckets).">
+        <SystemStatusCard title="Patients">
           <div className="grid grid-cols-2 gap-2">
             <SystemStatusMetric label="Active (draft / submitted / processing)" value={fmt(data.cases.active)} />
             <SystemStatusMetric label="Completed" value={fmt(data.cases.completed)} />

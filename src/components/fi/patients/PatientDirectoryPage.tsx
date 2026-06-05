@@ -37,7 +37,7 @@ export function PatientDirectoryPage({
             </Link>
             <span className="mx-2 text-gray-300">·</span>
             <Link href={`${base}/cases`} className="text-blue-600 hover:underline">
-              Cases
+              Patients
             </Link>
           </p>
         </div>
@@ -77,7 +77,7 @@ export function PatientDirectoryPage({
           <p className="mt-1 text-xl font-semibold tabular-nums text-gray-900">{summary.activePatients}</p>
         </div>
         <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">With active case</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">With active patient</p>
           <p className="mt-1 text-xl font-semibold tabular-nums text-gray-900">{summary.withActiveCase}</p>
         </div>
         <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">

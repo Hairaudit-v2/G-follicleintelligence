@@ -1,7 +1,7 @@
 import type { CaseTimelineFilterPreset, CaseTimelineItemKind } from "./caseTimelineTypes";
 
 const KIND_LABELS: Record<CaseTimelineItemKind, string> = {
-  case_lifecycle: "Case",
+  case_lifecycle: "Patient",
   lead: "Lead",
   booking: "Booking",
   image: "Image",
@@ -18,13 +18,13 @@ export function caseTimelineKindLabel(kind: CaseTimelineItemKind): string {
 }
 
 export const CASE_TIMELINE_FILTER_PRESETS: { id: CaseTimelineFilterPreset; label: string; hint: string }[] = [
-  { id: "all", label: "All", hint: "Everything linked to this case." },
+  { id: "all", label: "All", hint: "Everything linked to this patient." },
   {
     id: "clinical",
     label: "Clinical & ops",
-    hint: "Case, planning, procedure, post-op, follow-ups, bookings, images, foundation milestones.",
+    hint: "Patient, planning, procedure, post-op, follow-ups, bookings, images, foundation milestones.",
   },
-  { id: "crm", label: "CRM", hint: "Leads and CRM activity rows anchored on this case." },
+  { id: "crm", label: "CRM", hint: "Leads and CRM activity rows anchored on this patient." },
 ];
 
 export function caseTimelinePresetIncludesKind(preset: CaseTimelineFilterPreset, kind: CaseTimelineItemKind): boolean {

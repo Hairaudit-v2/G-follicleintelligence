@@ -22,7 +22,7 @@ function linkActive(pathname: string, href: string, isHome?: boolean): boolean {
 function buildNavItems(base: string, showCrmNav: boolean): NavItem[] {
   const items: NavItem[] = [
     { href: base, label: "Home", home: true },
-    { href: `${base}/cases`, label: "Cases" },
+    { href: `${base}/cases`, label: "Patients" },
     { href: `${base}/audit`, label: "Audit queue" },
     { href: `${base}/directory`, label: "Directory" },
     { href: `${base}/configuration`, label: "Configuration" },

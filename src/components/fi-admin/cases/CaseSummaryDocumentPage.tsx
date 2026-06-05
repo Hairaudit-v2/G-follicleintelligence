@@ -48,15 +48,15 @@ export function CaseSummaryDocumentPage({
         <div>
           <p className="print:hidden">
             <Link href={caseDetailHref} className="text-sm text-blue-600 hover:underline">
-              ← Back to case
+              ← Back to patient
             </Link>
           </p>
-          <h1 className="mt-2 text-xl font-semibold text-gray-900 print:mt-0 print:text-black">Case summary</h1>
+          <h1 className="mt-2 text-xl font-semibold text-gray-900 print:mt-0 print:text-black">Patient summary</h1>
           <p className="mt-1 text-sm text-gray-600 print:text-gray-800">
             Read-only handover view · Generated {generatedLabel}
           </p>
           <p className="mt-1 font-mono text-xs text-gray-500 print:text-gray-700">
-            Tenant {doc.meta.tenantId} · Case {doc.meta.caseId}
+            Tenant {doc.meta.tenantId} · Patient {doc.meta.caseId}
           </p>
         </div>
         <div className="flex shrink-0 gap-2 print:hidden">
@@ -65,7 +65,7 @@ export function CaseSummaryDocumentPage({
       </div>
 
       <div className="space-y-8 print:space-y-6">
-        <CaseSummaryDocumentSection title="Case summary">
+        <CaseSummaryDocumentSection title="Patient summary">
           <Dl rows={doc.caseSummary} />
         </CaseSummaryDocumentSection>
 
@@ -82,7 +82,7 @@ export function CaseSummaryDocumentPage({
 
         <CaseSummaryDocumentSection title="Linked CRM leads">
           {doc.linkedLeads.leads.length === 0 ? (
-            <p className="text-sm text-gray-600">No leads linked to this case.</p>
+            <p className="text-sm text-gray-600">No leads linked to this patient.</p>
           ) : (
             <ul className="list-none space-y-3">
               {doc.linkedLeads.leads.map((L) => (
@@ -106,19 +106,19 @@ export function CaseSummaryDocumentPage({
           <Dl rows={doc.treatmentProfile} />
         </CaseSummaryDocumentSection>
 
-        <CaseSummaryDocumentSection title="Planning notes (case)">
+        <CaseSummaryDocumentSection title="Planning notes (patient)">
           {doc.planningNotes ? (
             <div className="whitespace-pre-wrap rounded border border-gray-100 bg-gray-50/80 p-3 text-sm print:border-gray-300 print:bg-white">
               {doc.planningNotes}
             </div>
           ) : (
-            <p className="text-sm text-gray-600">No planning notes on the case record.</p>
+            <p className="text-sm text-gray-600">No planning notes on the patient record.</p>
           )}
         </CaseSummaryDocumentSection>
 
         <CaseSummaryDocumentSection title="Surgery plan">
           {!doc.surgeryPlan.present ? (
-            <p className="text-sm text-gray-600">No surgery plan row for this case yet.</p>
+            <p className="text-sm text-gray-600">No surgery plan row for this patient yet.</p>
           ) : (
             <>
               <Dl rows={doc.surgeryPlan.rows} />
@@ -219,7 +219,7 @@ export function CaseSummaryDocumentPage({
 
         <CaseSummaryDocumentSection title="Linked images">
           <p className="text-sm text-gray-900 print:text-black">
-            <span className="font-medium">{doc.linkedImageCount}</span> case-linked image
+            <span className="font-medium">{doc.linkedImageCount}</span> patient-linked image
             {doc.linkedImageCount === 1 ? "" : "s"} (loaded for this summary; list capped in source query).
           </p>
         </CaseSummaryDocumentSection>
@@ -278,7 +278,7 @@ export function CaseSummaryDocumentPage({
       </div>
 
       <footer className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500 print:mt-8 print:border-gray-800 print:text-gray-700">
-        Follicle Intelligence · SurgeryOS case summary · Internal use only. This view does not include HairAudit, formal
+        Follicle Intelligence · SurgeryOS patient summary · Internal use only. This view does not include HairAudit, formal
         audit grading, AI outcome scoring, or certification scoring.
       </footer>
     </div>

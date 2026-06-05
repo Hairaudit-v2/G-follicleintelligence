@@ -14,7 +14,7 @@ const STATUS_FILTER_TABS: { label: string; param: ConsultationStatus | null }[] 
   { label: "Completed", param: "completed" },
   { label: "Quoted", param: "quoted" },
   { label: "Accepted", param: "accepted" },
-  { label: "Converted to case", param: "converted_to_case" },
+  { label: "Converted to patient", param: "converted_to_case" },
   { label: "Archived", param: "archived" },
 ];
 
@@ -24,7 +24,7 @@ const STATUS_ROW_LABEL: Record<ConsultationStatus, string> = {
   completed: "Completed",
   quoted: "Quoted",
   accepted: "Accepted",
-  converted_to_case: "Converted to case",
+  converted_to_case: "Converted to patient",
   archived: "Archived",
 };
 

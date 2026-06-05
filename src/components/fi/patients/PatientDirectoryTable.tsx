@@ -46,7 +46,7 @@ export function PatientDirectoryTable({ tenantId, rows }: { tenantId: string; ro
             <th className="hidden px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600 lg:table-cell">
               Lead source
             </th>
-            <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-gray-600">Cases</th>
+            <th className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-gray-600">Patients</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">

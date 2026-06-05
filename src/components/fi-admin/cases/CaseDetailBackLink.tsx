@@ -10,7 +10,7 @@ export function CaseDetailBackLink({
   casesListReturnQuery?: string;
 }) {
   const href = caseDetailCasesListHref(tenantId, casesListReturnQuery);
-  const label = casesListReturnQuery ? "← Back to cases (same filters)" : "← Cases";
+  const label = casesListReturnQuery ? "← Back to patients (same filters)" : "← Patients";
 
   return (
     <Link href={href} className="text-sm text-blue-600 hover:underline">

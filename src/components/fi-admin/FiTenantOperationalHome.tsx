@@ -37,7 +37,7 @@ export function FiTenantOperationalHome(props: {
               href={`${base}/cases`}
               className="inline-flex items-center rounded-lg border border-white/[0.1] bg-[#141C33]/60 px-3 py-2 font-medium text-[#E2E8F0] transition hover:border-[#22C1FF]/35 hover:text-[#22C1FF]"
             >
-              Cases
+              Patients
             </Link>
             <Link
               href={`${base}/directory`}

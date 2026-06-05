@@ -12,7 +12,7 @@ import { loadUniversalCaseRecord } from "@/src/lib/fi/foundation/caseRecord";
 import { sanitizeFromCasesSearchParam } from "@/src/lib/cases/caseDetailFromCasesParam";
 
 export const metadata = {
-  title: "Case",
+  title: "Patient",
   robots: { index: false, follow: false },
 };
 

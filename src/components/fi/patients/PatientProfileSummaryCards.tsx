@@ -19,7 +19,7 @@ export function PatientProfileSummaryCards({ data }: { data: PatientProfileFound
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <SummaryCard label="Linked leads" value={String(s.totalLeads)} />
-        <SummaryCard label="Cases" value={String(s.totalCases)} />
+        <SummaryCard label="Clinical patients" value={String(s.totalCases)} />
         <SummaryCard label="Upcoming bookings" value={String(s.upcomingBookings)} />
         <SummaryCard label="Completed bookings" value={String(s.completedBookings)} />
         <SummaryCard label="Last activity" value={last} />

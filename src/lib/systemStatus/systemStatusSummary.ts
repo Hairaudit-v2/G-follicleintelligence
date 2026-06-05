@@ -233,7 +233,7 @@ function buildSummaryStrip(
     { id: "bookings", label: "Bookings", traffic: trafficBookings(bookings) },
     { id: "calendar", label: "Calendar", traffic: calendar.traffic },
     { id: "patients", label: "Patients", traffic: patients.traffic },
-    { id: "cases", label: "Cases", traffic: trafficCases(cases) },
+    { id: "cases", label: "Patients", traffic: trafficCases(cases) },
   ];
 }
 

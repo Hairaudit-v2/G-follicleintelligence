@@ -81,12 +81,12 @@ export function PatientImageUploadForm({
           <input name="taken_at" type="datetime-local" className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm" />
         </label>
         <label className="block text-xs text-gray-700">
-          Link case (optional)
+          Link patient (optional)
           <select name="case_id" defaultValue="" className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm">
             <option value="">—</option>
             {data.cases.map((c: PatientProfileCaseCard) => (
               <option key={c.id} value={c.id}>
-                {c.case_type ?? "Case"} · {c.id.slice(0, 8)}…
+                {c.case_type ?? "Patient"} · {c.id.slice(0, 8)}…
               </option>
             ))}
           </select>

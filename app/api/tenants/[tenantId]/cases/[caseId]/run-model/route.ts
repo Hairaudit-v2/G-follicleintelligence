@@ -32,7 +32,7 @@ export async function POST(
       .eq("tenant_id", tenantId)
       .single();
     if (!caseRow)
-      return NextResponse.json({ ok: false, error: "Case not found." }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
 
     const body = await req.json().catch(() => ({}));
     const dryRun = Boolean(body?.dryRun);

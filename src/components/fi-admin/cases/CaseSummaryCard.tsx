@@ -54,7 +54,7 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
   return (
     <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.summary)} className="text-sm font-semibold text-gray-900">
-        Case summary
+        Patient summary
       </h2>
       <p className="mt-1 text-xs text-gray-500">
         Stage 5A profile fields. Graft planning, procedure-day workflow, and audit scoring ship in later stages.
@@ -62,7 +62,7 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
 
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-xs font-medium text-gray-500">Case id</dt>
+          <dt className="text-xs font-medium text-gray-500">Patient id</dt>
           <dd className="font-mono text-xs text-gray-800">{initial.id}</dd>
         </div>
         <div>
@@ -99,7 +99,7 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
 
       <div className="mt-6 space-y-3 border-t border-gray-100 pt-4">
         <label htmlFor={SUMMARY_FIELDS.status.id} className="block text-xs font-medium text-gray-700">
-          Case status
+          Patient status
           <select
             {...SUMMARY_FIELDS.status}
             value={status}
@@ -129,13 +129,13 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
           />
         </label>
         <label htmlFor={SUMMARY_FIELDS.caseType.id} className="block text-xs font-medium text-gray-700">
-          Case type
+          Patient type
           <input
             {...SUMMARY_FIELDS.caseType}
             value={caseType}
             onChange={(e) => setCaseType(e.target.value)}
             className="mt-1 block w-full max-w-md rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
-            placeholder="Stored in case metadata (producer / bridge label)."
+            placeholder="Stored in patient metadata (producer / bridge label)."
           />
         </label>
       </div>

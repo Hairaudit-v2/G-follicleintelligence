@@ -27,7 +27,7 @@ export function CaseImagesCard({
         ) : null}
       </div>
       {images.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-500">No patient images are tagged with this case.</p>
+        <p className="mt-2 text-sm text-gray-500">No patient images are tagged with this clinical patient.</p>
       ) : (
         <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto text-sm">
           {images.map((im) => (

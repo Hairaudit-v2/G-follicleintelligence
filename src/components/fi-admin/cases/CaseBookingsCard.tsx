@@ -17,7 +17,7 @@ export function CaseBookingsCard({ tenantId, bookings }: { tenantId: string; boo
         </Link>
       </div>
       {bookings.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-500">No bookings are anchored to this case.</p>
+        <p className="mt-2 text-sm text-gray-500">No bookings are anchored to this patient.</p>
       ) : (
         <ul className="mt-3 divide-y divide-gray-100 text-sm">
           {bookings.map((b) => (

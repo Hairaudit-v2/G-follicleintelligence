@@ -12,7 +12,7 @@ import { loadCaseTimelineExtraSources } from "@/src/lib/cases/caseTimelineLoader
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 
 export const metadata = {
-  title: "Case summary",
+  title: "Patient summary",
   robots: { index: false, follow: false },
 };
 

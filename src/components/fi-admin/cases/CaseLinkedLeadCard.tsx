@@ -9,7 +9,7 @@ export function CaseLinkedLeadCard({ tenantId, leads }: { tenantId: string; lead
         Linked CRM leads
       </h2>
       {leads.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-500">No CRM leads reference this case.</p>
+        <p className="mt-2 text-sm text-gray-500">No CRM leads reference this patient.</p>
       ) : (
         <ul className="mt-3 list-inside list-disc space-y-2 text-sm">
           {leads.map((l) => (
@@ -18,7 +18,7 @@ export function CaseLinkedLeadCard({ tenantId, leads }: { tenantId: string; lead
                 {l.title}
               </Link>
               <span className="ml-2 text-xs text-gray-500">
-                ({l.link_reason === "case_id" ? "case" : "conversion"} · {l.status})
+                ({l.link_reason === "case_id" ? "patient" : "conversion"} · {l.status})
               </span>
             </li>
           ))}

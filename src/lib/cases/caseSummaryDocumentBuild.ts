@@ -50,7 +50,7 @@ function formatIsoShort(iso: string | null | undefined): string {
 }
 
 function leadLinkReasonLabel(reason: CaseLeadLink["link_reason"]): string {
-  return reason === "case_id" ? "Linked via case" : "Converted to this case";
+  return reason === "case_id" ? "Linked via patient" : "Converted to this patient";
 }
 
 function graftEstimate(plan: CaseSurgeryPlanRow | null): string | null {
@@ -79,10 +79,10 @@ export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): 
   const cid = detail.id;
 
   const caseSummary: CaseSummaryKeyValue[] = [
-    row("Case ID", cid),
+    row("Patient ID", cid),
     row("Status", detail.status),
     row("Treatment type", detail.treatment_type),
-    row("Case type", detail.case_type),
+    row("Patient type", detail.case_type),
     row("External ID", detail.external_id),
     row("Created", formatIsoShort(detail.created_at)),
     row("Updated", formatIsoShort(detail.updated_at)),
@@ -114,7 +114,7 @@ export function buildCaseSummaryDocument(input: BuildCaseSummaryDocumentInput): 
 
   const treatmentProfile: CaseSummaryKeyValue[] = [
     row("Treatment type", detail.treatment_type),
-    row("Case type", detail.case_type),
+    row("Patient type", detail.case_type),
     row("Clinic ID", detail.clinic_id),
     row("Organisation ID", detail.organisation_id),
     row("Partner ID", detail.partner_id),

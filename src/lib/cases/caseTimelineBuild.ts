@@ -71,12 +71,12 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
     id: `case-${detail.id}-created`,
     kind: "case_lifecycle",
     source: "fi_cases",
-    title: "Case opened",
+    title: "Patient opened",
     description: detail.treatment_type ? `Treatment type: ${detail.treatment_type}.` : null,
     occurred_at: detail.created_at,
     status: detail.status,
     href: null,
-    metadata_summary: detail.case_type ? `Case type: ${detail.case_type}` : null,
+    metadata_summary: detail.case_type ? `Patient type: ${detail.case_type}` : null,
   });
 
   if (detail.updated_at.trim() && detail.updated_at !== detail.created_at) {
@@ -84,8 +84,8 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
       id: `case-${detail.id}-updated`,
       kind: "case_lifecycle",
       source: "fi_cases",
-      title: "Case profile updated",
-      description: "Core case fields or planning notes reference changed.",
+      title: "Patient profile updated",
+      description: "Core patient fields or planning notes reference changed.",
       occurred_at: detail.updated_at,
       status: detail.status,
       href: null,
@@ -107,7 +107,7 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
       occurred_at: lead.created_at,
       status: lead.status,
       href: crmLeadHref(lead.id),
-      metadata_summary: lead.case_id === caseId ? "Linked via case_id" : lead.converted_case_id === caseId ? "Converted to this case" : null,
+      metadata_summary: lead.case_id === caseId ? "Linked via patient" : lead.converted_case_id === caseId ? "Converted to this patient" : null,
     });
 
     if (lead.converted_case_id === caseId && lead.converted_at?.trim()) {
@@ -115,7 +115,7 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
         id: `lead-${lead.id}-converted`,
         kind: "lead",
         source: "fi_crm_leads",
-        title: "Lead converted to this case",
+        title: "Lead converted to this patient",
         description: lead.summary?.trim() ? lead.summary.trim() : null,
         occurred_at: lead.converted_at,
         status: lead.status,

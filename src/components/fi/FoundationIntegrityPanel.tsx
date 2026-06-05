@@ -140,7 +140,7 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
         <h3 className="mb-2 text-base font-semibold text-[#F8FAFC] sm:text-lg">Risks & gaps</h3>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
           <Metric label="Unresolved global patients (view)" value={m.risks.unresolved_global_patients} />
-          <Metric label="Cases w/o foundation_patient (view)" value={m.risks.unresolved_cases_no_foundation_patient} />
+          <Metric label="Patients w/o foundation_patient (view)" value={m.risks.unresolved_cases_no_foundation_patient} />
           <Metric label="Duplicate-risk person emails (groups)" value={m.risks.duplicate_person_email_normalized_groups} />
           <Metric label="Duplicate patient rows / person_id" value={m.risks.duplicate_patient_rows_same_person_id} />
           <Metric label="fi_media_assets without case_id" value={m.risks.fi_media_assets_without_case_id} />
@@ -174,7 +174,7 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
           </ul>
         </div>
         <div>
-          <h4 className="mb-2 font-semibold text-[#E2E8F0]">Cases without foundation patient (preview)</h4>
+          <h4 className="mb-2 font-semibold text-[#E2E8F0]">Patients without foundation patient (preview)</h4>
           <ul className={listShell}>
             {m.previews.unresolved_cases.length === 0 ? (
               <li className="text-[#64748B]">None in preview window.</li>
@@ -193,7 +193,7 @@ export function FoundationIntegrityPanel({ tenantId }: { tenantId: string }) {
                   ) : null}
                   {" · "}
                   <Link href={`/fi-admin/${routeTenant}/cases/${r.case_id}`} className={linkClass}>
-                    Case record
+                    Patient record
                   </Link>
                 </li>
               ))

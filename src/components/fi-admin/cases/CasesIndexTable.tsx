@@ -4,18 +4,18 @@ import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 
 export function CasesIndexTable({ tenantId, rows }: { tenantId: string; rows: CaseIndexRow[] }) {
   if (rows.length === 0) {
-    return <p className="text-sm text-gray-500">No cases for this tenant yet.</p>;
+    return <p className="text-sm text-gray-500">No patients for this tenant yet.</p>;
   }
 
   return (
     <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow-sm">
       <table className="min-w-full text-sm" aria-labelledby="cases-index-table-heading">
         <caption id="cases-index-table-heading" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-          Tenant cases
+          Tenant patients
         </caption>
         <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
           <tr>
-            <th className="px-3 py-2">Case</th>
+            <th className="px-3 py-2">Patient</th>
             <th className="px-3 py-2">Person</th>
             <th className="px-3 py-2">Lead</th>
             <th className="px-3 py-2">Treatment</th>

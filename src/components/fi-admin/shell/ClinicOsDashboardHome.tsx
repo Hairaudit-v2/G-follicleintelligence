@@ -42,7 +42,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
           titleId="clinic-os-welcome-heading"
           eyebrow="Welcome back"
           title={workspaceName}
-          description="Manage today&apos;s bookings, patients, cases and follow-ups from one place."
+          description="Manage today&apos;s bookings, patients, clinical records and follow-ups from one place."
           primaryAction={
             <Link
               href={newBookingLauncherHref}
@@ -83,7 +83,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
             <div>
               <FiCalendarBlock title="Consultations" timeLabel="AM" tone="consult" placeholder />
               <FiCalendarBlock title="PRP / Treatment" timeLabel="Midday" tone="treatment" placeholder />
-              <FiCalendarBlock title="Surgery cases" timeLabel="PM" tone="surgery" placeholder />
+              <FiCalendarBlock title="Surgery patients" timeLabel="PM" tone="surgery" placeholder />
               <FiCalendarBlock title="Follow-ups" timeLabel="PM" tone="followup" placeholder />
             </div>
             <div className="mt-4 border-t border-slate-100 pt-4">
@@ -117,7 +117,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
               />
               <FiQuickActionCard
                 title="Book appointment"
-                description="Choose how to book — patient, lead, consultation, or case"
+                description="Choose how to book — patient, lead, consultation, or clinical patient"
                 href={newBookingLauncherHref}
               />
               <FiQuickActionCard
@@ -128,8 +128,8 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
                 disabledReason={!crmHref ? "Requires CRM workspace access (fi_admin or crm_operator)." : undefined}
               />
               <FiQuickActionCard
-                title="Open active cases"
-                description="Case list and worklists"
+                title="Open active patients"
+                description="Patient list and worklists"
                 href={casesHref}
               />
               <FiQuickActionCard title="Send message" description="Team and patient messaging" />

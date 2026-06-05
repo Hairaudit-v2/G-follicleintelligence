@@ -5,15 +5,15 @@ import type { PatientProfileFoundationData } from "@/src/lib/patients/patientPro
 export function PatientCasesCard({ tenantId, data }: { tenantId: string; data: PatientProfileFoundationData }) {
   return (
     <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Cases</h2>
+      <h2 className="text-sm font-semibold text-gray-900">Clinical patients</h2>
       {data.cases.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-600">No cases linked to this foundation patient.</p>
+        <p className="mt-2 text-sm text-gray-600">No clinical patients linked to this foundation patient.</p>
       ) : (
         <ul className="mt-3 divide-y divide-gray-100">
           {data.cases.map((c) => (
             <li key={c.id} className="py-2">
               <Link href={`/fi-admin/${tenantId}/cases/${c.id}`} className="text-sm font-medium text-blue-700 hover:underline">
-                Case {c.id.slice(0, 8)}…
+                Patient {c.id.slice(0, 8)}…
               </Link>
               <p className="text-xs text-gray-600">
                 Status: <strong>{c.status}</strong>

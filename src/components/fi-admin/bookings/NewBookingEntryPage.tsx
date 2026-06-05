@@ -108,9 +108,9 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
 
         <FiQuickActionCard
           title="Surgery or treatment planning"
-          description="Use this when the appointment relates to an active surgical or treatment case."
+          description="Use this when the appointment relates to an active surgical or treatment patient."
           href={casesHref}
-          openAffordanceLabel="Open cases"
+          openAffordanceLabel="Open patients"
         />
       </div>
     </div>

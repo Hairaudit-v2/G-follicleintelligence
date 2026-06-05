@@ -277,7 +277,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
               }}
               autoComplete="off"
               enterKeyHint="search"
-              placeholder="Name, phone, email or case number"
+              placeholder="Name, phone, email or patient number"
               className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 text-base text-slate-900 outline-none ring-sky-500/20 transition placeholder:text-slate-400 focus:border-sky-300 focus:bg-white focus:ring-4 sm:h-14 sm:text-lg"
             />
             </div>
@@ -292,7 +292,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
             {!debouncedTrim ? (
               <FiEmptyState
                 title="Start typing"
-                description="Search across patients, cases, and leads you have access to."
+                description="Search across patients, clinical records, and leads you have access to."
               />
             ) : loading ? (
               <div className="flex flex-col items-center justify-center gap-2 py-16 text-slate-500">
@@ -304,7 +304,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
             ) : !hasResults ? (
               <FiEmptyState
                 title="No matches"
-                description="Try a different name, phone, email, or case reference."
+                description="Try a different name, phone, email, or patient reference."
               />
             ) : (
               <div className="space-y-8">
@@ -335,7 +335,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                   <section aria-labelledby={`${titleId}-cases`}>
                     <h3 id={`${titleId}-cases`} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       <Briefcase className="h-3.5 w-3.5" aria-hidden />
-                      Cases
+                      Patients
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.cases.map((c) => (
@@ -436,7 +436,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                   onClick={() => onOpenChange(false)}
                   className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-800 outline-none transition hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
                 >
-                  New Case
+                  New Patient
                   <ArrowRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
                 </Link>
               </li>

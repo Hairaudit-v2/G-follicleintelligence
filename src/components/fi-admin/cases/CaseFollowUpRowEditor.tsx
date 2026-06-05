@@ -147,9 +147,9 @@ export function CaseFollowUpRowEditor({
       </label>
 
       <fieldset className="mt-2">
-        <legend className="text-xs font-medium text-gray-700">Linked case images (by ID)</legend>
+        <legend className="text-xs font-medium text-gray-700">Linked patient images (by ID)</legend>
         {imageOptions.length === 0 ? (
-          <p className="mt-1 text-xs text-gray-500">No case images on file — upload via case images first.</p>
+          <p className="mt-1 text-xs text-gray-500">No patient images on file — upload via patient images first.</p>
         ) : (
           <ul className="mt-1 max-h-32 space-y-1 overflow-y-auto text-xs">
             {imageOptions.map((img) => {

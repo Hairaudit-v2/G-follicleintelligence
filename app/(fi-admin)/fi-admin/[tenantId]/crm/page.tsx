@@ -65,7 +65,7 @@ export default async function CrmShellPage({
           </p>
           <p className="text-sm text-gray-600">
             <Link href={`/fi-admin/${tenantId}/cases`} className="text-blue-600 hover:underline">
-              ← Back to cases
+              ← Back to patients
             </Link>
           </p>
         </div>

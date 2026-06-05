@@ -33,7 +33,7 @@ export function DashboardQuickActions(props: { tenantId: string; showCrmNav: boo
         <QuickActionCard
           href={`${base}/bookings/new`}
           title="New booking"
-          description="Schedule a visit linked to a lead, patient, or case."
+          description="Schedule a visit linked to a lead, patient, or clinical patient."
           icon={<CalendarPlus size={ICON} strokeWidth={1.75} aria-hidden />}
         />
         <QuickActionCard

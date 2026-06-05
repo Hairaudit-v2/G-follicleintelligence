@@ -89,7 +89,7 @@ export function FirstCaseWizardClient({
   const onCreate = useCallback(async () => {
     setError(null);
     if (!canSubmit) {
-      setError("Complete all steps before creating the case.");
+      setError("Complete all steps before creating the patient.");
       return;
     }
     setBusy(true);
@@ -146,10 +146,10 @@ export function FirstCaseWizardClient({
           <Link href={`/fi-admin/${tenantId}/configuration`} className="text-blue-700 underline">
             Configuration
           </Link>{" "}
-          before adding a patient and case.
+          before adding a patient.
         </p>
         <Link href={`/fi-admin/${tenantId}/cases`} className="inline-block text-blue-700 underline">
-          Back to cases
+          Back to patients
         </Link>
       </div>
     );
@@ -159,17 +159,17 @@ export function FirstCaseWizardClient({
     <div className="mx-auto max-w-2xl space-y-6 py-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">First patient / first case</h1>
+          <h1 className="text-lg font-semibold text-gray-900">First patient</h1>
           <p className="mt-1 max-w-xl text-sm text-gray-600">
-            Guided setup: one person, one patient record, and one case. If you are signed in with a role that can edit
-            cases (for example <code className="rounded bg-gray-100 px-1 text-xs">fi_admin</code>,{" "}
+            Guided setup: one person, one patient record, and one clinical patient. If you are signed in with a role that can edit
+            patients (for example <code className="rounded bg-gray-100 px-1 text-xs">fi_admin</code>,{" "}
             <code className="rounded bg-gray-100 px-1 text-xs">admin</code>, or{" "}
-            <code className="rounded bg-gray-100 px-1 text-xs">crm_operator</code>), you can create the case without an
+            <code className="rounded bg-gray-100 px-1 text-xs">crm_operator</code>), you can create the patient without an
             API key. Optional: use an admin key override below for break-glass or automation.
           </p>
         </div>
         <Link href={`/fi-admin/${tenantId}/cases`} className="text-sm text-blue-600 hover:underline">
-          Back to cases
+          Back to patients
         </Link>
       </div>
 
@@ -182,11 +182,11 @@ export function FirstCaseWizardClient({
         <li aria-hidden="true">
           ·
         </li>
-        <li className={step >= 3 ? "font-semibold text-gray-900" : ""}>3. Case</li>
+        <li className={step >= 3 ? "font-semibold text-gray-900" : ""}>3. Patient</li>
         <li aria-hidden="true">
           ·
         </li>
-        <li className="text-gray-400">4. Open case</li>
+        <li className="text-gray-400">4. Open patient</li>
       </ol>
 
       {error ? (
@@ -329,14 +329,14 @@ export function FirstCaseWizardClient({
           aria-labelledby={WIZARD_STEP_HEADING_IDS[3]}
         >
           <h2 id={WIZARD_STEP_HEADING_IDS[3]} className="text-sm font-medium text-gray-900">
-            Step 3 — Case
+            Step 3 — Patient
           </h2>
           <label
             id={WIZARD_FIELDS.caseType.labelId}
             htmlFor={WIZARD_FIELDS.caseType.inputId}
             className="block text-sm text-gray-700"
           >
-            Case type
+            Patient type
             <input
               id={WIZARD_FIELDS.caseType.inputId}
               name={WIZARD_FIELDS.caseType.name}
@@ -363,7 +363,7 @@ export function FirstCaseWizardClient({
           </label>
           <div className="rounded border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-gray-600">
             <div>
-              <span className="font-medium text-gray-800">Case status:</span> consultation (default)
+              <span className="font-medium text-gray-800">Patient status:</span> consultation (default)
             </div>
             <div>
               <span className="font-medium text-gray-800">Source:</span> manual_admin_test (default)
@@ -404,10 +404,10 @@ export function FirstCaseWizardClient({
               disabled={busy || !canSubmit}
               onClick={() => void onCreate()}
             >
-              {busy ? "Creating…" : "Create and open case"}
+              {busy ? "Creating…" : "Create and open patient"}
             </button>
           </div>
-          <p className="text-xs text-gray-500">Step 4: after a successful create you are redirected to the new case detail page.</p>
+          <p className="text-xs text-gray-500">Step 4: after a successful create you are redirected to the new patient detail page.</p>
         </section>
       ) : null}
     </div>

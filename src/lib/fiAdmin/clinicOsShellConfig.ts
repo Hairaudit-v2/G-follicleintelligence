@@ -55,7 +55,7 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
   /** Patients home is tenant-wide; CRM-gated shortcuts live on the page. */
   { id: "patients", label: "Patients", path: "patients", permissionHint: {} },
   { id: "consultations", label: "Consultations", path: "consultations", permissionHint: {} },
-  { id: "cases", label: "Cases", path: "cases", permissionHint: {} },
+  { id: "cases", label: "Patients", path: "cases", permissionHint: {} },
   { id: "messages", label: "Messages", path: "", permissionHint: {}, placeholder: true },
   { id: "sales", label: "Sales", path: "crm", permissionHint: { requiresCrmShellNav: true } },
   { id: "reports", label: "Reports", path: "", permissionHint: {}, placeholder: true },
@@ -69,7 +69,7 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
   { id: "consultation", label: "Consultation", path: "consultations/new", permissionHint: {} },
   { id: "lead", label: "Lead", path: "crm", permissionHint: { requiresCrmShellNav: true } },
   { id: "booking", label: "Booking", path: "bookings/new", permissionHint: { requiresCrmShellNav: true } },
-  { id: "case", label: "Case", path: "cases/new", permissionHint: {} },
+  { id: "case", label: "Patient", path: "cases/new", permissionHint: {} },
   { id: "task", label: "Task", path: "", permissionHint: {}, placeholder: true },
   { id: "message", label: "Message", path: "", permissionHint: {}, placeholder: true },
 ];

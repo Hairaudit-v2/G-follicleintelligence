@@ -27,7 +27,7 @@ export const caseProfilePatchBodySchema = z
     planning_notes: z.string().max(CASE_PLANNING_NOTES_MAX).nullable().optional(),
   })
   .refine((b) => b.status !== undefined || b.treatment_type !== undefined || b.case_type !== undefined || b.planning_notes !== undefined, {
-    message: "Provide at least one of: status, treatment_type, case_type, planning_notes.",
+    message: "Provide at least one of: status, treatment type, patient type, or planning notes.",
   });
 
 export type CaseProfilePatchBody = z.infer<typeof caseProfilePatchBodySchema>;

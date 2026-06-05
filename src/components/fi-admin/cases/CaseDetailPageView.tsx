@@ -78,7 +78,7 @@ export function CaseDetailPageView({
       <div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <h1 id="case-detail-page-heading" className="text-lg font-semibold text-gray-900">
-            Treatment case
+            Treatment patient
           </h1>
           <Link
             href={caseSummaryDocumentPageHref(tenantId, detail.id, casesListReturnQuery)}
@@ -88,9 +88,9 @@ export function CaseDetailPageView({
           </Link>
         </div>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">
-          Tenant-scoped case profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
+          Tenant-scoped patient profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure
           day, Stage 5D post-op / outcome tracking, Stage 5E unified timeline, Stage 5F readiness indicators, Stage 5G–5I
-          worklist navigation polish, case-level planning notes, and Stage 5J read-only summary / print. HairAudit
+          worklist navigation polish, patient-level planning notes, and Stage 5J read-only summary / print. HairAudit
           scoring, formal audit grading, AI outcome scoring, and certification scoring are not part of this surface.
         </p>
       </div>
@@ -175,7 +175,7 @@ export function CaseDetailPageView({
       {!foundationRecord ? (
         <p className="text-xs text-gray-500">
           <Link className="text-blue-600 hover:underline" href={`${casePath}${caseSelfQuery(casesListReturnQuery, { foundation: "1" })}`}>
-            Load universal case record
+            Load universal patient record
           </Link>{" "}
           (read-only timeline, media, identifiers).
         </p>
@@ -189,7 +189,7 @@ export function CaseDetailPageView({
             </Link>
           </p>
           <details className="rounded border border-gray-200 bg-gray-50/50 p-3 text-sm">
-            <summary className="cursor-pointer font-medium text-gray-800">Advanced: universal case record (read-only)</summary>
+            <summary className="cursor-pointer font-medium text-gray-800">Advanced: universal patient record (read-only)</summary>
             <p className="mt-2 text-xs text-gray-600">
               Full foundation aggregate (timeline, unified media, identifiers) for operators who need ingest-level
               context.

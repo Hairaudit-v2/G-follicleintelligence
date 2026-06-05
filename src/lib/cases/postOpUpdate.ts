@@ -154,7 +154,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
       .eq("id", p.id)
       .maybeSingle();
     if (re) throw new Error(re.message);
-    if (!row) throw new Error("Follow-up row not found for this case.");
+    if (!row) throw new Error("Follow-up row not found for this patient.");
 
     const updatePayload: Record<string, unknown> = { updated_at: now };
     if (linkedIdsForWrite !== undefined) updatePayload.linked_image_ids = linkedIdsForWrite;

@@ -18,7 +18,7 @@ function formatWhen(iso: string): string {
 
 export function CaseTimelineItemList({ items }: { items: CaseTimelineItem[] }) {
   if (items.length === 0) {
-    return <p className="text-xs text-gray-500">No timeline entries yet for this case.</p>;
+    return <p className="text-xs text-gray-500">No timeline entries yet for this patient.</p>;
   }
 
   return (

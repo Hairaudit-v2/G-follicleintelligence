@@ -97,7 +97,7 @@ export function CrmLeadConversionPanel({
         ) : null}
         {caseRow ? (
           <p className="mt-1">
-            <span className="font-medium text-gray-900">Linked case:</span>{" "}
+            <span className="font-medium text-gray-900">Linked patient:</span>{" "}
             <span className="font-mono">{caseRow.id}</span> ({caseRow.status})
           </p>
         ) : null}
@@ -114,7 +114,7 @@ export function CrmLeadConversionPanel({
           ) : null}
           {lead.converted_case_id ? (
             <p className="text-xs">
-              Seeded case: <span className="font-mono">{lead.converted_case_id}</span>
+              Seeded patient: <span className="font-mono">{lead.converted_case_id}</span>
             </p>
           ) : null}
           <p className="text-xs text-gray-500">This lead cannot be converted again from this panel. Contact an administrator to relink if needed.</p>
@@ -133,15 +133,15 @@ export function CrmLeadConversionPanel({
 
           <label className="flex items-center gap-2 text-xs text-gray-700">
             <input type="checkbox" checked={seedCase && canSeedCase} disabled={!canSeedCase} onChange={(e) => setSeedCase(e.target.checked)} />
-            Create draft patient/case record now (adds a <code className="rounded bg-gray-100 px-0.5">fi_cases</code> shell in{" "}
+            Create draft patient record now (adds a <code className="rounded bg-gray-100 px-0.5">fi_cases</code> shell in{" "}
             <code className="rounded bg-gray-100 px-0.5">draft</code> status)
           </label>
-          {!canSeedCase ? <p className="text-xs text-amber-800">This lead already has a case link; a second shell is not created here.</p> : null}
+          {!canSeedCase ? <p className="text-xs text-amber-800">This lead already has a patient link; a second shell is not created here.</p> : null}
 
           {seedCase && canSeedCase ? (
             <div className="grid gap-2 sm:grid-cols-2">
               <label className="text-xs text-gray-600">
-                Case type (optional, stored in case metadata)
+                Patient type (optional, stored in patient metadata)
                 <input
                   value={caseType}
                   onChange={(e) => setCaseType(e.target.value)}

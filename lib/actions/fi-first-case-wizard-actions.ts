@@ -29,7 +29,7 @@ const inputSchema = z.object({
     .max(32)
     .optional()
     .transform((s) => (s === "" ? undefined : s)),
-  case_type: z.string().trim().min(1, "Case type is required.").max(256),
+  case_type: z.string().trim().min(1, "Patient type is required.").max(256),
   treatment_type: z.string().trim().min(1, "Treatment type is required.").max(512),
   case_status: z.enum(["consultation"]).optional().default("consultation"),
   source: z.string().trim().max(128).optional().default("manual_admin_test"),
@@ -156,7 +156,7 @@ export async function createFirstPatientCaseWizardAction(
   if (caseErr || !caseRow?.id) {
     await supabase.from("fi_patients").delete().eq("id", patientId).eq("tenant_id", tenantId);
     await supabase.from("fi_persons").delete().eq("id", personId).eq("tenant_id", tenantId);
-    return { ok: false, error: caseErr?.message ?? "Could not create case." };
+    return { ok: false, error: caseErr?.message ?? "Could not create patient." };
   }
   const caseId = String(caseRow.id);
 

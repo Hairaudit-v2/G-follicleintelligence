@@ -12,7 +12,7 @@ export function CaseLinkedPatientCard({ tenantId, patient }: { tenantId: string;
         Linked patient / person
       </h2>
       {!patient ? (
-        <p className="mt-2 text-sm text-gray-500">No foundation patient is linked to this case yet.</p>
+        <p className="mt-2 text-sm text-gray-500">No foundation patient is linked to this clinical patient yet.</p>
       ) : (
         <dl className="mt-3 space-y-2 text-sm">
           <div>

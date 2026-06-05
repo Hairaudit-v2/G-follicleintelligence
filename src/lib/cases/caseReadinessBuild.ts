@@ -105,8 +105,8 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
   const laterPending = laterCps.filter((cp) => !followUpScheduledOrDone(followUpRow(cp, followUps)));
 
   const profileChecks = [
-    { id: "status", label: "Case status set", ok: !!detail.status?.trim() },
-    { id: "type", label: "Treatment type or case type", ok: treatmentOrCaseType(detail) },
+    { id: "status", label: "Patient status set", ok: !!detail.status?.trim() },
+    { id: "type", label: "Treatment type or patient type", ok: treatmentOrCaseType(detail) },
     { id: "patient", label: "Linked patient / person", ok: hasLinkedPatient(detail) },
   ];
   const profileSection = finalizeSection({
@@ -114,7 +114,7 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
     title: caseReadinessSectionTitle("case_profile"),
     health: sectionHealth(profileChecks),
     summary:
-      profileChecks.every((c) => c.ok) ? "Profile identifiers are in good shape." : "Complete core case profile fields.",
+      profileChecks.every((c) => c.ok) ? "Profile identifiers are in good shape." : "Complete core patient profile fields.",
     checks: profileChecks,
   });
 
@@ -152,7 +152,7 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
       ? surgeryPlan.planning_status === "cancelled"
         ? "Surgery plan is cancelled — reopen or replace before proceeding."
         : "Surgery plan row present — fill required planning fields."
-      : "Create a surgery plan for this case.",
+      : "Create a surgery plan for this patient.",
     checks: planChecks,
   });
 
@@ -244,15 +244,15 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
     checks: fuChecks,
   });
 
-  const imageChecks = [{ id: "count", label: "At least one case-linked image", ok: detail.images.length >= 1 }];
+  const imageChecks = [{ id: "count", label: "At least one patient-linked image", ok: detail.images.length >= 1 }];
   const imageSection = finalizeSection({
     key: "images",
     title: caseReadinessSectionTitle("images"),
     health: sectionHealth(imageChecks),
     summary:
       detail.images.length === 0
-        ? "Upload at least one case image for documentation."
-        : `${detail.images.length} image(s) linked to this case.`,
+        ? "Upload at least one patient image for documentation."
+        : `${detail.images.length} image(s) linked to this patient.`,
     checks: imageChecks,
   });
 
@@ -263,7 +263,7 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
     health: sectionHealth(bookingChecks),
     summary:
       detail.bookings.length === 0
-        ? "No bookings on this case yet — add when scheduling."
+        ? "No bookings on this patient yet — add when scheduling."
         : `${detail.bookings.length} booking(s) linked.`,
     checks: bookingChecks,
   });
@@ -271,7 +271,7 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
   const timelineRich =
     timelineItems.some((i) => i.kind !== "case_lifecycle") || timelineItems.filter((i) => i.kind === "case_lifecycle").length >= 2;
 
-  const timelineChecks = [{ id: "activity", label: "Timeline shows activity beyond case creation", ok: timelineRich }];
+  const timelineChecks = [{ id: "activity", label: "Timeline shows activity beyond patient creation", ok: timelineRich }];
   const timelineSection = finalizeSection({
     key: "timeline",
     title: caseReadinessSectionTitle("timeline"),
@@ -330,9 +330,9 @@ function pickNextStep(sections: CaseReadinessSection[]): string {
       return `Next: ${s.title} — ${s.missing[0]}.`;
     }
     if (s.health === "not_started") {
-      return `Next: start ${s.title.toLowerCase()} for this case.`;
+      return `Next: start ${s.title.toLowerCase()} for this patient.`;
     }
     return `Next: finish remaining items in ${s.title.toLowerCase()}.`;
   }
-  return "Case readiness looks strong — review sections for any optional polish.";
+  return "Patient readiness looks strong — review sections for any optional polish.";
 }

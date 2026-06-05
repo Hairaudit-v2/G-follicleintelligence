@@ -52,7 +52,7 @@ export function UniversalCaseRecord({
     <div className="space-y-8 text-sm">
       <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
         <Link href={`${base}/cases`} className="hover:text-gray-900 hover:underline">
-          ← Cases
+          ← Patients
         </Link>
         <span className="text-gray-300">|</span>
         <Link href={`${base}/foundation-integrity`} className="hover:text-gray-900 hover:underline">
@@ -61,14 +61,14 @@ export function UniversalCaseRecord({
       </div>
 
       <section className="rounded border border-gray-200 bg-white p-4">
-        <h2 className="mb-3 text-base font-medium text-gray-900">Case header</h2>
+        <h2 className="mb-3 text-base font-medium text-gray-900">Patient header</h2>
         <dl className="grid gap-2 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <dt className="text-xs text-gray-500">Case id</dt>
+            <dt className="text-xs text-gray-500">Patient id</dt>
             <dd className="font-mono text-xs break-all">{c.case_id}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">Case type</dt>
+            <dt className="text-xs text-gray-500">Patient type</dt>
             <dd>{c.case_type ?? "—"}</dd>
           </div>
           <div>
@@ -80,11 +80,11 @@ export function UniversalCaseRecord({
             <dd>{c.source_system ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">Source case id</dt>
+            <dt className="text-xs text-gray-500">Source patient id</dt>
             <dd className="font-mono text-xs break-all">{c.source_case_id ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">Global case id</dt>
+            <dt className="text-xs text-gray-500">Global patient id</dt>
             <dd className="font-mono text-xs break-all">{c.global_case_id ?? "—"}</dd>
           </div>
           <div>
@@ -318,7 +318,7 @@ export function UniversalCaseRecord({
 
       {record.case_source_identifiers.length > 0 && (
         <section className="rounded border border-gray-200 bg-white p-4">
-          <h2 className="mb-2 text-base font-medium text-gray-900">Case source identifiers</h2>
+          <h2 className="mb-2 text-base font-medium text-gray-900">Patient source identifiers</h2>
           <ul className="space-y-1 text-xs">
             {record.case_source_identifiers.map((s, i) => (
               <li key={`${s.provenance}-${s.source_system}-${s.source_case_id}-${i}`} className="font-mono">

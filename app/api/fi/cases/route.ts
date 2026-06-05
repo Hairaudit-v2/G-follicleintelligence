@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     if (err) {
       if (err.code === "23505") {
         return NextResponse.json(
-          { ok: false, error: "Case with this external_id already exists." },
+          { ok: false, error: "Patient with this external_id already exists." },
           { status: 409 }
         );
       }
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           ok: false,
-          error: `Case created but intake failed: ${intakeErr.message}`,
+          error: `Patient created but intake failed: ${intakeErr.message}`,
         },
         { status: 500 }
       );

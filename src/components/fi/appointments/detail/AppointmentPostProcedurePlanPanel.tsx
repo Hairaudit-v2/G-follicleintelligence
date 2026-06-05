@@ -24,14 +24,14 @@ export function AppointmentPostProcedurePlanPanel({
       <section className={appointmentCardClass}>
         <h2 className="text-sm font-semibold text-gray-900">Post-procedure plan</h2>
         <p className="mt-1 text-xs text-gray-600">
-          Combines case surgery planning, post-op tracking, and instruction packs sent from this appointment.
+          Combines patient surgery planning, post-op tracking, and instruction packs sent from this appointment.
         </p>
         {caseId ? (
           <Link href={`/fi-admin/${tenantId}/cases/${caseId}`} className="mt-2 inline-block text-xs text-blue-600 hover:underline">
-            Open case workspace →
+            Open patient workspace →
           </Link>
         ) : (
-          <p className="mt-2 text-sm text-gray-600">No case linked — link a case for structured post-op tracking.</p>
+          <p className="mt-2 text-sm text-gray-600">No patient linked — link a patient for structured post-op tracking.</p>
         )}
       </section>
 

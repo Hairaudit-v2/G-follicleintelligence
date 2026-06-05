@@ -226,7 +226,7 @@ export function OperationalCalendarPage({
               disabledReason="CRM workspace access required."
               showOpenAffordance={false}
             />
-            <FiQuickActionCard title="Cases" description="Clinical worklists" href={`${base}/cases`} showOpenAffordance={false} />
+            <FiQuickActionCard title="Patients" description="Clinical worklists" href={`${base}/cases`} showOpenAffordance={false} />
           </div>
         </FiSection>
         <FiSection title="Details" description="Booking actions" headingId="operational-calendar-details-heading">

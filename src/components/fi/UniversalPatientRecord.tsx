@@ -52,7 +52,7 @@ export function UniversalPatientRecord({
         </Link>
         <span className="text-gray-300">|</span>
         <Link href={`${base}/cases`} className="hover:text-gray-900 hover:underline">
-          Cases
+          Patients
         </Link>
       </div>
 
@@ -101,7 +101,7 @@ export function UniversalPatientRecord({
         <h2 className="mb-3 text-base font-medium text-gray-900">Clinical timeline</h2>
         <p className="mb-2 text-xs text-gray-500">fi_timeline_events, newest first. Source is read from event detail when present.</p>
         {record.timeline_events.length === 0 ? (
-          <p className="text-gray-500">No timeline rows for resolved cases / patients.</p>
+          <p className="text-gray-500">No timeline rows for resolved clinical patients.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse text-xs">
@@ -111,7 +111,7 @@ export function UniversalPatientRecord({
                   <th className="py-2 pr-3">Kind</th>
                   <th className="py-2 pr-3">Title</th>
                   <th className="py-2 pr-3">Source</th>
-                  <th className="py-2 pr-3">Case</th>
+                  <th className="py-2 pr-3">Patient</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,15 +135,15 @@ export function UniversalPatientRecord({
       </section>
 
       <section className="rounded border border-gray-200 bg-white p-4">
-        <h2 className="mb-3 text-base font-medium text-gray-900">Cases</h2>
+        <h2 className="mb-3 text-base font-medium text-gray-900">Clinical patients</h2>
         {record.cases.length === 0 ? (
-          <p className="text-gray-500">No cases in scope.</p>
+          <p className="text-gray-500">No clinical patients in scope.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse text-xs">
               <thead>
                 <tr className="border-b border-gray-200 text-left text-gray-500">
-                  <th className="py-2 pr-3">Case id</th>
+                  <th className="py-2 pr-3">Patient id</th>
                   <th className="py-2 pr-3">Type</th>
                   <th className="py-2 pr-3">Status</th>
                   <th className="py-2 pr-3">Source</th>
@@ -190,7 +190,7 @@ export function UniversalPatientRecord({
                   <th className="py-2 pr-3">File</th>
                   <th className="py-2 pr-3">Storage path</th>
                   <th className="py-2 pr-3">Source</th>
-                  <th className="py-2 pr-3">Case</th>
+                  <th className="py-2 pr-3">Patient</th>
                   <th className="py-2 pr-3">Created</th>
                 </tr>
               </thead>
@@ -235,7 +235,7 @@ export function UniversalPatientRecord({
                   <th className="py-2 pr-3">File</th>
                   <th className="py-2 pr-3">Storage path</th>
                   <th className="py-2 pr-3">Source</th>
-                  <th className="py-2 pr-3">Case</th>
+                  <th className="py-2 pr-3">Patient</th>
                   <th className="py-2 pr-3">Created</th>
                 </tr>
               </thead>

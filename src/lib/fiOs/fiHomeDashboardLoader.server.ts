@@ -68,14 +68,14 @@ function computeNextAction(
   }
   if (caseCount === 0) {
     return {
-      title: "Create your first case",
-      description: "Use the guided wizard to add a person, patient record, and case in one flow.",
+      title: "Create your first patient",
+      description: "Use the guided wizard to add a person, patient record, and clinical patient in one flow.",
       href: `${base}/cases/new`,
     };
   }
   return {
-    title: "Open cases",
-    description: "Your foundation is in place. Continue day-to-day work in the cases worklist.",
+    title: "Open patients",
+    description: "Your foundation is in place. Continue day-to-day work in the patients worklist.",
     href: `${base}/cases`,
   };
 }

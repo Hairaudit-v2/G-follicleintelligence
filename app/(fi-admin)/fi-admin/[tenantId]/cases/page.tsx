@@ -14,7 +14,7 @@ import { loadCasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders
 import { loadCasesIndexForTenant } from "@/src/lib/cases/caseLoaders";
 
 export const metadata = {
-  title: "Cases",
+  title: "Patients",
   robots: { index: false, follow: false },
 };
 
@@ -63,11 +63,11 @@ export default async function CasesIndexRoutePage({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 id="cases-index-heading" className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
-            Cases
+            Patients
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#94A3B8] sm:text-base">
-            SurgeryOS worklist (Stage 5H): tenant-scoped cases with URL pagination, search, filters, and readiness
-            summaries — read-only list; open a case for 5A–5G detail. No HairAudit, audit grading, AI scoring, or
+            SurgeryOS worklist (Stage 5H): tenant-scoped patients with URL pagination, search, filters, and readiness
+            summaries — read-only list; open a patient for 5A–5G detail. No HairAudit, audit grading, AI scoring, or
             certification scoring here.
           </p>
         </div>
@@ -76,7 +76,7 @@ export default async function CasesIndexRoutePage({
             href={`/fi-admin/${tenantId}/cases/new`}
             className="text-sm font-semibold text-[#22C1FF] underline decoration-[#22C1FF]/35 underline-offset-4 transition hover:text-[#0EA5E9]"
           >
-            Create case
+            Create patient
           </Link>
           <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-[#94A3B8] transition hover:text-[#22C1FF]">
             CRM

@@ -136,7 +136,7 @@ export function FiHomeDashboard({
             <StatusPill percent={pct} />
           </div>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-[#94A3B8]">
-            Read-only operator home — jump to setup tasks, cases, and configuration. Underlying data and access rules are
+            Read-only operator home — jump to setup tasks, patients, and configuration. Underlying data and access rules are
             unchanged.
           </p>
         </div>
@@ -153,14 +153,14 @@ export function FiHomeDashboard({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <QuickActionCard
             href={`${base}/cases/new`}
-            title="Create first case"
-            description="Guided wizard for person, patient, and case."
+            title="Create first patient"
+            description="Guided wizard for person, patient record, and clinical patient."
             icon={<PlusCircle size={ICON} strokeWidth={1.75} aria-hidden />}
           />
           <QuickActionCard
             href={`${base}/cases`}
-            title="View cases"
-            description="Worklist, filters, and full case detail."
+            title="View patients"
+            description="Worklist, filters, and full patient detail."
             icon={<ListTodo size={ICON} strokeWidth={1.75} aria-hidden />}
           />
           <QuickActionCard
@@ -192,7 +192,7 @@ export function FiHomeDashboard({
               <ProgressChecklistItem done={data.checklist.organisationCreated} label="Organisation created" />
               <ProgressChecklistItem done={data.checklist.clinicCreated} label="Clinic created" />
               <ProgressChecklistItem done={data.checklist.clinicSettingsComplete} label="Clinic settings completed" />
-              <ProgressChecklistItem done={data.checklist.firstCaseCreated} label="First patient / case created" />
+              <ProgressChecklistItem done={data.checklist.firstCaseCreated} label="First patient created" />
               {showCrmShellExtras ? (
                 <>
                   <ProgressChecklistItem
@@ -215,7 +215,7 @@ export function FiHomeDashboard({
           <SectionHeader
             id="next-step-heading"
             title="Recommended next step"
-            description="Based on your current foundation and case data."
+            description="Based on your current foundation and patient data."
           />
           <div className="mt-5 flex min-h-0 flex-1 flex-col rounded-xl border border-white/[0.06] bg-[#081020]/50 p-5 sm:p-6">
             <p className="text-lg font-semibold text-[#F8FAFC]">{data.nextAction.title}</p>
@@ -251,7 +251,7 @@ export function FiHomeDashboard({
             icon={<UserCircle2 size={ICON} strokeWidth={1.75} />}
           />
           <StatCard
-            label="Cases"
+            label="Patients"
             value={data.counts.cases}
             icon={<FolderKanban size={ICON} strokeWidth={1.75} />}
           />
@@ -274,7 +274,7 @@ export function FiHomeDashboard({
               This screen is for <strong className="text-[#E2E8F0]">technical health</strong>,{" "}
               <strong className="text-[#E2E8F0]">event coverage</strong>, and{" "}
               <strong className="text-[#E2E8F0]">data integrity</strong> — not day-to-day clinical operations. Use{" "}
-              <strong className="text-[#E2E8F0]">Cases</strong> and (when available) <strong className="text-[#E2E8F0]">CRM</strong>{" "}
+              <strong className="text-[#E2E8F0]">Patients</strong> and (when available) <strong className="text-[#E2E8F0]">CRM</strong>{" "}
               for routine work.
             </p>
           </div>

@@ -9,7 +9,7 @@ import type { FoundationSearchFilter, FoundationSearchGroupedResult, FoundationS
 const FILTERS: { value: FoundationSearchFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "patients", label: "Patients" },
-  { value: "cases", label: "Cases" },
+  { value: "cases", label: "Clinical patients" },
   { value: "clinics", label: "Clinics" },
   { value: "organisations", label: "Organisations" },
 ];
@@ -214,7 +214,7 @@ export function FoundationSearchDirectory({
         />
       )}
       {(result.filter === "all" || result.filter === "cases") && (
-        <Group title="Cases" hits={result.cases} empty="No cases in this scope." />
+        <Group title="Clinical patients" hits={result.cases} empty="No clinical patients in this scope." />
       )}
       {(result.filter === "all" || result.filter === "clinics") && (
         <Group title="Clinics" hits={result.clinics} empty="No clinics in this scope." />

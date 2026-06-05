@@ -26,7 +26,7 @@ export async function GET(
       .single();
 
     if (caseErr || !caseRow)
-      return NextResponse.json({ ok: false, error: "Case not found." }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
 
     const [intakeRes, uploadsRes, bloodRes, imageRes, scorecardRes, reportRes] = await Promise.all([
       supabase

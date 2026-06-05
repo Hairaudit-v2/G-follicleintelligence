@@ -67,7 +67,7 @@ export function CaseDetailSectionNav() {
 
   return (
     <nav
-      aria-label="Case sections"
+      aria-label="Patient sections"
       className="sticky top-0 z-30 -mx-1 border-b border-gray-200 bg-white/95 px-1 py-2 shadow-sm backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 md:py-2.5"
     >
       <div className="flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

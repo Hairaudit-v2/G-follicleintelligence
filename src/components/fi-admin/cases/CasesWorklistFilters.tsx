@@ -19,13 +19,13 @@ const FILTER_HEADING_ID = "cases-worklist-filters-heading";
 
 const FILTER_FIELDS = {
   q: { inputId: "cases-worklist-filter-q", labelId: "cases-worklist-filter-q-label", label: "Search" },
-  status: { inputId: "cases-worklist-filter-status", labelId: "cases-worklist-filter-status-label", label: "Case status" },
+  status: { inputId: "cases-worklist-filter-status", labelId: "cases-worklist-filter-status-label", label: "Patient status" },
   treatment_type: {
     inputId: "cases-worklist-filter-treatment-type",
     labelId: "cases-worklist-filter-treatment-type-label",
     label: "Treatment type",
   },
-  case_type: { inputId: "cases-worklist-filter-case-type", labelId: "cases-worklist-filter-case-type-label", label: "Case type" },
+  case_type: { inputId: "cases-worklist-filter-case-type", labelId: "cases-worklist-filter-case-type-label", label: "Patient type" },
   planning_status: {
     inputId: "cases-worklist-filter-planning-status",
     labelId: "cases-worklist-filter-planning-status-label",
@@ -86,7 +86,7 @@ export function CasesWorklistFilters({
             name="q"
             type="search"
             defaultValue={query.q}
-            placeholder="Person, case id, lead, treatment…"
+            placeholder="Person, patient id, lead, treatment…"
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           />
         </label>

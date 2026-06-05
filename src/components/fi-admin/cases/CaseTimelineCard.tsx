@@ -50,7 +50,7 @@ export function CaseTimelineCard({ items }: { items: CaseTimelineItem[] }) {
             id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.timeline)}
             className="text-sm font-semibold text-gray-900"
           >
-            Case timeline
+            Patient timeline
           </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5E: read-only clinical journey (newest first). Aggregates case, CRM, bookings, media, planning,
