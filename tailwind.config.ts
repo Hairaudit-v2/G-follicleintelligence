@@ -34,6 +34,8 @@ const config: Config = {
         "fi-panel":
           "0 16px 50px rgb(1 5 12 / 48%), inset 0 1px 0 rgb(255 255 255 / 4%)",
         "fi-event": "0 1px 2px 0 rgb(15 23 42 / 8%)",
+        "fi-crm-card": "0 4px 6px -1px rgb(0 0 0 / 25%), 0 2px 4px -2px rgb(0 0 0 / 20%)",
+        "fi-crm-card-lg": "0 10px 15px -3px rgb(0 0 0 / 30%), 0 4px 6px -4px rgb(0 0 0 / 25%)",
       },
       colors: {
         background: "hsl(var(--background))",
@@ -70,6 +72,12 @@ const config: Config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         fi: {
+          crm: {
+            background: "#0f172a",
+            surface: "#1e293b",
+            grid: "#1e2937",
+            border: "#334155",
+          },
           procedure: {
             consult: {
               DEFAULT: "hsl(var(--fi-procedure-pre-surgery-consult-base))",

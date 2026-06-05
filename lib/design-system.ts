@@ -241,12 +241,12 @@ export const fiProcedureCssVarsLight: Record<FiProcedureFamily, { base: string; 
   virtual_zoom: { base: "38 92% 50%", foreground: "26 83% 14%", muted: "48 100% 96%" },
 };
 
-/** HSL triplets for dark mode surfaces. */
+/** HSL triplets for dark mode surfaces — base hues align with Tailwind *-400 accents. */
 export const fiProcedureCssVarsDark: Record<FiProcedureFamily, { base: string; foreground: string; muted: string }> = {
   pre_surgery_consult: { base: "239 84% 67%", foreground: "226 100% 94%", muted: "243 47% 20%" },
-  full_transplant: { base: "350 89% 60%", foreground: "356 100% 94%", muted: "343 50% 18%" },
-  prp_session: { base: "160 84% 39%", foreground: "152 81% 92%", muted: "166 50% 14%" },
-  follow_up_nurse_prp: { base: "199 89% 48%", foreground: "204 100% 94%", muted: "204 50% 16%" },
+  full_transplant: { base: "351 95% 71%", foreground: "356 100% 94%", muted: "343 50% 18%" },
+  prp_session: { base: "158 64% 52%", foreground: "152 81% 92%", muted: "166 50% 14%" },
+  follow_up_nurse_prp: { base: "198 93% 60%", foreground: "204 100% 94%", muted: "204 50% 16%" },
   virtual_zoom: { base: "38 92% 50%", foreground: "48 100% 92%", muted: "32 55% 16%" },
 };
 
@@ -266,29 +266,29 @@ export const fiProcedureBadgeClassNames: Record<FiProcedureFamily, string> = {
 
 /** Calendar event border — per procedure family. */
 export const fiProcedureBorderClassNames: Record<FiProcedureFamily, string> = {
-  pre_surgery_consult: "border-indigo-300/80 dark:border-indigo-700/70",
-  full_transplant: "border-rose-300/80 dark:border-rose-700/70",
-  prp_session: "border-emerald-300/80 dark:border-emerald-700/70",
-  follow_up_nurse_prp: "border-sky-300/80 dark:border-sky-700/70",
-  virtual_zoom: "border-amber-300/80 dark:border-amber-700/70",
+  pre_surgery_consult: "border-indigo-300/80 dark:border-indigo-400/35",
+  full_transplant: "border-rose-300/80 dark:border-rose-400/35",
+  prp_session: "border-emerald-300/80 dark:border-emerald-400/35",
+  follow_up_nurse_prp: "border-sky-300/80 dark:border-sky-400/35",
+  virtual_zoom: "border-amber-300/80 dark:border-amber-400/35",
 };
 
 /** Calendar event background tint — per procedure family. */
 export const fiProcedureBackgroundTintClassNames: Record<FiProcedureFamily, string> = {
-  pre_surgery_consult: "bg-indigo-100/90 dark:bg-indigo-950/70",
-  full_transplant: "bg-rose-100/90 dark:bg-rose-950/70",
-  prp_session: "bg-emerald-100/90 dark:bg-emerald-950/70",
-  follow_up_nurse_prp: "bg-sky-100/90 dark:bg-sky-950/70",
-  virtual_zoom: "bg-amber-100/90 dark:bg-amber-950/70",
+  pre_surgery_consult: "bg-indigo-100/90 dark:bg-indigo-950/50 dark:ring-1 dark:ring-inset dark:ring-indigo-400/10",
+  full_transplant: "bg-rose-100/90 dark:bg-rose-950/50 dark:ring-1 dark:ring-inset dark:ring-rose-400/10",
+  prp_session: "bg-emerald-100/90 dark:bg-emerald-950/50 dark:ring-1 dark:ring-inset dark:ring-emerald-400/10",
+  follow_up_nurse_prp: "bg-sky-100/90 dark:bg-sky-950/50 dark:ring-1 dark:ring-inset dark:ring-sky-400/10",
+  virtual_zoom: "bg-amber-100/90 dark:bg-amber-950/50 dark:ring-1 dark:ring-inset dark:ring-amber-400/10",
 };
 
 /** Calendar event foreground text — per procedure family. */
 export const fiProcedureTextClassNames: Record<FiProcedureFamily, string> = {
-  pre_surgery_consult: "text-indigo-950 dark:text-indigo-50",
-  full_transplant: "text-rose-950 dark:text-rose-50",
-  prp_session: "text-emerald-950 dark:text-emerald-50",
-  follow_up_nurse_prp: "text-sky-950 dark:text-sky-50",
-  virtual_zoom: "text-amber-950 dark:text-amber-50",
+  pre_surgery_consult: "text-indigo-950 dark:text-indigo-100",
+  full_transplant: "text-rose-950 dark:text-rose-100",
+  prp_session: "text-emerald-950 dark:text-emerald-100",
+  follow_up_nurse_prp: "text-sky-950 dark:text-sky-100",
+  virtual_zoom: "text-amber-950 dark:text-amber-100",
 };
 
 /** Calendar event block classes — higher contrast fill for time-grid chips. */
@@ -385,18 +385,140 @@ export const fiExtendedStatusBadgeClassNames: Record<BookingStatus, string> = {
 };
 
 // ---------------------------------------------------------------------------
+// CRM dark mode (Evolved Hair Clinics)
+// ---------------------------------------------------------------------------
+
+/** Core CRM dark palette — deep slate shell with muted secondary text. */
+export const fiCrmDarkColors = {
+  background: "#0f172a",
+  surface: "#0f172a",
+  surfaceElevated: "#1e293b",
+  border: "#334155",
+  borderSubtle: "#1e293b",
+  gridLine: "#1e2937",
+  text: "#f8fafc",
+  textMuted: "#94a3b8",
+  textSubtle: "#64748b",
+} as const;
+
+/** Procedure accent hex — Tailwind *-400 family for dark-mode chips and legends. */
+export const fiCrmDarkProcedureColors = {
+  consult: "#818cf8",
+  transplant: "#fb7185",
+  prp: "#34d399",
+  followUp: "#38bdf8",
+  virtual: "#fbbf24",
+} as const;
+
+/** Maps procedure families to CRM dark accent hex values. */
+export const fiCrmDarkProcedureColorByFamily: Record<FiProcedureFamily, string> = {
+  pre_surgery_consult: fiCrmDarkProcedureColors.consult,
+  full_transplant: fiCrmDarkProcedureColors.transplant,
+  prp_session: fiCrmDarkProcedureColors.prp,
+  follow_up_nurse_prp: fiCrmDarkProcedureColors.followUp,
+  virtual_zoom: fiCrmDarkProcedureColors.virtual,
+};
+
+/** Tailwind class maps for CRM dark procedure accents (calendar chips, badges, dots). */
+export const fiCrmDarkProcedureClassNames: Record<
+  "consult" | "transplant" | "prp" | "followUp",
+  { accent: string; border: string; surface: string; text: string; badge: string }
+> = {
+  consult: {
+    accent: "text-indigo-400",
+    border: "border-indigo-400/35",
+    surface: "bg-indigo-950/45 ring-1 ring-inset ring-indigo-400/12",
+    text: "text-indigo-100",
+    badge:
+      "border-indigo-400/30 bg-indigo-950/55 text-indigo-100 ring-1 ring-inset ring-indigo-400/20",
+  },
+  transplant: {
+    accent: "text-rose-400",
+    border: "border-rose-400/35",
+    surface: "bg-rose-950/45 ring-1 ring-inset ring-rose-400/12",
+    text: "text-rose-100",
+    badge: "border-rose-400/30 bg-rose-950/55 text-rose-100 ring-1 ring-inset ring-rose-400/20",
+  },
+  prp: {
+    accent: "text-emerald-400",
+    border: "border-emerald-400/35",
+    surface: "bg-emerald-950/45 ring-1 ring-inset ring-emerald-400/12",
+    text: "text-emerald-100",
+    badge:
+      "border-emerald-400/30 bg-emerald-950/55 text-emerald-100 ring-1 ring-inset ring-emerald-400/20",
+  },
+  followUp: {
+    accent: "text-sky-400",
+    border: "border-sky-400/35",
+    surface: "bg-sky-950/45 ring-1 ring-inset ring-sky-400/12",
+    text: "text-sky-100",
+    badge: "border-sky-400/30 bg-sky-950/55 text-sky-100 ring-1 ring-inset ring-sky-400/20",
+  },
+};
+
+/** Calendar time-grid lines — subtle separators on the deep dark shell. */
+export const fiCrmCalendarGridClassNames = {
+  shell: "bg-[#0f172a] dark:bg-[#0f172a]",
+  gutter:
+    "sticky left-0 z-20 border-r border-[#1e2937] bg-[#0f172a] dark:border-[#1e2937] dark:bg-[#0f172a]",
+  slotLine: "border-t border-[#1e2937] dark:border-[#1e2937]",
+  slotLineHalf: "border-t border-[#1e2937]/55 dark:border-[#1e2937]/55",
+  slotLabel: "text-[11px] font-medium tabular-nums text-slate-500 dark:text-slate-400",
+  column: "relative border-r border-[#1e2937] last:border-r-0 dark:border-[#1e2937]",
+} as const;
+
+/** CRM card surfaces — soft elevation with restrained borders. */
+export const fiCrmDarkCardClassNames = {
+  default:
+    "rounded-xl border border-slate-700/70 bg-[#0f172a] text-slate-50 shadow-md shadow-black/25 ring-1 ring-white/[0.04] dark:border-slate-700/70 dark:bg-[#0f172a] dark:shadow-black/30",
+  elevated:
+    "rounded-xl border border-slate-600/60 bg-[#1e293b] text-slate-50 shadow-lg shadow-black/30 ring-1 ring-white/[0.05] dark:border-slate-600/60 dark:bg-[#1e293b]",
+  interactive:
+    "rounded-xl border border-slate-700/70 bg-[#0f172a] text-slate-50 shadow-md shadow-black/25 ring-1 ring-white/[0.04] transition hover:border-slate-600/80 hover:shadow-lg hover:shadow-black/35 dark:hover:border-slate-600/80",
+  inset:
+    "rounded-lg border border-[#1e2937] bg-[#0f172a]/80 shadow-inner shadow-black/20 dark:border-[#1e2937]",
+} as const;
+
+export type FiCrmDarkCardVariant = keyof typeof fiCrmDarkCardClassNames;
+
+/** Empty calendar / list states — light grid pattern over deep background. */
+export const fiCrmEmptyStateClassNames = {
+  root:
+    "fi-crm-empty-grid flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700/50 bg-[#0f172a] text-center dark:border-slate-700/50 dark:bg-[#0f172a]",
+  compact: "px-3 py-6",
+  default: "px-6 py-10",
+  iconWrap:
+    "mb-3 inline-flex items-center justify-center rounded-2xl bg-slate-800/80 text-slate-400 ring-1 ring-[#1e2937] dark:bg-slate-800/80 dark:ring-[#1e2937]",
+  iconSize: "h-12 w-12",
+  iconSizeCompact: "h-10 w-10",
+  title: "font-semibold tracking-tight text-slate-100 dark:text-slate-100",
+  titleCompact: "text-xs",
+  titleDefault: "text-sm",
+  description: "mt-1 max-w-[16rem] text-slate-400 dark:text-slate-400",
+  descriptionCompact: "text-[10px] leading-relaxed",
+  descriptionDefault: "text-xs leading-relaxed",
+} as const;
+
+export const fiCrmDarkShadowClassNames = {
+  card: "shadow-md shadow-black/25 dark:shadow-black/30",
+  elevated: "shadow-lg shadow-black/30 dark:shadow-black/40",
+  event: "shadow-sm shadow-black/20 dark:shadow-black/25",
+} as const;
+
+// ---------------------------------------------------------------------------
 // Surfaces (shadcn-compatible light / dark shells)
 // ---------------------------------------------------------------------------
 
 export const fiSurfaceClassNames = {
   clinicLight:
-    "rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
+    "rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm dark:border-[#1e2937] dark:bg-[#0f172a] dark:text-slate-50 dark:shadow-md dark:shadow-black/25",
   crmDocument:
-    "rounded-lg border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50",
+    "rounded-lg border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-[#1e2937] dark:bg-[#0f172a] dark:text-slate-50 dark:shadow-md dark:shadow-black/25",
+  crmDark: fiCrmDarkCardClassNames.default,
   osDark:
     "rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 text-slate-50 shadow-xl shadow-black/40 backdrop-blur-md",
   muted:
-    "rounded-lg border border-border bg-muted/40 text-muted-foreground dark:border-border dark:bg-muted/30",
+    "rounded-lg border border-border bg-muted/40 text-muted-foreground dark:border-[#1e2937] dark:bg-[#0f172a]/80 dark:bg-muted/20",
 } as const;
 
 export type FiSurfaceVariant = keyof typeof fiSurfaceClassNames;
@@ -477,4 +599,46 @@ export function fiProcedureCssVarName(family: FiProcedureFamily, role: "base" | 
 
 export function fiStatusCssVarName(status: FiAppointmentStatus, role: "base" | "foreground" | "muted"): string {
   return `--fi-status-${status.replace(/_/g, "-")}-${role}`;
+}
+
+/** Compose CRM dark card classes for a given elevation variant. */
+export function crmDarkCardClasses(variant: FiCrmDarkCardVariant = "default"): string {
+  return fiCrmDarkCardClassNames[variant];
+}
+
+/** Compose CRM empty-state shell classes (optionally compact padding). */
+export function crmEmptyStateClasses(opts?: { compact?: boolean }): string {
+  const pad = opts?.compact ? fiCrmEmptyStateClassNames.compact : fiCrmEmptyStateClassNames.default;
+  return `${fiCrmEmptyStateClassNames.root} ${pad}`;
+}
+
+/** Resolve CRM dark procedure accent classes from a booking procedure family. */
+export function crmDarkProcedureClasses(family: FiProcedureFamily): {
+  accent: string;
+  border: string;
+  surface: string;
+  text: string;
+} {
+  const key =
+    family === "pre_surgery_consult"
+      ? "consult"
+      : family === "full_transplant"
+        ? "transplant"
+        : family === "prp_session"
+          ? "prp"
+          : family === "follow_up_nurse_prp"
+            ? "followUp"
+            : null;
+
+  if (!key) {
+    return {
+      accent: "text-amber-400",
+      border: "border-amber-400/35",
+      surface: "bg-amber-950/45 ring-1 ring-inset ring-amber-400/12",
+      text: "text-amber-100",
+    };
+  }
+
+  const row = fiCrmDarkProcedureClassNames[key];
+  return { accent: row.accent, border: row.border, surface: row.surface, text: row.text };
 }

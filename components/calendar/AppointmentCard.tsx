@@ -3,14 +3,18 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { motion } from "framer-motion";
-import { Clock, DoorOpen, GripVertical } from "lucide-react";
+import { Clock, DoorOpen, GripVertical, UserRound } from "lucide-react";
 import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { calendarPxPerMinute } from "@/components/calendar/ProviderColumn";
-import { appointmentStatusBadgeClasses } from "@/lib/design-system";
+import {
+  appointmentStatusBadgeClasses,
+  crmDarkProcedureClasses,
+  type FiProcedureFamily,
+} from "@/lib/design-system";
 import {
   durationMinutesFromPx,
   pxFromDurationMinutes,
@@ -73,6 +77,20 @@ export type AppointmentCardProps = {
 };
 
 const MotionCard = motion.create(Card);
+
+/** Procedure-colored hover glow for dark CRM calendar chips. */
+const PROCEDURE_HOVER_GLOW: Record<FiProcedureFamily, string> = {
+  pre_surgery_consult:
+    "hover:shadow-indigo-500/25 hover:ring-indigo-400/30 dark:hover:shadow-indigo-500/30 dark:hover:ring-indigo-400/35",
+  full_transplant:
+    "hover:shadow-rose-500/25 hover:ring-rose-400/30 dark:hover:shadow-rose-500/30 dark:hover:ring-rose-400/35",
+  prp_session:
+    "hover:shadow-emerald-500/25 hover:ring-emerald-400/30 dark:hover:shadow-emerald-500/30 dark:hover:ring-emerald-400/35",
+  follow_up_nurse_prp:
+    "hover:shadow-sky-500/25 hover:ring-sky-400/30 dark:hover:shadow-sky-500/30 dark:hover:ring-sky-400/35",
+  virtual_zoom:
+    "hover:shadow-amber-500/25 hover:ring-amber-400/30 dark:hover:shadow-amber-500/30 dark:hover:ring-amber-400/35",
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -221,18 +239,52 @@ function ResizeHandle({
       aria-label="Resize appointment"
       onPointerDown={onPointerDown}
       className={cn(
-        "absolute inset-x-1 bottom-0 z-20 flex cursor-ns-resize touch-none items-center justify-center rounded-b-lg",
+        "absolute inset-x-1 bottom-0 z-20 flex cursor-ns-resize touch-none items-center justify-center rounded-b-xl",
         touchFriendly ? "h-6 opacity-100" : "h-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100",
         isResizing && "opacity-100"
       )}
     >
       <span
         className={cn(
-          "rounded-full bg-slate-400/80 shadow-sm ring-1 ring-white/80 dark:bg-slate-500",
+          "rounded-full bg-slate-400/80 shadow-sm ring-1 ring-white/80 dark:bg-slate-500 dark:ring-slate-700",
           touchFriendly ? "h-1.5 w-12" : "h-1 w-8"
         )}
       />
     </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+function PriceBadge({ label, compact }: { label: string; compact?: boolean }) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "shrink-0 border-slate-600/50 bg-slate-800/90 font-semibold tabular-nums text-slate-100 shadow-sm",
+        "ring-1 ring-inset ring-white/[0.06] dark:border-slate-600/50 dark:bg-slate-800/90 dark:text-slate-100",
+        compact ? "px-1.5 py-0 text-[9px]" : "px-2 py-0.5 text-[10px]"
+      )}
+    >
+      {label}
+    </Badge>
+  );
+}
+
+function StatusBadge({ status, compact }: { status: string; compact?: boolean }) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "shrink-0 border font-medium",
+        appointmentStatusBadgeClasses(status),
+        compact ? "px-1.5 py-0 text-[9px]" : "px-2 py-0.5 text-[10px]"
+      )}
+    >
+      {bookingStatusLabel(status)}
+    </Badge>
   );
 }
 
@@ -254,14 +306,12 @@ function AppointmentCardInner({
   animateEntry = false,
 }: AppointmentCardProps) {
   const style = getAppointmentStyle(appointment);
+  const darkProcedure = crmDarkProcedureClasses(style.procedureFamily);
   const ProcedureIcon = style.icon;
-  const accentClass = style.accentClass;
   const procedureLabel = style.procedureLabel;
   const durationMin = appointment.durationMin ?? durationFromRange(appointment.startAt, appointment.endAt);
   const timeLabel = formatTimeRange(appointment.startAt, appointment.endAt);
   const priceLabel = formatPrice(appointment.price, appointment.currency);
-  const statusLabel = bookingStatusLabel(appointment.status);
-  const statusClasses = appointmentStatusBadgeClasses(appointment.status);
 
   const isTerminal = dimTerminal && style.isTerminal;
 
@@ -278,6 +328,8 @@ function AppointmentCardInner({
 
   const isCompact = layout ? layout.heightPx < 72 : false;
   const isMedium = layout ? layout.heightPx >= 72 && layout.heightPx < 110 : false;
+  const showMeta = !isCompact;
+  const showFooter = showMeta && (Boolean(priceLabel) || Boolean(layout));
 
   const hasOverlapLayout = layout?.leftPct != null && layout?.widthPct != null;
 
@@ -300,9 +352,13 @@ function AppointmentCardInner({
     ...(transform ? { transform: CSS.Translate.toString(transform), zIndex: isDragging ? 50 : undefined } : undefined),
   };
 
-  const roomProvider = [appointment.room?.trim(), appointment.provider?.trim()].filter(Boolean).join(" · ");
+  const room = appointment.room?.trim();
+  const provider = appointment.provider?.trim();
   const useMotion = animateEntry && layout != null && !isDragPreview;
   const Shell = useMotion ? MotionCard : Card;
+
+  const textSize = layout || isMedium ? "text-[10px]" : "text-xs";
+  const nameSize = layout ? "text-[11px] leading-tight" : "text-sm sm:text-[15px]";
 
   return (
     <Shell
@@ -325,16 +381,19 @@ function AppointmentCardInner({
       }
       style={dragStyle}
       className={cn(
-        "group relative overflow-hidden text-left shadow-sm backdrop-blur-sm transition-all duration-200 ease-out",
-        layout ? cn(style.borderColor, style.backgroundTint, style.textColor, style.statusRing) : "border-slate-200/90 bg-white/95",
-        "hover:-translate-y-0.5 hover:shadow-md",
-        layout ? "hover:brightness-[1.02]" : "hover:border-slate-300",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1",
-        "dark:border-slate-800 dark:bg-slate-950/95 dark:hover:border-slate-700 dark:hover:shadow-lg dark:hover:shadow-black/20",
+        "group relative overflow-hidden rounded-xl text-left ring-1 ring-inset ring-white/[0.04]",
+        "border border-slate-200/90 bg-white/95 shadow-sm backdrop-blur-sm",
+        "transition-all duration-200 ease-out",
+        "hover:-translate-y-px hover:shadow-md",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0f172a]",
+        "dark:border-[#1e2937] dark:bg-[#0f172a]/95 dark:shadow-black/30",
+        "dark:hover:shadow-lg",
+        PROCEDURE_HOVER_GLOW[style.procedureFamily],
+        layout && cn(style.borderColor, style.backgroundTint, style.textColor, style.statusRing),
         layout && !isDragPreview && (hasOverlapLayout ? "absolute z-[1]" : "absolute inset-x-1 z-[1]"),
-        isDragging && "scale-[1.02] opacity-90 shadow-lg ring-2 ring-sky-400/30",
-        isDragPreview && "w-full rotate-[0.5deg] shadow-xl ring-2 ring-sky-400/25",
-        isTerminal && "opacity-60 saturate-[0.85]",
+        isDragging && "scale-[1.02] opacity-90 shadow-xl ring-2 ring-sky-400/35",
+        isDragPreview && "w-full rotate-[0.5deg] shadow-2xl ring-2 ring-sky-400/30 dark:shadow-black/50",
+        isTerminal && "opacity-55 saturate-[0.8]",
         !layout && "w-full",
         className
       )}
@@ -342,7 +401,11 @@ function AppointmentCardInner({
       {/* Procedure accent bar */}
       <span
         aria-hidden
-        className={cn("absolute inset-y-0 left-0 w-1 rounded-l-xl", accentClass)}
+        className={cn(
+          "absolute inset-y-0 left-0 w-1.5 rounded-l-xl transition-shadow duration-200",
+          style.accentClass,
+          "group-hover:shadow-[2px_0_14px_-2px] group-hover:shadow-current/40"
+        )}
       />
 
       {canDrag ? (
@@ -352,8 +415,9 @@ function AppointmentCardInner({
           className={cn(
             "absolute left-0.5 top-0.5 z-20 flex cursor-grab items-center justify-center rounded-md text-slate-400",
             "touch-none transition-opacity hover:text-slate-600 active:cursor-grabbing",
+            "dark:text-slate-500 dark:hover:text-slate-300",
             touchFriendly
-              ? "fi-calendar-touch-target h-10 w-9 bg-white/80 opacity-100 shadow-sm ring-1 ring-slate-200/80"
+              ? "fi-calendar-touch-target h-10 w-9 bg-white/80 opacity-100 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-800/90 dark:ring-[#1e2937]"
               : "h-5 w-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
             isDragging && "opacity-100"
           )}
@@ -367,70 +431,77 @@ function AppointmentCardInner({
 
       <div
         className={cn(
-          "flex h-full min-h-0 gap-2 pl-3 pr-2.5",
+          "flex h-full min-h-0 gap-2 pl-3.5 pr-2.5",
           canDrag && (touchFriendly ? "pl-11" : "pl-5"),
-          layout ? "py-1.5" : "p-3 sm:gap-3 sm:p-3.5",
+          layout ? "py-1.5" : "p-3.5 sm:gap-3 sm:p-4",
           isCompact ? "items-center" : "items-start"
         )}
       >
-        {/* Avatar */}
-        {!isCompact ? (
-          <Avatar className={cn("mt-0.5", layout ? "h-7 w-7" : "h-9 w-9 sm:h-10 sm:w-10")}>
+        {/* Avatar / compact procedure icon */}
+        {isCompact ? (
+          <span
+            className={cn(
+              "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-sm ring-1 ring-white/10",
+              style.accentClass,
+              "text-white"
+            )}
+          >
+            <ProcedureIcon className="h-3 w-3" strokeWidth={2.25} aria-hidden />
+          </span>
+        ) : (
+          <Avatar
+            className={cn(
+              "mt-0.5 ring-2 ring-[#1e2937] dark:ring-[#1e2937]",
+              layout ? "h-7 w-7" : "h-9 w-9 sm:h-10 sm:w-10"
+            )}
+          >
             {appointment.avatarUrl ? (
               <AvatarImage src={appointment.avatarUrl} alt={appointment.patientName} />
             ) : null}
-            <AvatarFallback className="bg-slate-100 text-[10px] dark:bg-slate-800">
+            <AvatarFallback
+              className={cn(
+                "bg-slate-100 text-[10px] font-semibold uppercase tracking-wide text-slate-600",
+                "dark:bg-slate-800 dark:text-slate-300"
+              )}
+            >
               {patientInitials(appointment.patientName)}
             </AvatarFallback>
           </Avatar>
-        ) : null}
+        )}
 
         <div className="min-w-0 flex-1">
-          {/* Header row */}
+          {/* Patient + status */}
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                {isCompact ? (
-                  <span
-                    className={cn(
-                      "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
-                      accentClass,
-                      "text-white shadow-sm"
-                    )}
-                  >
-                    <ProcedureIcon className="h-3 w-3" strokeWidth={2.25} aria-hidden />
-                  </span>
-                ) : null}
-                <p
-                  className={cn(
-                    "truncate font-semibold tracking-tight text-slate-900 dark:text-slate-50",
-                    layout ? "text-[11px] leading-tight" : "text-sm sm:text-[15px]"
-                  )}
-                >
-                  {appointment.patientName}
-                </p>
-              </div>
+              <p
+                className={cn(
+                  "truncate font-bold tracking-tight text-slate-900 dark:text-slate-50",
+                  nameSize
+                )}
+              >
+                {appointment.patientName}
+              </p>
 
-              {!isCompact ? (
-                <div className="mt-0.5 flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+              {showMeta ? (
+                <div className={cn("mt-0.5 flex items-center gap-1.5", darkProcedure.accent)}>
                   <ProcedureIcon
-                    className={cn("shrink-0", layout || isMedium ? "h-3 w-3" : "h-3.5 w-3.5")}
+                    className={cn("shrink-0 opacity-90", layout || isMedium ? "h-3 w-3" : "h-3.5 w-3.5")}
                     strokeWidth={2}
                     aria-hidden
                   />
-                  <p className={cn("truncate font-medium", layout || isMedium ? "text-[10px]" : "text-xs")}>
+                  <p className={cn("truncate font-semibold text-slate-700 dark:text-slate-200", textSize)}>
                     {procedureLabel}
                   </p>
                 </div>
               ) : (
-                <p className="truncate text-[10px] font-medium text-slate-600 dark:text-slate-400">{procedureLabel}</p>
+                <p className={cn("truncate font-medium text-slate-600 dark:text-slate-400", textSize)}>
+                  {procedureLabel}
+                </p>
               )}
             </div>
 
             {!isCompact && !layout ? (
-              <Badge variant="outline" className={cn("shrink-0 border", statusClasses)}>
-                {statusLabel}
-              </Badge>
+              <StatusBadge status={appointment.status} />
             ) : null}
           </div>
 
@@ -441,49 +512,41 @@ function AppointmentCardInner({
               isCompact ? "mt-0" : "mt-1"
             )}
           >
-            <span className={cn("inline-flex items-center gap-1 tabular-nums", layout || isMedium ? "text-[10px]" : "text-xs")}>
+            <span className={cn("inline-flex items-center gap-1 tabular-nums", textSize)}>
               <Clock className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
               {timeLabel}
             </span>
             {durationMin > 0 ? (
-              <span className={cn("font-medium", layout || isMedium ? "text-[10px]" : "text-xs")}>
-                {formatDuration(durationMin)}
-              </span>
+              <span className={cn("font-medium tabular-nums", textSize)}>{formatDuration(durationMin)}</span>
             ) : null}
           </div>
 
-          {/* Room / provider — hidden in compact grid */}
-          {!isCompact && roomProvider ? (
-            <p
-              className={cn(
-                "mt-1 inline-flex items-center gap-1 truncate text-slate-500 dark:text-slate-400",
-                layout || isMedium ? "text-[10px]" : "text-xs"
-              )}
-            >
-              <DoorOpen className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-              {roomProvider}
-            </p>
+          {/* Room + provider */}
+          {showMeta && (room || provider) ? (
+            <div className={cn("mt-1 flex flex-col gap-0.5 text-slate-500 dark:text-slate-400", textSize)}>
+              {room ? (
+                <p className="inline-flex items-center gap-1 truncate">
+                  <DoorOpen className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
+                  {room}
+                </p>
+              ) : null}
+              {provider ? (
+                <p className="inline-flex items-center gap-1 truncate">
+                  <UserRound className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
+                  {provider}
+                </p>
+              ) : null}
+            </div>
           ) : null}
 
-          {/* Footer: price + status (list / tall grid) */}
-          {!isCompact && (priceLabel || layout) ? (
+          {/* Price + status badges */}
+          {showFooter ? (
             <div className="mt-1.5 flex items-center justify-between gap-2">
-              {priceLabel ? (
-                <span
-                  className={cn(
-                    "font-semibold tabular-nums text-slate-800 dark:text-slate-200",
-                    layout || isMedium ? "text-[10px]" : "text-xs"
-                  )}
-                >
-                  {priceLabel}
-                </span>
-              ) : (
-                <span />
-              )}
+              {priceLabel ? <PriceBadge label={priceLabel} compact={Boolean(layout || isMedium)} /> : <span />}
               {layout || isMedium ? (
-                <Badge variant="outline" className={cn("shrink-0 border px-1.5 py-0 text-[9px]", statusClasses)}>
-                  {statusLabel}
-                </Badge>
+                <StatusBadge status={appointment.status} compact />
+              ) : !priceLabel ? (
+                <StatusBadge status={appointment.status} />
               ) : null}
             </div>
           ) : null}
