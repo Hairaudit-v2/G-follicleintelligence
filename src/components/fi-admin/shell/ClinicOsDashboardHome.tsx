@@ -29,6 +29,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
   const crmHref = showCrmNav ? `${base}/crm` : null;
   const casesHref = `${base}/cases`;
   const newPatientHref = `${base}/patients/new`;
+  const newConsultationHref = `${base}/consultations/new`;
 
   return (
     <div className="space-y-4">
@@ -103,6 +104,12 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
           headingId="clinic-os-actions-heading"
         >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <FiQuickActionCard
+                title="Start consultation"
+                description="Open the ConsultationOS workspace (preview — fields not saved yet)"
+                href={newConsultationHref}
+                badge="Preview"
+              />
               <FiQuickActionCard
                 title="Add new patient"
                 description="Choose how to start — lead, booking, or profile"

@@ -54,6 +54,7 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
   { id: "calendar", label: "Calendar", path: "calendar", permissionHint: {} },
   /** Patients home is tenant-wide; CRM-gated shortcuts live on the page. */
   { id: "patients", label: "Patients", path: "patients", permissionHint: {} },
+  { id: "consultations", label: "Consultations", path: "consultations/new", permissionHint: {} },
   { id: "cases", label: "Cases", path: "cases", permissionHint: {} },
   { id: "messages", label: "Messages", path: "", permissionHint: {}, placeholder: true },
   { id: "sales", label: "Sales", path: "crm", permissionHint: { requiresCrmShellNav: true } },
@@ -65,6 +66,7 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
 
 export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
   { id: "patient", label: "Patient", path: "patients/new", permissionHint: {} },
+  { id: "consultation", label: "Consultation", path: "consultations/new", permissionHint: {} },
   { id: "lead", label: "Lead", path: "crm", permissionHint: { requiresCrmShellNav: true } },
   { id: "booking", label: "Booking", path: "bookings/new", permissionHint: { requiresCrmShellNav: true } },
   { id: "case", label: "Case", path: "cases/new", permissionHint: {} },
@@ -108,6 +110,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "calendar") return "calendar";
   if (first === "bookings") return "calendar";
   if (first === "patients") return "patients";
+  if (first === "consultations") return "consultations";
   if (first === "cases") return "cases";
   if (first === "crm") return "sales";
   if (first === "audit") return "audit";
