@@ -22,6 +22,7 @@ import {
   resolveClinicOsShellNavItems,
   resolveClinicOsShellQuickActions,
 } from "@/src/lib/fiAdmin/clinicOsShellConfig";
+import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
 
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 
@@ -91,6 +92,14 @@ export function ClinicOsShell({
     }
     window.addEventListener("keydown", onGlobalKey);
     return () => window.removeEventListener("keydown", onGlobalKey);
+  }, []);
+
+  useEffect(() => {
+    function onOpenSearchEvent() {
+      setSearchOpen(true);
+    }
+    window.addEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
+    return () => window.removeEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
   }, []);
   const navItems = resolveClinicOsShellNavItems(base, showCrmNav);
   const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav);

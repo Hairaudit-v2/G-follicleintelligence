@@ -1,7 +1,9 @@
-import { PatientDirectoryPage } from "@/src/components/fi/patients/PatientDirectoryPage";
-import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
-import { loadPatientDirectoryPage } from "@/src/lib/patients/patientDirectoryLoader";
-import { parsePatientDirectoryQuery } from "@/src/lib/patients/patientDirectoryQuery";
+import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
+
+import { ClinicOsPatientsHome } from "@/src/components/fi-admin/patients/ClinicOsPatientsHome";
+import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
   title: "Patients",
@@ -10,16 +12,16 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function PatientsDirectoryPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ tenantId: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
-}) {
+export default async function PatientsHomeRoutePage({ params }: { params: Promise<{ tenantId: string }> }) {
+  noStore();
   const { tenantId } = await params;
-  await assertCrmShellPageAccess(tenantId);
-  const q = parsePatientDirectoryQuery(searchParams);
-  const data = await loadPatientDirectoryPage(tenantId, q);
-  return <PatientDirectoryPage tenantId={tenantId} data={data} />;
+  if (!tenantId?.trim()) notFound();
+
+  await assertFiTenantPortalAccess(tenantId);
+  const showCrmNav = await getCrmShellNavAllowed(tenantId);
+  const clinicOsShellEnabled = process.env.NEXT_PUBLIC_FI_CLINIC_OS_SHELL === "true";
+
+  return (
+    <ClinicOsPatientsHome tenantId={tenantId.trim()} showCrmNav={showCrmNav} clinicOsShellEnabled={clinicOsShellEnabled} />
+  );
 }

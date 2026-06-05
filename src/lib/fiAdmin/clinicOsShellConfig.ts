@@ -52,7 +52,8 @@ export const CLINIC_OS_SHELL_NAV_ITEMS: ClinicOsShellNavDefinition[] = [
   { id: "dashboard", label: "Dashboard", path: "", home: true, permissionHint: {} },
   /** Calendar home is tenant-wide; booking/CRM shortcuts on the page use `showCrmNav`. */
   { id: "calendar", label: "Calendar", path: "calendar", permissionHint: {} },
-  { id: "patients", label: "Patients", path: "patients", permissionHint: { requiresCrmShellNav: true } },
+  /** Patients home is tenant-wide; CRM-gated shortcuts live on the page. */
+  { id: "patients", label: "Patients", path: "patients", permissionHint: {} },
   { id: "cases", label: "Cases", path: "cases", permissionHint: {} },
   { id: "messages", label: "Messages", path: "", permissionHint: {}, placeholder: true },
   { id: "sales", label: "Sales", path: "crm", permissionHint: { requiresCrmShellNav: true } },
