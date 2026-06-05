@@ -13,9 +13,8 @@ export function CrmLeadIndexViewTabs({
   query: ParsedCrmLeadListQuery;
 }) {
   const hrefQuery = parsedCrmLeadListToHrefQuery(query);
-  const { view: _v, ...rest } = hrefQuery;
-  const listHref = buildCrmLeadListHref(tenantId, rest);
-  const boardHref = buildCrmLeadListHref(tenantId, { ...rest, view: "board" });
+  const listHref = buildCrmLeadListHref(tenantId, { ...hrefQuery, view: undefined });
+  const boardHref = buildCrmLeadListHref(tenantId, { ...hrefQuery, view: "board" });
   const isBoard = query.view === "board";
 
   return (
