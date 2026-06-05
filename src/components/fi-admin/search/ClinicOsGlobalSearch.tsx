@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ArrowRight, Briefcase, LineChart, Loader2, Search, User, X } from "lucide-react";
 import type { ClinicOsGlobalSearchPayload } from "@/src/lib/fiAdmin/clinicOsGlobalSearchTypes";
 import { FiCaseCard } from "@/src/components/fi-design/FiCaseCard";
@@ -15,9 +15,11 @@ const RECENT_PLACEHOLDERS = [
   { name: "Sofia Martins", meta: "Consultation · preview" },
 ];
 
-const CLINIC_OS_SEARCH_INPUT_ID = "clinic-os-global-search-query";
-const CLINIC_OS_SEARCH_LABEL_ID = "clinic-os-global-search-label";
+const CLINIC_OS_SEARCH_DIALOG_TITLE_ID = "clinic-os-global-search-title";
 const CLINIC_OS_SEARCH_RESULTS_ID = "clinic-os-global-search-results";
+const CLINIC_OS_SEARCH_PATIENTS_HEADING_ID = "clinic-os-global-search-patients-heading";
+const CLINIC_OS_SEARCH_CASES_HEADING_ID = "clinic-os-global-search-cases-heading";
+const CLINIC_OS_SEARCH_LEADS_HEADING_ID = "clinic-os-global-search-leads-heading";
 
 const FOCUSABLE_SELECTOR =
   'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
@@ -41,9 +43,6 @@ function useDebouncedValue<T>(value: T, ms: number): T {
 
 export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenChange }: ClinicOsGlobalSearchProps) {
   const tid = tenantId.trim();
-  const titleId = useId();
-  const searchLabelId = CLINIC_OS_SEARCH_LABEL_ID;
-  const searchInputId = CLINIC_OS_SEARCH_INPUT_ID;
   const dialogRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -233,14 +232,14 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={titleId}
+        aria-labelledby={CLINIC_OS_SEARCH_DIALOG_TITLE_ID}
         className="flex max-h-[min(88vh,820px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_24px_80px_-12px_rgba(15,23,42,0.35)]"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <header className="shrink-0 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <h2 id={titleId} className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+              <h2 id={CLINIC_OS_SEARCH_DIALOG_TITLE_ID} className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 Search patients, leads, bookings and cases
               </h2>
               <p className="text-xs text-slate-500 sm:text-sm">Read-only search · no changes are made from this panel.</p>
@@ -255,17 +254,17 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
             </button>
           </div>
           <div className="relative mt-4">
-            <label htmlFor={searchInputId} id={searchLabelId} className="sr-only">
-              Search patients, cases, or commands
+            <label id="clinic-os-global-search-label" htmlFor="clinic-os-global-search-query" className="sr-only">
+              Search patients or commands
             </label>
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden />
             <input
               ref={searchInputRef}
-              id={searchInputId}
-              name={searchInputId}
+              id="clinic-os-global-search-query"
+              name="clinic-os-global-search-query"
               type="search"
               role="combobox"
-              aria-labelledby={searchLabelId}
+              aria-labelledby="clinic-os-global-search-label"
               aria-autocomplete="list"
               aria-expanded={Boolean(debouncedTrim)}
               aria-controls={debouncedTrim ? CLINIC_OS_SEARCH_RESULTS_ID : undefined}
@@ -315,8 +314,8 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
             ) : (
               <div className="space-y-8">
                 {data!.patients.length > 0 ? (
-                  <section aria-labelledby={`${titleId}-patients`}>
-                    <h3 id={`${titleId}-patients`} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <section aria-labelledby={CLINIC_OS_SEARCH_PATIENTS_HEADING_ID}>
+                    <h3 id={CLINIC_OS_SEARCH_PATIENTS_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       <User className="h-3.5 w-3.5" aria-hidden />
                       Patients
                     </h3>
@@ -338,8 +337,8 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                 ) : null}
 
                 {data!.cases.length > 0 ? (
-                  <section aria-labelledby={`${titleId}-cases`}>
-                    <h3 id={`${titleId}-cases`} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <section aria-labelledby={CLINIC_OS_SEARCH_CASES_HEADING_ID}>
+                    <h3 id={CLINIC_OS_SEARCH_CASES_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       <Briefcase className="h-3.5 w-3.5" aria-hidden />
                       Patients
                     </h3>
@@ -361,8 +360,8 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                 ) : null}
 
                 {data!.leads.length > 0 ? (
-                  <section aria-labelledby={`${titleId}-leads`}>
-                    <h3 id={`${titleId}-leads`} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <section aria-labelledby={CLINIC_OS_SEARCH_LEADS_HEADING_ID}>
+                    <h3 id={CLINIC_OS_SEARCH_LEADS_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       <LineChart className="h-3.5 w-3.5" aria-hidden />
                       Leads
                     </h3>

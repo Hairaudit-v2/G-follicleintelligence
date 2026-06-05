@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import { EvolvedLogoImage } from "@/src/components/brand/EvolvedLogoImage";
+import { isEvolvedLogoPath } from "@/src/lib/brand/publicImages";
 import { resolveTenantLogoSource } from "@/src/lib/brand/resolveTenantLogo";
 
 type BrandLogoImageProps = {
@@ -31,6 +33,20 @@ export function BrandLogoImage({
   const source = resolveTenantLogoSource(logoUrl);
 
   if (hide || !source) return null;
+
+  if (isEvolvedLogoPath(logoUrl)) {
+    return (
+      <EvolvedLogoImage
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        loading={loading}
+        priority={priority ?? true}
+        onError={() => setHide(true)}
+      />
+    );
+  }
 
   if (source.kind === "static") {
     return (

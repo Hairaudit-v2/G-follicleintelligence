@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-const corpHeaders = [{ key: "Cross-Origin-Resource-Policy", value: "cross-origin" }];
+const corpHeaders = [
+  { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+  { key: "Access-Control-Allow-Origin", value: "*" },
+];
 
 const nextConfig = {
   images: {

@@ -37,13 +37,36 @@ export const PUBLIC_IMAGE_PATHS = {
   androidChrome196: "/icons/android-chrome-196x196.png",
 } as const;
 
-/** Normalizes a root-relative public path; rejects traversal and off-origin URLs. */
+const EVOLVED_LOGO_BASENAME = "evolved-logo.png";
+
+/** Normalizes tenant/public logo references to a root-relative `/public` path. */
 export function normalizePublicImagePath(input: string | null | undefined): string | null {
   const t = input?.trim();
-  if (!t || t.length > 256) return null;
-  if (!t.startsWith("/") || t.includes("://") || t.includes("..")) return null;
-  const path = t.split(/[?#]/)[0];
-  return path || null;
+  if (!t || t.length > 2048 || t.includes("..")) return null;
+
+  let candidate = t.split(/[?#]/)[0]?.trim() ?? "";
+  if (!candidate) return null;
+
+  if (candidate.includes("://")) {
+    try {
+      candidate = new URL(candidate).pathname;
+    } catch {
+      return null;
+    }
+  }
+
+  if (!candidate.startsWith("/")) {
+    candidate = `/${candidate}`;
+  }
+
+  if (candidate.length > 256) return null;
+  return candidate;
+}
+
+export function isEvolvedLogoPath(path: string | null | undefined): boolean {
+  const normalized = normalizePublicImagePath(path);
+  if (!normalized) return false;
+  return normalized === PUBLIC_IMAGE_PATHS.evolvedLogo || normalized.endsWith(`/${EVOLVED_LOGO_BASENAME}`);
 }
 
 export function resolvePublicStaticImage(path: string | null | undefined): StaticImageData | null {
