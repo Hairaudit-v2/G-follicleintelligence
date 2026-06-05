@@ -17,6 +17,7 @@ const RECENT_PLACEHOLDERS = [
 
 const CLINIC_OS_SEARCH_INPUT_ID = "clinic-os-global-search-query";
 const CLINIC_OS_SEARCH_LABEL_ID = "clinic-os-global-search-label";
+const CLINIC_OS_SEARCH_RESULTS_ID = "clinic-os-global-search-results";
 
 const FOCUSABLE_SELECTOR =
   'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
@@ -253,17 +254,21 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
               <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
-          <div className="mt-4">
-            <label htmlFor={searchInputId} id={searchLabelId} className="mb-1.5 block text-sm font-medium text-slate-700">
-              Search query
+          <div className="relative mt-4">
+            <label htmlFor={searchInputId} id={searchLabelId} className="sr-only">
+              Search patients, cases, or commands
             </label>
-            <div className="relative">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden />
             <input
               ref={searchInputRef}
               id={searchInputId}
               name={searchInputId}
               type="search"
+              role="combobox"
+              aria-labelledby={searchLabelId}
+              aria-autocomplete="list"
+              aria-expanded={Boolean(debouncedTrim)}
+              aria-controls={debouncedTrim ? CLINIC_OS_SEARCH_RESULTS_ID : undefined}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -280,12 +285,13 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
               placeholder="Name, phone, email or patient number"
               className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 text-base text-slate-900 outline-none ring-sky-500/20 transition placeholder:text-slate-400 focus:border-sky-300 focus:bg-white focus:ring-4 sm:h-14 sm:text-lg"
             />
-            </div>
           </div>
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
           <div
+            id={CLINIC_OS_SEARCH_RESULTS_ID}
+            {...(hasResults ? ({ role: "listbox", "aria-label": "Search results" } as const) : {})}
             className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 lg:max-w-none"
             onKeyDown={onResultsKeyDown}
           >
