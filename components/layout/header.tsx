@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+
+import { PUBLIC_IMAGES } from "@/src/lib/brand/publicImages";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
@@ -31,7 +33,7 @@ export function Header() {
         <Link href="/" className="flex min-w-0 items-center gap-4 font-semibold tracking-tight">
           <div className="fi-panel-muted flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70">
             <Image
-              src="/icons/favicon-32x32.png"
+              src={PUBLIC_IMAGES.favicon32}
               alt="Follicle Intelligence"
               width={30}
               height={30}

@@ -10,6 +10,24 @@ export type FirstCaseWizardClinicOption = { id: string; display_name: string };
 const fieldClass =
   "mt-0.5 w-full max-w-md rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
 
+const WIZARD_STEP_HEADING_IDS = {
+  1: "first-case-wizard-step-1-heading",
+  2: "first-case-wizard-step-2-heading",
+  3: "first-case-wizard-step-3-heading",
+} as const;
+
+const WIZARD_FIELDS = {
+  clinic: { inputId: "first-case-wizard-clinic", labelId: "first-case-wizard-clinic-label" },
+  firstName: { inputId: "first-case-wizard-first-name", labelId: "first-case-wizard-first-name-label" },
+  lastName: { inputId: "first-case-wizard-last-name", labelId: "first-case-wizard-last-name-label" },
+  email: { inputId: "first-case-wizard-email", labelId: "first-case-wizard-email-label" },
+  phone: { inputId: "first-case-wizard-phone", labelId: "first-case-wizard-phone-label" },
+  dateOfBirth: { inputId: "first-case-wizard-dob", labelId: "first-case-wizard-dob-label" },
+  caseType: { inputId: "first-case-wizard-case-type", labelId: "first-case-wizard-case-type-label" },
+  treatmentType: { inputId: "first-case-wizard-treatment-type", labelId: "first-case-wizard-treatment-type-label" },
+  adminKey: { inputId: "first-case-wizard-admin-key", labelId: "first-case-wizard-admin-key-label" },
+} as const;
+
 export function FirstCaseWizardClient({
   tenantId,
   clinics,
@@ -176,17 +194,19 @@ export function FirstCaseWizardClient({
       {step === 1 ? (
         <section
           className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
-          aria-labelledby="first-case-wizard-step-1-heading"
+          aria-labelledby={WIZARD_STEP_HEADING_IDS[1]}
         >
-          <h2 id="first-case-wizard-step-1-heading" className="text-sm font-medium text-gray-900">
+          <h2 id={WIZARD_STEP_HEADING_IDS[1]} className="text-sm font-medium text-gray-900">
             Step 1 — Select clinic
           </h2>
-          <label className="block text-sm text-gray-700">
+          <label id={WIZARD_FIELDS.clinic.labelId} htmlFor={WIZARD_FIELDS.clinic.inputId} className="block text-sm text-gray-700">
             Clinic
             <select
+              id={WIZARD_FIELDS.clinic.inputId}
               className={fieldClass}
               value={clinicId}
               onChange={(e) => setClinicId(e.target.value)}
+              aria-labelledby={WIZARD_FIELDS.clinic.labelId}
               required
             >
               <option value="">Choose a clinic…</option>
@@ -208,9 +228,9 @@ export function FirstCaseWizardClient({
       {step === 2 ? (
         <section
           className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
-          aria-labelledby="first-case-wizard-step-2-heading"
+          aria-labelledby={WIZARD_STEP_HEADING_IDS[2]}
         >
-          <h2 id="first-case-wizard-step-2-heading" className="text-sm font-medium text-gray-900">
+          <h2 id={WIZARD_STEP_HEADING_IDS[2]} className="text-sm font-medium text-gray-900">
             Step 2 — Person / patient
           </h2>
           <p className="text-xs text-gray-500">
@@ -218,32 +238,75 @@ export function FirstCaseWizardClient({
             workflow (foundation layer).
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-sm text-gray-700">
+            <label
+              id={WIZARD_FIELDS.firstName.labelId}
+              htmlFor={WIZARD_FIELDS.firstName.inputId}
+              className="block text-sm text-gray-700"
+            >
               First name
-              <input className={fieldClass} value={firstName} onChange={(e) => setFirstName(e.target.value)} autoComplete="given-name" />
+              <input
+                id={WIZARD_FIELDS.firstName.inputId}
+                className={fieldClass}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                aria-labelledby={WIZARD_FIELDS.firstName.labelId}
+                autoComplete="given-name"
+              />
             </label>
-            <label className="block text-sm text-gray-700">
+            <label
+              id={WIZARD_FIELDS.lastName.labelId}
+              htmlFor={WIZARD_FIELDS.lastName.inputId}
+              className="block text-sm text-gray-700"
+            >
               Last name
-              <input className={fieldClass} value={lastName} onChange={(e) => setLastName(e.target.value)} autoComplete="family-name" />
+              <input
+                id={WIZARD_FIELDS.lastName.inputId}
+                className={fieldClass}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                aria-labelledby={WIZARD_FIELDS.lastName.labelId}
+                autoComplete="family-name"
+              />
             </label>
           </div>
-          <label className="block text-sm text-gray-700">
+          <label id={WIZARD_FIELDS.email.labelId} htmlFor={WIZARD_FIELDS.email.inputId} className="block text-sm text-gray-700">
             Email
             <input
+              id={WIZARD_FIELDS.email.inputId}
               className={fieldClass}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              aria-labelledby={WIZARD_FIELDS.email.labelId}
               autoComplete="email"
             />
           </label>
-          <label className="block text-sm text-gray-700">
+          <label id={WIZARD_FIELDS.phone.labelId} htmlFor={WIZARD_FIELDS.phone.inputId} className="block text-sm text-gray-700">
             Phone
-            <input className={fieldClass} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" />
+            <input
+              id={WIZARD_FIELDS.phone.inputId}
+              className={fieldClass}
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              aria-labelledby={WIZARD_FIELDS.phone.labelId}
+              autoComplete="tel"
+            />
           </label>
-          <label className="block text-sm text-gray-700">
+          <label
+            id={WIZARD_FIELDS.dateOfBirth.labelId}
+            htmlFor={WIZARD_FIELDS.dateOfBirth.inputId}
+            className="block text-sm text-gray-700"
+          >
             Date of birth <span className="text-gray-400">(optional)</span>
-            <input className={fieldClass} type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+            <input
+              id={WIZARD_FIELDS.dateOfBirth.inputId}
+              className={fieldClass}
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              aria-labelledby={WIZARD_FIELDS.dateOfBirth.labelId}
+            />
           </label>
           <div className="flex justify-between gap-2 pt-2">
             <button type="button" className="text-sm text-gray-700 underline" onClick={goBack}>
@@ -259,26 +322,38 @@ export function FirstCaseWizardClient({
       {step === 3 ? (
         <section
           className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
-          aria-labelledby="first-case-wizard-step-3-heading"
+          aria-labelledby={WIZARD_STEP_HEADING_IDS[3]}
         >
-          <h2 id="first-case-wizard-step-3-heading" className="text-sm font-medium text-gray-900">
+          <h2 id={WIZARD_STEP_HEADING_IDS[3]} className="text-sm font-medium text-gray-900">
             Step 3 — Case
           </h2>
-          <label className="block text-sm text-gray-700">
+          <label
+            id={WIZARD_FIELDS.caseType.labelId}
+            htmlFor={WIZARD_FIELDS.caseType.inputId}
+            className="block text-sm text-gray-700"
+          >
             Case type
             <input
+              id={WIZARD_FIELDS.caseType.inputId}
               className={fieldClass}
               value={caseType}
               onChange={(e) => setCaseType(e.target.value)}
+              aria-labelledby={WIZARD_FIELDS.caseType.labelId}
               placeholder="e.g. test_case, fue_consult"
             />
           </label>
-          <label className="block text-sm text-gray-700">
+          <label
+            id={WIZARD_FIELDS.treatmentType.labelId}
+            htmlFor={WIZARD_FIELDS.treatmentType.inputId}
+            className="block text-sm text-gray-700"
+          >
             Treatment type
             <input
+              id={WIZARD_FIELDS.treatmentType.inputId}
               className={fieldClass}
               value={treatmentType}
               onChange={(e) => setTreatmentType(e.target.value)}
+              aria-labelledby={WIZARD_FIELDS.treatmentType.labelId}
               placeholder="e.g. hair_transplant, fue"
             />
           </label>
@@ -297,14 +372,20 @@ export function FirstCaseWizardClient({
               not using a signed-in CRM/clinical role, or for scripted break-glass access. Leave blank for normal staff
               creation.
             </p>
-            <label className="mt-2 block text-sm text-gray-700">
+            <label
+              id={WIZARD_FIELDS.adminKey.labelId}
+              htmlFor={WIZARD_FIELDS.adminKey.inputId}
+              className="mt-2 block text-sm text-gray-700"
+            >
               FI admin API key
               <input
+                id={WIZARD_FIELDS.adminKey.inputId}
                 className={fieldClass}
                 type="password"
                 autoComplete="off"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
+                aria-labelledby={WIZARD_FIELDS.adminKey.labelId}
                 placeholder="Optional — matches server FI_ADMIN_API_KEY"
               />
             </label>

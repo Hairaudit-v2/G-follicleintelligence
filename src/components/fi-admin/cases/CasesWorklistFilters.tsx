@@ -15,6 +15,40 @@ function mergeOptions(staticVals: readonly string[], fromRows: string[]): string
   return Array.from(s).sort((a, b) => a.localeCompare(b));
 }
 
+const FILTER_HEADING_ID = "cases-worklist-filters-heading";
+
+const FILTER_FIELDS = {
+  q: { inputId: "cases-worklist-filter-q", labelId: "cases-worklist-filter-q-label", label: "Search" },
+  status: { inputId: "cases-worklist-filter-status", labelId: "cases-worklist-filter-status-label", label: "Case status" },
+  treatment_type: {
+    inputId: "cases-worklist-filter-treatment-type",
+    labelId: "cases-worklist-filter-treatment-type-label",
+    label: "Treatment type",
+  },
+  case_type: { inputId: "cases-worklist-filter-case-type", labelId: "cases-worklist-filter-case-type-label", label: "Case type" },
+  planning_status: {
+    inputId: "cases-worklist-filter-planning-status",
+    labelId: "cases-worklist-filter-planning-status-label",
+    label: "Planning status",
+  },
+  procedure_status: {
+    inputId: "cases-worklist-filter-procedure-status",
+    labelId: "cases-worklist-filter-procedure-status-label",
+    label: "Procedure status",
+  },
+  post_op_status: {
+    inputId: "cases-worklist-filter-post-op-status",
+    labelId: "cases-worklist-filter-post-op-status-label",
+    label: "Post-op status",
+  },
+  readiness: {
+    inputId: "cases-worklist-filter-readiness",
+    labelId: "cases-worklist-filter-readiness-label",
+    label: "Readiness",
+  },
+  sort: { inputId: "cases-worklist-filter-sort", labelId: "cases-worklist-filter-sort-label", label: "Sort" },
+} as const;
+
 export function CasesWorklistFilters({
   tenantId,
   query,
@@ -34,27 +68,40 @@ export function CasesWorklistFilters({
       method="get"
       action={basePath}
       className="rounded border border-gray-200 bg-gray-50/80 p-4"
-      aria-labelledby="cases-worklist-filters-heading"
+      aria-labelledby={FILTER_HEADING_ID}
     >
-      <h2 id="cases-worklist-filters-heading" className="sr-only">
+      <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-gray-900">
         Filter and search cases
       </h2>
       <input type="hidden" name="pageSize" value={String(query.pageSize)} />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-        <label className="block text-xs font-medium text-gray-700 sm:col-span-2">
-          Search
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+        <label
+          id={FILTER_FIELDS.q.labelId}
+          htmlFor={FILTER_FIELDS.q.inputId}
+          className="block text-xs font-medium text-gray-700 sm:col-span-2"
+        >
+          {FILTER_FIELDS.q.label}
           <input
+            id={FILTER_FIELDS.q.inputId}
             name="q"
+            type="search"
             defaultValue={query.q}
             placeholder="Person, case id, lead, treatment…"
+            aria-labelledby={FILTER_FIELDS.q.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Case status
+        <label
+          id={FILTER_FIELDS.status.labelId}
+          htmlFor={FILTER_FIELDS.status.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.status.label}
           <select
+            id={FILTER_FIELDS.status.inputId}
             name="status"
             defaultValue={query.status}
+            aria-labelledby={FILTER_FIELDS.status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -65,11 +112,17 @@ export function CasesWorklistFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Treatment type
+        <label
+          id={FILTER_FIELDS.treatment_type.labelId}
+          htmlFor={FILTER_FIELDS.treatment_type.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.treatment_type.label}
           <select
+            id={FILTER_FIELDS.treatment_type.inputId}
             name="treatment_type"
             defaultValue={query.treatment_type}
+            aria-labelledby={FILTER_FIELDS.treatment_type.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -80,11 +133,17 @@ export function CasesWorklistFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Case type
+        <label
+          id={FILTER_FIELDS.case_type.labelId}
+          htmlFor={FILTER_FIELDS.case_type.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.case_type.label}
           <select
+            id={FILTER_FIELDS.case_type.inputId}
             name="case_type"
             defaultValue={query.case_type}
+            aria-labelledby={FILTER_FIELDS.case_type.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -95,11 +154,17 @@ export function CasesWorklistFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Planning status
+        <label
+          id={FILTER_FIELDS.planning_status.labelId}
+          htmlFor={FILTER_FIELDS.planning_status.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.planning_status.label}
           <select
+            id={FILTER_FIELDS.planning_status.inputId}
             name="planning_status"
             defaultValue={query.planning_status}
+            aria-labelledby={FILTER_FIELDS.planning_status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -111,11 +176,17 @@ export function CasesWorklistFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Procedure status
+        <label
+          id={FILTER_FIELDS.procedure_status.labelId}
+          htmlFor={FILTER_FIELDS.procedure_status.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.procedure_status.label}
           <select
+            id={FILTER_FIELDS.procedure_status.inputId}
             name="procedure_status"
             defaultValue={query.procedure_status}
+            aria-labelledby={FILTER_FIELDS.procedure_status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -127,11 +198,17 @@ export function CasesWorklistFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Post-op status
+        <label
+          id={FILTER_FIELDS.post_op_status.labelId}
+          htmlFor={FILTER_FIELDS.post_op_status.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.post_op_status.label}
           <select
+            id={FILTER_FIELDS.post_op_status.inputId}
             name="post_op_status"
             defaultValue={query.post_op_status}
+            aria-labelledby={FILTER_FIELDS.post_op_status.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="">All</option>
@@ -143,11 +220,17 @@ export function CasesWorklistFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Readiness
+        <label
+          id={FILTER_FIELDS.readiness.labelId}
+          htmlFor={FILTER_FIELDS.readiness.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.readiness.label}
           <select
+            id={FILTER_FIELDS.readiness.inputId}
             name="readiness"
             defaultValue={query.readiness}
+            aria-labelledby={FILTER_FIELDS.readiness.labelId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
             <option value="all">All</option>
@@ -156,9 +239,19 @@ export function CasesWorklistFilters({
             <option value="needs_attention">{casesWorklistReadinessFilterLabel("needs_attention")}</option>
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
-          Sort
-          <select name="sort" defaultValue={query.sort} className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm">
+        <label
+          id={FILTER_FIELDS.sort.labelId}
+          htmlFor={FILTER_FIELDS.sort.inputId}
+          className="block text-xs font-medium text-gray-700"
+        >
+          {FILTER_FIELDS.sort.label}
+          <select
+            id={FILTER_FIELDS.sort.inputId}
+            name="sort"
+            defaultValue={query.sort}
+            aria-labelledby={FILTER_FIELDS.sort.labelId}
+            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          >
             <option value="updated_desc">Newest updated</option>
             <option value="created_desc">Newest created</option>
             <option value="procedure_date_desc">Procedure date</option>

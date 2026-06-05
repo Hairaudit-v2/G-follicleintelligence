@@ -15,7 +15,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
-import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex, safeLogoUrlForImg } from "@/src/lib/fi/foundation/brandingCss";
+import { BrandLogoImage } from "@/src/components/brand/BrandLogoImage";
+import { resolveTenantLogoSource } from "@/src/lib/brand/resolveTenantLogo";
+import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
 import {
   getClinicOsShellActiveNavId,
   isClinicOsShellCalendarContextRoute,
@@ -27,25 +29,6 @@ import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsSh
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 
 import { ClinicOsShellCalendarBar } from "./ClinicOsShellCalendarBar";
-
-function TenantLogo({ url, alt }: { url: string; alt: string }) {
-  const [hide, setHide] = useState(false);
-  if (hide) return null;
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- external tenant URLs; match FiTenantBrandFrame
-    <img
-      src={url}
-      alt={alt}
-      width={112}
-      height={36}
-      className="h-9 w-auto max-w-[120px] object-contain"
-      loading="lazy"
-      decoding="async"
-      referrerPolicy="no-referrer"
-      onError={() => setHide(true)}
-    />
-  );
-}
 
 function ComingSoonMenuRow({ label }: { label: string }) {
   return (
@@ -108,7 +91,7 @@ export function ClinicOsShell({
 
   const accent = safeBrandingColourHex(effective.accent_colour, FI_ADMIN_NEUTRAL_ACCENT);
   const brandName = effective.brand_name?.trim() || "Follicle Intelligence";
-  const logoSrc = safeLogoUrlForImg(effective.logo_url);
+  const logoSrc = resolveTenantLogoSource(effective.logo_url);
   const clinicContextLabel =
     effective.clinic_display_name?.trim() || effective.brand_name?.trim() || "This clinic";
 
@@ -135,7 +118,13 @@ export function ClinicOsShell({
 
             {logoSrc ? (
               <div className="hidden shrink-0 border-l border-slate-200 pl-3 sm:block">
-                <TenantLogo url={logoSrc} alt={brandName} />
+                <BrandLogoImage
+                  logoUrl={effective.logo_url}
+                  alt={brandName}
+                  width={112}
+                  height={36}
+                  className="h-9 w-auto max-w-[120px] object-contain"
+                />
               </div>
             ) : null}
 

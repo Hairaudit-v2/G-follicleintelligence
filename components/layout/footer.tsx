@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+
+import { PUBLIC_IMAGES } from "@/src/lib/brand/publicImages";
 import { motion } from "framer-motion";
 
 import { IiohrSeal } from "@/components/brand/iiohr-logo";
@@ -21,7 +23,7 @@ export function Footer() {
           <div className="fi-panel rounded-[1.5rem] p-7 md:p-8">
             <Link href="/" className="inline-block">
               <Image
-                src="/brand/follicle-intelligence-logo-white.svg"
+                src={PUBLIC_IMAGES.follicleLogoWhite}
                 alt="Follicle Intelligence"
                 width={240}
                 height={48}

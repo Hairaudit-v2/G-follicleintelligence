@@ -18,7 +18,7 @@ export function safeBrandingColourHex(input: string | null | undefined, fallback
   return t;
 }
 
-/** Only http(s) URLs within length; used before rendering <img src>. */
+/** Only http(s) URLs within length; used before rendering remote tenant logos. Local `/public` paths use `resolvePublicStaticImage`. */
 export function safeLogoUrlForImg(url: string | null | undefined): string | null {
   const t = url?.trim();
   if (!t || t.length > 2048) return null;

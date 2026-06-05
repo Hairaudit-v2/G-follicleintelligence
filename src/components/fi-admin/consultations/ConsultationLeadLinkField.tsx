@@ -34,6 +34,9 @@ export function ConsultationLeadLinkField({
 }: ConsultationLeadLinkFieldProps) {
   const tid = tenantId.trim();
   const dialogTitleId = useId();
+  const searchLabelId = useId();
+  const searchInputId = useId();
+  const searchHintId = useId();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const debounced = useDebouncedValue(query.trim(), 320);
@@ -144,12 +147,20 @@ export function ConsultationLeadLinkField({
               </button>
             </div>
             <div className="space-y-3 p-4">
-              <p className="text-xs text-slate-500">Search by lead name, phone, or email. Read-only.</p>
+              <label htmlFor={searchInputId} id={searchLabelId} className="block text-sm font-medium text-slate-800">
+                Lead search
+              </label>
+              <p id={searchHintId} className="text-xs text-slate-500">
+                Search by lead name, phone, or email. Read-only.
+              </p>
               <input
+                id={searchInputId}
                 type="search"
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                aria-labelledby={searchLabelId}
+                aria-describedby={searchHintId}
                 placeholder="Search…"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-sky-400/20 focus:border-sky-300 focus:ring-2"
               />

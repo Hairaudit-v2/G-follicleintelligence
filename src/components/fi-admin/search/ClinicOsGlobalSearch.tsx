@@ -38,6 +38,8 @@ function useDebouncedValue<T>(value: T, ms: number): T {
 export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenChange }: ClinicOsGlobalSearchProps) {
   const tid = tenantId.trim();
   const titleId = useId();
+  const searchLabelId = useId();
+  const searchInputId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -248,13 +250,19 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
               <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
-          <div className="relative mt-4">
+          <div className="mt-4">
+            <label htmlFor={searchInputId} id={searchLabelId} className="mb-1.5 block text-sm font-medium text-slate-700">
+              Search query
+            </label>
+            <div className="relative">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden />
             <input
               ref={searchInputRef}
+              id={searchInputId}
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-labelledby={searchLabelId}
               onKeyDown={(e) => {
                 if (e.key !== "ArrowDown") return;
                 if (!data || flatResultHrefs.length === 0) return;
@@ -269,6 +277,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
               placeholder="Name, phone, email or case number"
               className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 text-base text-slate-900 outline-none ring-sky-500/20 transition placeholder:text-slate-400 focus:border-sky-300 focus:bg-white focus:ring-4 sm:h-14 sm:text-lg"
             />
+            </div>
           </div>
         </header>
 

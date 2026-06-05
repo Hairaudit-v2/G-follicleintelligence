@@ -1,35 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import type { ReactNode } from "react";
 import {
   buildBrandingCssVariables,
   safeBrandingColourHex,
-  safeLogoUrlForImg,
   FI_ADMIN_NEUTRAL_ACCENT,
 } from "@/src/lib/fi/foundation/brandingCss";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
+import { BrandLogoImage } from "@/src/components/brand/BrandLogoImage";
+import { resolveTenantLogoSource } from "@/src/lib/brand/resolveTenantLogo";
 
 const DEFAULT_HEADLINE = "FI Admin";
-
-function BrandingLogo({ url, alt }: { url: string; alt: string }) {
-  const [hide, setHide] = useState(false);
-  if (hide) return null;
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- external tenant URLs; avoid remotePatterns config churn
-    <img
-      src={url}
-      alt={alt}
-      width={120}
-      height={40}
-      className="h-10 w-auto max-w-[140px] object-contain"
-      loading="lazy"
-      decoding="async"
-      referrerPolicy="no-referrer"
-      onError={() => setHide(true)}
-    />
-  );
-}
 
 function BrandingBlock({
   effective,
@@ -40,7 +21,7 @@ function BrandingBlock({
 }) {
   const accent = safeBrandingColourHex(effective.accent_colour, FI_ADMIN_NEUTRAL_ACCENT);
   const headline = effective.brand_name?.trim() || DEFAULT_HEADLINE;
-  const logoSrc = safeLogoUrlForImg(effective.logo_url);
+  const logoSrc = resolveTenantLogoSource(effective.logo_url);
   const support = effective.support_email?.trim() || null;
   const clinicLine = effective.clinic_display_name?.trim() || null;
 
@@ -64,7 +45,13 @@ function BrandingBlock({
       <div className="relative flex flex-wrap items-start gap-3 border-l-4 pl-3" style={{ borderLeftColor: accent }}>
         {logoSrc ? (
           <div className="shrink-0 pt-0.5">
-            <BrandingLogo url={logoSrc} alt={headline} />
+            <BrandLogoImage
+              logoUrl={effective.logo_url}
+              alt={headline}
+              width={120}
+              height={40}
+              className="h-10 w-auto max-w-[140px] object-contain"
+            />
           </div>
         ) : null}
         <div className="min-w-0 flex-1 space-y-1">

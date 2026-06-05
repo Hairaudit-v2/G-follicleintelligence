@@ -3,6 +3,8 @@
  * Schema.org types: Organization, WebSite. Extend with AboutPage, FAQPage, Article, BreadcrumbList as needed.
  */
 
+import { PUBLIC_IMAGE_PATHS } from "@/src/lib/brand/publicImages";
+
 const SCHEMA_CONTEXT = "https://schema.org";
 
 export interface OrganizationOptions {
@@ -20,7 +22,7 @@ export function buildOrganizationSchema(
 ): object {
   const {
     name = "Follicle Intelligence",
-    logoPath = "/brand/follicle-intelligence-logo-white.svg",
+    logoPath = PUBLIC_IMAGE_PATHS.follicleLogoWhite,
     sameAs = [
       "https://hairaudit.com",
       "https://hairlongevityinstitute.com",
