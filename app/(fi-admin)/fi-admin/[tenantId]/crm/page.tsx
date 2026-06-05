@@ -98,6 +98,8 @@ export default async function CrmShellPage({
               initialCards={board.cards}
               total={board.total}
               truncated={board.truncated}
+              clinics={scope.clinics}
+              assignees={owners}
             />
           )}
         </section>

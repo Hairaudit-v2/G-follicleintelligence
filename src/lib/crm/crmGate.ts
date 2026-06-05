@@ -4,7 +4,11 @@ import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { CRM_MUTATION_ROLES_LOWER, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+import {
+  CRM_MUTATION_ROLES_LOWER,
+  isCrmStaffManageRole,
+  isFiAdminApiKeyMatch,
+} from "./crmGatePolicy";
 
 export { CRM_MUTATION_ROLES_LOWER } from "./crmGatePolicy";
 
@@ -158,6 +162,38 @@ export async function tryResolveFiUserIdForTenant(tenantId: string, request?: Re
   if (!authUserId) return null;
   const row = await loadFiUserForTenant(tenantId, authUserId);
   return row?.id ?? null;
+}
+
+/**
+ * Staff directory writes: `FI_ADMIN_API_KEY` **or** tenant member with `fi_admin` / `admin` role.
+ * `crm_operator` may read staff and assign bookings, but cannot create/edit staff rows.
+ */
+export async function assertCrmTenantStaffManageAllowed(opts: {
+  tenantId: string;
+  adminKey?: string | null;
+  request?: Request | null;
+}): Promise<void> {
+  const tenantId = opts.tenantId.trim();
+  if (!tenantId) throw new CrmAccessError(400, "tenantId is required.");
+
+  if (requireFiAdminKey(opts.adminKey ?? undefined)) {
+    await assertTenantRowExists(tenantId);
+    return;
+  }
+
+  const authUserId = await resolveAuthUserId(opts.request ?? null);
+  if (!authUserId) {
+    throw new CrmAccessError(401, "Authentication required.");
+  }
+
+  const row = await loadFiUserForTenant(tenantId, authUserId);
+  if (!row) {
+    throw new CrmAccessError(403, "Not a member of this tenant.");
+  }
+
+  if (!isCrmStaffManageRole(row.role)) {
+    throw new CrmAccessError(403, "Admin role required to manage staff.");
+  }
 }
 
 export function parseAdminKeyFromUnknown(body: unknown): string | undefined {

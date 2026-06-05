@@ -3,6 +3,7 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { OperationalCalendarPage } from "@/src/components/fi-admin/calendar/OperationalCalendarPage";
 import { loadOperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarLoader.server";
+import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
@@ -25,7 +26,10 @@ export default async function TenantCalendarPage({
 
   await assertFiTenantPortalAccess(tenantId);
   const sp = (await searchParams) ?? {};
-  const data = await loadOperationalCalendarPageData(tenantId.trim(), sp);
+  const [data, session] = await Promise.all([
+    loadOperationalCalendarPageData(tenantId.trim(), sp),
+    getCrmShellSessionIfAllowed(tenantId.trim()),
+  ]);
 
-  return <OperationalCalendarPage data={data} />;
+  return <OperationalCalendarPage data={data} session={session} />;
 }

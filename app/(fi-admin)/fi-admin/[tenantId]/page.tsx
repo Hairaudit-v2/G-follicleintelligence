@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { FiTenantOperationalHome } from "@/src/components/fi-admin/FiTenantOperationalHome";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
@@ -40,5 +41,9 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
     throw e;
   }
 
-  return <FiTenantOperationalHome data={data} showCrmNav={showCrmNav} />;
+  return (
+    <CalendarToastProvider>
+      <FiTenantOperationalHome data={data} showCrmNav={showCrmNav} />
+    </CalendarToastProvider>
+  );
 }

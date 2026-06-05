@@ -19,6 +19,7 @@ import {
   assertMetadataJsonObject,
   assertNonCancelledBookingMutable,
 } from "./bookingPolicy";
+import { resolveBookingStaffAssignment, loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { syncBookingReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import { sortBookingsByStartAt } from "./bookingTime";
 import {
@@ -41,6 +42,7 @@ function mapBookingRow(row: Record<string, unknown>): FiBookingRow {
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
     clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+    assigned_staff_id: row.assigned_staff_id != null ? String(row.assigned_staff_id) : null,
     assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
     booking_type: String(row.booking_type),
     booking_status: String(row.booking_status),
@@ -251,6 +253,8 @@ export type LoadBookingsForOperatorViewParams = {
   status?: string | null;
   bookingType?: string | null;
   assignedUserId?: string | null;
+  /** Filter by `fi_staff` id (includes legacy rows linked via `fi_staff.fi_user_id`). */
+  assignedStaffId?: string | null;
   clinicId?: string | null;
   /** When false, rows with `booking_status = cancelled` are omitted. */
   includeCancelled?: boolean;
@@ -284,7 +288,17 @@ export async function loadBookingsForOperatorView(
   if (params.bookingType?.trim()) {
     q = q.eq("booking_type", params.bookingType.trim());
   }
-  if (params.assignedUserId?.trim()) {
+  const staffFilter = params.assignedStaffId?.trim() || null;
+  if (staffFilter) {
+    const staff = await loadStaffMemberForTenant(tid, staffFilter, supabase);
+    if (!staff) throw new Error("assignedStaffId not found for tenant.");
+    const linkedUser = staff.fi_user_id?.trim() || null;
+    if (linkedUser) {
+      q = q.or(`assigned_staff_id.eq.${staffFilter},and(assigned_staff_id.is.null,assigned_user_id.eq.${linkedUser})`);
+    } else {
+      q = q.eq("assigned_staff_id", staffFilter);
+    }
+  } else if (params.assignedUserId?.trim()) {
     q = q.eq("assigned_user_id", params.assignedUserId.trim());
   }
   if (params.clinicId?.trim()) {
@@ -301,7 +315,7 @@ export async function loadBookingsForOperatorView(
 }
 
 const CALENDAR_BOOKING_SELECT =
-  "id, tenant_id, lead_id, person_id, patient_id, case_id, clinic_id, assigned_user_id, booking_type, booking_status, title, description, start_at, end_at, timezone, location, metadata, cancelled_at, cancelled_by_user_id, cancellation_reason";
+  "id, tenant_id, lead_id, person_id, patient_id, case_id, clinic_id, assigned_staff_id, assigned_user_id, booking_type, booking_status, title, description, start_at, end_at, timezone, location, metadata, cancelled_at, cancelled_by_user_id, cancellation_reason";
 
 function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
   const meta = row.metadata;
@@ -315,6 +329,7 @@ function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
     clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+    assigned_staff_id: row.assigned_staff_id != null ? String(row.assigned_staff_id) : null,
     assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
     booking_type: String(row.booking_type),
     booking_status: String(row.booking_status),
@@ -365,7 +380,19 @@ export async function loadBookingsForCalendarOverlap(
   if (params.bookingType?.trim()) {
     q = q.eq("booking_type", params.bookingType.trim());
   }
-  if (params.assignedUserId?.trim()) {
+  const staffFilterCal = params.assignedStaffId?.trim() || null;
+  if (staffFilterCal) {
+    const staff = await loadStaffMemberForTenant(tid, staffFilterCal, supabase);
+    if (!staff) throw new Error("assignedStaffId not found for tenant.");
+    const linkedUser = staff.fi_user_id?.trim() || null;
+    if (linkedUser) {
+      q = q.or(
+        `assigned_staff_id.eq.${staffFilterCal},and(assigned_staff_id.is.null,assigned_user_id.eq.${linkedUser})`
+      );
+    } else {
+      q = q.eq("assigned_staff_id", staffFilterCal);
+    }
+  } else if (params.assignedUserId?.trim()) {
     q = q.eq("assigned_user_id", params.assignedUserId.trim());
   }
   if (params.clinicId?.trim()) {
@@ -493,6 +520,7 @@ export type CreateBookingParams = BookingAnchorInput & {
   location?: string | null;
   metadata?: Record<string, unknown> | null;
   clinicId?: string | null;
+  assignedStaffId?: string | null;
   assignedUserId?: string | null;
   /** Server-resolved fi_users.id; never from client JSON. */
   createdByUserId?: string | null;
@@ -535,7 +563,14 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
   );
 
   if (params.clinicId?.trim()) await assertClinicBelongsToTenant(supabase, tid, params.clinicId);
-  if (params.assignedUserId?.trim()) await assertFiUserBelongsToTenant(supabase, tid, params.assignedUserId);
+
+  const assign = await resolveBookingStaffAssignment(supabase, tid, {
+    assignedStaffId: params.assignedStaffId,
+    assignedUserId: params.assignedStaffId?.trim() ? null : params.assignedUserId,
+  });
+  if (assign.assigned_user_id?.trim()) {
+    await assertFiUserBelongsToTenant(supabase, tid, assign.assigned_user_id);
+  }
 
   const insertRow = {
     tenant_id: tid,
@@ -544,7 +579,8 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
     patient_id: params.patientId?.trim() || null,
     case_id: params.caseId?.trim() || null,
     clinic_id: params.clinicId?.trim() || null,
-    assigned_user_id: params.assignedUserId?.trim() || null,
+    assigned_staff_id: assign.assigned_staff_id,
+    assigned_user_id: assign.assigned_user_id,
     booking_type: params.bookingType.trim(),
     booking_status: "scheduled",
     title: params.title?.trim() || null,
@@ -594,6 +630,7 @@ export type UpdateBookingParams = BookingAnchorInput & {
   location?: string | null;
   metadata?: Record<string, unknown> | null;
   clinicId?: string | null;
+  assignedStaffId?: string | null;
   assignedUserId?: string | null;
 };
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 import { CrmLeadSlideOverProvider } from "@/src/components/fi/crm/LeadSlideOver";
 import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 
@@ -14,12 +15,14 @@ export default async function CrmShellLayout({ children, params }: CrmShellLayou
   const session = await getCrmShellPageSession(tenantId);
 
   return (
-    <CrmLeadSlideOverProvider
-      tenantId={tenantId}
-      operatorFiUserId={session.fiUserId}
-      userRole={session.role}
-    >
-      {children}
-    </CrmLeadSlideOverProvider>
+    <CalendarToastProvider>
+      <CrmLeadSlideOverProvider
+        tenantId={tenantId}
+        operatorFiUserId={session.fiUserId}
+        userRole={session.role}
+      >
+        {children}
+      </CrmLeadSlideOverProvider>
+    </CalendarToastProvider>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import { CalendarRightPanel } from "@/components/calendar/CalendarRightPanel";
@@ -19,7 +20,10 @@ import type { OperationalCalendarPageData } from "@/src/lib/calendar/operational
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
 import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/BookingEditDrawer";
+import { QuickCallInBookingModal } from "@/src/components/fi/appointments/QuickCallInBookingModal";
+import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { useCalendarAppointments } from "@/hooks/useCalendarAppointments";
+import type { CrmShellSession } from "@/src/lib/crm/crmShellAccess";
 
 const viewMotion = {
   initial: { opacity: 0, y: 10 },
@@ -35,19 +39,30 @@ export type CalendarPageProps = {
    * Normally use `?sample=1` on the calendar URL — parsed into {@link OperationalCalendarPageData.query.sampleMode}.
    */
   useSampleData?: boolean;
+  /** When set, enables call-in FAB + appointment slide-over from the operational calendar. */
+  crmShellSession?: CrmShellSession | null;
 };
 
-export function CalendarPage({ data, route = "fi-admin", useSampleData = false }: CalendarPageProps) {
+export function CalendarPage({
+  data,
+  route = "fi-admin",
+  useSampleData = false,
+  crmShellSession = null,
+}: CalendarPageProps) {
   const router = useRouter();
   const [drawer, setDrawer] = useState<FiBookingRow | null>(null);
   const [editing, setEditing] = useState<FiBookingRow | null>(null);
+  const [callInOpen, setCallInOpen] = useState(false);
+  const slide = useAppointmentSlideOverOptional();
 
   const sampleMode = Boolean(useSampleData || data.query.sampleMode);
 
-  const { bookings, bookingDisplay, buckets, rescheduleBooking, refresh, pendingIds } = useCalendarAppointments(
+  const { bookings, bookingDisplay, buckets, rescheduleBooking, refresh, pendingIds, upsertBooking } = useCalendarAppointments(
     data,
     { useSampleData: sampleMode }
   );
+
+  const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
 
   const base = `/fi-admin/${data.tenantId.trim()}`;
   const isMonthView = data.query.view === "month";
@@ -193,6 +208,34 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
         onClose={() => setEditing(null)}
         onSaved={refresh}
       />
+
+      {data.canMutateBookings && crmShellSession ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setCallInOpen(true)}
+            className="fixed bottom-20 right-4 z-[110] inline-flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-white shadow-lg shadow-sky-950/40 ring-2 ring-sky-300/50 transition hover:bg-sky-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200 sm:bottom-24 sm:right-6"
+            aria-label="New call-in booking"
+            title="New call-in booking"
+          >
+            <Phone className="h-6 w-6" aria-hidden />
+          </button>
+          <QuickCallInBookingModal
+            tenantId={data.tenantId}
+            open={callInOpen}
+            onClose={() => setCallInOpen(false)}
+            calendarTimezone={data.calendarTimezone}
+            initialLocalStart={slotPrefillLocal}
+            clinics={data.clinics}
+            assignees={data.assignees}
+            onCreated={({ booking }) => {
+              upsertBooking(booking);
+              refresh();
+            }}
+            onOpenBooking={(id) => slide?.openAppointment(id)}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

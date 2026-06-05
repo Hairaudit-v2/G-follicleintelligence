@@ -7,6 +7,7 @@ import { DashboardTasksDue } from "@/src/components/fi-admin/dashboard/Dashboard
 import { DashboardQuickStats } from "@/src/components/fi-admin/dashboard/DashboardQuickStats";
 import { DashboardQuickActions } from "@/src/components/fi-admin/dashboard/DashboardQuickActions";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
+import { TenantHomeQuickCallIn } from "@/src/components/fi-admin/TenantHomeQuickCallIn";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 export function FiTenantOperationalHome(props: {
@@ -32,7 +33,8 @@ export function FiTenantOperationalHome(props: {
             Operational overview for the next few days — bookings, CRM hygiene, tasks, and quick actions. Data is scoped to
             this tenant via server loaders.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3 text-sm">
+          <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+            {data.canQuickCallIn ? <TenantHomeQuickCallIn tenantId={data.tenantId} /> : null}
             <Link
               href={`${base}/cases`}
               className="inline-flex items-center rounded-lg border border-white/[0.1] bg-[#141C33]/60 px-3 py-2 font-medium text-[#E2E8F0] transition hover:border-[#22C1FF]/35 hover:text-[#22C1FF]"

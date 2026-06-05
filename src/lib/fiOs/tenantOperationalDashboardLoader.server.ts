@@ -11,6 +11,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadPipelineStages } from "@/src/lib/crm/pipeline";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 
 /** Days in current pipeline stage before a lead appears on the dashboard stale list. */
@@ -141,6 +142,7 @@ export const tenantOperationalDashboardSchema = z.object({
   tasksDue: z.array(taskDueItemSchema),
   quickStats: quickStatsSchema,
   viewerFiUserId: z.string().uuid().nullable(),
+  canQuickCallIn: z.boolean(),
 });
 
 export type TenantOperationalDashboard = z.infer<typeof tenantOperationalDashboardSchema>;
@@ -160,18 +162,24 @@ function mapBookingToDashboardItem(row: FiBookingRow): DashboardBookingItem {
   });
 }
 
-async function loadFiUserIdForTenant(tenantId: string, authUserId: string | null): Promise<string | null> {
+async function loadFiUserDashboard(
+  tenantId: string,
+  authUserId: string | null
+): Promise<{ id: string; role: string } | null> {
   if (!authUserId?.trim()) return null;
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
-    .select("id")
+    .select("id, role")
     .eq("tenant_id", tenantId.trim())
     .eq("auth_user_id", authUserId.trim())
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  return String((data as { id: string }).id);
+  return {
+    id: String((data as { id: string }).id),
+    role: String((data as { role: string | null }).role ?? "member"),
+  };
 }
 
 async function loadAgendaBookings(tenantId: string, now: Date): Promise<{
@@ -463,7 +471,9 @@ export async function loadTenantOperationalDashboard(
   const supabase = supabaseAdmin();
 
   const authUserId = await resolveAuthUserId(null);
-  const viewerFiUserId = await loadFiUserIdForTenant(tid, authUserId);
+  const viewer = await loadFiUserDashboard(tid, authUserId);
+  const viewerFiUserId = viewer?.id ?? null;
+  const canQuickCallIn = isCrmMutationRole(viewer?.role);
 
   const tenantRes = await supabase.from("fi_tenants").select("name").eq("id", tid).maybeSingle();
   if (tenantRes.error) throw new Error(tenantRes.error.message);
@@ -489,5 +499,6 @@ export async function loadTenantOperationalDashboard(
     tasksDue,
     quickStats,
     viewerFiUserId,
+    canQuickCallIn,
   });
 }

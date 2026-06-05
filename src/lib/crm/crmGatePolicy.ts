@@ -4,11 +4,18 @@
 
 export const CRM_MUTATION_ROLES_LOWER = new Set(["fi_admin", "admin", "crm_operator"]);
 
+/** Staff directory CRUD: `fi_admin` / `admin` only (not `crm_operator`). */
+export const CRM_STAFF_MANAGE_ROLES_LOWER = new Set(["fi_admin", "admin"]);
+
 /** CRM shell nav + FI Admin route guard (Stage 2E): `fi_admin` or delegated `crm_operator` only. */
 export const CRM_SHELL_NAV_ROLES_LOWER = new Set(["fi_admin", "crm_operator"]);
 
 export function isCrmMutationRole(role: string | null | undefined): boolean {
   return CRM_MUTATION_ROLES_LOWER.has(String(role ?? "").trim().toLowerCase());
+}
+
+export function isCrmStaffManageRole(role: string | null | undefined): boolean {
+  return CRM_STAFF_MANAGE_ROLES_LOWER.has(String(role ?? "").trim().toLowerCase());
 }
 
 export function isCrmShellNavRole(role: string | null | undefined): boolean {

@@ -2,16 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
-import { RefreshCw } from "lucide-react";
+import { Phone, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { crmMoveLeadStageAction } from "@/lib/actions/fi-crm-actions";
 import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
 import type { CrmKanbanLeadCard } from "@/src/lib/crm/types";
 import type { CrmShellLeadListItem } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { FI_CRM_KANBAN_REFRESH_EVENT } from "@/src/lib/calendar/quickCallInConstants";
 import { useCrmLeadSlideOver } from "./LeadSlideOver";
 import { CrmKanbanColumn } from "./CrmKanbanColumn";
 import { CrmLeadKanbanCard } from "./CrmLeadKanbanCard";
+import { QuickCallInBookingModal } from "@/src/components/fi/appointments/QuickCallInBookingModal";
 
 function mapStageRef(s: FiCrmPipelineStageRow): NonNullable<CrmShellLeadListItem["stage"]> {
   return { id: s.id, slug: s.slug, label: s.label, sort_order: s.sort_order };
@@ -23,12 +26,16 @@ export function CrmKanbanBoard({
   initialCards,
   total,
   truncated,
+  clinics = [],
+  assignees = [],
 }: {
   tenantId: string;
   stages: FiCrmPipelineStageRow[];
   initialCards: CrmKanbanLeadCard[];
   total: number;
   truncated: boolean;
+  clinics?: CrmShellClinicOption[];
+  assignees?: CrmShellUserPickerOption[];
 }) {
   const router = useRouter();
   const { openLead, operatorFiUserId, userRole } = useCrmLeadSlideOver();
@@ -36,6 +43,7 @@ export function CrmKanbanBoard({
   const [cards, setCards] = useState<CrmKanbanLeadCard[]>(initialCards);
   const [dropStageId, setDropStageId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
+  const [callInOpen, setCallInOpen] = useState(false);
 
   const canMutate = isCrmMutationRole(userRole);
 
@@ -49,6 +57,12 @@ export function CrmKanbanBoard({
     setCards(initialCards);
     setBannerError(null);
   }, [initialCards]);
+
+  useEffect(() => {
+    const onRefresh = () => syncFromServer();
+    window.addEventListener(FI_CRM_KANBAN_REFRESH_EVENT, onRefresh);
+    return () => window.removeEventListener(FI_CRM_KANBAN_REFRESH_EVENT, onRefresh);
+  }, [syncFromServer]);
 
   const unassigned = useMemo(() => cards.filter((c) => !c.lead.current_stage_id), [cards]);
 
@@ -132,6 +146,16 @@ export function CrmKanbanBoard({
           {truncated ? <span className="text-amber-700"> (board cap reached — narrow filters)</span> : null}.
         </p>
         <div className="flex items-center gap-2">
+          {canMutate ? (
+            <button
+              type="button"
+              onClick={() => setCallInOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded border border-sky-600 bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-700"
+            >
+              <Phone className="h-4 w-4 shrink-0" aria-hidden />
+              New call-in booking
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={isPending}
@@ -224,6 +248,14 @@ export function CrmKanbanBoard({
           </CrmKanbanColumn>
         ) : null}
       </div>
+
+      <QuickCallInBookingModal
+        tenantId={tenantId}
+        open={callInOpen}
+        onClose={() => setCallInOpen(false)}
+        clinics={clinics}
+        assignees={assignees}
+      />
     </div>
   );
 }

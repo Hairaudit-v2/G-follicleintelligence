@@ -11,10 +11,11 @@ type ToastItem = {
   id: number;
   tone: ToastTone;
   message: string;
+  action?: { label: string; onClick: () => void };
 };
 
 type CalendarToastContextValue = {
-  success: (message: string) => void;
+  success: (message: string, action?: { label: string; onClick: () => void }) => void;
   error: (message: string) => void;
 };
 
@@ -28,6 +29,10 @@ export function useCalendarToast(): CalendarToastContextValue {
   return ctx;
 }
 
+export function useCalendarToastOptional(): CalendarToastContextValue | null {
+  return useContext(CalendarToastContext);
+}
+
 export function CalendarToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -36,17 +41,18 @@ export function CalendarToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const push = useCallback(
-    (tone: ToastTone, message: string) => {
+    (tone: ToastTone, message: string, action?: ToastItem["action"]) => {
       const id = Date.now() + Math.floor(Math.random() * 1000);
-      setToasts((items) => [...items.slice(-2), { id, tone, message }]);
-      window.setTimeout(() => dismiss(id), tone === "success" ? 3200 : 5200);
+      setToasts((items) => [...items.slice(-2), { id, tone, message, action }]);
+      const ttl = tone === "success" ? (action ? 12_000 : 3200) : 5200;
+      window.setTimeout(() => dismiss(id), ttl);
     },
     [dismiss]
   );
 
   const value = useMemo(
     () => ({
-      success: (message: string) => push("success", message),
+      success: (message: string, action?: ToastItem["action"]) => push("success", message, action),
       error: (message: string) => push("error", message),
     }),
     [push]
@@ -76,6 +82,18 @@ export function CalendarToastProvider({ children }: { children: ReactNode }) {
               <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" aria-hidden />
             )}
             <p className="min-w-0 flex-1 text-sm font-medium leading-snug">{toast.message}</p>
+            {toast.action ? (
+              <button
+                type="button"
+                className="shrink-0 rounded-lg bg-emerald-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-800"
+                onClick={() => {
+                  toast.action?.onClick();
+                  dismiss(toast.id);
+                }}
+              >
+                {toast.action.label}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => dismiss(toast.id)}

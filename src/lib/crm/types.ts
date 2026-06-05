@@ -200,6 +200,17 @@ export type FiCrmMessageRow = {
 /** FI Admin CRM shell: tenant user row for owner filter dropdown (Stage 2F). */
 export type CrmShellUserPickerOption = { id: string; email: string | null };
 
+/** Clinic OS: schedulable staff row for booking / calendar pickers (`fi_staff`). */
+export type CrmShellStaffPickerOption = {
+  id: string;
+  full_name: string;
+  staff_role: string;
+  email: string | null;
+  mobile: string | null;
+  calendar_color: string | null;
+  fi_user_id: string | null;
+};
+
 /** FI Admin CRM shell: organisation row for lead scope picker (Stage 2G). */
 export type CrmShellOrgOption = { id: string; name: string };
 

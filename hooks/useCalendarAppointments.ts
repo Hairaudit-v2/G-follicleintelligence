@@ -54,6 +54,7 @@ export type UseCalendarAppointmentsResult = {
     meta?: CalendarRescheduleMeta
   ) => Promise<CalendarRescheduleResult>;
   refresh: () => void;
+  upsertBooking: (row: FiBookingRow, display?: OperationalCalendarBookingDisplay) => void;
 };
 
 /**
@@ -77,6 +78,7 @@ export function useCalendarAppointments(
   const patchBooking = useCalendarAppointmentsStore((s) => s.patchBooking);
   const replaceBooking = useCalendarAppointmentsStore((s) => s.replaceBooking);
   const markPending = useCalendarAppointmentsStore((s) => s.markPending);
+  const upsertBooking = useCalendarAppointmentsStore((s) => s.upsertBooking);
   const storeSyncKey = useCalendarAppointmentsStore((s) => s.syncKey);
 
   useEffect(() => {
@@ -229,5 +231,6 @@ export function useCalendarAppointments(
     pendingIds,
     rescheduleBooking,
     refresh,
+    upsertBooking,
   };
 }

@@ -34,6 +34,8 @@ type CalendarAppointmentsState = {
   hydrate: (input: CalendarAppointmentsHydrateInput) => void;
   patchBooking: (id: string, patch: CalendarReschedulePatch) => void;
   replaceBooking: (id: string, snapshot: FiBookingRow) => void;
+  /** Append or replace a row after server create (phone call-in, etc.). */
+  upsertBooking: (row: FiBookingRow, display?: OperationalCalendarBookingDisplay) => void;
   markPending: (id: string, pending: boolean) => void;
   getBooking: (id: string) => FiBookingRow | undefined;
 };
@@ -96,6 +98,31 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
     set((state) => ({
       bookings: state.bookings.map((b) => (b.id === id ? snapshot : b)),
     }));
+  },
+
+  upsertBooking: (row, display) => {
+    set((state) => {
+      const has = state.bookings.some((b) => b.id === row.id);
+      const bookings = has ? state.bookings.map((b) => (b.id === row.id ? row : b)) : [...state.bookings, row];
+      const startMs = Date.parse(row.start_at);
+      const endMs = Date.parse(row.end_at);
+      const durationMin =
+        Number.isFinite(startMs) && Number.isFinite(endMs)
+          ? Math.max(1, Math.round((endMs - startMs) / 60_000))
+          : 30;
+      const hint: OperationalCalendarBookingDisplay =
+        display ??
+        ({
+          anchorLabel: row.title?.trim() || row.booking_type || "Booking",
+          scalesSummary: null,
+          durationMin,
+          reminderHint: null,
+        } satisfies OperationalCalendarBookingDisplay);
+      return {
+        bookings,
+        bookingDisplay: { ...state.bookingDisplay, [row.id]: hint },
+      };
+    });
   },
 
   markPending: (id, pending) => {

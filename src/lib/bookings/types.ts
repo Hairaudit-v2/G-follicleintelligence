@@ -9,6 +9,8 @@ export type FiBookingRow = {
   patient_id: string | null;
   case_id: string | null;
   clinic_id: string | null;
+  /** Primary calendar assignee (`fi_staff`); optional link to `fi_users` via `fi_staff.fi_user_id`. */
+  assigned_staff_id: string | null;
   assigned_user_id: string | null;
   booking_type: string;
   booking_status: string;
