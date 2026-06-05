@@ -16,14 +16,7 @@ import {
   zonedNextDayUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "./types";
-import {
-  parseUtcCalendarDateString,
-  utcCalendarDateStringFromDate,
-  utcMondayStartMsContaining,
-  type ParsedCalendarQuery,
-  type CalendarHrefQuery,
-  type CalendarViewMode,
-} from "./calendarQuery";
+import type { ParsedCalendarQuery, CalendarHrefQuery, CalendarViewMode } from "./calendarQuery";
 
 export type CalendarDayLane = {
   /** Clinic-local `YYYY-MM-DD` key for bucketing. */
@@ -35,13 +28,6 @@ export type CalendarDayLane = {
   /** Short weekday label in clinic timezone. */
   headingShortUtc: string;
 };
-
-function utcMidnightMsFromYmd(ymd: string): number {
-  const y = Number(ymd.slice(0, 4));
-  const mo = Number(ymd.slice(5, 7)) - 1;
-  const d = Number(ymd.slice(8, 10));
-  return Date.UTC(y, mo, d, 0, 0, 0, 0);
-}
 
 function buildLane(dayKey: string, timeZone: string): CalendarDayLane | null {
   const tz = normalizeCalendarTimezone(timeZone);

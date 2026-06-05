@@ -51,7 +51,7 @@ export function calendarPxPerMinute(): number {
   return CALENDAR_PX_PER_HOUR / 60;
 }
 
-export function calendarGridBodyHeightPx(_cfg: BusinessGridConfig): number {
+export function calendarGridBodyHeightPx(): number {
   return timeSlotsGridHeightPx(CALENDAR_PX_PER_HOUR);
 }
 
@@ -338,7 +338,7 @@ export function ProviderColumn({
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
   className,
 }: ProviderColumnProps) {
-  const bodyHeightPx = bodyHeightPxProp ?? calendarGridBodyHeightPx(gridConfig);
+  const bodyHeightPx = bodyHeightPxProp ?? calendarGridBodyHeightPx();
 
   const overlapLayouts = useMemo(
     () => computeProviderColumnOverlapLayouts(appointments, lane, gridConfig),

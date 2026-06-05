@@ -15,6 +15,8 @@ Avatar.displayName = "Avatar";
 
 const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
   ({ className, alt = "", ...props }, ref) => (
+    // Avatars use arbitrary partner/patient URLs; `next/image` needs remotePatterns per host.
+    // eslint-disable-next-line @next/next/no-img-element -- see above
     <img ref={ref} alt={alt} className={cn("aspect-square h-full w-full object-cover", className)} {...props} />
   )
 );

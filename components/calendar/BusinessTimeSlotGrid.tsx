@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CALENDAR_TIME_SLOTS,
   calendarGridBodyHeightPx,
   calendarSlotHeightPx,
   generateCalendarTimeSlots,

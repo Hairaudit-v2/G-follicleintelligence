@@ -129,13 +129,6 @@ export type MonthViewProps = {
 // Grid helpers
 // ---------------------------------------------------------------------------
 
-function utcMidnightMsFromYmd(ymd: string): number {
-  const y = Number(ymd.slice(0, 4));
-  const mo = Number(ymd.slice(5, 7)) - 1;
-  const d = Number(ymd.slice(8, 10));
-  return Date.UTC(y, mo, d, 0, 0, 0, 0);
-}
-
 export function monthDayDropId(dayKey: string): string {
   return `${MONTH_DAY_DROP_PREFIX}${dayKey}`;
 }

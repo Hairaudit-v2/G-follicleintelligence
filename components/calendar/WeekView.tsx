@@ -35,7 +35,6 @@ import {
   CALENDAR_COLUMN_MIN_WIDTH_PX,
   CALENDAR_GRID_BG,
   CALENDAR_HEADER_HEIGHT_PX,
-  CALENDAR_PX_PER_HOUR,
   ProviderColumn,
   calendarGridBodyHeightPx,
   calendarPxPerMinute,
@@ -54,7 +53,6 @@ import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import {
   buildCalendarHref,
   mergeCalendarHrefQuery,
-  parseUtcCalendarDateString,
   type ParsedCalendarQuery,
 } from "@/src/lib/bookings/calendarQuery";
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
@@ -149,7 +147,7 @@ function WeekViewInner({
   shortcuts,
 }: WeekViewProps) {
   const router = useRouter();
-  const bodyHeightPx = calendarGridBodyHeightPx(gridConfig);
+  const bodyHeightPx = calendarGridBodyHeightPx();
   const [activeDrag, setActiveDrag] = useState<AppointmentCardData | null>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
