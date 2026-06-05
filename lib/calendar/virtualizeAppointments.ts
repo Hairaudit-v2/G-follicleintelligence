@@ -37,15 +37,15 @@ export function filterVisibleAppointmentIds(
   const forced = new Set(alwaysIncludeIds ?? []);
   const visible = new Set<string>();
 
-  for (const [id, layout] of layouts) {
+  layouts.forEach((layout, id) => {
     if (forced.has(id) || layoutIntersectsViewport(layout, range)) {
       visible.add(id);
     }
-  }
+  });
 
-  for (const id of forced) {
+  forced.forEach((id) => {
     if (layouts.has(id)) visible.add(id);
-  }
+  });
 
   return visible;
 }

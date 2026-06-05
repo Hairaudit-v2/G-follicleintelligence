@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 
 import { CALENDAR_HEADER_HEIGHT_PX, CALENDAR_PX_PER_HOUR } from "@/components/calendar/ProviderColumn";
 import { cn } from "@/lib/utils";
 
-function Shimmer({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function Shimmer({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
     <div
       className={cn(
