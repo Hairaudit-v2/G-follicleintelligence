@@ -7,8 +7,8 @@ export const CRM_MUTATION_ROLES_LOWER = new Set(["fi_admin", "admin", "crm_opera
 /** Staff directory CRUD: `fi_admin` / `admin` only (not `crm_operator`). */
 export const CRM_STAFF_MANAGE_ROLES_LOWER = new Set(["fi_admin", "admin"]);
 
-/** CRM shell nav + FI Admin route guard (Stage 2E): `fi_admin` or delegated `crm_operator` only. */
-export const CRM_SHELL_NAV_ROLES_LOWER = new Set(["fi_admin", "crm_operator"]);
+/** CRM shell nav + FI Admin route guard (Stage 2E): tenant `admin`, `fi_admin`, or delegated `crm_operator`. */
+export const CRM_SHELL_NAV_ROLES_LOWER = new Set(["admin", "fi_admin", "crm_operator"]);
 
 export function isCrmMutationRole(role: string | null | undefined): boolean {
   return CRM_MUTATION_ROLES_LOWER.has(String(role ?? "").trim().toLowerCase());

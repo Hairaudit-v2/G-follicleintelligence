@@ -46,12 +46,15 @@ export function ClinicOsShell({
   tenantId,
   base,
   showCrmNav,
+  showBookingsBoard = showCrmNav,
   effective,
   children,
 }: {
   tenantId: string;
   base: string;
   showCrmNav: boolean;
+  /** Bookings launcher + operator board (includes CRM roles and active `fi_staff` members). */
+  showBookingsBoard?: boolean;
   effective: EffectiveBranding;
   children: ReactNode;
 }) {
@@ -84,8 +87,8 @@ export function ClinicOsShell({
     window.addEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
     return () => window.removeEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
   }, []);
-  const navItems = resolveClinicOsShellNavItems(base, showCrmNav);
-  const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav);
+  const navItems = resolveClinicOsShellNavItems(base, showCrmNav, showBookingsBoard);
+  const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav, showBookingsBoard);
   const activeNavId = getClinicOsShellActiveNavId(pathname, base);
   const showCalendarBar = isClinicOsShellCalendarContextRoute();
 
@@ -231,6 +234,7 @@ export function ClinicOsShell({
         tenantId={tenantId}
         base={base}
         showCrmNav={showCrmNav}
+        showBookingsBoard={showBookingsBoard}
         open={searchOpen}
         onOpenChange={setSearchOpen}
       />

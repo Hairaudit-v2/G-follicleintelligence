@@ -26,7 +26,7 @@ describe("Stage 2E CRM shell nav policy (pure)", () => {
   it("allows fi_admin and crm_operator only for shell nav", () => {
     assert.equal(isCrmShellNavRole("fi_admin"), true);
     assert.equal(isCrmShellNavRole("crm_operator"), true);
-    assert.equal(isCrmShellNavRole("admin"), false);
+    assert.equal(isCrmShellNavRole("admin"), true);
     assert.equal(isCrmShellNavRole("member"), false);
   });
 });

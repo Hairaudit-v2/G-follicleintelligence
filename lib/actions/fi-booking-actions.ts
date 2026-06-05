@@ -16,7 +16,7 @@ import { loadAppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentS
 import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { cancelBooking, completeBooking, createBooking, updateBooking } from "@/src/lib/bookings/server";
-import { getCrmShellSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmLeadById, appendCrmActivityEvent } from "@/src/lib/crm/server";
 import { z, ZodError } from "zod";
 
@@ -141,8 +141,8 @@ export async function loadAppointmentSlideOverBundleAction(
 ): Promise<{ ok: true; data: AppointmentSlideOverPayload } | { ok: false; error: string }> {
   try {
     const parsed = appointmentSlideOverLoadSchema.parse({ tenantId, appointmentId });
-    const session = await getCrmShellSessionIfAllowed(parsed.tenantId);
-    if (!session) return { ok: false, error: "Not signed in or CRM access denied for this tenant." };
+    const session = await getBookingsOperatorSessionIfAllowed(parsed.tenantId);
+    if (!session) return { ok: false, error: "Not signed in or scheduling access denied for this tenant." };
     const data = await loadAppointmentSlideOverPayload(parsed.tenantId, parsed.appointmentId);
     if (!data) return { ok: false, error: "Appointment not found." };
     return { ok: true, data };

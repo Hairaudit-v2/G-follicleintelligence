@@ -29,6 +29,7 @@ import {
 } from "@/src/lib/bookings/calendarView";
 import type { CalendarHrefQuery } from "@/src/lib/bookings/calendarQuery";
 import { mergeCalendarHrefQuery } from "@/src/lib/bookings/calendarQuery";
+import { formatTimeRangeInTimezone } from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
@@ -72,9 +73,7 @@ function DraggableCalendarEvent({
   const topPx = dragTop ?? layout.topPx;
   const tone = bookingTypeCalendarEventClasses(booking.booking_type);
   const statusRing = bookingStatusCalendarAccent(booking.booking_status);
-  const range = `${new Date(booking.start_at).toLocaleTimeString(undefined, { timeStyle: "short" })}–${new Date(
-    booking.end_at
-  ).toLocaleTimeString(undefined, { timeStyle: "short" })}`;
+  const range = formatTimeRangeInTimezone(booking.start_at, booking.end_at, lane.timeZone);
 
   const terminal = isBookingCancelled(booking) || booking.booking_status === "completed";
 

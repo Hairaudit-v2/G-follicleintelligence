@@ -2,11 +2,14 @@
  * Clinic OS shell navigation and quick-action definitions.
  * Permission hints are descriptive only for future RBAC; visibility today mirrors
  * existing CRM shell nav via `showCrmNav` from `getCrmShellNavAllowed` (no new enforcement).
+ * Bookings launcher items also respect `showBookingsBoard` from `getBookingsBoardNavAllowed`.
  */
 
 export type ClinicOsShellPermissionHint = {
   /** When true, the item is only usable when CRM shell nav is allowed for the user. */
   requiresCrmShellNav?: boolean;
+  /** When true, the item requires bookings-board access (CRM shell roles or active `fi_staff` member). */
+  requiresBookingsBoardNav?: boolean;
   /** Reserved for future role-based gating (not evaluated yet). */
   minRole?: "member" | "admin" | "owner";
 };
@@ -69,7 +72,7 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
   { id: "patient", label: "Patient", path: "patients/new", permissionHint: {} },
   { id: "consultation", label: "Consultation", path: "consultations/new", permissionHint: {} },
   { id: "lead", label: "Lead", path: "crm", permissionHint: { requiresCrmShellNav: true } },
-  { id: "booking", label: "Booking", path: "bookings/new", permissionHint: { requiresCrmShellNav: true } },
+  { id: "booking", label: "Booking", path: "bookings/new", permissionHint: { requiresBookingsBoardNav: true } },
   { id: "case", label: "Patient", path: "cases/new", permissionHint: {} },
   { id: "task", label: "Task", path: "", permissionHint: {}, placeholder: true },
   { id: "message", label: "Message", path: "", permissionHint: {}, placeholder: true },
@@ -126,13 +129,21 @@ export function isClinicOsShellCalendarContextRoute(): boolean {
   return false;
 }
 
-export function resolveClinicOsShellNavItems(base: string, showCrmNav: boolean): ResolvedClinicOsShellNavItem[] {
+export function resolveClinicOsShellNavItems(
+  base: string,
+  showCrmNav: boolean,
+  showBookingsBoard: boolean = showCrmNav
+): ResolvedClinicOsShellNavItem[] {
   return CLINIC_OS_SHELL_NAV_ITEMS.map((def) => {
     if (def.placeholder) {
       return { id: def.id, label: def.label, href: "#", disabled: true, home: def.home };
     }
     const needsCrm = Boolean(def.permissionHint.requiresCrmShellNav);
+    const needsBookings = Boolean(def.permissionHint.requiresBookingsBoardNav);
     if (needsCrm && !showCrmNav) {
+      return { id: def.id, label: def.label, href: "#", disabled: true, home: def.home };
+    }
+    if (needsBookings && !showBookingsBoard) {
       return { id: def.id, label: def.label, href: "#", disabled: true, home: def.home };
     }
     const href = def.home ? normalizeBase(base) : hrefFor(base, def.path);
@@ -140,13 +151,21 @@ export function resolveClinicOsShellNavItems(base: string, showCrmNav: boolean):
   });
 }
 
-export function resolveClinicOsShellQuickActions(base: string, showCrmNav: boolean): ResolvedClinicOsQuickAction[] {
+export function resolveClinicOsShellQuickActions(
+  base: string,
+  showCrmNav: boolean,
+  showBookingsBoard: boolean = showCrmNav
+): ResolvedClinicOsQuickAction[] {
   return CLINIC_OS_SHELL_QUICK_ACTIONS.map((def) => {
     if (def.placeholder) {
       return { id: def.id, label: def.label, href: "#", disabled: true };
     }
     const needsCrm = Boolean(def.permissionHint.requiresCrmShellNav);
+    const needsBookings = Boolean(def.permissionHint.requiresBookingsBoardNav);
     if (needsCrm && !showCrmNav) {
+      return { id: def.id, label: def.label, href: "#", disabled: true };
+    }
+    if (needsBookings && !showBookingsBoard) {
       return { id: def.id, label: def.label, href: "#", disabled: true };
     }
     return { id: def.id, label: def.label, href: hrefFor(base, def.path), disabled: false };

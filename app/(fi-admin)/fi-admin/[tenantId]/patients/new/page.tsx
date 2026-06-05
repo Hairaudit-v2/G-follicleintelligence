@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { NewPatientEntryPage } from "@/src/components/fi-admin/patients/NewPatientEntryPage";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
@@ -16,7 +16,10 @@ export default async function NewPatientEntryRoutePage({ params }: { params: Pro
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
-  const showCrmNav = await getCrmShellNavAllowed(tenantId);
+  const [showCrmNav, showBookingsBoard] = await Promise.all([
+    getCrmShellNavAllowed(tenantId),
+    getBookingsBoardNavAllowed(tenantId),
+  ]);
 
-  return <NewPatientEntryPage tenantId={tenantId} showCrmNav={showCrmNav} />;
+  return <NewPatientEntryPage tenantId={tenantId} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />;
 }

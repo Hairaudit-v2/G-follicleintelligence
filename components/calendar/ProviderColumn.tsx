@@ -2,7 +2,7 @@
 
 import { useDroppable } from "@dnd-kit/core";
 import { AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 
 import { AppointmentCardFromBooking } from "@/components/calendar/AppointmentCard";
 import { BusinessTimeSlotGrid } from "@/components/calendar/BusinessTimeSlotGrid";
@@ -57,9 +57,12 @@ export function calendarGridBodyHeightPx(): number {
 
 import {
   calendarDateStringFromInstant,
+  isoFromLocalDayMinutes,
   minutesFromLaneStart as minutesFromLaneStartTz,
+  toDatetimeLocalValueInTimezone,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
+import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
 
 export function providerColumnDropId(dayKey: string, columnId: string): string {
   return `drop:${dayKey}:${columnId}`;
@@ -308,6 +311,8 @@ export type ProviderColumnProps = {
   pinnedAppointmentId?: string | null;
   /** Booking ids awaiting PATCH after optimistic reschedule. */
   pendingAppointmentIds?: ReadonlySet<string> | null;
+  /** Click empty grid area to book (e.g. quick call-in modal). */
+  onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
   bodyHeightPx?: number;
   minWidthPx?: number;
   className?: string;
@@ -334,6 +339,7 @@ export function ProviderColumn({
   viewportRange,
   pinnedAppointmentId,
   pendingAppointmentIds,
+  onEmptySlotClick,
   bodyHeightPx: bodyHeightPxProp,
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
   className,
@@ -363,6 +369,20 @@ export function ProviderColumn({
     data: { dayKey, columnId: id, providerName: name },
   });
 
+  const handleEmptySlotClick = (e: MouseEvent<HTMLButtonElement>) => {
+    if (!onEmptySlotClick) return;
+    if (e.button !== 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const ppm = calendarPxPerMinute();
+    const rawMin = gridConfig.dayStartHourUtc * 60 + y / ppm;
+    const snapped = snapCalendarMinutes(rawMin, gridConfig);
+    const iso = isoFromLocalDayMinutes(dayKey, snapped, gridConfig.timeZone);
+    if (!iso) return;
+    const localStart = toDatetimeLocalValueInTimezone(iso, gridConfig.timeZone);
+    onEmptySlotClick({ dayKey, columnId: id, localStart });
+  };
+
   return (
     <div
       className={cn(
@@ -388,7 +408,18 @@ export function ProviderColumn({
         <BusinessTimeSlotGrid bodyHeightPx={bodyHeightPx} timeZone={gridConfig.timeZone} />
         <CurrentTimeLine dayKey={dayKey} gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
-        <div className="relative" style={{ height: bodyHeightPx }}>
+        {onEmptySlotClick ? (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label={`Book appointment in ${name} column at selected time`}
+            className="absolute inset-0 z-[1] cursor-cell bg-transparent"
+            style={{ height: bodyHeightPx }}
+            onClick={handleEmptySlotClick}
+          />
+        ) : null}
+
+        <div className="relative z-[2]" style={{ height: bodyHeightPx }}>
           <AnimatePresence initial={false}>
             {appointments.map((booking) => {
                 const layout = overlapLayouts.get(booking.id);

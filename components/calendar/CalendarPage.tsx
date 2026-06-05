@@ -53,6 +53,11 @@ export function CalendarPage({
   const [drawer, setDrawer] = useState<FiBookingRow | null>(null);
   const [editing, setEditing] = useState<FiBookingRow | null>(null);
   const [callInOpen, setCallInOpen] = useState(false);
+  const [callInPrefill, setCallInPrefill] = useState<{
+    localStart?: string;
+    clinicId?: string;
+    assignedUserId?: string;
+  }>({});
   const slide = useAppointmentSlideOverOptional();
 
   const sampleMode = Boolean(useSampleData || data.query.sampleMode);
@@ -63,6 +68,26 @@ export function CalendarPage({
   );
 
   const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
+
+  const quickCallInEnabled = Boolean(data.canMutateBookings && crmShellSession);
+
+  const openCallInFromSlot = useCallback(
+    (p: { dayKey: string; columnId: string; localStart: string }) => {
+      const next: { localStart: string; clinicId?: string; assignedUserId?: string } = {
+        localStart: p.localStart.trim(),
+      };
+      if (p.columnId.startsWith("c:")) {
+        next.clinicId = p.columnId.slice(2);
+      } else if (p.columnId.startsWith("s:")) {
+        const sid = p.columnId.slice(2);
+        const uid = data.staffDirectory.find((s) => s.id === sid)?.fi_user_id?.trim();
+        if (uid) next.assignedUserId = uid;
+      }
+      setCallInPrefill(next);
+      setCallInOpen(true);
+    },
+    [data.staffDirectory]
+  );
 
   const base = `/fi-admin/${data.tenantId.trim()}`;
   const isMonthView = data.query.view === "month";
@@ -183,6 +208,7 @@ export function CalendarPage({
                   query: data.query,
                   addAppointmentHref: `${base}/bookings/new`,
                 }}
+                onEmptySlotClick={quickCallInEnabled ? openCallInFromSlot : undefined}
               />
             </motion.div>
           )}
@@ -217,7 +243,10 @@ export function CalendarPage({
         <>
           <button
             type="button"
-            onClick={() => setCallInOpen(true)}
+            onClick={() => {
+              setCallInPrefill({ localStart: slotPrefillLocal });
+              setCallInOpen(true);
+            }}
             className="fixed bottom-20 right-4 z-[110] inline-flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-white shadow-lg shadow-sky-950/40 ring-2 ring-sky-300/50 transition hover:bg-sky-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200 sm:bottom-24 sm:right-6"
             aria-label="New call-in booking"
             title="New call-in booking"
@@ -227,9 +256,14 @@ export function CalendarPage({
           <QuickCallInBookingModal
             tenantId={data.tenantId}
             open={callInOpen}
-            onClose={() => setCallInOpen(false)}
+            onClose={() => {
+              setCallInOpen(false);
+              setCallInPrefill({});
+            }}
             calendarTimezone={data.calendarTimezone}
-            initialLocalStart={slotPrefillLocal}
+            initialLocalStart={callInPrefill.localStart ?? slotPrefillLocal}
+            initialClinicId={callInPrefill.clinicId ?? null}
+            initialAssignedUserId={callInPrefill.assignedUserId ?? null}
             clinics={data.clinics}
             assignees={data.assignees}
             onCreated={({ booking }) => {

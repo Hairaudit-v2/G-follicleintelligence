@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
 import { PatientDirectoryPage } from "@/src/components/fi/patients/PatientDirectoryPage";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadPatientDirectoryPage } from "@/src/lib/patients/patientDirectoryLoader";
 import { parsePatientDirectoryQuery } from "@/src/lib/patients/patientDirectoryQuery";
 
@@ -26,10 +26,18 @@ export default async function PatientsHomeRoutePage({
 
   const sp = (await searchParams) ?? {};
   const query = parsePatientDirectoryQuery(sp);
-  const [data, showCrmNav] = await Promise.all([
+  const [data, showCrmNav, showBookingsBoard] = await Promise.all([
     loadPatientDirectoryPage(tenantId.trim(), query),
     getCrmShellNavAllowed(tenantId),
+    getBookingsBoardNavAllowed(tenantId),
   ]);
 
-  return <PatientDirectoryPage tenantId={tenantId.trim()} data={data} showCrmNav={showCrmNav} />;
+  return (
+    <PatientDirectoryPage
+      tenantId={tenantId.trim()}
+      data={data}
+      showCrmNav={showCrmNav}
+      showBookingsBoard={showBookingsBoard}
+    />
+  );
 }

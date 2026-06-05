@@ -62,6 +62,15 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/configuration`, base), "setup");
 });
 
+test("resolveClinicOsShellQuickActions: booking enabled when only bookings board access", () => {
+  const mixed = resolveClinicOsShellQuickActions(base, false, true);
+  const booking = mixed.find((a) => a.id === "booking");
+  const lead = mixed.find((a) => a.id === "lead");
+  assert.equal(booking?.disabled, false);
+  assert.equal(booking?.href, `${base}/bookings/new`);
+  assert.equal(lead?.disabled, true);
+});
+
 test("resolveClinicOsShellQuickActions: CRM-gated actions match nav policy", () => {
   const on = resolveClinicOsShellQuickActions(base, true);
   const off = resolveClinicOsShellQuickActions(base, false);

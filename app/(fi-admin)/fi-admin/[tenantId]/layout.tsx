@@ -5,7 +5,7 @@ import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import { buildBrandingCssVariables } from "@/src/lib/fi/foundation/brandingCss";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 const NEUTRAL_EFFECTIVE: EffectiveBranding = {
@@ -36,7 +36,10 @@ export default async function TenantAdminLayout({
   const { tenantId } = await params;
   await assertFiTenantPortalAccess(tenantId);
   const base = `/fi-admin/${tenantId}`;
-  const showCrmNav = await getCrmShellNavAllowed(tenantId);
+  const [showCrmNav, showBookingsBoard] = await Promise.all([
+    getCrmShellNavAllowed(tenantId),
+    getBookingsBoardNavAllowed(tenantId),
+  ]);
 
   let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
   try {
@@ -84,7 +87,7 @@ export default async function TenantAdminLayout({
   if (clinicOsShellEnabled) {
     return (
       <div style={buildBrandingCssVariables(effective)}>
-        <ClinicOsShell tenantId={tenantId} base={base} showCrmNav={showCrmNav} effective={effective}>
+        <ClinicOsShell tenantId={tenantId} base={base} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} effective={effective}>
           {mainSurface}
         </ClinicOsShell>
         <div className="mx-auto max-w-[1600px] px-3 sm:px-4 lg:px-6">{footer}</div>
@@ -93,7 +96,7 @@ export default async function TenantAdminLayout({
   }
 
   return (
-    <FiTenantBrandFrame effective={effective} topSlot={<FiAdminTenantNav base={base} showCrmNav={showCrmNav} />}>
+    <FiTenantBrandFrame effective={effective} topSlot={<FiAdminTenantNav base={base} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />}>
       {mainSurface}
       {footer}
     </FiTenantBrandFrame>

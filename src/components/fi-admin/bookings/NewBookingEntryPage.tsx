@@ -7,15 +7,17 @@ import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard"
 
 type NewBookingEntryPageProps = {
   tenantId: string;
-  /** When false, CRM- and booking-board paths are shown disabled with guidance (mirrors CRM shell nav). */
+  /** CRM leads + full CRM shell (fi_admin, admin, crm_operator). */
   showCrmNav: boolean;
+  /** Bookings operator + scheduling entry (CRM shell roles or active `fi_staff` member). */
+  showBookingsBoard: boolean;
 };
 
 /**
  * Stage 1E: safe booking pathway launcher (UI only). No inserts or server actions.
  * Shown under `/fi-admin/[tenantId]/bookings/new` for staff choosing how to proceed.
  */
-export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPageProps) {
+export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }: NewBookingEntryPageProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
   const crmHref = `${base}/crm`;
   const bookingsHref = `${base}/bookings`;
@@ -80,7 +82,7 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
           </FiCard>
         )}
 
-        {showCrmNav ? (
+        {showBookingsBoard ? (
           <FiQuickActionCard
             title="Create consultation booking"
             description="Use this for new consultations, assessments, or follow-up appointments."
@@ -94,7 +96,8 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
               Use this for new consultations, assessments, or follow-up appointments.
             </p>
             <p className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs leading-snug text-amber-950">
-              CRM workspace access is required for bookings. Ask an administrator if you need this path.
+              Scheduling access requires an Administrator or CRM operator role, or an active link to this tenant in Staff.
+              Ask an administrator if you need this path.
             </p>
             <button
               type="button"

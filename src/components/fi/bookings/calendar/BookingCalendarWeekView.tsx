@@ -75,6 +75,7 @@ export function BookingCalendarWeekView({
                       booking={b}
                       assignees={assignees}
                       layout={layout}
+                      calendarTimezone={lane.timeZone}
                       onClick={() => onSelectBooking(b)}
                     />
                   );

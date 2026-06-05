@@ -107,6 +107,8 @@ export type WeekViewProps = {
     query: ParsedCalendarQuery;
     addAppointmentHref: string;
   };
+  /** Click an empty time cell to open quick booking (parent supplies modal). */
+  onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
 };
 
 type CalendarColumn = {
@@ -157,6 +159,7 @@ function WeekViewInner({
   onRescheduleBooking,
   pendingAppointmentIds,
   shortcuts,
+  onEmptySlotClick,
 }: WeekViewProps) {
   const router = useRouter();
   const bodyHeightPx = calendarGridBodyHeightPx();
@@ -438,6 +441,7 @@ function WeekViewInner({
           pendingAppointmentIds={pendingAppointmentIds}
           onSelectAppointment={onSelectBooking}
           onResizeAppointment={onResizeAppointment}
+          onEmptySlotClick={onEmptySlotClick}
         />
       );
     },
@@ -451,6 +455,7 @@ function WeekViewInner({
       highlightedColumnId,
       lanes,
       layoutMode,
+      onEmptySlotClick,
       onResizeAppointment,
       onSelectBooking,
       pendingAppointmentIds,

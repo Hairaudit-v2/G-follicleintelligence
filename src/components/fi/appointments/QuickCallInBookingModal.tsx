@@ -26,6 +26,10 @@ export type QuickCallInBookingModalProps = {
   calendarTimezone?: string;
   /** Optional `YYYY-MM-DDTHH:mm` in `calendarTimezone` to prefill start. */
   initialLocalStart?: string | null;
+  /** Prefill clinic when opening from a site column. */
+  initialClinicId?: string | null;
+  /** Prefill assignee (`fi_users.id`) when opening from a staff column with a linked user. */
+  initialAssignedUserId?: string | null;
   clinics?: CrmShellClinicOption[];
   assignees?: CrmShellUserPickerOption[];
   adminKey?: string;
@@ -41,6 +45,8 @@ export function QuickCallInBookingModal({
   onClose,
   calendarTimezone = QUICK_CALL_IN_DEFAULT_TIMEZONE,
   initialLocalStart,
+  initialClinicId = null,
+  initialAssignedUserId = null,
   clinics = [],
   assignees = [],
   adminKey = "",
@@ -70,10 +76,10 @@ export function QuickCallInBookingModal({
     setLocalStart(base);
     setBookingType("consultation");
     setNotes("");
-    setClinicId("");
-    setAssignedUserId("");
+    setClinicId(initialClinicId?.trim() ?? "");
+    setAssignedUserId(initialAssignedUserId?.trim() ?? "");
     setError(null);
-  }, [initialLocalStart, tz]);
+  }, [initialAssignedUserId, initialClinicId, initialLocalStart, tz]);
 
   useEffect(() => {
     if (!open) return;

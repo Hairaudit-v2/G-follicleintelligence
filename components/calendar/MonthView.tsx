@@ -290,12 +290,15 @@ function MonthAppointmentPill({
   draggable,
   isPendingSave,
   onSelect,
+  calendarTimezone,
 }: {
   booking: FiBookingRow;
   label: string;
   draggable: boolean;
   isPendingSave?: boolean;
   onSelect: () => void;
+  /** Grid / tenant clinic IANA zone when `booking.timezone` is unset. */
+  calendarTimezone: string;
 }) {
   const meta = booking.metadata ?? {};
   const isVirtual = Boolean(meta.is_virtual ?? meta.virtual ?? meta.zoom);
@@ -305,7 +308,7 @@ function MonthAppointmentPill({
     isVirtual,
   });
   const Icon = appointmentStyle.icon;
-  const time = formatPillTime(booking.start_at, booking.timezone);
+  const time = formatPillTime(booking.start_at, booking.timezone, calendarTimezone);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: booking.id,
@@ -363,6 +366,7 @@ function MonthDayCell({
   pendingAppointmentIds,
   onDayClick,
   onSelectBooking,
+  calendarTimezone,
 }: {
   cell: MonthGridCell;
   dayBookings: FiBookingRow[];
@@ -373,6 +377,7 @@ function MonthDayCell({
   pendingAppointmentIds?: ReadonlySet<string>;
   onDayClick: (dayKey: string) => void;
   onSelectBooking: (b: FiBookingRow) => void;
+  calendarTimezone: string;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: monthDayDropId(cell.dayKey),
@@ -449,6 +454,7 @@ function MonthDayCell({
               label={label}
               draggable={draggableAppointments}
               isPendingSave={pendingAppointmentIds?.has(booking.id)}
+              calendarTimezone={calendarTimezone}
               onSelect={() => onSelectBooking(booking)}
             />
           );
@@ -734,6 +740,7 @@ function MonthViewInner({
                   pendingAppointmentIds={pendingAppointmentIds}
                   onDayClick={openDay}
                   onSelectBooking={onSelectBooking}
+                  calendarTimezone={gridConfig.timeZone}
                 />
               ))}
             </motion.div>

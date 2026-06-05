@@ -5,7 +5,7 @@ import { UniversalPatientRecord } from "@/src/components/fi/UniversalPatientReco
 import { PatientDetailPageView } from "@/src/components/fi/patients/detail/PatientDetailPageView";
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { loadUniversalPatientRecord } from "@/src/lib/fi/foundation/patientRecord";
-import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsOperatorPageSession } from "@/src/lib/crm/crmShellAccess";
 import { loadPatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
 import { parsePatientDetailTab } from "@/src/lib/patients/patientDetailTabs";
 import { parsePatientPreviewSearchParam } from "@/src/lib/patients/patientPreviewQuery";
@@ -40,7 +40,7 @@ export default async function PatientProfileRoutePage({
     return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
   }
 
-  const session = await getCrmShellPageSession(tenantId);
+  const session = await getBookingsOperatorPageSession(tenantId);
   const sp = (await searchParams) ?? {};
   const previewPatientId = parsePatientPreviewSearchParam(sp.preview);
   const activeTab = parsePatientDetailTab(sp.tab);

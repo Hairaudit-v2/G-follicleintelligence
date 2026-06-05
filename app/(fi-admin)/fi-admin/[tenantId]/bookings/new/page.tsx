@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { NewBookingEntryPage } from "@/src/components/fi-admin/bookings/NewBookingEntryPage";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
@@ -16,7 +16,10 @@ export default async function NewBookingEntryRoutePage({ params }: { params: Pro
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
-  const showCrmNav = await getCrmShellNavAllowed(tenantId);
+  const [showCrmNav, showBookingsBoard] = await Promise.all([
+    getCrmShellNavAllowed(tenantId),
+    getBookingsBoardNavAllowed(tenantId),
+  ]);
 
-  return <NewBookingEntryPage tenantId={tenantId} showCrmNav={showCrmNav} />;
+  return <NewBookingEntryPage tenantId={tenantId} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />;
 }

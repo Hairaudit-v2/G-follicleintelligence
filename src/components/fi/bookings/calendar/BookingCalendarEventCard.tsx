@@ -5,6 +5,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingTypeCalendarEventClasses, bookingTypeCalendarLegendLabel } from "@/src/lib/bookings/calendarLabels";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
+import { formatTimeRangeInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 
 function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
   if (!id) return "Unassigned";
@@ -17,16 +18,18 @@ export function BookingCalendarEventCard({
   assignees,
   layout,
   onClick,
+  /** Same IANA zone as the day column (tenant clinic clock). */
+  calendarTimezone,
 }: {
   booking: FiBookingRow;
   assignees: CrmShellUserPickerOption[];
   layout: { topPx: number; heightPx: number };
   onClick: () => void;
+  calendarTimezone?: string | null;
 }) {
   const tone = bookingTypeCalendarEventClasses(booking.booking_type);
-  const range = `${new Date(booking.start_at).toLocaleTimeString(undefined, { timeStyle: "short" })}–${new Date(
-    booking.end_at
-  ).toLocaleTimeString(undefined, { timeStyle: "short" })}`;
+  const tz = normalizeCalendarTimezone(calendarTimezone ?? booking.timezone);
+  const range = formatTimeRangeInTimezone(booking.start_at, booking.end_at, tz);
 
   return (
     <button

@@ -7,11 +7,11 @@ import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard"
 
 type NewPatientEntryPageProps = {
   tenantId: string;
-  /** When false, lead and booking paths are shown disabled with guidance. */
   showCrmNav: boolean;
+  showBookingsBoard: boolean;
 };
 
-export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPageProps) {
+export function NewPatientEntryPage({ tenantId, showCrmNav, showBookingsBoard }: NewPatientEntryPageProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
   const crmHref = `${base}/crm`;
   const bookingsHref = `${base}/bookings/new`;
@@ -60,7 +60,7 @@ export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPag
           </FiCard>
         )}
 
-        {showCrmNav ? (
+        {showBookingsBoard ? (
           <FiQuickActionCard
             title="Create from booking"
             description="Best when the patient is ready to book a consultation or treatment."
@@ -74,7 +74,8 @@ export function NewPatientEntryPage({ tenantId, showCrmNav }: NewPatientEntryPag
               Best when the patient is ready to book a consultation or treatment.
             </p>
             <p className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs leading-snug text-amber-950">
-              CRM workspace access is required for bookings. Ask an administrator if you need this path.
+              Scheduling access requires an Administrator or CRM operator role, or an active link to this tenant in Staff.
+              Ask an administrator if you need this path.
             </p>
             <button
               type="button"

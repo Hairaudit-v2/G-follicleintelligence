@@ -19,7 +19,7 @@ function linkActive(pathname: string, href: string, isHome?: boolean): boolean {
   return p === h || p.startsWith(`${h}/`);
 }
 
-function buildNavItems(base: string, showCrmNav: boolean): NavItem[] {
+function buildNavItems(base: string, showCrmNav: boolean, showBookingsBoard: boolean): NavItem[] {
   const items: NavItem[] = [
     { href: base, label: "Home", home: true },
     { href: `${base}/cases`, label: "Patients" },
@@ -38,6 +38,11 @@ function buildNavItems(base: string, showCrmNav: boolean): NavItem[] {
       { href: `${base}/calendar`, label: "Calendar" },
       { href: `${base}/system-status`, label: "System Status" },
     );
+  } else if (showBookingsBoard) {
+    items.push(
+      { href: `${base}/bookings`, label: "Bookings" },
+      { href: `${base}/calendar`, label: "Calendar" },
+    );
   }
   return items;
 }
@@ -52,11 +57,19 @@ const linkActiveClass =
   "bg-[#22C1FF]/12 text-[#22C1FF] shadow-[inset_0_-2px_0_0_rgba(34,193,255,0.85)] ring-1 ring-[#22C1FF]/25";
 
 /**
- * Tenant FI Admin primary nav — dark bar, cyan active affordance. Link set mirrors server layout (role-based via showCrmNav).
+ * Tenant FI Admin primary nav — dark bar, cyan active affordance. Link set mirrors server layout (role-based via showCrmNav / showBookingsBoard).
  */
-export function FiAdminTenantNav({ base, showCrmNav }: { base: string; showCrmNav: boolean }) {
+export function FiAdminTenantNav({
+  base,
+  showCrmNav,
+  showBookingsBoard = showCrmNav,
+}: {
+  base: string;
+  showCrmNav: boolean;
+  showBookingsBoard?: boolean;
+}) {
   const pathname = usePathname() ?? "";
-  const items = buildNavItems(base, showCrmNav);
+  const items = buildNavItems(base, showCrmNav, showBookingsBoard);
 
   return (
     <nav className={navBarClass} aria-label="Tenant admin">

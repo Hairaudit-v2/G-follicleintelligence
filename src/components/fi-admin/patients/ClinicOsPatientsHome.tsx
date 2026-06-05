@@ -9,8 +9,10 @@ import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard"
 
 type ClinicOsPatientsHomeProps = {
   tenantId: string;
-  /** From `getCrmShellNavAllowed` — enables booking and CRM lead shortcuts. */
+  /** From `getCrmShellNavAllowed` — enables CRM lead shortcuts. */
   showCrmNav: boolean;
+  /** From `getBookingsBoardNavAllowed` — enables booking launcher. */
+  showBookingsBoard: boolean;
   /** When true, “Open search” can trigger the shell global search dialog. */
   clinicOsShellEnabled: boolean;
 };
@@ -18,7 +20,12 @@ type ClinicOsPatientsHomeProps = {
 /**
  * Clinic OS patients landing (Stage 1I): navigation and placeholders only — no patient list query.
  */
-export function ClinicOsPatientsHome({ tenantId, showCrmNav, clinicOsShellEnabled }: ClinicOsPatientsHomeProps) {
+export function ClinicOsPatientsHome({
+  tenantId,
+  showCrmNav,
+  showBookingsBoard,
+  clinicOsShellEnabled,
+}: ClinicOsPatientsHomeProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
 
   return (
@@ -91,9 +98,9 @@ export function ClinicOsPatientsHome({ tenantId, showCrmNav, clinicOsShellEnable
               <FiQuickActionCard
                 title="Book appointment"
                 description="Open the booking launcher for this clinic."
-                href={showCrmNav ? `${base}/bookings/new` : undefined}
-                disabled={!showCrmNav}
-                disabledReason="Bookings require CRM workspace access (fi_admin or crm_operator)."
+                href={showBookingsBoard ? `${base}/bookings/new` : undefined}
+                disabled={!showBookingsBoard}
+                disabledReason="Bookings require scheduling access (admin/CRM operator or active staff link)."
               />
               <FiQuickActionCard
                 title="Create lead"

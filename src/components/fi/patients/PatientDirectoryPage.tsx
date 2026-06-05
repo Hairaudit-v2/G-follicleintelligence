@@ -9,10 +9,12 @@ export function PatientDirectoryPage({
   tenantId,
   data,
   showCrmNav,
+  showBookingsBoard,
 }: {
   tenantId: string;
   data: PatientDirectoryPageResult;
   showCrmNav: boolean;
+  showBookingsBoard: boolean;
 }) {
   const { rows, total, query, summary } = data;
   const filtered = patientDirectoryHasActiveFilters(query);
@@ -28,9 +30,15 @@ export function PatientDirectoryPage({
             Searchable patient directory — click a name for a quick preview, or open the full profile.
           </p>
           <p className="text-sm text-gray-600">
-            <Link href={`${base}/crm`} className="text-blue-600 hover:underline">
-              ← CRM
-            </Link>
+            {showCrmNav ? (
+              <Link href={`${base}/crm`} className="text-blue-600 hover:underline">
+                ← CRM
+              </Link>
+            ) : (
+              <span className="text-gray-400" title="CRM workspace is not enabled for your role">
+                CRM
+              </span>
+            )}
             <span className="mx-2 text-gray-300">·</span>
             <Link href={`${base}/appointments`} className="text-blue-600 hover:underline">
               Appointments
@@ -49,7 +57,7 @@ export function PatientDirectoryPage({
           >
             New patient
           </Link>
-          {showCrmNav ? (
+          {showBookingsBoard ? (
             <Link
               href={`${base}/bookings/new`}
               className="rounded bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-700"
@@ -59,9 +67,9 @@ export function PatientDirectoryPage({
           ) : (
             <span
               className="rounded border border-dashed border-gray-300 px-3 py-1.5 text-xs text-gray-500"
-              title="Bookings require CRM workspace access"
+              title="Bookings require scheduling access (admin/CRM operator or active staff link)"
             >
-              Book appointment (CRM access)
+              Book appointment (no access)
             </span>
           )}
         </div>

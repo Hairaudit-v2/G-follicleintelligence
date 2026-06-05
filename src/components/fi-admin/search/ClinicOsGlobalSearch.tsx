@@ -28,6 +28,7 @@ type ClinicOsGlobalSearchProps = {
   tenantId: string;
   base: string;
   showCrmNav: boolean;
+  showBookingsBoard?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -41,7 +42,14 @@ function useDebouncedValue<T>(value: T, ms: number): T {
   return debounced;
 }
 
-export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenChange }: ClinicOsGlobalSearchProps) {
+export function ClinicOsGlobalSearch({
+  tenantId,
+  base,
+  showCrmNav,
+  showBookingsBoard = showCrmNav,
+  open,
+  onOpenChange,
+}: ClinicOsGlobalSearchProps) {
   const tid = tenantId.trim();
   const dialogRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -398,7 +406,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                 </Link>
               </li>
               <li>
-                {showCrmNav ? (
+                {showBookingsBoard ? (
                   <Link
                     href={newBookingHref}
                     onClick={() => onOpenChange(false)}
@@ -410,7 +418,7 @@ export function ClinicOsGlobalSearch({ tenantId, base, showCrmNav, open, onOpenC
                 ) : (
                   <span
                     className="flex cursor-not-allowed items-center justify-between rounded-lg px-2 py-2 text-sm text-slate-400"
-                    title="Requires CRM workspace access"
+                    title="Requires scheduling access (admin/CRM operator or active staff link)"
                   >
                     New Booking
                   </span>
