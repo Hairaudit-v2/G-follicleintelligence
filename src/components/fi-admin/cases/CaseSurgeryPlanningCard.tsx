@@ -1,3 +1,4 @@
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { surgeryPlanningStatusLabel } from "@/src/lib/cases/surgeryPlanningLabels";
 import { CaseSurgeryPlanningForm } from "./CaseSurgeryPlanningForm";
@@ -12,10 +13,15 @@ export function CaseSurgeryPlanningCard({
   plan: CaseSurgeryPlanRow | null;
 }) {
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">Surgery planning foundation</h2>
+          <h2
+            id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.surgeryPlanning)}
+            className="text-sm font-semibold text-gray-900"
+          >
+            Surgery planning foundation
+          </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5B readiness only: summary, zones, procedure/session intent, estimated graft range, strategy notes, and
             planning status. No procedure-day workflow, live graft tallying, audits, or outcomes.
@@ -34,6 +40,6 @@ export function CaseSurgeryPlanningCard({
       <div className="mt-4 border-t border-gray-100 pt-4">
         <CaseSurgeryPlanningForm tenantId={tenantId} caseId={caseId} initial={plan} />
       </div>
-    </section>
+    </div>
   );
 }

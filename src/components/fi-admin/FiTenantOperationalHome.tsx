@@ -18,14 +18,16 @@ export function FiTenantOperationalHome(props: {
 
   return (
     <div className="space-y-8 pb-14 sm:space-y-10 sm:pb-16">
-      <DashboardCard elevated className="relative overflow-hidden p-6 sm:p-8">
+      <DashboardCard elevated className="relative overflow-hidden p-6 sm:p-8" role="region" aria-labelledby="tenant-home-heading">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_280px_at_0%_0%,rgba(34,193,255,0.12),transparent_55%),radial-gradient(400px_200px_at_100%_100%,rgba(124,58,237,0.08),transparent_50%)]"
           aria-hidden
         />
         <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">Tenant home</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">{data.tenantName}</h1>
+          <h1 id="tenant-home-heading" className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            {data.tenantName}
+          </h1>
           <p className="mt-2 max-w-2xl text-base leading-relaxed text-[#94A3B8]">
             Operational overview for the next few days — bookings, CRM hygiene, tasks, and quick actions. Data is scoped to
             this tenant via server loaders.

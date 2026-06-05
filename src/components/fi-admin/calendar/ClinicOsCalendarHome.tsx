@@ -256,6 +256,7 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
 
       <FiCard className="sm:p-5" aria-describedby="clinic-os-calendar-preview-note">
         <FiPageHeader
+          titleId="clinic-os-calendar-page-heading"
           title="Calendar"
           description="View bookings, consultations, treatments and surgery-related appointments."
           leading={
@@ -370,7 +371,11 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
         </FiSection>
 
         <aside className="w-full shrink-0 space-y-4 lg:w-72" aria-label="Calendar tools and filters">
-          <FiSection title="Quick actions" description="Jump to common workflows">
+          <FiSection
+            title="Quick actions"
+            description="Jump to common workflows"
+            headingId="clinic-os-calendar-quick-actions-heading"
+          >
             <div className="space-y-2">
               <FiQuickActionCard
                 className="min-h-0 py-3 sm:min-h-0"
@@ -407,7 +412,7 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
             </div>
           </FiSection>
 
-          <FiSection title="Staff view" description="Filter by role (preview)">
+          <FiSection title="Staff view" description="Filter by role (preview)" headingId="clinic-os-calendar-staff-heading">
             <div className="space-y-1.5">
               <PlaceholderChip label="All staff" />
               <PlaceholderChip label="Doctor" />
@@ -416,7 +421,11 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
             </div>
           </FiSection>
 
-          <FiSection title="Rooms & resources" description="Location filters (preview)">
+          <FiSection
+            title="Rooms & resources"
+            description="Location filters (preview)"
+            headingId="clinic-os-calendar-rooms-heading"
+          >
             <div className="space-y-1.5">
               <PlaceholderChip label="Consultation room" />
               <PlaceholderChip label="Treatment room" />

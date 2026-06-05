@@ -1,10 +1,13 @@
 import Link from "next/link";
 import type { CaseLeadLink } from "@/src/lib/cases/caseLoaders";
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 
 export function CaseLinkedLeadCard({ tenantId, leads }: { tenantId: string; leads: CaseLeadLink[] }) {
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Linked CRM leads</h2>
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.lead)} className="text-sm font-semibold text-gray-900">
+        Linked CRM leads
+      </h2>
       {leads.length === 0 ? (
         <p className="mt-2 text-sm text-gray-500">No CRM leads reference this case.</p>
       ) : (
@@ -21,6 +24,6 @@ export function CaseLinkedLeadCard({ tenantId, leads }: { tenantId: string; lead
           ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }

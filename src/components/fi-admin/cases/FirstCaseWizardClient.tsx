@@ -174,8 +174,13 @@ export function FirstCaseWizardClient({
       ) : null}
 
       {step === 1 ? (
-        <section className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-900">Step 1 — Select clinic</h2>
+        <section
+          className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
+          aria-labelledby="first-case-wizard-step-1-heading"
+        >
+          <h2 id="first-case-wizard-step-1-heading" className="text-sm font-medium text-gray-900">
+            Step 1 — Select clinic
+          </h2>
           <label className="block text-sm text-gray-700">
             Clinic
             <select
@@ -201,8 +206,13 @@ export function FirstCaseWizardClient({
       ) : null}
 
       {step === 2 ? (
-        <section className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-900">Step 2 — Person / patient</h2>
+        <section
+          className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
+          aria-labelledby="first-case-wizard-step-2-heading"
+        >
+          <h2 id="first-case-wizard-step-2-heading" className="text-sm font-medium text-gray-900">
+            Step 2 — Person / patient
+          </h2>
           <p className="text-xs text-gray-500">
             Contact details are stored on <code className="text-[11px]">fi_persons.metadata</code> for this admin
             workflow (foundation layer).
@@ -247,8 +257,13 @@ export function FirstCaseWizardClient({
       ) : null}
 
       {step === 3 ? (
-        <section className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-900">Step 3 — Case</h2>
+        <section
+          className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm"
+          aria-labelledby="first-case-wizard-step-3-heading"
+        >
+          <h2 id="first-case-wizard-step-3-heading" className="text-sm font-medium text-gray-900">
+            Step 3 — Case
+          </h2>
           <label className="block text-sm text-gray-700">
             Case type
             <input

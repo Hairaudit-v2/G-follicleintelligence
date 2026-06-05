@@ -1,3 +1,4 @@
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 import type { CaseProcedureRow, FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { CaseProcedureDayForm } from "./CaseProcedureDayForm";
@@ -14,10 +15,15 @@ export function CaseProcedureDayCard({
   teamUserOptions: FiUserPickerOption[];
 }) {
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">Procedure day workflow</h2>
+          <h2
+            id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.procedureDay)}
+            className="text-sm font-semibold text-gray-900"
+          >
+            Procedure day workflow
+          </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5C: structured procedure-day record (timing, team, technique, counts, notes). This is not HairAudit
             scoring or formal surgical audit grading — post-op and qualitative outcomes live in Stage 5D below.
@@ -37,6 +43,6 @@ export function CaseProcedureDayCard({
       <div className="mt-4 border-t border-gray-100 pt-4">
         <CaseProcedureDayForm tenantId={tenantId} caseId={caseId} initial={procedure} teamUserOptions={teamUserOptions} />
       </div>
-    </section>
+    </div>
   );
 }

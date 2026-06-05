@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateCaseProfileAction } from "@/lib/actions/fi-case-actions";
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 import { FI_CASE_STATUS_VALUES, isFiCaseStatus } from "@/src/lib/cases/caseTypes";
 
 export type CaseSummaryCardModel = {
@@ -43,8 +44,10 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
   }, [status, treatmentType, caseType, initial.status, initial.treatment_type, initial.case_type]);
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Case summary</h2>
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.summary)} className="text-sm font-semibold text-gray-900">
+        Case summary
+      </h2>
       <p className="mt-1 text-xs text-gray-500">
         Stage 5A profile fields. Graft planning, procedure-day workflow, and audit scoring ship in later stages.
       </p>
@@ -155,6 +158,6 @@ export function CaseSummaryCard({ tenantId, initial }: { tenantId: string; initi
       >
         {pending ? "Saving…" : "Save profile fields"}
       </button>
-    </section>
+    </div>
   );
 }

@@ -62,7 +62,9 @@ export default async function CasesIndexRoutePage({
     <div className="mx-auto max-w-6xl space-y-6 py-2">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Cases</h1>
+          <h1 id="cases-index-heading" className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
+            Cases
+          </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#94A3B8] sm:text-base">
             SurgeryOS worklist (Stage 5H): tenant-scoped cases with URL pagination, search, filters, and readiness
             summaries — read-only list; open a case for 5A–5G detail. No HairAudit, audit grading, AI scoring, or
@@ -82,6 +84,7 @@ export default async function CasesIndexRoutePage({
         </div>
       </div>
 
+      <section aria-labelledby="cases-index-heading">
       <CasesWorklistView
         tenantId={tenantId}
         query={{ ...query, page: pagination.page, pageSize: pagination.pageSize }}
@@ -99,6 +102,7 @@ export default async function CasesIndexRoutePage({
           rangeEnd: pagination.rangeEnd,
         }}
       />
+      </section>
     </div>
   );
 }

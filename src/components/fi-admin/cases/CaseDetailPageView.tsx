@@ -77,7 +77,9 @@ export function CaseDetailPageView({
 
       <div>
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <h1 className="text-lg font-semibold text-gray-900">Treatment case</h1>
+          <h1 id="case-detail-page-heading" className="text-lg font-semibold text-gray-900">
+            Treatment case
+          </h1>
           <Link
             href={caseSummaryDocumentPageHref(tenantId, detail.id, casesListReturnQuery)}
             className="shrink-0 text-sm font-medium text-blue-600 hover:underline"

@@ -202,7 +202,7 @@ export function OperationalCalendarPage({
       />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
-        <FiSection title="Workspace" description="Jump to related areas">
+        <FiSection title="Workspace" description="Jump to related areas" headingId="operational-calendar-workspace-heading">
           <div className="grid gap-2 sm:grid-cols-2">
             <FiQuickActionCard
               title="New booking"
@@ -229,7 +229,7 @@ export function OperationalCalendarPage({
             <FiQuickActionCard title="Cases" description="Clinical worklists" href={`${base}/cases`} showOpenAffordance={false} />
           </div>
         </FiSection>
-        <FiSection title="Details" description="Booking actions">
+        <FiSection title="Details" description="Booking actions" headingId="operational-calendar-details-heading">
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Select a booking on the grid or list to view anchors, status, and shortcuts. Use{" "}
             <span className="font-medium">Full edit</span> for type, assignee, and site changes.

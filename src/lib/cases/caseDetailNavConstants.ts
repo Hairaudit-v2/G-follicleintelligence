@@ -15,6 +15,11 @@ export const CASE_DETAIL_SECTION_IDS = {
 
 export type CaseDetailSectionId = (typeof CASE_DETAIL_SECTION_IDS)[keyof typeof CASE_DETAIL_SECTION_IDS];
 
+/** Stable heading id for `aria-labelledby` on case detail section landmarks. */
+export function caseDetailSectionHeadingId(sectionId: CaseDetailSectionId): string {
+  return `${sectionId}-heading`;
+}
+
 /** Order matches main page layout top-to-bottom. */
 export const CASE_DETAIL_NAV_SECTIONS: { id: CaseDetailSectionId; label: string }[] = [
   { id: CASE_DETAIL_SECTION_IDS.summary, label: "Summary" },

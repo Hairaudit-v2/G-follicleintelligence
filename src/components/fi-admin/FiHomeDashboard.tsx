@@ -259,14 +259,16 @@ export function FiHomeDashboard({
       </section>
 
       {/* 5. Foundation integrity */}
-      <DashboardCard className="border-amber-500/20 bg-[#0F1629]/80 p-5 sm:p-6">
+      <DashboardCard className="border-amber-500/20 bg-[#0F1629]/80 p-5 sm:p-6" role="region" aria-labelledby="foundation-integrity-heading">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
           <div className="min-w-0 space-y-3">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200">
                 <Activity size={ICON_SM} strokeWidth={1.75} aria-hidden />
               </span>
-              <h2 className="text-lg font-semibold text-[#F8FAFC] sm:text-xl">Foundation Integrity</h2>
+              <h2 id="foundation-integrity-heading" className="text-lg font-semibold text-[#F8FAFC] sm:text-xl">
+                Foundation Integrity
+              </h2>
             </div>
             <p className="max-w-3xl text-base leading-relaxed text-[#94A3B8]">
               This screen is for <strong className="text-[#E2E8F0]">technical health</strong>,{" "}

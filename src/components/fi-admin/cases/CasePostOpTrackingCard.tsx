@@ -1,3 +1,4 @@
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 import type { CaseImageListItem } from "@/src/lib/cases/caseLoaders";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import { postOpStatusLabel } from "@/src/lib/cases/postOpLabels";
@@ -18,10 +19,15 @@ export function CasePostOpTrackingCard({
   imageOptions: CaseImageListItem[];
 }) {
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">Post-op / outcome tracking</h2>
+          <h2
+            id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.postOp)}
+            className="text-sm font-semibold text-gray-900"
+          >
+            Post-op / outcome tracking
+          </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5D: recovery notes, follow-ups, complications, satisfaction, and qualitative outcomes. This is not
             HairAudit scoring, formal surgical audit grading, automated graft survival, AI outcome scoring, or
@@ -43,6 +49,6 @@ export function CasePostOpTrackingCard({
         <CasePostOpTrackingForm tenantId={tenantId} caseId={caseId} initial={tracking} />
         <CaseFollowUpsPanel tenantId={tenantId} caseId={caseId} followUps={followUps} imageOptions={imageOptions} />
       </div>
-    </section>
+    </div>
   );
 }

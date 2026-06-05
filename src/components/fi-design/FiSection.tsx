@@ -45,7 +45,7 @@ export function FiSection({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h2
-            id={headingId}
+            {...(headingId ? { id: headingId } : {})}
             className={
               darkHeading
                 ? "text-sm font-semibold text-[#F8FAFC]"

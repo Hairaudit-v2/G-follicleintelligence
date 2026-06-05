@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateCaseProfileAction } from "@/lib/actions/fi-case-actions";
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 
 export function CasePlanningNotesPanel({
   tenantId,
@@ -27,8 +28,10 @@ export function CasePlanningNotesPanel({
   const dirty = useMemo(() => notes !== (initialPlanningNotes ?? ""), [notes, initialPlanningNotes]);
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Planning notes</h2>
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <h2 id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.notes)} className="text-sm font-semibold text-gray-900">
+        Planning notes
+      </h2>
       <p className="mt-1 text-xs text-gray-500">
         High-level coordination and clinical intent — not graft counts or surgical audit scoring (Stage 5B+).
       </p>
@@ -61,6 +64,6 @@ export function CasePlanningNotesPanel({
       >
         {pending ? "Saving…" : "Save planning notes"}
       </button>
-    </section>
+    </div>
   );
 }

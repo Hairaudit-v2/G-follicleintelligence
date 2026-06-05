@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CaseImageListItem } from "@/src/lib/cases/caseLoaders";
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 
 export function CaseImagesCard({
   tenantId,
@@ -11,9 +12,14 @@ export function CaseImagesCard({
   images: CaseImageListItem[];
 }) {
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold text-gray-900">Linked patient images</h2>
+        <h2
+          id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.images)}
+          className="text-sm font-semibold text-gray-900"
+        >
+          Linked patient images
+        </h2>
         {patientId ? (
           <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-xs text-blue-600 hover:underline">
             Patient images
@@ -36,6 +42,6 @@ export function CaseImagesCard({
           ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }

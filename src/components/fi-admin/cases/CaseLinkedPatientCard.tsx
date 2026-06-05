@@ -1,10 +1,16 @@
 import Link from "next/link";
 import type { CasePatientLink } from "@/src/lib/cases/caseLoaders";
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 
 export function CaseLinkedPatientCard({ tenantId, patient }: { tenantId: string; patient: CasePatientLink | null }) {
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Linked patient / person</h2>
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <h2
+        id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.patient)}
+        className="text-sm font-semibold text-gray-900"
+      >
+        Linked patient / person
+      </h2>
       {!patient ? (
         <p className="mt-2 text-sm text-gray-500">No foundation patient is linked to this case yet.</p>
       ) : (
@@ -32,6 +38,6 @@ export function CaseLinkedPatientCard({ tenantId, patient }: { tenantId: string;
           </div>
         </dl>
       )}
-    </section>
+    </div>
   );
 }

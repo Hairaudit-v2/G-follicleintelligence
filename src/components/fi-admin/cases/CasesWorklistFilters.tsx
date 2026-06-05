@@ -30,7 +30,15 @@ export function CasesWorklistFilters({
   const postOpOpts = mergeOptions(POST_OP_STATUS_VALUES, filterOptions.post_op_statuses);
 
   return (
-    <form method="get" action={basePath} className="rounded border border-gray-200 bg-gray-50/80 p-4">
+    <form
+      method="get"
+      action={basePath}
+      className="rounded border border-gray-200 bg-gray-50/80 p-4"
+      aria-labelledby="cases-worklist-filters-heading"
+    >
+      <h2 id="cases-worklist-filters-heading" className="sr-only">
+        Filter and search cases
+      </h2>
       <input type="hidden" name="pageSize" value={String(query.pageSize)} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <label className="block text-xs font-medium text-gray-700 sm:col-span-2">

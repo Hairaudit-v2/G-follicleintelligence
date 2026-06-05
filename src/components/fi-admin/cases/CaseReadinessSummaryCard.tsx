@@ -1,6 +1,7 @@
 "use client";
 
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
+import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
 import { CaseReadinessChecklist } from "./CaseReadinessChecklist";
 
 export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessReport }) {
@@ -9,10 +10,15 @@ export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessRepo
   const warnMore = warnings.length - warnShow.length;
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">SurgeryOS readiness</h2>
+          <h2
+            id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.readiness)}
+            className="text-sm font-semibold text-gray-900"
+          >
+            SurgeryOS readiness
+          </h2>
           <p className="mt-1 max-w-3xl text-xs text-gray-500">
             Stage 5F: read-only checklist from data already on this page — no new writes, no HairAudit or audit
             scoring, no AI or certification scores, no graft survival math.
@@ -54,6 +60,6 @@ export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessRepo
         <p className="mb-3 text-xs font-medium text-gray-800">Section health</p>
         <CaseReadinessChecklist sections={sections} />
       </div>
-    </section>
+    </div>
   );
 }

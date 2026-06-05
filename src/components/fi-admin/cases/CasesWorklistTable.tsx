@@ -26,7 +26,10 @@ export function CasesWorklistTable({
 
   return (
     <div className="hidden overflow-x-auto rounded border border-gray-200 bg-white shadow-sm md:block">
-      <table className="min-w-full text-sm">
+      <table className="min-w-full text-sm" aria-labelledby="cases-worklist-table-caption">
+        <caption id="cases-worklist-table-caption" className="sr-only">
+          Cases worklist with case reference, readiness, planning, procedure, post-op, media, bookings, and last updated
+        </caption>
         <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
           <tr>
             <th className="px-3 py-2">Case / person</th>
