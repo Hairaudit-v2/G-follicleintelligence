@@ -25,6 +25,13 @@ import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
+import {
+  addDaysToCalendarDate,
+  calendarDateStringFromInstant,
+  localMondayStartMsContaining,
+  normalizeCalendarTimezone,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 
 // ---------------------------------------------------------------------------
 // Types & helpers
@@ -55,20 +62,42 @@ const SECTION_LABELS: Record<SidebarAgendaSection, string> = {
 
 const TERMINAL_STATUSES = new Set(["completed", "cancelled", "no_show"]);
 
-function utcDayKey(ms: number): string {
-  return new Date(ms).toISOString().slice(0, 10);
-}
+export function partitionSidebarAgendaBookings(
+  bookings: FiBookingRow[],
+  now: Date = new Date(),
+  calendarTimezone?: string | null
+): SidebarAgendaGroups {
+  const tz = normalizeCalendarTimezone(calendarTimezone);
+  const todayKey = calendarDateStringFromInstant(now, tz);
+  const tomorrowKey = addDaysToCalendarDate(todayKey, 1, tz);
+  const startOfTodayMs = zonedMidnightUtcMs(todayKey, tz) ?? now.getTime();
+  const mondayMs = localMondayStartMsContaining(startOfTodayMs, tz);
+  const mondayKey = calendarDateStringFromInstant(new Date(mondayMs), tz);
+  const sundayKey = addDaysToCalendarDate(mondayKey, 6, tz);
 
-function utcMondayKey(now: Date): string {
-  const d = now.getUTCDay();
-  const offset = d === 0 ? -6 : 1 - d;
-  const monday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + offset, 0, 0, 0, 0);
-  return utcDayKey(monday);
-}
+  const today: FiBookingRow[] = [];
+  const tomorrow: FiBookingRow[] = [];
+  const thisWeek: FiBookingRow[] = [];
 
-function utcSundayKey(now: Date): string {
-  const mondayMs = Date.parse(`${utcMondayKey(now)}T00:00:00.000Z`);
-  return utcDayKey(mondayMs + 6 * 86_400_000);
+  const sorted = [...bookings]
+    .filter((b) => !isWaitlistBooking(b) && !isBookingCancelled(b) && !TERMINAL_STATUSES.has(b.booking_status))
+    .sort((a, b) => a.start_at.localeCompare(b.start_at));
+
+  for (const booking of sorted) {
+    const startMs = Date.parse(booking.start_at);
+    if (!Number.isFinite(startMs)) continue;
+    const dayKey = calendarDateStringFromInstant(new Date(startMs), tz);
+
+    if (dayKey === todayKey) {
+      today.push(booking);
+    } else if (dayKey === tomorrowKey) {
+      tomorrow.push(booking);
+    } else if (dayKey >= mondayKey && dayKey <= sundayKey && dayKey !== todayKey && dayKey !== tomorrowKey) {
+      thisWeek.push(booking);
+    }
+  }
+
+  return { today, tomorrow, thisWeek };
 }
 
 function isWaitlistBooking(booking: FiBookingRow): boolean {
@@ -98,40 +127,6 @@ export function deriveWaitlistFromBookings(bookings: FiBookingRow[]): SidebarWai
     });
 }
 
-export function partitionSidebarAgendaBookings(
-  bookings: FiBookingRow[],
-  now: Date = new Date()
-): SidebarAgendaGroups {
-  const todayKey = utcDayKey(now.getTime());
-  const tomorrowKey = utcDayKey(now.getTime() + 86_400_000);
-  const weekStartKey = utcMondayKey(now);
-  const weekEndKey = utcSundayKey(now);
-
-  const today: FiBookingRow[] = [];
-  const tomorrow: FiBookingRow[] = [];
-  const thisWeek: FiBookingRow[] = [];
-
-  const sorted = [...bookings]
-    .filter((b) => !isWaitlistBooking(b) && !isBookingCancelled(b) && !TERMINAL_STATUSES.has(b.booking_status))
-    .sort((a, b) => a.start_at.localeCompare(b.start_at));
-
-  for (const booking of sorted) {
-    const startMs = Date.parse(booking.start_at);
-    if (!Number.isFinite(startMs)) continue;
-    const dayKey = utcDayKey(startMs);
-
-    if (dayKey === todayKey) {
-      today.push(booking);
-    } else if (dayKey === tomorrowKey) {
-      tomorrow.push(booking);
-    } else if (dayKey >= weekStartKey && dayKey <= weekEndKey && dayKey !== todayKey && dayKey !== tomorrowKey) {
-      thisWeek.push(booking);
-    }
-  }
-
-  return { today, tomorrow, thisWeek };
-}
-
 export function waitlistDragId(id: string): string {
   return `${WAITLIST_DRAG_PREFIX}${id}`;
 }
@@ -145,10 +140,11 @@ export function parseWaitlistDragId(activeId: string): string | null {
 function formatTime(iso: string, timezone?: string | null): string {
   const d = new Date(iso);
   if (!Number.isFinite(d.getTime())) return iso;
+  const tz = normalizeCalendarTimezone(timezone);
   return d.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: timezone?.trim() || "UTC",
+    timeZone: tz,
   });
 }
 
@@ -166,10 +162,12 @@ function durationMin(booking: FiBookingRow): number {
 function AgendaMiniCard({
   booking,
   label,
+  clinicTimeZone,
   onClick,
 }: {
   booking: FiBookingRow;
   label: string;
+  clinicTimeZone?: string | null;
   onClick?: () => void;
 }) {
   const appointmentStyle = getAppointmentStyle({
@@ -194,7 +192,7 @@ function AgendaMiniCard({
         <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px] text-slate-500">
           <span className="inline-flex items-center gap-1 tabular-nums">
             <Clock className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-            {formatTime(booking.start_at, booking.timezone)}
+            {formatTime(booking.start_at, clinicTimeZone ?? booking.timezone)}
             {durationMin(booking) > 0 ? ` · ${durationMin(booking)}m` : ""}
           </span>
           <span className="truncate font-medium text-slate-600">{bookingStatusLabel(booking.booking_status)}</span>
@@ -326,6 +324,8 @@ function AgendaSection({
 export type SidebarAgendaProps = {
   bookings: FiBookingRow[];
   bookingDisplay?: Record<string, OperationalCalendarBookingDisplay>;
+  /** Tenant clinic clock (`fi_tenant_settings.default_timezone`). */
+  calendarTimezone?: string | null;
   waitlist?: SidebarWaitlistItem[];
   addAppointmentHref?: string;
   onAddAppointment?: () => void;
@@ -340,6 +340,7 @@ export type SidebarAgendaProps = {
 export function SidebarAgenda({
   bookings,
   bookingDisplay = {},
+  calendarTimezone,
   waitlist: waitlistProp,
   addAppointmentHref,
   onAddAppointment,
@@ -367,7 +368,10 @@ export function SidebarAgenda({
     onCollapsedChange?.(next);
   };
 
-  const groups = useMemo(() => partitionSidebarAgendaBookings(bookings), [bookings]);
+  const groups = useMemo(
+    () => partitionSidebarAgendaBookings(bookings, new Date(), calendarTimezone),
+    [bookings, calendarTimezone]
+  );
   const waitlist = waitlistProp ?? deriveWaitlistFromBookings(bookings);
 
   const totalUpcoming = groups.today.length + groups.tomorrow.length + groups.thisWeek.length;
@@ -490,6 +494,7 @@ export function SidebarAgenda({
                     key={booking.id}
                     booking={booking}
                     label={label}
+                    clinicTimeZone={calendarTimezone}
                     onClick={onSelectBooking ? () => onSelectBooking(booking) : undefined}
                   />
                 );

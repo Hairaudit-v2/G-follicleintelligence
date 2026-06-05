@@ -25,6 +25,7 @@ import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { parseAppointmentInvoicePreview } from "@/src/lib/bookings/appointmentInvoicePreview";
+import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -76,6 +77,8 @@ export type AppointmentCardProps = {
   animateEntry?: boolean;
   /** Saving server state after optimistic move — dims card and blocks drag. */
   isPendingSave?: boolean;
+  /** Tenant clinic IANA zone for time labels. */
+  calendarTimezone?: string | null;
 };
 
 const MotionCard = motion.create(Card);
@@ -106,7 +109,8 @@ function patientInitials(name: string): string {
 }
 
 function formatTimeRange(startAt: string, endAt: string, timezone?: string | null): string {
-  const opts: Intl.DateTimeFormatOptions = { timeStyle: "short", timeZone: timezone?.trim() || "UTC" };
+  const tz = normalizeCalendarTimezone(timezone);
+  const opts: Intl.DateTimeFormatOptions = { timeStyle: "short", timeZone: tz };
   const start = new Date(startAt).toLocaleTimeString(undefined, opts);
   const end = new Date(endAt).toLocaleTimeString(undefined, opts);
   return `${start} – ${end}`;
@@ -307,13 +311,14 @@ function AppointmentCardInner({
   touchFriendly = false,
   animateEntry = false,
   isPendingSave = false,
+  calendarTimezone,
 }: AppointmentCardProps) {
   const style = getAppointmentStyle(appointment);
   const darkProcedure = crmDarkProcedureClasses(style.procedureFamily);
   const ProcedureIcon = style.icon;
   const procedureLabel = style.procedureLabel;
   const durationMin = appointment.durationMin ?? durationFromRange(appointment.startAt, appointment.endAt);
-  const timeLabel = formatTimeRange(appointment.startAt, appointment.endAt);
+  const timeLabel = formatTimeRange(appointment.startAt, appointment.endAt, calendarTimezone);
   const priceLabel = formatPrice(appointment.price, appointment.currency);
 
   const isTerminal = dimTerminal && style.isTerminal;
@@ -598,6 +603,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   touchFriendly,
   animateEntry,
   isPendingSave,
+  calendarTimezone,
 }: {
   booking: FiBookingRow;
   display?: {
@@ -617,6 +623,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   animateEntry?: boolean;
   /** Awaiting PATCH confirmation after optimistic reschedule. */
   isPendingSave?: boolean;
+  calendarTimezone?: string | null;
 }) {
   const appointment = appointmentCardDataFromBooking(booking, display);
   const cancelled = isBookingCancelled(booking);
@@ -636,6 +643,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
       touchFriendly={touchFriendly}
       animateEntry={animateEntry}
       isPendingSave={isPendingSave}
+      calendarTimezone={calendarTimezone}
     />
   );
 });

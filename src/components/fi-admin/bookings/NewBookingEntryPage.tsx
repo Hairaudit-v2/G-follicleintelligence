@@ -35,7 +35,7 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
 
       <FiPageHeader
         title="Book appointment"
-        description="Choose the safest way to book a consultation, treatment, or surgery-related appointment."
+        description="Choose the safest way to book a consultation, treatment, or hair-transplant-related appointment."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
@@ -107,7 +107,7 @@ export function NewBookingEntryPage({ tenantId, showCrmNav }: NewBookingEntryPag
         )}
 
         <FiQuickActionCard
-          title="Surgery or treatment planning"
+          title="Hair transplant or treatment planning"
           description="Use this when the appointment relates to an active surgical or treatment patient."
           href={casesHref}
           openAffordanceLabel="Open patients"

@@ -5,7 +5,7 @@ import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboar
 
 const BUCKET_LABEL: Record<AgendaBucket, string> = {
   consult: "Consultations",
-  surgery: "Surgery",
+  surgery: "Hair Transplant",
   follow_up: "Follow-up & review",
   other: "Other appointments",
 };

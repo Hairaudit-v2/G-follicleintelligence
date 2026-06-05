@@ -10,11 +10,7 @@ import {
 import { calendarRangeIsoForQuery, parseCalendarSearchParams, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "@/src/lib/bookings/operatorBookingConstants";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { resolveTenantCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
-import {
-  DEFAULT_BUSINESS_GRID,
-  type BusinessGridConfig,
-} from "@/src/lib/calendar/operationalCalendarLayout";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 
 import type {
   OperationalCalendarBookingDisplay,
@@ -178,48 +174,6 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
   return { assignees, clinics, resourceColumns };
 }
 
-function parseGridFromTenantMetadata(metadata: unknown, timeZone: string): BusinessGridConfig {
-  if (!metadata || typeof metadata !== "object") {
-    return { ...DEFAULT_BUSINESS_GRID, timeZone };
-  }
-  const root = metadata as Record<string, unknown>;
-  const raw = root.operational_calendar ?? root.calendar;
-  if (!raw || typeof raw !== "object") {
-    return { ...DEFAULT_BUSINESS_GRID, timeZone };
-  }
-  const c = raw as Record<string, unknown>;
-  let dayStart = Number(c.dayStartHourUtc);
-  let dayEnd = Number(c.dayEndHourUtc);
-  let sm = Number(c.slotMinutes);
-  if (!Number.isFinite(dayStart) || dayStart < 0 || dayStart > 23) dayStart = DEFAULT_BUSINESS_GRID.dayStartHourUtc;
-  if (!Number.isFinite(dayEnd) || dayEnd <= dayStart || dayEnd > 24) {
-    dayEnd = Math.max(dayStart + 1, DEFAULT_BUSINESS_GRID.dayEndHourUtc);
-  }
-  if (sm !== 30 && sm !== 60) sm = DEFAULT_BUSINESS_GRID.slotMinutes;
-  return {
-    dayStartHourUtc: Math.floor(dayStart),
-    dayEndHourUtc: Math.floor(dayEnd),
-    slotMinutes: sm as 30 | 60,
-    timeZone,
-  };
-}
-
-async function loadTenantCalendarSettings(tenantId: string): Promise<{ gridConfig: BusinessGridConfig; calendarTimezone: string }> {
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_tenant_settings")
-    .select("default_timezone, metadata")
-    .eq("tenant_id", tenantId.trim())
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  const row = data as { default_timezone?: string | null; metadata?: unknown } | null;
-  const calendarTimezone = resolveTenantCalendarTimezone(
-    row ? { default_timezone: row.default_timezone, metadata: row.metadata as Record<string, unknown> } : null
-  );
-  const gridConfig = parseGridFromTenantMetadata(row?.metadata, calendarTimezone);
-  return { gridConfig, calendarTimezone };
-}
-
 function applyStructuredFilters(rows: FiBookingRow[], q: ParsedCalendarQuery): FiBookingRow[] {
   return rows.filter((b) => {
     if (q.status?.trim()) {
@@ -282,7 +236,7 @@ export async function loadOperationalCalendarPageData(
   searchParams: Record<string, string | string[] | undefined>
 ): Promise<OperationalCalendarPageData> {
   const tid = tenantId.trim();
-  const calendarSettings = await loadTenantCalendarSettings(tid);
+  const calendarSettings = await loadTenantOperationalCalendarSettings(tid);
   const parsed = parseCalendarSearchParams(searchParams, new Date(), {
     calendarTimezone: calendarSettings.calendarTimezone,
   });

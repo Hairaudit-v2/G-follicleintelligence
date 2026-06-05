@@ -198,8 +198,13 @@ export function OperationalCalendarFilters({
         </a>
       </div>
       <p className="text-xs leading-snug text-slate-500 dark:text-slate-400">
-        Grid uses UTC business hours (tenant override via <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">fi_tenant_settings.metadata.operational_calendar</code>
-        ). Same booking overlap query as the tenant dashboard agenda.
+        Grid uses clinic-local business hours from{" "}
+        <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">fi_tenant_settings.default_timezone</code>{" "}
+        (IANA). Optional window overrides live in{" "}
+        <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">fi_tenant_settings.metadata.operational_calendar</code>{" "}
+        (<code className="rounded bg-slate-100 px-1 dark:bg-slate-800">dayStartHourUtc</code> /{" "}
+        <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">dayEndHourUtc</code> are wall-clock hours in that
+        zone). Same booking overlap query as the tenant dashboard agenda.
       </p>
     </form>
   );

@@ -36,7 +36,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       <header className="space-y-2">
         <h1 className="text-lg font-semibold text-gray-900">Calendar</h1>
         <p className="text-sm text-gray-600">
-          Scheduling view for the selected UTC range. Use the operator list for bulk filters and wide exports.
+          Scheduling for the selected clinic-local range. Use the operator list for bulk filters and wide exports.
         </p>
         <label className="block max-w-md text-xs text-gray-600">
           FI Admin key (optional — paste when your session role cannot write via service actions alone)
@@ -80,7 +80,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
         assignees={assignees}
         onSelectBooking={(b) => setDrawer(b)}
         onEmptySlot={(dayKey, hour) => {
-          const slot = utcHourSlotIsoRange(dayKey, hour);
+          const slot = utcHourSlotIsoRange(dayKey, hour, query.calendarTimezone);
           if (slot) {
             setSlotPrefill({ startIso: slot.startIso, endIso: slot.endIso });
             scrollToCreate();
@@ -94,6 +94,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
           assignees={assignees}
           clinics={clinics}
           adminKey={adminKey}
+          calendarTimezone={query.calendarTimezone}
           slotPrefill={slotPrefill}
           onCreated={() => {
             setSlotPrefill(null);
@@ -108,6 +109,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
         assignees={assignees}
         clinics={clinics}
         adminKey={adminKey}
+        calendarTimezone={query.calendarTimezone}
         onClose={() => setDrawer(null)}
         onChanged={refresh}
         onEdit={(b) => setEditing(b)}
@@ -120,6 +122,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
         assignees={assignees}
         clinics={clinics}
         adminKey={adminKey}
+        clinicCalendarTimezone={query.calendarTimezone}
         onClose={() => setEditing(null)}
         onSaved={refresh}
       />

@@ -122,7 +122,7 @@ export function ClinicOsPatientsHome({ tenantId, showCrmNav, clinicOsShellEnable
             <FiKpiTile label="Consultations due" value="—" description="Preview · Coming soon" tone="info" />
             <FiKpiTile label="Follow-ups due" value="—" description="Preview · Coming soon" tone="info" />
             <FiKpiTile label="Treatment patients" value="—" description="Preview · Coming soon" tone="info" />
-            <FiKpiTile label="Surgery patients" value="—" description="Preview · Coming soon" tone="info" />
+            <FiKpiTile label="Hair transplant patients" value="—" description="Preview · Coming soon" tone="info" />
             <FiKpiTile label="Records needing attention" value="—" description="Preview · Coming soon" tone="info" />
           </div>
         </aside>

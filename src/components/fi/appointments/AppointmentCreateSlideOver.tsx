@@ -8,10 +8,16 @@ import {
   checkAppointmentAvailability,
   DEFAULT_APPOINTMENT_BUFFER_MINUTES,
 } from "@/src/lib/bookings/appointmentAvailability";
+import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentProcedureDefaults";
+import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCreateTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
+import {
+  endLocalFromStartLocalAndProcedure,
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "@/src/components/fi/bookings/bookingFormUtils";
 import { appointmentCardClass } from "./shared";
 
 export function AppointmentCreateSlideOver({
@@ -59,6 +65,13 @@ export function AppointmentCreateSlideOver({
     if (bookingType.trim()) u.add(bookingType.trim());
     return Array.from(u);
   }, [bookingType]);
+
+  function onProcedureTypeChange(nextType: string) {
+    setBookingType(nextType);
+    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, undefined);
+    if (nextEnd) setEndLocal(nextEnd);
+    setAvailabilityHint(null);
+  }
 
   function runAvailabilityCheck(): boolean {
     const startIso = fromDatetimeLocalValue(startLocal);
@@ -156,11 +169,11 @@ export function AppointmentCreateSlideOver({
           <select
             className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
             value={bookingType}
-            onChange={(e) => setBookingType(e.target.value)}
+            onChange={(e) => onProcedureTypeChange(e.target.value)}
           >
             {typeOptions.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {bookingTypeLabel(t)}
               </option>
             ))}
           </select>
@@ -197,6 +210,10 @@ export function AppointmentCreateSlideOver({
               setAvailabilityHint(null);
             }}
           />
+          <p className="mt-1 text-[11px] text-gray-500">
+            Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType)} min (end updates when
+            you change type).
+          </p>
         </label>
         <label className="block text-xs text-gray-600">
           Staff

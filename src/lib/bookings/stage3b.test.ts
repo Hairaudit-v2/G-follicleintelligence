@@ -146,6 +146,7 @@ describe("Stage 3B — summary counts", () => {
 describe("Stage 3B — labels", () => {
   it("maps known booking types and statuses", () => {
     assert.equal(bookingTypeLabel("follow_up"), "Follow-up");
+    assert.equal(bookingTypeLabel("surgery"), "Hair Transplant");
     assert.equal(bookingStatusLabel("no_show"), "No-show");
   });
 });

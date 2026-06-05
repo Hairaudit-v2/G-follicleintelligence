@@ -1,6 +1,7 @@
 /**
  * Default slot lengths for Evolved Hair Clinics procedures (calendar API).
  * Used when POST /appointments omits `endAt`.
+ * Client booking forms use the same durations via `endIsoFromStartAndProcedure` when staff change procedure type.
  */
 
 import type { BookingType } from "./bookingPolicy";

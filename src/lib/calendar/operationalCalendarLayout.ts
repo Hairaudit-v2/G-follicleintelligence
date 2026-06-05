@@ -1,5 +1,5 @@
 /**
- * Pure layout helpers for FI Admin operational calendar (business-hour grid, UTC).
+ * Pure layout helpers for FI Admin operational calendar (business-hour grid, clinic-local).
  */
 
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";

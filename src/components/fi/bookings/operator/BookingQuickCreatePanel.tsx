@@ -3,8 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { createBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BOOKING_TYPES } from "@/src/lib/bookings";
+import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentProcedureDefaults";
+import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { defaultRangeIso, fromDatetimeLocalValue, toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
+import {
+  defaultRangeIso,
+  endLocalFromStartLocalAndProcedure,
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "@/src/components/fi/bookings/bookingFormUtils";
+import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -22,6 +30,7 @@ export function BookingQuickCreatePanel({
   adminKey,
   onCreated,
   slotPrefill,
+  calendarTimezone,
 }: {
   tenantId: string;
   assignees: CrmShellUserPickerOption[];
@@ -30,15 +39,18 @@ export function BookingQuickCreatePanel({
   onCreated: () => void;
   /** When set (e.g. empty slot click), overwrites start/end datetime fields. */
   slotPrefill?: { startIso: string; endIso: string } | null;
+  /** From `fi_tenant_settings.default_timezone` — wall times use this zone. */
+  calendarTimezone?: string | null;
 }) {
-  const def = useMemo(() => defaultRangeIso(), []);
+  const tz = calendarTimezone?.trim() || null;
+  const def = useMemo(() => defaultRangeIso(tz), [tz]);
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const [bookingType, setBookingType] = useState("consultation");
   const [title, setTitle] = useState("");
-  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(def.start));
-  const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(def.end));
+  const [startLocal, setStartLocal] = useState(() => toDatetimeLocalValue(def.start, tz));
+  const [endLocal, setEndLocal] = useState(() => toDatetimeLocalValue(def.end, tz));
   const [assignee, setAssignee] = useState("");
   const [location, setLocation] = useState("");
   const [clinicId, setClinicId] = useState("");
@@ -47,9 +59,9 @@ export function BookingQuickCreatePanel({
 
   useEffect(() => {
     if (!slotPrefill) return;
-    setStartLocal(toDatetimeLocalValue(slotPrefill.startIso));
-    setEndLocal(toDatetimeLocalValue(slotPrefill.endIso));
-  }, [slotPrefill]);
+    setStartLocal(toDatetimeLocalValue(slotPrefill.startIso, tz));
+    setEndLocal(toDatetimeLocalValue(slotPrefill.endIso, tz));
+  }, [slotPrefill, tz]);
 
   function withAdmin<T extends Record<string, unknown>>(body: T): T & { adminKey?: string } {
     if (adminKey.trim()) return { ...body, adminKey: adminKey.trim() };
@@ -62,13 +74,19 @@ export function BookingQuickCreatePanel({
     return Array.from(u);
   }, [bookingType]);
 
+  function onProcedureTypeChange(nextType: string) {
+    setBookingType(nextType);
+    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, tz);
+    if (nextEnd) setEndLocal(nextEnd);
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setFeedback(null);
     try {
-      const startIso = fromDatetimeLocalValue(startLocal);
-      const endIso = fromDatetimeLocalValue(endLocal);
+      const startIso = fromDatetimeLocalValue(startLocal, tz);
+      const endIso = fromDatetimeLocalValue(endLocal, tz);
       if (!startIso || !endIso) {
         setFeedback("Start and end times are required.");
         return;
@@ -99,7 +117,7 @@ export function BookingQuickCreatePanel({
           assignedUserId: assignee.trim() || null,
           location: location.trim() || null,
           clinicId: clinicId.trim() || null,
-          timezone: null,
+          timezone: tz,
           description: null,
           metadata: {},
         })
@@ -109,9 +127,9 @@ export function BookingQuickCreatePanel({
         onCreated();
         setTitle("");
         setAnchorId("");
-        const d = defaultRangeIso();
-        setStartLocal(toDatetimeLocalValue(d.start));
-        setEndLocal(toDatetimeLocalValue(d.end));
+        const d = defaultRangeIso(tz);
+        setStartLocal(toDatetimeLocalValue(d.start, tz));
+        setEndLocal(toDatetimeLocalValue(d.end, tz));
       }
     } finally {
       setBusy(false);
@@ -151,12 +169,12 @@ export function BookingQuickCreatePanel({
           Type
           <select
             value={bookingType}
-            onChange={(e) => setBookingType(e.target.value)}
+            onChange={(e) => onProcedureTypeChange(e.target.value)}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm"
           >
             {typeOptions.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {bookingTypeLabel(t)}
               </option>
             ))}
           </select>
@@ -170,7 +188,7 @@ export function BookingQuickCreatePanel({
           />
         </label>
         <label className="block text-xs font-medium text-gray-700">
-          Start (local)
+          Start{tz ? ` (${displayCalendarTimezoneSubtitle(tz)})` : " (device)"}
           <input
             type="datetime-local"
             value={startLocal}
@@ -179,13 +197,17 @@ export function BookingQuickCreatePanel({
           />
         </label>
         <label className="block text-xs font-medium text-gray-700">
-          End (local)
+          End{tz ? ` (${displayCalendarTimezoneSubtitle(tz)})` : " (device)"}
           <input
             type="datetime-local"
             value={endLocal}
             onChange={(e) => setEndLocal(e.target.value)}
             className="mt-1 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
           />
+          <p className="mt-1 text-[11px] text-gray-500">
+            Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType)} min (end updates when
+            you change type).
+          </p>
         </label>
         <label className="block text-xs font-medium text-gray-700">
           Assigned user

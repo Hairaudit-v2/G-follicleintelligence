@@ -8,6 +8,7 @@ import { calendarSidebarsCollapsedByDefault } from "@/lib/calendar/calendarRespo
 import { useCalendarLayoutMode } from "@/hooks/useCalendarLayoutMode";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
+import { calendarDateStringFromInstant, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { cn } from "@/lib/utils";
 
 export type CalendarDailyStats = {
@@ -22,8 +23,10 @@ export type CalendarDailyStats = {
 
 export function computeCalendarDailyStats(
   bookings: FiBookingRow[],
-  dayKeyUtc: string
+  dayKey: string,
+  calendarTimezone: string
 ): CalendarDailyStats {
+  const tz = normalizeCalendarTimezone(calendarTimezone);
   const stats: CalendarDailyStats = {
     total: 0,
     confirmed: 0,
@@ -43,8 +46,8 @@ export function computeCalendarDailyStats(
 
     const startMs = Date.parse(b.start_at);
     if (!Number.isFinite(startMs)) continue;
-    const key = new Date(startMs).toISOString().slice(0, 10);
-    if (key !== dayKeyUtc) continue;
+    const key = calendarDateStringFromInstant(new Date(startMs), tz);
+    if (key !== dayKey) continue;
     if (b.booking_status === "cancelled" || b.booking_status === "completed" || b.booking_status === "no_show") {
       continue;
     }
@@ -65,7 +68,8 @@ type PanelTab = "search" | "stats";
 export function CalendarRightPanel({
   bookings,
   bookingDisplay,
-  dayKeyUtc,
+  dayKey,
+  calendarTimezone,
   searchQuery,
   onSearchSubmit,
   collapsed: collapsedProp,
@@ -75,7 +79,9 @@ export function CalendarRightPanel({
 }: {
   bookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
-  dayKeyUtc: string;
+  /** Clinic-local calendar day (`YYYY-MM-DD`) matching the visible anchor. */
+  dayKey: string;
+  calendarTimezone: string;
   searchQuery?: string;
   onSearchSubmit: (q: string) => void;
   collapsed?: boolean;
@@ -103,7 +109,10 @@ export function CalendarRightPanel({
     onCollapsedChange?.(v);
   };
 
-  const stats = useMemo(() => computeCalendarDailyStats(bookings, dayKeyUtc), [bookings, dayKeyUtc]);
+  const stats = useMemo(
+    () => computeCalendarDailyStats(bookings, dayKey, calendarTimezone),
+    [bookings, dayKey, calendarTimezone]
+  );
 
   const quickMatches = useMemo(() => {
     const q = localQ.trim().toLowerCase();
@@ -281,7 +290,7 @@ export function CalendarRightPanel({
                 { label: "Confirmed", value: stats.confirmed },
                 { label: "Arrived", value: stats.arrived },
                 { label: "Consults", value: stats.consultations },
-                { label: "Surgery", value: stats.surgery },
+                { label: "Hair Transplant", value: stats.surgery },
                 { label: "PRP", value: stats.prp },
                 { label: "Waitlist", value: stats.waitlist },
               ].map((item) => (

@@ -69,6 +69,7 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
     <SidebarAgenda
       bookings={bookings}
       bookingDisplay={bookingDisplay}
+      calendarTimezone={data.calendarTimezone}
       addAppointmentHref={`${base}/bookings/new`}
       onSelectBooking={(b) => setDrawer(b)}
       draggableWaitlist={data.canMutateBookings}
@@ -80,7 +81,8 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
     <CalendarRightPanel
       bookings={bookings}
       bookingDisplay={bookingDisplay}
-      dayKeyUtc={data.query.dateAnchor}
+      dayKey={data.query.dateAnchor}
+      calendarTimezone={data.calendarTimezone}
       searchQuery={data.query.search ?? ""}
       onSearchSubmit={onSearchSubmit}
     />
@@ -174,6 +176,7 @@ export function CalendarPage({ data, route = "fi-admin", useSampleData = false }
         assignees={data.assignees}
         clinics={data.clinics}
         adminKey=""
+        calendarTimezone={data.calendarTimezone}
         onClose={() => setDrawer(null)}
         onChanged={refresh}
         onEdit={(b) => setEditing(b)}

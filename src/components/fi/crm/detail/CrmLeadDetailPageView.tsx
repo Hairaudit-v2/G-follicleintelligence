@@ -123,6 +123,7 @@ export function CrmLeadDetailPageView({
             assigneeOptions={payload.detail.owners}
             clinicOptions={payload.detail.clinics}
             groupingNowIso={groupingNowIso}
+            calendarTimezone={payload.calendarTimezone}
           />
         </div>
       ) : null}

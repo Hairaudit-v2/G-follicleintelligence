@@ -263,8 +263,26 @@ export function formatTimeRangeInTimezone(
 
 function tzLabel(timeZone: string): string {
   if (timeZone === "Europe/London") return "GMT/BST";
+  if (timeZone === DEFAULT_CALENDAR_TIMEZONE) return "GMT";
   const parts = timeZone.split("/");
   return parts[parts.length - 1]?.replace(/_/g, " ") ?? timeZone;
+}
+
+/** Short label for calendar column subtitles (no raw "UTC" string in UI). */
+export function displayCalendarTimezoneSubtitle(timeZone: string): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  if (tz === DEFAULT_CALENDAR_TIMEZONE) return "GMT";
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      timeZoneName: "shortGeneric",
+    }).formatToParts(new Date());
+    const name = parts.find((p) => p.type === "timeZoneName")?.value?.trim();
+    if (name) return name;
+  } catch {
+    /* fall through */
+  }
+  return tzLabel(tz);
 }
 
 /** Minutes from lane start (local day midnight UTC instant). */

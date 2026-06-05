@@ -67,7 +67,7 @@ describe("deriveCrmLeadNextAction", () => {
     ];
     const next = deriveCrmLeadNextAction([], [], bookings, now);
     assert.equal(next.kind, "appointment");
-    assert.match(next.label, /Surgery/);
+    assert.match(next.label, /Hair Transplant/);
     assert.equal(next.atIso, "2026-06-07T10:00:00.000Z");
   });
 });

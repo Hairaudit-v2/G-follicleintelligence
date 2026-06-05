@@ -83,7 +83,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
             <div>
               <FiCalendarBlock title="Consultations" timeLabel="AM" tone="consult" placeholder />
               <FiCalendarBlock title="PRP / Treatment" timeLabel="Midday" tone="treatment" placeholder />
-              <FiCalendarBlock title="Surgery patients" timeLabel="PM" tone="surgery" placeholder />
+              <FiCalendarBlock title="Hair transplant patients" timeLabel="PM" tone="surgery" placeholder />
               <FiCalendarBlock title="Follow-ups" timeLabel="PM" tone="followup" placeholder />
             </div>
             <div className="mt-4 border-t border-slate-100 pt-4">
@@ -146,7 +146,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
             <div className="grid grid-cols-1 gap-3">
               <FiKpiTile label="Unassigned leads" value="—" description="Leads awaiting owner" tone="info" />
               <FiKpiTile label="Pending follow-ups" value="—" description="Tasks due this week" tone="info" />
-              <FiKpiTile label="Upcoming surgeries" value="—" description="Next 14 days" tone="info" />
+              <FiKpiTile label="Upcoming hair transplants" value="—" description="Next 14 days" tone="info" />
               <FiKpiTile label="Open tasks" value="—" description="Across teams" tone="info" />
               <FiKpiTile label="Training reminders" value="—" description="Compliance and CPD" tone="info" />
               <FiKpiTile label="Audit alerts" value="—" description="Items needing review" tone="info" />

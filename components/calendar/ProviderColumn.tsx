@@ -279,7 +279,7 @@ export function ProviderColumnHeader({
 export type ProviderColumnProps = {
   /** Unique column id — used for dnd-kit drop zone. */
   id: string;
-  /** UTC day key (`YYYY-MM-DD`) for drop targeting and now-line. */
+  /** Clinic-local `YYYY-MM-DD` for drop targeting and now-line. */
   dayKey: string;
   name: string;
   role?: string | null;
@@ -411,6 +411,7 @@ export function ProviderColumn({
                     touchFriendly={touchFriendly}
                     animateEntry
                     isPendingSave={isPendingSave}
+                    calendarTimezone={gridConfig.timeZone}
                     onResizeEnd={
                       onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined
                     }

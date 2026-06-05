@@ -3,10 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BOOKING_TYPES, isBookingCancelled } from "@/src/lib/bookings";
+import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentProcedureDefaults";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
+import {
+  endLocalFromStartLocalAndProcedure,
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "@/src/components/fi/bookings/bookingFormUtils";
 
 const WRITABLE_STATUSES = ["scheduled", "confirmed", "arrived", "no_show"] as const;
 
@@ -71,6 +77,17 @@ export function BookingEditDrawer({
     if (bookingType?.trim()) u.add(bookingType.trim());
     return Array.from(u);
   }, [bookingType]);
+
+  const datetimeTz = useMemo(
+    () => clinicCalendarTimezone ?? (timezone.trim() || undefined),
+    [clinicCalendarTimezone, timezone]
+  );
+
+  function onProcedureTypeChange(nextType: string) {
+    setBookingType(nextType);
+    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, datetimeTz);
+    if (nextEnd) setEndLocal(nextEnd);
+  }
 
   const cancelled = booking ? isBookingCancelled(booking) : false;
   const completed = booking?.booking_status === "completed";
@@ -169,12 +186,12 @@ export function BookingEditDrawer({
                 Type
                 <select
                   value={bookingType}
-                  onChange={(e) => setBookingType(e.target.value)}
+                  onChange={(e) => onProcedureTypeChange(e.target.value)}
                   className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
                 >
                   {typeOptions.map((t) => (
                     <option key={t} value={t}>
-                      {t}
+                      {bookingTypeLabel(t)}
                     </option>
                   ))}
                 </select>
@@ -227,6 +244,10 @@ export function BookingEditDrawer({
                   onChange={(e) => setEndLocal(e.target.value)}
                   className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
                 />
+                <p className="mt-1 text-[11px] text-gray-500">
+                  Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType)} min (end updates
+                  when you change type).
+                </p>
               </label>
               <label className="block text-xs font-medium text-gray-700">
                 Timezone (optional)

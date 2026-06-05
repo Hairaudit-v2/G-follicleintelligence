@@ -3,9 +3,17 @@
 import { useMemo, useState } from "react";
 import { createBookingAction, updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { BOOKING_TYPES } from "@/src/lib/bookings";
+import { defaultProcedureDurationMinutes } from "@/src/lib/bookings/appointmentProcedureDefaults";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellClinicOption, CrmShellUserPickerOption, FiCrmLeadRow } from "@/src/lib/crm/types";
-import { defaultRangeIso, fromDatetimeLocalValue, toDatetimeLocalValue } from "./bookingFormUtils";
+import {
+  defaultRangeIso,
+  endLocalFromStartLocalAndProcedure,
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "./bookingFormUtils";
+import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 
 const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
 
@@ -17,6 +25,7 @@ export function BookingCreatePanel({
   assigneeOptions,
   clinicOptions,
   adminKey,
+  calendarTimezone,
   onCancelEdit,
   onSuccess,
 }: {
@@ -27,20 +36,25 @@ export function BookingCreatePanel({
   assigneeOptions: CrmShellUserPickerOption[];
   clinicOptions: CrmShellClinicOption[];
   adminKey: string;
+  /** Tenant default from `fi_tenant_settings.default_timezone`. */
+  calendarTimezone?: string | null;
   onCancelEdit: () => void;
   onSuccess: () => void;
 }) {
   const converted = Boolean(lead.converted_at?.trim());
-  const def = defaultRangeIso();
+  const clinicTz = calendarTimezone?.trim() || null;
+  const def = useMemo(() => defaultRangeIso(clinicTz), [clinicTz]);
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const [bookingType, setBookingType] = useState(initialBooking?.booking_type ?? "consultation");
   const [title, setTitle] = useState(initialBooking?.title ?? "");
   const [description, setDescription] = useState(initialBooking?.description ?? "");
-  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(initialBooking?.start_at ?? def.start));
-  const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(initialBooking?.end_at ?? def.end));
-  const [timezone, setTimezone] = useState(initialBooking?.timezone ?? "");
+  const [startLocal, setStartLocal] = useState(() =>
+    toDatetimeLocalValue(initialBooking?.start_at ?? def.start, clinicTz)
+  );
+  const [endLocal, setEndLocal] = useState(() => toDatetimeLocalValue(initialBooking?.end_at ?? def.end, clinicTz));
+  const [timezone, setTimezone] = useState(initialBooking?.timezone ?? clinicTz ?? "");
   const [location, setLocation] = useState(initialBooking?.location ?? "");
   const [assignee, setAssignee] = useState(initialBooking?.assigned_user_id ?? "");
   const [clinicId, setClinicId] = useState(initialBooking?.clinic_id ?? "");
@@ -56,13 +70,23 @@ export function BookingCreatePanel({
     return Array.from(u);
   }, [bookingType]);
 
+  function wallClockTz(): string | null {
+    return clinicTz || timezone.trim() || null;
+  }
+
+  function onProcedureTypeChange(nextType: string) {
+    setBookingType(nextType);
+    const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, wallClockTz());
+    if (nextEnd) setEndLocal(nextEnd);
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setFeedback(null);
     try {
-      const startIso = fromDatetimeLocalValue(startLocal);
-      const endIso = fromDatetimeLocalValue(endLocal);
+      const startIso = fromDatetimeLocalValue(startLocal, wallClockTz());
+      const endIso = fromDatetimeLocalValue(endLocal, wallClockTz());
       if (!startIso || !endIso) {
         setFeedback("Start and end times are required.");
         return;
@@ -92,9 +116,9 @@ export function BookingCreatePanel({
           onSuccess();
           setTitle("");
           setDescription("");
-          const d = defaultRangeIso();
-          setStartLocal(toDatetimeLocalValue(d.start));
-          setEndLocal(toDatetimeLocalValue(d.end));
+          const d = defaultRangeIso(clinicTz);
+          setStartLocal(toDatetimeLocalValue(d.start, clinicTz));
+          setEndLocal(toDatetimeLocalValue(d.end, clinicTz));
         }
       } else if (initialBooking) {
         const r = await updateBookingAction(
@@ -126,11 +150,11 @@ export function BookingCreatePanel({
             className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm disabled:bg-gray-100"
             value={converted ? bookingType : "consultation"}
             disabled={!converted}
-            onChange={(ev) => setBookingType(ev.target.value)}
+            onChange={(ev) => onProcedureTypeChange(ev.target.value)}
           >
             {typeOptions.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {bookingTypeLabel(t)}
               </option>
             ))}
           </select>
@@ -155,7 +179,7 @@ export function BookingCreatePanel({
         </label>
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="block text-xs text-gray-600">
-            Start
+            Start{clinicTz ? ` (${displayCalendarTimezoneSubtitle(clinicTz)})` : ""}
             <input
               type="datetime-local"
               className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
@@ -164,17 +188,23 @@ export function BookingCreatePanel({
             />
           </label>
           <label className="block text-xs text-gray-600">
-            End
+            End{clinicTz ? ` (${displayCalendarTimezoneSubtitle(clinicTz)})` : ""}
             <input
               type="datetime-local"
               className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
               value={endLocal}
               onChange={(ev) => setEndLocal(ev.target.value)}
             />
+            {converted ? (
+              <p className="mt-1 text-[11px] text-gray-500">
+                Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType)} min (end updates
+                when you change type).
+              </p>
+            ) : null}
           </label>
         </div>
         <label className="block text-xs text-gray-600">
-          Timezone (optional)
+          Timezone override (optional)
           <input
             className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
             value={timezone}

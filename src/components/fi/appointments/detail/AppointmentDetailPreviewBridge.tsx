@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import { parseAppointmentPreviewSearchParam } from "@/src/lib/bookings/appointmentPreviewQuery";
 import type { AppointmentShellRelatedAppointmentItem } from "@/src/lib/bookings/appointmentSlideOverLoader";
+import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { useAppointmentSlideOver } from "../AppointmentSlideOver";
 
 const card = "rounded border border-gray-200 bg-white p-3 shadow-sm";
@@ -116,9 +117,9 @@ export function AppointmentDetailPreviewBridge({
               }`}
             >
               <div className="min-w-0">
-                <p className="truncate font-medium text-gray-900">{r.title ?? r.booking_type}</p>
+                <p className="truncate font-medium text-gray-900">{r.title?.trim() || bookingTypeLabel(r.booking_type)}</p>
                 <p className="text-xs text-gray-600">
-                  {r.booking_status} · {r.booking_type}
+                  {bookingStatusLabel(r.booking_status)} · {bookingTypeLabel(r.booking_type)}
                   {" · "}
                   <span className="text-gray-500">
                     {new Date(r.start_at).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}

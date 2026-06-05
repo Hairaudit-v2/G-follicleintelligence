@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { cancelBookingAction, completeBookingAction } from "@/lib/actions/fi-booking-actions";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 
 const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
@@ -73,11 +74,11 @@ export function BookingSummaryCard({
     <div className={card}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-medium uppercase text-gray-500">{booking.booking_type}</p>
+          <p className="text-xs font-medium uppercase text-gray-500">{bookingTypeLabel(booking.booking_type)}</p>
           <p className="text-sm font-semibold text-gray-900">{booking.title?.trim() || "Booking"}</p>
           <p className="text-xs text-gray-600">{range}</p>
           <p className="text-xs text-gray-500">
-            {booking.booking_status}
+            {bookingStatusLabel(booking.booking_status)}
             {" · "}
             {assigneeLabel(assigneeOptions, booking.assigned_user_id)}
           </p>

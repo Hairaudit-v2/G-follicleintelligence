@@ -15,6 +15,7 @@ import {
   type BusinessGridConfig,
   OPERATIONAL_CAL_PX_PER_HOUR,
 } from "@/src/lib/calendar/operationalCalendarLayout";
+import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 import { BookingCalendarCard } from "./BookingCalendarCard";
 import { CalendarResourceColumn } from "./CalendarResourceColumn";
 
@@ -47,7 +48,7 @@ function TimeGutter({ gridConfig }: { gridConfig: BusinessGridConfig }) {
             {new Date(Date.UTC(2000, 0, 1, h, 0, 0)).toLocaleTimeString(undefined, {
               hour: "numeric",
               minute: "2-digit",
-              timeZone: "UTC",
+              timeZone: gridConfig.timeZone,
             })}
           </div>
         ))}
@@ -173,6 +174,7 @@ export function CalendarWeekView({
                         display={d}
                         layout={layout}
                         draggable={canMutateBookings}
+                        calendarTimezone={gridConfig.timeZone}
                         onClick={() => onSelectBooking(b)}
                         onDragStart={(e) => {
                           const startMs = Date.parse(b.start_at);
@@ -206,7 +208,7 @@ export function CalendarWeekView({
             <CalendarResourceColumn
               key={lane.dayKey}
               label={calendarDayHeading(lane)}
-              subtitle="UTC"
+              subtitle={displayCalendarTimezoneSubtitle(gridConfig.timeZone)}
               bodyMinHeightPx={bodyH}
             >
               <SlotDropLayer
@@ -232,6 +234,7 @@ export function CalendarWeekView({
                       display={d}
                       layout={layout}
                       draggable={canMutateBookings}
+                      calendarTimezone={gridConfig.timeZone}
                       onClick={() => onSelectBooking(b)}
                       onDragStart={(e) => {
                         const startMs = Date.parse(b.start_at);

@@ -25,6 +25,7 @@ import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type {
   CrmKanbanLeadCard,
@@ -350,6 +351,8 @@ export type CrmLeadShellDetailPagePayload = CrmLeadShellSlideOverPayload & {
   relatedLeads: CrmShellRelatedLeadItem[];
   clinicalDetails: PatientClinicalDetailsRow | null;
   patientImages: PatientImagesProfileBundle | null;
+  /** From `fi_tenant_settings.default_timezone` for booking datetime fields. */
+  calendarTimezone: string;
 };
 
 /** Full lead detail page: slide-over bundle + related leads + patient clinical + image gallery. */
@@ -361,10 +364,17 @@ export async function loadCrmShellLeadDetailPagePayload(
   if (!base?.detail.lead) return null;
   const lead = base.detail.lead;
   const pid = lead.patient_id?.trim() || null;
-  const [relatedLeads, clinicalDetails, patientImages] = await Promise.all([
+  const [relatedLeads, clinicalDetails, patientImages, calendarSettings] = await Promise.all([
     loadCrmShellRelatedLeads(tenantId, lead.person_id, lead.id, base.stages),
     pid ? loadPatientClinicalDetails(tenantId, pid) : Promise.resolve(null),
     pid ? loadPatientImagesProfileBundle(tenantId, pid) : Promise.resolve(null),
+    loadTenantOperationalCalendarSettings(tenantId.trim()),
   ]);
-  return { ...base, relatedLeads, clinicalDetails, patientImages };
+  return {
+    ...base,
+    relatedLeads,
+    clinicalDetails,
+    patientImages,
+    calendarTimezone: calendarSettings.calendarTimezone,
+  };
 }

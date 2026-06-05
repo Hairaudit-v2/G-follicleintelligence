@@ -9,6 +9,7 @@ import {
   bookingTypeCalendarLegendLabel,
 } from "@/src/lib/bookings/calendarLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { formatTimeRangeInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 
 export function BookingCalendarCard({
@@ -18,6 +19,7 @@ export function BookingCalendarCard({
   draggable,
   onClick,
   onDragStart,
+  calendarTimezone,
 }: {
   booking: FiBookingRow;
   display: { anchorLabel: string; scalesSummary: string | null; durationMin: number; reminderHint?: string | null };
@@ -25,13 +27,14 @@ export function BookingCalendarCard({
   draggable: boolean;
   onClick: () => void;
   onDragStart: (e: DragEvent) => void;
+  /** IANA zone from tenant settings (defaults to UTC). */
+  calendarTimezone?: string | null;
 }) {
   const cancelled = isBookingCancelled(booking);
   const completed = booking.booking_status === "completed";
   const tone = bookingTypeCalendarEventClasses(booking.booking_type);
-  const range = `${new Date(booking.start_at).toLocaleTimeString(undefined, { timeStyle: "short", timeZone: "UTC" })}–${new Date(
-    booking.end_at
-  ).toLocaleTimeString(undefined, { timeStyle: "short", timeZone: "UTC" })} UTC`;
+  const tz = normalizeCalendarTimezone(calendarTimezone ?? booking.timezone);
+  const range = formatTimeRangeInTimezone(booking.start_at, booking.end_at, tz);
 
   return (
     <button

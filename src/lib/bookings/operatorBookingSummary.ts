@@ -28,7 +28,7 @@ export type OperatorBookingSummaryCounts = {
 };
 
 /**
- * @param dayStartMs / dayEndMs — UTC instants bounding “today” for the summary strip (typically start/end of UTC day).
+ * @param dayStartMs / dayEndMs — UTC instants bounding “today” for the summary strip (clinic-local midnight → next midnight when tenant timezone is loaded).
  */
 export function computeOperatorBookingSummaryCounts(
   rows: FiBookingRow[],

@@ -10,7 +10,7 @@ const TYPE_LABELS: Record<string, string> = {
   prf: "PRF",
   mesotherapy: "Mesotherapy",
   exosomes: "Exosomes",
-  surgery: "Surgery",
+  surgery: "Hair Transplant",
   review: "Review",
   follow_up: "Follow-up",
   other: "Other",

@@ -9,6 +9,7 @@ import {
   utcHourSlotIsoRange,
 } from "@/src/lib/bookings/calendarView";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
+import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { BookingCalendarEventCard } from "./BookingCalendarEventCard";
 
@@ -46,18 +47,18 @@ export function BookingCalendarDayView({
       <div className="min-w-0 flex-1">
         <div className="border-b border-gray-200 bg-gray-50 px-2 py-2 text-sm font-medium text-gray-900">
           {calendarDayHeading(lane)}
-          <span className="ml-2 text-xs font-normal text-gray-500">UTC day column</span>
+          <span className="ml-2 text-xs font-normal text-gray-500">{displayCalendarTimezoneSubtitle(lane.timeZone)}</span>
         </div>
         <div className="relative" style={{ height: CALENDAR_DAY_COLUMN_HEIGHT_PX }}>
           {HOURS.map((h) => (
             <button
               key={h}
               type="button"
-              aria-label={`Create booking ${lane.dayKey} ${h}:00 UTC`}
+              aria-label={`Create booking ${lane.dayKey} ${String(h).padStart(2, "0")}:00 (${displayCalendarTimezoneSubtitle(lane.timeZone)})`}
               className="absolute left-0 right-0 border-t border-gray-100 hover:bg-primary/5"
               style={{ top: h * CALENDAR_GRID_PX_PER_HOUR, height: CALENDAR_GRID_PX_PER_HOUR }}
               onClick={() => {
-                if (utcHourSlotIsoRange(lane.dayKey, h)) onEmptySlot(lane.dayKey, h);
+                if (utcHourSlotIsoRange(lane.dayKey, h, lane.timeZone)) onEmptySlot(lane.dayKey, h);
               }}
             />
           ))}

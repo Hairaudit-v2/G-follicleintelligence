@@ -79,14 +79,13 @@ export function formatCalendarRangeTitle(
   const startYear = startParts.find((p) => p.type === "year")?.value;
   const endYear = endParts.find((p) => p.type === "year")?.value;
   const sameMonth = startMonth === endMonth && startYear === endYear;
-  const tzSuffix = tz === DEFAULT_CALENDAR_TIMEZONE ? " (UTC)" : "";
   if (sameMonth) {
     const startDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(start);
     const endDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: tz }).format(end);
     const monthLabel = start.toLocaleDateString("en-GB", { month: "long", timeZone: tz });
-    return `${startDay}–${endDay} ${monthLabel} ${startYear}${tzSuffix}`;
+    return `${startDay}–${endDay} ${monthLabel} ${startYear}`;
   }
-  return `${start.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: tz })} – ${end.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: tz })}${tzSuffix}`;
+  return `${start.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: tz })} – ${end.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: tz })}`;
 }
 
 export function bookingTypeCalendarLegendLabel(type: string): string {

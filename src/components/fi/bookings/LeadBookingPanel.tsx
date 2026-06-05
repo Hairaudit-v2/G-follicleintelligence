@@ -17,6 +17,7 @@ export function LeadBookingPanel({
   assigneeOptions,
   clinicOptions,
   groupingNowIso,
+  calendarTimezone,
 }: {
   tenantId: string;
   lead: FiCrmLeadRow;
@@ -24,6 +25,7 @@ export function LeadBookingPanel({
   assigneeOptions: CrmShellUserPickerOption[];
   clinicOptions: CrmShellClinicOption[];
   groupingNowIso: string;
+  calendarTimezone?: string | null;
 }) {
   const router = useRouter();
   const [adminKey, setAdminKey] = useState("");
@@ -80,6 +82,7 @@ export function LeadBookingPanel({
         assigneeOptions={assigneeOptions}
         clinicOptions={clinicOptions}
         adminKey={adminKey}
+        calendarTimezone={calendarTimezone}
         onCancelEdit={() => setEditing(null)}
         onSuccess={() => {
           setEditing(null);

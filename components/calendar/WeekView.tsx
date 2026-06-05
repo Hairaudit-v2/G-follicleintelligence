@@ -46,7 +46,7 @@ import {
   dropMinutesFromDragEvent,
   minutesFromLaneStart,
 } from "@/lib/calendar/dndMath";
-import { isoFromLaneMinutes, calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { calendarDateStringFromInstant, displayCalendarTimezoneSubtitle, isoFromLocalDayMinutes } from "@/src/lib/calendar/calendarTimezone";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
@@ -186,11 +186,11 @@ function WeekViewInner({
     return lanes.map((lane) => ({
       id: lane.dayKey,
       label: calendarDayHeading(lane, gridConfig.timeZone),
-      subtitle: "UTC",
+      subtitle: displayCalendarTimezoneSubtitle(gridConfig.timeZone),
       dayKey: lane.dayKey,
       photoUrl: null,
     }));
-  }, [view, lanes, resourceColumns]);
+  }, [view, lanes, resourceColumns, gridConfig.timeZone]);
 
   const primaryLane = lanes[0];
 
@@ -367,8 +367,9 @@ function WeekViewInner({
       }
 
       const newEndMin = newStartMin + durationMs / 60_000;
-      const startIso = isoFromLaneMinutes(lane.startMs, newStartMin);
-      const endIso = isoFromLaneMinutes(lane.startMs, newEndMin);
+      const startIso = isoFromLocalDayMinutes(drop.dayKey, newStartMin, gridConfig.timeZone);
+      const endIso = isoFromLocalDayMinutes(drop.dayKey, newEndMin, gridConfig.timeZone);
+      if (!startIso || !endIso) return;
 
       const targetColumn = columnsForView.find((c) => c.id === drop.columnId && c.dayKey === drop.dayKey);
       const meta: WeekViewRescheduleMeta | undefined =

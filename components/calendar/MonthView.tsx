@@ -36,14 +36,16 @@ import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { cn } from "@/lib/utils";
 import {
+  addMonthsToCalendarDate,
   calendarDateStringFromInstant,
+  DEFAULT_CALENDAR_TIMEZONE,
   isoFromLocalDayMinutes,
   minutesFromLaneStart,
+  normalizeCalendarTimezone,
   parseCalendarDateString,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
 import {
-  addUtcMonthsToCalendarDate,
   buildCalendarHref,
   mergeCalendarHrefQuery,
   type CalendarRoute,
@@ -101,7 +103,7 @@ export type MonthViewRescheduleMeta = {
 export type MonthViewProps = {
   sidebar?: ReactNode;
   rightPanel?: ReactNode;
-  /** Any UTC `YYYY-MM-DD` within the visible month. */
+  /** Any clinic-local `YYYY-MM-DD` within the visible month. */
   monthAnchor: string;
   bookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
@@ -136,12 +138,12 @@ export function monthDayDropId(dayKey: string): string {
 export function parseMonthDayDropId(id: string, timeZone?: string): string | null {
   if (!id.startsWith(MONTH_DAY_DROP_PREFIX)) return null;
   const dayKey = id.slice(MONTH_DAY_DROP_PREFIX.length).trim();
-  return parseCalendarDateString(dayKey, timeZone ?? "UTC") ? dayKey : null;
+  return parseCalendarDateString(dayKey, normalizeCalendarTimezone(timeZone)) ? dayKey : null;
 }
 
 /** Six-week Monday-start grid covering the month containing `monthAnchor`. */
 export function buildMonthGridCells(monthAnchor: string, timeZone: string, now: Date = new Date()): MonthGridCell[] {
-  const tz = timeZone.trim() || "UTC";
+  const tz = normalizeCalendarTimezone(timeZone);
   const todayKey = calendarDateStringFromInstant(now, tz);
   const anchor = parseCalendarDateString(monthAnchor, tz) ?? calendarDateStringFromInstant(now, tz);
   const anchorMs = zonedMidnightUtcMs(anchor, tz) ?? Date.now();
@@ -214,13 +216,14 @@ export function bucketBookingsForMonthCells(
   return map;
 }
 
-export function formatMonthTitle(monthAnchor: string, timeZone: string = "UTC"): string {
-  const anchor = parseCalendarDateString(monthAnchor, timeZone) ?? monthAnchor;
-  const ms = zonedMidnightUtcMs(anchor, timeZone) ?? Date.parse(`${anchor}T12:00:00Z`);
+export function formatMonthTitle(monthAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const anchor = parseCalendarDateString(monthAnchor, tz) ?? monthAnchor;
+  const ms = zonedMidnightUtcMs(anchor, tz) ?? Date.parse(`${anchor}T12:00:00Z`);
   return new Date(ms).toLocaleDateString("en-GB", {
     month: "long",
     year: "numeric",
-    timeZone,
+    timeZone: tz,
   });
 }
 
@@ -232,7 +235,7 @@ function formatPillTime(iso: string, timezone?: string | null, fallbackTz?: stri
   return new Date(iso).toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: timezone?.trim() || fallbackTz?.trim() || "UTC",
+    timeZone: normalizeCalendarTimezone(timezone || fallbackTz),
   });
 }
 
@@ -537,7 +540,7 @@ function MonthViewInner({
 
   const navigateMonth = useCallback(
     (delta: number) => {
-      const nextAnchor = addUtcMonthsToCalendarDate(monthAnchor, delta);
+      const nextAnchor = addMonthsToCalendarDate(monthAnchor, delta, gridConfig.timeZone);
       if (onNavigateMonth) {
         onNavigateMonth(nextAnchor);
         return;

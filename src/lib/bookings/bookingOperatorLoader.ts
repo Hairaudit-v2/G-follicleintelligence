@@ -11,8 +11,10 @@ import {
 } from "./operatorBookingQuery";
 import { computeOperatorBookingSummaryCounts, type OperatorBookingSummaryCounts } from "./operatorBookingSummary";
 import { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
-import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { calendarDateStringFromInstant, zonedMidnightUtcMs, zonedNextDayUtcMs } from "@/src/lib/calendar/calendarTimezone";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
+import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { loadBookingsForOperatorView } from "./bookings";
 import type { FiBookingRow } from "./types";
 
@@ -35,6 +37,8 @@ export type BookingsOperatorPageData = {
   /** True when the main list hit the default row cap. */
   listTruncated: boolean;
   groupingNowIso: string;
+  /** IANA timezone from `fi_tenant_settings.default_timezone` for labels and forms. */
+  calendarTimezone: string;
 };
 
 function maxIso(a: string, b: string): string {
@@ -51,7 +55,10 @@ export async function loadBookingsOperatorPageData(
   const tid = tenantId.trim();
   const now = new Date();
   const query = parseOperatorBookingSearchParams(searchParams, now);
-  const { dayStartMs, dayEndMs } = utcDayBoundsMs(now);
+  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
+  const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
+  const dayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone) ?? utcDayBoundsMs(now).dayStartMs;
+  const dayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone) ?? utcDayBoundsMs(now).dayEndMs;
 
   const summaryStartIso = addUtcDays(startOfUtcDayFromDate(now), -OPERATOR_SUMMARY_DAYS_BACK).toISOString();
   const tomorrowStartIso = addUtcDays(startOfUtcDayFromDate(now), 1).toISOString();
@@ -106,5 +113,6 @@ export async function loadBookingsOperatorPageData(
     summaryTruncated: summaryRows.length >= MAX_OPERATOR_BOOKINGS_LIMIT,
     listTruncated: bookings.length >= DEFAULT_OPERATOR_BOOKINGS_LIMIT,
     groupingNowIso: now.toISOString(),
+    calendarTimezone,
   };
 }

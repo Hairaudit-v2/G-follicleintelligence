@@ -114,7 +114,8 @@ export function BookingCalendarFilters({
         </a>
       </div>
       <p className="text-xs text-gray-500">
-        Grid columns are labelled in UTC. Create and edit forms use your browser&apos;s local timezone for datetime fields.
+        Times use the tenant clinic timezone ({query.calendarTimezone}). Create and quick-edit fields use the same
+        wall clock.
       </p>
     </form>
   );

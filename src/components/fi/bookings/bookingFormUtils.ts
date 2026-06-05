@@ -2,6 +2,7 @@ import {
   fromDatetimeLocalValueInTimezone,
   toDatetimeLocalValueInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
+import { endIsoFromStartAndProcedure } from "@/src/lib/bookings/appointmentProcedureDefaults";
 
 export function toDatetimeLocalValue(iso: string, timeZone?: string | null): string {
   if (timeZone?.trim()) return toDatetimeLocalValueInTimezone(iso, timeZone);
@@ -18,6 +19,25 @@ export function fromDatetimeLocalValue(local: string, timeZone?: string | null):
   const d = new Date(t);
   if (Number.isNaN(d.getTime())) return null;
   return d.toISOString();
+}
+
+/**
+ * Computes `datetime-local` end value from current start + procedure type, using
+ * {@link endIsoFromStartAndProcedure} (Evolved Hair default slot lengths).
+ */
+export function endLocalFromStartLocalAndProcedure(
+  startLocal: string,
+  procedure: string,
+  timeZone?: string | null
+): string | null {
+  const startIso = fromDatetimeLocalValue(startLocal, timeZone);
+  if (!startIso) return null;
+  try {
+    const endIso = endIsoFromStartAndProcedure(startIso, procedure);
+    return toDatetimeLocalValue(endIso, timeZone);
+  } catch {
+    return null;
+  }
 }
 
 export function defaultRangeIso(timeZone?: string | null): { start: string; end: string } {

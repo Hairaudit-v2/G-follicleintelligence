@@ -14,6 +14,7 @@ import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "./operatorBookingConstants";
 import type { FiBookingRow } from "./types";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 
 export type CalendarResources = {
   assignees: CrmShellUserPickerOption[];
@@ -32,7 +33,7 @@ export type CalendarViewData = {
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   listTruncated: boolean;
-  /** Human-readable UTC range heading for the toolbar. */
+  /** Human-readable range heading for the toolbar (clinic-local when tenant timezone is set). */
   rangeTitle: string;
   /** For booking edit drawer when legacy calendar UI is wired. */
   reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
@@ -75,15 +76,16 @@ export async function loadCalendarBookings(
 
 /**
  * Server payload for `/fi-admin/[tenantId]/calendar` (Stage 3C).
- * Loads only the visible UTC range (day or week) plus picker resources.
+ * Loads the visible clinic-local range (day or week) plus picker resources.
  */
 export async function loadCalendarViewData(
   tenantId: string,
   searchParams: Record<string, string | string[] | undefined>
 ): Promise<CalendarViewData> {
   const tid = tenantId.trim();
-  const query = parseCalendarSearchParams(searchParams);
-  const lanes = buildCalendarLanesForView(query.view, query.dateAnchor);
+  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
+  const query = parseCalendarSearchParams(searchParams, new Date(), { calendarTimezone });
+  const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
 
   const [{ bookings, rangeStartIso, rangeEndIso, listTruncated }, resources] = await Promise.all([
     loadCalendarBookings(tid, query),
@@ -96,7 +98,7 @@ export async function loadCalendarViewData(
     buckets[lane.dayKey] = bucketsMap.get(lane.dayKey) ?? [];
   }
 
-  const rangeTitle = formatCalendarRangeTitle(query.view, lanes);
+  const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
 
   const reminderMap = await loadReminderJobsForBookings(
     tid,

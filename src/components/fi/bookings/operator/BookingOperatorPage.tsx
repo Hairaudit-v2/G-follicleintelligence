@@ -20,7 +20,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
     router.refresh();
   }
 
-  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinics, summaryCounts, summaryTruncated, listTruncated } = data;
+  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinics, summaryCounts, summaryTruncated, listTruncated, calendarTimezone } = data;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
@@ -51,7 +51,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
-          <p className="text-xs font-medium uppercase text-gray-500">Today (starts UTC day)</p>
+          <p className="text-xs font-medium uppercase text-gray-500">Today (clinic calendar day)</p>
           <p className="mt-1 text-2xl font-semibold text-gray-900">{summaryCounts.today}</p>
         </div>
         <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
@@ -102,6 +102,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
           assignees={assignees}
           clinics={clinics}
           adminKey={adminKey}
+          calendarTimezone={calendarTimezone}
           onCreated={refresh}
         />
       </div>
@@ -113,6 +114,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
         assignees={assignees}
         clinics={clinics}
         adminKey={adminKey}
+        clinicCalendarTimezone={calendarTimezone}
         onClose={() => setEditing(null)}
         onSaved={refresh}
       />

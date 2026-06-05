@@ -7,6 +7,7 @@ import {
 } from "@/lib/calendar/time-slots";
 import { fiCrmCalendarGridClassNames } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
+import { DEFAULT_CALENDAR_TIMEZONE } from "@/src/lib/calendar/calendarTimezone";
 
 export type BusinessTimeSlotGridProps = {
   /** Override body height; defaults to full 8 AM–6 PM window. */
@@ -18,7 +19,11 @@ export type BusinessTimeSlotGridProps = {
  * Always-visible 8 AM–6 PM slot grid (30-min increments).
  * Renders even when a column has zero appointments.
  */
-export function BusinessTimeSlotGrid({ bodyHeightPx, className, timeZone = "UTC" }: BusinessTimeSlotGridProps & { timeZone?: string }) {
+export function BusinessTimeSlotGrid({
+  bodyHeightPx,
+  className,
+  timeZone = DEFAULT_CALENDAR_TIMEZONE,
+}: BusinessTimeSlotGridProps & { timeZone?: string }) {
   const slots = generateCalendarTimeSlots(timeZone);
   const slotH = calendarSlotHeightPx();
   const height = bodyHeightPx ?? calendarGridBodyHeightPx();
@@ -53,7 +58,7 @@ export function BusinessTimeSlotGrid({ bodyHeightPx, className, timeZone = "UTC"
 export function BusinessTimeGutter({
   bodyHeightPx,
   headerHeightPx = 56,
-  timeZone = "UTC",
+  timeZone = DEFAULT_CALENDAR_TIMEZONE,
 }: {
   bodyHeightPx?: number;
   headerHeightPx?: number;

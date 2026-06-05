@@ -9,6 +9,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingTypeBadge";
+import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 
 function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
   if (!id) return "Unassigned";
@@ -69,6 +70,7 @@ export function BookingCalendarDrawer({
   assignees,
   clinics,
   adminKey,
+  calendarTimezone,
   onClose,
   onChanged,
   onEdit,
@@ -78,6 +80,7 @@ export function BookingCalendarDrawer({
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
+  calendarTimezone?: string | null;
   onClose: () => void;
   onChanged: () => void;
   onEdit: (b: FiBookingRow) => void;
@@ -97,10 +100,12 @@ export function BookingCalendarDrawer({
   const cancelled = isBookingCancelled(row);
   const completed = row.booking_status === "completed";
 
+  const tz = normalizeCalendarTimezone(calendarTimezone ?? row.timezone);
   const range = `${new Date(row.start_at).toLocaleString(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
-  })} → ${new Date(row.end_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`;
+    timeZone: tz,
+  })} → ${new Date(row.end_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short", timeZone: tz })}`;
 
   async function onComplete() {
     setBusy(true);
