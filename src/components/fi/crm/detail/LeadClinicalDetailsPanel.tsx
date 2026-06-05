@@ -58,9 +58,14 @@ export function LeadClinicalDetailsPanel({
       <section className={crmLeadCardClass}>
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h2 className="text-sm font-semibold text-gray-900">Clinical scales</h2>
-          <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-xs text-blue-600 hover:underline">
-            Open patient profile →
-          </Link>
+          <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-600 hover:underline">
+              Patient directory
+            </Link>
+            <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-600 hover:underline">
+              Open profile →
+            </Link>
+          </p>
         </div>
         <p className="mt-2 text-sm text-gray-800">{scalesLine || "No scale data recorded yet."}</p>
       </section>

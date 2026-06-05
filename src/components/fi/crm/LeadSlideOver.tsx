@@ -450,6 +450,8 @@ export function LeadSlideOverPanel({
           {!loading && lead && payload ? (
             <div className="space-y-4">
               <LeadPersonHeader
+                tenantId={tenantId}
+                patientId={lead.patient_id}
                 personName={personName}
                 leadId={lead.id}
                 leadSummary={lead.summary}

@@ -4,6 +4,7 @@
 export * from "./patientPolicy";
 export * from "./patientLabels";
 export * from "./patientDirectoryQuery";
+export * from "./patientDirectoryMetrics";
 export * from "./patientProfileSummary";
 export * from "./clinicalDetailsPolicy";
 export * from "./clinicalDetailsChangedFields";

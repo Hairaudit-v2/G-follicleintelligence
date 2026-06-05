@@ -1,21 +1,37 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { UniversalPatientRecord } from "@/src/components/fi/UniversalPatientRecord";
-import { PatientProfilePage } from "@/src/components/fi/patients/PatientProfilePage";
+import { PatientDetailPageView } from "@/src/components/fi/patients/detail/PatientDetailPageView";
+import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { loadUniversalPatientRecord } from "@/src/lib/fi/foundation/patientRecord";
-import { assertCrmShellPageAccess } from "@/src/lib/crm/crmShellAccess";
+import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
+import { loadPatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
+import { parsePatientDetailTab } from "@/src/lib/patients/patientDetailTabs";
+import { parsePatientPreviewSearchParam } from "@/src/lib/patients/patientPreviewQuery";
 import { loadPatientProfile } from "@/src/lib/patients/patientProfileLoader";
-
-export const metadata = {
-  title: "Patient profile",
-  robots: { index: false, follow: false },
-};
-
 export const dynamic = "force-dynamic";
 
-export default async function PatientProfileRoutePage({
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ tenantId: string; patientId: string }>;
+}): Promise<Metadata> {
+  const { tenantId, patientId } = await params;
+  const payload = await loadPatientDetailPayload(tenantId, patientId);
+  const title = payload?.displayName ?? "Patient profile";
+  return {
+    title: `${title} · Patients`,
+    robots: { index: false, follow: false },
+  };
+}
+
+export default async function PatientProfileRoutePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ tenantId: string; patientId: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId, patientId } = await params;
   if (!tenantId?.trim() || !patientId?.trim()) notFound();
@@ -24,7 +40,10 @@ export default async function PatientProfileRoutePage({
     return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
   }
 
-  await assertCrmShellPageAccess(tenantId);
+  const session = await getCrmShellPageSession(tenantId);
+  const sp = (await searchParams) ?? {};
+  const previewPatientId = parsePatientPreviewSearchParam(sp.preview);
+  const activeTab = parsePatientDetailTab(sp.tab);
 
   const loaded = await loadPatientProfile(tenantId, patientId);
   if (!loaded.ok) notFound();
@@ -44,5 +63,27 @@ export default async function PatientProfileRoutePage({
     );
   }
 
-  return <PatientProfilePage tenantId={tenantId} data={loaded.data} />;
+  const payload = await loadPatientDetailPayload(tenantId, patientId);
+  if (!payload) notFound();
+
+  return (
+    <AppointmentSlideOverProvider
+      tenantId={tenantId}
+      operatorFiUserId={session.fiUserId}
+      userRole={session.role}
+      assignees={payload.assignees}
+      clinics={payload.clinics}
+      existingBookings={payload.bookingRows}
+    >
+      <Suspense fallback={<div className="mx-auto max-w-6xl animate-pulse space-y-4 py-6" aria-busy="true" aria-hidden />}>
+        <PatientDetailPageView
+          tenantId={tenantId}
+          patientId={patientId.trim()}
+          initialPayload={payload}
+          activeTab={activeTab}
+          previewPatientId={previewPatientId}
+        />
+      </Suspense>
+    </AppointmentSlideOverProvider>
+  );
 }

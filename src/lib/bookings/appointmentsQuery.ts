@@ -144,6 +144,25 @@ export function buildAppointmentsHref(tenantId: string, q: AppointmentsHrefQuery
   return qs ? `${base}?${qs}` : base;
 }
 
+/** Deep link from patient profile / slide-over → calendar + create slide-over with patient context. */
+export function buildBookAppointmentFromPatientHref(
+  tenantId: string,
+  patientId: string,
+  bookingType = "consultation",
+  leadId?: string | null
+): string {
+  const def = defaultRangeIso();
+  const sp = new URLSearchParams();
+  sp.set("tab", "calendar");
+  sp.set("create", "1");
+  sp.set("patientId", patientId.trim());
+  if (leadId?.trim()) sp.set("leadId", leadId.trim());
+  sp.set("start", def.start);
+  sp.set("end", def.end);
+  sp.set("type", bookingType.trim() || "consultation");
+  return `/fi-admin/${tenantId.trim()}/appointments?${sp.toString()}`;
+}
+
 /** Deep link from CRM lead detail → calendar + create slide-over with lead context. */
 export function buildBookAppointmentFromLeadHref(
   tenantId: string,

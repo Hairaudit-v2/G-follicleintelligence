@@ -6,6 +6,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { loadPatientSlideOverBundleAction } from "@/lib/actions/fi-patient-actions";
 import type { PatientSlideOverPayload } from "@/src/lib/patients/patientSlideOverLoader";
 import { crmLeadCardClass } from "@/src/components/fi/crm/shared/crmSharedStyles";
+import { PatientBookNextAppointmentCard } from "./shared/PatientBookNextAppointmentCard";
+import { PatientConsultationsCard } from "./shared/PatientConsultationsCard";
+import { PatientPersonLeadHistoryCard } from "./shared/PatientPersonLeadHistoryCard";
 import { PatientStatusBadge } from "./PatientStatusBadge";
 
 export type PatientShellOperatorContext = {
@@ -221,6 +224,27 @@ export function PatientSlideOverPanel({
                 </dl>
               </section>
 
+              <PatientBookNextAppointmentCard
+                tenantId={tenantId}
+                patientId={payload.patientId}
+                personId={payload.personId}
+                displayName={payload.displayName}
+                primaryLead={payload.primaryLead}
+                bookings={payload.bookingRows}
+                groupingNowIso={payload.groupingNowIso}
+                compact
+              />
+
+              <PatientConsultationsCard tenantId={tenantId} consultations={payload.consultations} compact />
+
+              <PatientPersonLeadHistoryCard
+                tenantId={tenantId}
+                currentPatientId={payload.patientId}
+                items={payload.personLeadHistory}
+                activity={payload.personCrmActivity}
+                compact
+              />
+
               <section className={crmLeadCardClass}>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Linked records</h3>
                 <ul className="mt-2 space-y-1 text-sm text-gray-800">
@@ -238,13 +262,6 @@ export function PatientSlideOverPanel({
               </section>
 
               <div className="flex flex-wrap gap-2">
-                <Link
-                  href={`/fi-admin/${tenantId}/bookings/new?patientId=${encodeURIComponent(payload.patientId)}`}
-                  className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
-                  onClick={() => onClose()}
-                >
-                  Book appointment
-                </Link>
                 <Link
                   href={href}
                   className="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"

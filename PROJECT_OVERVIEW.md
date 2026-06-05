@@ -4,7 +4,7 @@
 
 **Document purpose:** Establish a **baseline** for engineers and stakeholders: what exists today, how it is structured, and what remains for an MVP comparable to Salesforce + HubSpot + Timely in scope (not in vendor feature parity).
 
-**Last reviewed:** 2026-06-05 (CRM lead detail tabs + Appointments/Bookings module audit).
+**Last reviewed:** 2026-06-05 (Patients module audit + CRM lead detail + Appointments/Bookings).
 
 ---
 
@@ -91,11 +91,124 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | Area | Status | Detail |
 | --- | --- | --- |
 | `fi_persons` + `fi_patients` | **Completed** | Canonical person; one patient per person per tenant. |
-| Patient directory + profile | **Completed** | Gated CRM shell; clinical details, images, timeline, linked leads. |
-| Structured clinical summary | **Completed** | `fi_patient_clinical_details` — hair concern, meds, allergies, family history, etc. |
-| Patient images (private bucket) | **Completed** | `fi_patient_images` with categories including **`before` / `after`**, consult, post_op, etc.; APIs for upload/archive. |
-| **Norwood / Ludwig scale fields** | **Completed** | `fi_patient_clinical_details` + patient profile / consultation medical panel; surfaced on CRM kanban cards when linked patient has clinical rows. |
-| Universal timeline | **Completed / evolving** | Timeline filters and types in `src/lib/patients/timeline/*`. |
+| Patient profile (foundation) | **Completed** | `/fi-admin/[tenantId]/patients/[patientId]` — clinical, images, timeline, leads, bookings, cases. |
+| Patient directory (data + UI) | **In progress** | Loader + `PatientDirectoryPage` built; **`/patients` route still shows Clinic OS placeholder** (no live list). |
+| Structured clinical summary | **Completed** | `fi_patient_clinical_details` — scales, hairline pattern, bounded text + JSON flags. |
+| Patient images (private bucket) | **Completed** | `fi_patient_images`; upload/edit/archive; categories include **before / after / progress**. |
+| **Norwood / Ludwig** | **Completed** | DB + Zod + `hairLossScales.ts`; editable on profile; read-only on lead detail; kanban/reminder/appointment hints. |
+| Universal timeline | **Completed** | Read-only merge in `src/lib/patients/timeline/*` (no patient-native activity writer). |
+
+See **Patients Module** below for file map, hair-restoration gaps, and CRM/Appointment integration.
+
+### Patients Module
+
+**Naming:** Foundation patients live in **`fi_patients`** (linked to **`fi_persons`**). Legacy **`fi_global_patients`** still resolve via `v_fi_patient_resolution` and **`UniversalPatientRecord`** when no foundation row exists. Product “clinical scales” are columns on **`fi_patient_clinical_details`** (not a separate `clinical_scales` table).
+
+#### What's built
+
+| Layer | Location | Capability |
+| --- | --- | --- |
+| **Database** | `20260605140005_fi_patients_and_fi_patient_source_ids.sql`, `20260611120001_fi_patients_admin_fields.sql`, `20260612120001_fi_patient_clinical_details.sql`, `20260620120001_fi_patient_clinical_scales.sql`, `20260613120001_fi_patient_images.sql` | `fi_patients` (status, admin note, **reminder_consent**, preferred contact); **one** clinical row per patient; private image metadata with optional `lead_id` / `case_id` / `booking_id` anchors. |
+| **Domain / policy** | `src/lib/patients/*`, `src/lib/patientImages/*` | Status allow-list, clinical text maxima, Norwood/Ludwig/hairline enums (`hairLossScales.ts`), image category/MIME policy, `changed_keys` diffs, consultation → patient scale sync (`clinicalDetailsConsultationSync.ts`). |
+| **Loaders** | `patientProfileLoader.ts`, `patientDirectoryLoader.ts`, `clinicalDetailsServer.ts`, `patientImagesServer.ts`, `timeline/patientTimelineBuild.ts` | Profile graph: person, clinical, signed image tiles (max 50 active), leads by `patient_id`, cases by `foundation_patient_id`, bookings, CRM activity union, treatment timeline. Directory: search, filters, pagination (not routed). |
+| **Server actions** | `lib/actions/fi-patient-actions.ts` | `updatePatientAdminDetailsAction`, `updatePatientClinicalDetailsAction`, `updatePatientImageDetailsAction`, `archivePatientImageAction` (CRM write gate; **no** patient create action). |
+| **HTTP API** | `app/api/tenants/[tenantId]/patients/[patientId]/` | `PATCH` admin fields; `PATCH` `clinical-details`; `POST`/`PATCH`/archive under `images/`. |
+| **FI Admin routes** | `app/(fi-admin)/fi-admin/[tenantId]/patients/` | **`page.tsx`** → `ClinicOsPatientsHome` (placeholder KPIs, global search hint). **`[patientId]/page.tsx`** → `PatientProfilePage`. **`new/page.tsx`** → hub (CRM lead / booking paths; **no** direct “create patient” form). |
+| **Profile UI** | `src/components/fi/patients/*`, `src/components/fi/patient-images/*` | Header + summary KPIs; **editable** `PatientClinicalDetailsCard` (scales + text + optional JSON); **upload/gallery** `PatientImagesCard`; read-only timeline; linked leads, bookings, cases, CRM activity; admin notes + reminder consent. |
+| **Directory UI (unwired)** | `PatientDirectoryPage`, filters, table | Fully implemented components; **not** mounted on `/patients` route yet. |
+| **Patient creation** | `src/lib/crm/leadConversion.ts` | `resolveOrCreatePatient` on lead conversion (`fi_patient_source_ids` idempotency); no standalone operator “new patient” API. |
+| **Tests** | `stage4a.test.ts` … `stage4d.test.ts`, `patientImages/stage4c.test.ts` | Policy, directory query, clinical merge, timeline sanitisation, images. |
+| **Design docs** | `docs/design/21-patient-profile-foundation.md`, `22-patient-images-foundation.md`, `23-patient-treatment-timeline.md` | Stage 4A–4D checklists. |
+
+**Clinical fields today:** Bounded text — primary concern, treatment interest, duration, family/medical history, meds, allergies, contraindications, scalp conditions, **`previous_hair_treatments`** (single textarea, not structured procedures). Structured enums — **Norwood**, **Ludwig**, **hairline_pattern**. Extensibility — `clinical_flags`, `metadata` JSON (staff-maintained; not HLI output).
+
+**Image gallery:** Private Supabase bucket; categories `consult`, `scalp`, `donor`, `hairline`, `trichoscopy`, `post_op`, **`progress`**, **`before`**, **`after`**, `other`. Staff upload on profile; archive soft-deletes; signed URLs for active tiles. CRM lead **Clinical** tab and appointment drawer reuse **`LeadPhotoGalleryPanel`** (read-only grouping; edit on patient profile).
+
+#### Gaps (full hair restoration workflow)
+
+| Gap | Current state | Target for Evolved |
+| --- | --- | --- |
+| **Live patient directory** | Placeholder home at `/patients`; `loadPatientDirectoryPage` unused | Wire `PatientDirectoryPage` to route; replace preview KPIs with real counts |
+| **Direct patient intake** | Only via **lead conversion** or ingest | Operator “create patient” (person + patient) without forcing a CRM lead |
+| **Norwood / Ludwig depth** | Single current values on clinical row; UI selects in `ClinicalHairLossScaleFields` | Scale **history** over time (consult vs surgery vs 12-month review); optional diagram reference |
+| **Hair characteristics** | Free text only (`primary_hair_concern`, `scalp_conditions`, etc.) | Structured fields: density, caliber, color, texture, donor quality — or dedicated JSON schema |
+| **Previous procedures** | One field `previous_hair_treatments` | Table: procedure type, date, clinic, graft count, outcome, link to case/booking |
+| **Consent forms** | **`reminder_consent`** + preferred contact on `fi_patients` only | Treatment, photography, GDPR, surgery consents with signed PDF/storage + expiry |
+| **Progress tracking** | `progress` / `before` / `after` **categories** only | Comparison sets (baseline → 3/6/12 mo), graft survival notes, link to post-op case tracking |
+| **Merged lead history** | Profile lists leads with **`patient_id`**; CRM lead detail has **`relatedLeads`** by **`person_id`** | Patient profile **person-level** enquiry history (all leads for person), stage timeline, merged comms |
+| **Consultations on profile** | `fi_consultations.patient_id` exists; scales sync from `medical_hair_loss` draft | Consult list + deep link; complete consult → case/booking from patient shell |
+| **Patient-native audit** | Profile activity = read-only **`fi_crm_activity_events`**; clinical/image edits **not** logged | `fi_patient_activity` or keyed CRM events with `changed_keys` only |
+| **HLI / trichoscopy / graft math** | Explicitly deferred in design docs | Engine scores, measurement library, graft calculator tied to images and scales |
+| **Before/after engine** | Manual tagged photos | Side-by-side viewer, alignment, export for marketing (consent-gated) |
+
+#### Integration with CRM Lead Detail and Appointments
+
+| Surface | Today | Recommended next hooks |
+| --- | --- | --- |
+| **`CrmLeadDetailPageView` — Clinical tab** | Read-only `LeadClinicalDetailsPanel` + `LeadPhotoGalleryPanel` when `lead.patient_id` set; **related leads** by `person_id` on preview bridge | Inline “quick edit scales” with save → patient row; CTA when unconverted; show **all person leads** summary chip linking to patient |
+| **`LeadSlideOver`** | Norwood hint via `clinicalScalesSummary`; no gallery/clinical sections | Compact scales line + thumb strip + “Open patient” |
+| **`LeadBookNextAppointmentCard`** | Prefills appointment slide-over (`bookingLeadPrefill`) | Pass `patient_id` + Norwood into create form defaults |
+| **Kanban** | `getNorwoodShortLabel` on cards when patient linked | Batch-load clinical scales in kanban extras (avoid N+1) |
+| **`/appointments` + slide-over** | `appointmentSlideOverLoader` loads `clinicalDetails`, `clinicalScalesSummary`, `patientImages`; `AppointmentClinicalSection`, `AppointmentGallerySection` | Deep link header → patient profile; filter gallery by `booking_id`; post-complete sync scales to patient |
+| **`/appointments/[id]` detail** | Tabs: overview, clinical notes, procedure photos, invoice preview, post-op plan; breadcrumbs to patient | Embed `PatientClinicalDetailsCard` read-only peek or “edit on patient” |
+| **Bookings / calendar** | `PatientBookingsCard`; calendar clinical line when patient on booking | Unify copy: appointments route = bookings data |
+| **Reminders** | `{{norwood_summary}}` from patient clinical row; `reminder_consent` on patient | Surface consent block on patient admin card before enqueue |
+| **Consultation OS** | `syncConsultationMedicalHairLossToPatientClinicalDetails` on consult save | Patient profile card listing open/completed consults |
+
+#### Recommended file structure (evolution)
+
+Keep **`fi_patients`** and **`src/lib/patients`** as source of truth. Add submodules only where domain grows:
+
+```text
+src/lib/patients/                         # keep — core (current)
+  patientProfileLoader.ts
+  patientDirectoryLoader.ts
+  clinicalDetailsServer.ts
+  hairLossScales.ts
+  clinicalScaleHistory.ts                 # new — append-only scale snapshots
+  patientLeadHistory.ts                   # new — person_id → all leads + merged activity
+  patientConsent.ts                       # new — consent types + storage paths
+  previousProcedures.ts                   # new — structured procedure rows (or jsonb schema)
+
+src/lib/patientImages/                    # keep (current)
+  progressSeries.ts                       # new — group before/progress/after by case or date
+
+src/components/fi/patients/               # keep (current)
+  PatientDirectoryPage.tsx                # wire to route
+  PatientConsentPanel.tsx                 # new
+  PatientConsultationsCard.tsx            # new
+  PatientPersonLeadHistoryCard.tsx        # new — supersedes linked-only leads list
+  progress/PatientProgressCompare.tsx     # new
+
+src/components/fi/crm/shared/
+  PatientClinicalPeek.tsx                 # optional — scales + link for lead + appointment
+
+app/(fi-admin)/fi-admin/[tenantId]/patients/
+  page.tsx                                # switch: ClinicOsPatientsHome → PatientDirectoryPage
+  [patientId]/page.tsx                    # keep
+  new/page.tsx                            # keep hub; optional direct-create wizard
+
+docs/design/
+  24-patient-hair-restoration-roadmap.md  # new — scales history, procedures, consent, progress
+```
+
+**Principle:** one patient row per person per tenant, one clinical summary row, many images and bookings; CRM leads and cases are **anchors**, not duplicate patient records. Timely-style scheduling stays on **`fi_bookings`** / **`src/lib/bookings`**; patient module **consumes** booking and appointment UIs rather than forking storage.
+
+#### Priority features (Evolved Hair Clinics)
+
+| Priority | Feature | Why |
+| --- | --- | --- |
+| **P0** | **Wire patient directory** to `/patients` | Operators cannot discover patients without search/profile URL today |
+| **P0** | **Person-level lead history on patient profile** | Multiple enquiries per person are common; only `patient_id` leads shown now |
+| **P1** | **Consultations card** on patient + link to `fi_consultations` | Consult is the sales handoff; patient shell is the longitudinal record |
+| **P1** | **Progress / before–after compare UI** | Categories exist; restoration clinics need visual follow-up |
+| **P1** | **Appointment ↔ patient quick path** | Detail page has breadcrumbs; add norwood badge + gallery filter by booking |
+| **P2** | **Structured previous procedures** | Replace single textarea for FUE/PRP history and medico-legal accuracy |
+| **P2** | **Clinical scale history** | Track change from consult → surgery → reviews for outcomes reporting |
+| **P2** | **Consent documents** | Beyond reminder opt-in; photography and procedure consents |
+| **P3** | **Direct patient create** | Walk-ins without CRM lead first |
+| **P3** | **Patient-native activity stream** | Audit clinical edits without polluting CRM lead feed |
+| **P3** | **HLI / graft calculator integration** | After structured clinical + imaging foundation is stable |
 
 ### Scheduling (Timely direction)
 

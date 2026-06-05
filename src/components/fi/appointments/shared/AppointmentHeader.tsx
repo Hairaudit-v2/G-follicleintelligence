@@ -48,12 +48,17 @@ export function AppointmentHeader({
           </Link>
         ) : null}
         {booking.patient_id ? (
-          <Link
-            href={`/fi-admin/${tenantId}/patients/${booking.patient_id}`}
-            className="font-medium text-blue-600 hover:underline"
-          >
-            Patient record →
-          </Link>
+          <>
+            <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-600 hover:underline">
+              Patient directory
+            </Link>
+            <Link
+              href={`/fi-admin/${tenantId}/patients/${booking.patient_id}`}
+              className="font-medium text-blue-600 hover:underline"
+            >
+              Patient record →
+            </Link>
+          </>
         ) : lead && !lead.patient_id ? (
           <span className="text-gray-500">No patient linked yet</span>
         ) : null}

@@ -93,6 +93,8 @@ export function CrmLeadDetailPageView({
             pendingReminderCount={state.pendingReminderCount}
           />
           <LeadPersonHeader
+            tenantId={tenantId}
+            patientId={lead.patient_id}
             personName={personName}
             leadId={lead.id}
             leadSummary={lead.summary}
