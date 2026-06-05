@@ -6,6 +6,8 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeFiUploadType, buildFiUploadPath } from "@/lib/fi/uploadTypes";
 import { validateUploadFileByType } from "@/lib/fi/validation";
+import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
+import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 
 const BUCKET = process.env.FI_STORAGE_BUCKET_INTAKES || "fi-intakes";
 
@@ -28,6 +30,9 @@ export async function POST(
     }
 
     const form = await req.formData();
+    const adminKey = extractAdminKeyFromRequest(req, { adminKey: form.get("adminKey") });
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
+
     const typeRaw = form.get("type");
     const type = normalizeFiUploadType(typeRaw);
     const files = form.getAll("files") as File[];
@@ -104,9 +109,6 @@ export async function POST(
       files: fileRows.map((r) => ({ filename: r.filename, type: r.type })),
     });
   } catch (e: unknown) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
-      { status: 500 }
-    );
+    return mapCrmRouteError(e);
   }
 }

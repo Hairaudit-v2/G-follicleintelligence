@@ -5,6 +5,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateCaseCreate } from "@/lib/fi/validation";
+import { assertCrmTenantReadAllowed, assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
+import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,9 @@ export async function GET(
     const { tenantId } = await params;
     if (!tenantId)
       return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
+
+    const adminKey = extractAdminKeyFromRequest(req);
+    await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });
 
     const url = new URL(req.url);
     const status = url.searchParams.get("status")?.trim() || null;
@@ -59,10 +64,7 @@ export async function GET(
 
     return NextResponse.json({ ok: true, cases: list });
   } catch (e: unknown) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
-      { status: 500 }
-    );
+    return mapCrmRouteError(e);
   }
 }
 
@@ -77,6 +79,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     }
 
     const body = await req.json().catch(() => ({}));
+    const adminKey = extractAdminKeyFromRequest(req, body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
+
     const validated = validateCaseCreate(body);
     if (!validated.ok)
       return NextResponse.json({ ok: false, error: validated.error }, { status: 400 });
@@ -169,9 +174,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       case: { id: caseData.id, status: caseData.status, created_at: caseData.created_at },
     });
   } catch (e: unknown) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
-      { status: 500 }
-    );
+    return mapCrmRouteError(e);
   }
 }

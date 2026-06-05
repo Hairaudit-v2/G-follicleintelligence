@@ -19,7 +19,8 @@
     "supabase:migration:up": "npx supabase migration up",
     "supabase:migration:new": "npx supabase migration new",
     "supabase:push:consultations": "node scripts/apply-fi-consultations-remote.mjs",
-    "supabase:push:post-op-tracking": "node scripts/apply-fi-case-post-op-tracking-remote.mjs"
+    "supabase:push:post-op-tracking": "node scripts/apply-fi-case-post-op-tracking-remote.mjs",
+    "dev:provision:evolved": "tsx scripts/provision-evolved-tenant.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

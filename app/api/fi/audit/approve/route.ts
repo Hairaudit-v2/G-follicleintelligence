@@ -4,6 +4,7 @@
  */
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { checkFiTenantPortalApiAccess } from "@/src/lib/fiAdmin/clinicOsGlobalSearchApiAccess.server";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,11 @@ export async function POST(req: Request) {
         { ok: false, error: "tenant_id and report_id are required." },
         { status: 400 }
       );
+
+    const access = await checkFiTenantPortalApiAccess(req, tenant_id);
+    if (!access.ok) {
+      return NextResponse.json({ ok: false, error: access.message }, { status: access.status });
+    }
 
     const supabase = supabaseAdmin();
 

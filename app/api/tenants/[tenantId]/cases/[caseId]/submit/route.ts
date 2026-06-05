@@ -4,6 +4,8 @@
  */
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
+import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,10 @@ export async function POST(
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json({ ok: false, error: "Server misconfigured." }, { status: 500 });
     }
+
+    const body = await req.json().catch(() => ({}));
+    const adminKey = extractAdminKeyFromRequest(req, body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
 
     const supabase = supabaseAdmin();
 
@@ -61,9 +67,6 @@ export async function POST(
       case: { id: caseRow.id, status: caseRow.status },
     });
   } catch (e: unknown) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
-      { status: 500 }
-    );
+    return mapCrmRouteError(e);
   }
 }

@@ -167,5 +167,6 @@ From `/fi-admin` and `/hair-audit/admin`, submit **Sign out**; session should cl
 | Gates | `src/lib/fiOs/fiOsPortalGate.server.ts` |
 | Redirects | `src/lib/fiOs/fiOsRedirect.server.ts` |
 | Tenant API | `src/lib/fiAdmin/fiAdminTenantDirectory.ts`, `app/api/tenants/route.ts` |
+| Case / pipeline REST (tenant-scoped) | `app/api/tenants/[tenantId]/cases/**`, `.../tick-jobs`, `.../foundation-integrity` — gated with `assertCrmTenantReadAllowed` / `assertCrmTenantWriteAllowed` (see `src/lib/crm/crmGate.ts`) |
 | Migration | `supabase/migrations/20260614120001_fi_os_identities.sql` |
 | Local dev bypass | `docs/dev-local-fi-admin.md` |

@@ -9,6 +9,13 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { ok: false, error: "This endpoint is disabled in production." },
+        { status: 403 }
+      );
+    }
+
     const { tenantId } = await params;
     if (!tenantId)
       return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });

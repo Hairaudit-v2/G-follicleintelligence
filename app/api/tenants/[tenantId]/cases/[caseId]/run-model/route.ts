@@ -5,6 +5,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { runPipeline } from "@/lib/fi/pipeline";
+import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
+import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,10 @@ export async function POST(
       return NextResponse.json({ ok: false, error: "Server misconfigured." }, { status: 500 });
     }
 
+    const body = await req.json().catch(() => ({}));
+    const adminKey = extractAdminKeyFromRequest(req, body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
+
     const supabase = supabaseAdmin();
     const { data: caseRow } = await supabase
       .from("fi_cases")
@@ -34,7 +40,6 @@ export async function POST(
     if (!caseRow)
       return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });
 
-    const body = await req.json().catch(() => ({}));
     const dryRun = Boolean(body?.dryRun);
 
     const result = await runPipeline({ tenantId, caseId, dryRun });
@@ -49,9 +54,6 @@ export async function POST(
       message: dryRun ? "Pipeline completed (dry run)." : "Pipeline completed.",
     });
   } catch (e: unknown) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
-      { status: 500 }
-    );
+    return mapCrmRouteError(e);
   }
 }

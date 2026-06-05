@@ -2,6 +2,8 @@
 
 Use the dedicated OS sign-in page: **`/follicle-intelligence/login`** (alias **`/fi-login`**). Production builds require a Supabase Auth session and FI staff provisioning (`fi_os_identities` and/or `fi_users`) before `/fi-admin` and tenant routes load. Full rules and a go-live checklist: **`docs/fi-os-access-production.md`**.
 
+**Evolved tenant + UK timezone + reminder templates (dev):** run **`npm run dev:provision:evolved`** or follow **`docs/dev-provision-evolved-tenant.md`**.
+
 The FI Admin home page (`/fi-admin`) loads tenants from `GET /api/tenants`. In **production** (`NODE_ENV === 'production'`), you must be signed in with Supabase Auth. Tenant directory rules:
 
 - **`fi_os_identities.os_role`** in `fi_admin` or `fi_auditor`: all tenants (service-role read on the server).

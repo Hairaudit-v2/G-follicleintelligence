@@ -5,6 +5,8 @@
 import { NextResponse } from "next/server";
 import { getQueuedJobs } from "@/lib/fi/jobRunner";
 import { runPipeline } from "@/lib/fi/pipeline";
+import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
+import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     }
 
     const body = await req.json().catch(() => ({}));
+    const adminKey = extractAdminKeyFromRequest(req, body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
     const limit = Math.min(Math.max(1, Number(body?.limit) || 5), 20);
 
     const jobs = await getQueuedJobs(tenantId, limit);
@@ -43,9 +47,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       results,
     });
   } catch (e: unknown) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
-      { status: 500 }
-    );
+    return mapCrmRouteError(e);
   }
 }
