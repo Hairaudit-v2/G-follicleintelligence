@@ -17,7 +17,7 @@ import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
 import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/BookingEditDrawer";
 
-import { CalendarWeekView } from "./CalendarWeekView";
+import { WeekView } from "@/components/calendar/WeekView";
 import { OperationalCalendarFilters } from "./OperationalCalendarFilters";
 import { OperationalCalendarMobileList } from "./OperationalCalendarMobileList";
 import { OperationalCalendarToolbar } from "./OperationalCalendarToolbar";
@@ -65,14 +65,23 @@ export function OperationalCalendarPage({
   const base = `/fi-admin/${data.tenantId.trim()}`;
 
   const onRescheduleBooking = useCallback(
-    async (b: FiBookingRow, startIso: string, endIso: string) => {
+    async (
+      b: FiBookingRow,
+      startIso: string,
+      endIso: string,
+      meta?: { assignedUserId?: string | null; clinicId?: string | null }
+    ) => {
+      const assignedUserId =
+        meta && "assignedUserId" in meta ? (meta.assignedUserId ?? null) : b.assigned_user_id;
+      const clinicId = meta && "clinicId" in meta ? (meta.clinicId ?? null) : b.clinic_id;
+
       const conflicts = bookingConflictsForOperationalCalendar(
         {
           id: b.id,
           start_at: startIso,
           end_at: endIso,
-          assigned_user_id: b.assigned_user_id,
-          clinic_id: b.clinic_id,
+          assigned_user_id: assignedUserId,
+          clinic_id: clinicId,
         },
         bookings,
         { ignoreBookingId: b.id }
@@ -84,15 +93,19 @@ export function OperationalCalendarPage({
       }
 
       const snapshot = { ...b };
-      setBookings((rows) => rows.map((x) => (x.id === b.id ? { ...x, start_at: startIso, end_at: endIso } : x)));
+      setBookings((rows) =>
+        rows.map((x) =>
+          x.id === b.id ? { ...x, start_at: startIso, end_at: endIso, assigned_user_id: assignedUserId, clinic_id: clinicId } : x
+        )
+      );
 
       const r = await updateBookingAction(data.tenantId, b.id, {
         leadId: b.lead_id,
         personId: b.person_id,
         patientId: b.patient_id,
         caseId: b.case_id,
-        clinicId: b.clinic_id,
-        assignedUserId: b.assigned_user_id,
+        clinicId: clinicId,
+        assignedUserId: assignedUserId,
         bookingType: b.booking_type,
         bookingStatus: b.booking_status,
         title: b.title,
@@ -166,7 +179,7 @@ export function OperationalCalendarPage({
           {data.canMutateBookings ? "Drag & drop enabled" : "Read-only (CRM write role required)"}
         </FiStatusBadge>
         <span>
-          Slots: {data.gridConfig.slotMinutes} min · UTC {data.gridConfig.dayStartHourUtc}:00–{data.gridConfig.dayEndHourUtc}:00
+          Snap: 15 min · Grid: 30 min · UTC {data.gridConfig.dayStartHourUtc}:00–{data.gridConfig.dayEndHourUtc}:00
         </span>
       </div>
 
@@ -179,7 +192,7 @@ export function OperationalCalendarPage({
             </p>
           </div>
         ) : (
-          <CalendarWeekView
+          <WeekView
             view={data.query.view}
             lanes={data.lanes}
             buckets={buckets}

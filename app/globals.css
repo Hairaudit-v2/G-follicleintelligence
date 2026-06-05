@@ -24,6 +24,80 @@
     --destructive-foreground: 0 0% 98%;
     --ring: 196 74% 58%;
     --radius: 0.85rem;
+
+    /* FI procedure palette — indigo · rose · emerald · sky · amber */
+    --fi-procedure-pre-surgery-consult-base: 239 84% 67%;
+    --fi-procedure-pre-surgery-consult-foreground: 243 75% 18%;
+    --fi-procedure-pre-surgery-consult-muted: 226 100% 97%;
+    --fi-procedure-full-transplant-base: 350 89% 60%;
+    --fi-procedure-full-transplant-foreground: 343 84% 17%;
+    --fi-procedure-full-transplant-muted: 356 100% 97%;
+    --fi-procedure-prp-session-base: 160 84% 39%;
+    --fi-procedure-prp-session-foreground: 166 91% 9%;
+    --fi-procedure-prp-session-muted: 152 81% 96%;
+    --fi-procedure-follow-up-nurse-prp-base: 199 89% 48%;
+    --fi-procedure-follow-up-nurse-prp-foreground: 204 80% 16%;
+    --fi-procedure-follow-up-nurse-prp-muted: 204 100% 97%;
+    --fi-procedure-virtual-zoom-base: 38 92% 50%;
+    --fi-procedure-virtual-zoom-foreground: 26 83% 14%;
+    --fi-procedure-virtual-zoom-muted: 48 100% 96%;
+
+    /* FI appointment status palette */
+    --fi-status-confirmed-base: 217 91% 60%;
+    --fi-status-confirmed-foreground: 224 76% 18%;
+    --fi-status-confirmed-muted: 214 100% 97%;
+    --fi-status-arrived-base: 38 92% 50%;
+    --fi-status-arrived-foreground: 26 83% 14%;
+    --fi-status-arrived-muted: 48 100% 96%;
+    --fi-status-completed-base: 160 84% 39%;
+    --fi-status-completed-foreground: 166 91% 9%;
+    --fi-status-completed-muted: 152 81% 96%;
+    --fi-status-no-show-base: 0 72% 51%;
+    --fi-status-no-show-foreground: 0 74% 18%;
+    --fi-status-no-show-muted: 0 86% 97%;
+  }
+
+  /* Clinic OS / CRM light surfaces — toggle via `class="dark"` on `<html>` */
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 204 100% 97%;
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 14%;
+    --accent-foreground: 210 40% 98%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --ring: 199 89% 48%;
+
+    --fi-procedure-pre-surgery-consult-foreground: 226 100% 94%;
+    --fi-procedure-pre-surgery-consult-muted: 243 47% 20%;
+    --fi-procedure-full-transplant-foreground: 356 100% 94%;
+    --fi-procedure-full-transplant-muted: 343 50% 18%;
+    --fi-procedure-prp-session-foreground: 152 81% 92%;
+    --fi-procedure-prp-session-muted: 166 50% 14%;
+    --fi-procedure-follow-up-nurse-prp-foreground: 204 100% 94%;
+    --fi-procedure-follow-up-nurse-prp-muted: 204 50% 16%;
+    --fi-procedure-virtual-zoom-foreground: 48 100% 92%;
+    --fi-procedure-virtual-zoom-muted: 32 55% 16%;
+
+    --fi-status-confirmed-foreground: 214 100% 94%;
+    --fi-status-confirmed-muted: 224 50% 18%;
+    --fi-status-arrived-foreground: 48 100% 92%;
+    --fi-status-arrived-muted: 32 55% 16%;
+    --fi-status-completed-foreground: 152 81% 92%;
+    --fi-status-completed-muted: 166 50% 14%;
+    --fi-status-no-show-foreground: 0 86% 94%;
+    --fi-status-no-show-muted: 0 50% 18%;
   }
 }
 
