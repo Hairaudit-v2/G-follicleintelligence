@@ -1,17 +1,30 @@
 import { FiSection } from "@/src/components/fi-design/FiSection";
 
-import { LabeledDisabledInput } from "./consultationOsPreviewFields";
+import { LabeledTextInput, type ConsultationOsSectionBinder } from "./consultationOsPreviewFields";
 
-export function ConsultationOsRecommendationsPanel() {
+const FIELDS = [
+  { key: "surgery_suitability", label: "Surgery suitability" },
+  { key: "recommended_pathway", label: "Recommended treatment pathway" },
+  { key: "prp_prf", label: "PRP / PRF" },
+  { key: "exosomes", label: "Exosomes" },
+  { key: "medication_plan", label: "Medication plan" },
+  { key: "possible_complications", label: "Possible complications" },
+] as const;
+
+export function ConsultationOsRecommendationsPanel({ values, onFieldChange, disabled }: ConsultationOsSectionBinder) {
   return (
     <FiSection title="Recommendations" headingId="consultation-os-recs-heading">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <LabeledDisabledInput id="cos-suitability" label="Surgery suitability" />
-        <LabeledDisabledInput id="cos-pathway" label="Recommended treatment pathway" />
-        <LabeledDisabledInput id="cos-prp" label="PRP / PRF" />
-        <LabeledDisabledInput id="cos-exosomes" label="Exosomes" />
-        <LabeledDisabledInput id="cos-med-plan" label="Medication plan" />
-        <LabeledDisabledInput id="cos-complications" label="Possible complications" />
+        {FIELDS.map((f) => (
+          <LabeledTextInput
+            key={f.key}
+            id={`cos-rec-${f.key}`}
+            label={f.label}
+            value={values[f.key] ?? ""}
+            onChange={(v) => onFieldChange(f.key, v)}
+            disabled={disabled}
+          />
+        ))}
       </div>
     </FiSection>
   );

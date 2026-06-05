@@ -1,15 +1,24 @@
 import { FiSection } from "@/src/components/fi-design/FiSection";
 
-import { LabeledDisabledTextarea } from "./consultationOsPreviewFields";
+import { LabeledTextarea } from "./consultationOsPreviewFields";
 
 export type ConsultationOsNotesPanelProps = {
   /** Shown in the textarea `placeholder` to reflect the active consultation type. */
   notesPlaceholder: string;
   /** Short bullets rendered above the field as prompt guidance. */
   promptFocus: string[];
+  liveNotes: string;
+  onLiveNotesChange: (next: string) => void;
+  disabled?: boolean;
 };
 
-export function ConsultationOsNotesPanel({ notesPlaceholder, promptFocus }: ConsultationOsNotesPanelProps) {
+export function ConsultationOsNotesPanel({
+  notesPlaceholder,
+  promptFocus,
+  liveNotes,
+  onLiveNotesChange,
+  disabled,
+}: ConsultationOsNotesPanelProps) {
   return (
     <FiSection title="Live consultation notes" headingId="consultation-os-notes-heading">
       {promptFocus.length > 0 ? (
@@ -22,11 +31,14 @@ export function ConsultationOsNotesPanel({ notesPlaceholder, promptFocus }: Cons
           </ul>
         </div>
       ) : null}
-      <LabeledDisabledTextarea
+      <LabeledTextarea
         id="cos-live-notes"
         label="Notes"
+        value={liveNotes}
+        onChange={onLiveNotesChange}
         placeholder={notesPlaceholder}
-        hint="Autosave will be added in a later stage."
+        hint="Manual save only — autosave is not enabled in this stage."
+        disabled={disabled}
       />
     </FiSection>
   );

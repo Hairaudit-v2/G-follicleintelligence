@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { ConsultationOsNewPage } from "@/src/components/fi-admin/consultations/ConsultationOsNewPage";
+import { ConsultationOsCreatePage } from "@/src/components/fi-admin/consultations/ConsultationOsCreatePage";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
@@ -16,5 +16,5 @@ export default async function ConsultationOsNewRoutePage({ params }: { params: P
 
   await assertFiTenantPortalAccess(tenantId);
 
-  return <ConsultationOsNewPage tenantId={tenantId} />;
+  return <ConsultationOsCreatePage tenantId={tenantId} />;
 }
