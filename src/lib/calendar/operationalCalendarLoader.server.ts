@@ -26,6 +26,8 @@ export type {
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
 import type { CrmShellClinicOption, CrmShellStaffPickerOption } from "@/src/lib/crm/types";
+import { loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";
@@ -123,28 +125,26 @@ function humanizeRole(role: string | null | undefined): string {
 }
 
 async function loadTenantStaffAndClinics(tenantId: string): Promise<{
-  assignees: CrmShellUserPickerOption[];
+  assignees: CrmShellStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   resourceColumns: OperationalCalendarResourceColumn[];
+  staffUserByStaffId: Map<string, string | null>;
 }> {
-  const supabase = supabaseAdmin();
   const tid = tenantId.trim();
-  const [usersRes, clinicsRes] = await Promise.all([
-    supabase.from("fi_users").select("id, email, role").eq("tenant_id", tid).order("email", { ascending: true }),
-    supabase
+  const [staffAssignees, clinicsRes] = await Promise.all([
+    loadCrmShellStaffPickerOptions(tid),
+    supabaseAdmin()
       .from("fi_clinics")
       .select("id, display_name, organisation_id")
       .eq("tenant_id", tid)
       .order("display_name", { ascending: true }),
   ]);
-  if (usersRes.error) throw new Error(usersRes.error.message);
   if (clinicsRes.error) throw new Error(clinicsRes.error.message);
 
-  const users = (usersRes.data ?? []) as { id: string; email: string | null; role: string | null }[];
-  const assignees: CrmShellUserPickerOption[] = users.map((u) => ({
-    id: String(u.id),
-    email: u.email != null ? String(u.email) : null,
-  }));
+  const staffUserByStaffId = new Map<string, string | null>();
+  for (const s of staffAssignees) {
+    staffUserByStaffId.set(s.id, s.fi_user_id?.trim() || null);
+  }
 
   const clinics: CrmShellClinicOption[] = (clinicsRes.data ?? []).map((c) => {
     const r = c as { id: string; display_name: string; organisation_id: string | null };
@@ -156,11 +156,11 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
   });
 
   const resourceColumns: OperationalCalendarResourceColumn[] = [
-    ...users.map((u) => ({
-      id: `u:${String(u.id)}`,
-      kind: "fi_user" as const,
-      label: u.email?.trim() || `Staff ${String(u.id).slice(0, 8)}…`,
-      subtitle: humanizeRole(u.role),
+    ...staffAssignees.map((s) => ({
+      id: `s:${String(s.id)}`,
+      kind: "fi_staff" as const,
+      label: staffOptionPrimaryLabel(s),
+      subtitle: staffOptionSubtitle(s),
     })),
     ...clinics.map((c) => ({
       id: `c:${c.id}`,
@@ -171,10 +171,14 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
     { id: "unassigned", kind: "unassigned" as const, label: "Unassigned", subtitle: "No staff column" },
   ];
 
-  return { assignees, clinics, resourceColumns };
+  return { assignees: staffAssignees, clinics, resourceColumns, staffUserByStaffId };
 }
 
-function applyStructuredFilters(rows: FiBookingRow[], q: ParsedCalendarQuery): FiBookingRow[] {
+function applyStructuredFilters(
+  rows: FiBookingRow[],
+  q: ParsedCalendarQuery,
+  staffUserByStaffId: Map<string, string | null>
+): FiBookingRow[] {
   return rows.filter((b) => {
     if (q.status?.trim()) {
       if (b.booking_status !== q.status.trim()) return false;
@@ -182,6 +186,13 @@ function applyStructuredFilters(rows: FiBookingRow[], q: ParsedCalendarQuery): F
       return false;
     }
     if (q.bookingType?.trim() && b.booking_type !== q.bookingType.trim()) return false;
+    if (q.staffId?.trim()) {
+      const sid = q.staffId.trim();
+      const uid = staffUserByStaffId.get(sid) ?? null;
+      if (b.assigned_staff_id?.trim() === sid) return true;
+      if (!b.assigned_staff_id?.trim() && uid && b.assigned_user_id?.trim() === uid) return true;
+      return false;
+    }
     if (q.assignedUserId?.trim() && b.assigned_user_id !== q.assignedUserId.trim()) return false;
     if (q.clinicId?.trim() && b.clinic_id !== q.clinicId.trim()) return false;
     return true;
@@ -253,7 +264,7 @@ export async function loadOperationalCalendarPageData(
   ]);
   const gridConfig = calendarSettings.gridConfig;
 
-  const structured = applyStructuredFilters(rawBookings, query);
+  const structured = applyStructuredFilters(rawBookings, query, resources.staffUserByStaffId);
 
   const patientIds = structured.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()));
   const leadIds = structured.map((b) => b.lead_id).filter((x): x is string => Boolean(x?.trim()));
