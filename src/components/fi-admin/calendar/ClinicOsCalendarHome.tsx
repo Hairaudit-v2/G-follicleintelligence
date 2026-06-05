@@ -1,13 +1,15 @@
 import { Calendar as CalendarIcon } from "lucide-react";
+import Link from "next/link";
 
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
 import { FiSection } from "@/src/components/fi-design/FiSection";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
+import type { ClinicOsCalendarLiveBookingDTO, ClinicOsCalendarReadOnlyPayload } from "@/src/lib/fiAdmin/clinicOsCalendarTypes";
 import { cn } from "@/lib/utils";
 
-/** Calendar body starts at 8:00; last slot ends at 6:00pm (18:00). */
+/** Calendar body starts at 8:00; last slot ends at 6:00pm (18:00). Preview uses local wall clock; live uses UTC (see Stage 2A). */
 const DAY_START_HOUR = 8;
 const DAY_END_HOUR = 18;
 const HOUR_COUNT = DAY_END_HOUR - DAY_START_HOUR;
@@ -34,11 +36,14 @@ const toneClass: Record<PreviewTone, string> = {
   planning: "border-indigo-200 bg-indigo-50/95 text-indigo-950 ring-1 ring-indigo-100",
 };
 
+const liveToneClass =
+  "border-slate-300 bg-white text-slate-950 ring-1 ring-slate-200 shadow-sm hover:border-slate-400/90";
+
 type PlaceholderAppointment = {
   id: string;
   title: string;
   patientName: string;
-  /** Minutes from 8:00am (0 = 8:00am). */
+  /** Minutes from 8:00am local (0 = 8:00am). */
   startMin: number;
   durationMin: number;
   column: ColumnId;
@@ -110,7 +115,13 @@ function formatHourLabel(h: number): string {
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(d);
 }
 
-function formatClockFromDayStart(startMin: number): string {
+/** Hour labels aligned with UTC grid (live bookings). */
+function formatHourLabelUtc(h: number): string {
+  const d = new Date(Date.UTC(2000, 0, 1, h, 0, 0, 0));
+  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", timeZone: "UTC" }).format(d);
+}
+
+function formatClockFromDayStartLocal(startMin: number): string {
   const total = DAY_START_HOUR * 60 + startMin;
   const h = Math.floor(total / 60);
   const m = total % 60;
@@ -119,9 +130,18 @@ function formatClockFromDayStart(startMin: number): string {
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(d);
 }
 
-function formatTimeRange(startMin: number, durationMin: number): string {
+function formatTimeRangeLocal(startMin: number, durationMin: number): string {
   const endMin = startMin + durationMin;
-  return `${formatClockFromDayStart(startMin)} – ${formatClockFromDayStart(endMin)}`;
+  return `${formatClockFromDayStartLocal(startMin)} – ${formatClockFromDayStartLocal(endMin)}`;
+}
+
+function formatUtcTimeRange(isoStart: string, isoEnd: string): string {
+  const opts: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  };
+  return `${new Date(isoStart).toLocaleTimeString(undefined, opts)} – ${new Date(isoEnd).toLocaleTimeString(undefined, opts)} UTC`;
 }
 
 function PreviewAppointmentBlock({ appt }: { appt: PlaceholderAppointment }) {
@@ -142,8 +162,57 @@ function PreviewAppointmentBlock({ appt }: { appt: PlaceholderAppointment }) {
     >
       <p className="text-[11px] font-semibold leading-tight tracking-tight">{appt.title}</p>
       <p className="mt-0.5 truncate text-[10px] font-medium text-slate-700/95">{appt.patientName}</p>
-      <p className="mt-0.5 text-[10px] tabular-nums text-slate-600">{formatTimeRange(appt.startMin, appt.durationMin)}</p>
+      <p className="mt-0.5 text-[10px] tabular-nums text-slate-600">{formatTimeRangeLocal(appt.startMin, appt.durationMin)}</p>
       <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500">Preview only</p>
+    </div>
+  );
+}
+
+function LiveBookingBlock({ appt }: { appt: ClinicOsCalendarLiveBookingDTO }) {
+  const topPct = (appt.startMin / TOTAL_MINUTES) * 100;
+  const heightPct = (appt.durationMin / TOTAL_MINUTES) * 100;
+
+  const inner = (
+    <>
+      <p className="text-[11px] font-semibold leading-tight tracking-tight">{appt.title}</p>
+      <p className="mt-0.5 truncate text-[10px] font-medium text-slate-700/95">{appt.patientName}</p>
+      <p className="mt-0.5 text-[10px] tabular-nums text-slate-600">{formatUtcTimeRange(appt.startTime, appt.endTime)}</p>
+      <p className="mt-0.5 truncate text-[9px] text-slate-600">{appt.appointmentType}</p>
+      {appt.staffName ? (
+        <p className="mt-0.5 truncate text-[9px] text-slate-600">Staff: {appt.staffName}</p>
+      ) : null}
+      {appt.roomName ? (
+        <p className="mt-0.5 truncate text-[9px] text-slate-600">Room: {appt.roomName}</p>
+      ) : null}
+      {appt.status ? (
+        <p className="mt-0.5 text-[9px] font-medium uppercase tracking-wide text-slate-600">Status: {appt.status}</p>
+      ) : null}
+      <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-800/90">Read-only</p>
+    </>
+  );
+
+  const className = cn(
+    "absolute left-0.5 right-0.5 overflow-hidden rounded-md border px-1.5 py-1",
+    liveToneClass,
+    appt.href ? "transition-colors" : "cursor-default"
+  );
+  const style = {
+    top: `${topPct}%`,
+    height: `${heightPct}%`,
+    minHeight: "2.75rem",
+  };
+
+  if (appt.href) {
+    return (
+      <Link href={appt.href} className={cn(className, "block text-left no-underline")} style={style} role="listitem">
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <div role="listitem" className={className} style={style}>
+      {inner}
     </div>
   );
 }
@@ -165,19 +234,24 @@ type ClinicOsCalendarHomeProps = {
   tenantId: string;
   /** From `getCrmShellNavAllowed` — gates booking and CRM shortcuts only. */
   showCrmNav: boolean;
+  calendarReadOnly: ClinicOsCalendarReadOnlyPayload;
 };
 
 /**
- * Clinic OS calendar landing: Timely-style multi-column day preview only (Stage 1J).
- * No live bookings, mutations, or calendar data wiring.
+ * Clinic OS calendar landing: Stage 1J layout; Stage 2A adds read-only live bookings for today (UTC)
+ * when rows exist, otherwise preview placeholders only.
  */
-export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarHomeProps) {
+export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }: ClinicOsCalendarHomeProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
+  const hasLive = calendarReadOnly.liveBookings.length > 0;
+  const formatHour = hasLive ? formatHourLabelUtc : formatHourLabel;
 
   return (
     <div className="space-y-4">
       <p id="clinic-os-calendar-preview-note" className="sr-only">
-        Calendar grid and appointments are demonstration placeholders only. They are not live schedule data.
+        {hasLive
+          ? "Live bookings are shown in read-only mode. Drag, drop, create, and reschedule are disabled."
+          : "Calendar grid sample appointments are demonstration placeholders only. They are not live schedule data."}
       </p>
 
       <FiCard className="sm:p-5" aria-describedby="clinic-os-calendar-preview-note">
@@ -197,13 +271,36 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
         <FiSection
           className="min-w-0 flex-1 p-3 sm:p-4"
           title="Day view"
-          action={<FiStatusBadge tone="neutral">Preview</FiStatusBadge>}
+          action={
+            <FiStatusBadge tone={hasLive ? "success" : "neutral"}>{hasLive ? "Live (read-only)" : "Preview"}</FiStatusBadge>
+          }
           headingId="clinic-os-day-calendar-heading"
           contentClassName="mt-0 border-t border-slate-100 pt-3"
         >
-          <p className="mb-3 rounded-lg border border-sky-200/90 bg-sky-50 px-3 py-2 text-sm leading-snug text-sky-950">
-            This is a preview calendar. Live booking data will be connected in a later stage.
+          <p
+            className={cn(
+              "mb-3 rounded-lg border px-3 py-2 text-sm leading-snug",
+              hasLive ? "border-emerald-200/90 bg-emerald-50 text-emerald-950" : "border-sky-200/90 bg-sky-50 text-sky-950"
+            )}
+            role="status"
+          >
+            {hasLive
+              ? "Showing live bookings in read-only mode."
+              : "No live bookings found for today. Preview appointments are shown for layout only."}
           </p>
+
+          {hasLive ? (
+            <p className="mb-3 text-xs leading-snug text-slate-600">
+              Day window matches FI booking calendar conventions: <span className="font-medium">UTC {calendarReadOnly.dayUtcYmd}</span>{" "}
+              (8:00–18:00 UTC on the grid). Drag-and-drop and in-grid creation are disabled.
+            </p>
+          ) : null}
+
+          {calendarReadOnly.listTruncated ? (
+            <p className="mb-2 text-xs text-amber-800">
+              Booking list may be truncated at the calendar safety cap; some overlapping rows might not appear.
+            </p>
+          ) : null}
 
           <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
             <div className="inline-block min-w-[720px] w-max max-w-none align-top lg:min-w-[760px]">
@@ -231,7 +328,7 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
                   minHeight: GRID_BODY_PX,
                 }}
                 role="list"
-                aria-label="Sample multi-column schedule for layout preview"
+                aria-label={hasLive ? "Read-only multi-column schedule for today" : "Sample multi-column schedule for layout preview"}
               >
                 <div className="relative border-r border-slate-200">
                   {HOUR_ROWS.map((h) => (
@@ -240,7 +337,7 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
                       className="border-b border-slate-100 pr-1.5 pt-0.5 text-right text-[11px] font-medium tabular-nums text-slate-500 last:border-b-0"
                       style={{ height: HOUR_ROW_PX }}
                     >
-                      {formatHourLabel(h)}
+                      {formatHour(h)}
                     </div>
                   ))}
                 </div>
@@ -257,9 +354,13 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav }: ClinicOsCalendarH
                       ))}
                     </div>
                     <div className="relative z-[1]" style={{ height: GRID_BODY_PX }}>
-                      {PLACEHOLDER_APPOINTMENTS.filter((a) => a.column === col.id).map((appt) => (
-                        <PreviewAppointmentBlock key={appt.id} appt={appt} />
-                      ))}
+                      {hasLive
+                        ? calendarReadOnly.liveBookings
+                            .filter((a) => a.column === col.id)
+                            .map((appt) => <LiveBookingBlock key={appt.id} appt={appt} />)
+                        : PLACEHOLDER_APPOINTMENTS.filter((a) => a.column === col.id).map((appt) => (
+                            <PreviewAppointmentBlock key={appt.id} appt={appt} />
+                          ))}
                     </div>
                   </div>
                 ))}
