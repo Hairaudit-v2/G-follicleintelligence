@@ -17,7 +17,9 @@ export function PatientDirectoryRow({ tenantId, row }: { tenantId: string; row: 
         <PatientStatusBadge status={row.patientStatus} />
       </td>
       <td className="hidden px-3 py-2 text-xs text-gray-600 sm:table-cell">{row.createdAt.slice(0, 10)}</td>
-      <td className="hidden px-3 py-2 text-xs text-gray-600 xl:table-cell">{row.latestBookingAt?.slice(0, 10) ?? "—"}</td>
+      <td className="hidden px-3 py-2 text-xs text-gray-600 xl:table-cell">
+        {row.lastVisitAt?.slice(0, 10) ?? "—"}
+      </td>
       <td className="px-3 py-2 text-center text-xs tabular-nums text-gray-700">{row.activeCaseCount}</td>
       <td className="px-3 py-2 text-center text-xs tabular-nums text-gray-700">{row.linkedLeadCount}</td>
     </tr>
