@@ -4,11 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
-import {
-  type IiohrHrStaffImportRunResult,
-  logIiohrHrStaffImportReport,
-  runIiohrHrStaffImport,
-} from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
+import { type IiohrHrStaffImportRunResult, runIiohrHrStaffImport } from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
 
 const tenantRowsBodySchema = z.object({
   tenantId: z.string().uuid("tenantId must be a UUID."),
@@ -127,9 +123,4 @@ export async function importIiohrHrStaffAction(
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
-}
-
-/** Server-side helper to print the same summary as the CLI (e.g. from a route handler). */
-export function logIiohrHrStaffImportResultToConsole(result: IiohrHrStaffImportRunResult): void {
-  logIiohrHrStaffImportReport(result);
 }
