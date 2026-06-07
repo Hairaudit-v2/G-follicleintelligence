@@ -13,7 +13,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ tena
     }
 
     if (process.env.NEXT_PUBLIC_FI_CLINIC_OS_SHELL !== "true") {
-      return NextResponse.json({ ok: false, error: "Clinic OS search is not enabled." }, { status: 404 });
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "FI_CLINIC_OS_SHELL_DISABLED",
+          error: "Clinic OS workspace search is not enabled for this deployment.",
+        },
+        { status: 404 }
+      );
     }
 
     const gate = await checkFiTenantPortalApiAccess(request, tenantId);
@@ -31,7 +38,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ tena
     const payload = await loadClinicOsGlobalSearchResults(tenantId, q);
     return NextResponse.json({ ok: true, ...payload });
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Unexpected error.";
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    const safeMessage =
+      process.env.NODE_ENV === "production"
+        ? "Search could not be completed."
+        : e instanceof Error
+          ? e.message
+          : "Unexpected error.";
+    return NextResponse.json({ ok: false, code: "SEARCH_INTERNAL_ERROR", error: safeMessage }, { status: 500 });
   }
 }

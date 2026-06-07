@@ -29,7 +29,9 @@ export type FiTenantPortalApiAccess = { ok: true } | { ok: false; status: number
 
 /**
  * Route-handler variant of `assertFiTenantPortalAccess` (no redirects).
- * Non-production: always allows (matches FI admin tenant layout behaviour).
+ * **Non-production:** always allows (matches open local FI admin HTML routes).
+ * API callers without a session can therefore hit this route in dev only — do not rely on it for
+ * production-like API tests unless `NODE_ENV=production`.
  */
 export async function checkFiTenantPortalApiAccess(request: Request, tenantId: string): Promise<FiTenantPortalApiAccess> {
   const tid = tenantId.trim();

@@ -33,15 +33,17 @@ There is **no** `app/.../fi-admin/[tenantId]/page.tsx` — the default entry aft
 | `/fi-admin/[tenantId]/directory` | Foundation directory search + **create org/clinic** tools | Tenant member | Read search; **writes** gated by **`FI_ADMIN_API_KEY`** | `fi_organisations`, `fi_clinics`, search across persons/patients/cases | **Directory search**: can become **daily**; **org/clinic creation** stays **admin-only** |
 | `/fi-admin/[tenantId]/configuration` | Tenant / org / clinic **settings & branding** editor + preview | Tenant member | Read overview; **writes** via **`FI_ADMIN_API_KEY`** | `fi_tenant_settings`, `fi_organisation_settings`, `fi_clinic_settings` | **Branding preview** useful broadly; **raw settings + API key** remain **admin-only** |
 | `/fi-admin/[tenantId]/foundation-integrity` | Metrics / integrity view for dual-write and foundation coverage | Tenant member | Read (panel + optional API) | Integrity metrics over events, globals, foundation tables | **Internal / owner**; optional read-only tile on a future home |
-| `/fi-admin/[tenantId]/patients` | Patient directory (filters) | **`fi_users.role` in CRM shell set** (`fi_admin`, `crm_operator`) | Read | `fi_patients`, persons metadata, etc. | **CRM shell** — not all tenant members |
-| `/fi-admin/[tenantId]/patients/[patientId]` | Universal patient + profile tabs | Same CRM shell gate | Read; writes via patient actions + admin key / CRM roles | `fi_patients`, `fi_patient_clinical_details`, `fi_patient_images`, … | **Clinical / CRM** staff |
-| `/fi-admin/[tenantId]/crm` | CRM leads index, pipeline, create lead | Same CRM shell gate | Read + CRM actions | `fi_crm_leads`, stages, etc. | **CRM operators** |
+| `/fi-admin/[tenantId]/patients` | Patient directory (filters) | **Bookings operator session** (`getBookingsOperatorPageSession`: CRM shell roles **or** `member` with active `fi_staff`) | Read | `fi_patients`, persons metadata, etc. | **Clinical / scheduling** staff |
+| `/fi-admin/[tenantId]/patients/[patientId]` | Universal patient + profile tabs | Same bookings-operator gate | Read; writes via patient actions + admin key / CRM roles | `fi_patients`, `fi_patient_clinical_details`, `fi_patient_images`, … | **Clinical / CRM** staff |
+| `/fi-admin/[tenantId]/crm` | CRM leads index, pipeline, create lead | **CRM shell** (`getCrmShellPageSession` / `fi_users.role` in CRM shell set) | Read + CRM actions | `fi_crm_leads`, stages, etc. | **CRM operators** |
 | `/fi-admin/[tenantId]/crm/leads/[leadId]` | Lead detail | Same CRM shell gate | Read + mutations | CRM tables | **CRM operators** |
-| `/fi-admin/[tenantId]/bookings` | Bookings operator UI | Same CRM shell gate | Read + booking actions | `fi_bookings` | **Front-desk / CRM** |
-| `/fi-admin/[tenantId]/calendar` | Calendar view over bookings | Same CRM shell gate | Read | `fi_bookings` | **Front-desk / CRM** |
+| `/fi-admin/[tenantId]/bookings` | Bookings operator UI | **Bookings operator session** (same predicate as PatientOS layout) | Read + booking actions | `fi_bookings` | **Front-desk / scheduling** |
+| `/fi-admin/[tenantId]/calendar` | Calendar view over bookings | **Bookings operator session** for operator flows; nav visibility may differ by chrome | Read | `fi_bookings` | **Front-desk / scheduling** |
 | `/fi-admin/[tenantId]/system-status` | System / integration readiness | Same CRM shell gate | Read | Loader-defined | **Owner / admin** |
 
-**Layout nav:** Always shows Cases, Audit queue, Directory, Configuration, Foundation integrity. **Patients, CRM, Bookings, Calendar, System status** render only when `getCrmShellNavAllowed(tenantId)` is true (signed-in + `fi_users.role` is `fi_admin` or `crm_operator`).
+**Primary nav (tenant layout):** `FiAdminTenantNav` (legacy dark bar) or **`ClinicOsShell`** when `NEXT_PUBLIC_FI_CLINIC_OS_SHELL=true` at build time (`app/(fi-admin)/fi-admin/[tenantId]/layout.tsx`, `src/lib/fiAdmin/clinicOsShellConfig.ts`). Both enumerate FI OS modules; **LeadFlow** and some ClinicOS links require CRM or bookings-board flags from `crmShellAccess.ts`. **FoundationOS** is a first-class module (not nested under Settings). **Settings** holds Staff (when eligible), Services, Configuration, Reminders.
+
+Global search (⌘K / Ctrl+K in shell) calls **`GET /api/tenants/[tenantId]/clinic-os/global-search`**, which requires the same shell flag and production tenant-portal checks — see `docs/fi-os-access-production.md`.
 
 ### 1.2 `/cases`, `/crm`, `/patients` at app root
 
@@ -58,6 +60,7 @@ There is **no** `app/.../fi-admin/[tenantId]/page.tsx` — the default entry aft
 | Area | Example routes | Purpose | Auth / gate pattern |
 | --- | --- | --- | --- |
 | Tenant list | `GET /api/tenants` | FI Admin home: tenants for session (or dev fallback) | `resolveFiAdminTenantDirectory` |
+| Clinic OS global search | `GET /api/tenants/[tenantId]/clinic-os/global-search` | Workspace search (shell); patients/cases/leads | `NEXT_PUBLIC_FI_CLINIC_OS_SHELL` + `checkFiTenantPortalApiAccess` (production) |
 | Foundation integrity | `GET /api/tenants/[tenantId]/foundation-integrity` | JSON metrics | Service role; tenant existence check only (no user gate in handler) |
 | Cases | `.../cases`, `.../cases/[caseId]`, `submit`, `run-model`, `uploads` | Case CRUD / pipeline | Per-route (see handlers); often service role |
 | CRM | `.../crm/pipeline-stages`, `.../crm/leads`, nested lead notes/tasks/comms/convert/activity/stage/messages | CRM REST surface | **`assertCrmTenantReadAllowed` / `assertCrmTenantWriteAllowed`** + optional admin key extraction |
@@ -445,6 +448,7 @@ flowchart TB
 
 ## References (in-repo)
 
+- `docs/fi-os-access-production.md` — production gates, shell rollout, global search API.
 - `src/lib/fiOs/fiOsPortalGate.server.ts` — portal gates.
 - `src/lib/crm/crmGate.ts`, `crmGatePolicy.ts`, `crmShellAccess.ts` — CRM read/write and nav.
 - `lib/server/fiAdminKeyGate.ts` — admin key validation.

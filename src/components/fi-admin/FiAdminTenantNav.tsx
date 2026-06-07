@@ -137,6 +137,19 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
     ],
   });
 
+  groups.push({
+    id: "foundationos",
+    label: "FoundationOS",
+    description: "Patient identity, media, timelines, events, and Patient Twin health.",
+    items: [
+      {
+        href: `${base}/foundation-integrity`,
+        label: "FoundationOS",
+        title: "FoundationOS — patient identity, media, timelines, events, and Patient Twin health.",
+      },
+    ],
+  });
+
   const settingsItems: NavLink[] = [];
   if (showCrmNav || showBookingsBoard) {
     settingsItems.push({
@@ -160,11 +173,6 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       href: `${base}/settings/reminders`,
       label: "Reminders",
       title: "Settings — reminder templates.",
-    },
-    {
-      href: `${base}/foundation-integrity`,
-      label: "FoundationOS",
-      title: "Settings — FoundationOS dashboard (identity, media, timelines, twin health).",
     },
   );
   groups.push({

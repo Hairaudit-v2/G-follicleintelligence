@@ -161,6 +161,20 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     items: [{ id: "analyticsos", label: "AnalyticsOS", path: "analytics", permissionHint: {} }],
   },
   {
+    id: "foundationos-mod",
+    label: "FoundationOS",
+    description: "Patient identity, media, timelines, events, and Patient Twin health.",
+    items: [
+      {
+        id: "foundationos",
+        label: "FoundationOS",
+        path: "foundation-integrity",
+        permissionHint: {},
+        description: "Patient identity, media, timelines, events, and Patient Twin health.",
+      },
+    ],
+  },
+  {
     id: "settings-mod",
     label: "Settings",
     description: "Staff, services, and tenant administration.",
@@ -269,6 +283,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "crm") return "leadflow";
   if (first === "analytics") return "analyticsos";
   if (first === "audit") return "auditos";
+  if (first === "foundation-integrity") return "foundationos";
   if (first === "configuration" || first === "settings") return "configuration";
 
   return null;

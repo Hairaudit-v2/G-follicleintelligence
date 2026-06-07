@@ -31,7 +31,14 @@ import type { PatientOsOverviewModel } from "@/src/lib/patients/patientOsDashboa
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import type { SurgeryOsDashboardModel } from "@/src/lib/cases/surgeryOsDashboardDerive";
 
-function noteFor(key: string, err: unknown): string {
+/**
+ * User-facing AnalyticsOS load note. In production, never forward raw Error messages
+ * (may contain SQL, paths, or internal details). Developers still see full text locally.
+ */
+function publicAnalyticsLoadNote(key: string, err: unknown): string {
+  if (process.env.NODE_ENV === "production") {
+    return `${key}: data could not be loaded.`;
+  }
   const msg = err instanceof Error ? err.message : String(err);
   return `${key}: ${msg || "unknown error"}`;
 }
@@ -41,7 +48,7 @@ async function wrapLoad<T>(key: string, fn: () => Promise<T>): Promise<Analytics
     const data = await fn();
     return { state: "ok", data };
   } catch (e) {
-    return { state: "limited", error: noteFor(key, e) };
+    return { state: "limited", error: publicAnalyticsLoadNote(key, e) };
   }
 }
 
@@ -325,7 +332,7 @@ async function loadPatientWithFallback(tenantId: string): Promise<AnalyticsOsMod
     const prior = direct.state === "limited" ? direct.error : undefined;
     return {
       state: "limited",
-      error: [prior, noteFor("patientos_fallback", e)].filter(Boolean).join(" · "),
+      error: [prior, publicAnalyticsLoadNote("patientos_fallback", e)].filter(Boolean).join(" · "),
     };
   }
 }

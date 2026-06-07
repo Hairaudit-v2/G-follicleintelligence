@@ -26,6 +26,7 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.surgeryos?.href, `${base}/cases`);
   assert.equal(byId.auditos?.href, `${base}/audit`);
   assert.equal(byId.analyticsos?.href, `${base}/analytics`);
+  assert.equal(byId.foundationos?.href, `${base}/foundation-integrity`);
   assert.equal(byId.configuration?.href, `${base}/configuration`);
 });
 
@@ -73,6 +74,14 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/appointments/ap-1`, base), "appointments");
   assert.equal(getClinicOsShellActiveNavId(`${base}/directory`, base), "patientos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/foundation-integrity`, base), "foundationos");
+});
+
+test("getClinicOsShellActiveNavId: FoundationOS deep routes stay active", () => {
+  assert.equal(
+    getClinicOsShellActiveNavId(`${base}/foundation-integrity/sub`, base),
+    "foundationos"
+  );
 });
 
 test("resolveClinicOsShellNavItems: PatientOS disabled without bookings operator access", () => {

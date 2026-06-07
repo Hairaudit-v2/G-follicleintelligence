@@ -25,6 +25,18 @@ Guards live in `src/lib/fiOs/fiOsPortalGate.server.ts`. When `NODE_ENV !== 'prod
 
 Unauthenticated users are sent to `/follicle-intelligence/login?next=…` with a safe internal `next` path. Non–portal-staff authenticated users hitting `/fi-admin` are redirected with `notice=no_fi_access`.
 
+### Cross-tenant `fi_admin` / `fi_auditor` (platform operators)
+
+Users with `fi_os_identities.os_role` of **`fi_admin`** or **`fi_auditor`** are treated as **cross-tenant directory** roles (`isFiOsCrossTenantDirectoryRole` in `src/lib/fiOs/fiOsRoles.ts`):
+
+| Capability | Behaviour |
+|------------|-----------|
+| **`/fi-admin/[tenantId]/…` HTML** | `assertFiTenantPortalAccess` **allows** access when the tenant row exists **without** requiring a matching `fi_users` row for that `tenant_id`. |
+| **`GET /api/tenants`** | Returns **all** `fi_tenants` rows (same as the table in the `GET /api/tenants` section above). |
+| **Tenant-scoped REST** | Individual routes may still require CRM keys, `fi_users` membership, or other gates — read each handler. |
+
+Provision these identities deliberately; they are appropriate for internal staff and auditors, not clinic-only accounts.
+
 ## Post-login redirects (server)
 
 Implemented in `src/lib/fiOs/fiOsRedirect.server.ts` (after `fiOsPasswordSignInAction` sets cookies). The `next` form field is only honoured if it is a **relative path** starting with `/` and not `//` (open redirect hardening).
@@ -73,6 +85,25 @@ So **full tenant list is only returned** for authenticated **`fi_admin` / `fi_au
 - **`FI_ENABLE_DEV_ADMIN_ACCESS`** is ignored when `NODE_ENV === 'production'` (see `isFiDevTenantListFallbackEnabled()` and `resolveFiAdminTenantDirectory`).
 
 Therefore a **production-like** build is **`next build` + `next start`** (or a host that sets `NODE_ENV=production`). Plain `next dev` is **not** production-like for these gates.
+
+**Preview / staging hosts:** enforcement keys off **`NODE_ENV === 'production'`** only (not `VERCEL_ENV`). If a platform runs `next start` with `NODE_ENV=development`, HTML and API behaviour matches **local dev** (gates off). Confirm your provider sets `NODE_ENV=production` for any environment that should behave like production.
+
+### Clinic OS shell (`NEXT_PUBLIC_FI_CLINIC_OS_SHELL`)
+
+When set to the string **`true` at build time** (`next build`), the tenant FI Admin layout uses **`ClinicOsShell`** (workspace chrome, module nav, global search). The flag is read from `process.env` like other `NEXT_PUBLIC_*` variables (inlined into server and client bundles for that build).
+
+**Rollout checklist (internal / controlled production):**
+
+1. Set `NEXT_PUBLIC_FI_CLINIC_OS_SHELL=true` in the build environment **before** `next build` (CI and hosting env vars).
+2. Deploy **server + browser assets** together so every replica and CDN edge serves the same build hash; avoid mixing an old client bundle with a new server or the inverse.
+3. After deploy, signed-in smoke: open `/fi-admin/[tenantId]` — shell header and nav visible; open global search (⌘K / Ctrl+K) and run a query — expect **200** from `GET /api/tenants/[tenantId]/clinic-os/global-search?q=…`, not `404` with `code: FI_CLINIC_OS_SHELL_DISABLED`.
+4. Rollback: rebuild and redeploy with the variable unset or not `true`; the API and layout both read the same flag.
+
+### Global search API (`GET /api/tenants/[tenantId]/clinic-os/global-search`)
+
+- Requires **`NEXT_PUBLIC_FI_CLINIC_OS_SHELL === "true"`** (same as the shell UI) and passes **`checkFiTenantPortalApiAccess`** in production (session + tenant exists + portal membership or cross-tenant OS role — mirrors `assertFiTenantPortalAccess` intent).
+- **Env mismatch:** If the UI shell is on but the server build has the flag off (misaligned deploy), the route returns **404** with `code: FI_CLINIC_OS_SHELL_DISABLED` and a short `error` string. The client maps this to a clear message.
+- **500 responses:** In production, the JSON body uses a generic `error` (internal exception text is not forwarded to the client).
 
 ---
 
@@ -156,6 +187,11 @@ From `/fi-admin` and `/hair-audit/admin`, submit **Sign out**; session should cl
 - **Production behaviour** is keyed off **`process.env.NODE_ENV === 'production'`** only. `next start` (and typical PaaS deploys) set this; **`next dev` does not**, so HTML route guards and the **`/api/tenants` staff check** are **off** in dev (HTML stays open for local workflows; API still follows authenticated branches without the production-only 403-for-non-staff rule).
 - To validate **production-like** access end-to-end, use **`next build` + `next start`** (or your staging environment with `NODE_ENV=production`) and re-run checks **5–7** and **9**.
 
+### 11. Clinic OS shell + global search
+
+- Build with `NEXT_PUBLIC_FI_CLINIC_OS_SHELL=true`, deploy, then confirm shell chrome on `/fi-admin/[tenantId]` and a successful search query via the header search (or the global-search API with a session cookie).
+- Toggle-off rollback requires a **rebuild** without the flag so server and client stay aligned.
+
 ---
 
 ## Related files
@@ -167,6 +203,8 @@ From `/fi-admin` and `/hair-audit/admin`, submit **Sign out**; session should cl
 | Gates | `src/lib/fiOs/fiOsPortalGate.server.ts` |
 | Redirects | `src/lib/fiOs/fiOsRedirect.server.ts` |
 | Tenant API | `src/lib/fiAdmin/fiAdminTenantDirectory.ts`, `app/api/tenants/route.ts` |
+| Clinic OS global search | `app/api/tenants/[tenantId]/clinic-os/global-search/route.ts`, `src/lib/fiAdmin/clinicOsGlobalSearchApiAccess.server.ts` |
+| AnalyticsOS dashboard (read composition) | `src/lib/fiAdmin/analyticsOsDashboardRead.server.ts` — production `loadNotes` omit raw exception text |
 | Case / pipeline REST (tenant-scoped) | `app/api/tenants/[tenantId]/cases/**`, `.../tick-jobs`, `.../foundation-integrity` — gated with `assertCrmTenantReadAllowed` / `assertCrmTenantWriteAllowed` (see `src/lib/crm/crmGate.ts`) |
 | Migration | `supabase/migrations/20260614120001_fi_os_identities.sql` |
 | Local dev bypass | `docs/dev-local-fi-admin.md` |
