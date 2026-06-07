@@ -14,16 +14,17 @@ import {
   loadUniversalPatientRecord,
   type UniversalPatientRecordResult,
 } from "@/src/lib/fi/foundation/patientRecord";
+import { calculatePatientTwinCompleteness, type PatientTwinV1ForCompleteness } from "./patientTwinCompleteness";
 import { patientTwinV1Schema } from "./patientTwinSchema";
 import {
   PATIENT_TWIN_LOADER_VERSION,
   PATIENT_TWIN_VERSION,
+  type PatientTwinV1,
   type PatientTwinCaseMilestone,
   type PatientTwinCaseRow,
   type PatientTwinMediaLatestItem,
   type PatientTwinMediaSection,
   type PatientTwinTimelineItem,
-  type PatientTwinV1,
   type PatientTwinWarning,
   type PatientTwinWarningCode,
 } from "./patientTwinTypes";
@@ -343,7 +344,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     orParts.push(`converted_case_id.in.(${caseIds.join(",")})`);
   }
 
-  let leadsRaw: Record<string, unknown>[] = [];
+  const leadsRaw: Record<string, unknown>[] = [];
   if (orParts.length) {
     const { data, error } = await supabase
       .from("fi_crm_leads")
@@ -557,7 +558,8 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     };
   }
 
-  const twin: PatientTwinV1 = {
+  const generatedAt = new Date().toISOString();
+  const twinBefore: PatientTwinV1ForCompleteness = {
     version: PATIENT_TWIN_VERSION,
     tenant_id: tid,
     patient_id: primaryFoundation,
@@ -591,13 +593,24 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       model_outputs: [],
     },
     provenance: {
-      generated_at: new Date().toISOString(),
+      generated_at: generatedAt,
       loader_version: PATIENT_TWIN_LOADER_VERSION,
       source_views_used: [...SOURCE_VIEWS_USED],
       source_tables_used: [...SOURCE_TABLES_USED],
-      completeness_score: null,
+      completeness_score: 0,
     },
     warnings: dedupeWarnings(warnings),
+  };
+
+  const completeness = calculatePatientTwinCompleteness(twinBefore);
+
+  const twin: PatientTwinV1 = {
+    ...twinBefore,
+    completeness,
+    provenance: {
+      ...twinBefore.provenance,
+      completeness_score: completeness.score,
+    },
   };
 
   const parsed = patientTwinV1Schema.safeParse(twin);

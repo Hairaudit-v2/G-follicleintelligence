@@ -156,12 +156,42 @@ export type PatientTwinIntelligenceSection = {
   model_outputs: never[];
 };
 
+export type PatientTwinCompletenessMissingArea =
+  | "identity"
+  | "crm"
+  | "case"
+  | "audit"
+  | "media"
+  | "clinical"
+  | "timeline"
+  | "outcome";
+
+export type PatientTwinCompletenessSection = {
+  score: number;
+  band: "poor" | "partial" | "good" | "excellent";
+  missing: Array<{
+    area: PatientTwinCompletenessMissingArea;
+    label: string;
+    severity: "info" | "warning" | "important";
+  }>;
+  strengths: Array<{
+    area: string;
+    label: string;
+  }>;
+  recommended_actions: Array<{
+    label: string;
+    reason: string;
+    priority: "low" | "medium" | "high";
+  }>;
+};
+
 export type PatientTwinProvenanceSection = {
   generated_at: string;
   loader_version: string;
   source_views_used: string[];
   source_tables_used: string[];
-  completeness_score: null;
+  /** Mirrors `completeness.score` for API consumers that only read provenance. */
+  completeness_score: number;
 };
 
 export type PatientTwinV1 = {
@@ -179,4 +209,5 @@ export type PatientTwinV1 = {
   intelligence: PatientTwinIntelligenceSection;
   provenance: PatientTwinProvenanceSection;
   warnings: PatientTwinWarning[];
+  completeness: PatientTwinCompletenessSection;
 };

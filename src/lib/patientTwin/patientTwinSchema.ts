@@ -149,7 +149,43 @@ export const patientTwinProvenanceSectionSchema = z.object({
   loader_version: z.string(),
   source_views_used: z.array(z.string()),
   source_tables_used: z.array(z.string()),
-  completeness_score: z.null(),
+  completeness_score: z.number().int().min(0).max(100),
+});
+
+const completenessMissingAreaSchema = z.enum([
+  "identity",
+  "crm",
+  "case",
+  "audit",
+  "media",
+  "clinical",
+  "timeline",
+  "outcome",
+]);
+
+export const patientTwinCompletenessSectionSchema = z.object({
+  score: z.number().int().min(0).max(100),
+  band: z.enum(["poor", "partial", "good", "excellent"]),
+  missing: z.array(
+    z.object({
+      area: completenessMissingAreaSchema,
+      label: z.string(),
+      severity: z.enum(["info", "warning", "important"]),
+    })
+  ),
+  strengths: z.array(
+    z.object({
+      area: z.string(),
+      label: z.string(),
+    })
+  ),
+  recommended_actions: z.array(
+    z.object({
+      label: z.string(),
+      reason: z.string(),
+      priority: z.enum(["low", "medium", "high"]),
+    })
+  ),
 });
 
 export const patientTwinV1Schema = z.object({
@@ -167,6 +203,7 @@ export const patientTwinV1Schema = z.object({
   intelligence: patientTwinIntelligenceSectionSchema,
   provenance: patientTwinProvenanceSectionSchema,
   warnings: z.array(patientTwinWarningSchema),
+  completeness: patientTwinCompletenessSectionSchema,
 });
 
 export function validatePatientTwinV1(data: unknown) {

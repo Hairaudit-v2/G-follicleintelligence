@@ -13,7 +13,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ tenantId: string; patientId: string }>;
 }): Promise<Metadata> {
-  const { tenantId, patientId } = await params;
+  const { patientId } = await params;
   const name = patientId.trim().slice(0, 8);
   return {
     title: `Patient Twin · ${name}`,

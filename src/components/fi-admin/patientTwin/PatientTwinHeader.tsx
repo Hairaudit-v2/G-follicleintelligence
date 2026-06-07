@@ -29,11 +29,23 @@ function displayName(twin: PatientTwinV1): string {
   return twin.person.display_name?.trim() || "Patient";
 }
 
+function completenessKpiTone(band: PatientTwinV1["completeness"]["band"]): "neutral" | "info" | "success" | "warning" | "danger" {
+  if (band === "poor") return "danger";
+  if (band === "partial") return "warning";
+  if (band === "good") return "info";
+  return "success";
+}
+
+function bandLabel(band: PatientTwinV1["completeness"]["band"]): string {
+  return band.charAt(0).toUpperCase() + band.slice(1);
+}
+
 export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHeaderProps) {
   const warnings = twin.warnings.length;
   const cases = twin.cases.length;
   const audits = twin.audits.audits_total;
   const media = mediaAssetTotal(twin);
+  const c = twin.completeness;
   const profileHref = `/fi-admin/${tenantId}/patients/${patientId}`;
 
   return (
@@ -69,7 +81,7 @@ export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHead
               </span>
             ) : null}
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#64748B]">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#64748B]">
             <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono text-[#CBD5E1]">
               {twin.version}
             </span>
@@ -79,10 +91,23 @@ export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHead
             <Link href={profileHref} className="text-cyan-300/90 underline-offset-2 hover:text-cyan-200 hover:underline">
               Open clinical profile
             </Link>
+            <span aria-hidden>·</span>
+            <Link
+              href="#patient-twin-completeness"
+              className="text-cyan-300/90 underline-offset-2 hover:text-cyan-200 hover:underline"
+            >
+              Completeness detail
+            </Link>
           </div>
         </div>
 
-        <div className="grid w-full max-w-xl shrink-0 grid-cols-2 gap-2.5 sm:grid-cols-4 lg:max-w-none lg:grid-cols-2 xl:grid-cols-4">
+        <div className="grid w-full max-w-2xl shrink-0 grid-cols-2 gap-2.5 sm:grid-cols-3 xl:max-w-none xl:grid-cols-5">
+          <FiKpiTile
+            label="Completeness"
+            value={String(c.score)}
+            description={`${bandLabel(c.band)} · longitudinal record`}
+            tone={completenessKpiTone(c.band)}
+          />
           <FiKpiTile
             label="Warnings"
             value={String(warnings)}

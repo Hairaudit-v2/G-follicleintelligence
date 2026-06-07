@@ -21,7 +21,7 @@ export type PatientTwinDashboardProps = {
  */
 export function PatientTwinDashboard({ tenantId, patientId, twin }: PatientTwinDashboardProps) {
   return (
-    <div className="space-y-5">
+    <div className="scroll-mt-4 space-y-5">
       <PatientTwinHeader tenantId={tenantId} patientId={patientId} twin={twin} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
