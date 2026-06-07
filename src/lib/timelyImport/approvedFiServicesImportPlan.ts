@@ -76,7 +76,7 @@ export function dedupeApprovedByBookingType(rows: FiServiceApprovedImportRow[]):
     }
     byBt.set(bt, r);
   }
-  return { rows: [...noBt, ...byBt.values()], warnings };
+  return { rows: [...noBt, ...Array.from(byBt.values())], warnings };
 }
 
 /**
@@ -103,7 +103,7 @@ export function dedupeApprovedByNameCategory(rows: FiServiceApprovedImportRow[])
     }
     nullBtByKey.set(k, r);
   }
-  return { rows: [...withBt, ...nullBtByKey.values()], warnings };
+  return { rows: [...withBt, ...Array.from(nullBtByKey.values())], warnings };
 }
 
 /**

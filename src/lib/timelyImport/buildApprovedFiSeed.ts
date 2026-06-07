@@ -80,7 +80,7 @@ export function collectConsultationDuplicateDeferrals(rows: FiServiceSeedReviewR
   }
   const loserKeys = new Set<string>();
   const deferred: FiServiceInactiveDeferredRow[] = [];
-  for (const [, group] of consultBuckets) {
+  for (const [, group] of Array.from(consultBuckets.entries())) {
     if (group.length < 2) continue;
     group.sort((a, b) => grossOf(b) - grossOf(a));
     const [, ...rest] = group;

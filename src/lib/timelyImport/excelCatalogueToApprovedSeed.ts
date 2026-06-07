@@ -190,7 +190,7 @@ export function resolveDuplicateBookingTypesInCatalogue(staged: StagedCatalogueR
   }
 
   const winRowByType = new Map<string, number>();
-  for (const [bt, group] of byBt) {
+  for (const [bt, group] of Array.from(byBt.entries())) {
     if (group.length < 2) {
       winRowByType.set(bt, group[0]!.excel_row_number);
       continue;
