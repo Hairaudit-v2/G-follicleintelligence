@@ -69,10 +69,32 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/patients/p-1`, base), "patientos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/services`, base), "services");
   assert.equal(getClinicOsShellActiveNavId(`${base}/configuration`, base), "configuration");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/appointments`, base), "calendar");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/appointments/ap-1`, base), "calendar");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/appointments`, base), "appointments");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/appointments/ap-1`, base), "appointments");
   assert.equal(getClinicOsShellActiveNavId(`${base}/directory`, base), "patientos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
+});
+
+test("resolveClinicOsShellNavItems: PatientOS disabled without bookings operator access", () => {
+  const items = resolveClinicOsShellNavItems(base, true, false);
+  const patientos = items.find((i) => i.id === "patientos");
+  assert.ok(patientos);
+  assert.equal(patientos!.disabled, true);
+  assert.equal(patientos!.href, "#");
+});
+
+test("resolveClinicOsShellNavItems: PatientOS enabled with bookings operator access (member+staff path)", () => {
+  const items = resolveClinicOsShellNavItems(base, false, true);
+  const patientos = items.find((i) => i.id === "patientos");
+  assert.ok(patientos);
+  assert.equal(patientos!.disabled, false);
+  assert.equal(patientos!.href, `${base}/patients`);
+});
+
+test("resolveClinicOsShellQuickActions: Patient (new) disabled without bookings operator access", () => {
+  const mixed = resolveClinicOsShellQuickActions(base, true, false);
+  const patient = mixed.find((a) => a.id === "patient");
+  assert.equal(patient?.disabled, true);
 });
 
 test("resolveClinicOsShellQuickActions: booking enabled when only bookings board access", () => {
@@ -80,7 +102,7 @@ test("resolveClinicOsShellQuickActions: booking enabled when only bookings board
   const booking = mixed.find((a) => a.id === "booking");
   const lead = mixed.find((a) => a.id === "lead");
   assert.equal(booking?.disabled, false);
-  assert.equal(booking?.href, `${base}/bookings/new`);
+  assert.equal(booking?.href, `${base}/appointments`);
   assert.equal(lead?.disabled, true);
 });
 
