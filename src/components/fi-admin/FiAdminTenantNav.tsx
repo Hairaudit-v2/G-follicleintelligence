@@ -139,8 +139,8 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
     },
     {
       href: `${base}/foundation-integrity`,
-      label: "Foundation integrity",
-      title: "Settings — foundation integrity checks.",
+      label: "FoundationOS",
+      title: "Settings — FoundationOS dashboard (identity, media, timelines, twin health).",
     },
   );
   groups.push({

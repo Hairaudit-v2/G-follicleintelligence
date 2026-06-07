@@ -1,15 +1,27 @@
-import { FoundationIntegrityPanel } from "@/src/components/fi/FoundationIntegrityPanel";
+import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
+
+import { FoundationOsDashboard } from "@/src/components/fi-admin/foundation/FoundationOsDashboard";
+import { loadFoundationOsDashboard } from "@/src/lib/fi/foundation/foundationOsDashboardRead.server";
+
+export const metadata = {
+  title: "FoundationOS",
+  description: "Patient identity resolution, media unification, timelines, events, and Patient Twin health.",
+  robots: { index: false, follow: false },
+};
+
+export const dynamic = "force-dynamic";
 
 export default async function FoundationIntegrityPage({ params }: { params: Promise<{ tenantId: string }> }) {
+  noStore();
   const { tenantId } = await params;
+  if (!tenantId?.trim()) notFound();
+
+  const data = await loadFoundationOsDashboard(tenantId.trim());
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Foundation integrity</h1>
-      <p className="max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-        Read-only view of how FI events and legacy globals resolve into foundation tables (persons, patients, cases,
-        timeline, media). For internal operators only — same deployment access model as other FI Admin pages.
-      </p>
-      <FoundationIntegrityPanel tenantId={tenantId} />
+    <div className="mx-auto max-w-[88rem] min-w-0 space-y-6 px-4 py-6 sm:px-6">
+      <FoundationOsDashboard tenantId={tenantId.trim()} data={data} />
     </div>
   );
 }
