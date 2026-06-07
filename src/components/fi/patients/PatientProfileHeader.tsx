@@ -1,8 +1,15 @@
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
+import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 import { PatientStatusBadge } from "./PatientStatusBadge";
 
-export function PatientProfileHeader({ data }: { data: PatientProfileFoundationData }) {
+export function PatientProfileHeader({
+  tenantId,
+  data,
+}: {
+  tenantId: string;
+  data: PatientProfileFoundationData;
+}) {
   const { name, email, phone } = displayFromPersonMetadata(data.person.metadata);
   return (
     <header className="space-y-2 border-b border-gray-200 pb-4">
@@ -13,7 +20,10 @@ export function PatientProfileHeader({ data }: { data: PatientProfileFoundationD
             {email ?? "—"} · {phone ?? "—"}
           </p>
         </div>
-        <PatientStatusBadge status={data.patient.patient_status} />
+        <div className="flex max-w-full flex-shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+          <PatientTwinNavLink tenantId={tenantId} patientId={data.foundationPatientId} />
+          <PatientStatusBadge status={data.patient.patient_status} />
+        </div>
       </div>
       <p className="text-xs text-gray-500">
         Patient since <time dateTime={data.patient.created_at}>{data.patient.created_at.slice(0, 10)}</time> · ID{" "}

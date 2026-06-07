@@ -23,6 +23,7 @@ import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/pos
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
+import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 
 function caseSelfQuery(casesListReturnQuery?: string, opts?: { foundation?: "1" }): string {
   const p = new URLSearchParams();
@@ -59,6 +60,8 @@ export function CaseDetailPageView({
   casesListReturnQuery?: string;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
+  /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
+  const twinFoundationPatientId = detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null;
   const casePath = `/fi-admin/${tenantId}/cases/${detail.id}`;
 
   return (
@@ -80,12 +83,17 @@ export function CaseDetailPageView({
           <h1 id="case-detail-page-heading" className="text-lg font-semibold text-gray-900">
             Treatment patient
           </h1>
-          <Link
-            href={caseSummaryDocumentPageHref(tenantId, detail.id, casesListReturnQuery)}
-            className="shrink-0 text-sm font-medium text-blue-600 hover:underline"
-          >
-            Print / Export summary
-          </Link>
+          <div className="flex flex-shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+            {twinFoundationPatientId ? (
+              <PatientTwinNavLink tenantId={tenantId} patientId={twinFoundationPatientId} />
+            ) : null}
+            <Link
+              href={caseSummaryDocumentPageHref(tenantId, detail.id, casesListReturnQuery)}
+              className="shrink-0 self-start text-sm font-medium text-blue-600 hover:underline sm:self-center"
+            >
+              Print / Export summary
+            </Link>
+          </div>
         </div>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">
           Tenant-scoped patient profile for SurgeryOS: Stage 5A core profile, Stage 5B surgery planning, Stage 5C procedure

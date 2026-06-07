@@ -1,0 +1,620 @@
+/**
+ * PatientTwin V1 loader — **read model only** (service-role Supabase).
+ *
+ * Assembles the twin from existing foundation/CRM/case/audit/media/timeline sources. Does not
+ * write or replace authoritative tables. Partial failures surface as `warnings` rather than
+ * thrown errors where practical; invariant violations (e.g. DTO schema mismatch) still throw.
+ */
+
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import {
+  loadUniversalPatientRecord,
+  type UniversalPatientRecordResult,
+} from "@/src/lib/fi/foundation/patientRecord";
+import { patientTwinV1Schema } from "./patientTwinSchema";
+import {
+  PATIENT_TWIN_LOADER_VERSION,
+  PATIENT_TWIN_VERSION,
+  type PatientTwinCaseMilestone,
+  type PatientTwinCaseRow,
+  type PatientTwinMediaLatestItem,
+  type PatientTwinMediaSection,
+  type PatientTwinTimelineItem,
+  type PatientTwinV1,
+  type PatientTwinWarning,
+  type PatientTwinWarningCode,
+} from "./patientTwinTypes";
+
+const CHUNK = 400;
+const TIMELINE_CAP = 100;
+
+const SOURCE_VIEWS_USED = [
+  "v_fi_patient_resolution",
+  "v_fi_case_foundation",
+  "v_fi_media_unified",
+] as const;
+
+const SOURCE_TABLES_USED = [
+  "fi_patients",
+  "fi_persons",
+  "fi_patient_source_ids",
+  "fi_global_patients",
+  "fi_global_cases",
+  "fi_cases",
+  "fi_timeline_events",
+  "fi_crm_leads",
+  "fi_crm_tasks",
+  "fi_crm_activity_events",
+  "fi_crm_pipeline_stages",
+  "fi_users",
+  "fi_clinics",
+  "fi_organisations",
+  "fi_reports",
+  "fi_audits",
+  "fi_model_runs",
+  "fi_scorecards",
+  "fi_patient_clinical_details",
+] as const;
+
+const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
+
+function uniqueStrings(ids: (string | null | undefined)[]): string[] {
+  const s = new Set<string>();
+  for (const id of ids) {
+    if (id && typeof id === "string") {
+      const t = id.trim();
+      if (t) s.add(t);
+    }
+  }
+  return Array.from(s);
+}
+
+function pushWarning(out: PatientTwinWarning[], code: PatientTwinWarningCode, message: string) {
+  out.push({ code, message });
+}
+
+function mapLegacyWarnings(messages: string[], out: PatientTwinWarning[]) {
+  for (const m of messages) {
+    if (!m.trim()) continue;
+    let code: PatientTwinWarningCode = "generic";
+    if (m.includes("no foundation patient") || m.includes("No foundation patient")) {
+      code = "missing_foundation_patient";
+    } else if (m.includes("Global patient") && m.includes("no foundation_patient_id")) {
+      code = "unresolved_global_patient";
+    } else if (m.includes("Multiple resolution rows") || m.includes("Multiple fi_patients rows share")) {
+      code = "resolution_anomaly";
+    } else if (m.includes("unified media row") || m.includes("fi_media_assets row")) {
+      code = "duplicate_media_risk";
+    }
+    pushWarning(out, code, m);
+  }
+}
+
+function buildMediaSection(rows: UniversalPatientRecordResult["media_unified"]): PatientTwinMediaSection {
+  const by_asset_type: PatientTwinMediaSection["by_asset_type"] = {};
+  const sorted = [...rows].sort((a, b) => {
+    const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return tb - ta;
+  });
+  for (const row of sorted) {
+    const key = (row.asset_type && row.asset_type.trim()) || "unknown";
+    if (!by_asset_type[key]) {
+      by_asset_type[key] = { count: 0, latest: null };
+    }
+    const bucket = by_asset_type[key];
+    bucket.count += 1;
+    if (!bucket.latest) {
+      const latest: PatientTwinMediaLatestItem = {
+        asset_type: row.asset_type,
+        media_asset_id: row.media_asset_id,
+        legacy_upload_id: row.legacy_upload_id,
+        case_id: row.case_id,
+        file_name: row.file_name,
+        created_at: row.created_at,
+      };
+      bucket.latest = latest;
+    }
+  }
+  return { by_asset_type };
+}
+
+function buildFoundationTimeline(base: UniversalPatientRecordResult): PatientTwinTimelineItem[] {
+  const cap = Math.min(TIMELINE_CAP, base.timeline_events.length);
+  const newest = base.timeline_events.slice(0, cap);
+  const items: PatientTwinTimelineItem[] = newest.map((ev) => ({
+    source_type: "fi_timeline_events",
+    source_id: ev.id,
+    occurred_at: ev.occurred_at,
+    event_kind: ev.event_kind,
+    title: ev.title,
+    case_id: ev.case_id,
+    patient_id: ev.patient_id,
+  }));
+  return items;
+}
+
+function latestMilestoneByCaseId(base: UniversalPatientRecordResult): Map<string, PatientTwinCaseMilestone> {
+  const map = new Map<string, PatientTwinCaseMilestone>();
+  for (const ev of base.timeline_events) {
+    const cid = ev.case_id;
+    if (!cid || map.has(cid)) continue;
+    map.set(cid, {
+      event_kind: ev.event_kind,
+      title: ev.title,
+      occurred_at: ev.occurred_at,
+    });
+  }
+  return map;
+}
+
+async function sumCountForCases(
+  supabase: SupabaseClient,
+  table: "fi_reports" | "fi_audits" | "fi_model_runs" | "fi_scorecards",
+  tenantId: string,
+  caseIds: string[]
+): Promise<number> {
+  if (caseIds.length === 0) return 0;
+  let total = 0;
+  for (let i = 0; i < caseIds.length; i += CHUNK) {
+    const slice = caseIds.slice(i, i + CHUNK);
+    const { count, error } = await supabase
+      .from(table)
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tenantId)
+      .in("case_id", slice);
+    if (error) throw new Error(error.message);
+    total += count ?? 0;
+  }
+  return total;
+}
+
+async function aggregateStatusForCases(
+  supabase: SupabaseClient,
+  table: "fi_reports" | "fi_model_runs",
+  tenantId: string,
+  caseIds: string[],
+  column: "status"
+): Promise<Record<string, number>> {
+  const out: Record<string, number> = {};
+  if (caseIds.length === 0) return out;
+  for (let i = 0; i < caseIds.length; i += CHUNK) {
+    const slice = caseIds.slice(i, i + CHUNK);
+    const { data, error } = await supabase.from(table).select(column).eq("tenant_id", tenantId).in("case_id", slice);
+    if (error) throw new Error(error.message);
+    for (const row of data ?? []) {
+      const r = row as Record<string, unknown>;
+      const st = String(r[column] ?? "unknown");
+      out[st] = (out[st] ?? 0) + 1;
+    }
+  }
+  return out;
+}
+
+async function loadLatestReleasedReport(
+  supabase: SupabaseClient,
+  tenantId: string,
+  caseIds: string[]
+): Promise<PatientTwinV1["audits"]["latest_released_report"]> {
+  if (caseIds.length === 0) return null;
+  type Cand = NonNullable<PatientTwinV1["audits"]["latest_released_report"]>;
+  let best: Cand | null = null;
+  let bestTs = 0;
+  for (let i = 0; i < caseIds.length; i += CHUNK) {
+    const slice = caseIds.slice(i, i + CHUNK);
+    const { data, error } = await supabase
+      .from("fi_reports")
+      .select("id, case_id, version, released_at, created_at")
+      .eq("tenant_id", tenantId)
+      .eq("status", "released")
+      .in("case_id", slice)
+      .order("released_at", { ascending: false, nullsFirst: false })
+      .limit(25);
+    if (error) throw new Error(error.message);
+    for (const row of data ?? []) {
+      const r = row as {
+        id: string;
+        case_id: string;
+        version: number;
+        released_at: string | null;
+        created_at: string;
+      };
+      const t = r.released_at ? new Date(r.released_at).getTime() : new Date(r.created_at).getTime();
+      if (!best || t > bestTs) {
+        best = {
+          report_id: String(r.id),
+          case_id: String(r.case_id),
+          version: Number(r.version),
+          released_at: r.released_at != null ? String(r.released_at) : null,
+          created_at: String(r.created_at),
+        };
+        bestTs = t;
+      }
+    }
+  }
+  return best;
+}
+
+export type LoadPatientTwinV1Params = {
+  tenantId: string;
+  /** Foundation `fi_patients.id` for this tenant. */
+  foundationPatientId: string;
+  client?: SupabaseClient;
+};
+
+/**
+ * Loads PatientTwin V1 for a foundation patient. Returns `null` when the patient row does not
+ * exist in the tenant (caller should map to HTTP 404).
+ */
+export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promise<PatientTwinV1 | null> {
+  const supabase = params.client ?? supabaseAdmin();
+  const tid = params.tenantId.trim();
+  const pid = params.foundationPatientId.trim();
+  if (!tid || !pid) return null;
+
+  const base = await loadUniversalPatientRecord({ tenantId: tid, foundationPatientId: pid }, supabase);
+  if (!base.ok) {
+    if (base.error === "not_found") return null;
+    throw new Error(base.message);
+  }
+
+  const warnings: PatientTwinWarning[] = [];
+  mapLegacyWarnings(base.warnings, warnings);
+
+  const foundationIds = base.anchor.all_foundation_patient_ids;
+  const primaryFoundation = base.anchor.primary_foundation_patient_id ?? pid;
+  const caseIds = uniqueStrings(base.cases.map((c) => c.case_id));
+
+  if (caseIds.length === 0) {
+    pushWarning(warnings, "missing_case_linkage", "No fi_cases linked for this foundation patient in this tenant.");
+  }
+
+  const milestoneByCase = latestMilestoneByCaseId(base);
+
+  const casesOut: PatientTwinCaseRow[] = base.cases.map((c) => ({
+    case_id: c.case_id,
+    global_case_id: c.global_case_id,
+    foundation_patient_id: c.foundation_patient_id,
+    global_patient_id: c.global_patient_id,
+    status: c.status,
+    case_type: c.case_type,
+    created_at: c.created_at,
+    updated_at: c.updated_at,
+    clinic_display_name: c.clinic_display_name,
+    organisation_name: c.organisation_name,
+    latest_milestone: milestoneByCase.get(c.case_id) ?? null,
+  }));
+
+  const personMeta =
+    base.person && typeof base.person.metadata === "object" && !Array.isArray(base.person.metadata)
+      ? (base.person.metadata as Record<string, unknown>)
+      : {};
+  const dobRaw = personMeta.date_of_birth;
+  const date_of_birth = typeof dobRaw === "string" && dobRaw.trim() ? dobRaw.trim() : null;
+
+  const display_name =
+    base.patient?.display_name ??
+    (typeof personMeta.display_name === "string" ? personMeta.display_name : null) ??
+    base.resolution_rows[0]?.display_name ??
+    null;
+  const email = base.patient?.email ?? base.resolution_rows[0]?.email ?? null;
+  const phone = base.patient?.phone ?? base.resolution_rows[0]?.phone ?? null;
+
+  const source_labels = uniqueStrings([
+    ...base.resolution_rows.map((r) => r.source_system),
+    ...base.source_identifiers.map((s) => s.source_system),
+  ]);
+
+  const duplicate_risk = base.warnings.some(
+    (w) =>
+      w.includes("Multiple resolution rows") ||
+      w.includes("Multiple fi_patients rows share") ||
+      w.includes("unified media row") ||
+      w.includes("fi_media_assets row")
+  );
+
+  const resolution_warnings = base.resolution_rows
+    .filter((r) => r.global_patient_id && !r.foundation_patient_id)
+    .map(
+      (r) =>
+        `Global patient ${r.global_patient_id} (${r.source_system}:${r.source_patient_id}) has no foundation_patient_id.`
+    );
+
+  const identity_resolution: PatientTwinV1["identity_resolution"] = {
+    foundation_patient_id: primaryFoundation,
+    global_patient_id: base.anchor.primary_global_patient_id ?? base.linked_global_patient_ids[0] ?? null,
+    source_ids: base.source_identifiers.map((s) => ({
+      source_system: s.source_system,
+      source_patient_id: s.source_patient_id,
+    })),
+    duplicate_risk,
+    resolution_warnings,
+  };
+
+  const orParts: string[] = [];
+  if (foundationIds.length) {
+    orParts.push(`patient_id.in.(${foundationIds.join(",")})`);
+  }
+  if (caseIds.length) {
+    orParts.push(`case_id.in.(${caseIds.join(",")})`);
+    orParts.push(`converted_case_id.in.(${caseIds.join(",")})`);
+  }
+
+  let leadsRaw: Record<string, unknown>[] = [];
+  if (orParts.length) {
+    const { data, error } = await supabase
+      .from("fi_crm_leads")
+      .select(
+        "id, status, current_stage_id, updated_at, created_at, primary_owner_user_id, clinic_id, organisation_id, summary"
+      )
+      .eq("tenant_id", tid)
+      .or(orParts.join(","));
+    if (error) {
+      pushWarning(warnings, "generic", `CRM leads query skipped: ${error.message}`);
+    } else {
+      const seen = new Set<string>();
+      for (const row of data ?? []) {
+        const id = String((row as { id: string }).id);
+        if (seen.has(id)) continue;
+        seen.add(id);
+        leadsRaw.push(row as Record<string, unknown>);
+      }
+    }
+  }
+
+  const leadsMapped = leadsRaw.map((row) => ({
+    id: String(row.id),
+    status: String(row.status ?? "unknown"),
+    current_stage_id: row.current_stage_id != null ? String(row.current_stage_id) : null,
+    updated_at: String(row.updated_at ?? row.created_at),
+    created_at: String(row.created_at),
+    primary_owner_user_id: row.primary_owner_user_id != null ? String(row.primary_owner_user_id) : null,
+    clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+    organisation_id: row.organisation_id != null ? String(row.organisation_id) : null,
+    summary: row.summary != null ? String(row.summary) : null,
+  }));
+
+  const active_leads_count = leadsMapped.filter((l) => !CRM_TERMINAL_LEAD_STATUSES.has(l.status.toLowerCase())).length;
+
+  const leadsSorted = [...leadsMapped].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+  const latestLead = leadsSorted[0] ?? null;
+
+  const stageIds = uniqueStrings(leadsMapped.map((l) => l.current_stage_id));
+  const stageLabelById = new Map<string, string>();
+  if (stageIds.length) {
+    const { data: stages, error: se } = await supabase
+      .from("fi_crm_pipeline_stages")
+      .select("id, label")
+      .eq("tenant_id", tid)
+      .in("id", stageIds);
+    if (se) {
+      pushWarning(warnings, "generic", `CRM pipeline stages lookup skipped: ${se.message}`);
+    } else {
+      for (const s of stages ?? []) {
+        stageLabelById.set(String((s as { id: string }).id), String((s as { label: string }).label));
+      }
+    }
+  }
+
+  let open_tasks_count = 0;
+  const leadIds = leadsMapped.map((l) => l.id);
+  if (leadIds.length) {
+    for (let i = 0; i < leadIds.length; i += CHUNK) {
+      const slice = leadIds.slice(i, i + CHUNK);
+      const { count, error: te } = await supabase
+        .from("fi_crm_tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .in("lead_id", slice)
+        .is("completed_at", null);
+      if (te) {
+        pushWarning(warnings, "generic", `CRM open task count skipped: ${te.message}`);
+        break;
+      }
+      open_tasks_count += count ?? 0;
+    }
+  }
+
+  let latest_activity_summary: string | null = null;
+  if (orParts.length) {
+    const { data: act, error: ae } = await supabase
+      .from("fi_crm_activity_events")
+      .select("activity_kind, title, occurred_at")
+      .eq("tenant_id", tid)
+      .or(orParts.join(","))
+      .order("occurred_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (ae) {
+      pushWarning(warnings, "generic", `CRM latest activity skipped: ${ae.message}`);
+    } else if (act) {
+      const ak = String((act as { activity_kind: string }).activity_kind);
+      const tl = (act as { title: string | null }).title;
+      latest_activity_summary = tl && tl.trim() ? `${ak}: ${tl}` : ak;
+    }
+  }
+
+  let primary_owner_email: string | null = null;
+  let primary_clinic_display_name: string | null = null;
+  let primary_organisation_name: string | null = null;
+  if (latestLead?.primary_owner_user_id) {
+    const { data: u, error: ue } = await supabase
+      .from("fi_users")
+      .select("email")
+      .eq("tenant_id", tid)
+      .eq("id", latestLead.primary_owner_user_id)
+      .maybeSingle();
+    if (!ue && u) {
+      primary_owner_email = (u as { email: string | null }).email != null ? String((u as { email: string | null }).email) : null;
+    }
+  }
+  if (latestLead?.clinic_id) {
+    const { data: cl, error: cle } = await supabase
+      .from("fi_clinics")
+      .select("display_name")
+      .eq("tenant_id", tid)
+      .eq("id", latestLead.clinic_id)
+      .maybeSingle();
+    if (!cle && cl) {
+      primary_clinic_display_name = String((cl as { display_name: string }).display_name);
+    }
+  }
+  if (latestLead?.organisation_id) {
+    const { data: org, error: oe } = await supabase
+      .from("fi_organisations")
+      .select("name")
+      .eq("tenant_id", tid)
+      .eq("id", latestLead.organisation_id)
+      .maybeSingle();
+    if (!oe && org) {
+      primary_organisation_name = String((org as { name: string }).name);
+    }
+  }
+
+  const crm: PatientTwinV1["crm"] = {
+    active_leads_count,
+    latest_lead_status: latestLead?.status ?? null,
+    latest_lead_stage_label: latestLead?.current_stage_id
+      ? stageLabelById.get(latestLead.current_stage_id) ?? null
+      : null,
+    open_tasks_count,
+    latest_activity_summary,
+    primary_owner_email,
+    primary_clinic_display_name,
+    primary_organisation_name,
+  };
+
+  let reports_total = 0;
+  let audits_total = 0;
+  let model_runs_total = 0;
+  let scorecards_total = 0;
+  let reports_by_status: Record<string, number> = {};
+  let model_runs_by_status: Record<string, number> = {};
+  let latest_released_report: PatientTwinV1["audits"]["latest_released_report"] = null;
+
+  if (caseIds.length > 0) {
+    const [repTot, audTot, runTot, scoreTot, repBySt, runBySt, released] = await Promise.all([
+      sumCountForCases(supabase, "fi_reports", tid, caseIds),
+      sumCountForCases(supabase, "fi_audits", tid, caseIds),
+      sumCountForCases(supabase, "fi_model_runs", tid, caseIds),
+      sumCountForCases(supabase, "fi_scorecards", tid, caseIds),
+      aggregateStatusForCases(supabase, "fi_reports", tid, caseIds, "status"),
+      aggregateStatusForCases(supabase, "fi_model_runs", tid, caseIds, "status"),
+      loadLatestReleasedReport(supabase, tid, caseIds),
+    ]);
+    reports_total = repTot;
+    audits_total = audTot;
+    model_runs_total = runTot;
+    scorecards_total = scoreTot;
+    reports_by_status = repBySt;
+    model_runs_by_status = runBySt;
+    latest_released_report = released;
+  }
+
+  if (caseIds.length > 0 && reports_total === 0 && audits_total === 0) {
+    pushWarning(
+      warnings,
+      "missing_audit_linkage",
+      "Linked cases have no fi_reports or fi_audits rows in this tenant (audit pipeline may not have run)."
+    );
+  }
+
+  const audits: PatientTwinV1["audits"] = {
+    reports_total,
+    audits_total,
+    reports_by_status,
+    model_runs_total,
+    model_runs_by_status,
+    scorecards_total,
+    latest_released_report,
+    outcome_indicators: { placeholder: true },
+  };
+
+  const media = buildMediaSection(base.media_unified);
+
+  const timelineItems = buildFoundationTimeline(base);
+
+  let structured_profile: PatientTwinV1["clinical"]["structured_profile"] = null;
+  const { data: clin, error: cne } = await supabase
+    .from("fi_patient_clinical_details")
+    .select("norwood_scale, ludwig_scale, hairline_pattern, primary_concern, treatment_interest")
+    .eq("tenant_id", tid)
+    .eq("patient_id", primaryFoundation)
+    .maybeSingle();
+  if (cne) {
+    pushWarning(warnings, "generic", `Clinical structured profile skipped: ${cne.message}`);
+  } else if (clin) {
+    const c = clin as Record<string, unknown>;
+    structured_profile = {
+      norwood_scale: c.norwood_scale != null ? String(c.norwood_scale) : null,
+      ludwig_scale: c.ludwig_scale != null ? String(c.ludwig_scale) : null,
+      hairline_pattern: c.hairline_pattern != null ? String(c.hairline_pattern) : null,
+      primary_concern: c.primary_concern != null ? String(c.primary_concern) : null,
+      treatment_interest: c.treatment_interest != null ? String(c.treatment_interest) : null,
+    };
+  }
+
+  const twin: PatientTwinV1 = {
+    version: PATIENT_TWIN_VERSION,
+    tenant_id: tid,
+    patient_id: primaryFoundation,
+    person: {
+      person_id: base.person?.person_id ?? base.anchor.person_id,
+      display_name,
+      email,
+      phone,
+      date_of_birth,
+      source_labels,
+    },
+    identity_resolution,
+    crm,
+    cases: casesOut,
+    audits,
+    media,
+    timeline: {
+      order: "newest_first",
+      items: timelineItems,
+      item_cap: TIMELINE_CAP,
+    },
+    clinical: {
+      structured_profile,
+      medications: null,
+      treatments: [],
+      blood_markers: [],
+    },
+    intelligence: {
+      risk_score: null,
+      predicted_outcome: null,
+      model_outputs: [],
+    },
+    provenance: {
+      generated_at: new Date().toISOString(),
+      loader_version: PATIENT_TWIN_LOADER_VERSION,
+      source_views_used: [...SOURCE_VIEWS_USED],
+      source_tables_used: [...SOURCE_TABLES_USED],
+      completeness_score: null,
+    },
+    warnings: dedupeWarnings(warnings),
+  };
+
+  const parsed = patientTwinV1Schema.safeParse(twin);
+  if (!parsed.success) {
+    throw new Error(`PatientTwin V1 schema validation failed: ${parsed.error.message}`);
+  }
+  return parsed.data;
+}
+
+function dedupeWarnings(w: PatientTwinWarning[]): PatientTwinWarning[] {
+  const seen = new Set<string>();
+  const out: PatientTwinWarning[] = [];
+  for (const row of w) {
+    const k = `${row.code}:${row.message}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(row);
+  }
+  return out;
+}

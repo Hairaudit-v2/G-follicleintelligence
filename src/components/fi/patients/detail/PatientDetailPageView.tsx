@@ -41,7 +41,7 @@ export function PatientDetailPageView({
       <PatientDetailBreadcrumbs tenantId={tenantId} patientName={initialPayload.displayName} />
 
       <header className="space-y-1">
-        <PatientProfileHeader data={profile} />
+        <PatientProfileHeader tenantId={tenantId} data={profile} />
         <p className="text-sm text-gray-600">
           Foundation patient · <span className="font-mono text-xs">{patientId}</span>
         </p>

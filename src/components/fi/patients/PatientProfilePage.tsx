@@ -25,7 +25,7 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
         </Link>
       </p>
 
-      <PatientProfileHeader data={data} />
+      <PatientProfileHeader tenantId={tenantId} data={data} />
 
       <p className="rounded border border-blue-100 bg-blue-50/80 p-3 text-sm text-blue-950">
         Patient profiles are the foundation for future clinical records, images, treatment plans, HLI assessments,

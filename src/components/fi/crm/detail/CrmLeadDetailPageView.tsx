@@ -29,6 +29,7 @@ import { LeadBookNextAppointmentCard } from "./LeadBookNextAppointmentCard";
 import { LeadOverviewStats } from "./LeadOverviewStats";
 import { LeadPhotoGalleryPanel } from "./LeadPhotoGalleryPanel";
 import { useCrmLeadDetailState } from "./useCrmLeadDetailState";
+import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 
 export function CrmLeadDetailPageView({
   tenantId,
@@ -56,7 +57,10 @@ export function CrmLeadDetailPageView({
       <CrmLeadDetailBreadcrumbs tenantId={tenantId} leadTitle={leadTitle} />
 
       <header className="space-y-1">
-        <h1 className="text-xl font-semibold text-gray-900">{leadTitle}</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1 className="text-xl font-semibold text-gray-900">{leadTitle}</h1>
+          {lead.patient_id ? <PatientTwinNavLink tenantId={tenantId} patientId={lead.patient_id} /> : null}
+        </div>
         <p className="text-sm text-gray-600">
           CRM lead · <span className="font-mono text-xs">{lead.id}</span>
           {lead.patient_id ? (
