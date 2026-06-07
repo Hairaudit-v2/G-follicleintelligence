@@ -24,8 +24,8 @@ function BookingLine({ tenantId, b }: { tenantId: string; b: PatientProfileBooki
           Open calendar
         </Link>
         <span className="mx-1 text-gray-300">·</span>
-        <Link href={`/fi-admin/${tenantId}/bookings`} className="text-blue-600 hover:underline">
-          Operator view
+        <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-600 hover:underline">
+          Appointments
         </Link>
       </p>
     </li>
@@ -36,9 +36,22 @@ export function PatientBookingsCard({ tenantId, data }: { tenantId: string; data
   const { upcoming, past } = data.bookings;
   return (
     <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Bookings</h2>
+      <h2 className="text-sm font-semibold text-gray-900">Appointments</h2>
       {upcoming.length === 0 && past.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-600">No bookings for this patient.</p>
+        <div className="mt-2 space-y-2 text-sm text-gray-600">
+          <p>No appointments for this patient yet.</p>
+          <p className="text-xs text-gray-500">
+            Open{" "}
+            <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-600 hover:underline">
+              Appointments
+            </Link>{" "}
+            or the{" "}
+            <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-600 hover:underline">
+              calendar
+            </Link>{" "}
+            to schedule when you have booking access.
+          </p>
+        </div>
       ) : (
         <div className="mt-3 space-y-4">
           {upcoming.length ? (
@@ -51,11 +64,11 @@ export function PatientBookingsCard({ tenantId, data }: { tenantId: string; data
               </ul>
             </div>
           ) : (
-            <p className="text-sm text-gray-600">No upcoming bookings.</p>
+            <p className="text-sm text-gray-600">No upcoming appointments.</p>
           )}
           {past.length ? (
             <details className="rounded border border-gray-100 bg-gray-50/50 p-2">
-              <summary className="cursor-pointer text-xs font-semibold text-gray-700">Past bookings ({past.length})</summary>
+              <summary className="cursor-pointer text-xs font-semibold text-gray-700">Past appointments ({past.length})</summary>
               <ul className="mt-2 divide-y divide-gray-100">
                 {past.map((b) => (
                   <BookingLine key={b.id} tenantId={tenantId} b={b} />

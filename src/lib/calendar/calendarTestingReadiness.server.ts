@@ -346,13 +346,80 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
 
   const base = `/fi-admin/${tid}`;
   const workflowRows: CalendarQaRow[] = [
-    qaRow("wf_lead_consult", "CRM lead → consultation booking", "not_tested", `Open ${base}/crm, pick a lead, book a consultation, confirm it appears on ${base}/calendar.`),
-    qaRow("wf_patient_prp", "Patient → PRP booking", "not_tested", `From ${base}/patients or directory, open a patient and schedule PRP (or closest procedure).`),
-    qaRow("wf_case_surgery", "Case → surgery booking", "not_tested", `From ${base}/cases, anchor a surgery booking to the case when workflow supports it.`),
-    qaRow("wf_case_review", "Case → post-op review booking", "not_tested", `Schedule a follow-up / review linked to the same case after surgery.`),
-    qaRow("wf_cancel", "Cancel booking", "not_tested", `Cancel from appointments slide-over or booking drawer; verify status and agenda update.`),
-    qaRow("wf_complete", "Complete booking", "not_tested", `Mark complete from appointment or booking UI; confirm CRM side-effects if enabled.`),
-    qaRow("wf_reschedule", "Reschedule booking", "not_tested", `Drag on ${base}/calendar or edit times; confirm staff hours + overlap guards still pass.`),
+    qaRow(
+      "wf_lead_consult",
+      "Lead → consultation booking",
+      "not_tested",
+      `Open ${base}/crm, pick a lead (Overview), use Lead bookings to create a consultation; confirm it on ${base}/calendar and ${base}/appointments.`
+    ),
+    qaRow(
+      "wf_patient_consult",
+      "Patient → appointment",
+      "not_tested",
+      `Open ${base}/patients (or Directory), open a patient with foundation profile, use Appointments / slide-over to schedule; confirm on calendar.`
+    ),
+    qaRow(
+      "wf_case_anchor",
+      "Case → appointment (case_id)",
+      "not_tested",
+      `Open ${base}/cases/[caseId], use Case appointments → New appointment for this case; confirm row has fi_bookings.case_id and appears on calendar when filtered.`
+    ),
+    qaRow(
+      "wf_patient_prp",
+      "Patient → PRP (or related) booking",
+      "not_tested",
+      `From a patient profile, schedule PRP / PRF / mesotherapy / exosomes when your catalog supports it.`
+    ),
+    qaRow("wf_case_surgery", "Case → surgery booking", "not_tested", `Anchor a surgery-type booking to the SurgeryOS case when planning allows.`),
+    qaRow("wf_case_review", "Case → post-op review booking", "not_tested", `Schedule follow_up / review linked to the same case after surgery.`),
+    qaRow("wf_cancel", "Cancel booking", "not_tested", `Cancel from the appointment slide-over or booking UI; verify status and calendar refresh.`),
+    qaRow("wf_complete", "Complete booking", "not_tested", `Mark complete from appointment UI; verify status and any CRM side-effects.`),
+    qaRow("wf_reschedule", "Reschedule booking", "not_tested", `Change time via calendar drag/edit; confirm staff hours + overlap guards still pass.`),
+  ];
+
+  const errorCopyRows: CalendarQaRow[] = [
+    qaRow(
+      "err_staff_hours",
+      "Outside staff working hours",
+      "not_tested",
+      "Expected copy: appointment falls outside configured weekly hours for that staff member (with weekday and wall-time hint). Surfaces from calendar create/drag and booking mutations when a staff assignee is set.",
+    ),
+    qaRow(
+      "err_staff_inactive",
+      "Inactive staff assignee",
+      "not_tested",
+      "Expected copy: inactive staff cannot be assigned — choose another clinician or reactivate in Staff.",
+    ),
+    qaRow(
+      "err_staff_no_hours",
+      "Missing staff working hours",
+      "not_tested",
+      "Expected copy: no weekly hours on file — add hours in Staff before scheduling that person.",
+    ),
+    qaRow(
+      "err_overlap",
+      "Overlapping appointment",
+      "not_tested",
+      "Expected copy: slot overlaps another booking for the same assignee, including the configured buffer (default 15 minutes).",
+    ),
+    qaRow(
+      "err_service_duration",
+      "Missing / invalid service duration",
+      "not_tested",
+      "Catalog rows must have positive duration_minutes (≤ 24h). If a procedure type has no catalog row, the app uses built-in fallback durations — still verify Services for UAT realism.",
+    ),
+    qaRow(
+      "err_clinic",
+      "Invalid clinic",
+      "not_tested",
+      "Expected copy: clinic must belong to this tenant — pick a clinic from the tenant scope list.",
+    ),
+    qaRow(
+      "err_appt_permission",
+      "No appointment / scheduling permission",
+      "not_tested",
+      "Users without booking-operator access cannot open the appointment slide-over from case or patient context (amber notice + deep link to Appointments). loadAppointmentSlideOverBundleAction returns a clear denial when session is missing.",
+    ),
   ];
 
   const sections: CalendarQaSection[] = [
@@ -366,9 +433,15 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
     },
     {
       id: "workflow",
-      title: "Real workflow (manual)",
+      title: "Manual UAT workflows",
       description: "Sign off after you run each path in a staging tenant. Progress is stored in this browser only.",
       rows: workflowRows,
+    },
+    {
+      id: "error_copy",
+      title: "Expected error messages (reference)",
+      description: "What testers should see when guards fire — not automated; use during scripted UAT.",
+      rows: errorCopyRows,
     },
   ];
 

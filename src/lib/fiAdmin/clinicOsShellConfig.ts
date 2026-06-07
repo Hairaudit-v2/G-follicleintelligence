@@ -1,8 +1,10 @@
 /**
  * Clinic OS shell navigation and quick-action definitions.
- * Permission hints are descriptive only for future RBAC; visibility today mirrors
- * existing CRM shell nav via `showCrmNav` from `getCrmShellNavAllowed` (no new enforcement).
- * Bookings launcher items also respect `showBookingsBoard` from `getBookingsBoardNavAllowed`.
+ * Visibility mirrors server props from `crmShellAccess`:
+ * - CRM / LeadFlow: `showCrmNav` from {@link getCrmShellNavAllowed}
+ * - Bookings board, appointments, and **PatientOS** (`/patients*`): `showBookingsBoard` from
+ *   {@link getBookingsBoardNavAllowed} — same eligibility as {@link getBookingsOperatorPageSession}
+ *   used by `app/(fi-admin)/fi-admin/[tenantId]/patients/layout.tsx` (no separate route permission change).
  *
  * Navigation is grouped by FI OS module labels (ClinicOS, LeadFlow, …); route paths are unchanged.
  */
@@ -84,11 +86,18 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     items: [
       { id: "dashboard", label: "Dashboard", path: "", home: true, permissionHint: {}, description: "Tenant home and overview." },
       {
+        id: "appointments",
+        label: "Appointments",
+        path: "appointments",
+        permissionHint: { requiresBookingsBoardNav: true },
+        description: "Appointments list and slide-over.",
+      },
+      {
         id: "bookings",
-        label: "Bookings",
+        label: "Board",
         path: "bookings",
         permissionHint: { requiresBookingsBoardNav: true },
-        description: "Agenda and booking board.",
+        description: "Legacy booking board and agenda.",
       },
       { id: "calendar", label: "Calendar", path: "calendar", permissionHint: {}, description: "Operational calendar." },
       {
@@ -118,7 +127,14 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     id: "patientos",
     label: "PatientOS",
     description: "Patient profile, timeline, and treatment history.",
-    items: [{ id: "patientos", label: "PatientOS", path: "patients", permissionHint: {} }],
+    items: [
+      {
+        id: "patientos",
+        label: "PatientOS",
+        path: "patients",
+        permissionHint: { requiresBookingsBoardNav: true },
+      },
+    ],
   },
   {
     id: "surgeryos",
@@ -242,8 +258,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
 
   if (first === "bookings") return "bookings";
   if (first === "calendar") return "calendar";
-  /** Operational scheduling sibling routes — no dedicated shell tab. */
-  if (first === "appointments") return "calendar";
+  if (first === "appointments") return "appointments";
   if (first === "patients") return "patientos";
   /** Tenant directory — closest match to PatientOS (no dedicated shell tab). */
   if (first === "directory") return "patientos";
@@ -298,7 +313,7 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
     id: "patient",
     label: "Patient",
     path: "patients/new",
-    permissionHint: {},
+    permissionHint: { requiresBookingsBoardNav: true },
     description: "Create a patient record (PatientOS).",
   },
   {
@@ -317,10 +332,10 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
   },
   {
     id: "booking",
-    label: "Booking",
-    path: "bookings/new",
+    label: "Appointment",
+    path: "appointments",
     permissionHint: { requiresBookingsBoardNav: true },
-    description: "Create a booking (ClinicOS).",
+    description: "Open Appointments to create or edit (ClinicOS).",
   },
   {
     id: "case",

@@ -147,7 +147,7 @@ export async function resolveBookingStaffAssignment(
   const sid = params.assignedStaffId?.trim() || null;
   if (sid) {
     const staff = await assertFiStaffBelongsToTenant(supabase, tid, sid);
-    if (!staff.is_active) throw new Error("Cannot assign an inactive staff member.");
+    if (!staff.is_active) throw new Error("Cannot assign an inactive staff member. Reactivate them in Staff or pick another clinician.");
     return {
       assigned_staff_id: staff.id,
       assigned_user_id: staff.fi_user_id?.trim() || null,

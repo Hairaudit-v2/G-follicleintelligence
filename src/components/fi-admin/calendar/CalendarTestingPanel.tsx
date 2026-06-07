@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import Link from "next/link";
 import { ClipboardCheck, FlaskConical, RefreshCw } from "lucide-react";
 
-import { runCalendarConsultationSmokeTestAction } from "@/lib/actions/fi-calendar-testing-actions";
+import { runCalendarConsultationSmokeTestAction, runCalendarUatSeedAction } from "@/lib/actions/fi-calendar-testing-actions";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
@@ -12,7 +12,7 @@ import type { CalendarQaRow, CalendarQaStatus, CalendarTestingPagePayload } from
 
 import { cn } from "@/lib/utils";
 
-const LS_PREFIX = "fi-calendar-qa-checklist-v1::";
+const LS_PREFIX = "fi-calendar-uat-checklist-v2::";
 
 function lsKey(tenantId: string): string {
   return `${LS_PREFIX}${tenantId.trim()}`;
@@ -86,10 +86,13 @@ export function CalendarTestingPanel({
   tenantId,
   payload,
   showCrmNav,
+  uatSeedEnabled = false,
 }: {
   tenantId: string;
   payload: CalendarTestingPagePayload;
   showCrmNav: boolean;
+  /** Server flag: development or `FI_ALLOW_CALENDAR_UAT_SEED` — shows optional demo seed controls. */
+  uatSeedEnabled?: boolean;
 }) {
   const tid = tenantId.trim();
   const base = `/fi-admin/${tid}`;
@@ -97,6 +100,10 @@ export function CalendarTestingPanel({
   const [smokeBusy, setSmokeBusy] = useState(false);
   const [smokeMessage, setSmokeMessage] = useState<string | null>(null);
   const [smokeOk, setSmokeOk] = useState<boolean | null>(null);
+  const [seedAdminKey, setSeedAdminKey] = useState("");
+  const [seedBusy, setSeedBusy] = useState(false);
+  const [seedLines, setSeedLines] = useState<string[] | null>(null);
+  const [seedOk, setSeedOk] = useState<boolean | null>(null);
 
   useEffect(() => {
     setManual(readManual(tid));
@@ -133,6 +140,27 @@ export function CalendarTestingPanel({
     return row.status;
   };
 
+  const onUatSeed = async () => {
+    setSeedBusy(true);
+    setSeedLines(null);
+    setSeedOk(null);
+    try {
+      const r = await runCalendarUatSeedAction(tid, { adminKey: seedAdminKey.trim() || null });
+      if (r.ok) {
+        setSeedOk(true);
+        setSeedLines(r.lines);
+      } else {
+        setSeedOk(false);
+        setSeedLines([r.error]);
+      }
+    } catch (e) {
+      setSeedOk(false);
+      setSeedLines([e instanceof Error ? e.message : String(e)]);
+    } finally {
+      setSeedBusy(false);
+    }
+  };
+
   const onSmokeTest = async () => {
     setSmokeBusy(true);
     setSmokeMessage(null);
@@ -158,9 +186,9 @@ export function CalendarTestingPanel({
     <div className="min-w-0 space-y-6">
       <FiPageHeader
         eyebrow="ClinicOS"
-        title="Calendar QA"
-        description="Pre-rollout checklist for Paul and FI admins: staff & service readiness, automated guard probes, and manual workflow sign-off. Automated probes use the same validation paths as production."
-        titleId="calendar-qa-heading"
+        title="Calendar UAT"
+        description="Clinic calendar readiness for real testing: staff and service checks, automated guard probes, manual workflow sign-off, and optional demo seed data. Automated probes use the same server validation paths as production."
+        titleId="calendar-uat-heading"
         primaryAction={
           <Link
             href={`${base}/calendar`}
@@ -179,12 +207,30 @@ export function CalendarTestingPanel({
               <RefreshCw className="h-4 w-4" aria-hidden />
               Refresh probes
             </button>
+            <Link
+              href={`${base}/appointments`}
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+            >
+              Appointments
+            </Link>
+            <Link
+              href={`${base}/staff`}
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+            >
+              Staff
+            </Link>
+            <Link
+              href={`${base}/services`}
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+            >
+              Services
+            </Link>
             {showCrmNav ? (
               <Link
-                href={`${base}/appointments`}
+                href={`${base}/crm`}
                 className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
               >
-                Appointments
+                CRM
               </Link>
             ) : null}
           </div>
@@ -195,10 +241,10 @@ export function CalendarTestingPanel({
         <div className="flex gap-2">
           <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-sky-700" aria-hidden />
           <div className="min-w-0 text-sm text-sky-950">
-            <p className="font-semibold text-sky-900">Internal QA only</p>
+            <p className="font-semibold text-sky-900">Internal UAT only</p>
             <p className="mt-1 leading-relaxed text-sky-950/90">
               The consultation smoke test creates a real booking and immediately cancels it (audit trail may still list the event). Manual checklist progress is stored in{" "}
-              <code className="rounded bg-white/80 px-1 font-mono text-xs">localStorage</code> for this browser — not synced to the server.
+              <code className="rounded bg-white/80 px-1 font-mono text-xs">localStorage</code> for this browser — not synced to the server. Public booking, SMS, and payments are out of scope here.
             </p>
             <button
               type="button"
@@ -210,6 +256,47 @@ export function CalendarTestingPanel({
           </div>
         </div>
       </FiCard>
+
+      {uatSeedEnabled ? (
+        <FiCard className="border-amber-200/80 bg-amber-50/30">
+          <h2 className="text-base font-semibold text-amber-950">Optional demo seed (dev / staging)</h2>
+          <p className="mt-1 text-sm text-amber-950/90">
+            Creates up to three schedulable staff rows, three catalog services (consultation / PRP / surgery), and sample
+            bookings when a CRM lead with <code className="font-mono text-xs">person_id</code> and at least one clinic exist.
+            Requires tenant <strong>admin</strong> or <strong>fi_admin</strong>, or a valid <code className="font-mono text-xs">FI_ADMIN_API_KEY</code> in the field below. Idempotent for matching staff names and UAT-titled bookings.
+          </p>
+          <label className="mt-3 block text-xs font-medium text-amber-950">
+            FI Admin API key (optional)
+            <input
+              type="password"
+              autoComplete="off"
+              className="mt-1 w-full max-w-md rounded border border-amber-200 bg-white px-2 py-1.5 text-sm font-mono"
+              value={seedAdminKey}
+              onChange={(e) => setSeedAdminKey(e.target.value)}
+            />
+          </label>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              disabled={seedBusy}
+              onClick={onUatSeed}
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2",
+                seedBusy ? "cursor-not-allowed bg-slate-200 text-slate-500" : "bg-amber-700 text-white hover:bg-amber-800"
+              )}
+            >
+              {seedBusy ? "Seeding…" : "Run UAT seed"}
+            </button>
+          </div>
+          {seedLines?.length ? (
+            <ul className={cn("mt-3 list-inside list-disc space-y-1 text-sm", seedOk ? "text-emerald-900" : "text-rose-900")}>
+              {seedLines.map((line, i) => (
+                <li key={`${i}-${line}`}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </FiCard>
+      ) : null}
 
       {sections.map((section) => (
         <FiCard key={section.id}>

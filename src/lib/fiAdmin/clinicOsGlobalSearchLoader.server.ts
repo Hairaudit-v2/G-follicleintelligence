@@ -1,7 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { attachSearchPattern, parseCrmLeadListQuery } from "@/src/lib/crm/crmLeadListQuery";
 import { loadCrmLeadsShellPage } from "@/src/lib/crm/leadList";
 import { escapeIlikePattern, searchFoundationRecords } from "@/src/lib/fi/foundation/search";
@@ -100,21 +100,27 @@ export async function loadClinicOsGlobalSearchResults(tenantId: string, queryRaw
     return { patients: [], cases: [], leads: [] };
   }
 
+  const patientOsSearchAllowed = await getBookingsBoardNavAllowed(tid);
+
   const [patientBlock, caseBlock] = await Promise.all([
-    searchFoundationRecords({ tenantId: tid, query, type: "patients", limit: 12 }),
+    patientOsSearchAllowed
+      ? searchFoundationRecords({ tenantId: tid, query, type: "patients", limit: 12 })
+      : Promise.resolve({ patients: [] as Awaited<ReturnType<typeof searchFoundationRecords>>["patients"] }),
     searchFoundationRecords({ tenantId: tid, query, type: "cases", limit: 12 }),
   ]);
 
-  const patients: ClinicOsGlobalSearchPatient[] = patientBlock.patients.map((hit) => {
-    const { email, phone } = patientEmailPhoneFromSubtitle(hit.subtitle);
-    return {
-      id: hit.id,
-      name: hit.title,
-      email,
-      phone,
-      href: hit.href,
-    };
-  });
+  const patients: ClinicOsGlobalSearchPatient[] = patientOsSearchAllowed
+    ? patientBlock.patients.map((hit) => {
+        const { email, phone } = patientEmailPhoneFromSubtitle(hit.subtitle);
+        return {
+          id: hit.id,
+          name: hit.title,
+          email,
+          phone,
+          href: hit.href,
+        };
+      })
+    : [];
 
   const caseHits = caseBlock.cases;
   const caseIds = caseHits.map((h) => h.id);

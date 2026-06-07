@@ -1,4 +1,4 @@
-/** ClinicOS calendar QA dashboard (Stage Calendar 2C). */
+/** ClinicOS calendar UAT dashboard (Stage Calendar 2E). */
 
 export type CalendarQaStatus = "ready" | "warning" | "failed" | "not_tested";
 

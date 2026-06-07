@@ -197,7 +197,13 @@ export function CaseAppointmentsCard({
           </ul>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-gray-600">No upcoming appointments for this case.</p>
+        <p className="mt-3 text-sm text-gray-600">
+          No upcoming appointments for this case. Use &quot;New appointment for this case&quot; when you have booking access, or open{" "}
+          <Link href={`/fi-admin/${tenantId}/calendar`} className="text-blue-600 hover:underline">
+            Calendar
+          </Link>
+          .
+        </p>
       )}
 
       <Section title="Surgery" rows={surgery} tenantId={tenantId} slide={slide} empty="No surgery bookings on this case." />

@@ -103,7 +103,7 @@ export function checkAppointmentAvailability(args: {
       const title = b.title?.trim() || b.booking_type;
       return {
         ok: false,
-        message: `Conflicts with “${title}” (${b.start_at.slice(0, 16).replace("T", " ")} UTC) including ${args.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES}m buffer.`,
+        message: `This time overlaps another appointment for the same assignee (including a ${args.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute buffer). Choose a different time, assignee, or reschedule the conflicting booking.`,
         conflictingBookingId: b.id,
       };
     }

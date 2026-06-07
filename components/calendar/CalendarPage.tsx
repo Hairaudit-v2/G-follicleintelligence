@@ -110,7 +110,7 @@ export function CalendarPage({
       bookings={bookings}
       bookingDisplay={bookingDisplay}
       calendarTimezone={data.calendarTimezone}
-      addAppointmentHref={`${base}/bookings/new`}
+      addAppointmentHref={`${base}/appointments`}
       onSelectBooking={(b) => setDrawer(b)}
       draggableWaitlist={data.canMutateBookings}
       className="border-r-0 dark:border-[#1e2937]"

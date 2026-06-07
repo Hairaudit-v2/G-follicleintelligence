@@ -98,7 +98,7 @@ async function assertClinicBelongsToTenant(
     .eq("id", clinicId.trim())
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("clinicId must belong to the tenant.");
+  if (!data) throw new Error("Clinic is missing or does not belong to this tenant. Choose a clinic from your tenant list.");
 }
 
 async function assertPersonBelongsToTenant(

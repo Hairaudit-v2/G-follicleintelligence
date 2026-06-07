@@ -321,7 +321,14 @@ export function StaffDirectoryClient({
             {data.staff.length === 0 ? (
               <tr>
                 <td colSpan={canManage ? 8 : 7} className="px-3 py-8 text-center text-gray-600">
-                  No staff rows yet. {canManage ? "Use Add staff to create the directory." : "Ask an admin to add staff."}
+                  <p>No staff rows yet.</p>
+                  <p className="mt-2 text-sm">
+                    {canManage ? "Use Add staff to create the directory, or run " : "Ask an admin to add staff, or see "}
+                    <Link href={`${base}/calendar/testing`} className="text-blue-600 hover:underline">
+                      Calendar UAT
+                    </Link>
+                    {canManage ? " for a demo seed (dev / staging)." : " for setup guidance."}
+                  </p>
                 </td>
               </tr>
             ) : (

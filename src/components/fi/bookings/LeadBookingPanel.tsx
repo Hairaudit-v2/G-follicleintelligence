@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { isBookingUpcoming, sortBookingsByStartAt } from "@/src/lib/bookings";
@@ -52,6 +53,9 @@ export function LeadBookingPanel({
     [sorted, upcoming]
   );
 
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const hasAny = sorted.length > 0;
+
   function refresh() {
     router.refresh();
   }
@@ -59,10 +63,17 @@ export function LeadBookingPanel({
   return (
     <div className="space-y-4">
       <div className={card}>
-        <h2 className="text-sm font-semibold text-gray-900">Bookings</h2>
+        <h2 className="text-sm font-semibold text-gray-900">Appointments</h2>
         <p className="mt-1 text-xs text-gray-600">
-          Simple lead-scoped schedule (full calendar in a later stage). Optional FI Admin key for service-style writes
-          when not using a CRM-capable session role.
+          Lead-scoped list and quick create. Use the tenant{" "}
+          <Link href={`${base}/calendar`} className="text-blue-600 hover:underline">
+            calendar
+          </Link>{" "}
+          or{" "}
+          <Link href={`${base}/appointments`} className="text-blue-600 hover:underline">
+            Appointments
+          </Link>{" "}
+          for the full operational view. Optional FI Admin key for writes when your session role cannot mutate CRM data.
         </p>
         <label className="mt-2 block text-xs text-gray-600">
           FI Admin key (optional)
@@ -94,9 +105,26 @@ export function LeadBookingPanel({
         }}
       />
 
+      {!hasAny ? (
+        <div className={`${card} border-dashed bg-gray-50/80`}>
+          <p className="text-sm text-gray-700">No appointments for this lead yet.</p>
+          <p className="mt-1 text-xs text-gray-500">
+            Create one above, or open{" "}
+            <Link href={`${base}/calendar`} className="text-blue-600 hover:underline">
+              Calendar
+            </Link>{" "}
+            /{" "}
+            <Link href={`${base}/appointments`} className="text-blue-600 hover:underline">
+              Appointments
+            </Link>{" "}
+            for scheduling with staff hours and overlap checks.
+          </p>
+        </div>
+      ) : null}
+
       <section className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Upcoming</h3>
-        {upcoming.length === 0 ? <p className="text-sm text-gray-500">No upcoming bookings.</p> : null}
+        {upcoming.length === 0 ? <p className="text-sm text-gray-500">No upcoming appointments.</p> : null}
         <div className="space-y-2">
           {upcoming.map((b) => (
             <BookingSummaryCard
@@ -115,7 +143,7 @@ export function LeadBookingPanel({
       <section className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Past & cancelled</h3>
         <details className="rounded border border-gray-100 bg-gray-50 p-2">
-          <summary className="cursor-pointer text-sm text-gray-700">Show ({past.length})</summary>
+          <summary className="cursor-pointer text-sm text-gray-700">Past & cancelled ({past.length})</summary>
           <div className="mt-2 space-y-2">
             {past.map((b) => (
               <BookingSummaryCard

@@ -277,8 +277,15 @@ export function ServicesCatalogClient({
           <tbody className="divide-y divide-gray-100">
             {data.services.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-gray-500">
-                  No services yet. {canManage ? "Add the first row to drive booking defaults." : null}
+                <td colSpan={8} className="px-3 py-8 text-center text-gray-600">
+                  <p>No services in the catalog yet.</p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    {canManage ? "Add the first row to drive booking durations and colours, or use " : "See "}
+                    <Link href={`${base}/calendar/testing`} className="text-blue-600 hover:underline">
+                      Calendar UAT
+                    </Link>
+                    {canManage ? " for optional demo services (dev / staging)." : " for setup guidance."}
+                  </p>
                 </td>
               </tr>
             ) : (

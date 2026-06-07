@@ -39,12 +39,13 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   ];
   if (showBookingsBoard) {
     clinicItems.push(
-      { href: `${base}/bookings`, label: "Bookings", title: "ClinicOS — booking board and agenda." },
+      { href: `${base}/appointments`, label: "Appointments", title: "ClinicOS — appointments list and slide-over actions." },
+      { href: `${base}/bookings`, label: "Board", title: "ClinicOS — legacy booking board and agenda." },
       { href: `${base}/calendar`, label: "Calendar", title: "ClinicOS — operational calendar." },
       {
         href: `${base}/calendar/testing`,
-        label: "Cal. QA",
-        title: "ClinicOS — calendar staging checklist (staff, services, probes).",
+        label: "Cal. UAT",
+        title: "ClinicOS — calendar UAT checklist (staff, services, probes, seed data).",
       }
     );
   }
@@ -76,7 +77,7 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   });
 
   const patientItems: NavLink[] = [];
-  if (showCrmNav) {
+  if (showBookingsBoard) {
     patientItems.push({
       href: `${base}/patients`,
       label: "PatientOS",
@@ -137,14 +138,19 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
   });
 
   const settingsItems: NavLink[] = [];
-  if (showCrmNav) {
+  if (showCrmNav || showBookingsBoard) {
     settingsItems.push({
       href: `${base}/staff`,
       label: "Staff",
-      title: "Settings — staff directory and access.",
+      title: "Settings — staff directory, working hours, and calendar assignment.",
     });
   }
   settingsItems.push(
+    {
+      href: `${base}/services`,
+      label: "Services",
+      title: "Settings — procedure catalog (durations, types, pricing hints).",
+    },
     {
       href: `${base}/configuration`,
       label: "Configuration",

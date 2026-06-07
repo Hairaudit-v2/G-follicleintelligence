@@ -108,6 +108,10 @@ export async function getCrmShellSessionIfAllowed(tenantId: string): Promise<Crm
 /**
  * Bookings operator + appointment tooling: CRM shell roles, or `member` with an active
  * `fi_staff` row for this tenant (scheduling without CRM leads access).
+ *
+ * Same predicate as {@link getBookingsOperatorPageSession} / {@link getBookingsOperatorSessionIfAllowed}
+ * (PatientOS `/fi-admin/[tenantId]/patients/*` layout gate). Use this (or the session helpers) for shell
+ * visibility so nav matches route access.
  */
 export async function getBookingsBoardNavAllowed(tenantId: string): Promise<boolean> {
   const tid = tenantId.trim();

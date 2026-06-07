@@ -6,8 +6,8 @@ import { loadCalendarTestingPageData } from "@/src/lib/calendar/calendarTestingR
 import { assertBookingsOperatorPageAccess, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 
 export const metadata = {
-  title: "Calendar QA",
-  description: "ClinicOS calendar staging checklist for FI admins.",
+  title: "Calendar UAT",
+  description: "ClinicOS calendar UAT checklist for real clinic testing (FI Admin).",
   robots: { index: false, follow: false },
 };
 
@@ -24,9 +24,17 @@ export default async function CalendarTestingRoutePage({ params }: { params: Pro
     getCrmShellNavAllowed(tenantId.trim()),
   ]);
 
+  const uatSeedEnabled =
+    process.env.NODE_ENV === "development" || process.env.FI_ALLOW_CALENDAR_UAT_SEED === "true";
+
   return (
     <div className="mx-auto max-w-[88rem] min-w-0 space-y-6">
-      <CalendarTestingPanel tenantId={tenantId.trim()} payload={data} showCrmNav={showCrmNav} />
+      <CalendarTestingPanel
+        tenantId={tenantId.trim()}
+        payload={data}
+        showCrmNav={showCrmNav}
+        uatSeedEnabled={uatSeedEnabled}
+      />
     </div>
   );
 }
