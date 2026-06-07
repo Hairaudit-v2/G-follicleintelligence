@@ -145,7 +145,8 @@ export const tenantOperationalDashboardSchema = z.object({
   tasksDue: z.array(taskDueItemSchema),
   quickStats: quickStatsSchema,
   viewerFiUserId: z.string().uuid().nullable(),
-  viewerHasLinkedStaff: z.boolean(),
+  /** `fi_staff.id` for the signed-in tenant user when `fi_staff.fi_user_id` matches their `fi_users.id`. */
+  viewerStaffId: z.string().uuid().nullable(),
   canQuickCallIn: z.boolean(),
 });
 
@@ -503,15 +504,16 @@ export async function loadTenantOperationalDashboard(
   const viewerFiUserId = viewer?.id ?? null;
   const canQuickCallIn = isCrmMutationRole(viewer?.role);
 
-  let viewerHasLinkedStaff = false;
+  let viewerStaffId: string | null = null;
   if (viewerFiUserId) {
-    const { count, error: staffCountErr } = await supabase
+    const { data: staffRow, error: staffRowErr } = await supabase
       .from("fi_staff")
-      .select("id", { count: "exact", head: true })
+      .select("id")
       .eq("tenant_id", tid)
-      .eq("fi_user_id", viewerFiUserId);
-    if (staffCountErr) throw new Error(staffCountErr.message);
-    viewerHasLinkedStaff = (count ?? 0) > 0;
+      .eq("fi_user_id", viewerFiUserId)
+      .maybeSingle();
+    if (staffRowErr) throw new Error(staffRowErr.message);
+    if (staffRow) viewerStaffId = String((staffRow as { id: string }).id);
   }
 
   const tenantRes = await supabase.from("fi_tenants").select("name").eq("id", tid).maybeSingle();
@@ -538,7 +540,7 @@ export async function loadTenantOperationalDashboard(
     tasksDue,
     quickStats,
     viewerFiUserId,
-    viewerHasLinkedStaff,
+    viewerStaffId,
     canQuickCallIn,
   });
 }

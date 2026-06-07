@@ -1,11 +1,9 @@
 /**
  * Dry-run planner: map IIOHR HR export rows onto FI `fi_users`, `fi_staff`, and `fi_staff_source_ids`.
  * No database I/O — callers load snapshots and execute returned actions separately.
- *
- * Action types `update_fi_user` / `update_staff_source_id` are included for executors; HR→FI user
- * email sync may emit `update_fi_user` in a later iteration.
  */
 
+import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import {
   normalizeFiStaffSourceMetadata,
   normalizeFiStaffSourceStaffId,
@@ -13,147 +11,35 @@ import {
   normalizeFiStaffSourceUrl,
 } from "@/src/lib/staff/staffSourceIdsNormalize";
 
+import type {
+  IiohrHrImportExistingSourceId,
+  IiohrHrImportExistingStaff,
+  IiohrHrImportExistingUser,
+  IiohrHrStaffImportAction,
+  IiohrHrStaffImportMatchKind,
+  IiohrHrStaffImportPlanInput,
+  IiohrHrStaffImportPlanResult,
+  IiohrHrStaffImportRow,
+  IiohrHrStaffImportRowPlan,
+  IiohrHrStaffImportValidationIssue,
+} from "./iiohrHrStaffImportTypes";
+
+export type {
+  IiohrHrImportExistingSourceId,
+  IiohrHrImportExistingStaff,
+  IiohrHrImportExistingUser,
+  IiohrHrStaffImportAction,
+  IiohrHrStaffImportMatchKind,
+  IiohrHrStaffImportPlan,
+  IiohrHrStaffImportPlanInput,
+  IiohrHrStaffImportPlanResult,
+  IiohrHrStaffImportRow,
+  IiohrHrStaffImportRowPlan,
+  IiohrHrStaffImportValidationIssue,
+} from "./iiohrHrStaffImportTypes";
+
 /** Canonical `source_system` for IIOHR HR rows in `fi_staff_source_ids`. */
 export const IIOHR_HR_SOURCE_SYSTEM = normalizeFiStaffSourceSystem("iiohr_hr");
-
-export type IiohrHrStaffImportRow = {
-  external_staff_id: string;
-  iiohr_user_id?: string | null;
-  email: string;
-  full_name: string;
-  staff_role: string;
-  employment_status: string;
-  source_url?: string | null;
-  default_timezone?: string | null;
-  working_hours?: Record<string, unknown> | null;
-};
-
-export type IiohrHrImportExistingUser = {
-  id: string;
-  email: string | null;
-  role?: string | null;
-};
-
-export type IiohrHrImportExistingStaff = {
-  id: string;
-  fi_user_id: string | null;
-  full_name: string;
-  staff_role: string;
-  email: string | null;
-  is_active: boolean;
-  default_timezone?: string | null;
-  working_hours?: Record<string, unknown>;
-};
-
-export type IiohrHrImportExistingSourceId = {
-  id: string;
-  staff_id: string;
-  source_system: string;
-  source_staff_id: string;
-  source_url: string | null;
-  metadata: Record<string, unknown>;
-};
-
-export type IiohrHrStaffImportPlanInput = {
-  tenantId: string;
-  rows: IiohrHrStaffImportRow[];
-  existingUsers: IiohrHrImportExistingUser[];
-  existingStaff: IiohrHrImportExistingStaff[];
-  existingStaffSourceIds: IiohrHrImportExistingSourceId[];
-};
-
-export type IiohrHrStaffImportMatchKind = "source_id" | "staff_email" | "user_email" | "none";
-
-export type IiohrHrStaffImportAction =
-  | {
-      type: "create_fi_user";
-      sourceRowIndex: number;
-      payload: { email: string; role: string };
-    }
-  | {
-      type: "update_fi_user";
-      sourceRowIndex: number;
-      payload: { userId: string; email?: string; role?: string };
-    }
-  | {
-      type: "create_fi_staff";
-      sourceRowIndex: number;
-      payload: {
-        full_name: string;
-        staff_role: string;
-        email: string | null;
-        default_timezone: string | null;
-        working_hours: Record<string, unknown>;
-        is_active: boolean;
-        fi_user_id: string | null;
-        /**
-         * When set, executor binds `fi_user_id` from the `create_fi_user` action on this import row
-         * (same `sourceRowIndex`) after that user is inserted.
-         */
-        fi_user_id_from_same_row_index?: number | null;
-      };
-    }
-  | {
-      type: "update_fi_staff";
-      sourceRowIndex: number;
-      payload: {
-        staffId: string;
-        full_name?: string;
-        staff_role?: string;
-        email?: string | null;
-        default_timezone?: string | null;
-        working_hours?: Record<string, unknown>;
-        is_active?: boolean;
-      };
-    }
-  | {
-      type: "link_staff_to_user";
-      sourceRowIndex: number;
-      payload: { staffId: string; fiUserId: string };
-    }
-  | {
-      type: "create_staff_source_id";
-      sourceRowIndex: number;
-      payload: {
-        staffId: string | null;
-        /** Executor: apply after `create_fi_staff` for this `sourceRowIndex` when set. */
-        staffFromRowIndex: number | null;
-        source_system: string;
-        source_staff_id: string;
-        source_url: string | null;
-        metadata: Record<string, unknown>;
-      };
-    }
-  | {
-      type: "update_staff_source_id";
-      sourceRowIndex: number;
-      payload: {
-        id: string;
-        source_url?: string | null;
-        metadata?: Record<string, unknown>;
-      };
-    }
-  | {
-      type: "deactivate_staff";
-      sourceRowIndex: number;
-      payload: { staffId: string };
-    };
-
-export type IiohrHrStaffImportRowPlan = {
-  rowIndex: number;
-  row: IiohrHrStaffImportRow;
-  matchKind: IiohrHrStaffImportMatchKind;
-  matchedStaffId: string | null;
-  matchedUserId: string | null;
-  actions: IiohrHrStaffImportAction[];
-  skippedDuplicate: boolean;
-};
-
-export type IiohrHrStaffImportPlanResult = {
-  perRow: IiohrHrStaffImportRowPlan[];
-  actions: IiohrHrStaffImportAction[];
-  warnings: string[];
-};
 
 function emailKey(email: string | null | undefined): string | null {
   if (email == null) return null;
@@ -166,63 +52,39 @@ function jsonForCompare(v: unknown): string {
   return JSON.stringify(v === undefined ? null : v);
 }
 
-/** Exported for tests — maps HR employment strings to FI `is_active`. */
-export function mapIiohrHrEmploymentToIsActive(employment_status: string): boolean {
-  const s = employment_status.trim().toLowerCase();
-  if (s === "terminated" || s === "inactive") return false;
-  if (s === "active") return true;
-  if (s === "resigned" || s === "dismissed" || s === "laid_off") return false;
-  return true;
+/**
+ * Maps HR `employment_status` to FI `is_active`.
+ * - `active` / `current` / `employed` → `true`
+ * - `inactive` / `terminated` / `resigned` → `false`
+ * - unknown or empty → `null` (do not change existing staff active flag)
+ */
+export function resolveEmploymentIsActive(employment_status: string | null | undefined): boolean | null {
+  const s = String(employment_status ?? "").trim().toLowerCase();
+  if (!s) return null;
+  if (s === "active" || s === "current" || s === "employed") return true;
+  if (s === "inactive" || s === "terminated" || s === "resigned") return false;
+  return null;
 }
 
-function buildStaffUpdatePayload(
-  staff: IiohrHrImportExistingStaff,
+/** Default `is_active` for newly created `fi_staff` when employment is unknown. */
+export function defaultIsActiveForNewStaff(employment_status: string | null | undefined): boolean {
+  return resolveEmploymentIsActive(employment_status) !== false;
+}
+
+function resolveSourceUrlForRow(
+  rowIndex: number,
   row: IiohrHrStaffImportRow,
-  targetIsActive: boolean
-): {
-  staffId: string;
-  full_name?: string;
-  staff_role?: string;
-  email?: string | null;
-  default_timezone?: string | null;
-  working_hours?: Record<string, unknown>;
-  is_active?: boolean;
-} | null {
-  const emailNorm = emailKey(row.email);
-  const nextEmail = emailNorm ? row.email.trim() : null;
-  const wh =
-    row.working_hours && typeof row.working_hours === "object" && !Array.isArray(row.working_hours)
-      ? row.working_hours
-      : {};
-  const nextTz = row.default_timezone?.trim() || null;
-
-  const patch: {
-    staffId: string;
-    full_name?: string;
-    staff_role?: string;
-    email?: string | null;
-    default_timezone?: string | null;
-    working_hours?: Record<string, unknown>;
-    is_active?: boolean;
-  } = { staffId: staff.id };
-
-  if (row.full_name.trim() && row.full_name.trim() !== staff.full_name) patch.full_name = row.full_name.trim();
-  const role = row.staff_role.trim() || "consultant";
-  if (role !== staff.staff_role) patch.staff_role = role;
-  const staffEmailKey = emailKey(staff.email);
-  if (nextEmail !== staff.email && (nextEmail || staffEmailKey)) patch.email = nextEmail;
-  const stz = staff.default_timezone ?? null;
-  if (nextTz !== stz) patch.default_timezone = nextTz;
-
-  const existingWh =
-    staff.working_hours && typeof staff.working_hours === "object" && !Array.isArray(staff.working_hours)
-      ? staff.working_hours
-      : {};
-  if (jsonForCompare(wh) !== jsonForCompare(existingWh)) patch.working_hours = wh;
-
-  if (targetIsActive !== staff.is_active) patch.is_active = targetIsActive;
-
-  return Object.keys(patch).length > 1 ? patch : null;
+  warnings: string[]
+): string | null {
+  const raw = row.source_url;
+  if (raw == null) return null;
+  const t = String(raw).trim();
+  if (!t) return null;
+  if (!isAllowedHrPortalUrl(t)) {
+    warnings.push(`Row ${rowIndex}: invalid source_url ignored (only http:// or https:// allowed).`);
+    return null;
+  }
+  return normalizeFiStaffSourceUrl(t);
 }
 
 function mergeSourceMetadata(
@@ -248,17 +110,53 @@ function sourceIdNeedsUpdate(
 
 type UpdateFiStaffPayload = Extract<IiohrHrStaffImportAction, { type: "update_fi_staff" }>["payload"];
 
-function pushStaffUpdatesForExisting(
-  actions: IiohrHrStaffImportAction[],
-  rowIndex: number,
+function buildStaffUpdatePayload(
   staff: IiohrHrImportExistingStaff,
   row: IiohrHrStaffImportRow,
-  targetIsActive: boolean
+  targetIsActive: boolean | null
+): UpdateFiStaffPayload | null {
+  const emailNorm = emailKey(row.email);
+  const nextEmail = emailNorm ? String(row.email).trim() : null;
+  const wh =
+    row.working_hours && typeof row.working_hours === "object" && !Array.isArray(row.working_hours)
+      ? (row.working_hours as Record<string, unknown>)
+      : {};
+  const nextTz = row.default_timezone?.trim() || null;
+
+  const patch: UpdateFiStaffPayload = { staffId: staff.id };
+
+  if (row.full_name.trim() && row.full_name.trim() !== staff.full_name) patch.full_name = row.full_name.trim();
+  const role = (row.staff_role?.trim() || "consultant").trim() || "consultant";
+  if (role !== staff.staff_role) patch.staff_role = role;
+  const staffEmailKey = emailKey(staff.email);
+  if (nextEmail !== staff.email && (nextEmail || staffEmailKey)) patch.email = nextEmail;
+  const stz = staff.default_timezone ?? null;
+  if (nextTz !== stz) patch.default_timezone = nextTz;
+
+  const existingWh =
+    staff.working_hours && typeof staff.working_hours === "object" && !Array.isArray(staff.working_hours)
+      ? staff.working_hours
+      : {};
+  if (jsonForCompare(wh) !== jsonForCompare(existingWh)) patch.working_hours = wh;
+
+  if (targetIsActive !== null && targetIsActive !== staff.is_active) {
+    patch.is_active = targetIsActive;
+  }
+
+  return Object.keys(patch).length > 1 ? patch : null;
+}
+
+function pushStaffUpdatesForExisting(
+  actions: IiohrHrStaffImportAction[],
+  sourceRowIndex: number,
+  staff: IiohrHrImportExistingStaff,
+  row: IiohrHrStaffImportRow,
+  targetIsActive: boolean | null
 ): void {
-  const deactivate = !targetIsActive && staff.is_active;
+  const deactivate = targetIsActive === false && staff.is_active;
 
   if (deactivate) {
-    actions.push({ type: "deactivate_staff", sourceRowIndex: rowIndex, payload: { staffId: staff.id } });
+    actions.push({ type: "deactivate_staff", sourceRowIndex, payload: { staffId: staff.id } });
   }
 
   const patch = buildStaffUpdatePayload(staff, row, targetIsActive);
@@ -277,19 +175,35 @@ function pushStaffUpdatesForExisting(
   }
 
   if (Object.keys(payload).length > 1) {
-    actions.push({ type: "update_fi_staff", sourceRowIndex: rowIndex, payload });
+    actions.push({ type: "update_fi_staff", sourceRowIndex, payload });
   }
 }
 
+function resolveSourceRowIndex(input: IiohrHrStaffImportPlanInput, packedIndex: number): number {
+  const map = input.sourceRowIndices;
+  if (map) {
+    if (map.length !== input.rows.length) {
+      throw new Error("sourceRowIndices length must match rows length.");
+    }
+    return map[packedIndex]!;
+  }
+  return packedIndex;
+}
+
 /**
- * Produces ordered dry-run actions for an IIOHR HR staff CSV (or API) import.
+ * Produces ordered dry-run actions for an IIOHR HR staff import.
  *
  * Matching (first hit wins): `fi_staff_source_ids` (`iiohr_hr` + external id) → `fi_staff.email` → `fi_users.email` → new staff.
  */
 export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): IiohrHrStaffImportPlanResult {
   const warnings: string[] = [];
+  const validationIssues: IiohrHrStaffImportValidationIssue[] = [];
   const tid = input.tenantId.trim();
   if (!tid) warnings.push("tenantId is empty.");
+
+  if (input.sourceRowIndices && input.sourceRowIndices.length !== input.rows.length) {
+    throw new Error("sourceRowIndices must have the same length as rows.");
+  }
 
   const staffById = new Map<string, IiohrHrImportExistingStaff>();
   for (const s of input.existingStaff) staffById.set(s.id.trim(), s);
@@ -321,8 +235,9 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
   const consumedStaffIds = new Set<string>();
   const perRow: IiohrHrStaffImportRowPlan[] = [];
 
-  for (let rowIndex = 0; rowIndex < input.rows.length; rowIndex++) {
-    const row = input.rows[rowIndex];
+  for (let packedIndex = 0; packedIndex < input.rows.length; packedIndex++) {
+    const row = input.rows[packedIndex]!;
+    const rowIndex = resolveSourceRowIndex(input, packedIndex);
     const actions: IiohrHrStaffImportAction[] = [];
     let matchKind: IiohrHrStaffImportMatchKind = "none";
     let matchedStaffId: string | null = null;
@@ -330,11 +245,41 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
 
     const extNorm = normalizeFiStaffSourceStaffId(row.external_staff_id);
     if (!extNorm) {
-      warnings.push(`Row ${rowIndex}: empty external_staff_id; treated as no source-id match.`);
+      const msg = "external_staff_id is required.";
+      validationIssues.push({ rowIndex, field: "external_staff_id", message: msg });
+      actions.push({ type: "skip_row", sourceRowIndex: rowIndex, payload: { reason: msg } });
+      perRow.push({
+        rowIndex,
+        row,
+        matchKind: "none",
+        matchedStaffId: null,
+        matchedUserId: null,
+        actions,
+        skippedDuplicate: false,
+        skippedValidation: true,
+      });
+      continue;
+    }
+
+    if (!row.full_name?.trim()) {
+      const msg = "full_name is required.";
+      validationIssues.push({ rowIndex, field: "full_name", message: msg });
+      actions.push({ type: "skip_row", sourceRowIndex: rowIndex, payload: { reason: msg } });
+      perRow.push({
+        rowIndex,
+        row,
+        matchKind: "none",
+        matchedStaffId: null,
+        matchedUserId: null,
+        actions,
+        skippedDuplicate: false,
+        skippedValidation: true,
+      });
+      continue;
     }
 
     const emailK = emailKey(row.email);
-    let staffFromSource = extNorm ? externalIdToStaffId.get(extNorm) : undefined;
+    let staffFromSource = externalIdToStaffId.get(extNorm);
     if (staffFromSource && !staffById.has(staffFromSource)) {
       warnings.push(`Row ${rowIndex}: source id maps to unknown staff_id ${staffFromSource}; ignoring.`);
       staffFromSource = undefined;
@@ -363,21 +308,22 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
         matchedUserId,
         actions: [],
         skippedDuplicate: true,
+        skippedValidation: false,
       });
       continue;
     }
 
     if (matchedStaffId) consumedStaffIds.add(matchedStaffId);
 
-    const targetIsActive = mapIiohrHrEmploymentToIsActive(row.employment_status);
-    const nextUrl = normalizeFiStaffSourceUrl(row.source_url);
+    const employmentResolved = resolveEmploymentIsActive(row.employment_status);
+    const nextUrl = resolveSourceUrlForRow(rowIndex, row, warnings);
 
     if (matchKind === "source_id" || matchKind === "staff_email") {
       const staff = staffById.get(matchedStaffId!)!;
       const hrSource = staffIdToHrSource.get(staff.id);
       const nextMeta = mergeSourceMetadata(hrSource?.metadata ?? {}, row.iiohr_user_id);
 
-      pushStaffUpdatesForExisting(actions, rowIndex, staff, row, targetIsActive);
+      pushStaffUpdatesForExisting(actions, rowIndex, staff, row, employmentResolved);
 
       const userForEmail = emailK ? emailToUser.get(emailK) : undefined;
       if (!staff.fi_user_id && userForEmail) {
@@ -420,20 +366,21 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
 
       const wh =
         row.working_hours && typeof row.working_hours === "object" && !Array.isArray(row.working_hours)
-          ? row.working_hours
+          ? (row.working_hours as Record<string, unknown>)
           : {};
       const nextTz = row.default_timezone?.trim() || null;
+      const isActiveNew = defaultIsActiveForNewStaff(row.employment_status);
 
       actions.push({
         type: "create_fi_staff",
         sourceRowIndex: rowIndex,
         payload: {
           full_name: row.full_name.trim() || "Staff",
-          staff_role: row.staff_role.trim() || "consultant",
-          email: emailK ? row.email.trim() : null,
+          staff_role: (row.staff_role?.trim() || "consultant").trim() || "consultant",
+          email: emailK ? String(row.email).trim() : null,
           default_timezone: nextTz,
           working_hours: wh,
-          is_active: targetIsActive,
+          is_active: isActiveNew,
           fi_user_id: user.id,
         },
       });
@@ -463,7 +410,7 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
           actions.push({
             type: "create_fi_user",
             sourceRowIndex: rowIndex,
-            payload: { email: row.email.trim(), role: "member" },
+            payload: { email: String(row.email).trim(), role: "member" },
           });
           fiUserIdFromSameRowIndex = rowIndex;
         }
@@ -471,20 +418,21 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
 
       const wh =
         row.working_hours && typeof row.working_hours === "object" && !Array.isArray(row.working_hours)
-          ? row.working_hours
+          ? (row.working_hours as Record<string, unknown>)
           : {};
       const nextTz = row.default_timezone?.trim() || null;
+      const isActiveNew = defaultIsActiveForNewStaff(row.employment_status);
 
       actions.push({
         type: "create_fi_staff",
         sourceRowIndex: rowIndex,
         payload: {
           full_name: row.full_name.trim() || "Staff",
-          staff_role: row.staff_role.trim() || "consultant",
-          email: emailK ? row.email.trim() : null,
+          staff_role: (row.staff_role?.trim() || "consultant").trim() || "consultant",
+          email: emailK ? String(row.email).trim() : null,
           default_timezone: nextTz,
           working_hours: wh,
-          is_active: targetIsActive,
+          is_active: isActiveNew,
           fi_user_id: fiUserId,
           fi_user_id_from_same_row_index: fiUserIdFromSameRowIndex,
         },
@@ -512,10 +460,11 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
       matchedUserId,
       actions,
       skippedDuplicate: false,
+      skippedValidation: false,
     });
   }
 
   const actions = perRow.flatMap((p) => p.actions);
 
-  return { perRow, actions, warnings };
+  return { perRow, actions, warnings, validationIssues };
 }

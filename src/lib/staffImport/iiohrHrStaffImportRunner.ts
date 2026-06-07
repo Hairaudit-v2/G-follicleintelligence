@@ -15,24 +15,24 @@ import {
   normalizeFiStaffSourceStaffId,
   normalizeFiStaffSourceSystem,
 } from "@/src/lib/staff/staffSourceIdsNormalize";
-import {
-  planIiohrHrStaffImport,
-  type IiohrHrStaffImportAction,
-  type IiohrHrStaffImportPlanResult,
-  type IiohrHrStaffImportRow,
-} from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
+import { planIiohrHrStaffImport } from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
+import type {
+  IiohrHrStaffImportAction,
+  IiohrHrStaffImportPlanResult,
+  IiohrHrStaffImportRow,
+} from "@/src/lib/staffImport/iiohrHrStaffImportTypes";
 
 const tenantIdSchema = z.string().uuid("tenantId must be a UUID.");
 
 const iiohrHrStaffImportRowSchema = z.object({
-  external_staff_id: z.string().min(1, "external_staff_id is required."),
+  external_staff_id: z.coerce.string(),
   iiohr_user_id: z.union([z.string(), z.number()]).nullable().optional(),
-  email: z.string(),
-  full_name: z.string().min(1, "full_name is required."),
-  staff_role: z.string().min(1, "staff_role is required."),
-  employment_status: z.string().min(1, "employment_status is required."),
-  source_url: z.string().nullable().optional(),
-  default_timezone: z.string().nullable().optional(),
+  email: z.union([z.string(), z.null()]).optional(),
+  full_name: z.coerce.string(),
+  staff_role: z.union([z.string(), z.null()]).optional(),
+  employment_status: z.union([z.string(), z.null()]).optional(),
+  source_url: z.union([z.string(), z.null()]).optional(),
+  default_timezone: z.union([z.string(), z.null()]).optional(),
   working_hours: z.record(z.unknown()).nullable().optional(),
 });
 
@@ -112,11 +112,17 @@ function countFromActions(actions: IiohrHrStaffImportAction[]): IiohrHrStaffImpo
       case "update_staff_source_id":
         c.updatedSourceIds += 1;
         break;
+      case "skip_row":
+        break;
       default:
         break;
     }
   }
   return c;
+}
+
+function emptyPlan(): IiohrHrStaffImportPlanResult {
+  return { perRow: [], actions: [], warnings: [], validationIssues: [] };
 }
 
 async function assertTenantExists(tenantId: string): Promise<void> {
@@ -173,37 +179,40 @@ export async function assertIiohrHrStaffImportAllowed(opts: {
   throw new Error("Admin role required for IIOHR HR staff import.");
 }
 
-function validateImportRows(rows: unknown): { rows: IiohrHrStaffImportRow[]; errors: string[] } {
-  const errors: string[] = [];
+function validateImportRows(rows: unknown): {
+  rows: IiohrHrStaffImportRow[];
+  sourceRowIndices: number[];
+  validationErrors: string[];
+} {
+  const validationErrors: string[] = [];
   if (!Array.isArray(rows)) {
-    errors.push("Body must include a JSON array `rows`.");
-    return { rows: [], errors };
+    validationErrors.push("Body must include a JSON array `rows`.");
+    return { rows: [], sourceRowIndices: [], validationErrors };
   }
   const candidates: IiohrHrStaffImportRow[] = [];
+  const sourceRowIndices: number[] = [];
   for (let i = 0; i < rows.length; i++) {
     const parsed = iiohrHrStaffImportRowSchema.safeParse(rows[i]);
     if (!parsed.success) {
       const msg = parsed.error.errors[0]?.message ?? "Invalid row.";
-      errors.push(`Row ${i}: ${msg}`);
+      validationErrors.push(`Row ${i}: ${msg}`);
       continue;
     }
     const r = parsed.data;
     candidates.push({
-      external_staff_id: r.external_staff_id.trim(),
+      external_staff_id: String(r.external_staff_id).trim(),
       iiohr_user_id: r.iiohr_user_id != null ? String(r.iiohr_user_id).trim() : null,
-      email: r.email,
-      full_name: r.full_name.trim(),
-      staff_role: r.staff_role.trim(),
-      employment_status: r.employment_status.trim(),
-      source_url: r.source_url ?? undefined,
-      default_timezone: r.default_timezone?.trim() ?? undefined,
+      email: r.email != null && String(r.email).trim() ? String(r.email).trim().toLowerCase() : null,
+      full_name: String(r.full_name ?? "").trim(),
+      staff_role: r.staff_role != null ? String(r.staff_role).trim() : null,
+      employment_status: r.employment_status != null ? String(r.employment_status).trim() : null,
+      source_url: r.source_url != null ? String(r.source_url) : undefined,
+      default_timezone: r.default_timezone != null ? String(r.default_timezone).trim() : undefined,
       working_hours: r.working_hours ?? undefined,
     });
+    sourceRowIndices.push(i);
   }
-  if (errors.length) {
-    return { rows: [], errors };
-  }
-  return { rows: candidates, errors: [] };
+  return { rows: candidates, sourceRowIndices, validationErrors };
 }
 
 async function assertFiUserBelongsToTenant(
@@ -497,6 +506,8 @@ async function executePlanActions(
         applied.updatedSourceIds += 1;
         break;
       }
+      case "skip_row":
+        break;
       default:
         break;
     }
@@ -508,6 +519,8 @@ export type RunIiohrHrStaffImportParams = {
   rows: unknown;
   /** When false (default), only plan + counts — no writes. */
   commit?: boolean;
+  /** Required when `commit` is true (server / UI safety). */
+  confirm?: boolean;
   adminKey?: string | null;
   /** Supabase Auth user id when not using admin API key (server actions with session). */
   authUserId?: string | null;
@@ -515,7 +528,7 @@ export type RunIiohrHrStaffImportParams = {
 
 /**
  * Tenant-scoped IIOHR HR staff import: plan, optionally apply via service role.
- * Callers must pass `commit: true` to perform writes.
+ * Callers must pass `commit: true` and `confirm: true` to perform writes.
  */
 export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams): Promise<IiohrHrStaffImportRunResult> {
   const tenantParse = tenantIdSchema.safeParse(params.tenantId?.trim());
@@ -526,7 +539,7 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
       validationErrors: [tenantParse.error.errors[0]?.message ?? "Invalid tenantId."],
       warnings: [],
       skippedRowCount: 0,
-      plan: { perRow: [], actions: [], warnings: [] },
+      plan: emptyPlan(),
       dryRunCounts: emptyCounts(),
       error: "Validation failed.",
     };
@@ -547,36 +560,42 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
       validationErrors: [],
       warnings: [],
       skippedRowCount: 0,
-      plan: { perRow: [], actions: [], warnings: [] },
+      plan: emptyPlan(),
       dryRunCounts: emptyCounts(),
       error: msg,
     };
   }
 
-  const { rows, errors: validationErrors } = validateImportRows(params.rows);
-  if (validationErrors.length) {
+  const { rows, sourceRowIndices, validationErrors } = validateImportRows(params.rows);
+
+  if (validationErrors.some((e) => e.includes("JSON array"))) {
     return {
       ok: false,
       commit: params.commit === true,
       validationErrors,
       warnings: [],
       skippedRowCount: 0,
-      plan: { perRow: [], actions: [], warnings: [] },
+      plan: emptyPlan(),
       dryRunCounts: emptyCounts(),
       error: "Validation failed.",
     };
   }
 
   const { existingUsers, existingStaff, existingStaffSourceIds } = await loadSnapshotsForPlan(tenantId);
-  const plan = planIiohrHrStaffImport({
-    tenantId,
-    rows,
-    existingUsers,
-    existingStaff,
-    existingStaffSourceIds,
-  });
 
-  const skippedRowCount = plan.perRow.filter((p) => p.skippedDuplicate).length;
+  const plan =
+    rows.length === 0
+      ? emptyPlan()
+      : planIiohrHrStaffImport({
+          tenantId,
+          rows,
+          sourceRowIndices,
+          existingUsers,
+          existingStaff,
+          existingStaffSourceIds,
+        });
+
+  const skippedRowCount = plan.perRow.filter((p) => p.skippedDuplicate || p.skippedValidation).length;
   const dryRunCounts = countFromActions(plan.actions);
 
   const commit = params.commit === true;
@@ -584,11 +603,37 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
     return {
       ok: true,
       commit: false,
-      validationErrors: [],
+      validationErrors,
       warnings: plan.warnings,
       skippedRowCount,
       plan,
       dryRunCounts,
+    };
+  }
+
+  if (params.confirm !== true) {
+    return {
+      ok: false,
+      commit: true,
+      validationErrors,
+      warnings: plan.warnings,
+      skippedRowCount,
+      plan,
+      dryRunCounts,
+      error: "commit requires confirm: true",
+    };
+  }
+
+  if (rows.length === 0) {
+    return {
+      ok: false,
+      commit: true,
+      validationErrors,
+      warnings: [],
+      skippedRowCount: 0,
+      plan: emptyPlan(),
+      dryRunCounts: emptyCounts(),
+      error: "Nothing to commit — no valid rows.",
     };
   }
 
@@ -600,7 +645,7 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
     return {
       ok: false,
       commit: true,
-      validationErrors: [],
+      validationErrors,
       warnings: plan.warnings,
       skippedRowCount,
       plan,
@@ -613,7 +658,7 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
   return {
     ok: true,
     commit: true,
-    validationErrors: [],
+    validationErrors,
     warnings: plan.warnings,
     skippedRowCount,
     plan,
@@ -633,6 +678,13 @@ export function logIiohrHrStaffImportReport(result: IiohrHrStaffImportRunResult)
   if (result.validationErrors.length) {
     console.log("\nValidation errors:");
     for (const e of result.validationErrors) console.log(`  • ${e}`);
+  }
+
+  if (result.plan.validationIssues.length) {
+    console.log("\nPlanner validation issues:");
+    for (const v of result.plan.validationIssues) {
+      console.log(`  • Row ${v.rowIndex}${v.field ? ` (${v.field})` : ""}: ${v.message}`);
+    }
   }
 
   if (result.warnings.length) {

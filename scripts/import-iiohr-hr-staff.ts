@@ -100,6 +100,7 @@ async function main(): Promise<void> {
     tenantId: args.tenantId.trim(),
     rows,
     commit: args.commit,
+    confirm: args.commit ? true : undefined,
     adminKey,
   });
 

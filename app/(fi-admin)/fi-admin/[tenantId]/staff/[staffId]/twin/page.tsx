@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { ExternalLink } from "lucide-react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
+import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import { loadStaffTwinPage } from "@/src/lib/staff/staffTwinLoader.server";
 
 export const metadata = {
@@ -12,11 +13,6 @@ export const metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-function isSafeExternalHref(url: string): boolean {
-  const u = url.trim().toLowerCase();
-  return u.startsWith("https://") || u.startsWith("http://");
-}
 
 export default async function StaffTwinPage({
   params,
@@ -134,7 +130,7 @@ export default async function StaffTwinPage({
                   <p className="font-medium text-[#E2E8F0]">{row.source_system}</p>
                   <p className="mt-0.5 font-mono text-xs text-[#94A3B8]">{row.source_staff_id}</p>
                 </div>
-                {row.source_url && isSafeExternalHref(row.source_url) ? (
+                {row.source_url && isAllowedHrPortalUrl(row.source_url) ? (
                   <a
                     href={row.source_url.trim()}
                     target="_blank"

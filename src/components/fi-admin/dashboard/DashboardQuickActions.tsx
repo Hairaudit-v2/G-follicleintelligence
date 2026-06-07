@@ -57,7 +57,7 @@ export function DashboardQuickActions(props: {
           <QuickActionCard
             href={`${base}/staff/me/hr`}
             title="My HR Portal"
-            description="Open your linked employer HR workspace (onboarding, documents, training)."
+            description="View your staff documents and onboarding."
             icon={<Briefcase size={ICON} strokeWidth={1.75} aria-hidden />}
           />
         ) : null}
