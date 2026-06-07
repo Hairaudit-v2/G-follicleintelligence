@@ -1,3 +1,4 @@
+import type { CaseReadinessHealth } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import type { CaseIndexRow } from "@/src/lib/cases/caseLoaders";
@@ -54,4 +55,10 @@ export type CaseWorklistRow = CaseIndexRow & {
   readinessNeedsAttention: boolean;
   /** Procedure date YYYY-MM-DD or null (for sorting / display). */
   procedureDate: string | null;
+  /** Section health from `buildCaseReadiness` (worklist mode; no timeline section). */
+  readinessCaseProfileHealth: CaseReadinessHealth;
+  readinessSurgeryPlanningHealth: CaseReadinessHealth;
+  readinessProcedureDayHealth: CaseReadinessHealth;
+  readinessPostOpHealth: CaseReadinessHealth;
+  readinessFollowUpsHealth: CaseReadinessHealth;
 };

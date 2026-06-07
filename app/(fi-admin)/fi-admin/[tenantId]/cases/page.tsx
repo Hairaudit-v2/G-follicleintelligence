@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { redirect } from "next/navigation";
 import { CasesWorklistView } from "@/src/components/fi-admin/cases/CasesWorklistView";
+import { SurgeryOsDashboard } from "@/src/components/fi-admin/cases/SurgeryOsDashboard";
 import {
   applyCasesWorklistFilters,
   buildCaseWorklistRows,
@@ -14,7 +14,7 @@ import { loadCasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders
 import { loadCasesIndexForTenant } from "@/src/lib/cases/caseLoaders";
 
 export const metadata = {
-  title: "Patients",
+  title: "SurgeryOS",
   robots: { index: false, follow: false },
 };
 
@@ -59,49 +59,30 @@ export default async function CasesIndexRoutePage({
   const worklistQueryString = buildCasesWorklistQueryString(effectiveQuery) || undefined;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 py-2">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 id="cases-index-heading" className="text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">
-            Patients
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#94A3B8] sm:text-base">
-            SurgeryOS worklist (Stage 5H): tenant-scoped patients with URL pagination, search, filters, and readiness
-            summaries — read-only list; open a patient for 5A–5G detail. No HairAudit, audit grading, AI scoring, or
-            certification scoring here.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Link
-            href={`/fi-admin/${tenantId}/cases/new`}
-            className="text-sm font-semibold text-[#22C1FF] underline decoration-[#22C1FF]/35 underline-offset-4 transition hover:text-[#0EA5E9]"
-          >
-            Create patient
-          </Link>
-          <Link href={`/fi-admin/${tenantId}/crm`} className="text-sm text-[#94A3B8] transition hover:text-[#22C1FF]">
-            CRM
-          </Link>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-8 py-2 lg:max-w-[1200px]">
+      <SurgeryOsDashboard tenantId={tenantId} rows={enriched} worklistQueryString={worklistQueryString} />
 
-      <section aria-labelledby="cases-index-heading">
-      <CasesWorklistView
-        tenantId={tenantId}
-        query={{ ...query, page: pagination.page, pageSize: pagination.pageSize }}
-        filterOptions={filterOptions}
-        rows={rows}
-        totalBeforeFilters={enriched.length}
-        totalMatching={pagination.total}
-        worklistQueryString={worklistQueryString}
-        firstCaseWizardHref={`/fi-admin/${tenantId}/cases/new`}
-        pagination={{
-          page: pagination.page,
-          pageSize: pagination.pageSize,
-          totalPages: pagination.totalPages,
-          rangeStart: pagination.rangeStart,
-          rangeEnd: pagination.rangeEnd,
-        }}
-      />
+      <section id="surgeryos-case-worklist" aria-labelledby="cases-index-heading">
+        <h2 id="cases-index-heading" className="sr-only">
+          Surgery case worklist
+        </h2>
+        <CasesWorklistView
+          tenantId={tenantId}
+          query={{ ...query, page: pagination.page, pageSize: pagination.pageSize }}
+          filterOptions={filterOptions}
+          rows={rows}
+          totalBeforeFilters={enriched.length}
+          totalMatching={pagination.total}
+          worklistQueryString={worklistQueryString}
+          firstCaseWizardHref={`/fi-admin/${tenantId}/cases/new`}
+          pagination={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+            totalPages: pagination.totalPages,
+            rangeStart: pagination.rangeStart,
+            rangeEnd: pagination.rangeEnd,
+          }}
+        />
       </section>
     </div>
   );

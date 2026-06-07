@@ -1,7 +1,7 @@
 import type { CaseAdminDetail, CaseBookingListItem, CaseImageListItem, CaseIndexRow } from "@/src/lib/cases/caseLoaders";
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
 import type { CasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders";
-import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
+import type { CaseReadinessHealth, CaseReadinessReport, CaseReadinessSectionKey } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseWorklistRow, CasesIndexFilterOptions, CasesIndexQuery, CasesIndexPageSize, CasesWorklistReadinessBucket } from "./casesIndexTypes";
 import { CASES_INDEX_NONE_VALUE } from "./casesIndexTypes";
 
@@ -77,6 +77,10 @@ function readinessBucketFromReport(r: CaseReadinessReport): CasesWorklistReadine
   return "in_progress";
 }
 
+function readinessSectionHealth(report: CaseReadinessReport, key: CaseReadinessSectionKey): CaseReadinessHealth {
+  return report.sections.find((s) => s.key === key)?.health ?? "not_started";
+}
+
 /**
  * Merges index rows with extension bundle and computes worklist readiness (timeline omitted).
  */
@@ -121,6 +125,11 @@ export function buildCaseWorklistRows(
       readinessBucket: readinessBucketFromReport(readiness),
       readinessNeedsAttention: readiness.sections.some((s) => s.health === "needs_attention"),
       procedureDate,
+      readinessCaseProfileHealth: readinessSectionHealth(readiness, "case_profile"),
+      readinessSurgeryPlanningHealth: readinessSectionHealth(readiness, "surgery_planning"),
+      readinessProcedureDayHealth: readinessSectionHealth(readiness, "procedure_day"),
+      readinessPostOpHealth: readinessSectionHealth(readiness, "post_op"),
+      readinessFollowUpsHealth: readinessSectionHealth(readiness, "follow_ups"),
     };
   });
 }

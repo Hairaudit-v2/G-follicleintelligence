@@ -56,15 +56,15 @@ export function CasesWorklistView({
       <CasesWorklistFilters tenantId={tenantId} query={query} filterOptions={filterOptions} />
       {totalMatching === 0 && emptyTenantNoFilters && firstCaseWizardHref ? (
         <DashboardCard className="border-dashed border-[#22C1FF]/25 bg-[#0F1629]/90 p-8 text-center shadow-[0_0_40px_rgba(34,193,255,0.06)]">
-          <p className="text-lg font-semibold tracking-tight text-[#F8FAFC] sm:text-xl">No patients yet</p>
+          <p className="text-lg font-semibold tracking-tight text-[#F8FAFC] sm:text-xl">No surgery cases yet</p>
           <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-[#94A3B8]">
-            Create your first patient to begin using Follicle Intelligence.
+            Start a surgery case to plan procedures, track the day-of flow, and coordinate post-op follow-ups.
           </p>
           <Link
             href={firstCaseWizardHref}
             className="mt-6 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-950/40 transition duration-200 ease-out hover:-translate-y-0.5 hover:from-cyan-500 hover:to-sky-500 hover:shadow-xl hover:shadow-cyan-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#22C1FF]/60"
           >
-            Create first patient
+            Start first surgery case
           </Link>
         </DashboardCard>
       ) : null}
@@ -72,17 +72,18 @@ export function CasesWorklistView({
         <div className="text-sm text-[#94A3B8]">
           {totalMatching === 0 ? (
             emptyTenantNoFilters ? (
-              <p>No patients in this tenant yet.</p>
+              <p>No surgery cases in this tenant yet.</p>
             ) : (
               <DashboardCard className="border-dashed border-white/[0.12] bg-[#0F1629]/70 p-4 text-base leading-relaxed text-[#CBD5E1]">
-                No patients match the current filters. Clear search or reset filters to see more of your worklist.
+                No cases match the current filters. Clear search or reset filters to see more of your worklist.
               </DashboardCard>
             )
           ) : (
             <p>
               Showing <span className="font-medium text-[#F8FAFC]">{pagination.rangeStart}</span>–
               <span className="font-medium text-[#F8FAFC]">{pagination.rangeEnd}</span> of{" "}
-              <span className="font-medium text-[#F8FAFC]">{totalMatching}</span> {allInTenantUnfiltered ? "patients" : "matching"}
+              <span className="font-medium text-[#F8FAFC]">{totalMatching}</span>{" "}
+              {allInTenantUnfiltered ? "surgery cases" : "matching cases"}
               {!allInTenantUnfiltered ? (
                 <>
                   {" "}
