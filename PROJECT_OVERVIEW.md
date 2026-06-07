@@ -239,7 +239,7 @@ docs/design/
 | **Lead-scoped UI** | `src/components/fi/bookings/LeadBookingPanel.tsx`, `BookingCreatePanel`, `BookingSummaryCard` | On CRM lead detail **Overview** tab: list upcoming/past, create/edit/cancel/complete, default **1h** slot (`bookingFormUtils.defaultRangeIso`). |
 | **Edit drawer** | `src/components/fi/bookings/operator/BookingEditDrawer.tsx` | Full-field edit + **reminder jobs** list for that booking (used from operator + calendar flows). |
 | **Reminders** | `src/lib/reminders/reminderEnqueue.server.ts` (`syncBookingReminderJobs`) | Templates: `booking_created`, `booking_48h_before`, `booking_24h_before`; jobs cancelled on reschedule; merge fields include Norwood summary when patient present. |
-| **Other surfaces** | `CaseBookingsCard`, `PatientBookingsCard`, `DashboardTodayAgenda` | Bookings on case/patient; tenant home agenda reuses range loaders. |
+| **Other surfaces** | `CaseAppointmentsCard`, `PatientBookingsCard`, `DashboardTodayAgenda` | Appointments on case/patient; tenant home agenda reuses range loaders. |
 | **Tests** | `src/lib/bookings/stage3a.test.ts`, `stage3b.test.ts`, `stage3c.test.ts` | Policy, operator query, calendar bucketing. |
 | **Design doc** | `docs/design/19-booking-calendar-foundation.md` | Stage 3A/3B/3C checklist. |
 

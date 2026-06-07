@@ -1,7 +1,13 @@
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { CaseDetailPageView } from "@/src/components/fi-admin/cases/CaseDetailPageView";
+import { loadCaseAppointmentBookingsForShell } from "@/src/lib/cases/caseAppointmentShellLoader.server";
 import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
+import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
 import { loadFiUsersForProcedureTeamPicker, loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
@@ -81,7 +87,17 @@ export default async function CaseDetailRoutePage({
   const foundationRecord = showFoundation ? await loadUniversalCaseRecord({ tenantId, caseId }) : null;
   const foundationOk = foundationRecord && foundationRecord.ok ? foundationRecord : null;
 
-  return (
+  const linkedFiPatientId = detail.patient?.foundation_patient_id ?? null;
+  const [caseAppointmentBookings, services, calendarSettings, assignees, scope, bookingSession] = await Promise.all([
+    loadCaseAppointmentBookingsForShell(tenantId, caseId, linkedFiPatientId),
+    loadFiServicesForTenant(tenantId.trim()),
+    loadTenantOperationalCalendarSettings(tenantId.trim()),
+    loadCrmShellStaffPickerOptions(tenantId.trim()),
+    loadCrmShellScopePickerOptions(tenantId.trim()),
+    getBookingsOperatorSessionIfAllowed(tenantId.trim()),
+  ]);
+
+  const pageView = (
     <CaseDetailPageView
       tenantId={tenantId}
       detail={detail}
@@ -94,6 +110,24 @@ export default async function CaseDetailRoutePage({
       readiness={readiness}
       foundationRecord={foundationOk}
       casesListReturnQuery={casesListReturnQuery}
+      caseAppointmentBookings={caseAppointmentBookings}
     />
+  );
+
+  if (!bookingSession) return pageView;
+
+  return (
+    <AppointmentSlideOverProvider
+      tenantId={tenantId}
+      operatorFiUserId={bookingSession.fiUserId}
+      userRole={bookingSession.role}
+      assignees={assignees}
+      clinics={scope.clinics}
+      existingBookings={caseAppointmentBookings}
+      calendarTimezone={calendarSettings.calendarTimezone}
+      services={services}
+    >
+      {pageView}
+    </AppointmentSlideOverProvider>
   );
 }

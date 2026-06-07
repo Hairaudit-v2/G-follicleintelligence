@@ -30,7 +30,7 @@ export const CASE_DETAIL_NAV_SECTIONS: { id: CaseDetailSectionId; label: string 
   { id: CASE_DETAIL_SECTION_IDS.postOp, label: "Post-op / outcomes" },
   { id: CASE_DETAIL_SECTION_IDS.patient, label: "Patient" },
   { id: CASE_DETAIL_SECTION_IDS.lead, label: "Lead" },
-  { id: CASE_DETAIL_SECTION_IDS.bookings, label: "Bookings" },
+  { id: CASE_DETAIL_SECTION_IDS.bookings, label: "Appointments" },
   { id: CASE_DETAIL_SECTION_IDS.images, label: "Images" },
   { id: CASE_DETAIL_SECTION_IDS.notes, label: "Notes" },
 ];

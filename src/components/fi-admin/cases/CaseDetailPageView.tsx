@@ -4,7 +4,7 @@ import { caseSummaryDocumentPageHref } from "@/src/lib/cases/caseDetailFromCases
 import { CASE_DETAIL_SECTION_IDS } from "@/src/lib/cases/caseDetailNavConstants";
 import { UniversalCaseRecord } from "@/src/components/fi/UniversalCaseRecord";
 import type { UniversalCaseRecordResult } from "@/src/lib/fi/foundation/caseRecord";
-import { CaseBookingsCard } from "./CaseBookingsCard";
+import { CaseAppointmentsCard } from "./CaseAppointmentsCard";
 import { CaseDetailBackLink } from "./CaseDetailBackLink";
 import { CaseDetailSection } from "./CaseDetailSection";
 import { CaseDetailSectionNav } from "./CaseDetailSectionNav";
@@ -23,6 +23,7 @@ import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/pos
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
+import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 
 function caseSelfQuery(casesListReturnQuery?: string, opts?: { foundation?: "1" }): string {
@@ -45,6 +46,7 @@ export function CaseDetailPageView({
   readiness,
   foundationRecord,
   casesListReturnQuery,
+  caseAppointmentBookings,
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
@@ -58,10 +60,17 @@ export function CaseDetailPageView({
   foundationRecord: UniversalCaseRecordResult | null;
   /** Sanitized cases worklist query string for “back to cases” and deep links. */
   casesListReturnQuery?: string;
+  /** Full booking rows for case detail appointments + slide-over shell (merged with patient when linked). */
+  caseAppointmentBookings: FiBookingRow[];
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
   /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
   const twinFoundationPatientId = detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null;
+  const prefillPatientId = detail.patient?.foundation_patient_id ?? null;
+  const prefillPersonId = detail.patient?.person_id ?? null;
+  const prefillLeadId =
+    detail.leads.find((l) => l.link_reason === "case_id")?.id ?? detail.leads[0]?.id ?? null;
+  const prefillClinicId = detail.clinic_id;
   const casePath = `/fi-admin/${tenantId}/cases/${detail.id}`;
 
   return (
@@ -163,7 +172,15 @@ export function CaseDetailPageView({
             <CaseLinkedLeadCard tenantId={tenantId} leads={detail.leads} />
           </CaseDetailSection>
           <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.bookings} className="min-w-0">
-            <CaseBookingsCard tenantId={tenantId} bookings={detail.bookings} />
+            <CaseAppointmentsCard
+              tenantId={tenantId}
+              caseId={detail.id}
+              bookings={caseAppointmentBookings}
+              prefillPersonId={prefillPersonId}
+              prefillPatientId={prefillPatientId}
+              prefillLeadId={prefillLeadId}
+              prefillClinicId={prefillClinicId}
+            />
           </CaseDetailSection>
           <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.images} className="min-w-0">
             <CaseImagesCard tenantId={tenantId} patientId={patientId} images={detail.images} />
