@@ -65,6 +65,23 @@ async function sendReminderEmail(params: {
   return { provider: "resend", externalId: payload.id?.trim() || null };
 }
 
+/** Sends a one-off test email to `FI_REMINDER_TEST_EMAIL` (never the patient). Requires `FI_REMINDERS_TEST_SEND=true`. */
+export async function sendTestReminderEmailToOverride(params: {
+  cfg: ReminderDeliveryConfig;
+  to: string;
+  subject: string;
+  body: string;
+}): Promise<ReminderSendResult> {
+  const to = params.to.trim();
+  if (!to) throw new Error("Test recipient email is empty.");
+  return sendReminderEmail({
+    cfg: params.cfg,
+    to,
+    subject: params.subject.trim() || "Appointment reminder (test)",
+    body: params.body,
+  });
+}
+
 async function sendReminderSms(params: {
   cfg: ReminderDeliveryConfig;
   to: string;

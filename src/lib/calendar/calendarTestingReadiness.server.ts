@@ -23,6 +23,7 @@ import {
 } from "@/src/lib/staff/staffWeeklyHours";
 
 import { nextStaffWorkingLocalDayYmd } from "./calendarTestingSlotHelpers";
+import { loadCalendarReminderTestingPayload } from "./calendarReminderTesting.server";
 import type { CalendarQaRow, CalendarQaSection, CalendarTestingPagePayload } from "./calendarTestingTypes";
 
 function qaRow(id: string, title: string, status: CalendarQaRow["status"], detail?: string, description?: string): CalendarQaRow {
@@ -248,10 +249,11 @@ async function probeValidAppointmentPlaceholder(tenantId: string): Promise<Calen
 
 export async function loadCalendarTestingPageData(tenantId: string): Promise<CalendarTestingPagePayload> {
   const tid = tenantId.trim();
-  const [staff, services, inactiveBookings] = await Promise.all([
+  const [staff, services, inactiveBookings, reminders] = await Promise.all([
     loadAllStaffForTenant(tid),
     loadFiServicesForTenant(tid),
     countInactiveStaffBookings(tid),
+    loadCalendarReminderTestingPayload(tid),
   ]);
 
   const activeStaff = staff.filter((s) => s.is_active);
@@ -445,5 +447,5 @@ export async function loadCalendarTestingPageData(tenantId: string): Promise<Cal
     },
   ];
 
-  return { tenantId: tid, sections };
+  return { tenantId: tid, sections, reminders };
 }

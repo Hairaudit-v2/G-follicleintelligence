@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ClipboardCheck, FlaskConical, RefreshCw } from "lucide-react";
 
 import { runCalendarConsultationSmokeTestAction, runCalendarUatSeedAction } from "@/lib/actions/fi-calendar-testing-actions";
+import { CalendarReminderTestingSection } from "@/src/components/fi-admin/calendar/CalendarReminderTestingSection";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
@@ -370,6 +371,8 @@ export function CalendarTestingPanel({
           ) : null}
         </FiCard>
       ))}
+
+      <CalendarReminderTestingSection tenantId={tid} reminders={payload.reminders} />
     </div>
   );
 }

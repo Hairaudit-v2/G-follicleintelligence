@@ -190,7 +190,9 @@ const groupLabelClass =
   "hidden shrink-0 select-none text-[10px] font-semibold uppercase tracking-wide text-[#64748B] sm:inline sm:pr-1";
 
 /**
- * Tenant FI Admin primary nav — dark bar, cyan active affordance. Link set mirrors server layout (role-based via showCrmNav / showBookingsBoard); labels follow FI OS modules (routes unchanged).
+ * Tenant FI Admin primary nav — dark bar, cyan active affordance. Link set mirrors server layout
+ * (`showCrmNav` / `showBookingsBoard` from `getCrmShellNavAllowed` / `getBookingsBoardNavAllowed`);
+ * PatientOS `/patients` uses bookings-operator eligibility like the patients route layout.
  */
 export function FiAdminTenantNav({
   base,

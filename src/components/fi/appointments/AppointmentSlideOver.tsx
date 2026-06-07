@@ -954,7 +954,7 @@ export function AppointmentSlideOverPanel({
 
               <LeadRemindersSection
                 reminderJobs={payload.reminderJobs}
-                emptyMessage="No pending reminder jobs for this appointment or lead."
+                emptyMessage="No pending reminder jobs for this appointment or linked lead."
               />
 
               <AppointmentAnchorFlowsSection
