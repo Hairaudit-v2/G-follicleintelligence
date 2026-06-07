@@ -25,6 +25,7 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.consultations?.href, `${base}/consultations`);
   assert.equal(byId.surgeryos?.href, `${base}/cases`);
   assert.equal(byId.auditos?.href, `${base}/audit`);
+  assert.equal(byId.analyticsos?.href, `${base}/analytics`);
   assert.equal(byId.configuration?.href, `${base}/configuration`);
 });
 
@@ -46,12 +47,16 @@ test("resolveClinicOsShellNavItems: LeadFlow disabled without showCrmNav", () =>
 
 test("resolveClinicOsShellNavItems: placeholders stay disabled", () => {
   const items = resolveClinicOsShellNavItems(base, true);
-  for (const id of ["messages", "academyos", "analyticsos"]) {
+  for (const id of ["messages", "academyos"]) {
     const row = items.find((i) => i.id === id);
     assert.ok(row, id);
     assert.equal(row!.disabled, true);
     assert.equal(row!.href, "#");
   }
+  const analytics = items.find((i) => i.id === "analyticsos");
+  assert.ok(analytics);
+  assert.equal(analytics!.disabled, false);
+  assert.equal(analytics!.href, `${base}/analytics`);
 });
 
 test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
@@ -67,6 +72,7 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/appointments`, base), "calendar");
   assert.equal(getClinicOsShellActiveNavId(`${base}/appointments/ap-1`, base), "calendar");
   assert.equal(getClinicOsShellActiveNavId(`${base}/directory`, base), "patientos");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
 });
 
 test("resolveClinicOsShellQuickActions: booking enabled when only bookings board access", () => {

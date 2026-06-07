@@ -14,6 +14,7 @@ import {
 } from "@/src/lib/bookings/appointmentApiSchemas";
 import {
   AppointmentConflictError,
+  AppointmentStaffHoursError,
   createCalendarAppointment,
   listCalendarAppointments,
 } from "@/src/lib/bookings/appointmentsApi";
@@ -31,6 +32,9 @@ function mapAppointmentRouteError(e: unknown): NextResponse {
       },
       { status: 409 }
     );
+  }
+  if (e instanceof AppointmentStaffHoursError) {
+    return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
   }
   return mapCrmRouteError(e);
 }

@@ -10,7 +10,11 @@ import {
   procedureDetailsToMetadata,
   resolveProviderId,
 } from "@/src/lib/bookings/appointmentApiSchemas";
-import { AppointmentConflictError, rescheduleCalendarAppointment } from "@/src/lib/bookings/appointmentsApi";
+import {
+  AppointmentConflictError,
+  AppointmentStaffHoursError,
+  rescheduleCalendarAppointment,
+} from "@/src/lib/bookings/appointmentsApi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +29,9 @@ function mapAppointmentRouteError(e: unknown): NextResponse {
       },
       { status: 409 }
     );
+  }
+  if (e instanceof AppointmentStaffHoursError) {
+    return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
   }
   return mapCrmRouteError(e);
 }

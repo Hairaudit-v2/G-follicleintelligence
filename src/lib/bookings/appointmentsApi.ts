@@ -26,16 +26,10 @@ import {
 } from "./appointmentMetadata";
 import { bookingTypeLabel } from "./operatorBookingLabels";
 import type { FiBookingRow } from "./types";
+import { AppointmentConflictError } from "./bookingErrors";
+import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 
-export class AppointmentConflictError extends Error {
-  readonly conflictingBookingId: string | null;
-
-  constructor(message: string, conflictingBookingId: string | null) {
-    super(message);
-    this.name = "AppointmentConflictError";
-    this.conflictingBookingId = conflictingBookingId;
-  }
-}
+export { AppointmentConflictError, AppointmentStaffHoursError } from "./bookingErrors";
 
 export function utcCalendarDayRangeIso(dateYmd: string): { rangeStartIso: string; rangeEndIso: string } {
   const normalized = parseUtcCalendarDateString(dateYmd);
@@ -100,6 +94,12 @@ async function assertSlotAvailable(args: {
   candidateUserId: string | null;
   excludeBookingId?: string | null;
 }): Promise<void> {
+  const supabase = supabaseAdmin();
+  const sid = args.candidateStaffId?.trim() || null;
+  if (sid) {
+    await assertStaffAppointmentWithinWorkingHours(args.tenantId, sid, args.startAt, args.endAt, supabase);
+  }
+
   const { rangeStartIso, rangeEndIso } = utcCalendarDayRangeIso(
     parseUtcCalendarDateString(args.startAt.slice(0, 10)) ?? args.startAt.slice(0, 10)
   );
@@ -119,7 +119,7 @@ async function assertSlotAvailable(args: {
   });
 
   const staffIds = collectStaffIdsForAvailability(existing, args.candidateStaffId);
-  const staffIdToUserId = await loadStaffFiUserIdMap(args.tenantId, staffIds, supabaseAdmin());
+  const staffIdToUserId = await loadStaffFiUserIdMap(args.tenantId, staffIds, supabase);
 
   const result = checkAppointmentAvailability({
     candidateStartIso: args.startAt,

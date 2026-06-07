@@ -41,6 +41,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
     clinicItems.push(
       { href: `${base}/bookings`, label: "Bookings", title: "ClinicOS — booking board and agenda." },
       { href: `${base}/calendar`, label: "Calendar", title: "ClinicOS — operational calendar." },
+      {
+        href: `${base}/calendar/testing`,
+        label: "Cal. QA",
+        title: "ClinicOS — calendar staging checklist (staff, services, probes).",
+      }
     );
   }
   if (showCrmNav) {
@@ -104,6 +109,19 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       ],
     });
   }
+
+  groups.push({
+    id: "analyticsos",
+    label: "AnalyticsOS",
+    description: "Executive KPIs across ClinicOS, LeadFlow, PatientOS, SurgeryOS, AuditOS, FoundationOS.",
+    items: [
+      {
+        href: `${base}/analytics`,
+        label: "AnalyticsOS",
+        title: "AnalyticsOS — read-only cross-module intelligence.",
+      },
+    ],
+  });
 
   groups.push({
     id: "auditos",

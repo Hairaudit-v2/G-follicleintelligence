@@ -141,8 +141,8 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
   {
     id: "analyticsos",
     label: "AnalyticsOS",
-    description: "Dashboards and business intelligence (coming soon).",
-    items: [{ id: "analyticsos", label: "AnalyticsOS", path: "", permissionHint: {}, placeholder: true }],
+    description: "Executive intelligence across modules (read-only composition).",
+    items: [{ id: "analyticsos", label: "AnalyticsOS", path: "analytics", permissionHint: {} }],
   },
   {
     id: "settings-mod",
@@ -252,6 +252,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "consultations") return "consultations";
   if (first === "cases") return "surgeryos";
   if (first === "crm") return "leadflow";
+  if (first === "analytics") return "analyticsos";
   if (first === "audit") return "auditos";
   if (first === "configuration" || first === "settings") return "configuration";
 

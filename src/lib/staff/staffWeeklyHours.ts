@@ -97,7 +97,7 @@ export function defaultPerthClinicWeeklyHours(): StaffWeeklyHoursMap {
   };
 }
 
-function minutesFromHm(hm: string): number | null {
+export function minutesFromHm(hm: string): number | null {
   const m = HM_RE.exec(hm.trim());
   if (!m) return null;
   return Number(m[1]) * 60 + Number(m[2]);

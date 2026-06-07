@@ -19,8 +19,16 @@ import {
   assertMetadataJsonObject,
   assertNonCancelledBookingMutable,
 } from "./bookingPolicy";
-import { resolveBookingStaffAssignment, loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
+import {
+  resolveBookingStaffAssignment,
+  loadStaffMemberForTenant,
+  loadStaffFiUserIdMap,
+} from "@/src/lib/staff/staff.server";
+import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 import { syncBookingReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
+import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "./appointmentAvailability";
+import { AppointmentConflictError } from "./bookingErrors";
+import { parseUtcCalendarDateString } from "./calendarQuery";
 import { sortBookingsByStartAt } from "./bookingTime";
 import {
   CALENDAR_VIEW_BOOKINGS_LIMIT,
@@ -617,6 +625,71 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
   return row;
 }
 
+function utcCalendarDayRangeIsoFromStartIso(startAtIso: string): { rangeStartIso: string; rangeEndIso: string } {
+  const ymd = parseUtcCalendarDateString(startAtIso.slice(0, 10)) ?? startAtIso.slice(0, 10);
+  const normalized = parseUtcCalendarDateString(ymd);
+  if (!normalized) throw new Error("Invalid booking start date.");
+  const y = Number(normalized.slice(0, 4));
+  const mo = Number(normalized.slice(5, 7)) - 1;
+  const d = Number(normalized.slice(8, 10));
+  const startMs = Date.UTC(y, mo, d, 0, 0, 0, 0);
+  const endMs = startMs + 86_400_000;
+  return { rangeStartIso: new Date(startMs).toISOString(), rangeEndIso: new Date(endMs).toISOString() };
+}
+
+function collectStaffIdsForOverlapGuard(rows: FiBookingRow[], candidateStaffId: string | null): string[] {
+  const s = new Set<string>();
+  if (candidateStaffId?.trim()) s.add(candidateStaffId.trim());
+  for (const b of rows) {
+    if (b.assigned_staff_id?.trim()) s.add(b.assigned_staff_id.trim());
+  }
+  return Array.from(s);
+}
+
+/**
+ * Same overlap + buffer semantics as calendar `assertSlotAvailable` (Stage 3A / Calendar 2B).
+ * Keeps `updateBooking` aligned when times or assignees change.
+ */
+async function assertAssigneeOverlapGuardForMutation(
+  supabase: SupabaseClient,
+  tenantId: string,
+  startAt: string,
+  endAt: string,
+  candidateStaffId: string | null,
+  candidateUserId: string | null,
+  excludeBookingId: string
+): Promise<void> {
+  const { rangeStartIso, rangeEndIso } = utcCalendarDayRangeIsoFromStartIso(startAt);
+  const dayStartMs = Date.parse(rangeStartIso);
+  const dayEndMs = Date.parse(rangeEndIso);
+  const startMs = Date.parse(startAt);
+  const endMs = Date.parse(endAt);
+  const padStart = new Date(Math.min(dayStartMs, startMs - 86_400_000)).toISOString();
+  const padEnd = new Date(Math.max(dayEndMs, endMs + 86_400_000)).toISOString();
+
+  const existing = await loadBookingsForOperatorView({
+    tenantId,
+    rangeStartIso: padStart,
+    rangeEndIso: padEnd,
+    includeCancelled: false,
+  });
+  const staffIds = collectStaffIdsForOverlapGuard(existing, candidateStaffId);
+  const staffIdToUserId = await loadStaffFiUserIdMap(tenantId, staffIds, supabase);
+  const result = checkAppointmentAvailability({
+    candidateStartIso: startAt,
+    candidateEndIso: endAt,
+    candidateStaffId,
+    candidateUserId,
+    existing,
+    staffIdToUserId,
+    excludeBookingId,
+    bufferMinutes: DEFAULT_APPOINTMENT_BUFFER_MINUTES,
+  });
+  if (!result.ok) {
+    throw new AppointmentConflictError(result.message, result.conflictingBookingId);
+  }
+}
+
 export type UpdateBookingParams = BookingAnchorInput & {
   tenantId: string;
   bookingId: string;
@@ -717,6 +790,33 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
 
   if (next.clinic_id?.trim()) await assertClinicBelongsToTenant(supabase, tid, next.clinic_id);
   if (next.assigned_user_id?.trim()) await assertFiUserBelongsToTenant(supabase, tid, next.assigned_user_id);
+
+  const scheduleTouched =
+    params.startAt !== undefined ||
+    params.endAt !== undefined ||
+    params.assignedStaffId !== undefined ||
+    params.assignedUserId !== undefined;
+
+  if (scheduleTouched) {
+    if (next.assigned_staff_id?.trim()) {
+      await assertStaffAppointmentWithinWorkingHours(
+        tid,
+        next.assigned_staff_id.trim(),
+        next.start_at,
+        next.end_at,
+        supabase
+      );
+    }
+    await assertAssigneeOverlapGuardForMutation(
+      supabase,
+      tid,
+      next.start_at,
+      next.end_at,
+      next.assigned_staff_id,
+      next.assigned_user_id,
+      bid
+    );
+  }
 
   const nowIso = new Date().toISOString();
   const afterSnap = bookingDetailSnapshotFromRowLike(next);
