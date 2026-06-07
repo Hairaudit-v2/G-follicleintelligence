@@ -100,10 +100,10 @@ export function checkAppointmentAvailability(args: {
     if (!Number.isFinite(bStart) || !Number.isFinite(bEnd)) continue;
 
     if (overlapsWithBuffer(startMs, endMs, bStart, bEnd, bufferMs)) {
-      const title = b.title?.trim() || b.booking_type;
+      const label = b.title?.trim() || b.booking_type || "booking";
       return {
         ok: false,
-        message: `This time overlaps another appointment for the same assignee (including a ${args.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute buffer). Choose a different time, assignee, or reschedule the conflicting booking.`,
+        message: `This time overlaps "${label}" for the same assignee (including a ${args.bufferMinutes ?? DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute buffer). Choose a different time, assignee, or reschedule the conflicting booking.`,
         conflictingBookingId: b.id,
       };
     }
