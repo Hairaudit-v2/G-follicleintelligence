@@ -177,7 +177,8 @@ export function FoundationOsDashboard({ tenantId, data }: { tenantId: string; da
           </ul>
         </SectionCard>
 
-        <SectionCard title="Media health" description="Legacy uploads, foundation assets, and unified view (read models only).">
+        <div id="fi-os-foundation-media" className="scroll-mt-24">
+          <SectionCard title="Media health" description="Legacy uploads, foundation assets, and unified view (read models only).">
           <ul className="space-y-2 text-sm text-slate-700">
             <li>
               <span className="font-medium text-slate-900">Legacy fi_uploads:</span> {med.fi_uploads}
@@ -205,6 +206,7 @@ export function FoundationOsDashboard({ tenantId, data }: { tenantId: string; da
             </p>
           ) : null}
         </SectionCard>
+        </div>
       </div>
 
       <SectionCard

@@ -313,6 +313,8 @@ export type ProviderColumnProps = {
   pendingAppointmentIds?: ReadonlySet<string> | null;
   /** Click empty grid area to book (e.g. quick call-in modal). */
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
+  /** Right-click empty grid — quick actions menu (e.g. templates + block). */
+  onEmptySlotContextMenu?: (info: { dayKey: string; columnId: string; localStart: string; clientX: number; clientY: number }) => void;
   bodyHeightPx?: number;
   minWidthPx?: number;
   className?: string;
@@ -340,6 +342,7 @@ export function ProviderColumn({
   pinnedAppointmentId,
   pendingAppointmentIds,
   onEmptySlotClick,
+  onEmptySlotContextMenu,
   bodyHeightPx: bodyHeightPxProp,
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
   className,
@@ -369,18 +372,32 @@ export function ProviderColumn({
     data: { dayKey, columnId: id, providerName: name },
   });
 
-  const handleEmptySlotClick = (e: MouseEvent<HTMLButtonElement>) => {
-    if (!onEmptySlotClick) return;
-    if (e.button !== 0) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
+  function slotFromClientY(clientY: number, target: HTMLButtonElement) {
+    const rect = target.getBoundingClientRect();
+    const y = clientY - rect.top;
     const ppm = calendarPxPerMinute();
     const rawMin = gridConfig.dayStartHourUtc * 60 + y / ppm;
     const snapped = snapCalendarMinutes(rawMin, gridConfig);
     const iso = isoFromLocalDayMinutes(dayKey, snapped, gridConfig.timeZone);
-    if (!iso) return;
+    if (!iso) return null;
     const localStart = toDatetimeLocalValueInTimezone(iso, gridConfig.timeZone);
-    onEmptySlotClick({ dayKey, columnId: id, localStart });
+    return { localStart };
+  }
+
+  const handleEmptySlotClick = (e: MouseEvent<HTMLButtonElement>) => {
+    if (!onEmptySlotClick) return;
+    if (e.button !== 0) return;
+    const slot = slotFromClientY(e.clientY, e.currentTarget);
+    if (!slot) return;
+    onEmptySlotClick({ dayKey, columnId: id, localStart: slot.localStart });
+  };
+
+  const handleEmptySlotContextMenu = (e: MouseEvent<HTMLButtonElement>) => {
+    if (!onEmptySlotContextMenu) return;
+    e.preventDefault();
+    const slot = slotFromClientY(e.clientY, e.currentTarget);
+    if (!slot) return;
+    onEmptySlotContextMenu({ dayKey, columnId: id, localStart: slot.localStart, clientX: e.clientX, clientY: e.clientY });
   };
 
   return (
@@ -408,7 +425,7 @@ export function ProviderColumn({
         <BusinessTimeSlotGrid bodyHeightPx={bodyHeightPx} timeZone={gridConfig.timeZone} />
         <CurrentTimeLine dayKey={dayKey} gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
-        {onEmptySlotClick ? (
+        {onEmptySlotClick || onEmptySlotContextMenu ? (
           <button
             type="button"
             tabIndex={-1}
@@ -416,6 +433,7 @@ export function ProviderColumn({
             className="absolute inset-0 z-[1] cursor-cell bg-transparent"
             style={{ height: bodyHeightPx }}
             onClick={handleEmptySlotClick}
+            onContextMenu={handleEmptySlotContextMenu}
           />
         ) : null}
 

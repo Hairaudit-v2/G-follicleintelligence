@@ -88,21 +88,15 @@ Therefore a **production-like** build is **`next build` + `next start`** (or a h
 
 **Preview / staging hosts:** enforcement keys off **`NODE_ENV === 'production'`** only (not `VERCEL_ENV`). If a platform runs `next start` with `NODE_ENV=development`, HTML and API behaviour matches **local dev** (gates off). Confirm your provider sets `NODE_ENV=production` for any environment that should behave like production.
 
-### Clinic OS shell (`NEXT_PUBLIC_FI_CLINIC_OS_SHELL`)
+### FI OS workspace shell (tenant layout)
 
-When set to the string **`true` at build time** (`next build`), the tenant FI Admin layout uses **`ClinicOsShell`** (workspace chrome, module nav, global search). The flag is read from `process.env` like other `NEXT_PUBLIC_*` variables (inlined into server and client bundles for that build).
+The tenant FI Admin layout (`app/(fi-admin)/fi-admin/[tenantId]/layout.tsx`) always uses **`FiOsAppShell`** (`src/components/fi-os/FiOsAppShell.tsx`): full-viewport dark OS chrome, persistent primary sidebar (`FiOsSidebar` + `FiOsModuleNav`), sticky top command bar (`FiOsTopBar`: tenant switcher, global search, quick create, notifications placeholder, profile menu), and responsive mobile navigation. Tenant branding CSS variables are still applied via `buildBrandingCssVariables` / `resolveEffectiveBranding`.
 
-**Rollout checklist (internal / controlled production):**
-
-1. Set `NEXT_PUBLIC_FI_CLINIC_OS_SHELL=true` in the build environment **before** `next build` (CI and hosting env vars).
-2. Deploy **server + browser assets** together so every replica and CDN edge serves the same build hash; avoid mixing an old client bundle with a new server or the inverse.
-3. After deploy, signed-in smoke: open `/fi-admin/[tenantId]` — shell header and nav visible; open global search (⌘K / Ctrl+K) and run a query — expect **200** from `GET /api/tenants/[tenantId]/clinic-os/global-search?q=…`, not `404` with `code: FI_CLINIC_OS_SHELL_DISABLED`.
-4. Rollback: rebuild and redeploy with the variable unset or not `true`; the API and layout both read the same flag.
+**Legacy note:** `NEXT_PUBLIC_FI_CLINIC_OS_SHELL` previously toggled **`ClinicOsShell`** vs `FiTenantBrandFrame` + `FiAdminTenantNav`. That split is removed; the env var is no longer read by the tenant layout or global search API.
 
 ### Global search API (`GET /api/tenants/[tenantId]/clinic-os/global-search`)
 
-- Requires **`NEXT_PUBLIC_FI_CLINIC_OS_SHELL === "true"`** (same as the shell UI) and passes **`checkFiTenantPortalApiAccess`** in production (session + tenant exists + portal membership or cross-tenant OS role — mirrors `assertFiTenantPortalAccess` intent).
-- **Env mismatch:** If the UI shell is on but the server build has the flag off (misaligned deploy), the route returns **404** with `code: FI_CLINIC_OS_SHELL_DISABLED` and a short `error` string. The client maps this to a clear message.
+- Requires **`checkFiTenantPortalApiAccess`** in production (session + tenant exists + portal membership or cross-tenant OS role — mirrors `assertFiTenantPortalAccess` intent). Supabase must be configured for the search loader.
 - **500 responses:** In production, the JSON body uses a generic `error` (internal exception text is not forwarded to the client).
 
 ---
@@ -187,10 +181,9 @@ From `/fi-admin` and `/hair-audit/admin`, submit **Sign out**; session should cl
 - **Production behaviour** is keyed off **`process.env.NODE_ENV === 'production'`** only. `next start` (and typical PaaS deploys) set this; **`next dev` does not**, so HTML route guards and the **`/api/tenants` staff check** are **off** in dev (HTML stays open for local workflows; API still follows authenticated branches without the production-only 403-for-non-staff rule).
 - To validate **production-like** access end-to-end, use **`next build` + `next start`** (or your staging environment with `NODE_ENV=production`) and re-run checks **5–7** and **9**.
 
-### 11. Clinic OS shell + global search
+### 11. FI OS shell + global search
 
-- Build with `NEXT_PUBLIC_FI_CLINIC_OS_SHELL=true`, deploy, then confirm shell chrome on `/fi-admin/[tenantId]` and a successful search query via the header search (or the global-search API with a session cookie).
-- Toggle-off rollback requires a **rebuild** without the flag so server and client stay aligned.
+- Deploy, then confirm **`FiOsAppShell`** chrome on `/fi-admin/[tenantId]` (sidebar, command bar, ⌘K / Ctrl+K search) and a successful query from **`GET /api/tenants/[tenantId]/clinic-os/global-search?q=…`** with a session cookie (production: expect **401/403** without a valid tenant session, not a shell-disabled stub).
 
 ---
 

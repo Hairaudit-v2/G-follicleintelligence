@@ -75,6 +75,7 @@ function toOperationalPublic(d: TenantOperationalDashboard): AnalyticsOsOperatio
     staleLeadsCount: d.staleLeads.length,
     staleLeadThresholdDays: d.staleLeadThresholdDays,
     quickStats: { ...d.quickStats },
+    launchControl: { ...d.launchControl },
   };
 }
 

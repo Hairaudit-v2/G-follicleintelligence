@@ -115,9 +115,6 @@ export function ClinicOsGlobalSearch({
           code?: string;
         } & Partial<ClinicOsGlobalSearchPayload>;
         if (!res.ok || !json.ok) {
-          if (res.status === 404 && json.code === "FI_CLINIC_OS_SHELL_DISABLED") {
-            throw new Error("Search is not enabled on this server build (NEXT_PUBLIC_FI_CLINIC_OS_SHELL).");
-          }
           if (res.status >= 500) {
             throw new Error(json.error?.trim() || "Search could not be completed. Please try again.");
           }

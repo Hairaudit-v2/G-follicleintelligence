@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Phone } from "lucide-react";
+import { Phone, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
@@ -21,8 +21,13 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
 import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/BookingEditDrawer";
 import { QuickCallInBookingModal } from "@/src/components/fi/appointments/QuickCallInBookingModal";
+import { CalendarQuickCreateDrawer, type CalendarQuickCreatePrefill } from "@/src/components/fi/calendar/CalendarQuickCreateDrawer";
+import { CalendarSlotContextMenu } from "@/src/components/fi/calendar/CalendarSlotContextMenu";
+import type { CalendarQuickTemplateId } from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { useCalendarAppointments } from "@/hooks/useCalendarAppointments";
+import { cn } from "@/lib/utils";
+import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
 import type { CrmShellSession } from "@/src/lib/crm/crmShellAccess";
 
 const viewMotion = {
@@ -41,6 +46,8 @@ export type CalendarPageProps = {
   useSampleData?: boolean;
   /** When set, enables call-in FAB + appointment slide-over from the operational calendar. */
   crmShellSession?: CrmShellSession | null;
+  /** FI Admin OS scheduling workspace — full-bleed chrome, OS drawer, and quick filters. */
+  workspaceVariant?: "default" | "fiOs";
 };
 
 export function CalendarPage({
@@ -48,6 +55,7 @@ export function CalendarPage({
   route = "fi-admin",
   useSampleData = false,
   crmShellSession = null,
+  workspaceVariant = "default",
 }: CalendarPageProps) {
   const router = useRouter();
   const [drawer, setDrawer] = useState<FiBookingRow | null>(null);
@@ -58,6 +66,15 @@ export function CalendarPage({
     clinicId?: string;
     assignedUserId?: string;
   }>({});
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+  const [quickCreatePrefill, setQuickCreatePrefill] = useState<CalendarQuickCreatePrefill | null>(null);
+  const [slotContextMenu, setSlotContextMenu] = useState<{
+    x: number;
+    y: number;
+    dayKey: string;
+    columnId: string;
+    localStart: string;
+  } | null>(null);
   const slide = useAppointmentSlideOverOptional();
 
   const sampleMode = Boolean(useSampleData || data.query.sampleMode);
@@ -70,23 +87,21 @@ export function CalendarPage({
   const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
 
   const quickCallInEnabled = Boolean(data.canMutateBookings && crmShellSession);
+  const quickCreateEnabled = quickCallInEnabled;
+  const isFiOsWorkspace = workspaceVariant === "fiOs";
 
-  const openCallInFromSlot = useCallback(
-    (p: { dayKey: string; columnId: string; localStart: string }) => {
-      const next: { localStart: string; clinicId?: string; assignedUserId?: string } = {
+  const openQuickCreateFromSlot = useCallback(
+    (p: { dayKey: string; columnId: string; localStart: string }, templateId?: CalendarQuickTemplateId) => {
+      setSlotContextMenu(null);
+      setQuickCreatePrefill({
         localStart: p.localStart.trim(),
-      };
-      if (p.columnId.startsWith("c:")) {
-        next.clinicId = p.columnId.slice(2);
-      } else if (p.columnId.startsWith("s:")) {
-        const sid = p.columnId.slice(2);
-        const uid = data.staffDirectory.find((s) => s.id === sid)?.fi_user_id?.trim();
-        if (uid) next.assignedUserId = uid;
-      }
-      setCallInPrefill(next);
-      setCallInOpen(true);
+        columnId: p.columnId,
+        dayKey: p.dayKey,
+        templateId,
+      });
+      setQuickCreateOpen(true);
     },
-    [data.staffDirectory]
+    []
   );
 
   const base = `/fi-admin/${data.tenantId.trim()}`;
@@ -129,7 +144,14 @@ export function CalendarPage({
   );
 
   return (
-    <div className="-mx-3 flex min-h-[calc(100dvh-8rem)] flex-col bg-[#0f172a] sm:-mx-4 lg:-mx-6">
+    <div
+      className={cn(
+        "flex flex-col",
+        isFiOsWorkspace
+          ? "min-h-0 flex-1 bg-[#050a14] text-slate-100"
+          : "-mx-3 min-h-[calc(100dvh-8rem)] bg-[#0f172a] sm:-mx-4 lg:-mx-6"
+      )}
+    >
       <CalendarTopControls
         tenantId={data.tenantId}
         query={data.query}
@@ -138,7 +160,12 @@ export function CalendarPage({
         clinics={data.clinics}
         canMutateBookings={data.canMutateBookings}
         route={route}
+        variant={isFiOsWorkspace ? "fiOs" : "default"}
       />
+
+      {isFiOsWorkspace ? (
+        <FiOsCalendarQuickFilters tenantId={data.tenantId} query={data.query} clinics={data.clinics} route={route} />
+      ) : null}
 
       {sampleMode ? (
         <p
@@ -208,12 +235,112 @@ export function CalendarPage({
                   query: data.query,
                   addAppointmentHref: `${base}/bookings/new`,
                 }}
-                onEmptySlotClick={quickCallInEnabled ? openCallInFromSlot : undefined}
+                onEmptySlotClick={
+                  quickCreateEnabled
+                    ? (info) =>
+                        openQuickCreateFromSlot(info, isFiOsWorkspace ? "consultation_30" : undefined)
+                    : undefined
+                }
+                onEmptySlotContextMenu={
+                  quickCreateEnabled
+                    ? (info) =>
+                        setSlotContextMenu({
+                          x: info.clientX,
+                          y: info.clientY,
+                          dayKey: info.dayKey,
+                          columnId: info.columnId,
+                          localStart: info.localStart,
+                        })
+                    : undefined
+                }
               />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {slotContextMenu && quickCreateEnabled ? (
+        <CalendarSlotContextMenu
+          open
+          x={slotContextMenu.x}
+          y={slotContextMenu.y}
+          onClose={() => setSlotContextMenu(null)}
+          items={[
+            {
+              id: "consult",
+              label: "New Consultation",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "consultation_30"
+                ),
+            },
+            {
+              id: "treat",
+              label: "New Treatment",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "prp_treatment_30"
+                ),
+            },
+            {
+              id: "block",
+              label: "Block Time",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "block_time"
+                ),
+            },
+            {
+              id: "surg",
+              label: "Create Surgery",
+              onSelect: () =>
+                openQuickCreateFromSlot(
+                  {
+                    dayKey: slotContextMenu.dayKey,
+                    columnId: slotContextMenu.columnId,
+                    localStart: slotContextMenu.localStart,
+                  },
+                  "surgery_default"
+                ),
+            },
+          ]}
+        />
+      ) : null}
+
+      {quickCreateEnabled ? (
+        <CalendarQuickCreateDrawer
+          tenantId={data.tenantId}
+          open={quickCreateOpen}
+          onClose={() => {
+            setQuickCreateOpen(false);
+            setQuickCreatePrefill(null);
+          }}
+          calendarTimezone={data.calendarTimezone}
+          prefill={quickCreatePrefill}
+          clinics={data.clinics}
+          assignees={data.assignees}
+          staffDirectory={data.staffDirectory}
+          onCreated={(booking) => {
+            upsertBooking(booking);
+            refresh();
+          }}
+        />
+      ) : null}
 
       <BookingCalendarDrawer
         tenantId={data.tenantId}
@@ -225,6 +352,8 @@ export function CalendarPage({
         onClose={() => setDrawer(null)}
         onChanged={refresh}
         onEdit={(b) => setEditing(b)}
+        variant={isFiOsWorkspace ? "fiOs" : "default"}
+        patientSummary={drawer ? data.bookingDisplay[drawer.id]?.anchorLabel ?? null : null}
       />
 
       <BookingEditDrawer
@@ -242,13 +371,40 @@ export function CalendarPage({
 
       {data.canMutateBookings && crmShellSession ? (
         <>
+          {quickCreateEnabled ? (
+            <button
+              type="button"
+              onClick={() => {
+                setQuickCreatePrefill({
+                  localStart: slotPrefillLocal,
+                  templateId: "consultation_30",
+                });
+                setQuickCreateOpen(true);
+              }}
+              className={cn(
+                "fixed z-[120] inline-flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-2 transition focus:outline-none focus-visible:ring-4 sm:h-14 sm:w-14",
+                isFiOsWorkspace
+                  ? "bottom-28 right-4 bg-cyan-400 text-[#041018] shadow-cyan-950/50 ring-cyan-300/40 hover:bg-cyan-300 focus-visible:ring-cyan-200 sm:bottom-32 sm:right-6"
+                  : "bottom-28 right-4 bg-sky-500 text-white shadow-sky-950/40 ring-sky-300/50 hover:bg-sky-400 focus-visible:ring-sky-200 sm:bottom-32 sm:right-6"
+              )}
+              aria-label="New appointment"
+              title="New appointment"
+            >
+              <Plus className="h-7 w-7" aria-hidden strokeWidth={2.25} />
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => {
               setCallInPrefill({ localStart: slotPrefillLocal });
               setCallInOpen(true);
             }}
-            className="fixed bottom-20 right-4 z-[110] inline-flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-white shadow-lg shadow-sky-950/40 ring-2 ring-sky-300/50 transition hover:bg-sky-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200 sm:bottom-24 sm:right-6"
+            className={cn(
+              "fixed bottom-4 right-4 z-[110] inline-flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-2 transition focus:outline-none focus-visible:ring-4 sm:bottom-6 sm:right-6",
+              isFiOsWorkspace
+                ? "border border-white/[0.12] bg-[#0a1424]/95 text-cyan-100 shadow-black/40 ring-white/[0.08] backdrop-blur-md hover:bg-[#0d1829] focus-visible:ring-cyan-300/40"
+                : "bg-sky-500 text-white shadow-sky-950/40 ring-sky-300/50 hover:bg-sky-400 focus-visible:ring-sky-200"
+            )}
             aria-label="New call-in booking"
             title="New call-in booking"
           >

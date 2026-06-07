@@ -231,10 +231,10 @@ export function AppointmentCalendar({
       tab: "calendar",
       view: merged.view,
       date: merged.date,
-      status: merged.status,
-      type: merged.type,
-      assignedUserId: merged.assignedUserId,
-      clinicId: merged.clinicId,
+      status: merged.status ?? undefined,
+      type: merged.type ?? undefined,
+      assignedUserId: merged.assignedUserId ?? undefined,
+      clinicId: merged.clinicId ?? undefined,
       includeCancelled: merged.includeCancelled,
     });
   }

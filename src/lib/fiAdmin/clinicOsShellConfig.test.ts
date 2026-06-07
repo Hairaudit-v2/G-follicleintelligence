@@ -132,4 +132,8 @@ test("resolveClinicOsShellQuickActions: CRM-gated actions match nav policy", () 
   const surgeryCase = on.find((a) => a.id === "case");
   assert.equal(surgeryCase?.label, "New case");
   assert.equal(surgeryCase?.href, `${base}/cases/new`);
+
+  const taskOn = on.find((a) => a.id === "task");
+  assert.equal(taskOn?.disabled, false);
+  assert.equal(taskOn?.href, `${base}/crm`);
 });

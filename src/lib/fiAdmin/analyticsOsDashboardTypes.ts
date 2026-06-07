@@ -50,6 +50,13 @@ export type AnalyticsOsOperationalPublic = {
   staleLeadsCount: number;
   staleLeadThresholdDays: number;
   quickStats: AnalyticsOsQuickStatsPublic;
+  launchControl: {
+    consultationsToday: number;
+    surgeriesThisWeek: number;
+    leadsNeedingFollowUp: number;
+    openTasks: number;
+    revenueAvailable: boolean;
+  };
 };
 
 export type AnalyticsOsPatientKpisPublic = {

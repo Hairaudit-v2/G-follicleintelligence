@@ -14,10 +14,10 @@ export function DashboardCard({ className, elevated, children, ...rest }: Dashbo
   return (
     <div
       className={cn(
-        "rounded-2xl border backdrop-blur-md",
+        "rounded-xl border backdrop-blur-md",
         elevated
-          ? "border-white/[0.1] bg-[#141C33]/85 shadow-2xl shadow-black/50"
-          : "border-white/[0.08] bg-[#0F1629]/75 shadow-xl shadow-black/40",
+          ? "border-white/[0.1] bg-[#0f1629]/88 shadow-lg shadow-black/45"
+          : "border-white/[0.07] bg-[#0c1426]/80 shadow-md shadow-black/35",
         className,
       )}
       {...rest}

@@ -176,8 +176,12 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
 function applyStructuredFilters(
   rows: FiBookingRow[],
   q: ParsedCalendarQuery,
-  staffUserByStaffId: Map<string, string | null>
+  staffUserByStaffId: Map<string, string | null>,
+  staffDirectory: CrmShellUserPickerOption[]
 ): FiBookingRow[] {
+  const roleBucketIds =
+    q.staffRoleBucket && !q.staffId?.trim() ? staffIdsMatchingRoleBucket(staffDirectory, q.staffRoleBucket) : null;
+
   return rows.filter((b) => {
     if (q.status?.trim()) {
       if (b.booking_status !== q.status.trim()) return false;
@@ -192,10 +196,51 @@ function applyStructuredFilters(
       if (!b.assigned_staff_id?.trim() && uid && b.assigned_user_id?.trim() === uid) return true;
       return false;
     }
+    if (roleBucketIds) {
+      if (roleBucketIds.size === 0) return false;
+      const sid = b.assigned_staff_id?.trim();
+      if (sid) {
+        if (!roleBucketIds.has(sid)) return false;
+      } else {
+        const uid = b.assigned_user_id?.trim();
+        if (!uid) return false;
+        let ok = false;
+        for (const staffId of Array.from(roleBucketIds)) {
+          if ((staffUserByStaffId.get(staffId) ?? "").trim() === uid) {
+            ok = true;
+            break;
+          }
+        }
+        if (!ok) return false;
+      }
+    }
     if (q.assignedUserId?.trim() && b.assigned_user_id !== q.assignedUserId.trim()) return false;
     if (q.clinicId?.trim() && b.clinic_id !== q.clinicId.trim()) return false;
     return true;
   });
+}
+
+function staffIdsMatchingRoleBucket(
+  staffDirectory: CrmShellUserPickerOption[],
+  bucket: "doctor" | "nurse"
+): Set<string> {
+  const out = new Set<string>();
+  for (const s of staffDirectory) {
+    const r = (s.staff_role ?? "").toLowerCase();
+    if (bucket === "doctor") {
+      if (
+        /\b(doctor|physician|surgeon|consultant|dermatologist|gp)\b/.test(r) ||
+        r.includes("doctor") ||
+        r.includes("surgeon") ||
+        r.includes("physician")
+      ) {
+        out.add(s.id);
+      }
+    } else if (/\b(nurse|rn|en)\b/.test(r) || r.includes("nurse")) {
+      out.add(s.id);
+    }
+  }
+  return out;
 }
 
 function humanizeBookingType(type: string): string {
@@ -264,7 +309,7 @@ export async function loadOperationalCalendarPageData(
   ]);
   const gridConfig = calendarSettings.gridConfig;
 
-  const structured = applyStructuredFilters(rawBookings, query, resources.staffUserByStaffId);
+  const structured = applyStructuredFilters(rawBookings, query, resources.staffUserByStaffId, resources.staffDirectory);
 
   const patientIds = structured.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()));
   const leadIds = structured.map((b) => b.lead_id).filter((x): x is string => Boolean(x?.trim()));

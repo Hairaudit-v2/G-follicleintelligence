@@ -362,10 +362,9 @@ export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [
   {
     id: "task",
     label: "Task",
-    path: "",
-    permissionHint: {},
-    placeholder: true,
-    description: "Tasks (coming soon).",
+    path: "crm",
+    permissionHint: { requiresCrmShellNav: true },
+    description: "LeadFlow — open a lead, then add a task on the Timeline tab.",
   },
   {
     id: "message",

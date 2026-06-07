@@ -9,20 +9,14 @@ type DashboardShellProps = {
 };
 
 /**
- * Full-viewport FI Admin shell: deep navy gradient, ambient cyan/purple radials (login-adjacent).
+ * Full-viewport FI OS root: deep navy, ambient radials (login-adjacent). Children control inner padding
+ * (tenant shell is edge-to-edge; workspace picker adds its own gutters).
  */
 export function DashboardShell({ children, className }: DashboardShellProps) {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#081020] font-sans text-[#F8FAFC] antialiased">
+    <div className="relative min-h-screen min-h-dvh overflow-x-hidden bg-[#081020] font-sans text-[#F8FAFC] antialiased">
       <div className="pointer-events-none absolute inset-0" style={fiAdminAmbientBackgroundStyle} aria-hidden />
-      <div
-        className={cn(
-          "relative z-10 mx-auto min-h-screen w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8",
-          className,
-        )}
-      >
-        {children}
-      </div>
+      <div className={cn("relative z-10 min-h-screen min-h-dvh w-full", className)}>{children}</div>
     </div>
   );
 }

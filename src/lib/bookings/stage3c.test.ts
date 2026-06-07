@@ -55,6 +55,22 @@ function row(p: Partial<FiBookingRow> & Pick<FiBookingRow, "id">): FiBookingRow 
 }
 
 describe("Stage 3C — calendar query & URL", () => {
+  it("parses role=doctor|nurse into staffRoleBucket", () => {
+    const now = new Date("2026-06-01T00:00:00.000Z");
+    assert.equal(parseCalendarSearchParams({ role: "doctor" }, now).staffRoleBucket, "doctor");
+    assert.equal(parseCalendarSearchParams({ role: "NURSE" }, now).staffRoleBucket, "nurse");
+    assert.equal(parseCalendarSearchParams({ role: "x" }, now).staffRoleBucket, null);
+  });
+
+  it("mergeCalendarHrefQuery clears staffId when setting role bucket", () => {
+    const now = new Date("2026-06-01T00:00:00.000Z");
+    const q = parseCalendarSearchParams({ staffId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", role: "doctor" }, now);
+    assert.equal(q.staffId, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+    const merged = mergeCalendarHrefQuery(q, { role: "doctor", staffId: null });
+    assert.equal(merged.staffId, undefined);
+    assert.equal(merged.role, "doctor");
+  });
+
   it("parses calendar search params with week default and UTC date anchor", () => {
     const now = new Date("2026-06-05T12:00:00.000Z");
     const q = parseCalendarSearchParams({}, now);

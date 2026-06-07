@@ -108,6 +108,21 @@ const quickStatsSchema = z.object({
 
 export type TenantQuickStats = z.infer<typeof quickStatsSchema>;
 
+const launchControlSchema = z.object({
+  /** Consultation bookings starting today (tenant IANA calendar day, active statuses). */
+  consultationsToday: z.number().int().nonnegative(),
+  /** Surgery bookings scheduled Mon–Sun UTC week (active statuses). */
+  surgeriesThisWeek: z.number().int().nonnegative(),
+  /** Stale leads past threshold (same list as dashboard CRM hygiene). */
+  leadsNeedingFollowUp: z.number().int().nonnegative(),
+  /** Active CRM tasks (same visibility filter as tasks-due list; count not capped). */
+  openTasks: z.number().int().nonnegative(),
+  /** Reserved for billing integration — UI shows placeholder when false. */
+  revenueAvailable: z.boolean(),
+});
+
+export type TenantLaunchControl = z.infer<typeof launchControlSchema>;
+
 const dashboardReminderItemSchema = z.object({
   jobId: z.string().uuid(),
   scheduled_at: z.string(),
@@ -148,6 +163,7 @@ export const tenantOperationalDashboardSchema = z.object({
   /** `fi_staff.id` for the signed-in tenant user when `fi_staff.fi_user_id` matches their `fi_users.id`. */
   viewerStaffId: z.string().uuid().nullable(),
   canQuickCallIn: z.boolean(),
+  launchControl: launchControlSchema,
 });
 
 export type TenantOperationalDashboard = z.infer<typeof tenantOperationalDashboardSchema>;
@@ -368,6 +384,76 @@ async function loadTasksDue(tenantId: string, fiUserId: string | null, now: Date
   );
 }
 
+const ACTIVE_AGENDA_BOOKING_STATUSES = ["scheduled", "confirmed", "arrived"] as const;
+
+async function loadLaunchBookingCounts(
+  tenantId: string,
+  now: Date
+): Promise<{ consultationsToday: number; surgeriesThisWeek: number }> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+
+  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
+  const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
+  const localDayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone);
+  const localDayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone);
+  const dayStart = utcDayStart(now).toISOString();
+  const dayEnd = addHours(utcDayStart(now), 24).toISOString();
+  const localStartIso = localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart;
+  const localEndIso = localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd;
+
+  const weekStartIso = mondayStartUtc(now).toISOString();
+  const weekEndIso = addHours(mondayStartUtc(now), 7 * 24).toISOString();
+
+  const [cRes, sRes] = await Promise.all([
+    supabase
+      .from("fi_bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("booking_type", "consultation")
+      .in("booking_status", [...ACTIVE_AGENDA_BOOKING_STATUSES])
+      .gte("start_at", localStartIso)
+      .lt("start_at", localEndIso),
+    supabase
+      .from("fi_bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("booking_type", "surgery")
+      .in("booking_status", [...ACTIVE_AGENDA_BOOKING_STATUSES])
+      .gte("start_at", weekStartIso)
+      .lt("start_at", weekEndIso),
+  ]);
+
+  if (cRes.error) throw new Error(cRes.error.message);
+  if (sRes.error) throw new Error(sRes.error.message);
+
+  return {
+    consultationsToday: cRes.count ?? 0,
+    surgeriesThisWeek: sRes.count ?? 0,
+  };
+}
+
+async function loadOpenCrmTasksCount(tenantId: string, fiUserId: string | null): Promise<number> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+
+  let q = supabase
+    .from("fi_crm_tasks")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tid)
+    .in("status", [...CRM_TASK_ACTIVE_STATUS_VALUES]);
+
+  if (fiUserId) {
+    q = q.or(`assignee_user_id.eq.${fiUserId},assignee_user_id.is.null`);
+  } else {
+    q = q.is("assignee_user_id", null);
+  }
+
+  const { count, error } = await q;
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
+
 async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickStats> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
@@ -521,13 +607,16 @@ export async function loadTenantOperationalDashboard(
   if (!tenantRes.data) throw new Error("Tenant not found");
   const tenantName = String((tenantRes.data as { name?: string }).name ?? "").trim() || tid;
 
-  const [agenda, staleLeads, tasksDue, quickStats, upcomingReminders] = await Promise.all([
-    loadAgendaBookings(tid, now),
-    loadStaleLeads(tid, staleDays, now),
-    loadTasksDue(tid, viewerFiUserId, now),
-    loadQuickStats(tid, now),
-    loadUpcomingReminders(tid, now),
-  ]);
+  const [agenda, staleLeads, tasksDue, quickStats, upcomingReminders, launchBookings, openTasksCount] =
+    await Promise.all([
+      loadAgendaBookings(tid, now),
+      loadStaleLeads(tid, staleDays, now),
+      loadTasksDue(tid, viewerFiUserId, now),
+      loadQuickStats(tid, now),
+      loadUpcomingReminders(tid, now),
+      loadLaunchBookingCounts(tid, now),
+      loadOpenCrmTasksCount(tid, viewerFiUserId),
+    ]);
 
   return tenantOperationalDashboardSchema.parse({
     tenantId: tid,
@@ -542,5 +631,12 @@ export async function loadTenantOperationalDashboard(
     viewerFiUserId,
     viewerStaffId,
     canQuickCallIn,
+    launchControl: {
+      consultationsToday: launchBookings.consultationsToday,
+      surgeriesThisWeek: launchBookings.surgeriesThisWeek,
+      leadsNeedingFollowUp: staleLeads.length,
+      openTasks: openTasksCount,
+      revenueAvailable: false,
+    },
   });
 }

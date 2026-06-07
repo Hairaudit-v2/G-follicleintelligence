@@ -23,6 +23,13 @@ const VIEW_OPTIONS: { id: CalendarViewMode; label: string }[] = [
   { id: "month", label: "Month" },
 ];
 
+/** FI OS scheduling workspace — Day / Week / Month only (legacy `3day` URLs highlight Week). */
+const VIEW_OPTIONS_FI_OS: { id: CalendarViewMode; label: string; active: (q: ParsedCalendarQuery) => boolean }[] = [
+  { id: "day", label: "Day", active: (q) => q.view === "day" },
+  { id: "week", label: "Week", active: (q) => q.view === "week" || q.view === "3day" },
+  { id: "month", label: "Month", active: (q) => q.view === "month" },
+];
+
 export function CalendarTopControls({
   tenantId,
   query,
@@ -31,6 +38,7 @@ export function CalendarTopControls({
   clinics,
   canMutateBookings,
   route = "fi-admin",
+  variant = "default",
 }: {
   tenantId: string;
   query: ParsedCalendarQuery;
@@ -40,6 +48,7 @@ export function CalendarTopControls({
   clinics: CrmShellClinicOption[];
   canMutateBookings: boolean;
   route?: CalendarRoute;
+  variant?: "default" | "fiOs";
 }) {
   const router = useRouter();
   const hrefOpts = { route };
@@ -60,33 +69,41 @@ export function CalendarTopControls({
     clinics.find((c) => /south perth/i.test(c.display_name)) ??
     clinics[0];
 
+  const isFiOs = variant === "fiOs";
+  const shell = isFiOs
+    ? "border-b border-white/[0.08] bg-[#0a1424]/95 px-3 py-3 backdrop-blur-xl sm:px-4"
+    : "border-b border-[#1e2937] bg-[#0f172a] px-4 py-3";
+  const inset = isFiOs
+    ? "rounded-xl border border-white/[0.08] bg-[#060d18]/90 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    : "rounded-xl border border-[#1e2937] bg-[#0b1220] p-0.5 shadow-sm shadow-black/20";
+  const navBtn = isFiOs
+    ? "inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.06] hover:text-cyan-100"
+    : "inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100";
+  const todayCls = isFiOs
+    ? "rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06] hover:text-white"
+    : "rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white";
+  const dateShell = isFiOs
+    ? "relative inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#060d18]/90 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    : "relative inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-3 py-1.5 shadow-sm shadow-black/20";
+  const rangeCls = isFiOs ? "hidden text-sm font-medium text-slate-200 lg:block" : "hidden text-sm font-medium text-slate-300 lg:block";
+  const viewOpts = isFiOs ? VIEW_OPTIONS_FI_OS : VIEW_OPTIONS.map((o) => ({ ...o, active: (q: ParsedCalendarQuery) => q.view === o.id }));
+
   return (
-    <div className="flex flex-col gap-3 border-b border-[#1e2937] bg-[#0f172a] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", shell)}>
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <div className="inline-flex items-center rounded-xl border border-[#1e2937] bg-[#0b1220] p-0.5 shadow-sm shadow-black/20">
-          <Link
-            href={prev}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
-            aria-label="Previous period"
-          >
+        <div className={inset}>
+          <Link href={prev} className={navBtn} aria-label="Previous period">
             <ChevronLeft className="h-4 w-4" />
           </Link>
-          <Link
-            href={today}
-            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
-          >
+          <Link href={today} className={todayCls}>
             Today
           </Link>
-          <Link
-            href={next}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
-            aria-label="Next period"
-          >
+          <Link href={next} className={navBtn} aria-label="Next period">
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <label className="relative inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-3 py-1.5 shadow-sm shadow-black/20">
+        <label className={dateShell}>
           <CalendarDays className="h-4 w-4 text-slate-500" aria-hidden />
           <input
             type="date"
@@ -100,18 +117,14 @@ export function CalendarTopControls({
           />
         </label>
 
-        <p className="hidden text-sm font-medium text-slate-300 lg:block">{rangeTitle}</p>
+        <p className={rangeCls}>{rangeTitle}</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div
-          className="inline-flex rounded-xl border border-[#1e2937] bg-[#0b1220] p-0.5 shadow-sm shadow-black/20"
-          role="group"
-          aria-label="Calendar view"
-        >
-          {VIEW_OPTIONS.map((opt) => {
+        <div className={cn(inset, "inline-flex")} role="group" aria-label="Calendar view">
+          {viewOpts.map((opt) => {
             const href = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: opt.id }), hrefOpts);
-            const active = query.view === opt.id;
+            const active = opt.active(query);
             return (
               <Link
                 key={opt.id}
@@ -119,8 +132,12 @@ export function CalendarTopControls({
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-xs font-semibold transition sm:text-sm",
                   active
-                    ? "bg-sky-500 text-white shadow-md shadow-sky-500/25"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                    ? isFiOs
+                      ? "bg-cyan-500/90 text-[#041018] shadow-[0_0_16px_rgba(34,211,238,0.25)]"
+                      : "bg-sky-500 text-white shadow-md shadow-sky-500/25"
+                    : isFiOs
+                      ? "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
                 )}
                 aria-current={active ? "page" : undefined}
               >
@@ -130,14 +147,20 @@ export function CalendarTopControls({
           })}
         </div>
 
-        <label className="inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-2.5 py-1.5 shadow-sm shadow-black/20">
+        <label
+          className={
+            isFiOs
+              ? "inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#060d18]/90 px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              : "inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-2.5 py-1.5 shadow-sm shadow-black/20"
+          }
+        >
           <Users className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
           <span className="sr-only">Staff filter</span>
           <select
             value={query.staffId ?? ""}
             onChange={(e) =>
               navigate({
-                staffId: e.target.value || undefined,
+                staffId: e.target.value ? e.target.value : null,
                 assignedUserId: undefined,
               })
             }
@@ -152,12 +175,18 @@ export function CalendarTopControls({
           </select>
         </label>
 
-        <label className="inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-2.5 py-1.5 shadow-sm shadow-black/20">
+        <label
+          className={
+            isFiOs
+              ? "inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#060d18]/90 px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              : "inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-2.5 py-1.5 shadow-sm shadow-black/20"
+          }
+        >
           <MapPin className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
           <span className="sr-only">Location</span>
           <select
             value={query.clinicId ?? selectedClinic?.id ?? ""}
-            onChange={(e) => navigate({ clinicId: e.target.value || undefined })}
+            onChange={(e) => navigate({ clinicId: e.target.value ? e.target.value : null })}
             className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-slate-200 outline-none sm:max-w-[12rem] [color-scheme:dark]"
           >
             <option value="">All locations</option>
@@ -177,8 +206,12 @@ export function CalendarTopControls({
           className={cn(
             "rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide",
             canMutateBookings
-              ? "bg-emerald-950/60 text-emerald-300 ring-1 ring-emerald-500/30"
-              : "bg-slate-800 text-slate-400 ring-1 ring-slate-600/40"
+              ? isFiOs
+                ? "bg-emerald-500/10 text-emerald-200 ring-1 ring-emerald-400/25"
+                : "bg-emerald-950/60 text-emerald-300 ring-1 ring-emerald-500/30"
+              : isFiOs
+                ? "bg-white/[0.04] text-slate-400 ring-1 ring-white/[0.08]"
+                : "bg-slate-800 text-slate-400 ring-1 ring-slate-600/40"
           )}
         >
           {canMutateBookings ? "Live" : "Read-only"}
@@ -187,17 +220,29 @@ export function CalendarTopControls({
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent("fi-calendar-toggle-shortcuts"))}
-          className="hidden items-center gap-1.5 rounded-xl border border-[#1e2937] bg-[#0b1220] px-2.5 py-1.5 text-xs font-medium text-slate-400 shadow-sm shadow-black/20 transition hover:border-slate-600 hover:text-slate-100 sm:inline-flex"
+          className={cn(
+            "hidden items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium transition sm:inline-flex",
+            isFiOs
+              ? "border border-white/[0.08] bg-[#060d18]/90 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-cyan-500/20 hover:text-cyan-100"
+              : "border border-[#1e2937] bg-[#0b1220] text-slate-400 shadow-sm shadow-black/20 hover:border-slate-600 hover:text-slate-100"
+          )}
           aria-label="Keyboard shortcuts"
           title="Keyboard shortcuts (?)"
         >
           <Keyboard className="h-3.5 w-3.5" aria-hidden />
           <span className="hidden md:inline">Shortcuts</span>
-          <kbd className="rounded border border-[#1e2937] bg-slate-900 px-1 font-mono text-[10px] text-slate-400">?</kbd>
+          <kbd
+            className={cn(
+              "rounded border px-1 font-mono text-[10px]",
+              isFiOs ? "border-white/[0.1] bg-black/30 text-slate-400" : "border-[#1e2937] bg-slate-900 text-slate-400"
+            )}
+          >
+            ?
+          </kbd>
         </button>
       </div>
 
-      <p className="text-sm font-medium text-slate-300 lg:hidden">{rangeTitle}</p>
+      <p className={cn("text-sm font-medium lg:hidden", isFiOs ? "text-slate-200" : "text-slate-300")}>{rangeTitle}</p>
     </div>
   );
 }

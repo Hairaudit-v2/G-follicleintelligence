@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { FiTenantOperationalHome } from "@/src/components/fi-admin/FiTenantOperationalHome";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
-import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
@@ -30,7 +30,10 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
     );
   }
 
-  const showCrmNav = await getCrmShellNavAllowed(tenantId);
+  const [showCrmNav, showBookingsBoard] = await Promise.all([
+    getCrmShellNavAllowed(tenantId),
+    getBookingsBoardNavAllowed(tenantId),
+  ]);
 
   let data;
   try {
@@ -43,7 +46,7 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
 
   return (
     <CalendarToastProvider>
-      <FiTenantOperationalHome data={data} showCrmNav={showCrmNav} />
+      <FiTenantOperationalHome data={data} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />
     </CalendarToastProvider>
   );
 }

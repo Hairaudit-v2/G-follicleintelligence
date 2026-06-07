@@ -17,6 +17,9 @@ import { isAllowedBookingStatus, isAllowedBookingType } from "./bookingPolicy";
 
 export type CalendarViewMode = "day" | "3day" | "week" | "month";
 
+/** URL `role=` — filter bookings to staff whose `fi_staff.staff_role` matches the bucket heuristics. */
+export type CalendarStaffRoleBucket = "doctor" | "nurse";
+
 export type CalendarRoute = "fi-admin" | "dashboard";
 
 function firstString(v: string | string[] | undefined): string {
@@ -54,6 +57,8 @@ export type ParsedCalendarQuery = {
   search: string | null;
   /** `?sample=1` — merge demo appointments and stricter overlap hints for drag-and-drop testing. */
   sampleMode: boolean;
+  /** `?role=doctor|nurse` — ignored when {@link staffId} is set (specific staff wins). */
+  staffRoleBucket: CalendarStaffRoleBucket | null;
 };
 
 const UUID_RE =
@@ -134,6 +139,10 @@ export function parseCalendarSearchParams(
 
   const sampleMode = parseBoolParam(searchParams.sample);
 
+  const roleRaw = firstString(searchParams.role).trim().toLowerCase();
+  const staffRoleBucket: CalendarStaffRoleBucket | null =
+    roleRaw === "doctor" || roleRaw === "nurse" ? roleRaw : null;
+
   return {
     view,
     dateAnchor,
@@ -146,6 +155,7 @@ export function parseCalendarSearchParams(
     includeCancelled,
     search,
     sampleMode,
+    staffRoleBucket,
   };
 }
 
@@ -153,10 +163,15 @@ export type CalendarHrefQuery = {
   view?: CalendarViewMode;
   date?: string;
   status?: string;
-  type?: string;
+  /** Pass `null` or `""` to clear the booking-type filter. */
+  type?: string | null | "";
   assignedUserId?: string;
-  staffId?: string;
-  clinicId?: string;
+  /** Pass `null` or `""` to clear the staff filter (`All staff`). */
+  staffId?: string | null | "";
+  /** Pass `null` or `""` to clear the location filter (`All locations`). */
+  clinicId?: string | null | "";
+  /** Set to `null` or `""` to clear `role=` from the URL. */
+  role?: CalendarStaffRoleBucket | null | "";
   includeCancelled?: boolean;
   q?: string;
   /** When true, append `sample=1` for demo calendar rows. */
@@ -179,6 +194,7 @@ export function buildCalendarHref(
   if (q.assignedUserId?.trim()) sp.set("assignedUserId", q.assignedUserId.trim());
   if (q.staffId?.trim()) sp.set("staffId", q.staffId.trim());
   if (q.clinicId?.trim()) sp.set("clinicId", q.clinicId.trim());
+  if (q.role === "doctor" || q.role === "nurse") sp.set("role", q.role);
   if (q.includeCancelled) sp.set("includeCancelled", "1");
   if (q.q?.trim()) sp.set("q", q.q.trim());
   if (q.sample) sp.set("sample", "1");
@@ -188,14 +204,48 @@ export function buildCalendarHref(
 
 /** Merge current calendar URL state with partial overrides (pure). */
 export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: CalendarHrefQuery): CalendarHrefQuery {
+  const cleared = (v: string | null | undefined | ""): v is null | "" => v === null || v === "";
+
+  let staffId: string | undefined =
+    patch.staffId !== undefined
+      ? cleared(patch.staffId)
+        ? undefined
+        : String(patch.staffId).trim() || undefined
+      : current.staffId ?? undefined;
+
+  let role: CalendarStaffRoleBucket | undefined =
+    patch.role !== undefined
+      ? cleared(patch.role)
+        ? undefined
+        : patch.role === "doctor" || patch.role === "nurse"
+          ? patch.role
+          : current.staffRoleBucket ?? undefined
+      : current.staffRoleBucket ?? undefined;
+
+  if (patch.role === "doctor" || patch.role === "nurse") staffId = undefined;
+  if (patch.staffId !== undefined && staffId) role = undefined;
+
+  const clinicId: string | undefined =
+    patch.clinicId !== undefined
+      ? cleared(patch.clinicId)
+        ? undefined
+        : String(patch.clinicId).trim() || undefined
+      : current.clinicId ?? undefined;
+
   return {
     view: patch.view ?? current.view,
     date: patch.date ?? current.dateAnchor,
     status: patch.status !== undefined ? patch.status : current.status ?? undefined,
-    type: patch.type !== undefined ? patch.type : current.bookingType ?? undefined,
+    type:
+      patch.type !== undefined
+        ? cleared(patch.type)
+          ? undefined
+          : patch.type
+        : current.bookingType ?? undefined,
     assignedUserId: patch.assignedUserId !== undefined ? patch.assignedUserId : current.assignedUserId ?? undefined,
-    staffId: patch.staffId !== undefined ? patch.staffId : current.staffId ?? undefined,
-    clinicId: patch.clinicId !== undefined ? patch.clinicId : current.clinicId ?? undefined,
+    staffId,
+    clinicId,
+    role,
     includeCancelled: patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
     q: patch.q !== undefined ? patch.q : current.search ?? undefined,
     sample: patch.sample !== undefined ? patch.sample : current.sampleMode ? true : undefined,

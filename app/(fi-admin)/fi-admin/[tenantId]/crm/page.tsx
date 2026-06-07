@@ -147,12 +147,14 @@ export default async function CrmShellPage({
         <CrmLeadIdJump tenantId={tenantId} />
       </section>
 
-      <CrmCreateLeadPanel
-        tenantId={tenantId}
-        owners={owners}
-        organisations={scope.organisations}
-        clinics={scope.clinics}
-      />
+      <section id="fi-os-crm-create-lead" className="scroll-mt-24">
+        <CrmCreateLeadPanel
+          tenantId={tenantId}
+          owners={owners}
+          organisations={scope.organisations}
+          clinics={scope.clinics}
+        />
+      </section>
     </div>
   );
 }

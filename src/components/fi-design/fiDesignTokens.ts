@@ -10,7 +10,7 @@
 export const fiSurfaceVariantClassNames = {
   /** OS glass panels (`DashboardCard`, dark tenant surfaces). */
   darkGlass:
-    "rounded-2xl border border-white/[0.08] bg-[#0F1629]/75 shadow-xl shadow-black/40 backdrop-blur-md",
+    "rounded-xl border border-white/[0.08] bg-[#0F1629]/80 shadow-lg shadow-black/40 backdrop-blur-md",
   /** Clinic OS white cards (`FiCard`, `ClinicOsDashboardHome` sections). */
   clinicLight: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5",
   /** CRM / directory gray document panels. */
@@ -62,11 +62,11 @@ export type FiStatusBadgeChipTone = keyof typeof fiStatusBadgeChipToneClassNames
 export const fiPageHeaderVariantClassNames = {
   /** Dark OS glass sections (`SectionHeader`, setup modules on `#0F1629`). */
   osDark: {
-    root: "space-y-1",
-    eyebrow: "text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-[#22C1FF]/90",
-    title: "text-sm font-semibold tracking-tight text-[#F8FAFC] sm:text-base",
-    description: "max-w-2xl text-xs leading-relaxed text-[#94A3B8] sm:text-sm",
-    meta: "text-xs text-[#64748B]",
+    root: "space-y-0.5",
+    eyebrow: "text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#22C1FF]/85",
+    title: "text-xs font-semibold tracking-tight text-[#F8FAFC] sm:text-sm",
+    description: "max-w-2xl text-[11px] leading-relaxed text-[#94A3B8] sm:text-xs",
+    meta: "text-[11px] text-[#64748B]",
   },
   /** Clinic OS light welcome / `FiPageHeader`-style titles on white + slate. */
   clinicLight: {

@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { pickHrPortalFromSourceIds } from "@/src/lib/staff/myHrPortalSelection";
+import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
+import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
 
 export type MyHrPortalPageState =
   | { kind: "unauthenticated" }
@@ -17,6 +19,7 @@ export type MyHrPortalPageState =
       hrPortalUrl: string | null;
       sourceSystem: string | null;
       hasHrLink: boolean;
+      complianceSummary: StaffComplianceSummary;
     };
 
 export type MyHrPortalPageData = {
@@ -65,18 +68,31 @@ export async function loadMyHrPortalPage(tenantId: string): Promise<MyHrPortalPa
 
   const { data: sourceRows, error: srcErr } = await supabase
     .from("fi_staff_source_ids")
-    .select("source_system, source_url")
+    .select("source_system, source_url, metadata")
     .eq("tenant_id", tid)
     .eq("staff_id", staffId)
     .order("source_system", { ascending: true });
   if (srcErr) throw new Error(srcErr.message);
 
-  const rows = (sourceRows ?? []).map((r) => ({
-    source_system: String((r as { source_system: string }).source_system),
-    source_url: (r as { source_url: string | null }).source_url != null ? String((r as { source_url: string | null }).source_url) : null,
-  }));
+  const rows = (sourceRows ?? []).map((r) => {
+    const row = r as { source_system: string; source_url: string | null; metadata?: unknown };
+    return {
+      source_system: String(row.source_system),
+      source_url: row.source_url != null ? String(row.source_url) : null,
+      metadata: row.metadata,
+    };
+  });
 
   const picked = pickHrPortalFromSourceIds(rows);
+
+  const complianceSummary = buildStaffComplianceSummaryFromSourceRows(
+    rows.map((r) => {
+      const md = r.metadata;
+      const metadata =
+        md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : null;
+      return { source_system: r.source_system, metadata };
+    })
+  );
 
   return {
     tenantId: tid,
@@ -88,6 +104,7 @@ export async function loadMyHrPortalPage(tenantId: string): Promise<MyHrPortalPa
       hrPortalUrl: picked.hrPortalUrl,
       sourceSystem: picked.sourceSystem,
       hasHrLink: picked.hasHrLink,
+      complianceSummary,
     },
   };
 }

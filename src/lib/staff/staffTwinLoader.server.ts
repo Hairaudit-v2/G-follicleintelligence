@@ -7,6 +7,8 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadStaffMemberForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
+import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
+import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
 import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 
 export type StaffTwinLinkedUser = {
@@ -20,6 +22,7 @@ export type StaffTwinSourceIdRow = {
   source_system: string;
   source_staff_id: string;
   source_url: string | null;
+  metadata: Record<string, unknown> | null;
 };
 
 export type StaffTwinPageData = {
@@ -31,6 +34,8 @@ export type StaffTwinPageData = {
   workingHoursSummary: string;
   /** IANA timezone used for hours (staff default or Perth fallback label in summary). */
   schedulingTimezoneLabel: string;
+  /** Read-only IIOHR / Academy snapshot from `fi_staff_source_ids.metadata` (not the system of record). */
+  complianceSummary: StaffComplianceSummary;
 };
 
 async function loadFiUserRowForAuth(
@@ -120,21 +125,35 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
 
   const { data: srcRows, error: srcErr } = await supabase
     .from("fi_staff_source_ids")
-    .select("id, source_system, source_staff_id, source_url")
+    .select("id, source_system, source_staff_id, source_url, metadata")
     .eq("tenant_id", tid)
     .eq("staff_id", sid)
     .order("source_system", { ascending: true });
   if (srcErr) throw new Error(srcErr.message);
 
   const sourceIds: StaffTwinSourceIdRow[] = (srcRows ?? []).map((r) => {
-    const x = r as { id: string; source_system: string; source_staff_id: string; source_url: string | null };
+    const x = r as {
+      id: string;
+      source_system: string;
+      source_staff_id: string;
+      source_url: string | null;
+      metadata: unknown;
+    };
+    const md = x.metadata;
+    const metadata =
+      md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : null;
     return {
       id: String(x.id),
       source_system: String(x.source_system),
       source_staff_id: String(x.source_staff_id),
       source_url: x.source_url != null ? String(x.source_url) : null,
+      metadata,
     };
   });
+
+  const complianceSummary = buildStaffComplianceSummaryFromSourceRows(
+    sourceIds.map((row) => ({ source_system: row.source_system, metadata: row.metadata }))
+  );
 
   const weekly = parseStaffWeeklyHours(staff.working_hours);
   const workingHoursSummary = formatStaffWeeklyHoursSummary(weekly).trim();
@@ -148,5 +167,6 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
     sourceIds,
     workingHoursSummary,
     schedulingTimezoneLabel,
+    complianceSummary,
   };
 }

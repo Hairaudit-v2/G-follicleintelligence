@@ -14,7 +14,7 @@ export function OperationalCalendarPage({
   data: OperationalCalendarPageData;
   session: CrmShellSession | null;
 }) {
-  const page = <CalendarPage data={data} route="fi-admin" crmShellSession={session} />;
+  const page = <CalendarPage data={data} route="fi-admin" crmShellSession={session} workspaceVariant="fiOs" />;
   const wrapped = session ? (
     <AppointmentSlideOverProvider
       tenantId={data.tenantId}
