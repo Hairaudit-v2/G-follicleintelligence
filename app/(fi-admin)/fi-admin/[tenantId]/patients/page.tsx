@@ -4,10 +4,14 @@ import { unstable_noStore as noStore } from "next/cache";
 import { PatientDirectoryPage } from "@/src/components/fi/patients/PatientDirectoryPage";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadPatientDirectoryPage } from "@/src/lib/patients/patientDirectoryLoader";
+import {
+  buildPatientOsOverviewFallback,
+  loadPatientOsOverview,
+} from "@/src/lib/patients/patientOsDashboardLoader.server";
 import { parsePatientDirectoryQuery } from "@/src/lib/patients/patientDirectoryQuery";
 
 export const metadata = {
-  title: "Patients",
+  title: "PatientOS",
   robots: { index: false, follow: false },
 };
 
@@ -32,10 +36,18 @@ export default async function PatientsHomeRoutePage({
     getBookingsBoardNavAllowed(tenantId),
   ]);
 
+  let patientOs;
+  try {
+    patientOs = await loadPatientOsOverview(tenantId.trim(), { summary: data.summary });
+  } catch {
+    patientOs = buildPatientOsOverviewFallback(data.summary);
+  }
+
   return (
     <PatientDirectoryPage
       tenantId={tenantId.trim()}
       data={data}
+      patientOs={patientOs}
       showCrmNav={showCrmNav}
       showBookingsBoard={showBookingsBoard}
     />
