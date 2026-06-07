@@ -21,7 +21,7 @@ import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/fou
 import {
   getClinicOsShellActiveNavId,
   isClinicOsShellCalendarContextRoute,
-  resolveClinicOsShellNavItems,
+  resolveClinicOsShellNavModules,
   resolveClinicOsShellQuickActions,
 } from "@/src/lib/fiAdmin/clinicOsShellConfig";
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
@@ -30,10 +30,11 @@ import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsG
 
 import { ClinicOsShellCalendarBar } from "./ClinicOsShellCalendarBar";
 
-function ComingSoonMenuRow({ label }: { label: string }) {
+function ComingSoonMenuRow({ label, title }: { label: string; title?: string }) {
   return (
     <DropdownMenuItem
       disabled
+      title={title}
       className="pointer-events-none flex cursor-not-allowed items-center justify-between gap-3 rounded-md opacity-100 data-[disabled]:opacity-100"
     >
       <span className="text-slate-500">{label}</span>
@@ -87,7 +88,7 @@ export function ClinicOsShell({
     window.addEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
     return () => window.removeEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
   }, []);
-  const navItems = resolveClinicOsShellNavItems(base, showCrmNav, showBookingsBoard);
+  const navModules = resolveClinicOsShellNavModules(base, showCrmNav, showBookingsBoard);
   const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav, showBookingsBoard);
   const activeNavId = getClinicOsShellActiveNavId(pathname, base);
   const showCalendarBar = isClinicOsShellCalendarContextRoute();
@@ -114,7 +115,7 @@ export function ClinicOsShell({
                 FI
               </div>
               <div className="min-w-0 text-left">
-                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Clinic OS</p>
+                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">FI OS</p>
                 <p className="truncate text-sm font-semibold text-slate-900">{brandName}</p>
               </div>
             </Link>
@@ -170,10 +171,12 @@ export function ClinicOsShell({
                       <div key={action.id}>
                         {showSepBeforeTask ? <DropdownMenuSeparator className="bg-slate-200" /> : null}
                         {action.disabled ? (
-                          <ComingSoonMenuRow label={action.label} />
+                          <ComingSoonMenuRow label={action.label} title={action.description} />
                         ) : (
                           <DropdownMenuItem asChild className="cursor-pointer rounded-md">
-                            <Link href={action.href}>{action.label}</Link>
+                            <Link href={action.href} title={action.description}>
+                              {action.label}
+                            </Link>
                           </DropdownMenuItem>
                         )}
                       </div>
@@ -185,43 +188,64 @@ export function ClinicOsShell({
           </div>
 
           <nav
-            className="-mx-1 flex min-w-0 items-stretch gap-0.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            aria-label="Clinic workspace"
+            className="-mx-1 flex min-w-0 touch-pan-x items-stretch gap-2 overflow-x-auto overscroll-x-contain px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="FI OS tenant modules"
           >
-            {navItems.map((item) => {
-              const active = !item.disabled && activeNavId === item.id;
-              const common =
-                "shrink-0 whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 sm:px-3";
-
-              if (item.disabled) {
-                return (
+            {navModules.map((mod) => (
+              <div
+                key={mod.id}
+                className="flex min-w-0 shrink-0 items-center gap-2 border-r border-slate-200/90 pr-2 last:border-r-0 last:pr-0"
+              >
+                {mod.showModuleLabel ? (
                   <span
-                    key={item.id}
-                    className={cn(common, "cursor-not-allowed text-slate-400")}
-                    aria-disabled="true"
-                    title="Coming soon"
+                    className="hidden select-none text-[10px] font-semibold uppercase tracking-wide text-slate-400 sm:inline"
+                    title={mod.description}
                   >
-                    {item.label}
+                    {mod.label}
                   </span>
-                );
-              }
+                ) : null}
+                <div className="flex min-w-0 items-center gap-0.5">
+                  {mod.items.map((item) => {
+                    const active = !item.disabled && activeNavId === item.id;
+                    const common =
+                      "shrink-0 whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm font-medium transition outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 sm:px-3";
+                    const linkTitle = mod.showModuleLabel
+                      ? item.description ?? mod.description
+                      : mod.description ?? item.description;
 
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className={cn(
-                    common,
-                    active
-                      ? "bg-sky-50 text-sky-900 ring-1 ring-sky-200/90"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  )}
-                  aria-current={active ? "page" : undefined}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+                    if (item.disabled) {
+                      return (
+                        <span
+                          key={item.id}
+                          className={cn(common, "cursor-not-allowed text-slate-400")}
+                          aria-disabled="true"
+                          title={item.description ?? `${mod.label} (coming soon)`}
+                        >
+                          {item.label}
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        title={linkTitle}
+                        className={cn(
+                          common,
+                          active
+                            ? "bg-sky-50 text-sky-900 ring-1 ring-sky-200/90"
+                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        )}
+                        aria-current={active ? "page" : undefined}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
         </div>
       </header>

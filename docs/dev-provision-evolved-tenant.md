@@ -44,18 +44,19 @@ Adjust slug/name literals in that file if you use a non-`evolved` slug.
 
 ## Clinic OS shell + navigation
 
-The FI Admin tenant layout uses **`ClinicOsShell`** (`app/(fi-admin)/fi-admin/[tenantId]/layout.tsx`). Primary tabs are defined in **`src/lib/fiAdmin/clinicOsShellConfig.ts`**:
+The FI Admin tenant layout uses **`ClinicOsShell`** (`app/(fi-admin)/fi-admin/[tenantId]/layout.tsx`). Primary tabs are grouped by FI OS module in **`src/lib/fiAdmin/clinicOsShellConfig.ts`** (route paths are unchanged):
 
-| Tab | Route under `/fi-admin/[tenantId]/` | Notes |
-|-----|-------------------------------------|--------|
-| Dashboard | `/fi-admin/[tenantId]` | Home |
-| Calendar | `calendar` | Operational calendar |
-| Patients | `patients` | Patient directory |
-| Consultations | `consultations` | |
-| Cases | `cases` | Clinical / hair-audit cases |
-| Sales | `crm` | **Enabled** when `getCrmShellNavAllowed` is true — roles **`fi_admin`** or **`crm_operator`** on `fi_users` |
+| Module | Tab label(s) | Route under `/fi-admin/[tenantId]/` | Notes |
+|--------|----------------|-------------------------------------|--------|
+| ClinicOS | Dashboard, Bookings, Calendar, Consultations | ``, `bookings`, `calendar`, `consultations` | Bookings respects `getBookingsBoardNavAllowed` |
+| LeadFlow | LeadFlow | `crm` | **Enabled** when `getCrmShellNavAllowed` is true — roles **`fi_admin`** or **`crm_operator`** on `fi_users` |
+| PatientOS | PatientOS | `patients` | |
+| SurgeryOS | SurgeryOS | `cases` | |
+| AuditOS | AuditOS | `audit` | `/hair-audit/*` also highlights AuditOS |
+| AcademyOS / AnalyticsOS | (placeholders) | — | Disabled until routes exist |
+| Settings | Staff, Services, Configuration | `staff`, `services`, `configuration` | |
 
-Placeholder items (Messages, Reports, Training) render disabled. **Sales / pipeline** requires a CRM shell role; seed `fi_users` with `crm_operator` and set **`auth_user_id`** to your `auth.users.id` so the operator can sign in.
+Placeholder items (Messages, AcademyOS, AnalyticsOS) render disabled. **LeadFlow** requires a CRM shell role; seed `fi_users` with `crm_operator` and set **`auth_user_id`** to your `auth.users.id` so the operator can sign in.
 
 ## After provisioning
 

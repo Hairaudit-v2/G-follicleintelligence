@@ -3,7 +3,7 @@
  * with conservative fallbacks when the catalog is empty or a type has no row.
  */
 
-import { BOOKING_TYPES, type BookingType } from "./bookingPolicy";
+import type { BookingType } from "./bookingPolicy";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 /** Last-resort minutes per canonical `booking_type` when no `fi_services` row exists. */

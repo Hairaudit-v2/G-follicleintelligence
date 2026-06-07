@@ -325,7 +325,7 @@ export function ClinicOsGlobalSearch({
                   <section aria-labelledby={CLINIC_OS_SEARCH_PATIENTS_HEADING_ID}>
                     <h3 id={CLINIC_OS_SEARCH_PATIENTS_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       <User className="h-3.5 w-3.5" aria-hidden />
-                      Patients
+                      PatientOS
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.patients.map((p) => (
@@ -348,7 +348,7 @@ export function ClinicOsGlobalSearch({
                   <section aria-labelledby={CLINIC_OS_SEARCH_CASES_HEADING_ID}>
                     <h3 id={CLINIC_OS_SEARCH_CASES_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       <Briefcase className="h-3.5 w-3.5" aria-hidden />
-                      Patients
+                      SurgeryOS
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.cases.map((c) => (
@@ -371,7 +371,7 @@ export function ClinicOsGlobalSearch({
                   <section aria-labelledby={CLINIC_OS_SEARCH_LEADS_HEADING_ID}>
                     <h3 id={CLINIC_OS_SEARCH_LEADS_HEADING_ID} className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       <LineChart className="h-3.5 w-3.5" aria-hidden />
-                      Leads
+                      LeadFlow
                     </h3>
                     <ul className="space-y-1.5">
                       {data!.leads.map((l) => (
@@ -449,7 +449,7 @@ export function ClinicOsGlobalSearch({
                   onClick={() => onOpenChange(false)}
                   className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-800 outline-none transition hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
                 >
-                  New Patient
+                  New case
                   <ArrowRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
                 </Link>
               </li>

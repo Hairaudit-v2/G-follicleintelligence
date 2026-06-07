@@ -17,35 +17,36 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
 
   assert.equal(byId.dashboard?.href, base);
   assert.equal(byId.dashboard?.disabled, false);
+  assert.equal(byId.bookings?.href, `${base}/bookings`);
   assert.equal(byId.calendar?.href, `${base}/calendar`);
-  assert.equal(byId.patients?.href, `${base}/patients`);
+  assert.equal(byId.patientos?.href, `${base}/patients`);
   assert.equal(byId.staff?.href, `${base}/staff`);
   assert.equal(byId.services?.href, `${base}/services`);
   assert.equal(byId.consultations?.href, `${base}/consultations`);
-  assert.equal(byId.cases?.href, `${base}/cases`);
-  assert.equal(byId.audit?.href, `${base}/audit`);
-  assert.equal(byId.setup?.href, `${base}/configuration`);
+  assert.equal(byId.surgeryos?.href, `${base}/cases`);
+  assert.equal(byId.auditos?.href, `${base}/audit`);
+  assert.equal(byId.configuration?.href, `${base}/configuration`);
 });
 
-test("resolveClinicOsShellNavItems: Sales (CRM) enabled when showCrmNav", () => {
+test("resolveClinicOsShellNavItems: LeadFlow (CRM) enabled when showCrmNav", () => {
   const items = resolveClinicOsShellNavItems(base, true);
-  const sales = items.find((i) => i.id === "sales");
-  assert.ok(sales);
-  assert.equal(sales!.disabled, false);
-  assert.equal(sales!.href, `${base}/crm`);
+  const leadflow = items.find((i) => i.id === "leadflow");
+  assert.ok(leadflow);
+  assert.equal(leadflow!.disabled, false);
+  assert.equal(leadflow!.href, `${base}/crm`);
 });
 
-test("resolveClinicOsShellNavItems: Sales disabled without showCrmNav", () => {
+test("resolveClinicOsShellNavItems: LeadFlow disabled without showCrmNav", () => {
   const items = resolveClinicOsShellNavItems(base, false);
-  const sales = items.find((i) => i.id === "sales");
-  assert.ok(sales);
-  assert.equal(sales!.disabled, true);
-  assert.equal(sales!.href, "#");
+  const leadflow = items.find((i) => i.id === "leadflow");
+  assert.ok(leadflow);
+  assert.equal(leadflow!.disabled, true);
+  assert.equal(leadflow!.href, "#");
 });
 
 test("resolveClinicOsShellNavItems: placeholders stay disabled", () => {
   const items = resolveClinicOsShellNavItems(base, true);
-  for (const id of ["messages", "reports", "training"]) {
+  for (const id of ["messages", "academyos", "analyticsos"]) {
     const row = items.find((i) => i.id === id);
     assert.ok(row, id);
     assert.equal(row!.disabled, true);
@@ -56,13 +57,16 @@ test("resolveClinicOsShellNavItems: placeholders stay disabled", () => {
 test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(base, base), "dashboard");
   assert.equal(getClinicOsShellActiveNavId(`${base}/`, base), "dashboard");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/crm`, base), "sales");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/crm/leads`, base), "sales");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/crm`, base), "leadflow");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/crm/leads`, base), "leadflow");
   assert.equal(getClinicOsShellActiveNavId(`${base}/calendar`, base), "calendar");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/bookings/new`, base), "calendar");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/patients/p-1`, base), "patients");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/bookings/new`, base), "bookings");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/patients/p-1`, base), "patientos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/services`, base), "services");
-  assert.equal(getClinicOsShellActiveNavId(`${base}/configuration`, base), "setup");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/configuration`, base), "configuration");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/appointments`, base), "calendar");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/appointments/ap-1`, base), "calendar");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/directory`, base), "patientos");
 });
 
 test("resolveClinicOsShellQuickActions: booking enabled when only bookings board access", () => {
@@ -87,4 +91,8 @@ test("resolveClinicOsShellQuickActions: CRM-gated actions match nav policy", () 
   const patient = on.find((a) => a.id === "patient");
   assert.equal(patient?.href, `${base}/patients/new`);
   assert.equal(patient?.disabled, false);
+
+  const surgeryCase = on.find((a) => a.id === "case");
+  assert.equal(surgeryCase?.label, "New case");
+  assert.equal(surgeryCase?.href, `${base}/cases/new`);
 });
