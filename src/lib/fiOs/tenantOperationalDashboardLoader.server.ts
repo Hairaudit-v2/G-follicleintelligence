@@ -145,6 +145,7 @@ export const tenantOperationalDashboardSchema = z.object({
   tasksDue: z.array(taskDueItemSchema),
   quickStats: quickStatsSchema,
   viewerFiUserId: z.string().uuid().nullable(),
+  viewerHasLinkedStaff: z.boolean(),
   canQuickCallIn: z.boolean(),
 });
 
@@ -502,6 +503,17 @@ export async function loadTenantOperationalDashboard(
   const viewerFiUserId = viewer?.id ?? null;
   const canQuickCallIn = isCrmMutationRole(viewer?.role);
 
+  let viewerHasLinkedStaff = false;
+  if (viewerFiUserId) {
+    const { count, error: staffCountErr } = await supabase
+      .from("fi_staff")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("fi_user_id", viewerFiUserId);
+    if (staffCountErr) throw new Error(staffCountErr.message);
+    viewerHasLinkedStaff = (count ?? 0) > 0;
+  }
+
   const tenantRes = await supabase.from("fi_tenants").select("name").eq("id", tid).maybeSingle();
   if (tenantRes.error) throw new Error(tenantRes.error.message);
   if (!tenantRes.data) throw new Error("Tenant not found");
@@ -526,6 +538,7 @@ export async function loadTenantOperationalDashboard(
     tasksDue,
     quickStats,
     viewerFiUserId,
+    viewerHasLinkedStaff,
     canQuickCallIn,
   });
 }

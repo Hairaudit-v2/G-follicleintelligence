@@ -76,7 +76,11 @@ export function FiTenantOperationalHome(props: {
 
       <DashboardQuickStats tenantId={data.tenantId} stats={data.quickStats} />
 
-      <DashboardQuickActions tenantId={data.tenantId} showCrmNav={showCrmNav} />
+      <DashboardQuickActions
+        tenantId={data.tenantId}
+        showCrmNav={showCrmNav}
+        showMyHrPortal={data.viewerHasLinkedStaff}
+      />
     </div>
   );
 }

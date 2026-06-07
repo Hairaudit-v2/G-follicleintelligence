@@ -1,11 +1,17 @@
-import { CalendarPlus, UserPlus, Users } from "lucide-react";
+import { Briefcase, CalendarPlus, UserPlus, Users } from "lucide-react";
 
 import { DashboardCard, QuickActionCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 const ICON = 22;
 
-export function DashboardQuickActions(props: { tenantId: string; showCrmNav: boolean }) {
-  const { tenantId, showCrmNav } = props;
+export function DashboardQuickActions(props: {
+  tenantId: string;
+  showCrmNav: boolean;
+  /** Self-service HR route — only when the viewer has `fi_staff.fi_user_id` set for this tenant. */
+  showMyHrPortal?: boolean;
+}) {
+  const { tenantId, showCrmNav, showMyHrPortal } = props;
   const base = `/fi-admin/${tenantId}`;
 
   return (
@@ -16,7 +22,12 @@ export function DashboardQuickActions(props: { tenantId: string; showCrmNav: boo
         description="Shortcuts for common intake and scheduling flows."
         className="mb-4"
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-4",
+          showMyHrPortal ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
+        )}
+      >
         {showCrmNav ? (
           <QuickActionCard
             href={`${base}/crm`}
@@ -42,6 +53,14 @@ export function DashboardQuickActions(props: { tenantId: string; showCrmNav: boo
           description="Start a patient record from intake or conversion."
           icon={<Users size={ICON} strokeWidth={1.75} aria-hidden />}
         />
+        {showMyHrPortal ? (
+          <QuickActionCard
+            href={`${base}/staff/me/hr`}
+            title="My HR Portal"
+            description="Open your linked employer HR workspace (onboarding, documents, training)."
+            icon={<Briefcase size={ICON} strokeWidth={1.75} aria-hidden />}
+          />
+        ) : null}
       </div>
     </DashboardCard>
   );

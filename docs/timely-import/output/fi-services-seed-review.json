@@ -1,175 +1,83 @@
 {
-  "generatedAt": "2026-06-07T22:25:19.412Z",
-  "inputPath": "docs/timely-import/fixtures/ServiceSales.sample.csv",
+  "generatedAt": "2026-06-07T22:37:03.499Z",
+  "inputPath": "docs/timely-import/input/ServiceSales.csv",
   "warnings": [],
   "excluded": [
     {
       "line": 11,
-      "summary": "ServiceCategory1 — ServiceName5",
+      "summary": "ServiceCategory1 — ServiceCategory1",
       "reason": "Summary / header / pivot stub row"
     },
     {
       "line": 12,
-      "summary": "Grand Total — ",
+      "summary": " — ",
       "reason": "Summary / header / pivot stub row"
     },
     {
       "line": 13,
-      "summary": "Other — Package redemption — membership credits",
-      "reason": "Package / gift / membership redemption or similar (deduped import)"
+      "summary": " — ",
+      "reason": "Summary / header / pivot stub row"
     },
     {
       "line": 14,
-      "summary": "Other — Gift card redemption",
-      "reason": "Package / gift / membership redemption or similar (deduped import)"
+      "summary": " — ",
+      "reason": "Summary / header / pivot stub row"
     },
     {
       "line": 15,
-      "summary": "Adjustments — Invoice credit note (batch)",
-      "reason": "Negative adjustment / refund aggregate — excluded from active seed list"
+      "summary": " — ",
+      "reason": "Summary / header / pivot stub row"
+    },
+    {
+      "line": 51,
+      "summary": "ServiceCategory2 — ServiceCategory2",
+      "reason": "Summary / header / pivot stub row"
+    },
+    {
+      "line": 54,
+      "summary": "ServiceName5 — ServiceName5",
+      "reason": "Summary / header / pivot stub row"
+    },
+    {
+      "line": 55,
+      "summary": "ServiceCategory3 — ServiceCategory3",
+      "reason": "Summary / header / pivot stub row"
+    },
+    {
+      "line": 57,
+      "summary": "ServiceCategory4 — ServiceCategory4",
+      "reason": "Summary / header / pivot stub row"
     }
   ],
   "seedRows": [
     {
-      "name": "Initial hair consultation",
-      "category": "Consultation",
-      "booking_type": "consultation",
-      "duration_minutes": 45,
-      "base_price": 165,
-      "color": "#0ea5e9",
+      "name": "Hair Treatment",
+      "category": "Treatment",
+      "booking_type": null,
+      "duration_minutes": 60,
+      "base_price": 0,
+      "color": "#22c55e",
       "is_active": true,
       "is_bookable": true,
       "source": "timely_import",
-      "notes": "Timely import line 2; qty=48; gross=7920; net=7128",
-      "review_flags": [],
+      "notes": "Timely import line 2; qty=291",
+      "review_flags": [
+        "booking_type_uncertain",
+        "price_unknown_default_zero"
+      ],
       "timely": {
-        "timelyCategory": "Consultation",
-        "timelyServiceName": "Initial hair consultation",
-        "usageQuantity": 48,
-        "averageAmount": 165,
-        "grossAmount": 7920,
-        "taxAmount": 792,
-        "netAmount": 7128,
+        "timelyCategory": "Hair Treatment",
+        "timelyServiceName": "Hair Treatment",
+        "usageQuantity": 291,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
         "sourceLineNumber": 2
       }
     },
     {
-      "name": "FUE planning session",
-      "category": "Surgery",
-      "booking_type": "surgery",
-      "duration_minutes": 480,
-      "base_price": 220,
-      "color": "#a855f7",
-      "is_active": true,
-      "is_bookable": true,
-      "source": "timely_import",
-      "notes": "Timely import line 3; qty=12; gross=2640; net=2376",
-      "review_flags": [],
-      "timely": {
-        "timelyCategory": "Consultation",
-        "timelyServiceName": "FUE planning session",
-        "usageQuantity": 12,
-        "averageAmount": 220,
-        "grossAmount": 2640,
-        "taxAmount": 264,
-        "netAmount": 2376,
-        "sourceLineNumber": 3
-      }
-    },
-    {
-      "name": "PRP scalp session",
-      "category": "Treatment",
-      "booking_type": "prp",
-      "duration_minutes": 60,
-      "base_price": 395.5,
-      "color": "#22c55e",
-      "is_active": true,
-      "is_bookable": true,
-      "source": "timely_import",
-      "notes": "Timely import line 4; qty=86; gross=34013; net=30611.7",
-      "review_flags": [],
-      "timely": {
-        "timelyCategory": "Treatment",
-        "timelyServiceName": "PRP scalp session",
-        "usageQuantity": 86,
-        "averageAmount": 395.5,
-        "grossAmount": 34013,
-        "taxAmount": 3401.3,
-        "netAmount": 30611.7,
-        "sourceLineNumber": 4
-      }
-    },
-    {
-      "name": "Exosome therapy",
-      "category": "Treatment",
-      "booking_type": "exosomes",
-      "duration_minutes": 60,
-      "base_price": 520,
-      "color": "#22c55e",
-      "is_active": true,
-      "is_bookable": true,
-      "source": "timely_import",
-      "notes": "Timely import line 5; qty=15; gross=7800; net=7020",
-      "review_flags": [],
-      "timely": {
-        "timelyCategory": "Treatment",
-        "timelyServiceName": "Exosome therapy",
-        "usageQuantity": 15,
-        "averageAmount": 520,
-        "grossAmount": 7800,
-        "taxAmount": 780,
-        "netAmount": 7020,
-        "sourceLineNumber": 5
-      }
-    },
-    {
-      "name": "Mesotherapy maintenance",
-      "category": "Treatment",
-      "booking_type": "mesotherapy",
-      "duration_minutes": 60,
-      "base_price": 180,
-      "color": "#22c55e",
-      "is_active": true,
-      "is_bookable": true,
-      "source": "timely_import",
-      "notes": "Timely import line 6; qty=22; gross=3960; net=3564",
-      "review_flags": [],
-      "timely": {
-        "timelyCategory": "Treatment",
-        "timelyServiceName": "Mesotherapy maintenance",
-        "usageQuantity": 22,
-        "averageAmount": 180,
-        "grossAmount": 3960,
-        "taxAmount": 396,
-        "netAmount": 3564,
-        "sourceLineNumber": 6
-      }
-    },
-    {
-      "name": "FUE day surgery block",
-      "category": "Surgery",
-      "booking_type": "surgery",
-      "duration_minutes": 480,
-      "base_price": 8500,
-      "color": "#a855f7",
-      "is_active": true,
-      "is_bookable": true,
-      "source": "timely_import",
-      "notes": "Timely import line 7; qty=8; gross=68000; net=61200",
-      "review_flags": [],
-      "timely": {
-        "timelyCategory": "Surgery",
-        "timelyServiceName": "FUE day surgery block",
-        "usageQuantity": 8,
-        "averageAmount": 8500,
-        "grossAmount": 68000,
-        "taxAmount": 6800,
-        "netAmount": 61200,
-        "sourceLineNumber": 7
-      }
-    },
-    {
-      "name": "Post-op review (week 1)",
+      "name": "Follow Up Consultations",
       "category": "Follow-up",
       "booking_type": "follow_up",
       "duration_minutes": 30,
@@ -178,69 +86,196 @@
       "is_active": true,
       "is_bookable": true,
       "source": "timely_import",
-      "notes": "Timely import line 8; qty=34; gross=0; net=0",
+      "notes": "Timely import line 3; qty=135",
       "review_flags": [
         "price_unknown_default_zero"
       ],
       "timely": {
-        "timelyCategory": "Follow-up",
-        "timelyServiceName": "Post-op review (week 1)",
-        "usageQuantity": 34,
-        "averageAmount": 0,
-        "grossAmount": 0,
-        "taxAmount": 0,
-        "netAmount": 0,
+        "timelyCategory": "Follow Up Consultations",
+        "timelyServiceName": "Follow Up Consultations",
+        "usageQuantity": 135,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
+        "sourceLineNumber": 3
+      }
+    },
+    {
+      "name": "Ungrouped",
+      "category": "Other",
+      "booking_type": null,
+      "duration_minutes": 45,
+      "base_price": 0,
+      "color": "#64748b",
+      "is_active": true,
+      "is_bookable": true,
+      "source": "timely_import",
+      "notes": "Timely import line 4; qty=70",
+      "review_flags": [
+        "booking_type_uncertain",
+        "price_unknown_default_zero",
+        "fi_category_other_review"
+      ],
+      "timely": {
+        "timelyCategory": "Ungrouped",
+        "timelyServiceName": "Ungrouped",
+        "usageQuantity": 70,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
+        "sourceLineNumber": 4
+      }
+    },
+    {
+      "name": "Hair Transplant",
+      "category": "Surgery",
+      "booking_type": "surgery",
+      "duration_minutes": 480,
+      "base_price": 0,
+      "color": "#a855f7",
+      "is_active": true,
+      "is_bookable": true,
+      "source": "timely_import",
+      "notes": "Timely import line 5; qty=51",
+      "review_flags": [
+        "price_unknown_default_zero"
+      ],
+      "timely": {
+        "timelyCategory": "Hair Transplant",
+        "timelyServiceName": "Hair Transplant",
+        "usageQuantity": 51,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
+        "sourceLineNumber": 5
+      }
+    },
+    {
+      "name": "Specialist/Doctors Consultations (Face to Face)",
+      "category": "Other",
+      "booking_type": "consultation",
+      "duration_minutes": 45,
+      "base_price": 0,
+      "color": "#64748b",
+      "is_active": true,
+      "is_bookable": true,
+      "source": "timely_import",
+      "notes": "Timely import line 6; qty=16",
+      "review_flags": [
+        "price_unknown_default_zero"
+      ],
+      "timely": {
+        "timelyCategory": "Specialist/Doctors Consultations (Face to Face)",
+        "timelyServiceName": "Specialist/Doctors Consultations (Face to Face)",
+        "usageQuantity": 16,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
+        "sourceLineNumber": 6
+      }
+    },
+    {
+      "name": "Facial PRP",
+      "category": "Treatment",
+      "booking_type": "prp",
+      "duration_minutes": 60,
+      "base_price": 0,
+      "color": "#22c55e",
+      "is_active": true,
+      "is_bookable": true,
+      "source": "timely_import",
+      "notes": "Timely import line 7; qty=8",
+      "review_flags": [
+        "price_unknown_default_zero"
+      ],
+      "timely": {
+        "timelyCategory": "Facial PRP",
+        "timelyServiceName": "Facial PRP",
+        "usageQuantity": 8,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
+        "sourceLineNumber": 7
+      }
+    },
+    {
+      "name": "Virtual Consultation",
+      "category": "Consultation",
+      "booking_type": "consultation",
+      "duration_minutes": 45,
+      "base_price": 0,
+      "color": "#0ea5e9",
+      "is_active": true,
+      "is_bookable": true,
+      "source": "timely_import",
+      "notes": "Timely import line 8; qty=4",
+      "review_flags": [
+        "price_unknown_default_zero"
+      ],
+      "timely": {
+        "timelyCategory": "Virtual Consultation",
+        "timelyServiceName": "Virtual Consultation",
+        "usageQuantity": 4,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
         "sourceLineNumber": 8
       }
     },
     {
-      "name": "Trichoscopy / scalp scope",
-      "category": "Diagnostics",
+      "name": "LED Therapy",
+      "category": "Treatment",
       "booking_type": null,
-      "duration_minutes": 30,
-      "base_price": 95,
-      "color": "#6366f1",
+      "duration_minutes": 60,
+      "base_price": 0,
+      "color": "#22c55e",
       "is_active": true,
       "is_bookable": true,
       "source": "timely_import",
-      "notes": "Timely import line 9; qty=19; gross=1805; net=1624.5",
+      "notes": "Timely import line 9; qty=3",
       "review_flags": [
-        "booking_type_uncertain"
+        "booking_type_uncertain",
+        "price_unknown_default_zero"
       ],
       "timely": {
-        "timelyCategory": "Diagnostics",
-        "timelyServiceName": "Trichoscopy / scalp scope",
-        "usageQuantity": 19,
-        "averageAmount": 95,
-        "grossAmount": 1805,
-        "taxAmount": 180.5,
-        "netAmount": 1624.5,
+        "timelyCategory": "LED Therapy",
+        "timelyServiceName": "LED Therapy",
+        "usageQuantity": 3,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
         "sourceLineNumber": 9
       }
     },
     {
-      "name": "Shampoo retail (bundle)",
+      "name": "Phone Consults",
       "category": "Other",
-      "booking_type": null,
+      "booking_type": "consultation",
       "duration_minutes": 45,
-      "base_price": 35,
+      "base_price": 0,
       "color": "#64748b",
       "is_active": true,
-      "is_bookable": false,
+      "is_bookable": true,
       "source": "timely_import",
-      "notes": "Timely import line 10; qty=40; gross=1400; net=1260",
+      "notes": "Timely import line 10; qty=2",
       "review_flags": [
-        "booking_type_uncertain",
-        "fi_category_other_review"
+        "price_unknown_default_zero"
       ],
       "timely": {
-        "timelyCategory": "Retail",
-        "timelyServiceName": "Shampoo retail (bundle)",
-        "usageQuantity": 40,
-        "averageAmount": 35,
-        "grossAmount": 1400,
-        "taxAmount": 140,
-        "netAmount": 1260,
+        "timelyCategory": "Phone Consults",
+        "timelyServiceName": "Phone Consults",
+        "usageQuantity": 2,
+        "averageAmount": null,
+        "grossAmount": null,
+        "taxAmount": null,
+        "netAmount": null,
         "sourceLineNumber": 10
       }
     }

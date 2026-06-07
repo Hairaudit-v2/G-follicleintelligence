@@ -1,0 +1,391 @@
+{
+  "meta": {
+    "stage": "7a4",
+    "source_excel_path": "docs/timely-import/input/evolved-fi-services-catalogue-draft (1).xlsx",
+    "generated_at": "2026-06-07T22:57:40.254Z"
+  },
+  "approved_for_import": [
+    {
+      "name": "Hair Transplant Consultation",
+      "category": "Consultation",
+      "booking_type": "consultation",
+      "duration_minutes": 60,
+      "base_price": 50,
+      "color": "#2563eb",
+      "is_active": true,
+      "review_flags": [],
+      "curation_notes": "Excel notes: Core face-to-face consultation for transplant assessment."
+    },
+    {
+      "name": "Virtual Hair Transplant Consultation",
+      "category": "Consultation",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 0,
+      "color": "#2563eb",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Zoom/telehealth consultation. booking_type cleared: duplicate \"consultation\" in Excel catalogue — canonical row is \"Hair Transplant Consultation\" (Excel row 2)."
+    },
+    {
+      "name": "Phone Consultation",
+      "category": "Consultation",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 0,
+      "color": "#2563eb",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Initial phone consultation or short assessment. booking_type cleared: duplicate \"consultation\" in Excel catalogue — canonical row is \"Hair Transplant Consultation\" (Excel row 2)."
+    },
+    {
+      "name": "PRP / Mesotherapy Consultation",
+      "category": "Consultation",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 25,
+      "color": "#2563eb",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: For PRP, mesotherapy, exosomes, dutasteride pathway discussion. booking_type cleared: duplicate \"consultation\" in Excel catalogue — canonical row is \"Hair Transplant Consultation\" (Excel row 2)."
+    },
+    {
+      "name": "Trichological Examination",
+      "category": "Diagnostics",
+      "booking_type": null,
+      "duration_minutes": 60,
+      "base_price": 89,
+      "color": "#0f766e",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Detailed scalp and hair-loss assessment. booking_type cleared: duplicate \"consultation\" in Excel catalogue — canonical row is \"Hair Transplant Consultation\" (Excel row 2)."
+    },
+    {
+      "name": "Blood Test Review",
+      "category": "Diagnostics",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 0,
+      "color": "#0f766e",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Review bloods and treatment plan. booking_type cleared: duplicate \"consultation\" in Excel catalogue — canonical row is \"Hair Transplant Consultation\" (Excel row 2)."
+    },
+    {
+      "name": "Surgeon Pre-Surgery Consultation",
+      "category": "Consultation",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 140,
+      "color": "#2563eb",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Pre-surgery review and surgical consent planning. booking_type cleared: duplicate \"consultation\" in Excel catalogue — canonical row is \"Hair Transplant Consultation\" (Excel row 2)."
+    },
+    {
+      "name": "1 Week Follow-Up",
+      "category": "Follow-up",
+      "booking_type": "follow_up",
+      "duration_minutes": 15,
+      "base_price": 0,
+      "color": "#7c3aed",
+      "is_active": true,
+      "review_flags": [],
+      "curation_notes": "Excel notes: Post-procedure wound/scab review."
+    },
+    {
+      "name": "1 Month Follow-Up",
+      "category": "Follow-up",
+      "booking_type": null,
+      "duration_minutes": 20,
+      "base_price": 0,
+      "color": "#7c3aed",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Early post-op or treatment review. booking_type cleared: duplicate \"follow_up\" in Excel catalogue — canonical row is \"1 Week Follow-Up\" (Excel row 9)."
+    },
+    {
+      "name": "3 Month Follow-Up",
+      "category": "Follow-up",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 0,
+      "color": "#7c3aed",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Growth/treatment review. booking_type cleared: duplicate \"follow_up\" in Excel catalogue — canonical row is \"1 Week Follow-Up\" (Excel row 9)."
+    },
+    {
+      "name": "6 Month Follow-Up",
+      "category": "Follow-up",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 0,
+      "color": "#7c3aed",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Midpoint review and photo comparison. booking_type cleared: duplicate \"follow_up\" in Excel catalogue — canonical row is \"1 Week Follow-Up\" (Excel row 9)."
+    },
+    {
+      "name": "9 Month Follow-Up",
+      "category": "Follow-up",
+      "booking_type": null,
+      "duration_minutes": 30,
+      "base_price": 0,
+      "color": "#7c3aed",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Progress review where applicable. booking_type cleared: duplicate \"follow_up\" in Excel catalogue — canonical row is \"1 Week Follow-Up\" (Excel row 9)."
+    },
+    {
+      "name": "12 Month Follow-Up",
+      "category": "Follow-up",
+      "booking_type": null,
+      "duration_minutes": 45,
+      "base_price": 0,
+      "color": "#7c3aed",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Final growth/result review. booking_type cleared: duplicate \"follow_up\" in Excel catalogue — canonical row is \"1 Week Follow-Up\" (Excel row 9)."
+    },
+    {
+      "name": "18 Month Follow-Up",
+      "category": "Follow-up",
+      "booking_type": null,
+      "duration_minutes": 45,
+      "base_price": 0,
+      "color": "#7c3aed",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Extended review for slower growth or complex cases. booking_type cleared: duplicate \"follow_up\" in Excel catalogue — canonical row is \"1 Week Follow-Up\" (Excel row 9)."
+    },
+    {
+      "name": "PRP Single Session",
+      "category": "Treatment",
+      "booking_type": "prp",
+      "duration_minutes": 45,
+      "base_price": 320,
+      "color": "#dc2626",
+      "is_active": true,
+      "review_flags": [],
+      "curation_notes": "Excel notes: Single scalp PRP treatment."
+    },
+    {
+      "name": "PRP 3 Session Package",
+      "category": "Treatment",
+      "booking_type": null,
+      "duration_minutes": 45,
+      "base_price": 860,
+      "color": "#dc2626",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Package item; consider whether bookable directly or sold as package only. booking_type cleared: duplicate \"prp\" in Excel catalogue — canonical row is \"PRP Single Session\" (Excel row 16)."
+    },
+    {
+      "name": "PRP 6 Session Package",
+      "category": "Treatment",
+      "booking_type": null,
+      "duration_minutes": 45,
+      "base_price": 1500,
+      "color": "#dc2626",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Package item; consider whether bookable directly or sold as package only. booking_type cleared: duplicate \"prp\" in Excel catalogue — canonical row is \"PRP Single Session\" (Excel row 16)."
+    },
+    {
+      "name": "Facial PRP",
+      "category": "Treatment",
+      "booking_type": null,
+      "duration_minutes": 60,
+      "base_price": 400,
+      "color": "#dc2626",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "booking_type alias: facial_prp → prp (FI schema). Excel notes: Facial regenerative PRP treatment. booking_type cleared: duplicate \"prp\" in Excel catalogue — canonical row is \"PRP Single Session\" (Excel row 16)."
+    },
+    {
+      "name": "Exosome Therapy",
+      "category": "Treatment",
+      "booking_type": "exosomes",
+      "duration_minutes": 45,
+      "base_price": 450,
+      "color": "#ea580c",
+      "is_active": true,
+      "review_flags": [],
+      "curation_notes": "Excel notes: Scalp exosome treatment."
+    },
+    {
+      "name": "Mesotherapy Single Session",
+      "category": "Treatment",
+      "booking_type": "mesotherapy",
+      "duration_minutes": 45,
+      "base_price": 320,
+      "color": "#ea580c",
+      "is_active": true,
+      "review_flags": [],
+      "curation_notes": "Excel notes: Scalp mesotherapy treatment."
+    },
+    {
+      "name": "Dutasteride Mesotherapy",
+      "category": "Treatment",
+      "booking_type": null,
+      "duration_minutes": 45,
+      "base_price": 200,
+      "color": "#ea580c",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Confirm prescribing/clinical governance before enabling patient-facing booking. booking_type cleared: duplicate \"mesotherapy\" in Excel catalogue — canonical row is \"Mesotherapy Single Session\" (Excel row 21)."
+    },
+    {
+      "name": "LED Therapy",
+      "category": "Treatment",
+      "booking_type": "other",
+      "duration_minutes": 30,
+      "base_price": 20,
+      "color": "#059669",
+      "is_active": true,
+      "review_flags": [],
+      "curation_notes": "booking_type alias: led → other (FI schema). Excel notes: LED session."
+    },
+    {
+      "name": "Hair Transplant Full Day",
+      "category": "Surgery",
+      "booking_type": "surgery",
+      "duration_minutes": 480,
+      "base_price": 12000,
+      "color": "#111827",
+      "is_active": true,
+      "review_flags": [],
+      "curation_notes": "Excel notes: Main full-day transplant session."
+    },
+    {
+      "name": "Hair Transplant Two Day Session",
+      "category": "Surgery",
+      "booking_type": null,
+      "duration_minutes": 960,
+      "base_price": 17000,
+      "color": "#111827",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Two-day case; may be represented as two bookings in calendar. booking_type cleared: duplicate \"surgery\" in Excel catalogue — canonical row is \"Hair Transplant Full Day\" (Excel row 24)."
+    },
+    {
+      "name": "Small Hair Transplant Session",
+      "category": "Surgery",
+      "booking_type": null,
+      "duration_minutes": 240,
+      "base_price": 500,
+      "color": "#111827",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Small correction / partial-day session. booking_type cleared: duplicate \"surgery\" in Excel catalogue — canonical row is \"Hair Transplant Full Day\" (Excel row 24)."
+    },
+    {
+      "name": "Eyebrow Transplant",
+      "category": "Surgery",
+      "booking_type": null,
+      "duration_minutes": 360,
+      "base_price": 5500,
+      "color": "#111827",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Dedicated eyebrow transplant service. booking_type cleared: duplicate \"surgery\" in Excel catalogue — canonical row is \"Hair Transplant Full Day\" (Excel row 24)."
+    },
+    {
+      "name": "Beard Transplant",
+      "category": "Surgery",
+      "booking_type": null,
+      "duration_minutes": 420,
+      "base_price": 8000,
+      "color": "#111827",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Dedicated beard / facial hair transplant service. booking_type cleared: duplicate \"surgery\" in Excel catalogue — canonical row is \"Hair Transplant Full Day\" (Excel row 24)."
+    },
+    {
+      "name": "Hair Transplant Repair Consultation",
+      "category": "Consultation",
+      "booking_type": null,
+      "duration_minutes": 60,
+      "base_price": 0,
+      "color": "#2563eb",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Consultation for previous transplant repair. booking_type cleared: duplicate \"consultation\" in Excel catalogue — canonical row is \"Hair Transplant Consultation\" (Excel row 2)."
+    },
+    {
+      "name": "Hair Transplant Repair Surgery",
+      "category": "Surgery",
+      "booking_type": null,
+      "duration_minutes": 480,
+      "base_price": 0,
+      "color": "#111827",
+      "is_active": true,
+      "review_flags": [
+        "duplicate_booking_type_cleared"
+      ],
+      "curation_notes": "Excel notes: Repair or density correction surgery. booking_type cleared: duplicate \"surgery\" in Excel catalogue — canonical row is \"Hair Transplant Full Day\" (Excel row 24)."
+    }
+  ],
+  "inactive_deferred": [],
+  "removed_non_bookable": [
+    {
+      "name": "Deposit / Booking Fee",
+      "category": "Other",
+      "reason": "Excel row marked \"Review\" — non-bookable / financial per catalogue notes."
+    },
+    {
+      "name": "Retail Product Sale",
+      "category": "Other",
+      "reason": "Excel row marked \"Review\" — non-bookable / financial per catalogue notes."
+    }
+  ],
+  "summary": {
+    "approved_active_count": 29,
+    "inactive_deferred_count": 0,
+    "removed_non_bookable_count": 2,
+    "uncertain_resolved_count": 0
+  }
+}

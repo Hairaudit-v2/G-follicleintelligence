@@ -68,6 +68,8 @@ export function StaffDirectoryClient({
   );
 
   const canManage = data.canManageStaff;
+  const viewerStaffId = data.viewerStaffId;
+  const showTwinLinks = canManage || Boolean(viewerStaffId);
 
   const openCreate = () => {
     setError(null);
@@ -310,6 +312,11 @@ export function StaffDirectoryClient({
               <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
                 Active
               </th>
+              {showTwinLinks ? (
+                <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
+                  Twin
+                </th>
+              ) : null}
               {canManage ? (
                 <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
                   Actions
@@ -320,7 +327,7 @@ export function StaffDirectoryClient({
           <tbody className="divide-y divide-gray-100">
             {data.staff.length === 0 ? (
               <tr>
-                <td colSpan={canManage ? 8 : 7} className="px-3 py-8 text-center text-gray-600">
+                <td colSpan={7 + (showTwinLinks ? 1 : 0) + (canManage ? 1 : 0)} className="px-3 py-8 text-center text-gray-600">
                   <p>No staff rows yet.</p>
                   <p className="mt-2 text-sm">
                     {canManage ? "Use Add staff to create the directory, or run " : "Ask an admin to add staff, or see "}
@@ -352,6 +359,20 @@ export function StaffDirectoryClient({
                     {formatStaffWeeklyHoursSummary(parseStaffWeeklyHours(row.working_hours)) || "—"}
                   </td>
                   <td className="px-3 py-2">{row.is_active ? "Yes" : "No"}</td>
+                  {showTwinLinks ? (
+                    <td className="px-3 py-2">
+                      {canManage || row.id === viewerStaffId ? (
+                        <Link
+                          href={`${base}/staff/${row.id}/twin`}
+                          className="text-xs font-medium text-blue-600 hover:underline"
+                        >
+                          Open
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </td>
+                  ) : null}
                   {canManage ? (
                     <td className="px-3 py-2 text-right">
                       <button

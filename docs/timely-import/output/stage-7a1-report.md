@@ -1,9 +1,9 @@
 # Stage 7A.1 — Timely ServiceSales → FI catalogue seed (review)
 
-- **Generated:** 2026-06-07T22:25:19.412Z
-- **Input:** docs/timely-import/fixtures/ServiceSales.sample.csv
+- **Generated:** 2026-06-07T22:37:03.499Z
+- **Input:** docs/timely-import/input/ServiceSales.csv
 - **Seed rows:** 9
-- **Excluded rows:** 5
+- **Excluded rows:** 9
 
 ## Rules applied
 - Dropped stub/pivot labels (e.g. ServiceCategory1, ServiceName5, totals).
@@ -27,24 +27,28 @@
 ## Seed list (preview)
 | # | name | category | booking_type | duration_min | base_price | is_active | is_bookable | flags |
 |---|------|----------|----------------|--------------|------------|-----------|---------------|-------|
-| 1 | Initial hair consultation | Consultation | consultation | 45 | 165 | true | true | — |
-| 2 | FUE planning session | Surgery | surgery | 480 | 220 | true | true | — |
-| 3 | PRP scalp session | Treatment | prp | 60 | 395.5 | true | true | — |
-| 4 | Exosome therapy | Treatment | exosomes | 60 | 520 | true | true | — |
-| 5 | Mesotherapy maintenance | Treatment | mesotherapy | 60 | 180 | true | true | — |
-| 6 | FUE day surgery block | Surgery | surgery | 480 | 8500 | true | true | — |
-| 7 | Post-op review (week 1) | Follow-up | follow_up | 30 | 0 | true | true | price_unknown_default_zero |
-| 8 | Trichoscopy / scalp scope | Diagnostics | — | 30 | 95 | true | true | booking_type_uncertain |
-| 9 | Shampoo retail (bundle) | Other | — | 45 | 35 | true | false | booking_type_uncertain, fi_category_other_review |
+| 1 | Hair Treatment | Treatment | — | 60 | 0 | true | true | booking_type_uncertain, price_unknown_default_zero |
+| 2 | Follow Up Consultations | Follow-up | follow_up | 30 | 0 | true | true | price_unknown_default_zero |
+| 3 | Ungrouped | Other | — | 45 | 0 | true | true | booking_type_uncertain, price_unknown_default_zero, fi_category_other_review |
+| 4 | Hair Transplant | Surgery | surgery | 480 | 0 | true | true | price_unknown_default_zero |
+| 5 | Specialist/Doctors Consultations (Face to Face) | Other | consultation | 45 | 0 | true | true | price_unknown_default_zero |
+| 6 | Facial PRP | Treatment | prp | 60 | 0 | true | true | price_unknown_default_zero |
+| 7 | Virtual Consultation | Consultation | consultation | 45 | 0 | true | true | price_unknown_default_zero |
+| 8 | LED Therapy | Treatment | — | 60 | 0 | true | true | booking_type_uncertain, price_unknown_default_zero |
+| 9 | Phone Consults | Other | consultation | 45 | 0 | true | true | price_unknown_default_zero |
 
 ## Excluded / suppressed
 | line | summary | reason |
 |------|---------|--------|
-| 11 | ServiceCategory1 — ServiceName5 | Summary / header / pivot stub row |
-| 12 | Grand Total —  | Summary / header / pivot stub row |
-| 13 | Other — Package redemption — membership credits | Package / gift / membership redemption or similar (deduped import) |
-| 14 | Other — Gift card redemption | Package / gift / membership redemption or similar (deduped import) |
-| 15 | Adjustments — Invoice credit note (batch) | Negative adjustment / refund aggregate — excluded from active seed list |
+| 11 | ServiceCategory1 — ServiceCategory1 | Summary / header / pivot stub row |
+| 12 |  —  | Summary / header / pivot stub row |
+| 13 |  —  | Summary / header / pivot stub row |
+| 14 |  —  | Summary / header / pivot stub row |
+| 15 |  —  | Summary / header / pivot stub row |
+| 51 | ServiceCategory2 — ServiceCategory2 | Summary / header / pivot stub row |
+| 54 | ServiceName5 — ServiceName5 | Summary / header / pivot stub row |
+| 55 | ServiceCategory3 — ServiceCategory3 | Summary / header / pivot stub row |
+| 57 | ServiceCategory4 — ServiceCategory4 | Summary / header / pivot stub row |
 
 ## Next steps
 1. Human-review rows with `review_flags`.

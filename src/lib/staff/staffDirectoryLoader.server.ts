@@ -11,6 +11,8 @@ import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.se
 export type StaffDirectoryPageResult = {
   staff: FiStaffRow[];
   canManageStaff: boolean;
+  /** Staff profile id linked to the signed-in tenant user (`fi_staff.fi_user_id` = `fi_users.id`), if any. */
+  viewerStaffId: string | null;
   fiUsersForLink: { id: string; email: string | null }[];
 };
 
@@ -46,6 +48,7 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
 
   const authId = await resolveAuthUserId(null);
   let canManageStaff = false;
+  let viewerStaffId: string | null = null;
   if (authId) {
     const row = await loadFiUserRow(tid, authId);
     if (row && isCrmStaffManageRole(row.role)) canManageStaff = true;
@@ -53,7 +56,11 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
       const os = await loadFiOsIdentity(authId);
       if (normalizeFiOsRole(os?.osRole) === "fi_admin") canManageStaff = true;
     }
+    if (row) {
+      const mine = staffRes.find((s) => (s.fi_user_id?.trim() ?? "") === row.id);
+      viewerStaffId = mine?.id ?? null;
+    }
   }
 
-  return { staff: staffRes, canManageStaff, fiUsersForLink };
+  return { staff: staffRes, canManageStaff, viewerStaffId, fiUsersForLink };
 }
