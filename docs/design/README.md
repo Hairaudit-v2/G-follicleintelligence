@@ -32,6 +32,13 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 |-----|--------|
 | [FI Admin without login](../dev-local-fi-admin.md) | `FI_ENABLE_DEV_ADMIN_ACCESS` — optional `fi_tenants` listing when no Supabase session (non-production only). |
 
+## FI OS access & launch
+
+| Doc | Content |
+|-----|--------|
+| [FI OS production access](../fi-os-access-production.md) | `NODE_ENV` gates, tenant portal, cross-tenant OS roles, `/api/tenants`, Clinic OS shell rollout, global search API, validation checklist. |
+| [Stage 6F smoke test & release checklist](../fi-os-smoke-test-stage-6f.md) | Official pre-launch matrix, personas, pass/fail table, blockers, rollback. |
+
 ## Design rule
 
 **Follicle Intelligence must not become the operational database for HLI or HairAudit.** It consumes normalized signals, computes risk models and insights, and exposes analytics and recommendations back via read-only APIs.

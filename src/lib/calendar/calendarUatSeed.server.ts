@@ -2,7 +2,8 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createCalendarAppointment } from "@/src/lib/bookings/appointmentsApi";
-import { assertCrmTenantStaffManageAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import { tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import { assertFiServicesManageAllowed } from "@/src/lib/services/fiServicesManageAccess.server";
 import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import {
   addDaysToCalendarDate,
@@ -33,7 +34,7 @@ export type CalendarUatSeedResult =
 
 /**
  * Idempotent demo rows for clinic calendar UAT (development or `FI_ALLOW_CALENDAR_UAT_SEED=true` only).
- * Requires {@link assertCrmTenantStaffManageAllowed} (tenant admin / fi_admin or `FI_ADMIN_API_KEY`).
+ * Requires {@link assertFiServicesManageAllowed} (tenant admin / tenant fi_admin, platform OS fi_admin, or `FI_ADMIN_API_KEY`).
  * Does not enable public booking, SMS, or payments.
  */
 export async function runCalendarUatSeed(
@@ -49,11 +50,11 @@ export async function runCalendarUatSeed(
   }
 
   try {
-    await assertCrmTenantStaffManageAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
+    await assertFiServicesManageAllowed({ tenantId, adminKey: adminKey ?? undefined, request: undefined });
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Not allowed to run UAT seed (admin / fi_admin or FI_ADMIN_API_KEY).",
+      error: e instanceof Error ? e.message : "Not allowed to run UAT seed (service catalogue admin access required).",
     };
   }
 

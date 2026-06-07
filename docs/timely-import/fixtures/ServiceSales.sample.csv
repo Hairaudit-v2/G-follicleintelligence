@@ -1,0 +1,15 @@
+Service Category,Service Name,Quantity,Average Amount,Gross Amount,Tax Amount,Net Amount
+Consultation,Initial hair consultation,48,165.00,7920.00,792.00,7128.00
+Consultation,FUE planning session,12,220.00,2640.00,264.00,2376.00
+Treatment,PRP scalp session,86,395.50,34013.00,3401.30,30611.70
+Treatment,Exosome therapy,15,520.00,7800.00,780.00,7020.00
+Treatment,Mesotherapy maintenance,22,180.00,3960.00,396.00,3564.00
+Surgery,FUE day surgery block,8,8500.00,68000.00,6800.00,61200.00
+Follow-up,Post-op review (week 1),34,0.00,0.00,0.00,0.00
+Diagnostics,Trichoscopy / scalp scope,19,95.00,1805.00,180.50,1624.50
+Retail,Shampoo retail (bundle),40,35.00,1400.00,140.00,1260.00
+ServiceCategory1,ServiceName5,0,0,0,0,0
+Grand Total,,311,,,,,
+Other,Package redemption — membership credits,6,0.00,0.00,0.00,0.00
+Other,Gift card redemption,4,0.00,0.00,0.00,0.00
+Adjustments,Invoice credit note (batch),1,-450.00,-450.00,-45.00,-405.00

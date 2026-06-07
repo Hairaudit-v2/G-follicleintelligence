@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Timely — real exports (Stage 7A.1)
+docs/timely-import/input/ServiceSales.csv

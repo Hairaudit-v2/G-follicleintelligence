@@ -36,3 +36,10 @@ export const fiServicePatchBodySchema = z
     booking_type: bookingTypeEnum.nullable().optional(),
   })
   .strict();
+
+/** Body for catalogue deactivate (soft: `is_active = false`). */
+export const fiServiceDeactivateBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+  })
+  .strict();

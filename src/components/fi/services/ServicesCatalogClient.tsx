@@ -6,7 +6,7 @@ import { useCallback, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { createServiceAction, updateServiceAction } from "@/lib/actions/fi-services-actions";
+import { createServiceAction, deactivateServiceAction, updateServiceAction } from "@/lib/actions/fi-services-actions";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { formatPriceAud } from "@/src/lib/bookings/servicesCatalog";
@@ -81,6 +81,31 @@ export function ServicesCatalogClient({
   const onField = useCallback((key: string, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
   }, []);
+
+  const deactivateRow = (row: FiServiceRow) => {
+    if (!window.confirm(`Deactivate “${row.name}”? It will stay in the catalogue as inactive.`)) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await deactivateServiceAction(tenantId, row.id, {});
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      router.refresh();
+    });
+  };
+
+  const activateRow = (row: FiServiceRow) => {
+    setError(null);
+    startTransition(async () => {
+      const r = await updateServiceAction(tenantId, row.id, { is_active: true });
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      router.refresh();
+    });
+  };
 
   const submit = () => {
     setError(null);
@@ -158,7 +183,9 @@ export function ServicesCatalogClient({
             Add service
           </Button>
         ) : (
-          <p className="text-xs text-gray-500">View only — CRM staff-admin or fi_admin can edit the catalog.</p>
+          <p className="text-xs text-gray-500">
+            View only — tenant admin, platform FI OS admin, or valid admin API access can edit the catalogue.
+          </p>
         )}
       </header>
 
@@ -311,9 +338,35 @@ export function ServicesCatalogClient({
                   <td className="px-3 py-2">{row.is_active ? "Active" : "Inactive"}</td>
                   <td className="px-3 py-2 text-right">
                     {canManage ? (
-                      <button type="button" className="text-blue-600 hover:underline" onClick={() => openEdit(row)}>
-                        Edit
-                      </button>
+                      <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:underline disabled:opacity-50"
+                          disabled={pending}
+                          onClick={() => openEdit(row)}
+                        >
+                          Edit
+                        </button>
+                        {row.is_active ? (
+                          <button
+                            type="button"
+                            className="text-amber-700 hover:underline disabled:opacity-50"
+                            disabled={pending}
+                            onClick={() => deactivateRow(row)}
+                          >
+                            Deactivate
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="text-blue-600 hover:underline disabled:opacity-50"
+                            disabled={pending}
+                            onClick={() => activateRow(row)}
+                          >
+                            Activate
+                          </button>
+                        )}
+                      </span>
                     ) : null}
                   </td>
                 </tr>

@@ -1,0 +1,10 @@
+name,category,booking_type,duration_minutes,base_price,color,is_active,is_bookable,source,notes,review_flags
+"Initial hair consultation","Consultation","consultation",45,165,"#0ea5e9",true,true,"timely_import","Timely import line 2; qty=48; gross=7920; net=7128",""
+"FUE planning session","Surgery","surgery",480,220,"#a855f7",true,true,"timely_import","Timely import line 3; qty=12; gross=2640; net=2376",""
+"PRP scalp session","Treatment","prp",60,395.5,"#22c55e",true,true,"timely_import","Timely import line 4; qty=86; gross=34013; net=30611.7",""
+"Exosome therapy","Treatment","exosomes",60,520,"#22c55e",true,true,"timely_import","Timely import line 5; qty=15; gross=7800; net=7020",""
+"Mesotherapy maintenance","Treatment","mesotherapy",60,180,"#22c55e",true,true,"timely_import","Timely import line 6; qty=22; gross=3960; net=3564",""
+"FUE day surgery block","Surgery","surgery",480,8500,"#a855f7",true,true,"timely_import","Timely import line 7; qty=8; gross=68000; net=61200",""
+"Post-op review (week 1)","Follow-up","follow_up",30,0,"#f97316",true,true,"timely_import","Timely import line 8; qty=34; gross=0; net=0","price_unknown_default_zero"
+"Trichoscopy / scalp scope","Diagnostics","",30,95,"#6366f1",true,true,"timely_import","Timely import line 9; qty=19; gross=1805; net=1624.5","booking_type_uncertain"
+"Shampoo retail (bundle)","Other","",45,35,"#64748b",true,false,"timely_import","Timely import line 10; qty=40; gross=1400; net=1260","booking_type_uncertain; fi_category_other_review"

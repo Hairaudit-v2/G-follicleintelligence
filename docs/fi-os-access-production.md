@@ -208,3 +208,4 @@ From `/fi-admin` and `/hair-audit/admin`, submit **Sign out**; session should cl
 | Case / pipeline REST (tenant-scoped) | `app/api/tenants/[tenantId]/cases/**`, `.../tick-jobs`, `.../foundation-integrity` — gated with `assertCrmTenantReadAllowed` / `assertCrmTenantWriteAllowed` (see `src/lib/crm/crmGate.ts`) |
 | Migration | `supabase/migrations/20260614120001_fi_os_identities.sql` |
 | Local dev bypass | `docs/dev-local-fi-admin.md` |
+| Stage 6F pre-launch smoke test | `docs/fi-os-smoke-test-stage-6f.md` |
