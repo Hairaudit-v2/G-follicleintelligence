@@ -81,6 +81,15 @@ export function TaxLocalisationSection(props: {
 
   return (
     <div className="space-y-6">
+      {!canEdit ? (
+        <div
+          className="rounded-lg border border-amber-600/35 bg-amber-950/30 px-3 py-2 text-xs text-amber-100/95"
+          role="status"
+        >
+          View only — your role can review tax and localisation values but cannot save changes. Ask a clinic or finance
+          admin to update settings.
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="grid gap-1">
           <span className={labelClass}>Scope</span>

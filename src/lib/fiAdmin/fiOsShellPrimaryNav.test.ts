@@ -32,3 +32,15 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/tax-localisation`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");
 });
+
+test("resolveFiOsPrimarySidebarItems: dashboard_viewer AuditOS disabled when shell strips security nav", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true, "dashboard_viewer", false);
+  const audit = items.find((i) => i.id === "auditos");
+  assert.equal(audit?.disabled, true);
+});
+
+test("resolveFiOsPrimarySidebarItems: data_safety_admin AuditOS enabled when shell allows security nav", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true, "data_safety_admin", true);
+  const audit = items.find((i) => i.id === "auditos");
+  assert.equal(audit?.disabled, false);
+});

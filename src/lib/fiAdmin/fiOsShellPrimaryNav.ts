@@ -62,10 +62,14 @@ export function resolveFiOsPrimarySidebarItems(
   base: string,
   showCrmNav: boolean,
   showBookingsBoard: boolean,
-  tenantBackendAdminRole?: FiTenantAdminRole | null
+  tenantBackendAdminRole?: FiTenantAdminRole | null,
+  showAuditOsNav: boolean = true,
+  showConfigurationHubNav: boolean = true
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
+  const auditDisabled =
+    tenantBackendAdminRole != null ? !showAuditOsNav : blocks.audit;
   const calendarEligible = showBookingsBoard || tenantAdminRoleAllowsBookingsBoardNav(tenantBackendAdminRole ?? null);
   const items: FiOsPrimarySidebarItem[] = [
     { id: "dashboard", label: "Dashboard", shortLabel: "Home", href: b, disabled: false },
@@ -136,8 +140,8 @@ export function resolveFiOsPrimarySidebarItems(
       label: "AuditOS",
       shortLabel: "Audit",
       href: hrefFor(b, "audit"),
-      disabled: blocks.audit,
-      hint: blocks.audit ? "AuditOS is hidden for this read-only dashboard role." : undefined,
+      disabled: auditDisabled,
+      hint: auditDisabled ? "AuditOS requires security review access or a clinical tenant role." : undefined,
     },
     {
       id: "academyos",
@@ -160,7 +164,10 @@ export function resolveFiOsPrimarySidebarItems(
       label: "Settings",
       shortLabel: "Settings",
       href: hrefFor(b, "configuration"),
-      disabled: false,
+      disabled: !showConfigurationHubNav,
+      hint: !showConfigurationHubNav
+        ? "Configuration requires clinic, finance, operations, or admin-user management access."
+        : undefined,
     },
   ];
   return items;

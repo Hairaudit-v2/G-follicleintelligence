@@ -39,6 +39,46 @@ RLS: enabled on these tables; **no** broad `authenticated` DML — server uses *
 
 Roles are enforced in application code (`src/lib/tenantAdmin/tenantAdminRoles.ts`, CRM shell helpers, FI OS sidebar). Human-readable blurbs: `FI_TENANT_ADMIN_ROLE_CAPABILITIES`.
 
+The **capability matrix** below is the source of truth for tenant-backend personas (`fi_tenant_admin_users`). Implementation: `src/lib/fiAdmin/tenantAdminCapabilities.ts`. Session resolution (including legacy `fi_users.role` and platform overrides): `src/lib/tenantAdmin/tenantAdminProfile.server.ts`.
+
+### Capability identifiers
+
+| Capability | Typical use |
+| --- | --- |
+| `view_dashboards` | Dashboard / analytics surfaces |
+| `view_finance` | Finance read paths (where split from settings) |
+| `manage_finance_settings` | Tax & localisation and similar finance configuration |
+| `manage_clinic_settings` | Broad clinic configuration (reserved for future split; `clinic_admin` holds all caps today) |
+| `manage_admin_users` | Invite / role / suspend / revoke on Admin Users |
+| `manage_operations` | Reminders, operational calendar-style settings |
+| `view_security_audit` | AuditOS / security audit navigation and routes |
+| `view_read_only_reports` | Read-only reporting (paired with dashboard viewer patterns) |
+
+### Role → capability matrix
+
+| Capability | `clinic_admin` | `finance_admin` | `operations_admin` | `dashboard_viewer` | `data_safety_admin` |
+| --- | :---: | :---: | :---: | :---: | :---: |
+| `view_dashboards` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `view_finance` | ✓ | ✓ | — | — | — |
+| `manage_finance_settings` | ✓ | ✓ | — | — | — |
+| `manage_clinic_settings` | ✓ | — | — | — | — |
+| `manage_admin_users` | ✓ | — | — | — | — |
+| `manage_operations` | ✓ | — | ✓ | — | — |
+| `view_security_audit` | ✓ | — | — | — | ✓ |
+| `view_read_only_reports` | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+`clinic_admin` is the **union of all capabilities** (full tenant-backend matrix).
+
+### Resolution rules (high level)
+
+- **FI platform admin** (full session / OS platform admin): capability checks that gate tenant routes are bypassed or treated as “all capabilities” where the codebase already branches on platform admin — tenant matrix is not the limiting factor.
+- **Legacy `fi_users.role`:** `admin` / `fi_admin` continue to receive **full** tenant-backend capability set for matrix-gated routes (does not replace RLS or service-role boundaries).
+- **`crm_operator`:** receives a **fixed preset** aligned with `operations_admin` (dashboards, operations, read-only reports) and **does not** receive `manage_admin_users` via the CRM preset (`crmOperatorCapabilityPreset` in `tenantAdminCapabilities.ts`).
+- **`tenant_backend` without** an active `fi_tenant_admin_users` profile: matrix capabilities resolve to **empty** for gated settings; portal access still follows `assertFiTenantPortalAccess`.
+- **Clinical / non–`tenant_backend` members:** matrix used for FI OS nav is typically empty; **clinical access** continues to use existing `fi_users` / staff paths (e.g. reminders visible to clinical members independent of `manage_operations` where implemented).
+
+Settings navigation and server layouts use helpers such as `canManageTenantAdminUsersRoute`, `canViewTaxLocalisationRoute`, `canEditTaxLocalisationRoute`, `canAccessTenantReminderSettings`, `canViewSecurityAuditNav`, `canViewTenantConfigurationHub` from `tenantAdminProfile.server.ts` so **UI and server routes stay aligned** (nav hiding is not the only control).
+
 | Role | Intent |
 | --- | --- |
 | `clinic_admin` | Full clinic settings, user management (this screen), reporting, dashboards |
@@ -77,6 +117,7 @@ Insert helper: `src/lib/tenantAdmin/tenantAdminAudit.server.ts`
 
 ## Related code (bookmark)
 
-- `src/lib/tenantAdmin/tenantAdminProfile.server.ts` — load rows, session admin profile, last login
+- `src/lib/fiAdmin/tenantAdminCapabilities.ts` — capability constants, role → capability sets, `crmOperatorCapabilityPreset`
+- `src/lib/tenantAdmin/tenantAdminProfile.server.ts` — load rows, session admin profile, last login, route capability helpers
 - `src/lib/crm/crmShellAccess.ts` — combines legacy `fi_users.role` with tenant admin role for CRM / bookings / analytics nav
 - `src/lib/fiAdmin/fiOsShellPrimaryNav.ts` — sidebar clinical blocks per backend admin persona

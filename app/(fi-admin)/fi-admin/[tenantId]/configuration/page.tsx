@@ -9,6 +9,8 @@ import {
   resolveConfigurationPreviewContext,
   resolveEffectiveBranding,
 } from "@/src/lib/fi/foundation/tenantSettings";
+import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,11 @@ export default async function TenantConfigurationPage({
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
+
+  await assertFiTenantPortalAccess(tenantId);
+  if (!(await canViewTenantConfigurationHub(tenantId))) {
+    notFound();
+  }
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return (

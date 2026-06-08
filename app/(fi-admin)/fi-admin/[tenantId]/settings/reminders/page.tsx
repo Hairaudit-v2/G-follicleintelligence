@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { ReminderTemplatesSection } from "@/src/components/fi-admin/settings/ReminderTemplatesSection";
+import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadReminderTemplatesForTenant } from "@/src/lib/reminders/reminderTemplates.server";
+import { canAccessTenantReminderSettings } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,11 @@ export default async function TenantReminderSettingsPage({ params }: { params: P
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
+
+  await assertFiTenantPortalAccess(tenantId);
+  if (!(await canAccessTenantReminderSettings(tenantId))) {
+    notFound();
+  }
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     return (

@@ -30,6 +30,10 @@ export function FiOsAppShell({
   tenantBackendAdminRole = null,
   showStaffAndServicesNav = false,
   showAdminUsersNav = false,
+  showTaxLocalisationSettingsNav = true,
+  showRemindersSettingsNav = true,
+  showAuditOsNav = true,
+  showConfigurationHubNav = true,
   effective,
   userEmail,
   impersonationDisplayName,
@@ -44,8 +48,16 @@ export function FiOsAppShell({
   tenantBackendAdminRole?: FiTenantAdminRole | null;
   /** Staff + Services settings links (CRM shell or bookings operator). */
   showStaffAndServicesNav?: boolean;
-  /** Admin Users settings link (clinic_admin / legacy tenant admins). */
+  /** Admin Users settings link (`manage_admin_users` capability or legacy super-roles). */
   showAdminUsersNav?: boolean;
+  /** Tax & localisation settings link (finance capability or clinical member). */
+  showTaxLocalisationSettingsNav?: boolean;
+  /** Reminder templates settings link (`manage_operations` or clinical member). */
+  showRemindersSettingsNav?: boolean;
+  /** AuditOS primary nav (`view_security_audit` or clinical member). */
+  showAuditOsNav?: boolean;
+  /** `/configuration` hub link in primary sidebar. */
+  showConfigurationHubNav?: boolean;
   effective: EffectiveBranding;
   userEmail: string | null;
   impersonationDisplayName?: string | null;
@@ -66,7 +78,18 @@ export function FiOsAppShell({
   const clinicLabel =
     effective.clinic_display_name?.trim() || effective.brand_name?.trim() || "Clinic workspace";
 
-  const sidebarItems = resolveFiOsPrimarySidebarItems(base, showCrmNav, showBookingsBoard, tenantBackendAdminRole ?? null);
+  const sidebarItems = useMemo(
+    () =>
+      resolveFiOsPrimarySidebarItems(
+        base,
+        showCrmNav,
+        showBookingsBoard,
+        tenantBackendAdminRole ?? null,
+        showAuditOsNav,
+        showConfigurationHubNav
+      ),
+    [base, showCrmNav, showBookingsBoard, tenantBackendAdminRole, showAuditOsNav, showConfigurationHubNav]
+  );
   const activeSidebarId = getFiOsShellActiveSidebarId(pathname, base);
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
@@ -153,6 +176,9 @@ export function FiOsAppShell({
               tenantId={tenantId}
               showStaffAndServicesNav={showStaffAndServicesNav}
               showAdminUsersNav={showAdminUsersNav}
+              showConfigurationHubNav={showConfigurationHubNav}
+              showTaxLocalisationSettingsNav={showTaxLocalisationSettingsNav}
+              showRemindersSettingsNav={showRemindersSettingsNav}
             />
             {children}
           </main>

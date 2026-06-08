@@ -5,8 +5,10 @@ import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImperso
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
-import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import {
+  canEditTaxLocalisationRoute,
+  canViewTaxLocalisationRoute,
+} from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 async function resolveShellAuthUserId(sessionAuthUserId: string): Promise<string> {
   const imp = await getFiOsImpersonationTargetAuthUserId(sessionAuthUserId);
@@ -28,18 +30,9 @@ async function loadFiUserRow(
   return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
 }
 
-function legacyTenantRoleCanEditTax(role: string): boolean {
-  const r = role.trim().toLowerCase();
-  return r === "admin" || r === "fi_admin";
-}
-
-function tenantAdminRoleCanEditTax(role: FiTenantAdminRole | null): boolean {
-  return role === "clinic_admin" || role === "finance_admin";
-}
-
 /**
- * Tax & localisation UI: any tenant member may view; edit restricted to finance/clinic admins,
- * legacy tenant admins, or FI platform admin (full session).
+ * Tax & localisation UI: view requires finance capability or legacy clinical tenant member;
+ * edit requires {@link canEditTaxLocalisationRoute}. FI platform admin overrides apply here.
  */
 export async function getTaxLocalisationAccess(tenantId: string): Promise<{
   canView: boolean;
@@ -73,10 +66,12 @@ export async function getTaxLocalisationAccess(tenantId: string): Promise<{
     return { canView: true, canEdit: true, actorFiUserId: proxy?.id ?? row.id };
   }
 
-  const prof = await loadActiveTenantAdminProfileForSession(tid, authId);
-  const adminRole = prof?.adminRole ?? null;
+  const canView = await canViewTaxLocalisationRoute(tid);
+  if (!canView) {
+    return { canView: false, canEdit: false, actorFiUserId: null };
+  }
 
-  const canEdit = legacyTenantRoleCanEditTax(row.role) || tenantAdminRoleCanEditTax(adminRole);
+  const canEdit = await canEditTaxLocalisationRoute(tid);
 
   return {
     canView: true,

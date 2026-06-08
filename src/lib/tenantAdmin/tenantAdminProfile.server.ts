@@ -8,7 +8,15 @@ import {
   resolveAuthUserId,
 } from "@/src/lib/crm/crmGate";
 import type { FiTenantAdminRole, FiTenantAdminUserStatus } from "@/src/lib/tenantAdmin/tenantAdminRoles";
-import { canManageTenantAdminUsersFromProfiles, normalizeFiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import { normalizeFiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import {
+  ALL_TENANT_ADMIN_CAPABILITIES,
+  capabilitiesForTenantAdminRole,
+  crmOperatorCapabilityPreset,
+  type FiTenantAdminCapability,
+} from "@/src/lib/fiAdmin/tenantAdminCapabilities";
+import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
+import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 
 export type FiTenantAdminUserRow = {
   id: string;
@@ -158,6 +166,132 @@ export async function loadAuthLastSignInAtForUserIds(authUserIds: string[]): Pro
   return out;
 }
 
+function legacyFiUserRoleGrantsAllCapabilities(role: string): boolean {
+  const r = role.trim().toLowerCase();
+  return r === "admin" || r === "fi_admin";
+}
+
+function isTenantBackendFiRole(role: string): boolean {
+  return role.trim().toLowerCase() === "tenant_backend";
+}
+
+/**
+ * Effective capability set for tenant-backend personas and explicit legacy CRM / super-tenant roles.
+ * Clinical members (`fi_users.role` ≠ `tenant_backend`) get an empty set here; route helpers union
+ * legacy paths (e.g. reminders) where appropriate.
+ */
+export async function resolveSessionTenantAdminCapabilities(tenantId: string): Promise<ReadonlySet<FiTenantAdminCapability>> {
+  const tid = tenantId.trim();
+  const authId = await resolveAuthUserId(null);
+  if (!authId || !tid) return new Set();
+
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+    return ALL_TENANT_ADMIN_CAPABILITIES;
+  }
+
+  const navAuth = await resolveShellAuthUserId(authId);
+  const row = await loadFiUserRow(tid, navAuth);
+  if (!row) return new Set();
+
+  const os = await loadFiOsIdentity(authId);
+  if (os && isFiOsPlatformAdminRole(os.osRole)) {
+    return ALL_TENANT_ADMIN_CAPABILITIES;
+  }
+
+  const rl = row.role.trim().toLowerCase();
+  if (legacyFiUserRoleGrantsAllCapabilities(rl)) {
+    return ALL_TENANT_ADMIN_CAPABILITIES;
+  }
+  if (rl === "crm_operator") {
+    return crmOperatorCapabilityPreset();
+  }
+
+  const prof = await loadActiveTenantAdminProfileForSession(tid, authId);
+  if (prof?.adminRole) {
+    return capabilitiesForTenantAdminRole(prof.adminRole);
+  }
+
+  if (!isTenantBackendFiRole(row.role)) {
+    return new Set();
+  }
+
+  return new Set();
+}
+
+export async function canAccessTenantReminderSettings(tenantId: string): Promise<boolean> {
+  const caps = await resolveSessionTenantAdminCapabilities(tenantId);
+  if (caps.has("manage_operations")) return true;
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return false;
+  const navAuth = await resolveShellAuthUserId(authId);
+  const row = await loadFiUserRow(tenantId.trim(), navAuth);
+  if (!row) return false;
+  return !isTenantBackendFiRole(row.role);
+}
+
+export async function canViewTaxLocalisationRoute(tenantId: string): Promise<boolean> {
+  const caps = await resolveSessionTenantAdminCapabilities(tenantId);
+  if (caps.has("view_finance") || caps.has("manage_finance_settings")) return true;
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return false;
+  const navAuth = await resolveShellAuthUserId(authId);
+  const row = await loadFiUserRow(tenantId.trim(), navAuth);
+  if (!row) return false;
+  return !isTenantBackendFiRole(row.role);
+}
+
+export async function canEditTaxLocalisationRoute(tenantId: string): Promise<boolean> {
+  const caps = await resolveSessionTenantAdminCapabilities(tenantId);
+  if (caps.has("manage_finance_settings")) return true;
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return false;
+  const navAuth = await resolveShellAuthUserId(authId);
+  const row = await loadFiUserRow(tenantId.trim(), navAuth);
+  if (!row) return false;
+  const rl = row.role.trim().toLowerCase();
+  return rl === "admin" || rl === "fi_admin";
+}
+
+export async function canManageTenantAdminUsersRoute(tenantId: string): Promise<boolean> {
+  const caps = await resolveSessionTenantAdminCapabilities(tenantId);
+  if (caps.has("manage_admin_users")) return true;
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return false;
+  const navAuth = await resolveShellAuthUserId(authId);
+  const row = await loadFiUserRow(tenantId.trim(), navAuth);
+  if (!row) return false;
+  return legacyFiUserRoleGrantsAllCapabilities(row.role);
+}
+
+export async function canViewTenantConfigurationHub(tenantId: string): Promise<boolean> {
+  const caps = await resolveSessionTenantAdminCapabilities(tenantId);
+  if (
+    caps.has("manage_clinic_settings") ||
+    caps.has("manage_finance_settings") ||
+    caps.has("manage_operations") ||
+    caps.has("manage_admin_users")
+  ) {
+    return true;
+  }
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return false;
+  const navAuth = await resolveShellAuthUserId(authId);
+  const row = await loadFiUserRow(tenantId.trim(), navAuth);
+  if (!row) return false;
+  return !isTenantBackendFiRole(row.role);
+}
+
+export async function canViewSecurityAuditNav(tenantId: string): Promise<boolean> {
+  const caps = await resolveSessionTenantAdminCapabilities(tenantId);
+  if (caps.has("view_security_audit")) return true;
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return false;
+  const navAuth = await resolveShellAuthUserId(authId);
+  const row = await loadFiUserRow(tenantId.trim(), navAuth);
+  if (!row) return false;
+  return !isTenantBackendFiRole(row.role);
+}
+
 /**
  * Resolves actor fi_users.id for tenant admin mutations (respects impersonation + platform admin proxy row).
  */
@@ -176,16 +310,5 @@ export async function resolveActorFiUserIdForTenantAdminActions(tenantId: string
 
 /** Whether the current session may open Admin Users settings (invite / role / suspend). */
 export async function getTenantAdminUsersManageAllowed(tenantId: string): Promise<boolean> {
-  const tid = tenantId.trim();
-  const authId = await resolveAuthUserId(null);
-  if (!authId) return false;
-  if (await isFiOsPlatformAdminFullSessionBypass(authId)) return true;
-  const navAuth = await resolveShellAuthUserId(authId);
-  const row = await loadFiUserRow(tid, navAuth);
-  if (!row) return false;
-  const prof = await loadActiveTenantAdminProfileForSession(tid, authId);
-  return canManageTenantAdminUsersFromProfiles({
-    tenantFiUserRole: row.role,
-    activeTenantAdminRole: prof?.adminRole ?? null,
-  });
+  return canManageTenantAdminUsersRoute(tenantId);
 }

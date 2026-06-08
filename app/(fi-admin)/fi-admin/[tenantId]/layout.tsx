@@ -13,7 +13,11 @@ import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import {
-  getTenantAdminUsersManageAllowed,
+  canAccessTenantReminderSettings,
+  canManageTenantAdminUsersRoute,
+  canViewSecurityAuditNav,
+  canViewTaxLocalisationRoute,
+  canViewTenantConfigurationHub,
   loadActiveTenantAdminProfileForSession,
 } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
@@ -56,14 +60,28 @@ export default async function TenantAdminLayout({
       impersonationDisplayName = await resolveFiOsAuthUserDisplayNameById(target);
     }
   }
-  const [showCrmNav, showBookingsBoard, userEmail, showAdminUsersNav, adminProf] = await Promise.all([
+  const [
+    showCrmNav,
+    showBookingsBoard,
+    userEmail,
+    showAdminUsersNav,
+    adminProf,
+    showTaxLocalisationSettingsNav,
+    showRemindersSettingsNav,
+    showAuditOsNav,
+    showConfigurationHubNav,
+  ] = await Promise.all([
     getCrmShellNavAllowed(tenantId),
     getBookingsBoardNavAllowed(tenantId),
     resolveFiOsAuthUserEmail(),
-    getTenantAdminUsersManageAllowed(tenantId),
+    canManageTenantAdminUsersRoute(tenantId),
     sessionAuthId
       ? loadActiveTenantAdminProfileForSession(tenantId, sessionAuthId)
       : Promise.resolve(null),
+    canViewTaxLocalisationRoute(tenantId),
+    canAccessTenantReminderSettings(tenantId),
+    canViewSecurityAuditNav(tenantId),
+    canViewTenantConfigurationHub(tenantId),
   ]);
   const tenantBackendAdminRole = adminProf?.adminRole ?? null;
   const showStaffAndServicesNav = showCrmNav || showBookingsBoard;
@@ -99,6 +117,10 @@ export default async function TenantAdminLayout({
         tenantBackendAdminRole={tenantBackendAdminRole}
         showStaffAndServicesNav={showStaffAndServicesNav}
         showAdminUsersNav={showAdminUsersNav}
+        showTaxLocalisationSettingsNav={showTaxLocalisationSettingsNav}
+        showRemindersSettingsNav={showRemindersSettingsNav}
+        showAuditOsNav={showAuditOsNav}
+        showConfigurationHubNav={showConfigurationHubNav}
         effective={effective}
         userEmail={userEmail}
         impersonationDisplayName={impersonationDisplayName}

@@ -4,6 +4,8 @@ import Link from "next/link";
 
 import { IiohrSeal } from "@/components/brand/iiohr-logo";
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
+import { FiHomeEcosystemSection } from "@/components/home/FiHomeEcosystemSection";
+import { FiHomePatientTwinSection } from "@/components/home/FiHomePatientTwinSection";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -360,6 +362,10 @@ export default function HomePage() {
         </div>
       </section>
 
+      <FiHomeEcosystemSection />
+
+      <FiHomePatientTwinSection />
+
       <Section className="border-b border-border/50 py-14 md:py-16">
         <FadeIn>
           <SectionIntro
@@ -382,7 +388,6 @@ export default function HomePage() {
       </Section>
 
       <GlobalHairIntelligenceSectionDynamic
-        id="ecosystem"
         variant="follicle-intelligence"
         heading={ECOSYSTEM_HEADING}
         description={ECOSYSTEM_DESCRIPTION}

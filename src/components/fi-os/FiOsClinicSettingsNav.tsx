@@ -12,10 +12,16 @@ export function FiOsClinicSettingsNav({
   tenantId,
   showStaffAndServicesNav,
   showAdminUsersNav,
+  showConfigurationHubNav = true,
+  showTaxLocalisationSettingsNav = true,
+  showRemindersSettingsNav = true,
 }: {
   tenantId: string;
   showStaffAndServicesNav: boolean;
   showAdminUsersNav: boolean;
+  showConfigurationHubNav?: boolean;
+  showTaxLocalisationSettingsNav?: boolean;
+  showRemindersSettingsNav?: boolean;
 }) {
   const pathname = usePathname() ?? "";
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -34,9 +40,11 @@ export function FiOsClinicSettingsNav({
     <div className="border-b border-white/[0.08] bg-[#060d18]/80 px-3 py-2 sm:px-4">
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-1.5">
         <span className="pr-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Clinic settings</span>
-        <Link href={`${base}/configuration`} className={linkCls(`${base}/configuration`)}>
-          Configuration
-        </Link>
+        {showConfigurationHubNav ? (
+          <Link href={`${base}/configuration`} className={linkCls(`${base}/configuration`)}>
+            Configuration
+          </Link>
+        ) : null}
         {showStaffAndServicesNav ? (
           <>
             <Link href={`${base}/staff`} className={linkCls(`${base}/staff`)}>
@@ -47,12 +55,16 @@ export function FiOsClinicSettingsNav({
             </Link>
           </>
         ) : null}
-        <Link href={`${base}/settings/reminders`} className={linkCls(`${base}/settings/reminders`)}>
-          Reminders
-        </Link>
-        <Link href={`${base}/settings/tax-localisation`} className={linkCls(`${base}/settings/tax-localisation`)}>
-          Tax &amp; Localisation
-        </Link>
+        {showRemindersSettingsNav ? (
+          <Link href={`${base}/settings/reminders`} className={linkCls(`${base}/settings/reminders`)}>
+            Reminders
+          </Link>
+        ) : null}
+        {showTaxLocalisationSettingsNav ? (
+          <Link href={`${base}/settings/tax-localisation`} className={linkCls(`${base}/settings/tax-localisation`)}>
+            Tax &amp; Localisation
+          </Link>
+        ) : null}
         {showAdminUsersNav ? (
           <Link
             href={`${base}/settings/admin-users`}

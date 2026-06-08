@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { TaxLocalisationSection } from "@/src/components/fi-admin/settings/TaxLocalisationSection";
+import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { getTaxLocalisationAccess } from "@/src/lib/taxLocalisation/taxLocalisationAccess.server";
 import { loadClinicsForTenant, resolveTaxLocalisationDocumentOrDefault } from "@/src/lib/taxLocalisation/taxLocalisationSettings.server";
 
@@ -25,6 +26,8 @@ export default async function TaxLocalisationSettingsPage({
   noStore();
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
+
+  await assertFiTenantPortalAccess(tenantId);
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     return (
