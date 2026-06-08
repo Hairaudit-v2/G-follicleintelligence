@@ -13,7 +13,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   ArrowRight,
-  BadgeCheck,
   Building2,
   ChartColumnIncreasing,
   CheckCircle2,
@@ -35,9 +34,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Follicle Intelligence | Central Intelligence Layer for Hair Restoration Quality & Standards",
+  title: "Follicle Intelligence | Hair Restoration Intelligence Network",
   description:
-    "The shared intelligence layer connecting HairAudit surgical evidence, HLI longitudinal biology, and IIOHR methodology—building transparency, accountability, and benchmark visibility for clinics, institutions, and global hair restoration.",
+    "The intelligence layer connecting diagnosis, treatment, surgery, outcomes, training and business intelligence across the global hair restoration ecosystem—learning with every interaction.",
 };
 
 const ECOSYSTEM_HEADING = "One intelligence layer. Three operational surfaces.";
@@ -63,12 +62,18 @@ const GlobalHairIntelligenceSectionDynamic = dynamic(
   }
 );
 
-const HERO_METRICS = [
-  { label: "Audit Score Coverage", value: "24 domains" },
-  { label: "Benchmark Cohorts", value: "42 active" },
-  { label: "Evidence Confidence", value: "98.4%" },
-  { label: "Reporting Modes", value: "Public + internal" },
-];
+const FiHeroEcosystemViz = dynamic(
+  () => import("@/components/home/FiHeroEcosystemViz").then((m) => ({ default: m.FiHeroEcosystemViz })),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        aria-hidden
+        className="relative mx-auto aspect-[1/1.05] min-h-[320px] w-full max-w-[min(100%,520px)] animate-pulse rounded-[1.75rem] border border-white/[0.06] bg-[rgb(10_15_24_/0.85)] sm:min-h-[380px] md:min-h-[420px]"
+      />
+    ),
+  }
+);
 
 const MARKET_WHY_POINTS: { title: string; desc: string }[] = [
   {
@@ -283,147 +288,74 @@ export default function HomePage() {
   return (
     <>
       <section className="fi-grid relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_0%,hsl(var(--primary)/0.16),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_100%_20%,rgb(144_165_190_/_12%),transparent_38%)]" />
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-12 md:py-24">
-          <FadeIn className="md:col-span-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-primary/90">
-              <BadgeCheck className="h-3.5 w-3.5" />
-              Central intelligence layer
-            </div>
-            <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-foreground md:text-6xl">
-              Transparency and accountability at global scale—in hair restoration.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Follicle Intelligence is the shared layer that turns fragmented procedural evidence into
-              benchmarked quality, standards-aligned review, and credible reporting. It connects HairAudit
-              (surgical audit surface), Hair Longevity Institute (biology and longitudinal treatment
-              intelligence), and IIOHR (methodology, training, and standards)—learning across all three
-              without replacing any clinic system of record.
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_14%_0%,hsl(var(--primary)/0.2),transparent_46%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_96%_12%,rgb(110_150_200_/0.11),transparent_40%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/70" />
+
+        <div className="relative mx-auto grid max-w-6xl gap-14 px-6 py-20 md:grid-cols-12 md:gap-16 md:py-28">
+          <FadeIn className="md:col-span-6 lg:col-span-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-primary/90">
+              Hair Restoration Intelligence Platform
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <Button asChild size="lg" className="h-11 rounded-xl px-6">
-                <Link href="/contact?intent=demo">Request Demo</Link>
+            <h1 className="mt-5 max-w-3xl font-display text-4xl font-semibold tracking-tight text-foreground md:text-5xl md:leading-[1.08] lg:text-[3.15rem]">
+              The World&apos;s First Hair Restoration Intelligence Network
+            </h1>
+            <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-foreground/92 md:text-xl md:leading-relaxed">
+              Connecting diagnosis, treatment, surgery, outcomes, training and business intelligence into a single
+              ecosystem.
+            </p>
+            <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base md:leading-relaxed">
+              Follicle Intelligence sits at the centre of a growing global ecosystem connecting clinics, surgeons,
+              educators, researchers and patients. Every interaction contributes to a continuously learning intelligence
+              network designed specifically for hair restoration.
+            </p>
+
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Button
+                asChild
+                size="lg"
+                className="h-11 rounded-xl px-6 shadow-[0_10px_36px_hsl(var(--primary)/0.2)]"
+              >
+                <Link href="/contact?intent=demo">Request a Demo</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="h-11 rounded-xl px-6">
-                <Link href="/platform">Explore Platform</Link>
-              </Button>
-              <Button asChild variant="ghost" size="lg" className="h-11 rounded-xl px-2">
-                <Link href="/dashboard-demo">
-                  View Dashboard Demo
-                  <ArrowRight className="h-4 w-4" />
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-11 rounded-xl border-white/10 bg-background/25 px-6 backdrop-blur-sm"
+              >
+                <Link href="/#ecosystem" className="inline-flex items-center gap-2">
+                  Explore the Ecosystem
+                  <ArrowRight className="h-4 w-4 opacity-80" aria-hidden />
                 </Link>
               </Button>
             </div>
-            <div className="mt-12 grid gap-4 sm:grid-cols-2">
-              {HERO_METRICS.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-border/60 bg-background/45 px-4 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-foreground">{item.value}</p>
-                </div>
-              ))}
+
+            <div className="mt-10 border-t border-white/[0.07] pt-8">
+              <p className="sr-only">Intelligence domains across the network</p>
+              <ul className="flex flex-wrap items-center gap-x-1 gap-y-2 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground sm:text-[11px]">
+                {[
+                  "Clinical Intelligence",
+                  "Surgical Intelligence",
+                  "Outcome Intelligence",
+                  "Training Intelligence",
+                  "Business Intelligence",
+                ].map((item, idx) => (
+                  <li key={item} className="inline-flex items-center gap-x-3">
+                    {idx > 0 ? (
+                      <span className="select-none text-border/80" aria-hidden>
+                        ·
+                      </span>
+                    ) : null}
+                    <span className="text-foreground/78">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </FadeIn>
 
-          <FadeIn delay={0.08} className="md:col-span-6">
-            <div className="fi-panel rounded-[1.75rem] p-5 md:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                    Follicle Intelligence Preview
-                  </p>
-                  <h2 className="mt-3 text-xl font-semibold text-foreground md:text-2xl">
-                    Cross-surface audit command layer
-                  </h2>
-                </div>
-                <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-300">
-                  Live benchmarking
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                <div className="rounded-[1.4rem] border border-border/70 bg-background/55 p-5">
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                        Overall Audit Score
-                      </p>
-                      <p className="mt-3 text-4xl font-semibold text-foreground">91.8</p>
-                    </div>
-                    <div className="rounded-2xl border border-primary/20 bg-primary/10 px-3 py-2 text-right">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-primary/80">
-                        Cohort delta
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-primary">+8.4%</p>
-                    </div>
-                  </div>
-                  <div className="mt-5 grid gap-3">
-                    <ScoreBar label="Donor management" value="93" width="93%" />
-                    <ScoreBar label="Extraction quality" value="90" width="90%" />
-                    <ScoreBar label="Implantation quality" value="95" width="95%" />
-                  </div>
-                </div>
-
-                <div className="grid gap-4">
-                  <div className="rounded-[1.4rem] border border-border/70 bg-background/55 p-5">
-                    <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                      Benchmark standing
-                    </p>
-                    <p className="mt-3 text-2xl font-semibold text-foreground">Top 14% of peer cohort</p>
-                    <div className="mt-4 space-y-3">
-                      {[
-                        ["Clinic median", "84.6"],
-                        ["Group best", "93.1"],
-                        ["Internal target", "90.0"],
-                      ].map(([label, value]) => (
-                        <div key={label} className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">{label}</span>
-                          <span className="font-medium text-foreground">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-[1.4rem] border border-border/70 bg-background/55 p-5">
-                    <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                      Governance queue
-                    </p>
-                    <div className="mt-4 grid gap-3">
-                      {[
-                        ["Review flags", "03"],
-                        ["Training signals", "07"],
-                        ["Confidence exceptions", "01"],
-                      ].map(([label, value]) => (
-                        <div
-                          key={label}
-                          className="flex items-center justify-between rounded-xl border border-border/60 bg-card/50 px-3 py-3"
-                        >
-                          <span className="text-sm text-muted-foreground">{label}</span>
-                          <span className="text-sm font-semibold text-foreground">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                {[
-                  ["Outcome variance", "Contained"],
-                  ["Report state", "Internal review"],
-                  ["White-label layer", "Enabled"],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-2xl border border-border/60 bg-card/35 px-4 py-3">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                      {label}
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-foreground">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <FadeIn delay={0.08} className="md:col-span-6 lg:col-span-7">
+            <FiHeroEcosystemViz />
           </FadeIn>
         </div>
       </section>
@@ -450,6 +382,7 @@ export default function HomePage() {
       </Section>
 
       <GlobalHairIntelligenceSectionDynamic
+        id="ecosystem"
         variant="follicle-intelligence"
         heading={ECOSYSTEM_HEADING}
         description={ECOSYSTEM_DESCRIPTION}

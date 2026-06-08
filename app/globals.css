@@ -163,6 +163,34 @@ body {
     color: rgb(224 196 129 / 92%);
   }
 
+  /* Homepage hero — ecosystem link pulse (respects prefers-reduced-motion below) */
+  @keyframes fi-hero-network-dash {
+    to {
+      stroke-dashoffset: -40;
+    }
+  }
+  @keyframes fi-hero-network-dash-rev {
+    to {
+      stroke-dashoffset: 40;
+    }
+  }
+
+  .fi-hero-network-line-out {
+    stroke-dashoffset: 0;
+    animation: fi-hero-network-dash 3.2s linear infinite;
+  }
+  .fi-hero-network-line-in {
+    stroke-dashoffset: 0;
+    animation: fi-hero-network-dash-rev 2.8s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fi-hero-network-line-out,
+    .fi-hero-network-line-in {
+      animation: none;
+    }
+  }
+
   /* FI operational calendar — responsive grid tokens */
   .fi-calendar-shell {
     --fi-calendar-gutter: 44px;
