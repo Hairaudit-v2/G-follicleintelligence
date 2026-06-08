@@ -227,6 +227,13 @@ function applyStructuredFilters(
     }
     if (q.assignedUserId?.trim() && b.assigned_user_id !== q.assignedUserId.trim()) return false;
     if (q.clinicId?.trim() && b.clinic_id !== q.clinicId.trim()) return false;
+    if (q.waitingOnly) {
+      const st = b.booking_status.trim();
+      if (st !== "scheduled" && st !== "confirmed") return false;
+    }
+    if (q.unassignedOnly) {
+      if (b.assigned_staff_id?.trim() || b.assigned_user_id?.trim()) return false;
+    }
     return true;
   });
 }

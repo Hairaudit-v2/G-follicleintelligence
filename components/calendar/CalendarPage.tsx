@@ -29,6 +29,7 @@ import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointment
 import { useCalendarAppointments } from "@/hooks/useCalendarAppointments";
 import { cn } from "@/lib/utils";
 import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
+import { FiOsCalendarTodayCommandStrip } from "@/src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip";
 import type { CrmShellSession } from "@/src/lib/crm/crmShellAccess";
 
 const viewMotion = {
@@ -250,6 +251,10 @@ export function CalendarPage({
 
       {isFiOsWorkspace ? (
         <FiOsCalendarQuickFilters tenantId={data.tenantId} query={data.query} clinics={data.clinics} route={route} />
+      ) : null}
+
+      {isFiOsWorkspace ? (
+        <FiOsCalendarTodayCommandStrip tenantId={data.tenantId} query={data.query} bookings={bookings} lanes={data.lanes} route={route} />
       ) : null}
 
       {sampleMode ? (

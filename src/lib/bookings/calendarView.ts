@@ -177,6 +177,8 @@ function filtersPatchFromQuery(q: ParsedCalendarQuery): CalendarHrefQuery {
     includeCancelled: q.includeCancelled ? true : undefined,
     q: q.search?.trim() ? q.search.trim() : undefined,
     sample: q.sampleMode ? true : undefined,
+    waiting: q.waitingOnly ? true : undefined,
+    unassigned: q.unassignedOnly ? true : undefined,
   };
 }
 

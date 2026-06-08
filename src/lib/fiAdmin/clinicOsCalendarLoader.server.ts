@@ -22,6 +22,8 @@ function todayUtcDayQuery(now: Date): ParsedCalendarQuery {
     search: null,
     sampleMode: false,
     staffRoleBucket: null,
+    waitingOnly: false,
+    unassignedOnly: false,
   };
 }
 

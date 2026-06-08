@@ -59,6 +59,10 @@ export type ParsedCalendarQuery = {
   sampleMode: boolean;
   /** `?role=doctor|nurse` — ignored when {@link staffId} is set (specific staff wins). */
   staffRoleBucket: CalendarStaffRoleBucket | null;
+  /** `?waiting=1` — scheduled or confirmed (lobby / not yet arrived). Mutually exclusive with {@link status}. */
+  waitingOnly: boolean;
+  /** `?unassigned=1` — no `assigned_staff_id` and no `assigned_user_id`. Mutually exclusive with staff/assignee filters. */
+  unassignedOnly: boolean;
 };
 
 const UUID_RE =
@@ -143,6 +147,9 @@ export function parseCalendarSearchParams(
   const staffRoleBucket: CalendarStaffRoleBucket | null =
     roleRaw === "doctor" || roleRaw === "nurse" ? roleRaw : null;
 
+  const waitingOnly = parseBoolParam(searchParams.waiting);
+  const unassignedOnly = parseBoolParam(searchParams.unassigned);
+
   return {
     view,
     dateAnchor,
@@ -156,16 +163,18 @@ export function parseCalendarSearchParams(
     search,
     sampleMode,
     staffRoleBucket,
+    waitingOnly,
+    unassignedOnly,
   };
 }
 
 export type CalendarHrefQuery = {
   view?: CalendarViewMode;
   date?: string;
-  status?: string;
+  status?: string | null | "";
   /** Pass `null` or `""` to clear the booking-type filter. */
   type?: string | null | "";
-  assignedUserId?: string;
+  assignedUserId?: string | null | "";
   /** Pass `null` or `""` to clear the staff filter (`All staff`). */
   staffId?: string | null | "";
   /** Pass `null` or `""` to clear the location filter (`All locations`). */
@@ -176,6 +185,10 @@ export type CalendarHrefQuery = {
   q?: string;
   /** When true, append `sample=1` for demo calendar rows. */
   sample?: boolean;
+  /** `true` sets `waiting=1`, `false` clears it from the URL. */
+  waiting?: boolean;
+  /** `true` sets `unassigned=1`, `false` clears it from the URL. */
+  unassigned?: boolean;
 };
 
 export function buildCalendarHref(
@@ -198,6 +211,8 @@ export function buildCalendarHref(
   if (q.includeCancelled) sp.set("includeCancelled", "1");
   if (q.q?.trim()) sp.set("q", q.q.trim());
   if (q.sample) sp.set("sample", "1");
+  if (q.waiting) sp.set("waiting", "1");
+  if (q.unassigned) sp.set("unassigned", "1");
   const qs = sp.toString();
   return qs ? `${base}?${qs}` : base;
 }
@@ -232,23 +247,54 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
         : String(patch.clinicId).trim() || undefined
       : current.clinicId ?? undefined;
 
+  let waitingOnly =
+    patch.waiting !== undefined ? Boolean(patch.waiting) : current.waitingOnly;
+  let unassignedOnly =
+    patch.unassigned !== undefined ? Boolean(patch.unassigned) : current.unassignedOnly;
+
+  let statusOut: string | undefined =
+    patch.status !== undefined
+      ? cleared(patch.status)
+        ? undefined
+        : String(patch.status).trim() || undefined
+      : current.status ?? undefined;
+
+  if (waitingOnly) statusOut = undefined;
+  if (statusOut) waitingOnly = false;
+
+  let assignedUserIdOut: string | undefined =
+    patch.assignedUserId !== undefined
+      ? cleared(patch.assignedUserId)
+        ? undefined
+        : String(patch.assignedUserId).trim() || undefined
+      : current.assignedUserId ?? undefined;
+
+  if (staffId || assignedUserIdOut || role) unassignedOnly = false;
+  if (unassignedOnly) {
+    staffId = undefined;
+    role = undefined;
+    assignedUserIdOut = undefined;
+  }
+
   return {
     view: patch.view ?? current.view,
     date: patch.date ?? current.dateAnchor,
-    status: patch.status !== undefined ? patch.status : current.status ?? undefined,
+    status: statusOut,
     type:
       patch.type !== undefined
         ? cleared(patch.type)
           ? undefined
           : patch.type
         : current.bookingType ?? undefined,
-    assignedUserId: patch.assignedUserId !== undefined ? patch.assignedUserId : current.assignedUserId ?? undefined,
+    assignedUserId: assignedUserIdOut,
     staffId,
     clinicId,
     role,
     includeCancelled: patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
     q: patch.q !== undefined ? patch.q : current.search ?? undefined,
     sample: patch.sample !== undefined ? patch.sample : current.sampleMode ? true : undefined,
+    waiting: waitingOnly ? true : undefined,
+    unassigned: unassignedOnly ? true : undefined,
   };
 }
 
