@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
 import { getFiOsShellActiveSidebarId, resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
 
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
@@ -37,6 +38,7 @@ export function FiOsAppShell({
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
+  const isCalendarMainLocked = useMemo(() => isFiOsTenantCalendarPath(pathname), [pathname]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
   const quickCreateOpenRef = useRef(false);
@@ -124,7 +126,14 @@ export function FiOsAppShell({
             onOpenMobileNav={() => setMobileNav(true)}
             onOpenQuickCreate={() => setQuickCreateOpen(true)}
           />
-          <main className={cn(fiOsChromeClasses.mainScroll, "flex min-h-0 flex-col")}>{children}</main>
+          <main
+            className={cn(
+              isCalendarMainLocked ? fiOsChromeClasses.mainScrollCalendarLock : fiOsChromeClasses.mainScroll,
+              "flex min-h-0 flex-col"
+            )}
+          >
+            {children}
+          </main>
         </div>
       </div>
 

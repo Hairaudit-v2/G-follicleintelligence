@@ -23,6 +23,15 @@ import {
 } from "@/src/components/fi-design/fiDesignTokens";
 import { cn } from "@/lib/utils";
 
+/** FI OS: primary appointment types (consultation, PRP, surgery, follow-up, block). */
+const FI_OS_PRIMARY_TEMPLATE_IDS: CalendarQuickTemplateId[] = [
+  "consultation_30",
+  "prp_treatment_30",
+  "surgery_default",
+  "follow_up_15",
+  "block_time",
+];
+
 function useDebouncedValue<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -41,6 +50,8 @@ export type CalendarQuickCreatePrefill = {
   columnId?: string;
   dayKey?: string;
   templateId?: CalendarQuickTemplateId;
+  /** When the slot column does not imply a clinic (e.g. staff column), seed from calendar URL filter. */
+  defaultClinicId?: string;
 };
 
 type AnchorSelection =
@@ -78,6 +89,7 @@ export function CalendarQuickCreateDrawer({
   assignees,
   staffDirectory,
   onCreated,
+  workflowVariant = "default",
 }: {
   tenantId: string;
   open: boolean;
@@ -88,6 +100,8 @@ export function CalendarQuickCreateDrawer({
   assignees: CrmShellUserPickerOption[];
   staffDirectory: CrmShellUserPickerOption[];
   onCreated: (booking: FiBookingRow) => void;
+  /** FI OS: condensed type row + collapsible time/location. */
+  workflowVariant?: "default" | "fiOs";
 }) {
   const toast = useCalendarToastOptional();
   const titleId = useId();
@@ -115,7 +129,8 @@ export function CalendarQuickCreateDrawer({
   const resetFromPrefill = useCallback(() => {
     if (!prefill?.localStart?.trim()) return;
     const colDefaults = columnResourceDefaults(prefill.columnId);
-    setClinicId(colDefaults.clinicId);
+    const clinicFromFilter = prefill.defaultClinicId?.trim() ?? "";
+    setClinicId(colDefaults.clinicId || clinicFromFilter || "");
     setAssigneeSelect(colDefaults.assigneeSelect);
     const tpl = prefill.templateId ? calendarQuickTemplateById(prefill.templateId) : null;
     const nextTpl = tpl?.id ?? "consultation_30";
@@ -241,6 +256,31 @@ export function CalendarQuickCreateDrawer({
     return rows;
   }, [assignees, staffDirectory]);
 
+  const isFiOsFlow = workflowVariant === "fiOs";
+
+  const fiOsPrimaryTemplates = useMemo(() => {
+    const out: NonNullable<ReturnType<typeof calendarQuickTemplateById>>[] = [];
+    for (const id of FI_OS_PRIMARY_TEMPLATE_IDS) {
+      const t = calendarQuickTemplateById(id);
+      if (t) out.push(t);
+    }
+    return out;
+  }, []);
+
+  const scheduleSummary = useMemo(() => {
+    if (!startLocal || !endLocal) return "Time, clinic & provider — tap to adjust";
+    const datePart = startLocal.slice(0, 10);
+    const tStart = startLocal.slice(11, 16);
+    const tEnd = endLocal.slice(11, 16);
+    const c = clinics.find((x) => x.id === clinicId)?.display_name?.trim();
+    const assigneeLabel =
+      assigneeOptions.find((o) => o.value === assigneeSelect)?.label?.trim().replace(/\s*\(staff\)\s*$/, "") ?? "";
+    const parts: string[] = [datePart, `${tStart}–${tEnd}`];
+    if (c) parts.push(c);
+    if (assigneeLabel && assigneeLabel !== "Unassigned") parts.push(assigneeLabel);
+    return parts.join(" · ");
+  }, [assigneeOptions, assigneeSelect, clinicId, clinics, endLocal, startLocal]);
+
   const parseAssigneeSelect = useCallback((v: string) => {
     if (v.startsWith("s:")) return { assignedStaffId: v.slice(2), assignedUserId: "" };
     if (v.startsWith("u:")) return { assignedStaffId: "", assignedUserId: v.slice(2) };
@@ -348,9 +388,12 @@ export function CalendarQuickCreateDrawer({
           <div className={cn(os.root, "min-w-0")}>
             <p className={os.eyebrow}>Scheduling</p>
             <h2 id={titleId} className={cn(os.title, "text-lg sm:text-xl")}>
-              Quick create appointment
+              {isFiOsFlow ? "Quick book" : "Quick create appointment"}
             </h2>
-            <p className={os.description}>Times use {tzLabel}.</p>
+            <p className={os.description}>
+              {isFiOsFlow ? "Prefilled from the slot and calendar filters. " : null}
+              Times use {tzLabel}.
+            </p>
           </div>
           <button
             type="button"
@@ -365,9 +408,9 @@ export function CalendarQuickCreateDrawer({
         <form onSubmit={(e) => void onSubmit(e)} className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-5">
           <div className="space-y-4">
             <div>
-              <p className={cn(os.eyebrow, "mb-2")}>Template</p>
+              <p className={cn(os.eyebrow, "mb-2")}>{isFiOsFlow ? "Appointment type" : "Template"}</p>
               <div className="flex flex-wrap gap-2">
-                {CALENDAR_QUICK_TEMPLATES.map((t) => (
+                {(isFiOsFlow ? fiOsPrimaryTemplates : CALENDAR_QUICK_TEMPLATES).map((t) => (
                   <button
                     key={t.id}
                     type="button"
@@ -386,43 +429,105 @@ export function CalendarQuickCreateDrawer({
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
-                Start
-                <input type="datetime-local" className={inputClass} value={startLocal} onChange={(e) => onStartChange(e.target.value)} required />
-              </label>
-              <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
-                End
-                <input type="datetime-local" className={inputClass} value={endLocal} onChange={(e) => setEndLocal(e.target.value)} required />
-              </label>
-            </div>
+            {isFiOsFlow ? (
+              <details className="rounded-xl border border-white/[0.1] bg-slate-950/25 open:border-cyan-500/25">
+                <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-slate-200 [&::-webkit-details-marker]:hidden">
+                  <span className="text-slate-500">Time & place · </span>
+                  {scheduleSummary}
+                </summary>
+                <div className="space-y-3 border-t border-white/[0.08] px-3 pb-3 pt-2">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
+                      Start
+                      <input
+                        type="datetime-local"
+                        className={inputClass}
+                        value={startLocal}
+                        onChange={(e) => onStartChange(e.target.value)}
+                        required
+                      />
+                    </label>
+                    <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
+                      End
+                      <input
+                        type="datetime-local"
+                        className={inputClass}
+                        value={endLocal}
+                        onChange={(e) => setEndLocal(e.target.value)}
+                        required
+                      />
+                    </label>
+                  </div>
 
-            {clinics.length > 0 ? (
-              <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                Clinic
-                <select className={inputClass} value={clinicId} onChange={(e) => setClinicId(e.target.value)}>
-                  <option value="">—</option>
-                  {clinics.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.display_name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
+                  {clinics.length > 0 ? (
+                    <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                      Clinic
+                      <select className={inputClass} value={clinicId} onChange={(e) => setClinicId(e.target.value)}>
+                        <option value="">—</option>
+                        {clinics.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.display_name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null}
 
-            {assigneeOptions.length > 1 ? (
-              <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                Provider / resource
-                <select className={inputClass} value={assigneeSelect} onChange={(e) => setAssigneeSelect(e.target.value)}>
-                  {assigneeOptions.map((o) => (
-                    <option key={o.value || "none"} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
+                  {assigneeOptions.length > 1 ? (
+                    <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                      Provider / resource
+                      <select className={inputClass} value={assigneeSelect} onChange={(e) => setAssigneeSelect(e.target.value)}>
+                        {assigneeOptions.map((o) => (
+                          <option key={o.value || "none"} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null}
+                </div>
+              </details>
+            ) : (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
+                    Start
+                    <input type="datetime-local" className={inputClass} value={startLocal} onChange={(e) => onStartChange(e.target.value)} required />
+                  </label>
+                  <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
+                    End
+                    <input type="datetime-local" className={inputClass} value={endLocal} onChange={(e) => setEndLocal(e.target.value)} required />
+                  </label>
+                </div>
+
+                {clinics.length > 0 ? (
+                  <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                    Clinic
+                    <select className={inputClass} value={clinicId} onChange={(e) => setClinicId(e.target.value)}>
+                      <option value="">—</option>
+                      {clinics.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.display_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+
+                {assigneeOptions.length > 1 ? (
+                  <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                    Provider / resource
+                    <select className={inputClass} value={assigneeSelect} onChange={(e) => setAssigneeSelect(e.target.value)}>
+                      {assigneeOptions.map((o) => (
+                        <option key={o.value || "none"} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+              </>
+            )}
 
             {calendarQuickTemplateById(templateId)?.isBlock ? (
               <p className="rounded-lg border border-sky-500/25 bg-sky-950/30 px-3 py-2 text-xs text-sky-100">

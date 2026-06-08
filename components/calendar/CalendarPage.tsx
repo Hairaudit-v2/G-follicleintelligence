@@ -89,7 +89,8 @@ export function CalendarPage({
   const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
 
   const quickCallInEnabled = Boolean(data.canMutateBookings && crmShellSession);
-  const quickCreateEnabled = quickCallInEnabled;
+  /** FI OS: slot quick-create uses tenant booking rights; CRM session is only required for call-in + slide-over. */
+  const quickCreateEnabled = Boolean(data.canMutateBookings && (workspaceVariant === "fiOs" || crmShellSession));
   const isFiOsWorkspace = workspaceVariant === "fiOs";
 
   const dismissFiOsCalendarDrawers = useCallback(() => {
@@ -115,10 +116,32 @@ export function CalendarPage({
         columnId: p.columnId,
         dayKey: p.dayKey,
         templateId,
+        defaultClinicId: data.query.clinicId?.trim() || undefined,
       });
       setQuickCreateOpen(true);
     },
-    []
+    [data.query.clinicId]
+  );
+
+  const quickCreateFabPrefill = useMemo(
+    () => ({
+      localStart: slotPrefillLocal,
+      templateId: "consultation_30" as const,
+      defaultClinicId: data.query.clinicId?.trim() || undefined,
+      columnId: data.query.staffId
+        ? (`s:${data.query.staffId}` as const)
+        : data.query.assignedUserId
+          ? (`u:${data.query.assignedUserId}` as const)
+          : data.query.clinicId
+            ? (`c:${data.query.clinicId}` as const)
+            : undefined,
+    }),
+    [
+      data.query.assignedUserId,
+      data.query.clinicId,
+      data.query.staffId,
+      slotPrefillLocal,
+    ]
   );
 
   const base = `/fi-admin/${data.tenantId.trim()}`;
@@ -319,60 +342,130 @@ export function CalendarPage({
           x={slotContextMenu.x}
           y={slotContextMenu.y}
           onClose={() => setSlotContextMenu(null)}
-          items={[
-            {
-              id: "consult",
-              label: "New Consultation",
-              onSelect: () =>
-                openQuickCreateFromSlot(
+          items={
+            isFiOsWorkspace
+              ? [
                   {
-                    dayKey: slotContextMenu.dayKey,
-                    columnId: slotContextMenu.columnId,
-                    localStart: slotContextMenu.localStart,
+                    id: "consult",
+                    label: "Consultation",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "consultation_30"
+                      ),
                   },
-                  "consultation_30"
-                ),
-            },
-            {
-              id: "treat",
-              label: "New Treatment",
-              onSelect: () =>
-                openQuickCreateFromSlot(
                   {
-                    dayKey: slotContextMenu.dayKey,
-                    columnId: slotContextMenu.columnId,
-                    localStart: slotContextMenu.localStart,
+                    id: "prp",
+                    label: "PRP",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "prp_treatment_30"
+                      ),
                   },
-                  "prp_treatment_30"
-                ),
-            },
-            {
-              id: "block",
-              label: "Block Time",
-              onSelect: () =>
-                openQuickCreateFromSlot(
                   {
-                    dayKey: slotContextMenu.dayKey,
-                    columnId: slotContextMenu.columnId,
-                    localStart: slotContextMenu.localStart,
+                    id: "surg",
+                    label: "Surgery",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "surgery_default"
+                      ),
                   },
-                  "block_time"
-                ),
-            },
-            {
-              id: "surg",
-              label: "Create Surgery",
-              onSelect: () =>
-                openQuickCreateFromSlot(
                   {
-                    dayKey: slotContextMenu.dayKey,
-                    columnId: slotContextMenu.columnId,
-                    localStart: slotContextMenu.localStart,
+                    id: "follow",
+                    label: "Follow-up",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "follow_up_15"
+                      ),
                   },
-                  "surgery_default"
-                ),
-            },
-          ]}
+                  {
+                    id: "block",
+                    label: "Block time",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "block_time"
+                      ),
+                  },
+                ]
+              : [
+                  {
+                    id: "consult",
+                    label: "New Consultation",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "consultation_30"
+                      ),
+                  },
+                  {
+                    id: "treat",
+                    label: "New Treatment",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "prp_treatment_30"
+                      ),
+                  },
+                  {
+                    id: "block",
+                    label: "Block Time",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "block_time"
+                      ),
+                  },
+                  {
+                    id: "surg",
+                    label: "Create Surgery",
+                    onSelect: () =>
+                      openQuickCreateFromSlot(
+                        {
+                          dayKey: slotContextMenu.dayKey,
+                          columnId: slotContextMenu.columnId,
+                          localStart: slotContextMenu.localStart,
+                        },
+                        "surgery_default"
+                      ),
+                  },
+                ]
+          }
         />
       ) : null}
 
@@ -389,6 +482,7 @@ export function CalendarPage({
           clinics={data.clinics}
           assignees={data.assignees}
           staffDirectory={data.staffDirectory}
+          workflowVariant={isFiOsWorkspace ? "fiOs" : "default"}
           onCreated={(booking) => {
             upsertBooking(booking);
             refresh();
@@ -423,30 +517,28 @@ export function CalendarPage({
         onSaved={refresh}
       />
 
+      {quickCreateEnabled ? (
+        <button
+          type="button"
+          onClick={() => {
+            setQuickCreatePrefill({ ...quickCreateFabPrefill });
+            setQuickCreateOpen(true);
+          }}
+          className={cn(
+            "fixed z-[120] inline-flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-2 transition focus:outline-none focus-visible:ring-4 sm:h-14 sm:w-14",
+            isFiOsWorkspace
+              ? "bottom-28 right-4 bg-cyan-400 text-[#041018] shadow-cyan-950/50 ring-cyan-300/40 hover:bg-cyan-300 focus-visible:ring-cyan-200 sm:bottom-32 sm:right-6"
+              : "bottom-28 right-4 bg-sky-500 text-white shadow-sky-950/40 ring-sky-300/50 hover:bg-sky-400 focus-visible:ring-sky-200 sm:bottom-32 sm:right-6"
+          )}
+          aria-label="New appointment"
+          title="New appointment"
+        >
+          <Plus className="h-7 w-7" aria-hidden strokeWidth={2.25} />
+        </button>
+      ) : null}
+
       {data.canMutateBookings && crmShellSession ? (
         <>
-          {quickCreateEnabled ? (
-            <button
-              type="button"
-              onClick={() => {
-                setQuickCreatePrefill({
-                  localStart: slotPrefillLocal,
-                  templateId: "consultation_30",
-                });
-                setQuickCreateOpen(true);
-              }}
-              className={cn(
-                "fixed z-[120] inline-flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-2 transition focus:outline-none focus-visible:ring-4 sm:h-14 sm:w-14",
-                isFiOsWorkspace
-                  ? "bottom-28 right-4 bg-cyan-400 text-[#041018] shadow-cyan-950/50 ring-cyan-300/40 hover:bg-cyan-300 focus-visible:ring-cyan-200 sm:bottom-32 sm:right-6"
-                  : "bottom-28 right-4 bg-sky-500 text-white shadow-sky-950/40 ring-sky-300/50 hover:bg-sky-400 focus-visible:ring-sky-200 sm:bottom-32 sm:right-6"
-              )}
-              aria-label="New appointment"
-              title="New appointment"
-            >
-              <Plus className="h-7 w-7" aria-hidden strokeWidth={2.25} />
-            </button>
-          ) : null}
           <button
             type="button"
             onClick={() => {

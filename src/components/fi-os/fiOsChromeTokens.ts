@@ -4,6 +4,10 @@
  */
 export { fiAdminDashboard as fiOsDesignTokens, fiAdminAmbientBackgroundStyle } from "@/src/components/fi-admin/dashboard-ui/dashboardTheme";
 
+/** Shared padding + flex sizing for FI OS `<main>` (vertical overflow chosen in `FiOsAppShell`). */
+const FI_OS_MAIN_PAD =
+  "relative min-h-0 flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5";
+
 /** Tailwind class bundles (static strings for build). */
 export const fiOsChromeClasses = {
   shellRoot: "flex min-h-[100dvh] w-full flex-col bg-[#081020] text-[#F8FAFC]",
@@ -11,8 +15,10 @@ export const fiOsChromeClasses = {
   mainColumn: "flex min-h-0 min-w-0 flex-1 flex-col",
   /** Command bar — tighter vertical rhythm than marketing pages. */
   topBar: "sticky top-0 z-30 shrink-0 border-b border-white/[0.08] bg-[#0a1424]/92 px-3 py-2 backdrop-blur-xl sm:px-4 lg:px-5",
-  /** Main workspace gutter — app density (not wide marketing margins). */
-  mainScroll: "relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5",
+  /** Non-calendar tenant pages: single vertical scroll on `<main>`. */
+  mainScroll: `${FI_OS_MAIN_PAD} overflow-y-auto`,
+  /** Calendar subtree owns scroll; `<main>` does not scroll vertically (`isFiOsTenantCalendarPath`). */
+  mainScrollCalendarLock: `${FI_OS_MAIN_PAD} overflow-hidden`,
   /** Tenant route inset card behind page content (glass + soft lift). */
   tenantMainSurface:
     "relative min-h-[min(32vh,400px)] overflow-hidden rounded-xl border border-white/[0.08] bg-[#050a12]/94 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_36px_rgba(0,0,0,0.32)]",

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
-import { DashboardShell } from "@/src/components/fi-admin/dashboard-ui";
-import { FiOsWorkspacePickerChrome } from "@/src/components/fi-admin/shell/FiOsWorkspacePickerChrome";
+import { FiOsWorkspaceEntryShell } from "@/src/components/fi-os/FiOsWorkspaceEntryShell";
 import { resolveFiOsAuthUserEmail } from "@/src/lib/fiOs/fiOsAuthDisplay.server";
 import { assertFiAdminShellAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
@@ -18,9 +17,5 @@ export default async function FiAdminLayout({
   await assertFiAdminShellAccess();
   const userEmail = await resolveFiOsAuthUserEmail();
 
-  return (
-    <DashboardShell>
-      <FiOsWorkspacePickerChrome userEmail={userEmail}>{children}</FiOsWorkspacePickerChrome>
-    </DashboardShell>
-  );
+  return <FiOsWorkspaceEntryShell userEmail={userEmail}>{children}</FiOsWorkspaceEntryShell>;
 }
