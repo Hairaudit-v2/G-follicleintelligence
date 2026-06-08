@@ -1,4 +1,6 @@
 import { getClinicOsShellActiveNavId } from "@/src/lib/fiAdmin/clinicOsShellConfig";
+import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 export type FiOsPrimarySidebarItem = {
   id: string;
@@ -21,6 +23,37 @@ function hrefFor(base: string, path: string): string {
   return `${b}/${p}`;
 }
 
+function primaryNavClinicalBlocks(role: FiTenantAdminRole | null | undefined): {
+  calendar: boolean;
+  cases: boolean;
+  rx: boolean;
+  doctor: boolean;
+  patients: boolean;
+  patientTwin: boolean;
+  analytics: boolean;
+  audit: boolean;
+} {
+  if (!role) {
+    return { calendar: false, cases: false, rx: false, doctor: false, patients: false, patientTwin: false, analytics: false, audit: false };
+  }
+  if (role === "clinic_admin") {
+    return { calendar: false, cases: false, rx: false, doctor: false, patients: false, patientTwin: false, analytics: false, audit: false };
+  }
+  if (role === "operations_admin") {
+    return { calendar: false, cases: false, rx: true, doctor: true, patients: false, patientTwin: false, analytics: false, audit: false };
+  }
+  if (role === "finance_admin") {
+    return { calendar: true, cases: true, rx: true, doctor: true, patients: true, patientTwin: true, analytics: false, audit: false };
+  }
+  if (role === "dashboard_viewer") {
+    return { calendar: true, cases: true, rx: true, doctor: true, patients: true, patientTwin: true, analytics: false, audit: false };
+  }
+  if (role === "data_safety_admin") {
+    return { calendar: true, cases: true, rx: true, doctor: true, patients: true, patientTwin: true, analytics: false, audit: false };
+  }
+  return { calendar: false, cases: false, rx: false, doctor: false, patients: false, patientTwin: false, analytics: false, audit: false };
+}
+
 /**
  * Primary FI OS sidebar — one entry per top-level module (product requirement).
  * Visibility mirrors `showCrmNav` / `showBookingsBoard` from `crmShellAccess` (same as legacy nav).
@@ -28,9 +61,12 @@ function hrefFor(base: string, path: string): string {
 export function resolveFiOsPrimarySidebarItems(
   base: string,
   showCrmNav: boolean,
-  showBookingsBoard: boolean
+  showBookingsBoard: boolean,
+  tenantBackendAdminRole?: FiTenantAdminRole | null
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
+  const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
+  const calendarEligible = showBookingsBoard || tenantAdminRoleAllowsBookingsBoardNav(tenantBackendAdminRole ?? null);
   const items: FiOsPrimarySidebarItem[] = [
     { id: "dashboard", label: "Dashboard", shortLabel: "Home", href: b, disabled: false },
     {
@@ -38,23 +74,30 @@ export function resolveFiOsPrimarySidebarItems(
       label: "Doctor workspace",
       shortLabel: "Doctor",
       href: hrefFor(b, "doctor"),
-      disabled: !showBookingsBoard,
-      hint: !showBookingsBoard ? "Requires CRM shell role or active staff membership for this tenant." : undefined,
+      disabled: !showBookingsBoard || blocks.doctor,
+      hint:
+        !showBookingsBoard || blocks.doctor
+          ? "Requires bookings operator access and a clinical role for this tenant."
+          : undefined,
     },
     {
       id: "calendar",
       label: "Calendar",
       shortLabel: "Cal",
       href: hrefFor(b, "calendar"),
-      disabled: false,
+      disabled: !calendarEligible || blocks.calendar,
+      hint:
+        !calendarEligible || blocks.calendar
+          ? "Operational calendar requires bookings operator access or an operations/clinic admin role."
+          : undefined,
     },
     {
       id: "patients",
       label: "Patients",
       shortLabel: "Patients",
       href: hrefFor(b, "patients"),
-      disabled: !showBookingsBoard,
-      hint: !showBookingsBoard ? "Requires bookings operator access for this tenant." : undefined,
+      disabled: !showBookingsBoard || blocks.patients,
+      hint: !showBookingsBoard || blocks.patients ? "Requires bookings operator access for this tenant." : undefined,
     },
     {
       id: "crm",
@@ -69,28 +112,32 @@ export function resolveFiOsPrimarySidebarItems(
       label: "Cases / SurgeryOS",
       shortLabel: "Cases",
       href: hrefFor(b, "cases"),
-      disabled: false,
+      disabled: blocks.cases,
+      hint: blocks.cases ? "SurgeryOS is not enabled for this admin role." : undefined,
     },
     {
       id: "prescriptions",
       label: "Prescriptions",
       shortLabel: "Rx",
       href: hrefFor(b, "prescriptions"),
-      disabled: false,
+      disabled: blocks.rx,
+      hint: blocks.rx ? "Prescribing is not enabled for this admin role." : undefined,
     },
     {
       id: "patient-twin",
       label: "Patient Twin",
       shortLabel: "Twin",
       href: hrefFor(b, "foundation-integrity"),
-      disabled: false,
+      disabled: blocks.patientTwin,
+      hint: blocks.patientTwin ? "FoundationOS deep links are not enabled for this admin role." : undefined,
     },
     {
       id: "auditos",
       label: "AuditOS",
       shortLabel: "Audit",
       href: hrefFor(b, "audit"),
-      disabled: false,
+      disabled: blocks.audit,
+      hint: blocks.audit ? "AuditOS is hidden for this read-only dashboard role." : undefined,
     },
     {
       id: "academyos",
@@ -105,7 +152,8 @@ export function resolveFiOsPrimarySidebarItems(
       label: "AnalyticsOS",
       shortLabel: "Analytics",
       href: hrefFor(b, "analytics"),
-      disabled: false,
+      disabled: blocks.analytics,
+      hint: blocks.analytics ? "Analytics is hidden for this admin role." : undefined,
     },
     {
       id: "settings",
@@ -147,6 +195,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     const rest = npRaw.slice(nb.length).replace(/^\//, "");
     const first = rest.split("/")[0] ?? "";
     if (first === "system-status") return "calendar";
+    if (first === "settings") return "settings";
   }
 
   return null;

@@ -5,6 +5,14 @@ import { getFiOsShellActiveSidebarId, resolveFiOsPrimarySidebarItems } from "@/s
 
 const base = "/fi-admin/t-1";
 
+test("resolveFiOsPrimarySidebarItems: finance_admin persona disables operational clinical tabs", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, false, false, "finance_admin");
+  const cal = items.find((i) => i.id === "calendar");
+  const rx = items.find((i) => i.id === "prescriptions");
+  assert.equal(cal?.disabled, true);
+  assert.equal(rx?.disabled, true);
+});
+
 test("resolveFiOsPrimarySidebarItems: CRM and patients follow flags", () => {
   const all = resolveFiOsPrimarySidebarItems(base, true, true);
   assert.ok(all.find((i) => i.id === "crm" && !i.disabled));
@@ -20,6 +28,6 @@ test("resolveFiOsPrimarySidebarItems: CRM and patients follow flags", () => {
 test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () => {
   assert.equal(getFiOsShellActiveSidebarId(`${base}/foundation-integrity`, base), "patient-twin");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "settings");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/reminders`, base), "settings");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/admin-users`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");
 });

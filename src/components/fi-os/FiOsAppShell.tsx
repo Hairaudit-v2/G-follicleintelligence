@@ -9,7 +9,9 @@ import { getFiOsShellActiveSidebarId, resolveFiOsPrimarySidebarItems } from "@/s
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
 
+import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
+import { FiOsClinicSettingsNav } from "@/src/components/fi-os/FiOsClinicSettingsNav";
 import { FiOsQuickCreatePalette } from "@/src/components/fi-os/FiOsQuickCreatePalette";
 import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
@@ -25,6 +27,9 @@ export function FiOsAppShell({
   base,
   showCrmNav,
   showBookingsBoard = showCrmNav,
+  tenantBackendAdminRole = null,
+  showStaffAndServicesNav = false,
+  showAdminUsersNav = false,
   effective,
   userEmail,
   impersonationDisplayName,
@@ -35,6 +40,12 @@ export function FiOsAppShell({
   base: string;
   showCrmNav: boolean;
   showBookingsBoard?: boolean;
+  /** Active fi_tenant_admin_users role for sidebar clinical gating (non-clinical personas). */
+  tenantBackendAdminRole?: FiTenantAdminRole | null;
+  /** Staff + Services settings links (CRM shell or bookings operator). */
+  showStaffAndServicesNav?: boolean;
+  /** Admin Users settings link (clinic_admin / legacy tenant admins). */
+  showAdminUsersNav?: boolean;
   effective: EffectiveBranding;
   userEmail: string | null;
   impersonationDisplayName?: string | null;
@@ -55,7 +66,7 @@ export function FiOsAppShell({
   const clinicLabel =
     effective.clinic_display_name?.trim() || effective.brand_name?.trim() || "Clinic workspace";
 
-  const sidebarItems = resolveFiOsPrimarySidebarItems(base, showCrmNav, showBookingsBoard);
+  const sidebarItems = resolveFiOsPrimarySidebarItems(base, showCrmNav, showBookingsBoard, tenantBackendAdminRole ?? null);
   const activeSidebarId = getFiOsShellActiveSidebarId(pathname, base);
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
@@ -138,6 +149,11 @@ export function FiOsAppShell({
               "flex min-h-0 flex-col"
             )}
           >
+            <FiOsClinicSettingsNav
+              tenantId={tenantId}
+              showStaffAndServicesNav={showStaffAndServicesNav}
+              showAdminUsersNav={showAdminUsersNav}
+            />
             {children}
           </main>
         </div>

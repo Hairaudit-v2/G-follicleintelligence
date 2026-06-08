@@ -7,6 +7,7 @@ import { Download, Upload } from "lucide-react";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { commitHrStaffImportAction, previewHrStaffImportAction } from "@/src/lib/actions/fi-hr-staff-import-actions";
 import { syncIiohrHrStaffPayloadAction } from "@/src/lib/actions/fi-hr-staff-sync-actions";
+import { pushCurrentHrStaffToFiAction } from "@/src/lib/actions/push-current-hr-staff-to-fi-actions";
 import type { HrStaffImportPageModel } from "@/src/lib/staff/staffHrImportPage.server";
 import type { IiohrHrStaffImportRowPlan } from "@/src/lib/staffImport/iiohrHrStaffImportTypes";
 import type { IiohrHrStaffImportRunResult } from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
@@ -202,6 +203,12 @@ export function StaffImportClient({
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncPending, startSyncTransition] = useTransition();
 
+  const [fiOutboundError, setFiOutboundError] = useState<string | null>(null);
+  const [fiOutboundOk, setFiOutboundOk] = useState<
+    Awaited<ReturnType<typeof pushCurrentHrStaffToFiAction>> & { ok: true } | null
+  >(null);
+  const [fiOutboundPending, startFiOutboundTransition] = useTransition();
+
   const syncCounts = useMemo(() => {
     if (!syncSummary) return null;
     return syncSummary.result.commit && syncSummary.result.appliedCounts
@@ -328,6 +335,32 @@ export function StaffImportClient({
     });
   };
 
+  const onFiOutboundPreview = () => {
+    setFiOutboundError(null);
+    startFiOutboundTransition(async () => {
+      const r = await pushCurrentHrStaffToFiAction({ tenantId, mode: "preview" });
+      if (!r.ok) {
+        setFiOutboundError(r.error);
+        setFiOutboundOk(null);
+        return;
+      }
+      setFiOutboundOk(r);
+    });
+  };
+
+  const onFiOutboundCommit = () => {
+    setFiOutboundError(null);
+    startFiOutboundTransition(async () => {
+      const r = await pushCurrentHrStaffToFiAction({ tenantId, mode: "commit", confirm: true });
+      if (!r.ok) {
+        setFiOutboundError(r.error);
+        setFiOutboundOk(null);
+        return;
+      }
+      setFiOutboundOk(r);
+    });
+  };
+
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header className="space-y-2">
@@ -352,6 +385,13 @@ export function StaffImportClient({
             tenant level; add or rename a Perth site in Foundation if you need clinic linkage metadata on HR source ids.
           </InfoNotice>
         )}
+        <InfoNotice variant="info" title="Outbound: IIOHR HR → FI (Evolved Perth)">
+          When Perth staff changes in the IIOHR HR portal, use <span className="font-mono text-[#94A3B8]">Preview FI staff sync</span> then{" "}
+          <span className="font-mono text-[#94A3B8]">Push FI staff sync</span> in the card below. Requires{" "}
+          <span className="font-mono text-[#94A3B8]">IIOHR_HR_PERTH_STAFF_FEED_URL</span> on this host, and{" "}
+          <span className="font-mono text-[#94A3B8]">FI_BASE_URL</span> plus <span className="font-mono text-[#94A3B8]">IIOHR_HR_SYNC_SECRET</span> matching
+          the FI staff-sync API. Only the operational projection is sent — no contracts, letters, or payroll payloads.
+        </InfoNotice>
       </header>
 
       {error ? (
@@ -427,6 +467,83 @@ export function StaffImportClient({
         <p className="mt-3 text-xs text-[#64748B]">
           Commit uses the exact row set returned from your last successful preview. Edit the text area after preview to discard the lock and preview again.
         </p>
+      </DashboardCard>
+
+      <DashboardCard className="p-5 sm:p-6">
+        <h2 className="text-lg font-semibold text-[#F8FAFC]">Outbound: IIOHR HR → Follicle Intelligence</h2>
+        <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
+          Reads the configured Evolved Perth HR JSON feed, maps to FI staff-sync rows, and POSTs to{" "}
+          <span className="font-mono text-xs text-[#CBD5E1]">POST …/integrations/iiohr-hr/staff-sync</span> on the FI
+          deployment (<span className="font-mono text-xs">FI_BASE_URL</span>). Preview is dry-run on FI; push applies when FI accepts the commit.
+        </p>
+
+        {fiOutboundError ? (
+          <div className="mt-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100" role="alert">
+            {fiOutboundError}
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            type="button"
+            disabled={fiOutboundPending}
+            onClick={onFiOutboundPreview}
+            className="rounded-xl border border-violet-500/40 bg-violet-500/15 px-4 py-2 text-sm font-semibold text-violet-100 transition hover:bg-violet-500/25 disabled:opacity-50"
+          >
+            {fiOutboundPending ? "Working…" : "Preview FI staff sync"}
+          </button>
+          <button
+            type="button"
+            disabled={fiOutboundPending}
+            onClick={onFiOutboundCommit}
+            className="rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/25 disabled:opacity-50"
+          >
+            {fiOutboundPending ? "Working…" : "Push FI staff sync"}
+          </button>
+        </div>
+
+        {fiOutboundOk ? (
+          <div className="mt-6 space-y-3 rounded-lg border border-white/[0.06] bg-[#0a1020]/50 p-4">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-[#CBD5E1]">
+              <span className={chipClass(fiOutboundOk.display.fiOk ? "ok" : "bad")}>
+                {fiOutboundOk.display.fiOk ? "FI accepted run" : "FI reported failure"}
+              </span>
+              <span className="text-xs text-[#64748B]">
+                HTTP <span className="font-mono text-[#94A3B8]">{fiOutboundOk.fi.httpStatus}</span>
+              </span>
+            </div>
+            <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+              {(
+                [
+                  ["Rows sent", fiOutboundOk.display.rowsSent],
+                  ["FI runId", fiOutboundOk.display.runId ?? "—"],
+                  ["Created (rollup)", fiOutboundOk.display.created ?? "—"],
+                  ["Updated (rollup)", fiOutboundOk.display.updated ?? "—"],
+                  ["Linked", fiOutboundOk.display.linked ?? "—"],
+                  ["Skipped rows", fiOutboundOk.display.skipped ?? "—"],
+                ] as const
+              ).map(([k, v]) => (
+                <div key={k} className="rounded border border-white/[0.05] bg-[#0a1020]/40 px-2 py-1.5">
+                  <dt className="text-[10px] font-medium uppercase tracking-wide text-[#64748B]">{k}</dt>
+                  <dd className="font-mono text-sm text-[#F8FAFC]">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            {fiOutboundOk.display.warnings.length > 0 ? (
+              <div>
+                <p className="text-xs font-semibold text-amber-200">Warnings</p>
+                <ul className="mt-1 list-inside list-disc text-xs text-[#94A3B8]">
+                  {fiOutboundOk.display.warnings.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <p className="text-xs text-[#64748B]">
+              Mapped <span className="font-mono text-[#94A3B8]">{fiOutboundOk.mappedRowCount}</span> HR feed row(s) before POST.
+            </p>
+          </div>
+        ) : null}
       </DashboardCard>
 
       <DashboardCard className="p-5 sm:p-6">

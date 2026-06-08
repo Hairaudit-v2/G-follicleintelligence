@@ -14,6 +14,8 @@ export type ClinicOsShellPermissionHint = {
   requiresCrmShellNav?: boolean;
   /** When true, the item requires bookings-board access (CRM shell roles or active `fi_staff` member). */
   requiresBookingsBoardNav?: boolean;
+  /** When true, only `clinic_admin` / legacy tenant admins may use the link (Admin Users settings). */
+  requiresManageAdminUsers?: boolean;
   /** Reserved for future role-based gating (not evaluated yet). */
   minRole?: "member" | "admin" | "owner";
 };
@@ -202,6 +204,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         permissionHint: {},
         description: "Tenant and system configuration.",
       },
+      {
+        id: "admin-users",
+        label: "Admin Users",
+        path: "settings/admin-users",
+        permissionHint: { requiresManageAdminUsers: true },
+        description: "Trusted backend users and roles without clinical staff profiles.",
+      },
     ],
   },
 ];
@@ -229,7 +238,8 @@ function resolveOneNavItem(
   base: string,
   def: ClinicOsShellNavDefinition,
   showCrmNav: boolean,
-  showBookingsBoard: boolean
+  showBookingsBoard: boolean,
+  showManageAdminUsers: boolean
 ): ResolvedClinicOsShellNavItem {
   if (def.placeholder) {
     return {
@@ -243,6 +253,7 @@ function resolveOneNavItem(
   }
   const needsCrm = Boolean(def.permissionHint.requiresCrmShellNav);
   const needsBookings = Boolean(def.permissionHint.requiresBookingsBoardNav);
+  const needsAdminUsers = Boolean(def.permissionHint.requiresManageAdminUsers);
   if (needsCrm && !showCrmNav) {
     return {
       id: def.id,
@@ -254,6 +265,16 @@ function resolveOneNavItem(
     };
   }
   if (needsBookings && !showBookingsBoard) {
+    return {
+      id: def.id,
+      label: def.label,
+      href: "#",
+      disabled: true,
+      home: def.home,
+      description: def.description,
+    };
+  }
+  if (needsAdminUsers && !showManageAdminUsers) {
     return {
       id: def.id,
       label: def.label,
@@ -313,10 +334,11 @@ export function isClinicOsShellCalendarContextRoute(): boolean {
 export function resolveClinicOsShellNavModules(
   base: string,
   showCrmNav: boolean,
-  showBookingsBoard: boolean = showCrmNav
+  showBookingsBoard: boolean = showCrmNav,
+  showManageAdminUsers: boolean = false
 ): ResolvedClinicOsShellNavModule[] {
   return CLINIC_OS_SHELL_NAV_MODULES.map((mod) => {
-    const items = mod.items.map((def) => resolveOneNavItem(base, def, showCrmNav, showBookingsBoard));
+    const items = mod.items.map((def) => resolveOneNavItem(base, def, showCrmNav, showBookingsBoard, showManageAdminUsers));
     const nonPlaceholderDefs = mod.items.filter((d) => !d.placeholder);
     const realLinks = nonPlaceholderDefs.length;
     const duplicateModuleLabel = nonPlaceholderDefs.some((d) => d.label === mod.label);
@@ -334,9 +356,10 @@ export function resolveClinicOsShellNavModules(
 export function resolveClinicOsShellNavItems(
   base: string,
   showCrmNav: boolean,
-  showBookingsBoard: boolean = showCrmNav
+  showBookingsBoard: boolean = showCrmNav,
+  showManageAdminUsers: boolean = false
 ): ResolvedClinicOsShellNavItem[] {
-  return resolveClinicOsShellNavModules(base, showCrmNav, showBookingsBoard).flatMap((m) => m.items);
+  return resolveClinicOsShellNavModules(base, showCrmNav, showBookingsBoard, showManageAdminUsers).flatMap((m) => m.items);
 }
 
 export const CLINIC_OS_SHELL_QUICK_ACTIONS: ClinicOsQuickActionDefinition[] = [

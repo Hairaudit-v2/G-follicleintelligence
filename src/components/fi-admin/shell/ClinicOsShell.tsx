@@ -48,6 +48,7 @@ export function ClinicOsShell({
   base,
   showCrmNav,
   showBookingsBoard = showCrmNav,
+  showManageAdminUsersNav = false,
   effective,
   children,
 }: {
@@ -56,6 +57,8 @@ export function ClinicOsShell({
   showCrmNav: boolean;
   /** Bookings launcher + operator board (includes CRM roles and active `fi_staff` members). */
   showBookingsBoard?: boolean;
+  /** When true, enables Settings → Admin Users in horizontal module nav. */
+  showManageAdminUsersNav?: boolean;
   effective: EffectiveBranding;
   children: ReactNode;
 }) {
@@ -88,7 +91,7 @@ export function ClinicOsShell({
     window.addEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
     return () => window.removeEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
   }, []);
-  const navModules = resolveClinicOsShellNavModules(base, showCrmNav, showBookingsBoard);
+  const navModules = resolveClinicOsShellNavModules(base, showCrmNav, showBookingsBoard, showManageAdminUsersNav);
   const quickActions = resolveClinicOsShellQuickActions(base, showCrmNav, showBookingsBoard);
   const activeNavId = getClinicOsShellActiveNavId(pathname, base);
   const showCalendarBar = isClinicOsShellCalendarContextRoute();

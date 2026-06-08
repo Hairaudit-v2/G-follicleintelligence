@@ -139,3 +139,19 @@ test("resolveClinicOsShellQuickActions: CRM-gated actions match nav policy", () 
   assert.equal(taskOn?.disabled, false);
   assert.equal(taskOn?.href, `${base}/crm`);
 });
+
+test("getClinicOsShellActiveNavId: admin users under settings cluster", () => {
+  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/admin-users`, base), "configuration");
+});
+
+test("resolveClinicOsShellNavItems: Admin Users gated by showManageAdminUsers", () => {
+  const off = resolveClinicOsShellNavItems(base, true, true, false);
+  const on = resolveClinicOsShellNavItems(base, true, true, true);
+  const adminOff = off.find((i) => i.id === "admin-users");
+  const adminOn = on.find((i) => i.id === "admin-users");
+  assert.ok(adminOff);
+  assert.ok(adminOn);
+  assert.equal(adminOff?.disabled, true);
+  assert.equal(adminOn?.disabled, false);
+  assert.equal(adminOn?.href, `${base}/settings/admin-users`);
+});

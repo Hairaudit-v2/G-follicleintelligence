@@ -12,6 +12,10 @@ import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImperso
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import {
+  getTenantAdminUsersManageAllowed,
+  loadActiveTenantAdminProfileForSession,
+} from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 const NEUTRAL_EFFECTIVE: EffectiveBranding = {
   brand_name: null,
@@ -52,11 +56,17 @@ export default async function TenantAdminLayout({
       impersonationDisplayName = await resolveFiOsAuthUserDisplayNameById(target);
     }
   }
-  const [showCrmNav, showBookingsBoard, userEmail] = await Promise.all([
+  const [showCrmNav, showBookingsBoard, userEmail, showAdminUsersNav, adminProf] = await Promise.all([
     getCrmShellNavAllowed(tenantId),
     getBookingsBoardNavAllowed(tenantId),
     resolveFiOsAuthUserEmail(),
+    getTenantAdminUsersManageAllowed(tenantId),
+    sessionAuthId
+      ? loadActiveTenantAdminProfileForSession(tenantId, sessionAuthId)
+      : Promise.resolve(null),
   ]);
+  const tenantBackendAdminRole = adminProf?.adminRole ?? null;
+  const showStaffAndServicesNav = showCrmNav || showBookingsBoard;
 
   let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
   try {
@@ -86,6 +96,9 @@ export default async function TenantAdminLayout({
         base={base}
         showCrmNav={showCrmNav}
         showBookingsBoard={showBookingsBoard}
+        tenantBackendAdminRole={tenantBackendAdminRole}
+        showStaffAndServicesNav={showStaffAndServicesNav}
+        showAdminUsersNav={showAdminUsersNav}
         effective={effective}
         userEmail={userEmail}
         impersonationDisplayName={impersonationDisplayName}
