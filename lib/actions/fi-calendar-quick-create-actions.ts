@@ -10,6 +10,7 @@ import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
 import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
 import { BOOKING_TYPES, isAllowedBookingType } from "@/src/lib/bookings/bookingPolicy";
 import { createBooking } from "@/src/lib/bookings/server";
+import { logFiCalendarTimezoneDebug } from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 const UUID = z.string().uuid();
@@ -293,6 +294,12 @@ export async function calendarQuickCreateBookingAction(
       location: null,
       metadata: { ...metaBase, ...templateMeta, intake: "calendar_quick_create" },
       createdByUserId,
+    });
+
+    logFiCalendarTimezoneDebug("quick-create-booking-saved", {
+      calendarTimezone: tz,
+      start_at: booking.start_at,
+      end_at: booking.end_at,
     });
 
     return { ok: true, booking };

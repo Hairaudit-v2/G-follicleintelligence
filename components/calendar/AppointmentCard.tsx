@@ -26,7 +26,7 @@ import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { parseAppointmentInvoicePreview } from "@/src/lib/bookings/appointmentInvoicePreview";
-import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import { formatTimeRangeInTimezone } from "@/src/lib/calendar/calendarTimezone";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -109,14 +109,6 @@ function patientInitials(name: string): string {
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
-}
-
-function formatTimeRange(startAt: string, endAt: string, timezone?: string | null): string {
-  const tz = normalizeCalendarTimezone(timezone);
-  const opts: Intl.DateTimeFormatOptions = { timeStyle: "short", timeZone: tz };
-  const start = new Date(startAt).toLocaleTimeString(undefined, opts);
-  const end = new Date(endAt).toLocaleTimeString(undefined, opts);
-  return `${start} – ${end}`;
 }
 
 function formatDuration(minutes: number): string {
@@ -327,7 +319,7 @@ function AppointmentCardInner({
   const ProcedureIcon = style.icon;
   const procedureLabel = style.procedureLabel;
   const durationMin = appointment.durationMin ?? durationFromRange(appointment.startAt, appointment.endAt);
-  const timeLabel = formatTimeRange(appointment.startAt, appointment.endAt, calendarTimezone);
+  const timeLabel = formatTimeRangeInTimezone(appointment.startAt, appointment.endAt, calendarTimezone ?? "");
   const priceLabel = formatPrice(appointment.price, appointment.currency);
 
   const isTerminal = dimTerminal && style.isTerminal;

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { resolveTenantCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import { getCalendarTimeZone } from "@/src/lib/calendar/calendarTimezone";
 import {
   DEFAULT_BUSINESS_GRID,
   type BusinessGridConfig,
@@ -35,7 +35,7 @@ function parseGridFromTenantMetadata(metadata: unknown, timeZone: string): Busin
 
 /**
  * Loads `fi_tenant_settings.default_timezone` (and optional `metadata.operational_calendar`)
- * for scheduling grids. Canonical clinic clock: `fi_tenant_settings.default_timezone`.
+ * for scheduling grids. Effective IANA zone via {@link getCalendarTimeZone} (tenant → Brisbane fallback).
  */
 export async function loadTenantOperationalCalendarSettings(tenantId: string): Promise<{
   gridConfig: BusinessGridConfig;
@@ -49,8 +49,8 @@ export async function loadTenantOperationalCalendarSettings(tenantId: string): P
     .maybeSingle();
   if (error) throw new Error(error.message);
   const row = data as { default_timezone?: string | null; metadata?: unknown } | null;
-  const calendarTimezone = resolveTenantCalendarTimezone(
-    row ? { default_timezone: row.default_timezone, metadata: row.metadata as Record<string, unknown> } : null
+  const calendarTimezone = getCalendarTimeZone(
+    row ? { tenant: { default_timezone: row.default_timezone, metadata: row.metadata as Record<string, unknown> } } : null
   );
   const gridConfig = parseGridFromTenantMetadata(row?.metadata, calendarTimezone);
   return { gridConfig, calendarTimezone };

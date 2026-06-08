@@ -71,12 +71,12 @@ describe("Stage 3C — calendar query & URL", () => {
     assert.equal(merged.role, "doctor");
   });
 
-  it("parses calendar search params with week default and UTC date anchor", () => {
+  it("parses calendar search params with week default and Brisbane date anchor when no tenant tz", () => {
     const now = new Date("2026-06-05T12:00:00.000Z");
     const q = parseCalendarSearchParams({}, now);
     assert.equal(q.view, "week");
     assert.equal(q.dateAnchor, "2026-06-05");
-    assert.equal(q.calendarTimezone, "UTC");
+    assert.equal(q.calendarTimezone, "Australia/Brisbane");
     assert.equal(q.includeCancelled, false);
     assert.equal(q.search, null);
     assert.equal(q.sampleMode, false);
@@ -146,15 +146,17 @@ describe("Stage 3C — calendar query & URL", () => {
 });
 
 describe("Stage 3C — visible range & week boundaries (UTC)", () => {
+  const utcOpts = { calendarTimezone: "UTC" as const };
+
   it("day view covers single UTC day", () => {
-    const q = parseCalendarSearchParams({ view: "day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"));
+    const q = parseCalendarSearchParams({ view: "day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"), utcOpts);
     const { rangeStartMs, rangeEndMs } = calendarVisibleUtcRangeMs(q);
     assert.equal(rangeEndMs - rangeStartMs, 86400000);
     assert.equal(new Date(rangeStartMs).toISOString(), "2026-06-10T00:00:00.000Z");
   });
 
   it("week view is Monday 00:00 UTC through the following Monday (exclusive)", () => {
-    const q = parseCalendarSearchParams({ view: "week", date: "2026-06-04" }, new Date("2026-01-01T00:00:00.000Z"));
+    const q = parseCalendarSearchParams({ view: "week", date: "2026-06-04" }, new Date("2026-01-01T00:00:00.000Z"), utcOpts);
     const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(q);
     assert.equal(rangeStartIso, "2026-06-01T00:00:00.000Z");
     assert.equal(rangeEndIso, "2026-06-08T00:00:00.000Z");
@@ -174,7 +176,7 @@ describe("Stage 3C — visible range & week boundaries (UTC)", () => {
   });
 
   it("3day view covers three UTC days from anchor", () => {
-    const q = parseCalendarSearchParams({ view: "3day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"));
+    const q = parseCalendarSearchParams({ view: "3day", date: "2026-06-10" }, new Date("2026-01-01T00:00:00.000Z"), utcOpts);
     const { rangeStartMs, rangeEndMs } = calendarVisibleUtcRangeMs(q);
     assert.equal(rangeEndMs - rangeStartMs, 3 * 86400000);
     assert.equal(new Date(rangeStartMs).toISOString(), "2026-06-10T00:00:00.000Z");

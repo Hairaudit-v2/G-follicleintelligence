@@ -1,4 +1,5 @@
 import {
+  DEFAULT_CALENDAR_TIMEZONE,
   fromDatetimeLocalValueInTimezone,
   toDatetimeLocalValueInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
@@ -7,19 +8,12 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export function toDatetimeLocalValue(iso: string, timeZone?: string | null): string {
   if (timeZone?.trim()) return toDatetimeLocalValueInTimezone(iso, timeZone);
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return toDatetimeLocalValueInTimezone(iso, DEFAULT_CALENDAR_TIMEZONE);
 }
 
 export function fromDatetimeLocalValue(local: string, timeZone?: string | null): string | null {
   if (timeZone?.trim()) return fromDatetimeLocalValueInTimezone(local, timeZone);
-  const t = local.trim();
-  if (!t) return null;
-  const d = new Date(t);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+  return fromDatetimeLocalValueInTimezone(local, DEFAULT_CALENDAR_TIMEZONE);
 }
 
 /**

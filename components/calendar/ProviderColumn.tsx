@@ -7,13 +7,22 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { AppointmentCardFromBooking } from "@/components/calendar/AppointmentCard";
 import { BusinessTimeSlotGrid } from "@/components/calendar/BusinessTimeSlotGrid";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
+import { calendarGridBodyHeightPx as timeSlotsGridHeightPx } from "@/lib/calendar/time-slots";
 import type { CalendarViewportRange } from "@/lib/calendar/virtualizeAppointments";
 import {
   filterVisibleAppointmentIds,
   shouldVirtualizeAppointments,
 } from "@/lib/calendar/virtualizeAppointments";
 import { cn } from "@/lib/utils";
-import { calendarGridBodyHeightPx as timeSlotsGridHeightPx } from "@/lib/calendar/time-slots";
+import {
+  calendarDateStringFromInstant,
+  clinicLocalSlotToUtcIso,
+  logFiCalendarTimezoneDebug,
+  minutesFromLaneStart as minutesFromLaneStartTz,
+  toDatetimeLocalValueInTimezone,
+  zonedMidnightUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
@@ -54,15 +63,6 @@ export function calendarPxPerMinute(): number {
 export function calendarGridBodyHeightPx(): number {
   return timeSlotsGridHeightPx(CALENDAR_PX_PER_HOUR);
 }
-
-import {
-  calendarDateStringFromInstant,
-  isoFromLocalDayMinutes,
-  minutesFromLaneStart as minutesFromLaneStartTz,
-  toDatetimeLocalValueInTimezone,
-  zonedMidnightUtcMs,
-} from "@/src/lib/calendar/calendarTimezone";
-import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
 
 export function providerColumnDropId(dayKey: string, columnId: string): string {
   return `drop:${dayKey}:${columnId}`;
@@ -378,9 +378,16 @@ export function ProviderColumn({
     const ppm = calendarPxPerMinute();
     const rawMin = gridConfig.dayStartHourUtc * 60 + y / ppm;
     const snapped = snapCalendarMinutes(rawMin, gridConfig);
-    const iso = isoFromLocalDayMinutes(dayKey, snapped, gridConfig.timeZone);
+    const iso = clinicLocalSlotToUtcIso(dayKey, snapped, gridConfig.timeZone);
     if (!iso) return null;
     const localStart = toDatetimeLocalValueInTimezone(iso, gridConfig.timeZone);
+    logFiCalendarTimezoneDebug("empty-slot-click", {
+      dayKey,
+      snappedMinutesFromLocalMidnight: snapped,
+      clinicTimezone: gridConfig.timeZone,
+      slotUtcIso: iso,
+      datetimeLocalValue: localStart,
+    });
     return { localStart };
   }
 

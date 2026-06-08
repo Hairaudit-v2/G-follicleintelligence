@@ -71,9 +71,10 @@ export function buildCalendarWeek(dateAnchor: string, timeZone: string = DEFAULT
   const anchorStart = zonedMidnightUtcMs(ymd, tz);
   if (anchorStart == null) return [];
   const monday = localMondayStartMsContaining(anchorStart, tz);
+  const mondayYmd = calendarDateStringFromInstant(new Date(monday), tz);
   const days: CalendarDayLane[] = [];
   for (let i = 0; i < 7; i++) {
-    const dayKey = calendarDateStringFromInstant(new Date(monday + i * 86400000), tz);
+    const dayKey = addDaysToCalendarDate(mondayYmd, i, tz);
     const lane = buildLane(dayKey, tz);
     if (lane) days.push(lane);
   }
@@ -114,10 +115,10 @@ export function buildCalendarMonth(dateAnchor: string, timeZone: string = DEFAUL
   const firstMs = zonedMidnightUtcMs(firstYmd, tz) ?? anchorMs;
   const gridStartMs = localMondayStartMsContaining(firstMs, tz);
   const lanes: CalendarDayLane[] = [];
+  const firstDayKey = calendarDateStringFromInstant(new Date(gridStartMs), tz);
 
   for (let i = 0; i < 42; i++) {
-    const startMs = gridStartMs + i * 86_400_000;
-    const dayKey = calendarDateStringFromInstant(new Date(startMs), tz);
+    const dayKey = addDaysToCalendarDate(firstDayKey, i, tz);
     const lane = buildLane(dayKey, tz);
     if (lane) lanes.push(lane);
   }

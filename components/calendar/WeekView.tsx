@@ -46,7 +46,11 @@ import {
   dropMinutesFromDragEvent,
   minutesFromLaneStart,
 } from "@/lib/calendar/dndMath";
-import { calendarDateStringFromInstant, displayCalendarTimezoneSubtitle, isoFromLocalDayMinutes } from "@/src/lib/calendar/calendarTimezone";
+import {
+  calendarDateStringFromInstant,
+  clinicLocalSlotToUtcIso,
+  displayCalendarTimezoneSubtitle,
+} from "@/src/lib/calendar/calendarTimezone";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
 import { cn } from "@/lib/utils";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
@@ -393,8 +397,8 @@ function WeekViewInner({
       }
 
       const newEndMin = newStartMin + durationMs / 60_000;
-      const startIso = isoFromLocalDayMinutes(drop.dayKey, newStartMin, gridConfig.timeZone);
-      const endIso = isoFromLocalDayMinutes(drop.dayKey, newEndMin, gridConfig.timeZone);
+      const startIso = clinicLocalSlotToUtcIso(drop.dayKey, newStartMin, gridConfig.timeZone);
+      const endIso = clinicLocalSlotToUtcIso(drop.dayKey, newEndMin, gridConfig.timeZone);
       if (!startIso || !endIso) return;
 
       const targetColumn = columnsForView.find((c) => c.id === drop.columnId && c.dayKey === drop.dayKey);

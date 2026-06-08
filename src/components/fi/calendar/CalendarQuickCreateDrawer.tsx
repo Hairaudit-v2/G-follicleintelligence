@@ -5,13 +5,13 @@ import { X } from "lucide-react";
 
 import { calendarQuickCreateBookingAction } from "@/lib/actions/fi-calendar-quick-create-actions";
 import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
-import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
 import {
-  CALENDAR_QUICK_TEMPLATES,
-  calendarQuickTemplateById,
-  type CalendarQuickTemplateId,
-} from "@/src/lib/calendar/calendarQuickCreateTemplates";
-import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
+  displayCalendarTimezoneSubtitle,
+  formatClinicTime,
+  fromDatetimeLocalValueInTimezone,
+  logFiCalendarTimezoneDebug,
+  toDatetimeLocalValueInTimezone,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -137,7 +137,7 @@ export function CalendarQuickCreateDrawer({
     setTemplateId(nextTpl);
     const start = prefill.localStart.trim();
     setStartLocal(start);
-    const startIso = fromDatetimeLocalValue(start, tz);
+    const startIso = fromDatetimeLocalValueInTimezone(start, tz);
     const t = calendarQuickTemplateById(nextTpl);
     let endIso: string | null = null;
     if (t?.isBlock) {
@@ -150,7 +150,7 @@ export function CalendarQuickCreateDrawer({
       }
     }
     if (startIso && endIso) {
-      setEndLocal(toDatetimeLocalValue(endIso, tz));
+      setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     } else {
       setEndLocal("");
     }
@@ -162,6 +162,12 @@ export function CalendarQuickCreateDrawer({
     setNewLeadPhone("");
     setNewLeadEmail("");
     setFormErr(null);
+    logFiCalendarTimezoneDebug("quick-create-drawer-prefill", {
+      clinicTimezone: tz,
+      selectedSlotDatetimeLocal: start,
+      selectedSlotUtcIso: startIso,
+      endUtcIso: endIso,
+    });
   }, [prefill, tz]);
 
   useEffect(() => {
@@ -218,10 +224,10 @@ export function CalendarQuickCreateDrawer({
         if (prev?.kind === "block") return null;
         return prev;
       });
-      const startIso = fromDatetimeLocalValue(startLocal, tz);
+      const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
       if (!startIso || !t) return;
       const endIso = addMinutesToIso(startIso, t.durationMinutes);
-      setEndLocal(toDatetimeLocalValue(endIso, tz));
+      setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     },
     [startLocal, tz]
   );
@@ -230,10 +236,10 @@ export function CalendarQuickCreateDrawer({
     (nextStart: string) => {
       setStartLocal(nextStart);
       const tpl = calendarQuickTemplateById(templateId);
-      const startIso = fromDatetimeLocalValue(nextStart, tz);
+      const startIso = fromDatetimeLocalValueInTimezone(nextStart, tz);
       if (!startIso || !tpl) return;
       const endIso = addMinutesToIso(startIso, tpl.durationMinutes);
-      setEndLocal(toDatetimeLocalValue(endIso, tz));
+      setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     },
     [templateId, tz]
   );
@@ -295,8 +301,8 @@ export function CalendarQuickCreateDrawer({
       setFormErr("Pick a valid template.");
       return;
     }
-    const startIso = fromDatetimeLocalValue(startLocal, tz);
-    const endIso = fromDatetimeLocalValue(endLocal, tz);
+    const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
+    const endIso = fromDatetimeLocalValueInTimezone(endLocal, tz);
     if (!startIso || !endIso) {
       setFormErr("Start and end times are required.");
       return;
@@ -305,6 +311,15 @@ export function CalendarQuickCreateDrawer({
       setFormErr("End must be after start.");
       return;
     }
+
+    logFiCalendarTimezoneDebug("quick-create-submit", {
+      clinicTimezone: tz,
+      startLocal,
+      endLocal,
+      startUtcIso: startIso,
+      endUtcIso: endIso,
+      renderedStartDisplay: formatClinicTime(startIso, tz),
+    });
 
     let anchor:
       | { kind: "lead"; leadId: string }
@@ -358,6 +373,12 @@ export function CalendarQuickCreateDrawer({
         toast?.error(r.error);
         return;
       }
+      logFiCalendarTimezoneDebug("quick-create-booking-returned", {
+        clinicTimezone: tz,
+        loadedStartAt: r.booking.start_at,
+        loadedEndAt: r.booking.end_at,
+        renderedStartDisplay: formatClinicTime(r.booking.start_at, tz),
+      });
       toast?.success("Appointment created.");
       onCreated(r.booking);
       onClose();

@@ -128,7 +128,9 @@ function zonedDateTimeToUtc(
 ): number | null {
   const target = { year, month, day, hour, minute, second };
   const base = Date.UTC(year, month - 1, day, hour, minute, second);
-  for (let offsetMin = -180; offsetMin <= 180; offsetMin++) {
+  // `base` is a naive UTC interpretation of the wall clock; the true UTC instant can be many
+  // hours away (e.g. Australia/Brisbane +10). Scan a full ±20h window before wider bisection.
+  for (let offsetMin = -20 * 60; offsetMin <= 20 * 60; offsetMin++) {
     const candidate = base + offsetMin * 60_000;
     const p = getZonedParts(candidate, timeZone);
     if (compareZoned(p, target) === 0) return candidate;
