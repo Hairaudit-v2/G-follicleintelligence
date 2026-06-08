@@ -18,6 +18,7 @@ import {
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
 } from "@/src/components/fi/bookings/bookingFormUtils";
+import { formatIsoDateTimeInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 
 const WRITABLE_STATUSES = ["scheduled", "confirmed", "arrived", "no_show"] as const;
 
@@ -153,6 +154,8 @@ export function BookingEditDrawer({
 
   if (!booking) return null;
 
+  const displayTz = normalizeCalendarTimezone(clinicCalendarTimezone ?? booking.timezone);
+
   return (
     <div className="fixed inset-0 z-40 flex justify-end bg-black/30" role="presentation" onClick={onClose}>
       <aside
@@ -176,7 +179,9 @@ export function BookingEditDrawer({
                 <p className="mt-2 text-gray-800">Reason: {booking.cancellation_reason}</p>
               ) : null}
               {booking.cancelled_at ? (
-                <p className="mt-1 text-gray-700">Cancelled at: {new Date(booking.cancelled_at).toLocaleString()}</p>
+                <p className="mt-1 text-gray-700">
+                  Cancelled at: {formatIsoDateTimeInTimezone(booking.cancelled_at, displayTz)}
+                </p>
               ) : null}
             </div>
           ) : completed ? (
@@ -328,7 +333,7 @@ export function BookingEditDrawer({
                       {j.template_type} · {j.template_trigger_event}
                     </span>
                     <span className="w-full text-gray-600 sm:w-auto">
-                      {j.status} · scheduled {new Date(j.scheduled_at).toLocaleString()}
+                      {j.status} · scheduled {formatIsoDateTimeInTimezone(j.scheduled_at, displayTz)}
                     </span>
                     {j.error_log?.trim() && (j.status === "failed" || j.status === "cancelled") ? (
                       <span className="w-full text-[11px] text-amber-800">{j.error_log}</span>

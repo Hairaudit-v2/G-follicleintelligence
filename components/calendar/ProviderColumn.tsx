@@ -20,6 +20,7 @@ import {
   clinicLocalSlotToUtcIso,
   logFiCalendarTimezoneDebug,
   minutesFromLaneStart as minutesFromLaneStartTz,
+  parseIsoUtcMs,
   toDatetimeLocalValueInTimezone,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
@@ -81,9 +82,9 @@ export function layoutBookingInCalendarPx(
   lane: CalendarDayLane,
   cfg: BusinessGridConfig
 ): { topPx: number; heightPx: number } | null {
-  const s = Date.parse(booking.start_at);
-  const e = Date.parse(booking.end_at);
-  if (!Number.isFinite(s) || !Number.isFinite(e)) return null;
+  const s = parseIsoUtcMs(booking.start_at);
+  const e = parseIsoUtcMs(booking.end_at);
+  if (s == null || e == null) return null;
 
   const clampS = Math.max(s, lane.startMs);
   const clampE = Math.min(e, lane.endMs);
@@ -114,9 +115,9 @@ function timedBookingsForColumn(
   const out: TimedBooking[] = [];
 
   for (const booking of bookings) {
-    const s = Date.parse(booking.start_at);
-    const e = Date.parse(booking.end_at);
-    if (!Number.isFinite(s) || !Number.isFinite(e)) continue;
+    const s = parseIsoUtcMs(booking.start_at);
+    const e = parseIsoUtcMs(booking.end_at);
+    if (s == null || e == null) continue;
     const clampS = Math.max(s, lane.startMs);
     const clampE = Math.min(e, lane.endMs);
     if (clampE <= clampS) continue;

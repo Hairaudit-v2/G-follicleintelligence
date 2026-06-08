@@ -27,9 +27,14 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 import {
   addDaysToCalendarDate,
+  addUtcMinutesToIso,
+  bookingDurationMinutesUtc,
   calendarDateStringFromInstant,
+  formatIsoTimeNumericInTimezone,
   localMondayStartMsContaining,
   normalizeCalendarTimezone,
+  parseIsoUtcMs,
+  utcNowIso,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
 
@@ -84,8 +89,8 @@ export function partitionSidebarAgendaBookings(
     .sort((a, b) => a.start_at.localeCompare(b.start_at));
 
   for (const booking of sorted) {
-    const startMs = Date.parse(booking.start_at);
-    if (!Number.isFinite(startMs)) continue;
+    const startMs = parseIsoUtcMs(booking.start_at);
+    if (startMs == null) continue;
     const dayKey = calendarDateStringFromInstant(new Date(startMs), tz);
 
     if (dayKey === todayKey) {
@@ -110,12 +115,7 @@ export function deriveWaitlistFromBookings(bookings: FiBookingRow[]): SidebarWai
     .filter((b) => isWaitlistBooking(b) && !isBookingCancelled(b) && !TERMINAL_STATUSES.has(b.booking_status))
     .map((b) => {
       const meta = b.metadata ?? {};
-      const startMs = Date.parse(b.start_at);
-      const endMs = Date.parse(b.end_at);
-      const durationMin =
-        Number.isFinite(startMs) && Number.isFinite(endMs) && endMs > startMs
-          ? Math.round((endMs - startMs) / 60_000)
-          : 30;
+      const durationMin = bookingDurationMinutesUtc(b.start_at, b.end_at) ?? 30;
       return {
         id: b.id,
         patientName: b.title?.trim() || "Patient",
@@ -135,24 +135,6 @@ export function parseWaitlistDragId(activeId: string): string | null {
   if (!activeId.startsWith(WAITLIST_DRAG_PREFIX)) return null;
   const id = activeId.slice(WAITLIST_DRAG_PREFIX.length);
   return id.trim() || null;
-}
-
-function formatTime(iso: string, timezone?: string | null): string {
-  const d = new Date(iso);
-  if (!Number.isFinite(d.getTime())) return iso;
-  const tz = normalizeCalendarTimezone(timezone);
-  return d.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: tz,
-  });
-}
-
-function durationMin(booking: FiBookingRow): number {
-  const a = Date.parse(booking.start_at);
-  const b = Date.parse(booking.end_at);
-  if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return 0;
-  return Math.round((b - a) / 60_000);
 }
 
 // ---------------------------------------------------------------------------
@@ -177,6 +159,8 @@ function AgendaMiniCard({
   });
   const accent = appointmentStyle.accentClass;
   const procedure = appointmentStyle.procedureLabel;
+  const durMin = bookingDurationMinutesUtc(booking.start_at, booking.end_at) ?? 0;
+  const tzKey = normalizeCalendarTimezone(clinicTimeZone ?? booking.timezone);
 
   const className = cn(
     "group relative w-full overflow-hidden rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-left shadow-sm transition",
@@ -192,8 +176,8 @@ function AgendaMiniCard({
         <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px] text-slate-500">
           <span className="inline-flex items-center gap-1 tabular-nums">
             <Clock className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-            {formatTime(booking.start_at, clinicTimeZone ?? booking.timezone)}
-            {durationMin(booking) > 0 ? ` · ${durationMin(booking)}m` : ""}
+            {formatIsoTimeNumericInTimezone(booking.start_at, tzKey)}
+            {durMin > 0 ? ` · ${durMin}m` : ""}
           </span>
           <span className="truncate font-medium text-slate-600">{bookingStatusLabel(booking.booking_status)}</span>
         </div>
@@ -241,8 +225,8 @@ function WaitlistMiniCard({
             patientName: item.patientName,
             procedureType: item.procedureType,
             procedureLabel: procedure,
-            startAt: new Date().toISOString(),
-            endAt: new Date(Date.now() + (item.durationMin ?? 30) * 60_000).toISOString(),
+            startAt: utcNowIso(),
+            endAt: addUtcMinutesToIso(utcNowIso(), item.durationMin ?? 30),
             durationMin: item.durationMin ?? 30,
             status: "scheduled",
           },

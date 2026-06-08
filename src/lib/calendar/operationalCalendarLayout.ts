@@ -36,6 +36,18 @@ export const DEFAULT_BUSINESS_GRID: BusinessGridConfig = {
   timeZone: "UTC",
 };
 
+/**
+ * `datetime-local` string for FI OS month empty-day quick create: clinic business open hour
+ * (`dayStartHourUtc`, clinic-local wall time), or 09:00 when the configured hour is invalid.
+ */
+export function monthEmptyDayQuickCreateLocalStart(dayKey: string, cfg: BusinessGridConfig): string {
+  const raw = cfg.dayStartHourUtc;
+  const hour =
+    Number.isFinite(raw) && raw >= 0 && raw <= 23 ? Math.floor(raw) : 9;
+  const hh = String(hour).padStart(2, "0");
+  return `${dayKey.trim()}T${hh}:00`;
+}
+
 /** Pixel height of one hour row (matches legacy FI calendar density). */
 export const OPERATIONAL_CAL_PX_PER_HOUR = 44;
 

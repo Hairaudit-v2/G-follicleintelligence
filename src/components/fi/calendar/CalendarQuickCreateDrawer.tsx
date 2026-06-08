@@ -6,10 +6,12 @@ import { X } from "lucide-react";
 import { calendarQuickCreateBookingAction } from "@/lib/actions/fi-calendar-quick-create-actions";
 import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import {
+  addUtcMinutesToIso,
   displayCalendarTimezoneSubtitle,
   formatClinicTime,
   fromDatetimeLocalValueInTimezone,
   logFiCalendarTimezoneDebug,
+  parseIsoUtcMs,
   toDatetimeLocalValueInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
@@ -42,7 +44,7 @@ function useDebouncedValue<T>(value: T, ms: number): T {
 }
 
 function addMinutesToIso(startIso: string, minutes: number): string {
-  return new Date(Date.parse(startIso) + minutes * 60_000).toISOString();
+  return addUtcMinutesToIso(startIso, minutes);
 }
 
 export type CalendarQuickCreatePrefill = {
@@ -307,7 +309,9 @@ export function CalendarQuickCreateDrawer({
       setFormErr("Start and end times are required.");
       return;
     }
-    if (Date.parse(endIso) <= Date.parse(startIso)) {
+    const endMs = parseIsoUtcMs(endIso);
+    const startMs = parseIsoUtcMs(startIso);
+    if (endMs == null || startMs == null || endMs <= startMs) {
       setFormErr("End must be after start.");
       return;
     }

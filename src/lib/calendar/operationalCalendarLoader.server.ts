@@ -28,6 +28,7 @@ import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellStaffPickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
+import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";
@@ -44,10 +45,17 @@ function readPatientLabel(metadata: Record<string, unknown> | null | undefined):
   return null;
 }
 
-async function loadPatientNameMap(tenantId: string, patientIds: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
+async function loadPatientNameAndContactMaps(
+  tenantId: string,
+  patientIds: string[]
+): Promise<{
+  labels: Map<string, string>;
+  contacts: Map<string, { email: string | null; phone: string | null }>;
+}> {
+  const labels = new Map<string, string>();
+  const contacts = new Map<string, { email: string | null; phone: string | null }>();
   const ids = Array.from(new Set(patientIds.map((x) => x.trim()).filter(Boolean)));
-  if (!ids.length) return out;
+  if (!ids.length) return { labels, contacts };
 
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -58,10 +66,13 @@ async function loadPatientNameMap(tenantId: string, patientIds: string[]): Promi
   if (error) throw new Error(error.message);
   for (const raw of data ?? []) {
     const r = raw as { id: string; metadata: unknown };
-    const label = readPatientLabel(r.metadata as Record<string, unknown>);
-    if (label) out.set(String(r.id), label);
+    const meta = (r.metadata ?? {}) as Record<string, unknown>;
+    const label = readPatientLabel(meta);
+    if (label) labels.set(String(r.id), label);
+    const { email, phone } = displayFromPersonMetadata(meta);
+    contacts.set(String(r.id), { email, phone });
   }
-  return out;
+  return { labels, contacts };
 }
 
 async function loadLeadTitleMap(tenantId: string, leadIds: string[]): Promise<Map<string, string>> {
@@ -314,11 +325,13 @@ export async function loadOperationalCalendarPageData(
   const patientIds = structured.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()));
   const leadIds = structured.map((b) => b.lead_id).filter((x): x is string => Boolean(x?.trim()));
 
-  const [patientLabels, leadTitles, clinicalMap] = await Promise.all([
-    loadPatientNameMap(tid, patientIds),
+  const [patientMaps, leadTitles, clinicalMap] = await Promise.all([
+    loadPatientNameAndContactMaps(tid, patientIds),
     loadLeadTitleMap(tid, leadIds),
     loadClinicalDetailsMap(tid, patientIds),
   ]);
+  const patientLabels = patientMaps.labels;
+  const patientContacts = patientMaps.contacts;
 
   const bookingDisplay: Record<string, OperationalCalendarBookingDisplay> = {};
   for (const row of structured) {
@@ -338,6 +351,8 @@ export async function loadOperationalCalendarPageData(
       : null;
 
     const cat = serviceForBookingType(services, row.booking_type);
+    const pid = row.patient_id?.trim();
+    const contact = pid ? patientContacts.get(pid) : undefined;
     bookingDisplay[row.id] = {
       anchorLabel: anchorLabelForRow(row, patientLabels, leadTitles),
       scalesSummary,
@@ -346,6 +361,8 @@ export async function loadOperationalCalendarPageData(
       procedureCatalogName: cat?.name ?? null,
       procedureCatalogHex: cat?.color ?? null,
       suggestedPrice: cat != null ? cat.base_price : null,
+      patientEmail: contact?.email ?? null,
+      patientPhone: contact?.phone ?? null,
     };
   }
 
@@ -378,7 +395,7 @@ export async function loadOperationalCalendarPageData(
   for (const b of bookings) {
     const jobs = reminderMap.get(b.id) ?? [];
     reminderJobsByBookingId[b.id] = jobs;
-    const hint = formatNextReminderHint(jobs);
+    const hint = formatNextReminderHint(jobs, query.calendarTimezone);
     const prev = bookingDisplay[b.id];
     if (prev) {
       bookingDisplay[b.id] = { ...prev, reminderHint: hint };

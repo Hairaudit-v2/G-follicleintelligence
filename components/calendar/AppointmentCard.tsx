@@ -26,7 +26,12 @@ import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { parseAppointmentInvoicePreview } from "@/src/lib/bookings/appointmentInvoicePreview";
-import { formatTimeRangeInTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  addUtcMinutesToIso,
+  bookingDurationMinutesUtc,
+  formatTimeRangeInTimezone,
+  parseIsoUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -135,10 +140,7 @@ function formatPrice(price: string | null | undefined, currency: string | null |
 }
 
 function durationFromRange(startAt: string, endAt: string): number {
-  const a = Date.parse(startAt);
-  const b = Date.parse(endAt);
-  if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return 0;
-  return Math.round((b - a) / 60_000);
+  return bookingDurationMinutesUtc(startAt, endAt) ?? 0;
 }
 
 /** Map a `FiBookingRow` + display bundle into `AppointmentCardData`. */
@@ -202,9 +204,9 @@ function ResizeHandle({
   const finishResize = React.useCallback(
     (heightPx: number) => {
       const durationMin = durationMinutesFromPx(heightPx);
-      const startMs = Date.parse(startAt);
-      if (!Number.isFinite(startMs)) return;
-      onResizeEnd(new Date(startMs + durationMin * 60_000).toISOString());
+      const startMs = parseIsoUtcMs(startAt);
+      if (startMs == null) return;
+      onResizeEnd(addUtcMinutesToIso(startAt, durationMin));
       onLiveHeightChange(null);
     },
     [onLiveHeightChange, onResizeEnd, startAt]

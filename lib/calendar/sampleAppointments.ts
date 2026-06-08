@@ -5,6 +5,7 @@
 
 import { utcCalendarDateStringFromDate } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { bookingDurationMinutesUtc } from "@/src/lib/calendar/calendarTimezone";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 
 export const SAMPLE_BOOKING_ID_PREFIX = "sample-";
@@ -177,12 +178,7 @@ export function sampleBookingDisplayMap(bookings: FiBookingRow[]): Record<string
   const out: Record<string, OperationalCalendarBookingDisplay> = {};
   for (const b of bookings) {
     if (!isSampleBookingId(b.id)) continue;
-    const startMs = Date.parse(b.start_at);
-    const endMs = Date.parse(b.end_at);
-    const durationMin =
-      Number.isFinite(startMs) && Number.isFinite(endMs)
-        ? Math.max(1, Math.round((endMs - startMs) / 60_000))
-        : 30;
+    const durationMin = bookingDurationMinutesUtc(b.start_at, b.end_at) ?? 30;
     const meta = b.metadata ?? {};
     const anchorLabel =
       (typeof meta.display_name === "string" && meta.display_name.trim()) ||

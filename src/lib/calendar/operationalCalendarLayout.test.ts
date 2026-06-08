@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { bookingConflictsForOperationalCalendar } from "./operationalCalendarLayout";
+import {
+  bookingConflictsForOperationalCalendar,
+  monthEmptyDayQuickCreateLocalStart,
+} from "./operationalCalendarLayout";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 const TID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -77,5 +80,31 @@ describe("bookingConflictsForOperationalCalendar", () => {
       ignoreBookingId: candidate.id,
     });
     assert.equal(conflicts.length, 0);
+  });
+});
+
+describe("monthEmptyDayQuickCreateLocalStart", () => {
+  it("uses clinic-local business open hour", () => {
+    assert.equal(
+      monthEmptyDayQuickCreateLocalStart("2026-06-15", {
+        dayStartHourUtc: 8,
+        dayEndHourUtc: 18,
+        slotMinutes: 30,
+        timeZone: "Australia/Brisbane",
+      }),
+      "2026-06-15T08:00"
+    );
+  });
+
+  it("falls back to 09:00 when open hour is invalid", () => {
+    assert.equal(
+      monthEmptyDayQuickCreateLocalStart("2026-06-15", {
+        dayStartHourUtc: NaN,
+        dayEndHourUtc: 18,
+        slotMinutes: 30,
+        timeZone: "UTC",
+      }),
+      "2026-06-15T09:00"
+    );
   });
 });

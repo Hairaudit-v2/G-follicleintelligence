@@ -5,6 +5,7 @@ import { cancelBookingAction, completeBookingAction } from "@/lib/actions/fi-boo
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 
 const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
 
@@ -64,11 +65,10 @@ export function BookingSummaryCard({
     }
   }
 
-  const range = useMemo(
-    () =>
-      `${new Date(booking.start_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })} → ${new Date(booking.end_at).toLocaleTimeString(undefined, { timeStyle: "short" })}`,
-    [booking.start_at, booking.end_at]
-  );
+  const range = useMemo(() => {
+    const tz = normalizeCalendarTimezone(booking.timezone);
+    return formatBookingWindowInTimezone(booking.start_at, booking.end_at, tz, { endPart: "timeOnly" });
+  }, [booking.start_at, booking.end_at, booking.timezone]);
 
   return (
     <div className={card}>

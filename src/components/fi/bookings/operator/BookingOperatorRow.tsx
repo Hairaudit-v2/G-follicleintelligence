@@ -7,6 +7,7 @@ import { cancelBookingAction, completeBookingAction } from "@/lib/actions/fi-boo
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { BookingStatusBadge } from "./BookingStatusBadge";
 import { BookingTypeBadge } from "./BookingTypeBadge";
 
@@ -90,10 +91,8 @@ export function BookingOperatorRow({
     return body;
   }
 
-  const range = `${new Date(booking.start_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  })} → ${new Date(booking.end_at).toLocaleTimeString(undefined, { timeStyle: "short" })}`;
+  const tz = normalizeCalendarTimezone(booking.timezone);
+  const range = formatBookingWindowInTimezone(booking.start_at, booking.end_at, tz, { endPart: "timeOnly" });
 
   async function onComplete() {
     setBusy(true);

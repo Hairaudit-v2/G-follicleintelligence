@@ -281,8 +281,11 @@ export function formatTimeRangeInTimezone(
 ): string {
   const tz = normalizeCalendarTimezone(timeZone);
   const fmt: Intl.DateTimeFormatOptions = { timeStyle: "short", timeZone: tz };
-  const start = new Date(startAt).toLocaleTimeString(undefined, fmt);
-  const end = new Date(endAt).toLocaleTimeString(undefined, fmt);
+  const startMs = parseIsoUtcMs(startAt);
+  const endMs = parseIsoUtcMs(endAt);
+  if (startMs == null || endMs == null) return "";
+  const start = new Date(startMs).toLocaleTimeString(undefined, fmt);
+  const end = new Date(endMs).toLocaleTimeString(undefined, fmt);
   const suffix = opts?.suffix && tz !== DEFAULT_CALENDAR_TIMEZONE ? ` ${tzLabel(tz)}` : "";
   return `${start} – ${end}${suffix}`;
 }
@@ -335,8 +338,8 @@ export function isoFromLaneMinutes(laneStartMs: number, minutesLocal: number): s
 
 /** `datetime-local` value for an ISO instant in clinic timezone. */
 export function toDatetimeLocalValueInTimezone(iso: string, timeZone: string): string {
-  const ms = Date.parse(iso);
-  if (!Number.isFinite(ms)) return "";
+  const ms = parseIsoUtcMs(iso);
+  if (ms == null) return "";
   const tz = normalizeCalendarTimezone(timeZone);
   const p = getZonedParts(ms, tz);
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -373,6 +376,91 @@ export function clinicLocalSlotToUtcIso(
   return isoFromLocalDayMinutes(dayKey, minutesFromLocalMidnight, timeZone);
 }
 
+// ---------------------------------------------------------------------------
+// UTC instant helpers (ISO strings from DB/API — arithmetic is always UTC)
+// ---------------------------------------------------------------------------
+
+/** Parse a booking/server ISO instant to UTC epoch ms; invalid → null. */
+export function parseIsoUtcMs(iso: string): number | null {
+  const ms = Date.parse(iso.trim());
+  return Number.isFinite(ms) ? ms : null;
+}
+
+/** Current instant as UTC ISO (single entry point for calendar/agenda placeholders). */
+export function utcNowIso(): string {
+  return new Date().toISOString();
+}
+
+/** Add whole minutes to a UTC ISO instant (durations, resize handles, templates). */
+export function addUtcMinutesToIso(iso: string, minutes: number): string {
+  const ms = parseIsoUtcMs(iso);
+  if (ms == null) return new Date(0).toISOString();
+  return new Date(ms + minutes * 60_000).toISOString();
+}
+
+export function bookingDurationMinutesUtc(startIso: string, endIso: string): number | null {
+  const a = parseIsoUtcMs(startIso);
+  const b = parseIsoUtcMs(endIso);
+  if (a == null || b == null || b <= a) return null;
+  return Math.round((b - a) / 60_000);
+}
+
+export function maxUtcIsoFromMs(aMs: number, bMs: number): string {
+  return new Date(Math.max(aMs, bMs)).toISOString();
+}
+
+export function formatIsoDateTimeInTimezone(iso: string, timeZone: string): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ms = parseIsoUtcMs(iso);
+  if (ms == null) return iso.trim();
+  return new Date(ms).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: tz,
+  });
+}
+
+/** Compact time (e.g. agenda pills) using explicit IANA zone. */
+export function formatIsoTimeNumericInTimezone(iso: string, timeZone: string): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ms = parseIsoUtcMs(iso);
+  if (ms == null) return iso.trim();
+  return new Date(ms).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: tz,
+  });
+}
+
+/** Month title from a UTC-ms anchor (e.g. zoned local midnight). */
+export function formatIsoMonthYearInTimezone(anchorMs: number, timeZone: string): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  if (!Number.isFinite(anchorMs)) return "";
+  return new Date(anchorMs).toLocaleDateString("en-GB", {
+    month: "long",
+    year: "numeric",
+    timeZone: tz,
+  });
+}
+
+/**
+ * Human-readable booking window in a single IANA zone (drawer / list rows).
+ * `endPart: "timeOnly"` matches legacy “start full → end time only” rows.
+ */
+export function formatBookingWindowInTimezone(
+  startIso: string,
+  endIso: string,
+  timeZone: string,
+  opts?: { endPart?: "mediumShort" | "timeOnly" }
+): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const start = formatIsoDateTimeInTimezone(startIso, tz);
+  const endPart = opts?.endPart ?? "mediumShort";
+  const end =
+    endPart === "timeOnly" ? formatIsoTimeNumericInTimezone(endIso, tz) : formatIsoDateTimeInTimezone(endIso, tz);
+  return `${start} → ${end}`;
+}
+
 /** UTC ISO instant → short display string in the clinic zone (never uses browser-local offset alone). */
 export function utcIsoToClinicDisplay(
   iso: string,
@@ -380,8 +468,8 @@ export function utcIsoToClinicDisplay(
   style: "time" | "datetime" = "time"
 ): string {
   const tz = normalizeCalendarTimezone(timeZone);
-  const ms = Date.parse(iso);
-  if (!Number.isFinite(ms)) return "";
+  const ms = parseIsoUtcMs(iso);
+  if (ms == null) return "";
   const opts: Intl.DateTimeFormatOptions =
     style === "time"
       ? { timeStyle: "short", timeZone: tz }

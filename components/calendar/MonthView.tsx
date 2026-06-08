@@ -38,13 +38,17 @@ import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { cn } from "@/lib/utils";
 import {
   addMonthsToCalendarDate,
+  bookingDurationMinutesUtc,
   calendarDateStringFromInstant,
   DEFAULT_CALENDAR_TIMEZONE,
+  formatIsoMonthYearInTimezone,
+  formatIsoTimeNumericInTimezone,
   isoFromLocalDayMinutes,
   localClockMinutesFromInstant,
   minutesFromLaneStart,
   normalizeCalendarTimezone,
   parseCalendarDateString,
+  parseIsoUtcMs,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
 import {
@@ -129,6 +133,11 @@ export type MonthViewProps = {
   pendingAppointmentIds?: ReadonlySet<string>;
   calendarShellMode?: "default" | "fiOs";
   fiOsDrawerDismiss?: () => void;
+  /**
+   * FI OS: when set, days in the current month with no appointments open Quick Book instead of day view
+   * (day number + “Open · click to schedule” targets).
+   */
+  onEmptyDayQuickCreate?: (dayKey: string) => void;
 };
 
 // ---------------------------------------------------------------------------
@@ -199,9 +208,9 @@ export function bucketBookingsForMonthCells(
   }
 
   for (const booking of bookings) {
-    const s = Date.parse(booking.start_at);
-    const e = Date.parse(booking.end_at);
-    if (!Number.isFinite(s) || !Number.isFinite(e)) continue;
+    const s = parseIsoUtcMs(booking.start_at);
+    const e = parseIsoUtcMs(booking.end_at);
+    if (s == null || e == null) continue;
 
     for (const cell of cells) {
       if (s < cell.endMs && e > cell.startMs) {
@@ -213,7 +222,7 @@ export function bucketBookingsForMonthCells(
   for (const cell of cells) {
     const arr = map.get(cell.dayKey);
     if (arr) {
-      arr.sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at));
+      arr.sort((a, b) => (parseIsoUtcMs(a.start_at) ?? 0) - (parseIsoUtcMs(b.start_at) ?? 0));
     }
   }
 
@@ -223,12 +232,9 @@ export function bucketBookingsForMonthCells(
 export function formatMonthTitle(monthAnchor: string, timeZone: string = DEFAULT_CALENDAR_TIMEZONE): string {
   const tz = normalizeCalendarTimezone(timeZone);
   const anchor = parseCalendarDateString(monthAnchor, tz) ?? monthAnchor;
-  const ms = zonedMidnightUtcMs(anchor, tz) ?? Date.parse(`${anchor}T12:00:00Z`);
-  return new Date(ms).toLocaleDateString("en-GB", {
-    month: "long",
-    year: "numeric",
-    timeZone: tz,
-  });
+  const ms = zonedMidnightUtcMs(anchor, tz) ?? parseIsoUtcMs(`${anchor}T12:00:00.000Z`);
+  if (ms == null) return monthAnchor;
+  return formatIsoMonthYearInTimezone(ms, tz);
 }
 
 function defaultWaitlistDropMinutes(cfg: BusinessGridConfig): number {
@@ -236,11 +242,7 @@ function defaultWaitlistDropMinutes(cfg: BusinessGridConfig): number {
 }
 
 function formatPillTime(iso: string, timezone?: string | null, fallbackTz?: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: normalizeCalendarTimezone(timezone || fallbackTz),
-  });
+  return formatIsoTimeNumericInTimezone(iso, normalizeCalendarTimezone(timezone || fallbackTz));
 }
 
 // ---------------------------------------------------------------------------
@@ -367,6 +369,7 @@ function MonthDayCell({
   draggableAppointments,
   pendingAppointmentIds,
   onDayClick,
+  onEmptyDayQuickCreate,
   onSelectBooking,
   calendarTimezone,
 }: {
@@ -378,6 +381,8 @@ function MonthDayCell({
   draggableAppointments: boolean;
   pendingAppointmentIds?: ReadonlySet<string>;
   onDayClick: (dayKey: string) => void;
+  /** When set with a quiet in-month day, primary actions open quick create instead of day view. */
+  onEmptyDayQuickCreate?: (dayKey: string) => void;
   onSelectBooking: (b: FiBookingRow) => void;
   calendarTimezone: string;
 }) {
@@ -393,6 +398,7 @@ function MonthDayCell({
   const visibleProviders = providerSummary.slice(0, 4);
   const overflowProviders = providerSummary.length - visibleProviders.length;
   const isQuietDay = cell.inCurrentMonth && dayBookings.length === 0;
+  const openEmptyDayQuickCreate = isQuietDay && onEmptyDayQuickCreate ? onEmptyDayQuickCreate : null;
 
   return (
     <motion.div
@@ -412,9 +418,11 @@ function MonthDayCell({
     >
       <button
         type="button"
-        onClick={() => onDayClick(cell.dayKey)}
+        onClick={() => (openEmptyDayQuickCreate ? openEmptyDayQuickCreate(cell.dayKey) : onDayClick(cell.dayKey))}
         className="mb-1.5 flex w-full items-start justify-between gap-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
-        aria-label={`Open day view for ${cell.dayKey}`}
+        aria-label={
+          openEmptyDayQuickCreate ? `Quick book appointment on ${cell.dayKey}` : `Open day view for ${cell.dayKey}`
+        }
       >
         <span
           className={cn(
@@ -473,10 +481,12 @@ function MonthDayCell({
         ) : isQuietDay ? (
           <button
             type="button"
-            onClick={() => onDayClick(cell.dayKey)}
+            onClick={() =>
+              openEmptyDayQuickCreate ? openEmptyDayQuickCreate(cell.dayKey) : onDayClick(cell.dayKey)
+            }
             className="mt-auto w-full rounded-md border border-dashed border-[#1e2937]/80 px-1.5 py-1 text-[10px] font-medium text-slate-600 opacity-0 transition group-hover/cell:opacity-100 hover:border-slate-600 hover:bg-slate-900/50 hover:text-slate-300"
           >
-            Open · click to schedule
+            {openEmptyDayQuickCreate ? "Quick book" : "Open · click to schedule"}
           </button>
         ) : null}
       </div>
@@ -507,6 +517,7 @@ function MonthViewInner({
   pendingAppointmentIds,
   calendarShellMode = "default",
   fiOsDrawerDismiss,
+  onEmptyDayQuickCreate,
 }: MonthViewProps) {
   const router = useRouter();
   const { success, error: toastError } = useCalendarToast();
@@ -618,15 +629,12 @@ function MonthViewInner({
       const waitData = active.data.current as { item?: { durationMin?: number } } | undefined;
       const durationMin = waitlistBookingId
         ? Math.max(30, waitData?.item?.durationMin ?? 30)
-        : Math.max(
-            15,
-            Math.round((Date.parse(booking.end_at) - Date.parse(booking.start_at)) / 60_000) || 30
-          );
+        : Math.max(15, bookingDurationMinutesUtc(booking.start_at, booking.end_at) ?? 30);
 
       let startMin = defaultWaitlistDropMinutes(gridConfig);
       if (!waitlistBookingId) {
-        const origMs = Date.parse(booking.start_at);
-        if (!Number.isFinite(origMs)) return;
+        const origMs = parseIsoUtcMs(booking.start_at);
+        if (origMs == null) return;
         const origDayKey = calendarDateStringFromInstant(new Date(origMs), gridConfig.timeZone);
         if (origDayKey === dayKey) {
           startMin = minutesFromLaneStart(cell.startMs, origMs);
@@ -726,6 +734,7 @@ function MonthViewInner({
             draggableAppointments={canMutateBookings}
             pendingAppointmentIds={pendingAppointmentIds}
             onDayClick={openDay}
+            onEmptyDayQuickCreate={onEmptyDayQuickCreate}
             onSelectBooking={onSelectBooking}
             calendarTimezone={gridConfig.timeZone}
           />

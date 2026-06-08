@@ -3,7 +3,11 @@
 import { create } from "zustand";
 
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
-import { DEFAULT_CALENDAR_TIMEZONE } from "@/src/lib/calendar/calendarTimezone";
+import {
+  bookingDurationMinutesUtc,
+  DEFAULT_CALENDAR_TIMEZONE,
+  utcNowIso,
+} from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 export type CalendarAppointmentsHydrateInput = {
@@ -90,7 +94,7 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
                 patch.assigned_user_id !== undefined ? patch.assigned_user_id : b.assigned_user_id,
               clinic_id: patch.clinic_id !== undefined ? patch.clinic_id : b.clinic_id,
               metadata: patch.metadata ?? b.metadata,
-              updated_at: new Date().toISOString(),
+              updated_at: utcNowIso(),
             }
           : b
       ),
@@ -107,12 +111,7 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
     set((state) => {
       const has = state.bookings.some((b) => b.id === row.id);
       const bookings = has ? state.bookings.map((b) => (b.id === row.id ? row : b)) : [...state.bookings, row];
-      const startMs = Date.parse(row.start_at);
-      const endMs = Date.parse(row.end_at);
-      const durationMin =
-        Number.isFinite(startMs) && Number.isFinite(endMs)
-          ? Math.max(1, Math.round((endMs - startMs) / 60_000))
-          : 30;
+      const durationMin = bookingDurationMinutesUtc(row.start_at, row.end_at) ?? 30;
       const hint: OperationalCalendarBookingDisplay =
         display ??
         ({

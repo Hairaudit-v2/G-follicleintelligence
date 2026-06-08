@@ -17,6 +17,7 @@ import {
   type CalendarRoute,
 } from "@/src/lib/bookings/calendarQuery";
 import type { OperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarTypes";
+import { monthEmptyDayQuickCreateLocalStart } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
 import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/BookingEditDrawer";
@@ -88,6 +89,13 @@ export function CalendarPage({
 
   const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
 
+  const quickCreateColumnIdFromFilters = useMemo(() => {
+    if (data.query.staffId?.trim()) return `s:${data.query.staffId.trim()}`;
+    if (data.query.assignedUserId?.trim()) return `u:${data.query.assignedUserId.trim()}`;
+    if (data.query.clinicId?.trim()) return `c:${data.query.clinicId.trim()}`;
+    return undefined;
+  }, [data.query.staffId, data.query.assignedUserId, data.query.clinicId]);
+
   const quickCallInEnabled = Boolean(data.canMutateBookings && crmShellSession);
   /** FI OS: slot quick-create uses tenant booking rights; CRM session is only required for call-in + slide-over. */
   const quickCreateEnabled = Boolean(data.canMutateBookings && (workspaceVariant === "fiOs" || crmShellSession));
@@ -109,11 +117,11 @@ export function CalendarPage({
   }, [dismissFiOsCalendarDrawers, fiOsAgendaOpen, fiOsInsightsOpen, isFiOsWorkspace]);
 
   const openQuickCreateFromSlot = useCallback(
-    (p: { dayKey: string; columnId: string; localStart: string }, templateId?: CalendarQuickTemplateId) => {
+    (p: { dayKey: string; columnId?: string; localStart: string }, templateId?: CalendarQuickTemplateId) => {
       setSlotContextMenu(null);
       setQuickCreatePrefill({
         localStart: p.localStart.trim(),
-        columnId: p.columnId,
+        ...(p.columnId ? { columnId: p.columnId } : {}),
         dayKey: p.dayKey,
         templateId,
         defaultClinicId: data.query.clinicId?.trim() || undefined,
@@ -123,25 +131,29 @@ export function CalendarPage({
     [data.query.clinicId]
   );
 
+  const openQuickCreateFromMonthEmptyDay = useCallback(
+    (dayKey: string) => {
+      const localStart = monthEmptyDayQuickCreateLocalStart(dayKey, data.gridConfig);
+      openQuickCreateFromSlot(
+        {
+          dayKey,
+          localStart,
+          ...(quickCreateColumnIdFromFilters ? { columnId: quickCreateColumnIdFromFilters } : {}),
+        },
+        "consultation_30"
+      );
+    },
+    [data.gridConfig, openQuickCreateFromSlot, quickCreateColumnIdFromFilters]
+  );
+
   const quickCreateFabPrefill = useMemo(
     () => ({
       localStart: slotPrefillLocal,
       templateId: "consultation_30" as const,
       defaultClinicId: data.query.clinicId?.trim() || undefined,
-      columnId: data.query.staffId
-        ? (`s:${data.query.staffId}` as const)
-        : data.query.assignedUserId
-          ? (`u:${data.query.assignedUserId}` as const)
-          : data.query.clinicId
-            ? (`c:${data.query.clinicId}` as const)
-            : undefined,
+      columnId: quickCreateColumnIdFromFilters,
     }),
-    [
-      data.query.assignedUserId,
-      data.query.clinicId,
-      data.query.staffId,
-      slotPrefillLocal,
-    ]
+    [data.query.clinicId, quickCreateColumnIdFromFilters, slotPrefillLocal]
   );
 
   const base = `/fi-admin/${data.tenantId.trim()}`;
@@ -280,6 +292,9 @@ export function CalendarPage({
                 calendarRoute={route}
                 calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                 fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
+                onEmptyDayQuickCreate={
+                  quickCreateEnabled && isFiOsWorkspace ? openQuickCreateFromMonthEmptyDay : undefined
+                }
               />
             </motion.div>
           ) : (
@@ -502,6 +517,15 @@ export function CalendarPage({
         onEdit={(b) => setEditing(b)}
         variant={isFiOsWorkspace ? "fiOs" : "default"}
         patientSummary={drawer ? data.bookingDisplay[drawer.id]?.anchorLabel ?? null : null}
+        staffDirectory={data.staffDirectory}
+        canMutateBookings={data.canMutateBookings}
+        procedureLabel={drawer ? data.bookingDisplay[drawer.id]?.procedureCatalogName ?? null : null}
+        patientContactEmail={drawer ? data.bookingDisplay[drawer.id]?.patientEmail ?? null : null}
+        patientContactPhone={drawer ? data.bookingDisplay[drawer.id]?.patientPhone ?? null : null}
+        onBookingUpdated={(b) => {
+          upsertBooking(b);
+          setDrawer(b);
+        }}
       />
 
       <BookingEditDrawer

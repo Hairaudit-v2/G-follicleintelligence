@@ -16,6 +16,9 @@ export type OperationalCalendarBookingDisplay = {
   procedureCatalogName?: string | null;
   procedureCatalogHex?: string | null;
   suggestedPrice?: number | null;
+  /** From `fi_patients.metadata` when the booking is anchored to a patient. */
+  patientEmail?: string | null;
+  patientPhone?: string | null;
 };
 
 export type OperationalCalendarResourceColumn = {

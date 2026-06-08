@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
+import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import type { ReminderMergeContext } from "./remindersCore";
 
@@ -55,19 +56,8 @@ export async function buildMergeContext(
     if (name) ctx.clinic_name = name;
   }
 
-  const tz = booking.timezone?.trim() || undefined;
-  const start = new Date(booking.start_at);
-  const end = new Date(booking.end_at);
-  if (Number.isFinite(start.getTime()) && Number.isFinite(end.getTime())) {
-    const df = new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: tz,
-    });
-    ctx.booking_time = `${df.format(start)} – ${df.format(end)}`;
-  } else {
-    ctx.booking_time = booking.start_at;
-  }
+  const tzKey = normalizeCalendarTimezone(booking.timezone?.trim() || null);
+  ctx.booking_time = formatBookingWindowInTimezone(booking.start_at, booking.end_at, tzKey);
 
   if (booking.patient_id?.trim()) {
     await appendClinicalSummaryToContext(supabase, tenantId, booking.patient_id.trim(), ctx);

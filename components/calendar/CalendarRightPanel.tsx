@@ -8,7 +8,11 @@ import { calendarSidebarsCollapsedByDefault } from "@/lib/calendar/calendarRespo
 import { useCalendarLayoutMode } from "@/hooks/useCalendarLayoutMode";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
-import { calendarDateStringFromInstant, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import {
+  calendarDateStringFromInstant,
+  normalizeCalendarTimezone,
+  parseIsoUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 import { cn } from "@/lib/utils";
 
 export type CalendarDailyStats = {
@@ -44,8 +48,8 @@ export function computeCalendarDailyStats(
       continue;
     }
 
-    const startMs = Date.parse(b.start_at);
-    if (!Number.isFinite(startMs)) continue;
+    const startMs = parseIsoUtcMs(b.start_at);
+    if (startMs == null) continue;
     const key = calendarDateStringFromInstant(new Date(startMs), tz);
     if (key !== dayKey) continue;
     if (b.booking_status === "cancelled" || b.booking_status === "completed" || b.booking_status === "no_show") {

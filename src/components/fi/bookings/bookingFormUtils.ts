@@ -1,7 +1,9 @@
 import {
+  addUtcMinutesToIso,
   DEFAULT_CALENDAR_TIMEZONE,
   fromDatetimeLocalValueInTimezone,
   toDatetimeLocalValueInTimezone,
+  utcNowIso,
 } from "@/src/lib/calendar/calendarTimezone";
 import { endIsoFromStartAndProcedure } from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
@@ -37,9 +39,8 @@ export function endLocalFromStartLocalAndProcedure(
 }
 
 export function defaultRangeIso(timeZone?: string | null): { start: string; end: string } {
-  const now = new Date();
   if (timeZone?.trim()) {
-    const localNow = toDatetimeLocalValueInTimezone(now.toISOString(), timeZone);
+    const localNow = toDatetimeLocalValueInTimezone(utcNowIso(), timeZone);
     const [datePart, timePart] = localNow.split("T");
     if (datePart && timePart) {
       const [h] = timePart.split(":").map(Number);
@@ -51,10 +52,8 @@ export function defaultRangeIso(timeZone?: string | null): { start: string; end:
       if (start && end) return { start, end };
     }
   }
-  const a = new Date();
-  a.setMinutes(0, 0, 0);
-  a.setHours(a.getHours() + 1);
-  const b = new Date(a);
-  b.setHours(b.getHours() + 1);
-  return { start: a.toISOString(), end: b.toISOString() };
+  const nowIso = utcNowIso();
+  const start = addUtcMinutesToIso(nowIso, 60);
+  const end = addUtcMinutesToIso(nowIso, 120);
+  return { start, end };
 }

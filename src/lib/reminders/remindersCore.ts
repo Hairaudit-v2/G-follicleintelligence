@@ -1,5 +1,11 @@
 import type { ReminderTriggerEvent } from "./reminderConstants";
 import type { ReminderTemplateType } from "./reminderConstants";
+import {
+  formatIsoDateTimeInTimezone,
+  maxUtcIsoFromMs,
+  normalizeCalendarTimezone,
+  parseIsoUtcMs,
+} from "@/src/lib/calendar/calendarTimezone";
 
 export const REMINDER_PLACEHOLDER_KEYS = [
   "{{patient_name}}",
@@ -67,21 +73,21 @@ export function scheduledAtForBookingTrigger(params: {
   bookingStartIso: string;
   nowIso: string;
 }): string | null {
-  const startMs = Date.parse(params.bookingStartIso);
-  if (!Number.isFinite(startMs)) return null;
-  const nowMs = Date.parse(params.nowIso);
-  if (!Number.isFinite(nowMs)) return null;
+  const startMs = parseIsoUtcMs(params.bookingStartIso);
+  if (startMs == null) return null;
+  const nowMs = parseIsoUtcMs(params.nowIso);
+  if (nowMs == null) return null;
 
   switch (params.trigger) {
     case "booking_created":
       return params.nowIso;
     case "booking_48h_before": {
       const t = startMs - 48 * 3_600_000;
-      return new Date(Math.max(t, nowMs)).toISOString();
+      return maxUtcIsoFromMs(t, nowMs);
     }
     case "booking_24h_before": {
       const t = startMs - 24 * 3_600_000;
-      return new Date(Math.max(t, nowMs)).toISOString();
+      return maxUtcIsoFromMs(t, nowMs);
     }
     default:
       return null;
@@ -110,20 +116,22 @@ export function templateTypeMatchesPreference(
 }
 
 export function bookingStartsAfterNow(bookingStartIso: string, nowMs: number): boolean {
-  const startMs = Date.parse(bookingStartIso);
-  return Number.isFinite(startMs) && startMs > nowMs;
+  const startMs = parseIsoUtcMs(bookingStartIso);
+  return startMs != null && startMs > nowMs;
 }
 
 /** One-line hint for calendar cards: next pending/processing reminder for a booking. */
 export function formatNextReminderHint(
-  jobs: { scheduled_at: string; status: string; template_name?: string; template_type: string }[]
+  jobs: { scheduled_at: string; status: string; template_name?: string; template_type: string }[],
+  displayTimeZone?: string | null
 ): string | null {
   const pending = jobs
     .filter((j) => j.status === "pending" || j.status === "processing")
     .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
   const j = pending[0];
   if (!j) return null;
-  const when = new Date(j.scheduled_at).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
+  const tz = normalizeCalendarTimezone(displayTimeZone);
+  const when = formatIsoDateTimeInTimezone(j.scheduled_at, tz);
   const label = j.template_name?.trim() || "Reminder";
   return `${label} (${j.template_type}) · ${when}`;
 }

@@ -50,6 +50,7 @@ import {
   calendarDateStringFromInstant,
   clinicLocalSlotToUtcIso,
   displayCalendarTimezoneSubtitle,
+  parseIsoUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
 import { cn } from "@/lib/utils";
@@ -387,9 +388,9 @@ function WeekViewInner({
         const fallbackStart = gridConfig.dayStartHourUtc * 60 + 60;
         newStartMin = dropMinutesFromDragEvent(event, gridConfig, fallbackStart);
       } else {
-        const origStartMs = Date.parse(booking.start_at);
-        const origEndMs = Date.parse(booking.end_at);
-        if (!Number.isFinite(origStartMs) || !Number.isFinite(origEndMs)) return;
+        const origStartMs = parseIsoUtcMs(booking.start_at);
+        const origEndMs = parseIsoUtcMs(booking.end_at);
+        if (origStartMs == null || origEndMs == null) return;
 
         durationMs = Math.max(CALENDAR_SNAP_MINUTES * 60_000, origEndMs - origStartMs);
         const origStartMin = minutesFromLaneStart(lane.startMs, origStartMs);
