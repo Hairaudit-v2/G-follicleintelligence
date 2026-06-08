@@ -237,6 +237,10 @@ export function calculatePatientTwinCompleteness(twin: PatientTwinV1ForCompleten
   }
   score += Math.min(15, clinPts);
 
+  if (twin.pathology.requests.length > 0 || twin.pathology.results.length > 0) {
+    pushStrength(strengths, "pathology", "Blood pathology requests or results exist for this patient.");
+  }
+
   // --- Timeline (10) ---
   if (twin.timeline.items.length > 0) {
     score += 10;

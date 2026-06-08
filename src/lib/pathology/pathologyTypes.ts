@@ -34,3 +34,47 @@ export type PathologyRequestItemRow = {
   test_label: string;
   created_at: string;
 };
+
+export type PathologyPdfTestLine = { code: string | null; label: string };
+
+export type PathologyPdfBranding = {
+  clinicName: string;
+  accentHex: string;
+  /** Optional extra lines (phone, address, web). */
+  clinicLines: string[];
+};
+
+export type PathologyPdfInput = {
+  branding: PathologyPdfBranding;
+  patientName: string;
+  dateOfBirth: string | null;
+  patientEmail: string | null;
+  patientPhone: string | null;
+  requestDate: string;
+  templateLabel: string;
+  doctorDisplayName: string | null;
+  clinicalNotes: string | null;
+  tests: PathologyPdfTestLine[];
+  requestRef: string;
+};
+
+export type PathologyRequestAuditEvent = {
+  id: string;
+  occurred_at: string;
+  activity_kind: string;
+  title: string | null;
+  detail: Record<string, unknown>;
+};
+
+export type PathologyRequestDetailBundle = {
+  request: PathologyRequestRow;
+  items: PathologyRequestItemRow[];
+  patientName: string;
+  dateOfBirth: string | null;
+  patientEmail: string | null;
+  patientPhone: string | null;
+  doctorDisplayName: string | null;
+  branding: PathologyPdfBranding;
+  tenantDisplayName: string;
+  templateLabel: string;
+};

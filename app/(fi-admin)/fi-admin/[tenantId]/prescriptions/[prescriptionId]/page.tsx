@@ -4,6 +4,10 @@ import { notFound } from "next/navigation";
 import { PrescriptionEditorClient } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
 import type { PrescriptionEditorLine } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
 import { loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import {
+  loadActiveCompoundPharmaciesForTenant,
+  loadPharmacyTransmissionsForPrescription,
+} from "@/src/lib/prescribing/fiPharmacyLoaders.server";
 import { loadMedicationCatalogueForTenant, loadPrescriptionDetail } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
 
 export const dynamic = "force-dynamic";
@@ -35,10 +39,12 @@ export default async function PrescriptionEditorRoutePage({
   const tid = tenantId.trim();
   const rid = prescriptionId.trim();
 
-  const [bundle, catalogue, staff] = await Promise.all([
+  const [bundle, catalogue, staff, pharmacies, transmissions] = await Promise.all([
     loadPrescriptionDetail(tid, rid),
     loadMedicationCatalogueForTenant(tid),
     loadCrmShellStaffPickerOptions(tid),
+    loadActiveCompoundPharmaciesForTenant(tid),
+    loadPharmacyTransmissionsForPrescription(tid, rid),
   ]);
 
   if (!bundle) notFound();
@@ -71,6 +77,7 @@ export default async function PrescriptionEditorRoutePage({
     doseInstructions: it.dose_instructions,
     repeatsInstructions: it.repeats_instructions ?? "",
     reorderRule: it.reorder_rule ?? "",
+    repeatRulesPrescriberConfirmed: it.repeat_rules_prescriber_confirmed,
   }));
 
   return (
@@ -91,6 +98,15 @@ export default async function PrescriptionEditorRoutePage({
       catalogue={catalogue}
       staffOptions={staffOptions}
       initialEvents={bundle.events}
+      initialPharmacies={pharmacies}
+      initialTransmissions={transmissions}
+      initialRepeatsAllowed={p.repeats_allowed}
+      initialRepeatLimit={p.repeat_limit}
+      initialReorderValidFrom={p.reorder_valid_from ?? ""}
+      initialReorderValidUntil={p.reorder_valid_until ?? ""}
+      initialReorderReviewRequired={p.reorder_review_required}
+      initialPatientReorderFeePence={p.patient_reorder_fee_pence != null ? String(p.patient_reorder_fee_pence) : ""}
+      initialReorderFeePaymentRequired={p.reorder_fee_payment_required}
     />
   );
 }

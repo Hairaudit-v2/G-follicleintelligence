@@ -38,7 +38,7 @@ function errMsg(e: unknown): string {
 function revalidateStaffSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
   revalidatePath(`/fi-admin/${tid}/staff`);
-  revalidatePath(`/fi-admin/${tid}/staff/import/iiohr-hr`);
+  revalidatePath(`/fi-admin/${tid}/hr/staff-import`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}`);
   revalidatePath(`/fi-admin/${tid}/appointments`);

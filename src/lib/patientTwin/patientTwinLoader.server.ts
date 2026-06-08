@@ -58,6 +58,10 @@ const SOURCE_TABLES_USED = [
   "fi_model_runs",
   "fi_scorecards",
   "fi_patient_clinical_details",
+  "fi_pathology_requests",
+  "fi_pathology_results",
+  "fi_pathology_result_items",
+  "fi_pathology_ai_interpretations",
 ] as const;
 
 const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
@@ -538,6 +542,169 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
 
   const timelineItems = buildFoundationTimeline(base);
 
+  const pathologyCap = 12;
+  const pathologyResultsCap = 12;
+  let pathology: PatientTwinV1["pathology"] = {
+    requests: [],
+    results: [],
+    item_cap: pathologyCap,
+    results_item_cap: pathologyResultsCap,
+    abnormal_markers_total: 0,
+    last_result_reviewed_at: null,
+    latest_ai_interpretation: null,
+  };
+
+  const { data: pthRows, error: pthErr } = await supabase
+    .from("fi_pathology_requests")
+    .select("id, request_date, template_used, status, emailed_to_patient_at, cancelled_at, created_at")
+    .eq("tenant_id", tid)
+    .eq("patient_id", primaryFoundation)
+    .order("created_at", { ascending: false })
+    .limit(pathologyCap);
+  if (pthErr) {
+    pushWarning(warnings, "generic", `Pathology requests section skipped: ${pthErr.message}`);
+  } else {
+    pathology = {
+      ...pathology,
+      item_cap: pathologyCap,
+      requests: (pthRows ?? []).map((r) => {
+        const x = r as Record<string, unknown>;
+        return {
+          id: String(x.id),
+          request_date: String(x.request_date ?? "").slice(0, 10),
+          template_used: String(x.template_used ?? ""),
+          status: String(x.status ?? ""),
+          emailed_to_patient_at: x.emailed_to_patient_at != null ? String(x.emailed_to_patient_at) : null,
+          cancelled_at: x.cancelled_at != null ? String(x.cancelled_at) : null,
+          created_at: String(x.created_at ?? ""),
+        };
+      }),
+    };
+  }
+
+  const { data: prRows, error: prErr } = await supabase
+    .from("fi_pathology_results")
+    .select("id, result_date, provider_name, status, pathology_request_id, source_type, reviewed_at, created_at")
+    .eq("tenant_id", tid)
+    .eq("patient_id", primaryFoundation)
+    .order("created_at", { ascending: false })
+    .limit(pathologyResultsCap);
+  if (prErr) {
+    pushWarning(warnings, "generic", `Pathology results section skipped: ${prErr.message}`);
+  } else {
+    const resultIds = (prRows ?? []).map((r) => String((r as Record<string, unknown>).id));
+    const markerCountByResult = new Map<string, number>();
+    const abnormalByResult = new Map<string, number>();
+    if (resultIds.length > 0) {
+      const { data: itRows, error: itErr } = await supabase
+        .from("fi_pathology_result_items")
+        .select("result_id, flag")
+        .eq("tenant_id", tid)
+        .in("result_id", resultIds);
+      if (itErr) {
+        pushWarning(warnings, "generic", `Pathology result markers skipped: ${itErr.message}`);
+      } else {
+        for (const raw of itRows ?? []) {
+          const x = raw as Record<string, unknown>;
+          const rid = String(x.result_id);
+          markerCountByResult.set(rid, (markerCountByResult.get(rid) ?? 0) + 1);
+          const fl = String(x.flag ?? "");
+          if (fl === "low" || fl === "high" || fl === "critical") {
+            abnormalByResult.set(rid, (abnormalByResult.get(rid) ?? 0) + 1);
+          }
+        }
+      }
+    }
+
+    const results = (prRows ?? []).map((r) => {
+      const x = r as Record<string, unknown>;
+      const id = String(x.id);
+      return {
+        id,
+        result_date: String(x.result_date ?? "").slice(0, 10),
+        provider_name: x.provider_name != null ? String(x.provider_name) : null,
+        status: String(x.status ?? ""),
+        pathology_request_id: x.pathology_request_id != null ? String(x.pathology_request_id) : null,
+        marker_count: markerCountByResult.get(id) ?? 0,
+        abnormal_marker_count: abnormalByResult.get(id) ?? 0,
+        source_type: String(x.source_type ?? ""),
+        reviewed_at: x.reviewed_at != null ? String(x.reviewed_at) : null,
+        created_at: String(x.created_at ?? ""),
+      };
+    });
+
+    let abnormal_markers_total = 0;
+    let last_result_reviewed_at: string | null = null;
+    for (const row of results) {
+      abnormal_markers_total += row.abnormal_marker_count;
+      if (row.reviewed_at) {
+        if (!last_result_reviewed_at || row.reviewed_at > last_result_reviewed_at) {
+          last_result_reviewed_at = row.reviewed_at;
+        }
+      }
+    }
+
+    pathology = {
+      ...pathology,
+      results_item_cap: pathologyResultsCap,
+      results,
+      abnormal_markers_total,
+      last_result_reviewed_at,
+    };
+  }
+
+  const { data: aiRow, error: aiErr } = await supabase
+    .from("fi_pathology_ai_interpretations")
+    .select("id, pathology_result_id, status, hair_loss_relevance_score, surgical_readiness_score, interpretation_json, created_at, reviewed_at")
+    .eq("tenant_id", tid)
+    .eq("patient_id", primaryFoundation)
+    .neq("status", "archived")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (aiErr) {
+    pushWarning(warnings, "generic", `Pathology AI interpretation skipped: ${aiErr.message}`);
+  } else if (aiRow) {
+    const x = aiRow as Record<string, unknown>;
+    const blob =
+      x.interpretation_json && typeof x.interpretation_json === "object" && !Array.isArray(x.interpretation_json)
+        ? (x.interpretation_json as Record<string, unknown>)
+        : {};
+    const contributorsRaw = Array.isArray(blob.likely_contributors) ? blob.likely_contributors : [];
+    const main_contributors = contributorsRaw
+      .map((c) => {
+        if (typeof c === "string") return c.trim();
+        if (c && typeof c === "object" && !Array.isArray(c)) {
+          const name = (c as Record<string, unknown>).name;
+          return typeof name === "string" ? name.trim() : "";
+        }
+        return "";
+      })
+      .filter(Boolean)
+      .slice(0, 3);
+    const overviewRaw = typeof blob.overview === "string" ? blob.overview.trim() : "";
+    pathology = {
+      ...pathology,
+      latest_ai_interpretation: {
+        id: String(x.id),
+        pathology_result_id: String(x.pathology_result_id),
+        status: String(x.status ?? ""),
+        hair_loss_relevance_score:
+          x.hair_loss_relevance_score != null && Number.isFinite(Number(x.hair_loss_relevance_score))
+            ? Number(x.hair_loss_relevance_score)
+            : null,
+        surgical_readiness_score:
+          x.surgical_readiness_score != null && Number.isFinite(Number(x.surgical_readiness_score))
+            ? Number(x.surgical_readiness_score)
+            : null,
+        main_contributors,
+        overview_snippet: overviewRaw ? overviewRaw.slice(0, 240) : null,
+        created_at: String(x.created_at ?? ""),
+        reviewed_at: x.reviewed_at != null ? String(x.reviewed_at) : null,
+      },
+    };
+  }
+
   let structured_profile: PatientTwinV1["clinical"]["structured_profile"] = null;
   const { data: clin, error: cne } = await supabase
     .from("fi_patient_clinical_details")
@@ -576,6 +743,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     cases: casesOut,
     audits,
     media,
+    pathology,
     timeline: {
       order: "newest_first",
       items: timelineItems,

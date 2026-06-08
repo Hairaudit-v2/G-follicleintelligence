@@ -128,8 +128,11 @@ function buildStaffUpdatePayload(
   if (row.full_name.trim() && row.full_name.trim() !== staff.full_name) patch.full_name = row.full_name.trim();
   const role = (row.staff_role?.trim() || "consultant").trim() || "consultant";
   if (role !== staff.staff_role) patch.staff_role = role;
-  const staffEmailKey = emailKey(staff.email);
-  if (nextEmail !== staff.email && (nextEmail || staffEmailKey)) patch.email = nextEmail;
+  /** Do not overwrite an existing staff email from HR import; only set when the FI row has no email yet. */
+  const staffHasEmail = Boolean(staff.email?.trim());
+  if (!staffHasEmail && nextEmail !== (staff.email ?? null)) {
+    patch.email = nextEmail;
+  }
   const stz = staff.default_timezone ?? null;
   if (nextTz !== stz) patch.default_timezone = nextTz;
 

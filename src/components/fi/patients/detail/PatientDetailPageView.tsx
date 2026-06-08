@@ -21,6 +21,8 @@ import { PatientPreviousProceduresCard } from "./PatientPreviousProceduresCard";
 import { PatientProgressCompare } from "../progress/PatientProgressCompare";
 import { PatientAppointmentsTab } from "./PatientAppointmentsTab";
 import { PatientDocumentsTab } from "./PatientDocumentsTab";
+import { PatientVoiceClinicalNotesCard } from "@/src/components/fi/clinical-notes/PatientVoiceClinicalNotesCard";
+import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
 
 export function PatientDetailPageView({
   tenantId,
@@ -59,13 +61,20 @@ export function PatientDetailPageView({
         <PatientDetailTabNav tenantId={tenantId} patientId={patientId} activeTab={activeTab} />
       </Suspense>
 
-      <div className="flex flex-wrap items-center gap-2 rounded border border-gray-200 bg-gray-50/80 px-3 py-2">
+      <div id="patient-actions" className="flex flex-wrap items-center gap-2 rounded border border-gray-200 bg-gray-50/80 px-3 py-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</span>
+        <VoiceNoteEntryButton tenantId={tenantId} patientId={patientId} />
         <Link
           href={`/fi-admin/${tenantId}/patients/${patientId}/blood-request`}
           className="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
         >
           Request blood tests
+        </Link>
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}/blood-results/new`}
+          className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-50"
+        >
+          Upload blood results
         </Link>
       </div>
 
@@ -90,6 +99,7 @@ export function PatientDetailPageView({
 
       {activeTab === "clinical" ? (
         <div className="space-y-4">
+          <PatientVoiceClinicalNotesCard tenantId={tenantId} items={initialPayload.voiceClinicalNotes} />
           <PatientClinicalDetailsCard tenantId={tenantId} data={profile} />
           <PatientPreviousProceduresCard procedures={initialPayload.previousProcedures} />
           <PatientConsultationsCard tenantId={tenantId} consultations={initialPayload.consultations} />

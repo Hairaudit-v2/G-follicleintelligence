@@ -15,8 +15,9 @@ export function PatientDocumentsTab({
       <section className={crmLeadCardClass}>
         <h2 className="text-sm font-semibold text-gray-900">Documents</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Consent PDFs, signed treatment plans, and external document storage are not connected yet. Use admin notes and
-          CRM activity below until a patient document vault ships.
+          Consent PDFs and a full document vault are not connected yet. <strong>Blood test request PDFs</strong>{" "}
+          generated in DoctorOS are stored privately (patient storage) when you download or email them from a saved
+          request, and appear on the patient&apos;s treatment timeline.
         </p>
       </section>
       <PatientAdminNotesCard tenantId={tenantId} data={data} />

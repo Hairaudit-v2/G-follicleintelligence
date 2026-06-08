@@ -31,6 +31,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       templateUsed: parsed.template_used,
       requestDate,
       doctorUserId,
+      clinicalNotes: parsed.clinical_notes?.trim() ? parsed.clinical_notes.trim() : null,
       tests: parsed.tests.map((t) => ({
         code: t.code?.trim() ? t.code.trim() : null,
         label: t.label.trim(),

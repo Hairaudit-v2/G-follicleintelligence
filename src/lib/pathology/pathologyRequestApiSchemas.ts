@@ -27,7 +27,7 @@ export const createPathologyRequestBodySchema = z.object({
 });
 
 export const patchPathologyRequestBodySchema = z.object({
-  clinical_notes: z.string().trim().max(8000).nullable().optional(),
+  clinical_notes: z.string().max(8000).nullable(),
   adminKey: z.string().optional(),
 });
 

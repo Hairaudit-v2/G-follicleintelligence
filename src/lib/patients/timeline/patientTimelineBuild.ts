@@ -90,6 +90,36 @@ function safeActivityMetadataSummary(kind: string, detail: Record<string, unknow
     if (tpl) return `Template: ${tpl.replace(/_/g, " ")}`;
     return "Blood request";
   }
+  if (k === "pathology.blood_request.sent") {
+    return "PDF emailed to patient";
+  }
+  if (k === "pathology.blood_request.cancelled") {
+    const tpl = readString(detail, "template_used");
+    return tpl ? `Template: ${tpl.replace(/_/g, " ")}` : "Request voided";
+  }
+  if (k === "pathology.blood_result.uploaded" || k === "pathology.blood_result.reviewed" || k === "pathology.blood_result.archived") {
+    const rd = readString(detail, "result_date");
+    const prov = readString(detail, "provider_name");
+    const n = detail.marker_count;
+    const count = typeof n === "number" && Number.isFinite(n) ? n : null;
+    const req = readString(detail, "pathology_request_id");
+    const parts: string[] = [];
+    if (rd) parts.push(`Date: ${rd}`);
+    if (prov) parts.push(`Provider: ${prov}`);
+    if (count != null) parts.push(`${count} marker(s)`);
+    if (req) parts.push("Linked request");
+    return parts.length ? parts.join(" · ") : "Blood result";
+  }
+  if (k.startsWith("pathology.ai_interpretation.")) {
+    const hair = detail.hair_loss_relevance_score;
+    const surgery = detail.surgical_readiness_score;
+    const flags = detail.major_risk_flags_count;
+    const parts: string[] = [];
+    if (typeof hair === "number" && Number.isFinite(hair)) parts.push(`Hair relevance: ${hair}/100`);
+    if (typeof surgery === "number" && Number.isFinite(surgery)) parts.push(`Surgery readiness: ${surgery}/100`);
+    if (typeof flags === "number" && Number.isFinite(flags)) parts.push(`${flags} risk flag(s)`);
+    return parts.length ? parts.join(" · ") : "AI interpretation";
+  }
   return null;
 }
 
@@ -144,7 +174,20 @@ export function buildPatientTimeline(
     let href: string | null = null;
     if (ev.case_id) href = hrefForCase(ctx, ev.case_id);
     else if (ev.lead_id) href = hrefForLead(ctx, ev.lead_id);
-    else if (ev.patient_id) href = `/fi-admin/${ctx.tenantId.trim()}/patients/${ev.patient_id}`;
+    else if (ev.patient_id) {
+      const pid = String(ev.patient_id);
+      const tid = ctx.tenantId.trim();
+      const kind = ev.activity_kind.trim();
+      const prid = readString(meta as Record<string, unknown>, "pathology_request_id");
+      const resid = readString(meta as Record<string, unknown>, "pathology_result_id");
+      if (prid && kind.startsWith("pathology.blood_request.")) {
+        href = `/fi-admin/${tid}/patients/${pid}/blood-request/${prid}`;
+      } else if (resid && (kind.startsWith("pathology.blood_result.") || kind.startsWith("pathology.ai_interpretation."))) {
+        href = `/fi-admin/${tid}/patients/${pid}/blood-results/${resid}`;
+      } else {
+        href = `/fi-admin/${tid}/patients/${pid}`;
+      }
+    }
     items.push({
       id: `crm_activity:${ev.id}`,
       occurred_at: ev.occurred_at,

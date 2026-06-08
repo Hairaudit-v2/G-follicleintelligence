@@ -107,6 +107,51 @@ export const patientTwinMediaSectionSchema = z.object({
   ),
 });
 
+export const patientTwinPathologyRequestRowSchema = z.object({
+  id: z.string().uuid(),
+  request_date: z.string(),
+  template_used: z.string(),
+  status: z.string(),
+  emailed_to_patient_at: z.string().nullable(),
+  cancelled_at: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const patientTwinPathologyResultRowSchema = z.object({
+  id: z.string().uuid(),
+  result_date: z.string(),
+  provider_name: z.string().nullable(),
+  status: z.string(),
+  pathology_request_id: z.string().uuid().nullable(),
+  marker_count: z.number().int().nonnegative(),
+  abnormal_marker_count: z.number().int().nonnegative(),
+  source_type: z.string(),
+  reviewed_at: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const patientTwinPathologyAiInterpretationSummarySchema = z.object({
+  id: z.string().uuid(),
+  pathology_result_id: z.string().uuid(),
+  status: z.string(),
+  hair_loss_relevance_score: z.number().nullable(),
+  surgical_readiness_score: z.number().nullable(),
+  main_contributors: z.array(z.string()),
+  overview_snippet: z.string().nullable(),
+  created_at: z.string(),
+  reviewed_at: z.string().nullable(),
+});
+
+export const patientTwinPathologySectionSchema = z.object({
+  requests: z.array(patientTwinPathologyRequestRowSchema),
+  results: z.array(patientTwinPathologyResultRowSchema),
+  item_cap: z.number().int().positive(),
+  results_item_cap: z.number().int().positive(),
+  abnormal_markers_total: z.number().int().nonnegative(),
+  last_result_reviewed_at: z.string().nullable(),
+  latest_ai_interpretation: patientTwinPathologyAiInterpretationSummarySchema.nullable(),
+});
+
 export const patientTwinTimelineItemSchema = z.object({
   source_type: z.literal("fi_timeline_events"),
   source_id: z.string().uuid(),
@@ -198,6 +243,7 @@ export const patientTwinV1Schema = z.object({
   cases: z.array(patientTwinCaseRowSchema),
   audits: patientTwinAuditRollupSectionSchema,
   media: patientTwinMediaSectionSchema,
+  pathology: patientTwinPathologySectionSchema,
   timeline: patientTwinTimelineSectionSchema,
   clinical: patientTwinClinicalSectionSchema,
   intelligence: patientTwinIntelligenceSectionSchema,

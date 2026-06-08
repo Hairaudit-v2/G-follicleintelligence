@@ -151,8 +151,8 @@ export function StaffDirectoryClient({
             {canManage ? (
               <>
                 <span className="mx-2 text-gray-300">·</span>
-                <Link href={`${base}/staff/import/iiohr-hr`} className="text-blue-600 hover:underline">
-                  Import IIOHR HR staff
+                <Link href={`${base}/hr/staff-import`} className="text-blue-600 hover:underline">
+                  Staff import (HR)
                 </Link>
               </>
             ) : null}

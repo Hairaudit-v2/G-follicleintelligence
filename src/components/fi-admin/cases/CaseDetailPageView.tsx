@@ -26,6 +26,7 @@ import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
+import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
 
 function caseSelfQuery(casesListReturnQuery?: string, opts?: { foundation?: "1" }): string {
   const p = new URLSearchParams();
@@ -103,6 +104,13 @@ export function CaseDetailPageView({
             >
               Print / Export summary
             </Link>
+            {detail.foundation_patient_id ? (
+              <VoiceNoteEntryButton
+                tenantId={tenantId}
+                patientId={detail.foundation_patient_id}
+                caseId={detail.id}
+              />
+            ) : null}
           </div>
         </div>
         <p className="mt-1 max-w-3xl text-sm text-gray-600">

@@ -111,6 +111,21 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
     });
   }
 
+  if (showCrmNav) {
+    groups.push({
+      id: "hr",
+      label: "HR",
+      description: "Import Evolved HR staff records and link them to FI staff profiles.",
+      items: [
+        {
+          href: `${base}/hr/staff-import`,
+          label: "Staff Import",
+          title: "Import Evolved HR staff records and link them to FI staff profiles.",
+        },
+      ],
+    });
+  }
+
   groups.push({
     id: "analyticsos",
     label: "AnalyticsOS",

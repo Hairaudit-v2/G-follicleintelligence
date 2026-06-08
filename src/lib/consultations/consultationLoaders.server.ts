@@ -74,6 +74,8 @@ export type ListConsultationsOptions = {
   limit?: number;
   offset?: number;
   status?: ConsultationStatus;
+  /** When set, filters to any of these statuses (takes precedence over `status`). */
+  statusIn?: ConsultationStatus[];
 };
 
 /** Worklist row: base consultation + resolved subject line for the index UI. */
@@ -338,7 +340,9 @@ export async function listConsultationsForTenant(
   const supabase = supabaseAdmin();
   let q = supabase.from("fi_consultations").select("*").eq("tenant_id", tid).order("updated_at", { ascending: false });
 
-  if (options.status) {
+  if (options.statusIn?.length) {
+    q = q.in("status", options.statusIn);
+  } else if (options.status) {
     q = q.eq("status", options.status);
   }
 

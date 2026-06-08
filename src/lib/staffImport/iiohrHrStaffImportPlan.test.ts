@@ -84,10 +84,23 @@ test("match by fi_staff_source_ids iiohr_hr before email", () => {
   assert.ok(upd && upd.type === "update_fi_staff");
   assert.equal(upd.payload.full_name, "Updated Name");
   assert.equal(upd.payload.staff_role, "surgeon");
-  assert.equal(upd.payload.email, "newemail@example.com");
+  assert.equal(upd.payload.email, undefined);
 });
 
-test("match by fi_staff.email case-insensitive", () => {
+test("planner preview: new staff row plans create_fi_staff + source id", () => {
+  const r = planIiohrHrStaffImport({
+    tenantId: TENANT,
+    rows: [row({ external_staff_id: "N-NEW", email: "onlynew@x.com", full_name: "Only New" })],
+    existingUsers: [],
+    existingStaff: [],
+    existingStaffSourceIds: [],
+  });
+  assert.equal(r.perRow[0]?.matchKind, "none");
+  assert.ok(r.actions.some((a) => a.type === "create_fi_staff"));
+  assert.ok(r.actions.some((a) => a.type === "create_staff_source_id"));
+});
+
+test("planner preview: existing staff email match", () => {
   const staff: IiohrHrImportExistingStaff[] = [
     {
       id: "staff-2",
@@ -410,6 +423,40 @@ test("invalid source_url is ignored with warning", () => {
   const sid = r.actions.find((a) => a.type === "create_staff_source_id");
   assert.ok(sid && sid.type === "create_staff_source_id");
   assert.equal(sid.payload.source_url, null);
+});
+
+test("existing staff with blank email accepts HR row email on update", () => {
+  const staff: IiohrHrImportExistingStaff[] = [
+    {
+      id: "staff-no-mail",
+      fi_user_id: null,
+      full_name: "No Mail",
+      staff_role: "consultant",
+      email: null,
+      is_active: true,
+      working_hours: {},
+    },
+  ];
+  const source: IiohrHrImportExistingSourceId[] = [
+    {
+      id: "src-nm",
+      staff_id: "staff-no-mail",
+      source_system: IIOHR_HR_SOURCE_SYSTEM,
+      source_staff_id: "NM-1",
+      source_url: null,
+      metadata: {},
+    },
+  ];
+  const r = planIiohrHrStaffImport({
+    tenantId: TENANT,
+    rows: [row({ external_staff_id: "NM-1", email: "new@x.com", full_name: "No Mail" })],
+    existingUsers: [],
+    existingStaff: staff,
+    existingStaffSourceIds: source,
+  });
+  const upd = r.perRow[0]?.actions.find((a) => a.type === "update_fi_staff");
+  assert.ok(upd && upd.type === "update_fi_staff");
+  assert.equal(upd.payload.email, "new@x.com");
 });
 
 test("sourceRowIndices maps actions back to original row numbers", () => {

@@ -42,6 +42,17 @@ function asPrescriptionRow(raw: Record<string, unknown>): FiPatientPrescriptionR
     signed_at: raw.signed_at != null ? String(raw.signed_at) : null,
     sent_at: raw.sent_at != null ? String(raw.sent_at) : null,
     ready_for_pharmacy_at: raw.ready_for_pharmacy_at != null ? String(raw.ready_for_pharmacy_at) : null,
+    repeats_allowed: Boolean(raw.repeats_allowed),
+    repeat_limit: Number(raw.repeat_limit ?? 0),
+    reorders_used: Number(raw.reorders_used ?? 0),
+    reorder_valid_from: raw.reorder_valid_from != null ? String(raw.reorder_valid_from) : null,
+    reorder_valid_until: raw.reorder_valid_until != null ? String(raw.reorder_valid_until) : null,
+    reorder_review_required: Boolean(raw.reorder_review_required),
+    patient_reorder_fee_pence:
+      raw.patient_reorder_fee_pence != null && raw.patient_reorder_fee_pence !== ""
+        ? Number(raw.patient_reorder_fee_pence)
+        : null,
+    reorder_fee_payment_required: Boolean(raw.reorder_fee_payment_required),
     created_by_fi_user_id: raw.created_by_fi_user_id != null ? String(raw.created_by_fi_user_id) : null,
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
@@ -60,6 +71,7 @@ function asItemRow(raw: Record<string, unknown>): FiPrescriptionItemRow {
     dose_instructions: String(raw.dose_instructions ?? ""),
     repeats_instructions: raw.repeats_instructions != null ? String(raw.repeats_instructions) : null,
     reorder_rule: raw.reorder_rule != null ? String(raw.reorder_rule) : null,
+    repeat_rules_prescriber_confirmed: Boolean(raw.repeat_rules_prescriber_confirmed),
     sort_order: Number(raw.sort_order ?? 0),
     created_at: String(raw.created_at ?? ""),
   };

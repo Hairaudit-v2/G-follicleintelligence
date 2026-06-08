@@ -33,6 +33,7 @@ export function BloodPathologyRequestClient({
   const [templateId, setTemplateId] = useState<PathologyTemplateId>("hair_loss_investigation");
   const [requestDate, setRequestDate] = useState(defaultRequestDate);
   const [lines, setLines] = useState<Line[]>(() => linesFromTemplate("hair_loss_investigation"));
+  const [clinicalNotes, setClinicalNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,14 +78,20 @@ export function BloodPathologyRequestClient({
           template_used: templateId,
           request_date: requestDate,
           tests,
+          clinical_notes: clinicalNotes.trim() ? clinicalNotes.trim() : null,
         }),
       });
-      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; pathology_request?: { id: string } };
       if (!res.ok || json.ok !== true) {
         setError(typeof json?.error === "string" ? json.error : `Save failed (${res.status}).`);
         return;
       }
-      router.push(`/fi-admin/${tenantId}/patients/${patientId}?tab=timeline`);
+      const newId = json.pathology_request?.id;
+      if (newId) {
+        router.push(`/fi-admin/${tenantId}/patients/${patientId}/blood-request/${newId}`);
+      } else {
+        router.push(`/fi-admin/${tenantId}/patients/${patientId}?tab=timeline`);
+      }
       router.refresh();
     } catch {
       setError("Network error while saving.");
@@ -132,6 +139,19 @@ export function BloodPathologyRequestClient({
             className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
             value={requestDate}
             onChange={(e) => setRequestDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-700" htmlFor="clinical-notes">
+            Clinical notes / indication (optional)
+          </label>
+          <textarea
+            id="clinical-notes"
+            className="mt-1 w-full rounded border border-gray-300 px-2 py-2 text-sm"
+            rows={4}
+            value={clinicalNotes}
+            onChange={(e) => setClinicalNotes(e.target.value)}
+            placeholder="Shown on the PDF — e.g. indication, fasting, or lab preferences."
           />
         </div>
       </div>

@@ -194,6 +194,51 @@ export type PatientTwinProvenanceSection = {
   completeness_score: number;
 };
 
+export type PatientTwinPathologyRequestRow = {
+  id: string;
+  request_date: string;
+  template_used: string;
+  status: string;
+  emailed_to_patient_at: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+};
+
+export type PatientTwinPathologyResultRow = {
+  id: string;
+  result_date: string;
+  provider_name: string | null;
+  status: string;
+  pathology_request_id: string | null;
+  marker_count: number;
+  abnormal_marker_count: number;
+  source_type: string;
+  reviewed_at: string | null;
+  created_at: string;
+};
+
+export type PatientTwinPathologyAiInterpretationSummary = {
+  id: string;
+  pathology_result_id: string;
+  status: string;
+  hair_loss_relevance_score: number | null;
+  surgical_readiness_score: number | null;
+  main_contributors: string[];
+  overview_snippet: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+};
+
+export type PatientTwinPathologySection = {
+  requests: PatientTwinPathologyRequestRow[];
+  results: PatientTwinPathologyResultRow[];
+  item_cap: number;
+  results_item_cap: number;
+  abnormal_markers_total: number;
+  last_result_reviewed_at: string | null;
+  latest_ai_interpretation: PatientTwinPathologyAiInterpretationSummary | null;
+};
+
 export type PatientTwinV1 = {
   version: typeof PATIENT_TWIN_VERSION;
   tenant_id: string;
@@ -204,6 +249,7 @@ export type PatientTwinV1 = {
   cases: PatientTwinCaseRow[];
   audits: PatientTwinAuditRollupSection;
   media: PatientTwinMediaSection;
+  pathology: PatientTwinPathologySection;
   timeline: PatientTwinTimelineSection;
   clinical: PatientTwinClinicalSection;
   intelligence: PatientTwinIntelligenceSection;

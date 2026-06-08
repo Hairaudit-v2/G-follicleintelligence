@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadConsultationsForPatient } from "@/src/lib/consultations/consultationLoaders.server";
+import { loadClinicalNotesForPatient, type PatientClinicalNoteSummary } from "@/src/lib/clinicalNotes/clinicalNotesLoaders.server";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -58,6 +59,8 @@ export type PatientDetailPayload = {
   clinics: Awaited<ReturnType<typeof loadCrmShellScopePickerOptions>>["clinics"];
   /** Tenant clinic clock for booking forms. */
   calendarTimezone: string;
+  /** DoctorOS 1C: voice-derived clinical notes (draft until approved). */
+  voiceClinicalNotes: PatientClinicalNoteSummary[];
 };
 
 function buildTreatmentPlanSummary(
@@ -137,14 +140,16 @@ export async function loadPatientDetailPayload(
 
   const personLeadHistory = await loadPatientPersonLeadHistory(supabase, tid, personId, pid);
 
-  const [personCrmActivity, consultationsRaw, bookingRows, assignees, scope, calendarSettings] = await Promise.all([
-    loadPersonCrmActivityForLeads(supabase, tid, pid, personLeadHistory),
-    loadConsultationsForPatient(tid, pid, personId),
-    loadPatientBookingRows(supabase, tid, pid),
-    loadCrmShellStaffPickerOptions(tid),
-    loadCrmShellScopePickerOptions(tid),
-    loadTenantOperationalCalendarSettings(tid),
-  ]);
+  const [personCrmActivity, consultationsRaw, bookingRows, assignees, scope, calendarSettings, voiceClinicalNotes] =
+    await Promise.all([
+      loadPersonCrmActivityForLeads(supabase, tid, pid, personLeadHistory),
+      loadConsultationsForPatient(tid, pid, personId),
+      loadPatientBookingRows(supabase, tid, pid),
+      loadCrmShellStaffPickerOptions(tid),
+      loadCrmShellScopePickerOptions(tid),
+      loadTenantOperationalCalendarSettings(tid),
+      loadClinicalNotesForPatient(tid, pid),
+    ]);
 
   const bookingLikes: PatientDirectoryBookingLike[] = bookingRows.map((b) => ({
     id: b.id,
@@ -188,5 +193,6 @@ export async function loadPatientDetailPayload(
     assignees,
     clinics: scope.clinics,
     calendarTimezone: calendarSettings.calendarTimezone,
+    voiceClinicalNotes,
   };
 }

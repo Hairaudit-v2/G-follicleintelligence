@@ -50,6 +50,14 @@ export type FiPatientPrescriptionRow = {
   signed_at: string | null;
   sent_at: string | null;
   ready_for_pharmacy_at: string | null;
+  repeats_allowed: boolean;
+  repeat_limit: number;
+  reorders_used: number;
+  reorder_valid_from: string | null;
+  reorder_valid_until: string | null;
+  reorder_review_required: boolean;
+  patient_reorder_fee_pence: number | null;
+  reorder_fee_payment_required: boolean;
   created_by_fi_user_id: string | null;
   created_at: string;
   updated_at: string;
@@ -66,6 +74,7 @@ export type FiPrescriptionItemRow = {
   dose_instructions: string;
   repeats_instructions: string | null;
   reorder_rule: string | null;
+  repeat_rules_prescriber_confirmed: boolean;
   sort_order: number;
   created_at: string;
 };

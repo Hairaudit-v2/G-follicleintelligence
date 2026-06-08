@@ -249,6 +249,12 @@ export function FiOsControlCentreHome(props: {
               <MetricTile label="Leads · follow-up" value={lc.leadsNeedingFollowUp} href={`${base}/crm`} foot="Stage dwell" />
               <MetricTile label="Open tasks" value={lc.openTasks} href={`${base}/crm`} foot="Active CRM" />
               <MetricTile
+                label="Refill reviews"
+                value={data.medicationReorderReviewsPending}
+                href={`${base}/medication-reorders`}
+                foot="Patient portal queue"
+              />
+              <MetricTile
                 label="Revenue"
                 value={lc.revenueAvailable ? "Live" : "—"}
                 href={`${base}/analytics`}

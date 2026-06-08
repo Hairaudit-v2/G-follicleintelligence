@@ -15,12 +15,78 @@ import {
   normalizeFiStaffSourceStaffId,
   normalizeFiStaffSourceSystem,
 } from "@/src/lib/staff/staffSourceIdsNormalize";
-import { planIiohrHrStaffImport } from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
+import { IIOHR_HR_SOURCE_SYSTEM, planIiohrHrStaffImport } from "@/src/lib/staffImport/iiohrHrStaffImportPlan";
 import type {
   IiohrHrStaffImportAction,
   IiohrHrStaffImportPlanResult,
   IiohrHrStaffImportRow,
 } from "@/src/lib/staffImport/iiohrHrStaffImportTypes";
+
+const HR_IMPORT_PRIMARY_CLINIC_META_KEY = "primary_fi_clinic_id";
+
+/**
+ * Resolves a Perth clinic row for Evolved HR imports: prefers exact
+ * "Evolved Hair Restoration Perth", then name containing Perth + Evolved/Hair/Restoration, then any "Perth".
+ */
+export type EvolvedHrPerthClinicPick = { clinicId: string | null; displayName: string | null };
+
+/**
+ * Resolves a Perth clinic row for Evolved HR imports: prefers exact
+ * "Evolved Hair Restoration Perth", then name containing Perth + Evolved/Hair/Restoration, then any "Perth".
+ */
+export async function resolveEvolvedHrPerthClinicForTenant(tenantId: string): Promise<EvolvedHrPerthClinicPick> {
+  try {
+    const tid = assertNonEmptyUuid(tenantId, "tenantId");
+    const supabase = supabaseAdmin();
+    const { data, error } = await supabase.from("fi_clinics").select("id, display_name").eq("tenant_id", tid);
+    if (error) return { clinicId: null, displayName: null };
+    const rows = (data ?? []) as { id: string; display_name: string }[];
+    const lower = (s: string) => s.trim().toLowerCase();
+    const pick = (r: { id: string; display_name: string }) => ({
+      clinicId: String(r.id),
+      displayName: String(r.display_name ?? "").trim() || null,
+    });
+    const exact = rows.find((r) => lower(r.display_name) === "evolved hair restoration perth");
+    if (exact) return pick(exact);
+    const evolvedPerth = rows.find((r) => {
+      const d = lower(r.display_name);
+      return d.includes("perth") && (d.includes("evolved") || d.includes("restoration") || d.includes("hair"));
+    });
+    if (evolvedPerth) return pick(evolvedPerth);
+    const anyPerth = rows.find((r) => lower(r.display_name).includes("perth"));
+    return anyPerth ? pick(anyPerth) : { clinicId: null, displayName: null };
+  } catch {
+    return { clinicId: null, displayName: null };
+  }
+}
+
+/** Mutates plan: tags `iiohr_hr` source-id actions with `primary_fi_clinic_id` when a Perth clinic exists; otherwise appends a warning. */
+export function attachEvolvedPerthClinicMetadataToPlan(plan: IiohrHrStaffImportPlanResult, clinicId: string | null): void {
+  if (!clinicId) {
+    plan.warnings.push(
+      "No Perth clinic record matched for this tenant (expected a clinic name including “Perth”, e.g. Evolved Hair Restoration Perth). Staff are imported at tenant level only — add or rename a Perth clinic in Foundation to link HR imports."
+    );
+    return;
+  }
+  for (const pr of plan.perRow) {
+    for (const a of pr.actions) {
+      if (a.type === "create_staff_source_id") {
+        if (normalizeFiStaffSourceSystem(a.payload.source_system) !== IIOHR_HR_SOURCE_SYSTEM) continue;
+        a.payload.metadata = normalizeFiStaffSourceMetadata({
+          ...normalizeFiStaffSourceMetadata(a.payload.metadata),
+          [HR_IMPORT_PRIMARY_CLINIC_META_KEY]: clinicId,
+        });
+      } else if (a.type === "update_staff_source_id") {
+        const base = a.payload.metadata != null ? normalizeFiStaffSourceMetadata(a.payload.metadata) : {};
+        a.payload.metadata = normalizeFiStaffSourceMetadata({
+          ...base,
+          [HR_IMPORT_PRIMARY_CLINIC_META_KEY]: clinicId,
+        });
+      }
+    }
+  }
+  plan.actions = plan.perRow.flatMap((p) => p.actions);
+}
 
 const tenantIdSchema = z.string().uuid("tenantId must be a UUID.");
 
@@ -57,6 +123,8 @@ export type IiohrHrStaffImportRunResult = {
   dryRunCounts: IiohrHrStaffImportCounts;
   appliedCounts?: IiohrHrStaffImportCounts;
   error?: string;
+  /** Rows accepted after per-row schema validation (same order as planner input). Omitted when tenant parse fails before validation. */
+  validatedPackedRows?: IiohrHrStaffImportRow[];
 };
 
 type FiStaffUpsertInput = {
@@ -383,13 +451,16 @@ async function loadSnapshotsForPlan(tenantId: string): Promise<{
   return { existingUsers, existingStaff, existingStaffSourceIds };
 }
 
-async function executePlanActions(
+/**
+ * Applies a planned IIOHR HR staff import using the given Supabase client (tests inject a mock).
+ */
+export async function applyIiohrHrStaffImportPlanForTests(
   tenantId: string,
   plan: IiohrHrStaffImportPlanResult,
-  applied: IiohrHrStaffImportCounts
+  applied: IiohrHrStaffImportCounts,
+  supabase: SupabaseClient
 ): Promise<void> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const supabase = supabaseAdmin();
   const rowIndexToNewFiUserId = new Map<number, string>();
   const rowIndexToNewFiStaffId = new Map<number, string>();
 
@@ -514,6 +585,14 @@ async function executePlanActions(
   }
 }
 
+async function applyIiohrHrStaffImportPlan(
+  tenantId: string,
+  plan: IiohrHrStaffImportPlanResult,
+  applied: IiohrHrStaffImportCounts
+): Promise<void> {
+  return applyIiohrHrStaffImportPlanForTests(tenantId, plan, applied, supabaseAdmin());
+}
+
 export type RunIiohrHrStaffImportParams = {
   tenantId: string;
   rows: unknown;
@@ -524,6 +603,11 @@ export type RunIiohrHrStaffImportParams = {
   adminKey?: string | null;
   /** Supabase Auth user id when not using admin API key (server actions with session). */
   authUserId?: string | null;
+  /**
+   * When true, skips `assertIiohrHrStaffImportAllowed` — caller must have enforced access
+   * (e.g. `assertCrmTenantWriteAllowed` in HR staff import actions).
+   */
+  skipImportAuthCheck?: boolean;
 };
 
 /**
@@ -546,24 +630,26 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
   }
   const tenantId = tenantParse.data;
 
-  try {
-    await assertIiohrHrStaffImportAllowed({
-      tenantId,
-      adminKey: params.adminKey,
-      authUserId: params.authUserId,
-    });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return {
-      ok: false,
-      commit: params.commit === true,
-      validationErrors: [],
-      warnings: [],
-      skippedRowCount: 0,
-      plan: emptyPlan(),
-      dryRunCounts: emptyCounts(),
-      error: msg,
-    };
+  if (!params.skipImportAuthCheck) {
+    try {
+      await assertIiohrHrStaffImportAllowed({
+        tenantId,
+        adminKey: params.adminKey,
+        authUserId: params.authUserId,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return {
+        ok: false,
+        commit: params.commit === true,
+        validationErrors: [],
+        warnings: [],
+        skippedRowCount: 0,
+        plan: emptyPlan(),
+        dryRunCounts: emptyCounts(),
+        error: msg,
+      };
+    }
   }
 
   const { rows, sourceRowIndices, validationErrors } = validateImportRows(params.rows);
@@ -595,6 +681,11 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
           existingStaffSourceIds,
         });
 
+  if (rows.length > 0) {
+    const { clinicId } = await resolveEvolvedHrPerthClinicForTenant(tenantId);
+    attachEvolvedPerthClinicMetadataToPlan(plan, clinicId);
+  }
+
   const skippedRowCount = plan.perRow.filter((p) => p.skippedDuplicate || p.skippedValidation).length;
   const dryRunCounts = countFromActions(plan.actions);
 
@@ -608,6 +699,7 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
       skippedRowCount,
       plan,
       dryRunCounts,
+      validatedPackedRows: rows,
     };
   }
 
@@ -621,6 +713,7 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
       plan,
       dryRunCounts,
       error: "commit requires confirm: true",
+      validatedPackedRows: rows,
     };
   }
 
@@ -634,12 +727,13 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
       plan: emptyPlan(),
       dryRunCounts: emptyCounts(),
       error: "Nothing to commit — no valid rows.",
+      validatedPackedRows: rows,
     };
   }
 
   const applied = emptyCounts();
   try {
-    await executePlanActions(tenantId, plan, applied);
+    await applyIiohrHrStaffImportPlan(tenantId, plan, applied);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     return {
@@ -652,6 +746,7 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
       dryRunCounts,
       appliedCounts: applied,
       error: msg,
+      validatedPackedRows: rows,
     };
   }
 
@@ -664,6 +759,7 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
     plan,
     dryRunCounts,
     appliedCounts: applied,
+    validatedPackedRows: rows,
   };
 }
 

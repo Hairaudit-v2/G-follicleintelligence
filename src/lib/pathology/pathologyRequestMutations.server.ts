@@ -138,13 +138,13 @@ export async function updatePathologyRequestClinicalNotes(
 
   const { data, error } = await supabase
     .from("fi_pathology_requests")
-    .update({ clinical_notes: params.clinicalNotes?.trim() ? params.clinicalNotes.trim() : null })
+    .update({ clinical_notes: params.clinicalNotes == null || !String(params.clinicalNotes).trim() ? null : String(params.clinicalNotes).trim() })
     .eq("tenant_id", tid)
     .eq("patient_id", pid)
     .eq("id", rid)
     .eq("status", "saved")
     .select("*")
-    .single();
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Request not found or not editable.");
   return mapRequest(data as Record<string, unknown>);
@@ -167,7 +167,7 @@ export async function cancelPathologyRequest(
     .eq("id", rid)
     .eq("status", "saved")
     .select("*")
-    .single();
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Request not found or already cancelled.");
 

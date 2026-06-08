@@ -101,6 +101,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
       },
       { id: "calendar", label: "Calendar", path: "calendar", permissionHint: {}, description: "Operational calendar." },
       {
+        id: "doctor-workspace",
+        label: "Doctor workspace",
+        path: "doctor",
+        permissionHint: { requiresBookingsBoardNav: true },
+        description: "DoctorOS clinical command centre — rounds, Rx, pharmacy, voice notes.",
+      },
+      {
         id: "consultations",
         label: "Consultations",
         path: "consultations",
@@ -285,6 +292,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "directory") return "patientos";
   if (first === "staff") return "staff";
   if (first === "services") return "services";
+  if (first === "doctor") return "doctor-workspace";
   if (first === "consultations") return "consultations";
   if (first === "prescriptions") return "prescriptions";
   if (first === "cases") return "surgeryos";

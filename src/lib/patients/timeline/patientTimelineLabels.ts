@@ -23,6 +23,14 @@ const CRM_ACTIVITY_LABELS: Record<string, string> = {
   "booking.completed": "Booking activity",
   "booking.cancelled": "Booking activity",
   "pathology.blood_request.created": "Blood request created",
+  "pathology.blood_request.sent": "Blood request emailed to patient",
+  "pathology.blood_request.cancelled": "Blood request cancelled",
+  "pathology.blood_result.uploaded": "Blood result recorded",
+  "pathology.blood_result.reviewed": "Blood result reviewed",
+  "pathology.blood_result.archived": "Blood result archived",
+  "pathology.ai_interpretation.generated": "AI blood interpretation generated",
+  "pathology.ai_interpretation.reviewed": "AI blood interpretation reviewed",
+  "pathology.ai_interpretation.archived": "AI blood interpretation archived",
 };
 
 export function crmActivityTimelineTitle(activityKind: string): string {

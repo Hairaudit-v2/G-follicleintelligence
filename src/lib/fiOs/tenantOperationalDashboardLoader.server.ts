@@ -14,6 +14,7 @@ import { loadPipelineStages } from "@/src/lib/crm/pipeline";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 
 /** Days in current pipeline stage before a lead appears on the dashboard stale list. */
@@ -164,6 +165,8 @@ export const tenantOperationalDashboardSchema = z.object({
   viewerStaffId: z.string().uuid().nullable(),
   canQuickCallIn: z.boolean(),
   launchControl: launchControlSchema,
+  /** DoctorOS 1D: medication reorders awaiting clinic review (requested + doctor_review_required). */
+  medicationReorderReviewsPending: z.number().int().nonnegative(),
 });
 
 export type TenantOperationalDashboard = z.infer<typeof tenantOperationalDashboardSchema>;
@@ -570,7 +573,7 @@ async function loadUpcomingReminders(tenantId: string, now: Date): Promise<Dashb
     horizonDays: UPCOMING_REMINDER_HORIZON_DAYS,
     limit: UPCOMING_REMINDER_ROW_CAP,
   });
-  return raw.map((r) => dashboardReminderItemSchema.parse(r));
+  return raw.map((r: unknown) => dashboardReminderItemSchema.parse(r));
 }
 
 /**
@@ -607,7 +610,7 @@ export async function loadTenantOperationalDashboard(
   if (!tenantRes.data) throw new Error("Tenant not found");
   const tenantName = String((tenantRes.data as { name?: string }).name ?? "").trim() || tid;
 
-  const [agenda, staleLeads, tasksDue, quickStats, upcomingReminders, launchBookings, openTasksCount] =
+  const [agenda, staleLeads, tasksDue, quickStats, upcomingReminders, launchBookings, openTasksCount, medicationReorderReviewsPending] =
     await Promise.all([
       loadAgendaBookings(tid, now),
       loadStaleLeads(tid, staleDays, now),
@@ -616,6 +619,7 @@ export async function loadTenantOperationalDashboard(
       loadUpcomingReminders(tid, now),
       loadLaunchBookingCounts(tid, now),
       loadOpenCrmTasksCount(tid, viewerFiUserId),
+      loadMedicationReorderPendingReviewCount(tid),
     ]);
 
   return tenantOperationalDashboardSchema.parse({
@@ -638,5 +642,6 @@ export async function loadTenantOperationalDashboard(
       openTasks: openTasksCount,
       revenueAvailable: false,
     },
+    medicationReorderReviewsPending,
   });
 }

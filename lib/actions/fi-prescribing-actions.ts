@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { insertPrescriptionStatusAuditEvent } from "@/src/lib/prescribing/prescriptionStatusAudit.server";
 import { requireFiPrescribingActor } from "@/src/lib/prescribing/fiPrescribingAccess.server";
 import { loadPrescriptionDetail } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
+import { validateRepeatRulesPrescriberConfirmed } from "@/src/lib/prescribing/prescribingRepeatRules";
 import {
   prescriptionIdBodySchema,
   savePrescriptionDraftBodySchema,
@@ -76,16 +78,7 @@ async function insertStatusEvent(opts: {
   actorFiUserId: string;
   note?: string | null;
 }) {
-  const supabase = supabaseAdmin();
-  const { error } = await supabase.from("fi_prescription_status_events").insert({
-    tenant_id: opts.tenantId.trim(),
-    prescription_id: opts.prescriptionId.trim(),
-    from_status: opts.fromStatus,
-    to_status: opts.toStatus,
-    actor_fi_user_id: opts.actorFiUserId.trim(),
-    note: opts.note ?? null,
-  });
-  if (error) throw new Error(error.message);
+  await insertPrescriptionStatusAuditEvent(opts);
 }
 
 async function loadCatalogueRowMap(
@@ -131,6 +124,19 @@ export async function savePrescriptionDraftAction(
     await assertStaffTenant(supabase, tid, parsed.doctorId);
     await assertCaseTenantAndPatient(supabase, tid, parsed.caseId, parsed.patientId);
 
+    const repeatDraftErr = validateRepeatRulesPrescriberConfirmed(
+      parsed.items.map((it) => ({
+        repeats_instructions: it.repeatsInstructions?.trim() ?? null,
+        reorder_rule: it.reorderRule?.trim() ?? null,
+        repeat_rules_prescriber_confirmed: it.repeatRulesPrescriberConfirmed,
+      }))
+    );
+    if (repeatDraftErr) return { ok: false, error: repeatDraftErr };
+
+    if (parsed.repeatsAllowed && parsed.repeatLimit < 1) {
+      return { ok: false, error: "Repeat limit must be at least 1 when patient repeats are allowed." };
+    }
+
     const catIds = parsed.items.map((i) => i.catalogueId);
     const catMap = await loadCatalogueRowMap(supabase, tid, catIds);
 
@@ -153,6 +159,13 @@ export async function savePrescriptionDraftAction(
           delivery_type: parsed.deliveryType?.trim() || null,
           patient_shipping_address: parsed.patientShippingAddress?.trim() || null,
           pharmacy_name: parsed.pharmacyName?.trim() || null,
+          repeats_allowed: parsed.repeatsAllowed ?? false,
+          repeat_limit: parsed.repeatLimit ?? 0,
+          reorder_valid_from: parsed.reorderValidFrom?.trim() || null,
+          reorder_valid_until: parsed.reorderValidUntil?.trim() || null,
+          reorder_review_required: parsed.reorderReviewRequired ?? false,
+          patient_reorder_fee_pence: parsed.patientReorderFeePence ?? null,
+          reorder_fee_payment_required: parsed.reorderFeePaymentRequired ?? false,
           updated_at: new Date().toISOString(),
         })
         .eq("tenant_id", tid)
@@ -180,6 +193,7 @@ export async function savePrescriptionDraftAction(
           dose_instructions: it.doseInstructions.trim(),
           repeats_instructions: it.repeatsInstructions?.trim() || null,
           reorder_rule: it.reorderRule?.trim() || null,
+          repeat_rules_prescriber_confirmed: Boolean(it.repeatRulesPrescriberConfirmed),
           sort_order: it.sortOrder,
         };
       });
@@ -204,6 +218,13 @@ export async function savePrescriptionDraftAction(
         delivery_type: parsed.deliveryType?.trim() || null,
         patient_shipping_address: parsed.patientShippingAddress?.trim() || null,
         pharmacy_name: parsed.pharmacyName?.trim() || null,
+        repeats_allowed: parsed.repeatsAllowed ?? false,
+        repeat_limit: parsed.repeatLimit ?? 0,
+        reorder_valid_from: parsed.reorderValidFrom?.trim() || null,
+        reorder_valid_until: parsed.reorderValidUntil?.trim() || null,
+        reorder_review_required: parsed.reorderReviewRequired ?? false,
+        patient_reorder_fee_pence: parsed.patientReorderFeePence ?? null,
+        reorder_fee_payment_required: parsed.reorderFeePaymentRequired ?? false,
         created_by_fi_user_id: actor.fiUserId,
       })
       .select("id")
@@ -233,6 +254,7 @@ export async function savePrescriptionDraftAction(
         dose_instructions: it.doseInstructions.trim(),
         repeats_instructions: it.repeatsInstructions?.trim() || null,
         reorder_rule: it.reorderRule?.trim() || null,
+        repeat_rules_prescriber_confirmed: Boolean(it.repeatRulesPrescriberConfirmed),
         sort_order: it.sortOrder,
       };
     });
@@ -266,6 +288,9 @@ export async function signPrescriptionAction(
     if (bundle.items.length === 0) {
       return { ok: false, error: "Add at least one medication before signing." };
     }
+
+    const repeatErr = validateRepeatRulesPrescriberConfirmed(bundle.items);
+    if (repeatErr) return { ok: false, error: repeatErr };
 
     const signedAt = new Date().toISOString();
     const { error: u1 } = await supabase

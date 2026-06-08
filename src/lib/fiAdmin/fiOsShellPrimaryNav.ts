@@ -34,6 +34,14 @@ export function resolveFiOsPrimarySidebarItems(
   const items: FiOsPrimarySidebarItem[] = [
     { id: "dashboard", label: "Dashboard", shortLabel: "Home", href: b, disabled: false },
     {
+      id: "doctor-workspace",
+      label: "Doctor workspace",
+      shortLabel: "Doctor",
+      href: hrefFor(b, "doctor"),
+      disabled: !showBookingsBoard,
+      hint: !showBookingsBoard ? "Requires CRM shell role or active staff membership for this tenant." : undefined,
+    },
+    {
       id: "calendar",
       label: "Calendar",
       shortLabel: "Cal",
@@ -114,6 +122,14 @@ export function resolveFiOsPrimarySidebarItems(
  * Maps legacy horizontal-nav ids (from URL segments) to a single primary sidebar tab.
  */
 export function getFiOsShellActiveSidebarId(pathname: string, base: string): string | null {
+  const nb = base.replace(/\/+$/, "") || "";
+  const npRaw = pathname.replace(/\/+$/, "") || "/";
+  if (npRaw.startsWith(nb)) {
+    const restEarly = npRaw.slice(nb.length).replace(/^\//, "");
+    const firstEarly = restEarly.split("/")[0] ?? "";
+    if (firstEarly === "doctor") return "doctor-workspace";
+  }
+
   const legacy = getClinicOsShellActiveNavId(pathname, base);
   if (legacy === "foundationos") return "patient-twin";
   if (legacy === "staff" || legacy === "services" || legacy === "configuration") return "settings";
@@ -127,8 +143,6 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "analyticsos") return "analytics";
   if (legacy === "appointments" || legacy === "bookings" || legacy === "consultations") return "calendar";
 
-  const nb = base.replace(/\/+$/, "") || "";
-  const npRaw = pathname.replace(/\/+$/, "") || "/";
   if (npRaw.startsWith(nb)) {
     const rest = npRaw.slice(nb.length).replace(/^\//, "");
     const first = rest.split("/")[0] ?? "";

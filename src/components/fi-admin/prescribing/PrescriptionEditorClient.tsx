@@ -10,14 +10,30 @@ import {
   savePrescriptionDraftAction,
   signPrescriptionAction,
 } from "@/lib/actions/fi-prescribing-actions";
+import { PrescriptionPharmacySendPanel } from "@/src/components/fi-admin/prescribing/PrescriptionPharmacySendPanel";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
-import type { FiMedicationCatalogueRow, FiPrescriptionStatusEventRow, MedicationCatalogueCategory, PrescriptionStatus } from "@/src/lib/prescribing/fiPrescribingTypes";
+import type { FiCompoundPharmacyRow, FiPharmacyTransmissionRow } from "@/src/lib/prescribing/fiPharmacyLoaders.server";
+import type {
+  FiMedicationCatalogueRow,
+  FiPrescriptionStatusEventRow,
+  MedicationCatalogueCategory,
+  PrescriptionStatus,
+} from "@/src/lib/prescribing/fiPrescribingTypes";
 import {
   MEDICATION_CATALOGUE_CATEGORIES,
   MEDICATION_CATEGORY_LABELS,
   PRESCRIPTION_STATUS_LABELS,
 } from "@/src/lib/prescribing/fiPrescribingTypes";
+
+function formatRxEventStatus(st: string): string {
+  if (st in PRESCRIPTION_STATUS_LABELS) {
+    return PRESCRIPTION_STATUS_LABELS[st as PrescriptionStatus];
+  }
+  if (st === "ready_for_pharmacy") return "Ready for pharmacy (queued internally)";
+  if (st === "pharmacy_acknowledged") return "Pharmacy acknowledged";
+  return st.replace(/_/g, " ");
+}
 
 export type PrescriptionEditorLine = {
   key: string;
@@ -25,6 +41,7 @@ export type PrescriptionEditorLine = {
   doseInstructions: string;
   repeatsInstructions: string;
   reorderRule: string;
+  repeatRulesPrescriberConfirmed: boolean;
 };
 
 export type PrescriptionEditorStaffOption = { id: string; label: string };
@@ -46,6 +63,15 @@ export function PrescriptionEditorClient({
   catalogue,
   staffOptions,
   initialEvents,
+  initialPharmacies = [],
+  initialTransmissions = [],
+  initialRepeatsAllowed = false,
+  initialRepeatLimit = 0,
+  initialReorderValidFrom = "",
+  initialReorderValidUntil = "",
+  initialReorderReviewRequired = false,
+  initialPatientReorderFeePence = "",
+  initialReorderFeePaymentRequired = false,
 }: {
   tenantId: string;
   patientId: string;
@@ -63,6 +89,15 @@ export function PrescriptionEditorClient({
   catalogue: FiMedicationCatalogueRow[];
   staffOptions: PrescriptionEditorStaffOption[];
   initialEvents: FiPrescriptionStatusEventRow[];
+  initialPharmacies?: FiCompoundPharmacyRow[];
+  initialTransmissions?: FiPharmacyTransmissionRow[];
+  initialRepeatsAllowed?: boolean;
+  initialRepeatLimit?: number;
+  initialReorderValidFrom?: string;
+  initialReorderValidUntil?: string;
+  initialReorderReviewRequired?: boolean;
+  initialPatientReorderFeePence?: string;
+  initialReorderFeePaymentRequired?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -80,6 +115,18 @@ export function PrescriptionEditorClient({
   const [signedAt, setSignedAt] = useState<string | null>(initialSignedAt);
   const [events, setEvents] = useState(initialEvents);
 
+  const [repeatsAllowed, setRepeatsAllowed] = useState(initialRepeatsAllowed);
+  const [repeatLimit, setRepeatLimit] = useState(initialRepeatLimit);
+  const [reorderValidFrom, setReorderValidFrom] = useState(
+    initialReorderValidFrom ? initialReorderValidFrom.slice(0, 16) : ""
+  );
+  const [reorderValidUntil, setReorderValidUntil] = useState(
+    initialReorderValidUntil ? initialReorderValidUntil.slice(0, 16) : ""
+  );
+  const [reorderReviewRequired, setReorderReviewRequired] = useState(initialReorderReviewRequired);
+  const [patientReorderFeePence, setPatientReorderFeePence] = useState(initialPatientReorderFeePence);
+  const [reorderFeePaymentRequired, setReorderFeePaymentRequired] = useState(initialReorderFeePaymentRequired);
+
   const [lines, setLines] = useState<PrescriptionEditorLine[]>(() =>
     initialItems.length
       ? initialItems
@@ -90,6 +137,7 @@ export function PrescriptionEditorClient({
             doseInstructions: "",
             repeatsInstructions: "",
             reorderRule: "",
+            repeatRulesPrescriberConfirmed: false,
           },
         ]
   );
@@ -118,6 +166,7 @@ export function PrescriptionEditorClient({
         doseInstructions: "",
         repeatsInstructions: "",
         reorderRule: "",
+        repeatRulesPrescriberConfirmed: false,
       },
     ]);
   }
@@ -141,6 +190,7 @@ export function PrescriptionEditorClient({
           doseInstructions: l.doseInstructions,
           repeatsInstructions: l.repeatsInstructions.trim() || null,
           reorderRule: l.reorderRule.trim() || null,
+          repeatRulesPrescriberConfirmed: l.repeatRulesPrescriberConfirmed,
           sortOrder: idx,
         }));
       const res = await savePrescriptionDraftAction({
@@ -153,6 +203,17 @@ export function PrescriptionEditorClient({
         deliveryType: deliveryType.trim() || null,
         patientShippingAddress: patientShippingAddress.trim() || null,
         pharmacyName: pharmacyName.trim() || null,
+        repeatsAllowed,
+        repeatLimit,
+        reorderValidFrom: reorderValidFrom.trim()
+          ? (Number.isNaN(Date.parse(reorderValidFrom)) ? null : new Date(reorderValidFrom).toISOString())
+          : null,
+        reorderValidUntil: reorderValidUntil.trim()
+          ? (Number.isNaN(Date.parse(reorderValidUntil)) ? null : new Date(reorderValidUntil).toISOString())
+          : null,
+        reorderReviewRequired,
+        patientReorderFeePence: patientReorderFeePence.trim() ? Number(patientReorderFeePence.trim()) : null,
+        reorderFeePaymentRequired,
         items,
       });
       if (!res.ok) {
@@ -350,6 +411,87 @@ export function PrescriptionEditorClient({
       </FiCard>
 
       <FiCard>
+        <h2 className="text-sm font-semibold text-slate-900">Patient reorder programme (portal)</h2>
+        <p className="mt-1 text-xs text-slate-600">
+          Controls whether this signed prescription appears in the patient portal for refills. Requires repeat limit ≥ 1
+          when repeats are allowed.
+        </p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-800 md:col-span-2">
+            <input
+              type="checkbox"
+              checked={repeatsAllowed}
+              disabled={!canEditBody}
+              onChange={(e) => setRepeatsAllowed(e.target.checked)}
+            />
+            Allow patient portal repeats / reorders
+          </label>
+          <label className="block text-xs font-medium text-slate-700">
+            Repeat limit (max approved reorders)
+            <input
+              type="number"
+              min={0}
+              max={99}
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              value={repeatLimit}
+              disabled={!canEditBody}
+              onChange={(e) => setRepeatLimit(Number(e.target.value))}
+            />
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-800">
+            <input
+              type="checkbox"
+              checked={reorderReviewRequired}
+              disabled={!canEditBody}
+              onChange={(e) => setReorderReviewRequired(e.target.checked)}
+            />
+            Every patient reorder requires doctor review
+          </label>
+          <label className="block text-xs font-medium text-slate-700">
+            Reorder window start (local)
+            <input
+              type="datetime-local"
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              value={reorderValidFrom}
+              disabled={!canEditBody}
+              onChange={(e) => setReorderValidFrom(e.target.value)}
+            />
+          </label>
+          <label className="block text-xs font-medium text-slate-700">
+            Reorder window end (local)
+            <input
+              type="datetime-local"
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              value={reorderValidUntil}
+              disabled={!canEditBody}
+              onChange={(e) => setReorderValidUntil(e.target.value)}
+            />
+          </label>
+          <label className="block text-xs font-medium text-slate-700">
+            Patient reorder fee (pence, optional)
+            <input
+              type="number"
+              min={0}
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              value={patientReorderFeePence}
+              disabled={!canEditBody}
+              onChange={(e) => setPatientReorderFeePence(e.target.value)}
+              placeholder="e.g. 500 for £5.00"
+            />
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-800">
+            <input
+              type="checkbox"
+              checked={reorderFeePaymentRequired}
+              disabled={!canEditBody}
+              onChange={(e) => setReorderFeePaymentRequired(e.target.checked)}
+            />
+            Require payment acknowledgement before patient can submit
+          </label>
+        </div>
+      </FiCard>
+
+      <FiCard>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-900">Medication lines</h2>
           {canEditBody ? (
@@ -436,6 +578,20 @@ export function PrescriptionEditorClient({
                   />
                 </label>
               </div>
+              {line.repeatsInstructions.trim() || line.reorderRule.trim() ? (
+                <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-slate-800">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5"
+                    checked={line.repeatRulesPrescriberConfirmed}
+                    disabled={!canEditBody}
+                    onChange={(e) => updateLine(line.key, { repeatRulesPrescriberConfirmed: e.target.checked })}
+                  />
+                  <span>
+                    Prescriber confirms repeat / reorder rules for this line (required to sign and send to pharmacy).
+                  </span>
+                </label>
+              ) : null}
             </div>
           ))}
         </div>
@@ -484,6 +640,17 @@ export function PrescriptionEditorClient({
         ) : null}
       </div>
 
+      {prescriptionId ? (
+        <PrescriptionPharmacySendPanel
+          tenantId={tenantId}
+          patientId={patientId}
+          prescriptionId={prescriptionId}
+          prescriptionStatus={status}
+          pharmacies={initialPharmacies}
+          transmissions={initialTransmissions}
+        />
+      ) : null}
+
       <FiCard>
         <h2 className="text-sm font-semibold text-slate-900">Workflow log</h2>
         <ul className="mt-3 space-y-2 text-sm text-slate-700">
@@ -492,10 +659,10 @@ export function PrescriptionEditorClient({
               <span className="font-mono text-xs text-slate-500">{new Date(ev.created_at).toLocaleString()}</span>
               {ev.from_status ? (
                 <span className="ml-2 text-xs">
-                  {ev.from_status} → {ev.to_status}
+                  {formatRxEventStatus(ev.from_status)} → {formatRxEventStatus(ev.to_status)}
                 </span>
               ) : (
-                <span className="ml-2 text-xs">{ev.to_status}</span>
+                <span className="ml-2 text-xs">{formatRxEventStatus(ev.to_status)}</span>
               )}
               {ev.note ? <p className="mt-0.5 text-xs text-slate-600">{ev.note}</p> : null}
             </li>
