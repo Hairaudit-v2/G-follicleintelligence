@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 /**
- * Secondary strip for clinic settings routes (Configuration, Staff, Services, Reminders, Admin Users).
+ * Secondary strip for clinic settings routes (Configuration, Staff, Services, Reminders, Tax & localisation, Admin Users).
  */
 export function FiOsClinicSettingsNav({
   tenantId,
@@ -49,6 +49,9 @@ export function FiOsClinicSettingsNav({
         ) : null}
         <Link href={`${base}/settings/reminders`} className={linkCls(`${base}/settings/reminders`)}>
           Reminders
+        </Link>
+        <Link href={`${base}/settings/tax-localisation`} className={linkCls(`${base}/settings/tax-localisation`)}>
+          Tax &amp; Localisation
         </Link>
         {showAdminUsersNav ? (
           <Link href={`${base}/settings/admin-users`} className={linkCls(`${base}/settings/admin-users`)}>

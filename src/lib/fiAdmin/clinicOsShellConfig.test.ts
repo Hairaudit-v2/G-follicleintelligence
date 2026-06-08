@@ -28,6 +28,10 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.analyticsos?.href, `${base}/analytics`);
   assert.equal(byId.foundationos?.href, `${base}/foundation-integrity`);
   assert.equal(byId.configuration?.href, `${base}/configuration`);
+  const taxLoc = items.find((i) => i.id === "tax-localisation");
+  assert.ok(taxLoc);
+  assert.equal(taxLoc!.disabled, false);
+  assert.equal(taxLoc!.href, `${base}/settings/tax-localisation`);
 });
 
 test("resolveClinicOsShellNavItems: LeadFlow (CRM) enabled when showCrmNav", () => {
@@ -142,6 +146,10 @@ test("resolveClinicOsShellQuickActions: CRM-gated actions match nav policy", () 
 
 test("getClinicOsShellActiveNavId: admin users under settings cluster", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/settings/admin-users`, base), "configuration");
+});
+
+test("getClinicOsShellActiveNavId: tax localisation under settings cluster", () => {
+  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/tax-localisation`, base), "configuration");
 });
 
 test("resolveClinicOsShellNavItems: Admin Users gated by showManageAdminUsers", () => {

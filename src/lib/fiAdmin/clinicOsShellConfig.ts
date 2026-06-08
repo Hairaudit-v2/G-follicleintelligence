@@ -211,6 +211,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         permissionHint: { requiresManageAdminUsers: true },
         description: "Trusted backend users and roles without clinical staff profiles.",
       },
+      {
+        id: "tax-localisation",
+        label: "Tax & Localisation",
+        path: "settings/tax-localisation",
+        permissionHint: {},
+        description: "Configure tax, currency, invoice, and regional business settings for this clinic.",
+      },
     ],
   },
 ];

@@ -189,6 +189,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       label: "Reminders",
       title: "Settings — reminder templates.",
     },
+    {
+      href: `${base}/settings/tax-localisation`,
+      label: "Tax & Localisation",
+      title: "Settings — tax, currency, invoice, and regional business settings.",
+    },
   );
   groups.push({
     id: "settings",
