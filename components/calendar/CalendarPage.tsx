@@ -537,7 +537,7 @@ export function CalendarPage({
         </button>
       ) : null}
 
-      {data.canMutateBookings && crmShellSession ? (
+      {quickCallInEnabled ? (
         <>
           <button
             type="button"

@@ -1,10 +1,18 @@
 /**
  * Clinic-local calendar timezone helpers (IANA). Pure — safe for tests and server/client.
+ *
+ * Operational calendar uses a single effective zone: optional per-clinic override, else tenant
+ * `default_timezone` / `metadata.timezone`, else {@link FALLBACK_CALENDAR_TIMEZONE}.
+ * Explicit `"UTC"` remains valid for UTC-native grids and fast paths.
  */
 
 import { parseUtcCalendarDateString, utcCalendarDateStringFromDate } from "@/src/lib/bookings/calendarQuery";
 
+/** Explicit UTC calendar mode (lane math + ISO without IANA offset lookup). */
 export const DEFAULT_CALENDAR_TIMEZONE = "UTC";
+
+/** When tenant/clinic omit or supply an invalid IANA id, FI scheduling defaults here (no DST). */
+export const FALLBACK_CALENDAR_TIMEZONE = "Australia/Brisbane";
 
 const YMD_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -28,24 +36,40 @@ const WEEKDAY_INDEX: Record<string, number> = {
   Sat: 6,
 };
 
-/** Validates IANA timezone; falls back to UTC. */
+/** Validates IANA timezone; falls back to {@link FALLBACK_CALENDAR_TIMEZONE}. */
 export function normalizeCalendarTimezone(tz: string | null | undefined): string {
   const t = tz?.trim();
-  if (!t) return DEFAULT_CALENDAR_TIMEZONE;
+  if (!t) return FALLBACK_CALENDAR_TIMEZONE;
   try {
     Intl.DateTimeFormat(undefined, { timeZone: t });
     return t;
   } catch {
-    return DEFAULT_CALENDAR_TIMEZONE;
+    return FALLBACK_CALENDAR_TIMEZONE;
   }
 }
 
-/** Tenant column `default_timezone`, then `metadata.timezone`. */
+export type CalendarTimeZoneSource = {
+  tenant?: { default_timezone?: string | null; metadata?: Record<string, unknown> | null } | null;
+  /** Future: `fi_clinics.timezone` when present — wins over tenant default for that location. */
+  clinic?: { timezone?: string | null } | null;
+};
+
+/**
+ * Single source for operational calendar IANA zone: clinic override (when set), else tenant
+ * resolution, else Brisbane fallback.
+ */
+export function getCalendarTimeZone(source?: CalendarTimeZoneSource | null): string {
+  const c = source?.clinic?.timezone?.trim();
+  if (c) return normalizeCalendarTimezone(c);
+  return resolveTenantCalendarTimezone(source?.tenant ?? null);
+}
+
+/** Tenant column `default_timezone`, then `metadata.timezone`, else {@link FALLBACK_CALENDAR_TIMEZONE}. */
 export function resolveTenantCalendarTimezone(input: {
   default_timezone?: string | null;
   metadata?: Record<string, unknown> | null;
 } | null | undefined): string {
-  if (!input) return DEFAULT_CALENDAR_TIMEZONE;
+  if (!input) return normalizeCalendarTimezone(null);
   const meta =
     input.metadata && typeof input.metadata === "object" && !Array.isArray(input.metadata)
       ? input.metadata
@@ -329,10 +353,59 @@ export function fromDatetimeLocalValueInTimezone(local: string, timeZone: string
   const minute = Number(m[5]);
   const tz = normalizeCalendarTimezone(timeZone);
   if (tz === DEFAULT_CALENDAR_TIMEZONE) {
-    const d = new Date(t);
-    return Number.isNaN(d.getTime()) ? null : d.toISOString();
+    const ms = Date.UTC(y, mo - 1, da, hour, minute, 0, 0);
+    if (!Number.isFinite(ms)) return null;
+    return new Date(ms).toISOString();
   }
   const utcMs = zonedDateTimeToUtc(y, mo, da, hour, minute, 0, tz);
   if (utcMs == null) return null;
   return new Date(utcMs).toISOString();
+}
+
+/** Local calendar day + minutes from local midnight → UTC ISO (operational grid / slot click). */
+export function clinicLocalSlotToUtcIso(
+  dayKey: string,
+  minutesFromLocalMidnight: number,
+  timeZone: string
+): string | null {
+  return isoFromLocalDayMinutes(dayKey, minutesFromLocalMidnight, timeZone);
+}
+
+/** UTC ISO instant → short display string in the clinic zone (never uses browser-local offset alone). */
+export function utcIsoToClinicDisplay(
+  iso: string,
+  timeZone: string,
+  style: "time" | "datetime" = "time"
+): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return "";
+  const opts: Intl.DateTimeFormatOptions =
+    style === "time"
+      ? { timeStyle: "short", timeZone: tz }
+      : { dateStyle: "medium", timeStyle: "short", timeZone: tz };
+  return new Date(ms).toLocaleString(undefined, opts);
+}
+
+export function formatClinicTime(iso: string, timeZone: string): string {
+  return utcIsoToClinicDisplay(iso, timeZone, "time");
+}
+
+/** Wall clock on a clinic-local calendar day → UTC ISO instant. */
+export function buildClinicZonedDateTime(
+  dayKey: string,
+  wall: { hour: number; minute: number },
+  timeZone: string
+): string | null {
+  return isoFromLocalDayMinutes(dayKey, wall.hour * 60 + wall.minute, timeZone);
+}
+
+/**
+ * Dev-only structured log for calendar timezone audits (slot pick, quick create, server save).
+ * No-op outside `NODE_ENV === "development"`.
+ */
+export function logFiCalendarTimezoneDebug(stage: string, fields: Record<string, unknown>): void {
+  if (process.env.NODE_ENV !== "development") return;
+  // eslint-disable-next-line no-console -- intentional FI calendar audit trail (development only)
+  console.info(`[fi-calendar-tz] ${stage}`, fields);
 }
