@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarDays, ChevronLeft, ChevronRight, Keyboard, MapPin, Users } from "lucide-react";
+import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Keyboard, MapPin, PanelLeftOpen, Users } from "lucide-react";
 
 import {
   buildCalendarHref,
@@ -39,6 +39,7 @@ export function CalendarTopControls({
   canMutateBookings,
   route = "fi-admin",
   variant = "default",
+  fiOsPanelControls,
 }: {
   tenantId: string;
   query: ParsedCalendarQuery;
@@ -49,6 +50,12 @@ export function CalendarTopControls({
   canMutateBookings: boolean;
   route?: CalendarRoute;
   variant?: "default" | "fiOs";
+  fiOsPanelControls?: {
+    agendaOpen: boolean;
+    insightsOpen: boolean;
+    onToggleAgenda: () => void;
+    onToggleInsights: () => void;
+  };
 }) {
   const router = useRouter();
   const hrefOpts = { route };
@@ -91,6 +98,48 @@ export function CalendarTopControls({
   return (
     <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", shell)}>
       <div className="flex min-w-0 flex-wrap items-center gap-2">
+        {isFiOs && fiOsPanelControls ? (
+          <div
+            className={cn(
+              "inline-flex items-center gap-0.5 rounded-xl p-0.5",
+              "border border-white/[0.08] bg-[#060d18]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            )}
+            role="group"
+            aria-label="Calendar drawers"
+          >
+            <button
+              type="button"
+              onClick={fiOsPanelControls.onToggleAgenda}
+              aria-pressed={fiOsPanelControls.agendaOpen}
+              className={cn(
+                "inline-flex h-8 w-8 items-center justify-center rounded-lg transition",
+                fiOsPanelControls.agendaOpen
+                  ? "bg-cyan-500/20 text-cyan-100 ring-1 ring-cyan-400/30"
+                  : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+              )}
+              title="Agenda & waitlist"
+              aria-label="Toggle agenda and waitlist drawer"
+            >
+              <PanelLeftOpen className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={fiOsPanelControls.onToggleInsights}
+              aria-pressed={fiOsPanelControls.insightsOpen}
+              className={cn(
+                "inline-flex h-8 w-8 items-center justify-center rounded-lg transition",
+                fiOsPanelControls.insightsOpen
+                  ? "bg-cyan-500/20 text-cyan-100 ring-1 ring-cyan-400/30"
+                  : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+              )}
+              title="Daily insights"
+              aria-label="Toggle daily insights drawer"
+            >
+              <BarChart3 className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        ) : null}
+
         <div className={inset}>
           <Link href={prev} className={navBtn} aria-label="Previous period">
             <ChevronLeft className="h-4 w-4" />

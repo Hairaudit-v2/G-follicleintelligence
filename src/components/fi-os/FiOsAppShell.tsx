@@ -13,6 +13,7 @@ import { FiOsQuickCreatePalette } from "@/src/components/fi-os/FiOsQuickCreatePa
 import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { cn } from "@/lib/utils";
 
 /**
  * Authenticated FI OS workspace chrome: fixed primary rail, sticky command bar, scrollable main.
@@ -123,7 +124,7 @@ export function FiOsAppShell({
             onOpenMobileNav={() => setMobileNav(true)}
             onOpenQuickCreate={() => setQuickCreateOpen(true)}
           />
-          <main className={fiOsChromeClasses.mainScroll}>{children}</main>
+          <main className={cn(fiOsChromeClasses.mainScroll, "flex min-h-0 flex-col")}>{children}</main>
         </div>
       </div>
 

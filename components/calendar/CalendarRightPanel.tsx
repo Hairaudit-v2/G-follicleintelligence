@@ -76,6 +76,7 @@ export function CalendarRightPanel({
   defaultCollapsed = false,
   onCollapsedChange,
   className,
+  forceOsDrawer = false,
 }: {
   bookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
@@ -88,6 +89,7 @@ export function CalendarRightPanel({
   defaultCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
   className?: string;
+  forceOsDrawer?: boolean;
 }) {
   const layoutMode = useCalendarLayoutMode();
   const collapseByDefault = defaultCollapsed ?? calendarSidebarsCollapsedByDefault(layoutMode);
@@ -133,7 +135,7 @@ export function CalendarRightPanel({
     window.dispatchEvent(new Event(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT));
   }
 
-  if (layoutMode === "compact") {
+  if (layoutMode === "compact" && !forceOsDrawer) {
     return null;
   }
 

@@ -53,14 +53,14 @@ export default async function TenantAdminLayout({
   }
 
   const mainSurface = (
-    <div className={fiOsChromeClasses.tenantMainSurface}>
+    <div className={cn(fiOsChromeClasses.tenantMainSurface, "flex min-h-0 min-w-0 flex-1 flex-col")}>
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.38]"
         style={fiAdminAmbientBackgroundStyle}
         aria-hidden
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a1528]/45 via-transparent to-[#02060d]/85" aria-hidden />
-      <div className={cn(fiOsChromeClasses.tenantMainSurfaceInner)}>{children}</div>
+      <div className={cn(fiOsChromeClasses.tenantMainSurfaceInner, "flex min-h-0 min-w-0 flex-1 flex-col")}>{children}</div>
     </div>
   );
 

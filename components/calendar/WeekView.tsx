@@ -48,6 +48,7 @@ import {
 } from "@/lib/calendar/dndMath";
 import { calendarDateStringFromInstant, displayCalendarTimezoneSubtitle, isoFromLocalDayMinutes } from "@/src/lib/calendar/calendarTimezone";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
+import { cn } from "@/lib/utils";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import {
@@ -111,6 +112,10 @@ export type WeekViewProps = {
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
   /** Right-click empty cell — context menu (parent supplies drawer presets). */
   onEmptySlotContextMenu?: (info: { dayKey: string; columnId: string; localStart: string; clientX: number; clientY: number }) => void;
+  /** FI OS: agenda + insights render as overlays; grid stays centered (~90% width). */
+  calendarShellMode?: "default" | "fiOs";
+  /** FI OS: closes agenda + insights backdrop (both panels). */
+  fiOsDrawerDismiss?: () => void;
 };
 
 type CalendarColumn = {
@@ -163,8 +168,11 @@ function WeekViewInner({
   shortcuts,
   onEmptySlotClick,
   onEmptySlotContextMenu,
+  calendarShellMode = "default",
+  fiOsDrawerDismiss,
 }: WeekViewProps) {
   const router = useRouter();
+  const shellIsFiOs = calendarShellMode === "fiOs";
   const bodyHeightPx = calendarGridBodyHeightPx();
   const [activeDrag, setActiveDrag] = useState<AppointmentCardData | null>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
@@ -505,6 +513,66 @@ function WeekViewInner({
     );
   }
 
+  const gridColumn = (
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      {swipeLayout ? (
+        <CalendarColumnPager
+          labels={columnLabels}
+          subtitles={columnSubtitles}
+          activeIndex={activeColumnIndex}
+          onSelect={scrollToColumn}
+        />
+      ) : null}
+
+      <div ref={gridScrollRef} className="flex min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
+        <div className="flex min-h-min min-w-0 flex-1" style={{ height: bodyHeightPx }}>
+          <BusinessTimeGutter
+            bodyHeightPx={bodyHeightPx}
+            headerHeightPx={CALENDAR_HEADER_HEIGHT_PX}
+            timeZone={gridConfig.timeZone}
+          />
+
+          {swipeLayout ? (
+            <div
+              ref={swipeTrackRef}
+              className="fi-calendar-swipe-track flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {columnsForView.map((col, i) => (
+                <motion.div
+                  key={`${col.dayKey}-${col.id}-slide`}
+                  custom={i}
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.16, delay: Math.min(i * 0.04, 0.12) }}
+                  className="fi-calendar-swipe-slide min-w-full max-w-full flex-shrink-0"
+                >
+                  {renderProviderColumn(col)}
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
+              {columnsForView.map((col, i) => (
+                <motion.div
+                  key={`${col.dayKey}-${col.id}-wrap`}
+                  custom={i}
+                  initial={{ opacity: 0, x: 6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.16, delay: Math.min(i * 0.03, 0.1) }}
+                  className="flex min-w-0 flex-1"
+                >
+                  {renderProviderColumn(col)}
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const fiOsPanelsOpen = shellIsFiOs && Boolean(sidebar || rightPanel);
+
   return (
     <DndContext
       sensors={sensors}
@@ -518,70 +586,49 @@ function WeekViewInner({
         variants={calendarShellVariants}
         initial="hidden"
         animate="show"
-        className="fi-calendar-shell flex min-h-[min(32rem,72dvh)] flex-col overflow-hidden rounded-xl border border-[#1e2937] bg-[#0f172a] shadow-sm shadow-black/30 ring-1 ring-white/[0.04] md:min-h-[32rem] md:rounded-2xl lg:min-h-[calc(100dvh-13rem)]"
+        className={cn(
+          "fi-calendar-shell flex overflow-hidden rounded-xl border border-[#1e2937] bg-[#0f172a] shadow-sm shadow-black/30 ring-1 ring-white/[0.04] md:rounded-2xl",
+          shellIsFiOs
+            ? "relative min-h-0 flex-1 flex-col"
+            : "min-h-[min(32rem,72dvh)] flex-col md:min-h-[32rem] lg:min-h-[calc(100dvh-13rem)]"
+        )}
       >
-        {sidebar}
-
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          {swipeLayout ? (
-            <CalendarColumnPager
-              labels={columnLabels}
-              subtitles={columnSubtitles}
-              activeIndex={activeColumnIndex}
-              onSelect={scrollToColumn}
-            />
-          ) : null}
-
-          <div
-            ref={gridScrollRef}
-            className="flex min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain"
-          >
-            <div className="flex min-h-min min-w-0 flex-1" style={{ height: bodyHeightPx }}>
-              <BusinessTimeGutter
-                bodyHeightPx={bodyHeightPx}
-                headerHeightPx={CALENDAR_HEADER_HEIGHT_PX}
-                timeZone={gridConfig.timeZone}
-              />
-
-              {swipeLayout ? (
-                <div
-                  ref={swipeTrackRef}
-                  className="fi-calendar-swipe-track flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                >
-                  {columnsForView.map((col, i) => (
-                    <motion.div
-                      key={`${col.dayKey}-${col.id}-slide`}
-                      custom={i}
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.16, delay: Math.min(i * 0.04, 0.12) }}
-                      className="fi-calendar-swipe-slide min-w-full max-w-full flex-shrink-0"
-                    >
-                      {renderProviderColumn(col)}
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
-                  {columnsForView.map((col, i) => (
-                    <motion.div
-                      key={`${col.dayKey}-${col.id}-wrap`}
-                      custom={i}
-                      initial={{ opacity: 0, x: 6 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.16, delay: Math.min(i * 0.03, 0.1) }}
-                      className="flex min-w-0 flex-1"
-                    >
-                      {renderProviderColumn(col)}
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+        {shellIsFiOs ? (
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className="flex min-h-0 min-w-0 flex-1 justify-center px-1 sm:px-2">
+              <div className="flex min-h-0 w-[min(100%,92vw)] max-w-[min(100%,1400px)] min-w-0 flex-1 flex-col">
+                {gridColumn}
+              </div>
             </div>
-          </div>
-        </div>
 
-        {rightPanel}
+            {fiOsPanelsOpen && fiOsDrawerDismiss ? (
+              <button
+                type="button"
+                className="absolute inset-0 z-[34] bg-black/45 backdrop-blur-[1px] transition hover:bg-black/50"
+                aria-label="Close calendar panels"
+                onClick={fiOsDrawerDismiss}
+              />
+            ) : null}
+
+            {sidebar ? (
+              <div className="absolute inset-y-0 left-0 z-[36] flex w-[min(20rem,calc(100vw-1rem))] max-w-[92vw] shadow-2xl lg:left-[272px]">
+                {sidebar}
+              </div>
+            ) : null}
+
+            {rightPanel ? (
+              <div className="absolute inset-y-0 right-0 z-[36] flex w-[min(18rem,calc(100vw-1rem))] max-w-[min(100%,20rem)] shadow-2xl">
+                {rightPanel}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="flex min-h-0 min-w-0 flex-1 flex-row">
+            {sidebar}
+            {gridColumn}
+            {rightPanel}
+          </div>
+        )}
       </motion.div>
 
       <CalendarKeyboardHints open={showShortcutHints} onClose={() => setShowShortcutHints(false)} />

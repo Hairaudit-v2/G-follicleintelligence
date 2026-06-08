@@ -335,6 +335,8 @@ export type SidebarAgendaProps = {
   defaultCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
   className?: string;
+  /** When true, never use the full-screen compact overlay (parent provides the drawer chrome). */
+  disableMobileOverlay?: boolean;
 };
 
 export function SidebarAgenda({
@@ -350,6 +352,7 @@ export function SidebarAgenda({
   defaultCollapsed = false,
   onCollapsedChange,
   className,
+  disableMobileOverlay = false,
 }: SidebarAgendaProps) {
   const layoutMode = useCalendarLayoutMode();
   const collapseByDefault = defaultCollapsed ?? calendarSidebarsCollapsedByDefault(layoutMode);
@@ -395,7 +398,7 @@ export function SidebarAgenda({
     </Button>
   );
 
-  const isMobileOverlay = !collapsed && layoutMode === "compact";
+  const isMobileOverlay = !disableMobileOverlay && !collapsed && layoutMode === "compact";
 
   if (collapsed) {
     return (

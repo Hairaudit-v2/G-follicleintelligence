@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Phone, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import { CalendarRightPanel } from "@/components/calendar/CalendarRightPanel";
@@ -75,6 +75,8 @@ export function CalendarPage({
     columnId: string;
     localStart: string;
   } | null>(null);
+  const [fiOsAgendaOpen, setFiOsAgendaOpen] = useState(false);
+  const [fiOsInsightsOpen, setFiOsInsightsOpen] = useState(false);
   const slide = useAppointmentSlideOverOptional();
 
   const sampleMode = Boolean(useSampleData || data.query.sampleMode);
@@ -89,6 +91,21 @@ export function CalendarPage({
   const quickCallInEnabled = Boolean(data.canMutateBookings && crmShellSession);
   const quickCreateEnabled = quickCallInEnabled;
   const isFiOsWorkspace = workspaceVariant === "fiOs";
+
+  const dismissFiOsCalendarDrawers = useCallback(() => {
+    setFiOsAgendaOpen(false);
+    setFiOsInsightsOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isFiOsWorkspace) return;
+    if (!fiOsAgendaOpen && !fiOsInsightsOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") dismissFiOsCalendarDrawers();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dismissFiOsCalendarDrawers, fiOsAgendaOpen, fiOsInsightsOpen, isFiOsWorkspace]);
 
   const openQuickCreateFromSlot = useCallback(
     (p: { dayKey: string; columnId: string; localStart: string }, templateId?: CalendarQuickTemplateId) => {
@@ -120,35 +137,58 @@ export function CalendarPage({
     [data.query, data.tenantId, route, router]
   );
 
-  const sidebar = (
-    <SidebarAgenda
-      bookings={bookings}
-      bookingDisplay={bookingDisplay}
-      calendarTimezone={data.calendarTimezone}
-      addAppointmentHref={`${base}/appointments`}
-      onSelectBooking={(b) => setDrawer(b)}
-      draggableWaitlist={data.canMutateBookings}
-      className="border-r-0 dark:border-[#1e2937]"
-    />
+  const sidebar = useMemo(
+    () => (
+      <SidebarAgenda
+        bookings={bookings}
+        bookingDisplay={bookingDisplay}
+        calendarTimezone={data.calendarTimezone}
+        addAppointmentHref={`${base}/appointments`}
+        onSelectBooking={(b) => setDrawer(b)}
+        draggableWaitlist={data.canMutateBookings}
+        disableMobileOverlay={isFiOsWorkspace}
+        className={cn(
+          "border-r-0 dark:border-[#1e2937]",
+          isFiOsWorkspace && "h-full min-h-0 overflow-hidden rounded-none border-[#1e2937]"
+        )}
+      />
+    ),
+    [base, bookingDisplay, bookings, data.calendarTimezone, data.canMutateBookings, isFiOsWorkspace]
   );
 
-  const rightPanel = (
-    <CalendarRightPanel
-      bookings={bookings}
-      bookingDisplay={bookingDisplay}
-      dayKey={data.query.dateAnchor}
-      calendarTimezone={data.calendarTimezone}
-      searchQuery={data.query.search ?? ""}
-      onSearchSubmit={onSearchSubmit}
-    />
+  const rightPanel = useMemo(
+    () => (
+      <CalendarRightPanel
+        bookings={bookings}
+        bookingDisplay={bookingDisplay}
+        dayKey={data.query.dateAnchor}
+        calendarTimezone={data.calendarTimezone}
+        searchQuery={data.query.search ?? ""}
+        onSearchSubmit={onSearchSubmit}
+        forceOsDrawer={isFiOsWorkspace}
+        {...(isFiOsWorkspace ? { defaultCollapsed: false } : {})}
+      />
+    ),
+    [
+      bookingDisplay,
+      bookings,
+      data.calendarTimezone,
+      data.query.dateAnchor,
+      data.query.search,
+      isFiOsWorkspace,
+      onSearchSubmit,
+    ]
   );
+
+  const sidebarForGrid = isFiOsWorkspace ? (fiOsAgendaOpen ? sidebar : null) : sidebar;
+  const rightPanelForGrid = isFiOsWorkspace ? (fiOsInsightsOpen ? rightPanel : null) : rightPanel;
 
   return (
     <div
       className={cn(
         "flex flex-col",
         isFiOsWorkspace
-          ? "min-h-0 flex-1 bg-[#050a14] text-slate-100"
+          ? "min-h-0 flex-1 overflow-hidden bg-[#050a14] text-slate-100"
           : "-mx-3 min-h-[calc(100dvh-8rem)] bg-[#0f172a] sm:-mx-4 lg:-mx-6"
       )}
     >
@@ -161,6 +201,16 @@ export function CalendarPage({
         canMutateBookings={data.canMutateBookings}
         route={route}
         variant={isFiOsWorkspace ? "fiOs" : "default"}
+        fiOsPanelControls={
+          isFiOsWorkspace
+            ? {
+                agendaOpen: fiOsAgendaOpen,
+                insightsOpen: fiOsInsightsOpen,
+                onToggleAgenda: () => setFiOsAgendaOpen((v) => !v),
+                onToggleInsights: () => setFiOsInsightsOpen((v) => !v),
+              }
+            : undefined
+        }
       />
 
       {isFiOsWorkspace ? (
@@ -191,8 +241,8 @@ export function CalendarPage({
           {isMonthView ? (
             <motion.div key="month" className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
               <MonthView
-                sidebar={sidebar}
-                rightPanel={rightPanel}
+                sidebar={sidebarForGrid}
+                rightPanel={rightPanelForGrid}
                 monthAnchor={data.query.dateAnchor}
                 bookings={bookings}
                 bookingDisplay={bookingDisplay}
@@ -205,13 +255,15 @@ export function CalendarPage({
                 tenantId={data.tenantId}
                 query={data.query}
                 calendarRoute={route}
+                calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
+                fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
               />
             </motion.div>
           ) : (
             <motion.div key={data.query.view} className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
               <CalendarGrid
-                sidebar={sidebar}
-                rightPanel={rightPanel}
+                sidebar={sidebarForGrid}
+                rightPanel={rightPanelForGrid}
                 view={data.query.view as "day" | "3day" | "week"}
                 lanes={data.lanes}
                 buckets={buckets}
@@ -253,6 +305,8 @@ export function CalendarPage({
                         })
                     : undefined
                 }
+                calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
+                fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
               />
             </motion.div>
           )}

@@ -127,6 +127,8 @@ export type MonthViewProps = {
   calendarRoute?: CalendarRoute;
   /** Booking ids awaiting PATCH after optimistic reschedule. */
   pendingAppointmentIds?: ReadonlySet<string>;
+  calendarShellMode?: "default" | "fiOs";
+  fiOsDrawerDismiss?: () => void;
 };
 
 // ---------------------------------------------------------------------------
@@ -503,6 +505,8 @@ function MonthViewInner({
   onNavigateMonth,
   calendarRoute = "fi-admin",
   pendingAppointmentIds,
+  calendarShellMode = "default",
+  fiOsDrawerDismiss,
 }: MonthViewProps) {
   const router = useRouter();
   const { success, error: toastError } = useCalendarToast();
@@ -649,6 +653,87 @@ function MonthViewInner({
     [bookings, canMutateBookings, cells, gridConfig, onRescheduleBooking, success, toastError]
   );
 
+  const shellIsFiOs = calendarShellMode === "fiOs";
+  const fiOsPanelsOpen = shellIsFiOs && Boolean(sidebar || rightPanel);
+
+  const monthMain = (
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <header className="flex items-center justify-between gap-3 border-b border-[#1e2937] px-4 py-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-semibold tracking-tight text-slate-50">{monthTitle}</h2>
+          <p className="text-xs text-slate-400">
+            {monthStats.total > 0 ? (
+              <>
+                {monthStats.total} appointment{monthStats.total === 1 ? "" : "s"} this month
+                {monthStats.busiestCount > 1 ? ` · busiest day ${monthStats.busiestCount}` : ""}
+                {monthStats.openDays > 0
+                  ? ` · ${monthStats.openDays} open day${monthStats.openDays === 1 ? "" : "s"}`
+                  : ""}
+              </>
+            ) : (
+              <>Quiet month — click any day to open the schedule or drag from the waitlist</>
+            )}
+          </p>
+        </div>
+        <div className="inline-flex shrink-0 items-center rounded-xl border border-[#1e2937] bg-[#0b1220] p-0.5">
+          <button
+            type="button"
+            onClick={() => navigateMonth(-1)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateMonth(1)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
+            aria-label="Next month"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-7 border-b border-[#1e2937] bg-[#0b1220]/60">
+        {MONTH_WEEKDAY_LABELS.map((label) => (
+          <div
+            key={label}
+            className={cn(
+              "px-2 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500",
+              fiCrmCalendarGridClassNames.slotLabel
+            )}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+
+      <motion.div
+        variants={staggerContainerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 overflow-y-auto overscroll-y-contain"
+      >
+        {cells.map((cell) => (
+          <MonthDayCell
+            key={cell.dayKey}
+            cell={cell}
+            dayBookings={buckets.get(cell.dayKey) ?? []}
+            bookingDisplay={bookingDisplay}
+            resourceColumns={resourceColumns}
+            droppable={canMutateBookings}
+            draggableAppointments={canMutateBookings}
+            pendingAppointmentIds={pendingAppointmentIds}
+            onDayClick={openDay}
+            onSelectBooking={onSelectBooking}
+            calendarTimezone={gridConfig.timeZone}
+          />
+        ))}
+      </motion.div>
+    </div>
+  );
+
   return (
     <DndContext
       sensors={sensors}
@@ -662,92 +747,47 @@ function MonthViewInner({
         initial="hidden"
         animate="show"
         className={cn(
-          "fi-calendar-shell flex min-h-[min(36rem,78dvh)] flex-col overflow-hidden rounded-xl border shadow-sm ring-1",
-          "border-[#1e2937] bg-[#0f172a] shadow-black/30 ring-white/[0.04]",
-          "md:min-h-[36rem] md:rounded-2xl lg:min-h-[calc(100dvh-13rem)]"
+          "fi-calendar-shell flex overflow-hidden rounded-xl border shadow-sm ring-1",
+          "border-[#1e2937] bg-[#0f172a] shadow-black/30 ring-white/[0.04] md:rounded-2xl",
+          shellIsFiOs ? "relative min-h-0 flex-1 flex-col" : "min-h-[min(36rem,78dvh)] flex-col md:min-h-[36rem] lg:min-h-[calc(100dvh-13rem)]"
         )}
       >
-        <div className="flex min-h-0 min-w-0 flex-1">
-          {sidebar}
-
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <header className="flex items-center justify-between gap-3 border-b border-[#1e2937] px-4 py-3">
-              <div className="min-w-0">
-                <h2 className="truncate text-lg font-semibold tracking-tight text-slate-50">{monthTitle}</h2>
-                <p className="text-xs text-slate-400">
-                  {monthStats.total > 0 ? (
-                    <>
-                      {monthStats.total} appointment{monthStats.total === 1 ? "" : "s"} this month
-                      {monthStats.busiestCount > 1 ? ` · busiest day ${monthStats.busiestCount}` : ""}
-                      {monthStats.openDays > 0
-                        ? ` · ${monthStats.openDays} open day${monthStats.openDays === 1 ? "" : "s"}`
-                        : ""}
-                    </>
-                  ) : (
-                    <>Quiet month — click any day to open the schedule or drag from the waitlist</>
-                  )}
-                </p>
+        {shellIsFiOs ? (
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className="flex min-h-0 min-w-0 flex-1 justify-center px-1 sm:px-2">
+              <div className="flex min-h-0 w-[min(100%,92vw)] max-w-[min(100%,1400px)] min-w-0 flex-1 flex-col">
+                {monthMain}
               </div>
-              <div className="inline-flex shrink-0 items-center rounded-xl border border-[#1e2937] bg-[#0b1220] p-0.5">
-                <button
-                  type="button"
-                  onClick={() => navigateMonth(-1)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
-                  aria-label="Previous month"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateMonth(1)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
-                  aria-label="Next month"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </header>
-
-            <div className="grid grid-cols-7 border-b border-[#1e2937] bg-[#0b1220]/60">
-              {MONTH_WEEKDAY_LABELS.map((label) => (
-                <div
-                  key={label}
-                  className={cn(
-                    "px-2 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500",
-                    fiCrmCalendarGridClassNames.slotLabel
-                  )}
-                >
-                  {label}
-                </div>
-              ))}
             </div>
 
-            <motion.div
-              variants={staggerContainerVariants}
-              initial="hidden"
-              animate="show"
-              className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 overflow-y-auto overscroll-y-contain"
-            >
-              {cells.map((cell) => (
-                <MonthDayCell
-                  key={cell.dayKey}
-                  cell={cell}
-                  dayBookings={buckets.get(cell.dayKey) ?? []}
-                  bookingDisplay={bookingDisplay}
-                  resourceColumns={resourceColumns}
-                  droppable={canMutateBookings}
-                  draggableAppointments={canMutateBookings}
-                  pendingAppointmentIds={pendingAppointmentIds}
-                  onDayClick={openDay}
-                  onSelectBooking={onSelectBooking}
-                  calendarTimezone={gridConfig.timeZone}
-                />
-              ))}
-            </motion.div>
-          </div>
+            {fiOsPanelsOpen && fiOsDrawerDismiss ? (
+              <button
+                type="button"
+                className="absolute inset-0 z-[34] bg-black/45 backdrop-blur-[1px] transition hover:bg-black/50"
+                aria-label="Close calendar panels"
+                onClick={fiOsDrawerDismiss}
+              />
+            ) : null}
 
-          {rightPanel}
-        </div>
+            {sidebar ? (
+              <div className="absolute inset-y-0 left-0 z-[36] flex w-[min(20rem,calc(100vw-1rem))] max-w-[92vw] shadow-2xl lg:left-[272px]">
+                {sidebar}
+              </div>
+            ) : null}
+
+            {rightPanel ? (
+              <div className="absolute inset-y-0 right-0 z-[36] flex w-[min(18rem,calc(100vw-1rem))] max-w-[min(100%,20rem)] shadow-2xl">
+                {rightPanel}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="flex min-h-0 min-w-0 flex-1 flex-row">
+            {sidebar}
+            {monthMain}
+            {rightPanel}
+          </div>
+        )}
       </motion.div>
 
       <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1)" }}>

@@ -152,7 +152,9 @@ export function BookingCalendarDrawer({
 
   return (
     <div
-      className={os ? "fixed inset-0 z-40 flex justify-end bg-black/50 backdrop-blur-[2px]" : "fixed inset-0 z-40 flex justify-end bg-black/30"}
+      className={
+        os ? "fixed inset-0 z-[52] flex justify-end bg-black/50 backdrop-blur-[2px]" : "fixed inset-0 z-40 flex justify-end bg-black/30"
+      }
       role="presentation"
       onClick={onClose}
     >
