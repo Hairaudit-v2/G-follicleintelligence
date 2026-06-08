@@ -104,7 +104,9 @@ export function TenantAdminUsersSection({
         <div className={sectionClass}>
           <h2 className="mb-2 text-base font-semibold text-[#F8FAFC]">Invite user</h2>
           <p className="mb-3 text-xs text-[#94A3B8]">
-            Sends a Supabase auth invite when needed, or links immediately if the account already exists.
+            Grants platform access via this tenant&apos;s existing Supabase login — no separate auth system. Creates or
+            reuses a <span className="text-[#CBD5E1]">fi_users</span> row and a <span className="text-[#CBD5E1]">fi_tenant_admin_users</span> role; does not create{" "}
+            <span className="text-[#CBD5E1]">fi_staff</span>. Sends an auth invite when the account is not linked yet.
           </p>
           <div className="grid max-w-lg gap-3">
             <label className="grid gap-1 text-xs font-medium text-[#CBD5E1]">
@@ -186,8 +188,8 @@ export function TenantAdminUsersSection({
             {sorted.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-3 py-6 text-center text-slate-500">
-                  No admin users yet. Invite a trusted backend user to grant tenant-scoped access without a clinical staff
-                  profile.
+                  No admin users yet. Invite a trusted user for CFO, finance, operations, compliance, or read-only
+                  analytics access — without adding them as clinical staff.
                 </td>
               </tr>
             ) : (

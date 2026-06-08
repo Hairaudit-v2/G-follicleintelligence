@@ -210,7 +210,7 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         path: "settings/admin-users",
         permissionHint: { requiresManageAdminUsers: true },
         description:
-          "Non-clinical platform access for administrators, finance, owners, auditors, and operations (independent of staff profiles).",
+          "Manage non-clinical platform access for trusted administrators, finance teams, owners, auditors, and operational staff.",
       },
       {
         id: "tax-localisation",

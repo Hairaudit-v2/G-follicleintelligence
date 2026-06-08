@@ -70,7 +70,7 @@ Legend: **Completed** = usable end-to-end for at least one happy path; **In prog
 | FI Admin shell + tenant picker | **Completed** | `/fi-admin` loads tenants via `/api/tenants`; tenant routes under `/fi-admin/[tenantId]/*`. |
 | Production portal gates | **Completed** | `assertFiTenantPortalAccess`, `assertFiAdminShellAccess` in `src/lib/fiOs/fiOsPortalGate.server.ts` (dev vs production behaviour documented in UI). |
 | CRM workspace gate | **Completed** | `fi_admin` / `crm_operator` roles for CRM nav, patients, bookings, calendar (`crmShellAccess`). |
-| Cross-tenant OS identities | **Completed** | `fi_os_identities` + roles for directory-style access (see migrations and `fiOsRoles`). |
+| Tenant backend admin users (`fi_tenant_admin_users`) | **Completed** | Non-clinical access roles separate from `fi_staff`; invite/suspend/revoke + audit; `/fi-admin/[tenantId]/settings/admin-users`. See `docs/design/fi-tenant-admin-users-access-foundation.md`. |
 
 ### CRM (Salesforce / HubSpot direction)
 

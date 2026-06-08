@@ -57,9 +57,11 @@ export default async function TenantAdminUsersSettingsPage({ params }: { params:
         </p>
         <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Admin Users</h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
-          Manage non-clinical platform access for trusted administrators, finance teams, owners, auditors, and operational
-          staff. Admin access is independent of <span className="text-[#CBD5E1]">fi_staff</span> clinical profiles:
-          rosters, calendars, and HR import only use staff records unless someone is linked there separately.
+          Manage non-clinical platform access for trusted administrators, finance teams, owners, auditors, investors,
+          compliance officers, and operational staff.{" "}
+          <span className="text-[#CBD5E1]">Access users</span> (this screen) are separate from{" "}
+          <span className="text-[#CBD5E1]">staff profiles</span> used for rosters, calendars, surgical teams, and HR:
+          removing one does not remove the other.
         </p>
       </div>
       <TenantAdminUsersSection tenantId={tenantId} rows={rows} lastLoginByAuthUserId={lastLoginByAuthUserId} />

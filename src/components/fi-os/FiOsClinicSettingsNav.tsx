@@ -54,7 +54,11 @@ export function FiOsClinicSettingsNav({
           Tax &amp; Localisation
         </Link>
         {showAdminUsersNav ? (
-          <Link href={`${base}/settings/admin-users`} className={linkCls(`${base}/settings/admin-users`)}>
+          <Link
+            href={`${base}/settings/admin-users`}
+            className={linkCls(`${base}/settings/admin-users`)}
+            title="Manage non-clinical platform access for trusted administrators, finance teams, owners, auditors, and operational staff."
+          >
             Admin Users
           </Link>
         ) : null}
