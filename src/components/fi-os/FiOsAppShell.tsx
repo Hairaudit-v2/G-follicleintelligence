@@ -27,6 +27,8 @@ export function FiOsAppShell({
   showBookingsBoard = showCrmNav,
   effective,
   userEmail,
+  impersonationDisplayName,
+  showFiPlatformSystemLink = false,
   children,
 }: {
   tenantId: string;
@@ -35,6 +37,8 @@ export function FiOsAppShell({
   showBookingsBoard?: boolean;
   effective: EffectiveBranding;
   userEmail: string | null;
+  impersonationDisplayName?: string | null;
+  showFiPlatformSystemLink?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
@@ -125,6 +129,8 @@ export function FiOsAppShell({
             quickCreateKbdHint={quickCreateKbdHint}
             onOpenMobileNav={() => setMobileNav(true)}
             onOpenQuickCreate={() => setQuickCreateOpen(true)}
+            impersonationDisplayName={impersonationDisplayName ?? null}
+            showFiPlatformSystemLink={showFiPlatformSystemLink}
           />
           <main
             className={cn(

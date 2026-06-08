@@ -6,7 +6,11 @@ import { buildBrandingCssVariables } from "@/src/lib/fi/foundation/brandingCss";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
-import { resolveFiOsAuthUserEmail } from "@/src/lib/fiOs/fiOsAuthDisplay.server";
+import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { resolveFiOsAuthUserDisplayNameById, resolveFiOsAuthUserEmail } from "@/src/lib/fiOs/fiOsAuthDisplay.server";
+import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
+import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
+import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 const NEUTRAL_EFFECTIVE: EffectiveBranding = {
@@ -37,6 +41,17 @@ export default async function TenantAdminLayout({
   const { tenantId } = await params;
   await assertFiTenantPortalAccess(tenantId);
   const base = `/fi-admin/${tenantId}`;
+  const sessionAuthId = await resolveAuthUserId(null);
+  let impersonationDisplayName: string | null = null;
+  let showFiPlatformSystemLink = false;
+  if (sessionAuthId) {
+    const os = await loadFiOsIdentity(sessionAuthId);
+    showFiPlatformSystemLink = Boolean(os && isFiOsPlatformAdminRole(os.osRole));
+    const target = await getFiOsImpersonationTargetAuthUserId(sessionAuthId);
+    if (target) {
+      impersonationDisplayName = await resolveFiOsAuthUserDisplayNameById(target);
+    }
+  }
   const [showCrmNav, showBookingsBoard, userEmail] = await Promise.all([
     getCrmShellNavAllowed(tenantId),
     getBookingsBoardNavAllowed(tenantId),
@@ -73,6 +88,8 @@ export default async function TenantAdminLayout({
         showBookingsBoard={showBookingsBoard}
         effective={effective}
         userEmail={userEmail}
+        impersonationDisplayName={impersonationDisplayName}
+        showFiPlatformSystemLink={showFiPlatformSystemLink}
       >
         {mainSurface}
       </FiOsAppShell>

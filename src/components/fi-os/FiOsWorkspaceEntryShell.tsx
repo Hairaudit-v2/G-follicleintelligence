@@ -17,30 +17,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
 
-function isWorkspacePickerPath(pathname: string) {
-  return pathname === "/fi-admin" || pathname === "/fi-admin/";
+function showsWorkspaceChrome(pathname: string) {
+  const p = pathname.replace(/\/+$/, "") || "/";
+  return p === "/fi-admin" || p.startsWith("/fi-admin/system");
 }
 
 /**
  * Pre-tenant FI admin gateway: same deep/glass language as {@link FiOsAppShell}, without marketing chrome.
- * Renders a compact command bar only on `/fi-admin`; tenant routes receive children unchanged.
+ * Renders a compact command bar on `/fi-admin` and `/fi-admin/system/*`; tenant routes receive children unchanged.
  */
 export function FiOsWorkspaceEntryShell({
   children,
   userEmail,
+  showSystemAdminEntry = false,
 }: {
   children: React.ReactNode;
   userEmail: string | null;
+  /** When true, show link to `/fi-admin/system` (fi_platform_admin). */
+  showSystemAdminEntry?: boolean;
 }) {
   const pathname = usePathname() ?? "";
-  const isPicker = isWorkspacePickerPath(pathname);
+  const showChrome = showsWorkspaceChrome(pathname);
+  const isWorkspacePickerOnly = (pathname.replace(/\/+$/, "") || "/") === "/fi-admin";
 
   return (
     <div className="relative min-h-screen min-h-dvh overflow-x-hidden bg-[#081020] font-sans text-[#F8FAFC] antialiased">
       <div className="pointer-events-none absolute inset-0" style={fiAdminAmbientBackgroundStyle} aria-hidden />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a1528]/35 via-transparent to-[#02060d]/80" aria-hidden />
       <div className="relative z-10 flex min-h-screen min-h-dvh w-full flex-col">
-        {isPicker ? (
+        {showChrome ? (
           <header className={cn(fiOsChromeClasses.topBar, "flex flex-wrap items-center justify-between gap-3")}>
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.05] text-xs font-bold tracking-tight text-cyan-300">
@@ -48,10 +53,20 @@ export function FiOsWorkspaceEntryShell({
               </div>
               <div className="min-w-0">
                 <p className={fiOsChromeClasses.sectionEyebrow}>FI OS</p>
-                <p className="truncate text-sm font-semibold text-slate-100">Workspace launcher</p>
+                <p className="truncate text-sm font-semibold text-slate-100">
+                  {pathname.startsWith("/fi-admin/system") ? "System administration" : "Workspace launcher"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {showSystemAdminEntry ? (
+                <Link
+                  href="/fi-admin/system"
+                  className="hidden rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-2 text-sm font-medium text-cyan-300 transition hover:border-cyan-500/35 hover:bg-white/[0.07] sm:inline-block"
+                >
+                  System administration
+                </Link>
+              ) : null}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -76,6 +91,14 @@ export function FiOsWorkspaceEntryShell({
                       <DropdownMenuSeparator className="bg-white/[0.08]" />
                     </>
                   ) : null}
+                  {showSystemAdminEntry ? (
+                    <>
+                      <DropdownMenuItem asChild className="cursor-pointer rounded-lg focus:bg-white/[0.06]">
+                        <Link href="/fi-admin/system">System administration</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-white/[0.08]" />
+                    </>
+                  ) : null}
                   <DropdownMenuItem asChild className="cursor-pointer rounded-lg focus:bg-white/[0.06]">
                     <Link href="/fi-login">Sign in</Link>
                   </DropdownMenuItem>
@@ -96,7 +119,7 @@ export function FiOsWorkspaceEntryShell({
         <div
           className={cn(
             "flex min-h-0 w-full flex-1 flex-col",
-            isPicker ? "mx-auto max-w-3xl px-3 py-6 sm:px-4 sm:py-8 lg:max-w-4xl" : ""
+            isWorkspacePickerOnly ? "mx-auto max-w-3xl px-3 py-6 sm:px-4 sm:py-8 lg:max-w-4xl" : showChrome ? "w-full px-3 py-6 sm:px-4 sm:py-8" : ""
           )}
         >
           {children}

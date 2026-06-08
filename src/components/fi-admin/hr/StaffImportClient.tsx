@@ -108,6 +108,14 @@ function rowGroup(p: IiohrHrStaffImportRowPlan): "linked_staff" | "linked_user" 
   return "new_staff";
 }
 
+function formatStaffSyncRunTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  } catch {
+    return iso;
+  }
+}
+
 function chipClass(kind: "neutral" | "ok" | "warn" | "bad" | "info"): string {
   const base =
     "inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ring-1 ring-inset";
@@ -525,6 +533,64 @@ export function StaffImportClient({
             ) : null}
           </div>
         ) : null}
+
+        <div className="mt-8 border-t border-white/[0.06] pt-6">
+          <h3 className="text-sm font-semibold text-[#F8FAFC]">Recent IIOHR HR API sync runs</h3>
+          <p className="mt-1 text-xs text-[#64748B]">
+            Last five producer POSTs to{" "}
+            <span className="font-mono text-[#94A3B8]">/api/tenants/…/integrations/iiohr-hr/staff-sync</span> (header{" "}
+            <span className="font-mono text-[#94A3B8]">x-iiohr-sync-secret</span>), stored in{" "}
+            <span className="font-mono text-[#94A3B8]">fi_staff_sync_runs</span>.
+          </p>
+          {pageModel.recentStaffSyncRuns.length === 0 ? (
+            <p className="mt-3 text-sm text-[#64748B]">No API sync runs recorded yet.</p>
+          ) : (
+            <div className="mt-3 overflow-x-auto rounded-lg border border-white/[0.06]">
+              <table className="w-full min-w-[720px] text-left text-xs text-[#CBD5E1]">
+                <thead className="border-b border-white/[0.06] bg-[#0a1020]/80 text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">
+                  <tr>
+                    <th className="px-3 py-2">Started</th>
+                    <th className="px-3 py-2">Mode</th>
+                    <th className="px-3 py-2">Status</th>
+                    <th className="px-3 py-2 text-right">Rows</th>
+                    <th className="px-3 py-2 text-right">Created</th>
+                    <th className="px-3 py-2 text-right">Updated</th>
+                    <th className="px-3 py-2 text-right">Linked</th>
+                    <th className="px-3 py-2 text-right">Skipped</th>
+                    <th className="px-3 py-2 text-right">Warnings</th>
+                    <th className="px-3 py-2">Error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageModel.recentStaffSyncRuns.map((r) => (
+                    <tr key={r.id} className="border-b border-white/[0.04] last:border-0">
+                      <td className="whitespace-nowrap px-3 py-2 text-[#94A3B8]">{formatStaffSyncRunTime(r.started_at)}</td>
+                      <td className="px-3 py-2 font-mono text-[11px] text-[#E2E8F0]">{r.mode}</td>
+                      <td className="px-3 py-2">
+                        <span
+                          className={chipClass(
+                            r.status === "success" ? "ok" : r.status === "failed" ? "bad" : r.status === "running" ? "warn" : "neutral"
+                          )}
+                        >
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono">{r.received_rows}</td>
+                      <td className="px-3 py-2 text-right font-mono">{r.created_count ?? "—"}</td>
+                      <td className="px-3 py-2 text-right font-mono">{r.updated_count ?? "—"}</td>
+                      <td className="px-3 py-2 text-right font-mono">{r.linked_count ?? "—"}</td>
+                      <td className="px-3 py-2 text-right font-mono">{r.skipped_count ?? "—"}</td>
+                      <td className="px-3 py-2 text-right font-mono">{r.warning_count ?? "—"}</td>
+                      <td className="max-w-[200px] truncate px-3 py-2 text-rose-200/90" title={r.error_message ?? undefined}>
+                        {r.error_message ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </DashboardCard>
 
       {preview && preview.ok ? (

@@ -6,12 +6,13 @@ This document describes **how access works in production** (`NODE_ENV === 'produ
 
 | Layer | Storage | Used for |
 |--------|---------|----------|
-| **Platform OS** | `fi_os_identities` (`auth_user_id`, `os_role`) | Cross-tenant directory (`fi_admin`, `fi_auditor`), post-login redirects, HairAudit OS hub. |
+| **Platform OS** | `fi_os_identities` (`auth_user_id`, `os_role`) | Cross-tenant directory (`fi_platform_admin`, `fi_admin`, `fi_auditor`), post-login redirects, HairAudit OS hub, `/fi-admin/system`. |
 | **Tenant membership** | `fi_users` (`tenant_id`, `auth_user_id`, `role`) | Tenant-scoped FI Admin, CRM gates, `/api/tenants` subset when not cross-tenant OS. |
+| **Impersonation audit** | `fi_os_impersonation_sessions` | Platform-initiated user impersonation (initiator, target, IP, user-agent, optional `tenant_id`, timestamps). |
 
 **FI portal staff** = has a row in `fi_os_identities` **or** at least one row in `fi_users` for the auth user.
 
-Allowed `fi_os_identities.os_role` values: `fi_admin`, `fi_auditor`, `fi_clinic_admin`, `fi_doctor`, `fi_nurse`, `fi_consultant`.
+Allowed `fi_os_identities.os_role` values: `fi_platform_admin`, `fi_admin`, `fi_auditor`, `fi_clinic_admin`, `fi_doctor`, `fi_nurse`, `fi_consultant`.
 
 ## Route guards (production only)
 
@@ -20,20 +21,21 @@ Guards live in `src/lib/fiOs/fiOsPortalGate.server.ts`. When `NODE_ENV !== 'prod
 | Surface | Rule |
 |---------|------|
 | **`/fi-admin` shell** | `assertFiAdminShellAccess`: session required; must be FI portal staff. |
-| **`/fi-admin/[tenantId]/…`** | `assertFiTenantPortalAccess`: session required; tenant must exist; user must be **`fi_admin` or `fi_auditor` OS** (any tenant) **or** have **`fi_users`** for that `tenant_id`. |
-| **`/hair-audit/admin`** | `assertHairAuditOsAdminAccess`: session required; OS role **`fi_admin`** or **`fi_auditor`** only. |
+| **`/fi-admin/[tenantId]/…`** | `assertFiTenantPortalAccess`: session required; tenant must exist; user must be **`fi_platform_admin`, `fi_admin` or `fi_auditor` OS** (any tenant) **or** have **`fi_users`** for that `tenant_id`. |
+| **`/fi-admin/system/…`** | `assertFiPlatformAdminSystemAccess` (`fiOsPlatformSystemGate.server.ts`): session required; OS role **`fi_platform_admin`** only (all environments). |
+| **`/hair-audit/admin`** | `assertHairAuditOsAdminAccess`: session required; OS role **`fi_admin`**, **`fi_auditor`**, or **`fi_platform_admin`**. |
 
 Unauthenticated users are sent to `/follicle-intelligence/login?next=…` with a safe internal `next` path. Non–portal-staff authenticated users hitting `/fi-admin` are redirected with `notice=no_fi_access`.
 
-### Cross-tenant `fi_admin` / `fi_auditor` (platform operators)
+### Cross-tenant `fi_platform_admin` / `fi_admin` / `fi_auditor` (platform operators)
 
-Users with `fi_os_identities.os_role` of **`fi_admin`** or **`fi_auditor`** are treated as **cross-tenant directory** roles (`isFiOsCrossTenantDirectoryRole` in `src/lib/fiOs/fiOsRoles.ts`):
+Users with `fi_os_identities.os_role` of **`fi_platform_admin`**, **`fi_admin`**, or **`fi_auditor`** are treated as **cross-tenant directory** roles where `isFiOsCrossTenantDirectoryRole` is true (`src/lib/fiOs/fiOsRoles.ts`). **`fi_platform_admin`** additionally has full tenant REST bypass when not impersonating (`crmGate.ts` / `crmShellAccess.ts`), system administration UI under `/fi-admin/system`, and audited user impersonation via httpOnly cookie + `fi_os_impersonation_sessions`.
 
 | Capability | Behaviour |
 |------------|-----------|
 | **`/fi-admin/[tenantId]/…` HTML** | `assertFiTenantPortalAccess` **allows** access when the tenant row exists **without** requiring a matching `fi_users` row for that `tenant_id`. |
 | **`GET /api/tenants`** | Returns **all** `fi_tenants` rows (same as the table in the `GET /api/tenants` section above). |
-| **Tenant-scoped REST** | Individual routes may still require CRM keys, `fi_users` membership, or other gates — read each handler. |
+| **Tenant-scoped REST** | **`fi_platform_admin`** without impersonation: `assertCrmTenantReadAllowed` / `assertCrmTenantWriteAllowed` and related shell helpers allow the tenant after existence check. Other OS roles and impersonation sessions still follow `fi_users` membership per handler. |
 
 Provision these identities deliberately; they are appropriate for internal staff and auditors, not clinic-only accounts.
 
@@ -44,7 +46,7 @@ Implemented in `src/lib/fiOs/fiOsRedirect.server.ts` (after `fiOsPasswordSignInA
 | Condition | Redirect |
 |-----------|-----------|
 | OS `fi_auditor` | `/hair-audit/admin` |
-| OS `fi_admin` | `/fi-admin` |
+| OS `fi_platform_admin` / `fi_admin` | `/fi-admin` |
 | OS `fi_clinic_admin` / `fi_doctor` / `fi_nurse` / `fi_consultant` | First `fi_users` tenant → `/fi-admin/[tenantId]/cases`, else `/fi-admin` |
 | No OS row | First `fi_users` tenant → `/fi-admin/[tenantId]/cases`, else `/fi-admin` |
 
@@ -56,12 +58,12 @@ Implemented in `src/lib/fiAdmin/fiAdminTenantDirectory.ts`.
 |-------------|--------|--------|
 | **Production** | No session | **401** `AUTH_REQUIRED` |
 | **Production** | Session, **not** FI portal staff | **403** `FI_PORTAL_FORBIDDEN` |
-| **Production** | Session, staff, OS `fi_admin` or `fi_auditor` | **200**, `tenants` = **all** `fi_tenants` rows |
+| **Production** | Session, staff, OS cross-tenant directory role (`fi_platform_admin`, `fi_admin`, `fi_auditor`) | **200**, `tenants` = **all** `fi_tenants` rows |
 | **Production** | Session, staff, no cross-tenant OS role | **200**, `tenants` = tenants linked via `fi_users` only |
 | **Non-production** | No session, `FI_ENABLE_DEV_ADMIN_ACCESS=true` | **200**, all tenants + `devTenantListFallback: true` |
 | **Non-production** | No session, flag off | **401** |
 
-So **full tenant list is only returned** for authenticated **`fi_admin` / `fi_auditor`** OS users (or dev fallback when unauthenticated).
+So **full tenant list is only returned** for authenticated **`fi_platform_admin` / `fi_admin` / `fi_auditor`** OS users (or dev fallback when unauthenticated).
 
 ## Auth aliases and robots
 
