@@ -254,7 +254,7 @@ export async function createPathologyResult(input: CreatePathologyResultInput, c
   if (insErr) throw new Error(insErr.message);
 
   let result = mapResult(insRow as Record<string, unknown>);
-  let items = await replaceResultItems(supabase, tid, result.id, input.items);
+  const items = await replaceResultItems(supabase, tid, result.id, input.items);
 
   if (hasPdf && input.pdfBytes) {
     const path = buildPathologyResultPdfStoragePath(tid, pid, result.id);
