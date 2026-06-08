@@ -22,7 +22,21 @@ export const createPathologyRequestBodySchema = z.object({
     .optional(),
   template_used: pathologyTemplateIdSchema,
   tests: z.array(testLineSchema).min(1, "Add at least one test."),
+  clinical_notes: z.string().trim().max(8000).optional().nullable(),
+  adminKey: z.string().optional(),
+});
+
+export const patchPathologyRequestBodySchema = z.object({
+  clinical_notes: z.string().trim().max(8000).nullable().optional(),
+  adminKey: z.string().optional(),
+});
+
+export const sendPathologyRequestToPatientBodySchema = z.object({
+  /** Optional extra sentence from the clinician (appended to the template body). */
+  personal_note: z.string().trim().max(2000).optional().nullable(),
   adminKey: z.string().optional(),
 });
 
 export type CreatePathologyRequestBody = z.infer<typeof createPathologyRequestBodySchema>;
+export type PatchPathologyRequestBody = z.infer<typeof patchPathologyRequestBodySchema>;
+export type SendPathologyRequestToPatientBody = z.infer<typeof sendPathologyRequestToPatientBodySchema>;

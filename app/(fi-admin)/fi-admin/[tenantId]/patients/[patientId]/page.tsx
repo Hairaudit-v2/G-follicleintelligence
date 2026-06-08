@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { UniversalPatientRecord } from "@/src/components/fi/UniversalPatientRecord";
+import { PatientPrescriptionsTab } from "@/src/components/fi-admin/prescribing/PatientPrescriptionsTab";
 import { PatientDetailPageView } from "@/src/components/fi/patients/detail/PatientDetailPageView";
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { loadUniversalPatientRecord } from "@/src/lib/fi/foundation/patientRecord";
@@ -87,6 +88,17 @@ export default async function PatientProfileRoutePage({
           initialPayload={payload}
           activeTab={activeTab}
           previewPatientId={previewPatientId}
+          prescriptionsTab={
+            activeTab === "prescriptions" ? (
+              <Suspense
+                fallback={
+                  <div className="mx-auto max-w-6xl animate-pulse rounded border border-gray-200 bg-white py-12" aria-hidden />
+                }
+              >
+                <PatientPrescriptionsTab tenantId={tenantId} patientId={patientId.trim()} />
+              </Suspense>
+            ) : null
+          }
         />
       </Suspense>
     </AppointmentSlideOverProvider>

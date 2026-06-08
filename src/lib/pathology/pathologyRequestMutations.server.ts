@@ -19,6 +19,11 @@ function mapRequest(row: Record<string, unknown>): PathologyRequestRow {
     doctor_user_id: row.doctor_user_id != null ? String(row.doctor_user_id) : null,
     template_used: String(row.template_used) as PathologyTemplateId,
     status: String(row.status) as PathologyRequestStatus,
+    clinical_notes: row.clinical_notes != null ? String(row.clinical_notes) : null,
+    emailed_to_patient_at: row.emailed_to_patient_at != null ? String(row.emailed_to_patient_at) : null,
+    cancelled_at: row.cancelled_at != null ? String(row.cancelled_at) : null,
+    pdf_storage_bucket: row.pdf_storage_bucket != null ? String(row.pdf_storage_bucket) : null,
+    pdf_storage_path: row.pdf_storage_path != null ? String(row.pdf_storage_path) : null,
     metadata:
       row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
         ? (row.metadata as Record<string, unknown>)
@@ -46,6 +51,7 @@ export type CreatePathologyRequestInput = {
   templateUsed: PathologyTemplateId;
   requestDate: string;
   doctorUserId: string | null;
+  clinicalNotes?: string | null;
   tests: { code: string | null; label: string }[];
 };
 
@@ -83,6 +89,7 @@ export async function createPathologyRequest(
       doctor_user_id: input.doctorUserId,
       template_used: input.templateUsed,
       status: "saved",
+      clinical_notes: input.clinicalNotes?.trim() ? input.clinicalNotes.trim() : null,
       metadata: {},
     })
     .select("*")
@@ -118,4 +125,102 @@ export async function createPathologyRequest(
   });
 
   return { request, items };
+}
+
+export async function updatePathologyRequestClinicalNotes(
+  params: { tenantId: string; patientId: string; requestId: string; clinicalNotes: string | null },
+  client?: SupabaseClient
+): Promise<PathologyRequestRow> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = params.tenantId.trim();
+  const pid = params.patientId.trim();
+  const rid = params.requestId.trim();
+
+  const { data, error } = await supabase
+    .from("fi_pathology_requests")
+    .update({ clinical_notes: params.clinicalNotes?.trim() ? params.clinicalNotes.trim() : null })
+    .eq("tenant_id", tid)
+    .eq("patient_id", pid)
+    .eq("id", rid)
+    .eq("status", "saved")
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Request not found or not editable.");
+  return mapRequest(data as Record<string, unknown>);
+}
+
+export async function cancelPathologyRequest(
+  params: { tenantId: string; patientId: string; requestId: string },
+  client?: SupabaseClient
+): Promise<PathologyRequestRow> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = params.tenantId.trim();
+  const pid = params.patientId.trim();
+  const rid = params.requestId.trim();
+
+  const { data, error } = await supabase
+    .from("fi_pathology_requests")
+    .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+    .eq("tenant_id", tid)
+    .eq("patient_id", pid)
+    .eq("id", rid)
+    .eq("status", "saved")
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Request not found or already cancelled.");
+
+  const row = mapRequest(data as Record<string, unknown>);
+
+  await appendCrmActivityEvent({
+    tenantId: tid,
+    activityKind: "pathology.blood_request.cancelled",
+    title: "Blood request cancelled",
+    patientId: pid,
+    detail: {
+      pathology_request_id: rid,
+      template_used: row.template_used,
+    },
+    occurredAt: new Date().toISOString(),
+  });
+
+  return row;
+}
+
+export async function persistPathologyRequestPdfStorage(
+  params: {
+    tenantId: string;
+    patientId: string;
+    requestId: string;
+    bucket: string;
+    storagePath: string;
+  },
+  client?: SupabaseClient
+): Promise<void> {
+  const supabase = client ?? supabaseAdmin();
+  const { error } = await supabase
+    .from("fi_pathology_requests")
+    .update({
+      pdf_storage_bucket: params.bucket.trim(),
+      pdf_storage_path: params.storagePath.trim(),
+    })
+    .eq("tenant_id", params.tenantId.trim())
+    .eq("patient_id", params.patientId.trim())
+    .eq("id", params.requestId.trim());
+  if (error) throw new Error(error.message);
+}
+
+export async function markPathologyRequestEmailedToPatient(
+  params: { tenantId: string; patientId: string; requestId: string; occurredAtIso: string },
+  client?: SupabaseClient
+): Promise<void> {
+  const supabase = client ?? supabaseAdmin();
+  const { error } = await supabase
+    .from("fi_pathology_requests")
+    .update({ emailed_to_patient_at: params.occurredAtIso })
+    .eq("tenant_id", params.tenantId.trim())
+    .eq("patient_id", params.patientId.trim())
+    .eq("id", params.requestId.trim());
+  if (error) throw new Error(error.message);
 }

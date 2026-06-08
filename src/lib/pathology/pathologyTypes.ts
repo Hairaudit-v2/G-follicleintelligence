@@ -15,6 +15,11 @@ export type PathologyRequestRow = {
   doctor_user_id: string | null;
   template_used: PathologyTemplateId;
   status: PathologyRequestStatus;
+  clinical_notes: string | null;
+  emailed_to_patient_at: string | null;
+  cancelled_at: string | null;
+  pdf_storage_bucket: string | null;
+  pdf_storage_path: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;

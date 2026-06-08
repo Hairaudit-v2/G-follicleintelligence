@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import type { PatientDetailTabId } from "@/src/lib/patients/patientDetailTabs";
 import type { PatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
 import { PatientProfileHeader } from "../PatientProfileHeader";
@@ -21,7 +21,6 @@ import { PatientPreviousProceduresCard } from "./PatientPreviousProceduresCard";
 import { PatientProgressCompare } from "../progress/PatientProgressCompare";
 import { PatientAppointmentsTab } from "./PatientAppointmentsTab";
 import { PatientDocumentsTab } from "./PatientDocumentsTab";
-import { PatientPrescriptionsTab } from "@/src/components/fi-admin/prescribing/PatientPrescriptionsTab";
 
 export function PatientDetailPageView({
   tenantId,
@@ -29,12 +28,15 @@ export function PatientDetailPageView({
   initialPayload,
   activeTab,
   previewPatientId,
+  /** Server-rendered async tab; passed from the route so this client module never imports prescribing loaders. */
+  prescriptionsTab,
 }: {
   tenantId: string;
   patientId: string;
   initialPayload: PatientDetailPayload;
   activeTab: PatientDetailTabId;
   previewPatientId?: string;
+  prescriptionsTab?: ReactNode;
 }) {
   const { profile } = initialPayload;
 
@@ -123,7 +125,7 @@ export function PatientDetailPageView({
         <PatientTreatmentTimelineCard patientTimeline={profile.patientTimeline} patientImages={profile.patientImages} />
       ) : null}
 
-      {activeTab === "prescriptions" ? <PatientPrescriptionsTab tenantId={tenantId} patientId={patientId} /> : null}
+      {activeTab === "prescriptions" ? prescriptionsTab : null}
 
       {activeTab === "documents" ? <PatientDocumentsTab tenantId={tenantId} data={profile} /> : null}
     </div>
