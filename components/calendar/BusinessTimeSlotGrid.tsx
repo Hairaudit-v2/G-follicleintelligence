@@ -1,32 +1,35 @@
 "use client";
 
+import { useMemo } from "react";
+
 import {
-  calendarGridBodyHeightPx,
+  calendarGridBodyHeightForBusinessHours,
   calendarSlotHeightPx,
-  generateCalendarTimeSlots,
+  generateOperationalCalendarTimeSlots,
+  type OperationalGridHours,
 } from "@/lib/calendar/time-slots";
 import { fiCrmCalendarGridClassNames } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
-import { DEFAULT_CALENDAR_TIMEZONE } from "@/src/lib/calendar/calendarTimezone";
 
 export type BusinessTimeSlotGridProps = {
-  /** Override body height; defaults to full 8 AM–6 PM window. */
+  /** Override body height; defaults to span of `gridHours`. */
   bodyHeightPx?: number;
   className?: string;
+  /** Clinic-local business window (hour fields are wall-clock, not UTC offsets). */
+  gridHours: OperationalGridHours;
 };
 
 /**
- * Always-visible 8 AM–6 PM slot grid (30-min increments).
- * Renders even when a column has zero appointments.
+ * Visible business-day slot grid (30-min rows). Lines and labels use wall-clock minutes only.
  */
-export function BusinessTimeSlotGrid({
-  bodyHeightPx,
-  className,
-  timeZone = DEFAULT_CALENDAR_TIMEZONE,
-}: BusinessTimeSlotGridProps & { timeZone?: string }) {
-  const slots = generateCalendarTimeSlots(timeZone);
+export function BusinessTimeSlotGrid({ bodyHeightPx, className, gridHours }: BusinessTimeSlotGridProps) {
+  const { dayStartHourUtc, dayEndHourUtc } = gridHours;
+  const slots = useMemo(
+    () => generateOperationalCalendarTimeSlots({ dayStartHourUtc, dayEndHourUtc }),
+    [dayStartHourUtc, dayEndHourUtc]
+  );
   const slotH = calendarSlotHeightPx();
-  const height = bodyHeightPx ?? calendarGridBodyHeightPx();
+  const height = bodyHeightPx ?? calendarGridBodyHeightForBusinessHours(gridHours);
 
   return (
     <div
@@ -36,7 +39,7 @@ export function BusinessTimeSlotGrid({
     >
       {slots.map((slot, i) => (
         <div
-          key={slot.start}
+          key={`${gridHours.dayStartHourUtc}-${i}`}
           className={cn(
             "absolute inset-x-0 border-t",
             i % 2 === 0 ? fiCrmCalendarGridClassNames.slotLine : fiCrmCalendarGridClassNames.slotLineHalf
@@ -53,20 +56,24 @@ export function BusinessTimeSlotGrid({
 }
 
 /**
- * Time gutter labels aligned to {@link CALENDAR_TIME_SLOTS} (hour marks only).
+ * Time gutter labels on full-hour marks for the same business window as {@link BusinessTimeSlotGrid}.
  */
 export function BusinessTimeGutter({
   bodyHeightPx,
   headerHeightPx = 56,
-  timeZone = DEFAULT_CALENDAR_TIMEZONE,
+  gridHours,
 }: {
   bodyHeightPx?: number;
   headerHeightPx?: number;
-  timeZone?: string;
+  gridHours: OperationalGridHours;
 }) {
-  const slots = generateCalendarTimeSlots(timeZone);
+  const { dayStartHourUtc, dayEndHourUtc } = gridHours;
+  const slots = useMemo(
+    () => generateOperationalCalendarTimeSlots({ dayStartHourUtc, dayEndHourUtc }),
+    [dayStartHourUtc, dayEndHourUtc]
+  );
   const slotH = calendarSlotHeightPx();
-  const height = bodyHeightPx ?? calendarGridBodyHeightPx();
+  const height = bodyHeightPx ?? calendarGridBodyHeightForBusinessHours(gridHours);
 
   return (
     <div
@@ -83,7 +90,7 @@ export function BusinessTimeGutter({
       <div className="relative" style={{ height }}>
         {slots.filter((_, i) => i % 2 === 0).map((slot, hourIndex) => (
           <div
-            key={slot.start}
+            key={`gutter-${gridHours.dayStartHourUtc}-${hourIndex}`}
             className="absolute left-0 right-0 flex items-start justify-end pr-2 pt-1"
             style={{ top: hourIndex * 2 * slotH, height: slotH * 2 }}
           >

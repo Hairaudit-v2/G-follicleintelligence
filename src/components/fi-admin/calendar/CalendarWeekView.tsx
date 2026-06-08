@@ -16,6 +16,7 @@ import {
   OPERATIONAL_CAL_PX_PER_HOUR,
 } from "@/src/lib/calendar/operationalCalendarLayout";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
+import { formatWallClockMinutesFromMidnight } from "@/lib/calendar/time-slots";
 import { BookingCalendarCard } from "./BookingCalendarCard";
 import { CalendarResourceColumn } from "./CalendarResourceColumn";
 
@@ -45,11 +46,7 @@ function TimeGutter({ gridConfig }: { gridConfig: BusinessGridConfig }) {
               height: OPERATIONAL_CAL_PX_PER_HOUR,
             }}
           >
-            {new Date(Date.UTC(2000, 0, 1, h, 0, 0)).toLocaleTimeString(undefined, {
-              hour: "numeric",
-              minute: "2-digit",
-              timeZone: gridConfig.timeZone,
-            })}
+            {formatWallClockMinutesFromMidnight(h * 60)}
           </div>
         ))}
       </div>

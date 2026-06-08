@@ -1,9 +1,12 @@
 /**
- * Fixed business-day time slots for the Evolved Hair Clinics CRM calendar grid.
- * Ensures the grid always renders the full 8 AM–6 PM window, even with zero appointments.
+ * CRM calendar grid: business-day slot rows and gutter labels.
+ *
+ * Lane minutes and gutter text are clinic **wall-clock** (minutes from local midnight on the grid axis).
+ * Do not interpret these hours through `Date` + IANA conversion — that mislabels 08:00 as an evening time
+ * when a UTC anchor is shifted into Australia zones.
+ *
+ * Booking instants still use `calendarTimezone.ts` for ISO ↔ clinic-local placement.
  */
-
-import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 
 export type CalendarTimeSlot = {
   start: string;
@@ -11,37 +14,50 @@ export type CalendarTimeSlot = {
   label: string;
 };
 
-/** Inclusive start of the visible day (8:00 AM). */
+/** Inclusive start of the default visible day (8:00 AM wall clock). */
 export const CALENDAR_DAY_START_HOUR = 8;
 
-/** Exclusive end of the visible day (6:00 PM). */
+/** Exclusive end of the default visible day (6:00 PM wall clock). */
 export const CALENDAR_DAY_END_HOUR = 18;
 
 export const CALENDAR_SLOT_MINUTES = 30;
 
-function formatLocalMinutes(totalMinutes: number, timeZone: string): string {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  const tz = normalizeCalendarTimezone(timeZone);
-  return new Date(Date.UTC(2000, 0, 1, hours, minutes, 0)).toLocaleTimeString(undefined, {
+/** Tenant / operational grid uses these field names (values are wall-clock hours, not UTC). */
+export type OperationalGridHours = {
+  dayStartHourUtc: number;
+  dayEndHourUtc: number;
+};
+
+/**
+ * Format minutes-from-local-midnight as a clock string using a fixed UTC calendar clock,
+ * so the displayed hour/minute equals the wall values with no zone shift.
+ */
+export function formatWallClockMinutesFromMidnight(totalMinutes: number): string {
+  const clamped = Math.max(0, totalMinutes);
+  const h = Math.floor(clamped / 60);
+  const m = Math.floor(clamped % 60);
+  const ms = Date.UTC(1970, 0, 1, h, m, 0, 0);
+  return new Date(ms).toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: tz === "UTC" ? "UTC" : tz,
+    timeZone: "UTC",
   });
 }
 
 /**
- * Build every 30-minute slot from 8:00 AM through 6:00 PM (20 slots) in clinic-local time labels.
+ * Build 30-minute slot rows between configured clinic-local open/close hours (labels are wall-clock only).
  */
-export function generateCalendarTimeSlots(timeZone: string = "UTC"): CalendarTimeSlot[] {
-  const startMinutes = CALENDAR_DAY_START_HOUR * 60;
-  const endMinutes = CALENDAR_DAY_END_HOUR * 60;
+export function generateOperationalCalendarTimeSlots(grid: OperationalGridHours): CalendarTimeSlot[] {
+  const startH = Math.floor(Number(grid.dayStartHourUtc));
+  const endH = Math.floor(Number(grid.dayEndHourUtc));
+  const startMinutes = Math.max(0, Math.min(23, startH)) * 60;
+  const endMinutes = Math.max(startMinutes + CALENDAR_SLOT_MINUTES, Math.min(24, endH) * 60);
   const slots: CalendarTimeSlot[] = [];
 
   for (let cursor = startMinutes; cursor < endMinutes; cursor += CALENDAR_SLOT_MINUTES) {
     const slotEnd = cursor + CALENDAR_SLOT_MINUTES;
-    const start = formatLocalMinutes(cursor, timeZone);
-    const end = formatLocalMinutes(slotEnd, timeZone);
+    const start = formatWallClockMinutesFromMidnight(cursor);
+    const end = formatWallClockMinutesFromMidnight(slotEnd);
     slots.push({
       start,
       end,
@@ -52,8 +68,16 @@ export function generateCalendarTimeSlots(timeZone: string = "UTC"): CalendarTim
   return slots;
 }
 
-/** Precomputed slots for UTC — same window as {@link DEFAULT_BUSINESS_GRID}. */
-export const CALENDAR_TIME_SLOTS: readonly CalendarTimeSlot[] = generateCalendarTimeSlots("UTC");
+/** @deprecated Prefer {@link generateOperationalCalendarTimeSlots} with explicit hours. */
+export function generateCalendarTimeSlots(): CalendarTimeSlot[] {
+  return generateOperationalCalendarTimeSlots({
+    dayStartHourUtc: CALENDAR_DAY_START_HOUR,
+    dayEndHourUtc: CALENDAR_DAY_END_HOUR,
+  });
+}
+
+/** Precomputed default 8–18 slots (wall-clock labels). */
+export const CALENDAR_TIME_SLOTS: readonly CalendarTimeSlot[] = generateCalendarTimeSlots();
 
 /** Pixel height of one hour row in the CRM calendar grid. */
 export const CALENDAR_PX_PER_HOUR = 56;
@@ -63,17 +87,31 @@ export function calendarSlotHeightPx(pxPerHour: number = CALENDAR_PX_PER_HOUR): 
   return (pxPerHour * CALENDAR_SLOT_MINUTES) / 60;
 }
 
-/** Total grid body height for the fixed business-day window (20 × 30-min slots). */
+/** Vertical body height for a business-hour window (same math as slot rows × slot height). */
+export function calendarGridBodyHeightForBusinessHours(
+  grid: OperationalGridHours,
+  pxPerHour: number = CALENDAR_PX_PER_HOUR
+): number {
+  const hours = Math.max(1, Math.floor(grid.dayEndHourUtc) - Math.floor(grid.dayStartHourUtc));
+  return hours * pxPerHour;
+}
+
+/** Total grid body height for the default 8–18 window. */
 export function calendarGridBodyHeightPx(pxPerHour: number = CALENDAR_PX_PER_HOUR): number {
   return CALENDAR_TIME_SLOTS.length * calendarSlotHeightPx(pxPerHour);
 }
 
-/** Number of visible 30-minute slots (20 for 8 AM–6 PM). */
+/** Number of visible 30-minute slots for the given business window. */
+export function operationalCalendarSlotCount(grid: OperationalGridHours): number {
+  return generateOperationalCalendarTimeSlots(grid).length;
+}
+
+/** Number of visible 30-minute slots (20 for default 8 AM–6 PM). */
 export function calendarSlotCount(): number {
   return CALENDAR_TIME_SLOTS.length;
 }
 
-/** 0-based slot index for local minutes-from-midnight within the business window. */
+/** 0-based slot index for local minutes-from-midnight within the default 8–18 business window. */
 export function calendarSlotIndexFromMinutes(totalMinutes: number): number {
   const gridStart = CALENDAR_DAY_START_HOUR * 60;
   const rel = totalMinutes - gridStart;

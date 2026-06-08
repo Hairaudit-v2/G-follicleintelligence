@@ -430,7 +430,10 @@ export function ProviderColumn({
         )}
         style={{ minHeight: bodyHeightPx, backgroundColor: CALENDAR_GRID_BG }}
       >
-        <BusinessTimeSlotGrid bodyHeightPx={bodyHeightPx} timeZone={gridConfig.timeZone} />
+        <BusinessTimeSlotGrid
+          bodyHeightPx={bodyHeightPx}
+          gridHours={{ dayStartHourUtc: gridConfig.dayStartHourUtc, dayEndHourUtc: gridConfig.dayEndHourUtc }}
+        />
         <CurrentTimeLine dayKey={dayKey} gridConfig={gridConfig} bodyHeightPx={bodyHeightPx} />
 
         {onEmptySlotClick || onEmptySlotContextMenu ? (

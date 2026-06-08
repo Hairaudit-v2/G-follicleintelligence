@@ -36,11 +36,11 @@ import {
   CALENDAR_GRID_BG,
   CALENDAR_HEADER_HEIGHT_PX,
   ProviderColumn,
-  calendarGridBodyHeightPx,
   calendarPxPerMinute,
   parseProviderColumnDropId,
 } from "@/components/calendar/ProviderColumn";
 import { BusinessTimeGutter } from "@/components/calendar/BusinessTimeSlotGrid";
+import { calendarGridBodyHeightForBusinessHours } from "@/lib/calendar/time-slots";
 import {
   CALENDAR_SNAP_MINUTES,
   dropMinutesFromDragEvent,
@@ -178,7 +178,14 @@ function WeekViewInner({
 }: WeekViewProps) {
   const router = useRouter();
   const shellIsFiOs = calendarShellMode === "fiOs";
-  const bodyHeightPx = calendarGridBodyHeightPx();
+  const bodyHeightPx = useMemo(
+    () =>
+      calendarGridBodyHeightForBusinessHours({
+        dayStartHourUtc: gridConfig.dayStartHourUtc,
+        dayEndHourUtc: gridConfig.dayEndHourUtc,
+      }),
+    [gridConfig.dayEndHourUtc, gridConfig.dayStartHourUtc]
+  );
   const [activeDrag, setActiveDrag] = useState<AppointmentCardData | null>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
@@ -534,7 +541,7 @@ function WeekViewInner({
           <BusinessTimeGutter
             bodyHeightPx={bodyHeightPx}
             headerHeightPx={CALENDAR_HEADER_HEIGHT_PX}
-            timeZone={gridConfig.timeZone}
+            gridHours={{ dayStartHourUtc: gridConfig.dayStartHourUtc, dayEndHourUtc: gridConfig.dayEndHourUtc }}
           />
 
           {swipeLayout ? (

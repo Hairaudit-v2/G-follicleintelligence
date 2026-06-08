@@ -7,7 +7,12 @@ import { HairEcosystemNav } from "@/components/layout/hair-ecosystem-nav";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
-function isFiOsPortalBarePath(pathname: string | null): boolean {
+function isFiAdminPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return pathname === "/fi-admin" || pathname.startsWith("/fi-admin/");
+}
+
+function isMarketingBareShell(pathname: string | null): boolean {
   if (!pathname) return false;
   if (pathname === "/fi-login") return true;
   if (pathname.startsWith("/follicle-intelligence/login")) return true;
@@ -18,11 +23,14 @@ function isFiOsPortalBarePath(pathname: string | null): boolean {
 }
 
 /**
- * Marketing site chrome is hidden on FI OS auth and HairAudit hub routes so they read as a dedicated portal entry.
+ * Marketing site chrome is hidden on FI Admin, FI OS auth, and HairAudit hub routes so they read as dedicated portal shells.
  */
 export function FiPortalChromeGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  if (isFiOsPortalBarePath(pathname)) {
+  if (isFiAdminPath(pathname)) {
+    return <>{children}</>;
+  }
+  if (isMarketingBareShell(pathname)) {
     return <div className="min-h-screen bg-slate-950 text-slate-100">{children}</div>;
   }
   return (
