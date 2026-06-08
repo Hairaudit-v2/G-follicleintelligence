@@ -14,6 +14,11 @@ import {
   parseIsoUtcMs,
   toDatetimeLocalValueInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
+import {
+  CALENDAR_QUICK_TEMPLATES,
+  calendarQuickTemplateById,
+  type CalendarQuickTemplateId,
+} from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";

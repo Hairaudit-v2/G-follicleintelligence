@@ -11,7 +11,6 @@ import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/Bookin
 import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingTypeBadge";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssigneeDisplayLabel } from "@/src/lib/staff/staffAssigneeDisplay";
-import { cn } from "@/lib/utils";
 
 function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
   if (!id) return "Unassigned";
@@ -144,6 +143,16 @@ export function BookingCalendarDrawer({
 }) {
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const os = variant === "fiOs";
+
+  useEffect(() => {
+    if (!os || !booking) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [os, booking, onClose]);
 
   function withAdmin<T extends Record<string, unknown>>(body: T): T & { adminKey?: string } {
     if (adminKey.trim()) return { ...body, adminKey: adminKey.trim() };
@@ -222,20 +231,10 @@ export function BookingCalendarDrawer({
     }
   }
 
-  const os = variant === "fiOs";
   const mut = canMutateBookings;
   const canMarkArrived =
     mut && !cancelled && !completed && (row.booking_status === "scheduled" || row.booking_status === "confirmed");
   const canRescheduleOrComplete = mut && !cancelled && !completed;
-
-  useEffect(() => {
-    if (!os) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [os, onClose]);
 
   const osActionClass =
     "inline-flex w-full items-center justify-center rounded-md border border-white/[0.12] bg-white/[0.05] px-2 py-2 text-xs font-medium text-slate-100 transition hover:bg-white/[0.09] disabled:pointer-events-none disabled:opacity-40";
