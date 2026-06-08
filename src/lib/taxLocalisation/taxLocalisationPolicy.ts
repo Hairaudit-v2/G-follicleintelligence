@@ -1,4 +1,4 @@
-import type { FiTaxCountryRegion, FiTaxProfile } from "./taxLocalisationTypes";
+import type { FiTaxCountryRegion } from "./taxLocalisationTypes";
 
 /** Consumer-facing label for the primary consumption tax (not legal advice). */
 export function primaryConsumptionTaxLabel(country: FiTaxCountryRegion): string {
@@ -10,7 +10,7 @@ export function primaryConsumptionTaxLabel(country: FiTaxCountryRegion): string 
 }
 
 /** Best-effort registration number label for invoices/receipts. */
-export function businessRegistrationLabel(country: FiTaxCountryRegion, profile: FiTaxProfile): string {
+export function businessRegistrationLabel(country: FiTaxCountryRegion): string {
   if (country === "AU") return "ABN";
   if (country === "IN") return "GSTIN";
   if (country === "NZ") return "GST number";

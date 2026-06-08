@@ -52,13 +52,12 @@ export type NewZealandTaxProfile = {
   gstRatePercent: number;
 };
 
-export type GenericTaxProfile = {};
-
 export type FiTaxProfile =
   | ({ country: "AU" } & AustraliaTaxProfile)
   | ({ country: "IN" } & IndiaTaxProfile)
   | ({ country: "NZ" } & NewZealandTaxProfile)
-  | ({ country: "GB" | "US" | "OTHER" } & GenericTaxProfile);
+  /** GB/US/OTHER: country-specific fields added later; `object` avoids the banned empty-object type. */
+  | ({ country: "GB" | "US" | "OTHER" } & object);
 
 export type FiInvoiceSettings = {
   invoicePrefix: string;
