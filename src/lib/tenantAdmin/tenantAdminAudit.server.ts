@@ -6,7 +6,8 @@ export type FiTenantAdminAuditEventKind =
   | "admin_user.invited"
   | "admin_user.role_changed"
   | "admin_user.suspended"
-  | "admin_user.reactivated";
+  | "admin_user.reactivated"
+  | "admin_user.removed";
 
 export async function insertFiTenantAdminAuditEvent(opts: {
   tenantId: string;

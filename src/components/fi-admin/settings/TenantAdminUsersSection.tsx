@@ -6,11 +6,12 @@ import { useMemo, useState, useTransition, type ChangeEvent } from "react";
 import {
   inviteTenantAdminUserAction,
   reactivateTenantAdminUserAction,
+  revokeTenantAdminUserAccessAction,
   suspendTenantAdminUserAction,
   updateTenantAdminUserRoleAction,
 } from "@/lib/actions/fi-tenant-admin-actions";
 import type { FiTenantAdminUserRow } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
-import { FI_TENANT_ADMIN_ROLES } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import { FI_TENANT_ADMIN_ROLES, FI_TENANT_ADMIN_ROLE_CAPABILITIES } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
 const inputClass =
   "w-full rounded-lg border border-white/[0.1] bg-[#081020]/85 px-2 py-1.5 text-sm text-[#F8FAFC] shadow-inner outline-none transition placeholder:text-[#475569] focus:border-[#22C1FF]/45 focus:ring-2 focus:ring-[#22C1FF]/20";
@@ -78,19 +79,30 @@ export function TenantAdminUsersSection({
 
   return (
     <div className="space-y-4">
+      <details className={sectionClass}>
+        <summary className="cursor-pointer text-sm font-medium text-[#CBD5E1]">Role capabilities</summary>
+        <ul className="mt-3 list-inside list-disc space-y-1.5 text-xs text-[#94A3B8]">
+          {FI_TENANT_ADMIN_ROLES.map((r) => (
+            <li key={r}>
+              <span className="font-medium text-slate-300">{ROLE_LABEL[r] ?? r}:</span> {FI_TENANT_ADMIN_ROLE_CAPABILITIES[r]}
+            </li>
+          ))}
+        </ul>
+      </details>
+
       <div className="flex flex-wrap items-center justify-end gap-3">
         <button
           type="button"
           className="rounded-lg bg-cyan-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-cyan-500"
           onClick={() => setShowInvite((v) => !v)}
         >
-          {showInvite ? "Close invite form" : "Invite admin user"}
+          {showInvite ? "Close invite form" : "Invite user"}
         </button>
       </div>
 
       {showInvite ? (
         <div className={sectionClass}>
-          <h2 className="mb-2 text-base font-semibold text-[#F8FAFC]">Invite admin user</h2>
+          <h2 className="mb-2 text-base font-semibold text-[#F8FAFC]">Invite user</h2>
           <p className="mb-3 text-xs text-[#94A3B8]">
             Sends a Supabase auth invite when needed, or links immediately if the account already exists.
           </p>
@@ -150,7 +162,7 @@ export function TenantAdminUsersSection({
                 className="rounded-lg bg-cyan-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
                 onClick={() => void submitInvite()}
               >
-                {pending ? "Sending…" : "Send invite"}
+                {pending ? "Sending…" : "Send invitation"}
               </button>
             </div>
           </div>
@@ -166,7 +178,7 @@ export function TenantAdminUsersSection({
               <th className="px-3 py-2 font-medium">Role</th>
               <th className="px-3 py-2 font-medium">Status</th>
               <th className="px-3 py-2 font-medium">Last login</th>
-              <th className="px-3 py-2 font-medium">Created at</th>
+              <th className="px-3 py-2 font-medium">Created</th>
               <th className="px-3 py-2 font-medium">Actions</th>
             </tr>
           </thead>
@@ -268,6 +280,30 @@ function TenantAdminUserRow({
               Suspend
             </button>
           )}
+          <button
+            type="button"
+            className="rounded border border-red-800/50 px-2 py-0.5 text-xs text-red-200 hover:bg-red-950/30"
+            disabled={pending}
+            onClick={() => {
+              if (
+                !window.confirm(
+                  "Revoke admin access for this user? Their FI login row stays; only this tenant admin role is removed. Staff records are unchanged.",
+                )
+              ) {
+                return;
+              }
+              startTransition(async () => {
+                const res = await revokeTenantAdminUserAccessAction({ tenantId, adminUserId: row.id });
+                if (!res.ok) {
+                  window.alert(res.error);
+                  return;
+                }
+                router.refresh();
+              });
+            }}
+          >
+            Revoke access
+          </button>
         </div>
       </td>
     </tr>

@@ -250,6 +250,9 @@ export async function suspendTenantAdminUserAction(body: unknown): Promise<FiTen
       .eq("id", parsed.adminUserId.trim())
       .maybeSingle();
     if (le || !row) return { ok: false, error: "Admin user not found." };
+    if (String((row as { fi_user_id: string }).fi_user_id) === actorFiUserId) {
+      return { ok: false, error: "You cannot suspend your own admin access." };
+    }
 
     const { error: up } = await supabase
       .from("fi_tenant_admin_users")
@@ -294,9 +297,27 @@ export async function reactivateTenantAdminUserAction(body: unknown): Promise<Fi
       .maybeSingle();
     if (le || !row) return { ok: false, error: "Admin user not found." };
 
+    const fiUserId = String((row as { fi_user_id: string }).fi_user_id);
+    let nextStatus: "invited" | "active" = "invited";
+    const { data: fu, error: fuErr } = await supabase
+      .from("fi_users")
+      .select("auth_user_id")
+      .eq("tenant_id", tid)
+      .eq("id", fiUserId)
+      .maybeSingle();
+    if (!fuErr && fu) {
+      const authUid = String((fu as { auth_user_id: string | null }).auth_user_id ?? "").trim();
+      if (authUid) {
+        const { data: au, error: auErr } = await supabase.auth.admin.getUserById(authUid);
+        if (!auErr && au?.user && (au.user.email_confirmed_at || au.user.last_sign_in_at)) {
+          nextStatus = "active";
+        }
+      }
+    }
+
     const { error: up } = await supabase
       .from("fi_tenant_admin_users")
-      .update({ status: "active", updated_at: new Date().toISOString() })
+      .update({ status: nextStatus, updated_at: new Date().toISOString() })
       .eq("tenant_id", tid)
       .eq("id", parsed.adminUserId.trim());
     if (up) return { ok: false, error: up.message };
@@ -306,8 +327,59 @@ export async function reactivateTenantAdminUserAction(body: unknown): Promise<Fi
       eventKind: "admin_user.reactivated",
       actorFiUserId,
       subjectAdminUserId: parsed.adminUserId.trim(),
-      subjectFiUserId: String((row as { fi_user_id: string }).fi_user_id),
-      detail: {},
+      subjectFiUserId: fiUserId,
+      detail: { status: nextStatus },
+    });
+
+    revalidatePath(`/fi-admin/${tid}/settings/admin-users`);
+    return { ok: true };
+  } catch (e) {
+    if (e instanceof z.ZodError) return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+/**
+ * Removes the tenant admin access row only. Does not delete `fi_users` or `fi_staff`.
+ */
+export async function revokeTenantAdminUserAccessAction(body: unknown): Promise<FiTenantAdminActionResult> {
+  try {
+    const parsed = idBodySchema.parse(body);
+    const tid = parsed.tenantId.trim();
+    if (!(await getTenantAdminUsersManageAllowed(tid))) {
+      return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
+    }
+    const actorFiUserId = await resolveActorFiUserIdForTenantAdminActions(tid);
+    if (!actorFiUserId) return { ok: false, error: "Could not resolve your clinic user for this action." };
+
+    const supabase = supabaseAdmin();
+    const { data: row, error: le } = await supabase
+      .from("fi_tenant_admin_users")
+      .select("id, fi_user_id, admin_role")
+      .eq("tenant_id", tid)
+      .eq("id", parsed.adminUserId.trim())
+      .maybeSingle();
+    if (le || !row) return { ok: false, error: "Admin user not found." };
+    const fiUserId = String((row as { fi_user_id: string }).fi_user_id);
+    if (fiUserId === actorFiUserId) {
+      return { ok: false, error: "You cannot revoke your own admin access from this screen." };
+    }
+    const adminUserId = parsed.adminUserId.trim();
+    const prevRole = String((row as { admin_role: string }).admin_role);
+
+    const { data: fu } = await supabase.from("fi_users").select("email").eq("tenant_id", tid).eq("id", fiUserId).maybeSingle();
+    const email = fu && typeof (fu as { email: unknown }).email === "string" ? (fu as { email: string }).email : null;
+
+    const { error: delErr } = await supabase.from("fi_tenant_admin_users").delete().eq("tenant_id", tid).eq("id", adminUserId);
+    if (delErr) return { ok: false, error: delErr.message };
+
+    await insertFiTenantAdminAuditEvent({
+      tenantId: tid,
+      eventKind: "admin_user.removed",
+      actorFiUserId,
+      subjectAdminUserId: null,
+      subjectFiUserId: fiUserId,
+      detail: { removed_admin_user_id: adminUserId, role: prevRole, email },
     });
 
     revalidatePath(`/fi-admin/${tid}/settings/admin-users`);

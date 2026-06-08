@@ -46,7 +46,14 @@ export async function pushStaffSyncToFi(input: PushStaffSyncToFiInput): Promise<
     body.confirm = true;
   }
 
-  const { httpStatus, json } = await executeFiStaffSyncPost({ url, secret, body });
+  const { httpStatus, json } = await executeFiStaffSyncPost({
+    url,
+    secret,
+    body,
+    extraHeaders: input.syncTrigger?.trim()
+      ? { "x-fi-staff-sync-source": input.syncTrigger.trim() }
+      : undefined,
+  });
   const runId = json.runId != null ? String(json.runId) : null;
   const ok = Boolean(json.ok);
 

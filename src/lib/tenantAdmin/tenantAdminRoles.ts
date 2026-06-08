@@ -13,6 +13,15 @@ export const FI_TENANT_ADMIN_ROLES = [
 
 export type FiTenantAdminRole = (typeof FI_TENANT_ADMIN_ROLES)[number];
 
+/** Short capability blurbs for Admin Users UI (non-clinical platform access). */
+export const FI_TENANT_ADMIN_ROLE_CAPABILITIES: Record<FiTenantAdminRole, string> = {
+  clinic_admin: "Full clinic settings, user management, reporting, dashboards.",
+  finance_admin: "Revenue, invoices, payments, finance reporting.",
+  operations_admin: "Tasks, workflow, reminders, scheduling operations.",
+  dashboard_viewer: "Read-only analytics.",
+  data_safety_admin: "Audit logs, security review, compliance monitoring.",
+};
+
 export const FI_TENANT_ADMIN_USER_STATUSES = ["invited", "active", "suspended"] as const;
 export type FiTenantAdminUserStatus = (typeof FI_TENANT_ADMIN_USER_STATUSES)[number];
 

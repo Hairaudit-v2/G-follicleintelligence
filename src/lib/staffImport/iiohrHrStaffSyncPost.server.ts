@@ -24,6 +24,7 @@ export async function postIiohrHrStaffSyncHttp(request: Request, tenantId: strin
       secretHeader: request.headers.get("x-iiohr-sync-secret"),
       configuredSecret: process.env.IIOHR_HR_SYNC_SECRET,
       body: rawBody,
+      syncSource: request.headers.get("x-fi-staff-sync-source"),
     },
     {
       assertTenantExists,

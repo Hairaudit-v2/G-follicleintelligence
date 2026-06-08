@@ -9,6 +9,8 @@ export type PushStaffSyncToFiInput = {
   rows: IiohrHrStaffSyncRow[];
   mode: "preview" | "commit";
   confirm?: boolean;
+  /** Forwarded as `x-fi-staff-sync-source` for FI audit metadata (e.g. `cron`). */
+  syncTrigger?: string | null;
 };
 
 /** Parsed FI API JSON (POST …/staff-sync). Safe to use from client components (no secrets). */
@@ -26,6 +28,8 @@ export type ExecuteFiStaffSyncPostInput = {
   body: Record<string, unknown>;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
+  /** Extra request headers (e.g. internal sync source). */
+  extraHeaders?: Record<string, string>;
 };
 
 export type ExecuteFiStaffSyncPostResult = {
@@ -40,6 +44,14 @@ export async function executeFiStaffSyncPost(input: ExecuteFiStaffSyncPostInput)
   const secret = input.secret;
   const timeoutMs = input.timeoutMs ?? 25_000;
   const fetchFn = input.fetchImpl ?? fetch;
+  const extra = input.extraHeaders ?? {};
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    "x-iiohr-sync-secret": secret,
+  };
+  for (const [k, v] of Object.entries(extra)) {
+    if (v) headers[k.toLowerCase()] = v;
+  }
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -47,10 +59,7 @@ export async function executeFiStaffSyncPost(input: ExecuteFiStaffSyncPostInput)
   try {
     res = await fetchFn(input.url, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-iiohr-sync-secret": secret,
-      },
+      headers,
       body: JSON.stringify(input.body),
       signal: ctrl.signal,
       cache: "no-store",

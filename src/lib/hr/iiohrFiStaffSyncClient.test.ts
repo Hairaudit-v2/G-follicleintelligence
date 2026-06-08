@@ -45,6 +45,23 @@ test("executeFiStaffSyncPost: commit body includes confirm true", async () => {
   assert.equal(parsed.confirm, true);
 });
 
+test("executeFiStaffSyncPost forwards extraHeaders", async () => {
+  let seenHeaders: HeadersInit | undefined;
+  const fetchImpl: typeof fetch = async (_url, init) => {
+    seenHeaders = init?.headers;
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  };
+  await executeFiStaffSyncPost({
+    url: "https://fi.example/api",
+    secret: "sec",
+    body: { rows: [] },
+    extraHeaders: { "x-fi-staff-sync-source": "cron" },
+    fetchImpl,
+  });
+  const h = new Headers(seenHeaders as Headers);
+  assert.equal(h.get("x-fi-staff-sync-source"), "cron");
+});
+
 test("pushStaffSyncToFi: missing FI_BASE_URL fails clearly", async () => {
   const prevBase = process.env.FI_BASE_URL;
   const prevSecret = process.env.IIOHR_HR_SYNC_SECRET;

@@ -394,6 +394,66 @@ export function StaffImportClient({
         </InfoNotice>
       </header>
 
+      <DashboardCard className="p-4 sm:p-5">
+        <h2 className="text-sm font-semibold text-[#F8FAFC]">Automation status</h2>
+        <p className="mt-1 text-xs text-[#64748B]">
+          Scheduled job: <span className="font-mono text-[#94A3B8]">POST {pageModel.automation.cronPath}</span> with{" "}
+          <span className="font-mono text-[#94A3B8]">Authorization: Bearer CRON_SECRET</span>. See{" "}
+          <span className="font-mono text-[#94A3B8]">docs/iiohr-hr-perth-staff-sync-cron.md</span>.
+        </p>
+        <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+          {(
+            [
+              ["Cron secret (16+ chars)", pageModel.automation.cronSecretConfigured && pageModel.automation.cronSecretLengthOk],
+              ["Evolved Perth tenant env matches this page", pageModel.automation.evolvedPerthTenantMatchesPageTenant],
+              ["Outbound push env (FI + feed)", pageModel.automation.allOutboundEnvConfigured],
+              ["Full cron stack ready", pageModel.automation.allCronEnvConfigured],
+            ] as const
+          ).map(([label, ok]) => (
+            <div key={label} className="flex items-center justify-between gap-2 rounded border border-white/[0.06] bg-[#0a1020]/40 px-2 py-1.5">
+              <dt className="text-[#94A3B8]">{label}</dt>
+              <dd>
+                <span className={chipClass(ok ? "ok" : "warn")}>{ok ? "Yes" : "No"}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-3 space-y-1 text-xs text-[#94A3B8]">
+          <p>
+            <span className="text-[#64748B]">Last producer API sync</span>{" "}
+            {pageModel.automation.lastProducerApiRun ? (
+              <span className="font-mono text-[#CBD5E1]">
+                {formatStaffSyncRunTime(pageModel.automation.lastProducerApiRun.started_at)} ·{" "}
+                {pageModel.automation.lastProducerApiRun.status}
+              </span>
+            ) : (
+              <span className="text-[#64748B]">—</span>
+            )}
+          </p>
+          <p>
+            <span className="text-[#64748B]">Last scheduled (cron) sync</span>{" "}
+            {pageModel.automation.lastCronRun ? (
+              <span className="font-mono text-[#CBD5E1]">
+                {formatStaffSyncRunTime(pageModel.automation.lastCronRun.started_at)} · {pageModel.automation.lastCronRun.status}
+              </span>
+            ) : (
+              <span className="text-[#64748B]">—</span>
+            )}
+          </p>
+          {pageModel.automation.lastSuccessfulRunAt ? (
+            <p>
+              <span className="text-[#64748B]">Last successful sync</span>{" "}
+              <span className="font-mono text-[#CBD5E1]">{formatStaffSyncRunTime(pageModel.automation.lastSuccessfulRunAt)}</span>
+            </p>
+          ) : null}
+        </div>
+        {pageModel.automation.staleSyncWarning ? (
+          <InfoNotice variant="warning" title="Sync freshness" className="mt-3">
+            {pageModel.automation.staleSyncWarning}
+          </InfoNotice>
+        ) : null}
+      </DashboardCard>
+
       {error ? (
         <div className="rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100" role="alert">
           {error}

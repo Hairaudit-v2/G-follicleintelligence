@@ -256,3 +256,22 @@ test("sync throw finishes run as failed", async () => {
   assert.equal(finishes.length, 1);
   assert.equal(finishes[0]!.status, "failed");
 });
+
+test("syncSource is stored on fi_staff_sync_runs metadata as trigger", async () => {
+  const { deps, createCalls } = trackedDeps();
+  const r = await processIiohrHrStaffSyncPost(
+    {
+      tenantId: TENANT,
+      secretHeader: SECRET,
+      configuredSecret: SECRET,
+      body: { mode: "preview", rows: oneRow() },
+      syncSource: "cron",
+    },
+    deps
+  );
+  assert.equal(r.httpStatus, 200);
+  assert.equal(createCalls.length, 1);
+  const meta = (createCalls[0] as { metadata?: Record<string, unknown> }).metadata;
+  assert.equal(meta?.trigger, "cron");
+  assert.equal(meta?.channel, "api");
+});

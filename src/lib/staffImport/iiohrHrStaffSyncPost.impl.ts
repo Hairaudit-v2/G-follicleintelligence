@@ -94,6 +94,11 @@ export type ProcessIiohrHrStaffSyncPostInput = {
   secretHeader: string | null;
   configuredSecret: string | undefined;
   body: unknown;
+  /**
+   * When set (e.g. from internal `x-fi-staff-sync-source` header), stored on
+   * `fi_staff_sync_runs.metadata.trigger` to distinguish scheduled FI cron from external producers.
+   */
+  syncSource?: string | null;
 };
 
 /**
@@ -157,11 +162,16 @@ export async function processIiohrHrStaffSyncPost(
   }
   const payload: IiohrHrStaffSyncPayload = { rows: rowParse.rows };
 
+  const trigger = input.syncSource?.trim();
   const run = await services.createRun({
     tenantId,
     mode: effectiveMode,
     receivedRows: payload.rows.length,
-    metadata: { channel: "api", path: "iiohr-hr/staff-sync" },
+    metadata: {
+      channel: "api",
+      path: "iiohr-hr/staff-sync",
+      ...(trigger ? { trigger } : {}),
+    },
   });
   if (!run) {
     return { httpStatus: 500, body: { ok: false, error: "Could not record sync run." } };
