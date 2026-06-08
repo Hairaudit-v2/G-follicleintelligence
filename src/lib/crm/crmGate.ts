@@ -4,6 +4,9 @@ import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
+import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
+import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import {
   CRM_MUTATION_ROLES_LOWER,
   isCrmStaffManageRole,
@@ -94,6 +97,52 @@ async function loadFiUserForTenant(tenantId: string, authUserId: string): Promis
   return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
 }
 
+/** `fi_platform_admin` without an active impersonation cookie — full tenant API access (server-enforced). */
+export async function isFiOsPlatformAdminFullSessionBypass(sessionAuthUserId: string): Promise<boolean> {
+  const id = sessionAuthUserId.trim();
+  if (!id) return false;
+  const os = await loadFiOsIdentity(id);
+  if (!os || !isFiOsPlatformAdminRole(os.osRole)) return false;
+  return !(await getFiOsImpersonationTargetAuthUserId(id));
+}
+
+/**
+ * Platform administrators may lack a `fi_users` row; resolve a stable tenant `fi_users.id` for FKs
+ * (prefer the signed-in user's row, else a tenant admin, else any member).
+ */
+export async function loadProxyFiUserRowForPlatformAdminTenant(
+  tenantId: string,
+  sessionAuthUserId: string
+): Promise<{ id: string; role: string } | null> {
+  const tid = tenantId.trim();
+  const sid = sessionAuthUserId.trim();
+  if (!tid || !sid) return null;
+  const own = await loadFiUserForTenant(tid, sid);
+  if (own) return own;
+  const supabase = supabaseAdmin();
+  const { data: admins, error: e1 } = await supabase
+    .from("fi_users")
+    .select("id, role")
+    .eq("tenant_id", tid)
+    .in("role", ["fi_admin", "admin"])
+    .limit(1);
+  if (!e1 && admins?.[0]) {
+    const r = admins[0] as { id: string; role: string | null };
+    return { id: String(r.id), role: String(r.role ?? "fi_admin") };
+  }
+  const { data: anyRow, error: e2 } = await supabase.from("fi_users").select("id, role").eq("tenant_id", tid).limit(1);
+  if (!e2 && anyRow?.[0]) {
+    const r = anyRow[0] as { id: string; role: string | null };
+    return { id: String(r.id), role: String(r.role ?? "member") };
+  }
+  return null;
+}
+
+async function resolveTenantMembershipAuthUserId(sessionAuthUserId: string): Promise<string> {
+  const imp = await getFiOsImpersonationTargetAuthUserId(sessionAuthUserId);
+  return imp ?? sessionAuthUserId;
+}
+
 /**
  * Reads: valid `FI_ADMIN_API_KEY` **or** signed-in user with `fi_users` row for the tenant (any role).
  */
@@ -115,7 +164,13 @@ export async function assertCrmTenantReadAllowed(opts: {
     throw new CrmAccessError(401, "Authentication required.");
   }
 
-  const row = await loadFiUserForTenant(tenantId, authUserId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
+    await assertTenantRowExists(tenantId);
+    return;
+  }
+
+  const principal = await resolveTenantMembershipAuthUserId(authUserId);
+  const row = await loadFiUserForTenant(tenantId, principal);
   if (!row) {
     throw new CrmAccessError(403, "Not a member of this tenant.");
   }
@@ -142,7 +197,13 @@ export async function assertCrmTenantWriteAllowed(opts: {
     throw new CrmAccessError(401, "Authentication required.");
   }
 
-  const row = await loadFiUserForTenant(tenantId, authUserId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
+    await assertTenantRowExists(tenantId);
+    return;
+  }
+
+  const principal = await resolveTenantMembershipAuthUserId(authUserId);
+  const row = await loadFiUserForTenant(tenantId, principal);
   if (!row) {
     throw new CrmAccessError(403, "Not a member of this tenant.");
   }
@@ -158,9 +219,14 @@ export async function assertCrmTenantWriteAllowed(opts: {
  * Returns null when unauthenticated or the user has no row in this tenant.
  */
 export async function tryResolveFiUserIdForTenant(tenantId: string, request?: Request | null): Promise<string | null> {
-  const authUserId = await resolveAuthUserId(request ?? null);
-  if (!authUserId) return null;
-  const row = await loadFiUserForTenant(tenantId, authUserId);
+  const sessionAuthUserId = await resolveAuthUserId(request ?? null);
+  if (!sessionAuthUserId) return null;
+  const os = await loadFiOsIdentity(sessionAuthUserId);
+  if (os && isFiOsPlatformAdminRole(os.osRole)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tenantId, sessionAuthUserId);
+    return proxy?.id ?? null;
+  }
+  const row = await loadFiUserForTenant(tenantId, sessionAuthUserId);
   return row?.id ?? null;
 }
 
@@ -186,7 +252,13 @@ export async function assertCrmTenantStaffManageAllowed(opts: {
     throw new CrmAccessError(401, "Authentication required.");
   }
 
-  const row = await loadFiUserForTenant(tenantId, authUserId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
+    await assertTenantRowExists(tenantId);
+    return;
+  }
+
+  const principal = await resolveTenantMembershipAuthUserId(authUserId);
+  const row = await loadFiUserForTenant(tenantId, principal);
   if (!row) {
     throw new CrmAccessError(403, "Not a member of this tenant.");
   }

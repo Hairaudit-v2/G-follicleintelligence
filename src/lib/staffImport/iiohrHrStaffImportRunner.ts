@@ -240,7 +240,7 @@ export async function assertIiohrHrStaffImportAllowed(opts: {
     .maybeSingle();
   if (osErr) throw new Error("Could not verify OS identity.");
   const raw = (osRow as { os_role: string | null } | null)?.os_role;
-  if (normalizeFiOsRole(raw) === "fi_admin") {
+  if (normalizeFiOsRole(raw) === "fi_admin" || normalizeFiOsRole(raw) === "fi_platform_admin") {
     return;
   }
 
@@ -608,6 +608,11 @@ export type RunIiohrHrStaffImportParams = {
    * (e.g. `assertCrmTenantWriteAllowed` in HR staff import actions).
    */
   skipImportAuthCheck?: boolean;
+  /**
+   * Optional hook after Perth clinic metadata is attached (Stage 1 HR sync: stamp `last_synced_at`, etc.).
+   * Mutations should edit `plan.perRow[*].actions` in place; `plan.actions` is rebuilt immediately after.
+   */
+  mutatePlanAfterAttachPerth?: (plan: IiohrHrStaffImportPlanResult) => void;
 };
 
 /**
@@ -684,6 +689,11 @@ export async function runIiohrHrStaffImport(params: RunIiohrHrStaffImportParams)
   if (rows.length > 0) {
     const { clinicId } = await resolveEvolvedHrPerthClinicForTenant(tenantId);
     attachEvolvedPerthClinicMetadataToPlan(plan, clinicId);
+  }
+
+  params.mutatePlanAfterAttachPerth?.(plan);
+  if (rows.length > 0) {
+    plan.actions = plan.perRow.flatMap((p) => p.actions);
   }
 
   const skippedRowCount = plan.perRow.filter((p) => p.skippedDuplicate || p.skippedValidation).length;

@@ -5,7 +5,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmStaffManageRole } from "@/src/lib/crm/crmGatePolicy";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
-import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
+import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadStaffMemberForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
@@ -60,7 +60,7 @@ async function canViewStaffTwin(opts: {
   authUserId: string;
 }): Promise<boolean> {
   const os = await loadFiOsIdentity(opts.authUserId);
-  if (normalizeFiOsRole(os?.osRole) === "fi_admin") {
+  if (isFiOsElevatedOsOperatorRole(os?.osRole)) {
     return true;
   }
 

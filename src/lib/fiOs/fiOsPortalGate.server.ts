@@ -95,7 +95,7 @@ export async function assertHairAuditOsAdminAccess(): Promise<void> {
 
   const os = await loadFiOsIdentity(authId);
   const r = String(os?.osRole ?? "").trim().toLowerCase();
-  if (r !== "fi_auditor" && r !== "fi_admin") {
+  if (r !== "fi_auditor" && r !== "fi_admin" && r !== "fi_platform_admin") {
     redirect("/follicle-intelligence/login?notice=no_audit_access");
   }
 }

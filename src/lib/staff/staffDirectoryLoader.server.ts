@@ -5,7 +5,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmStaffManageRole } from "@/src/lib/crm/crmGatePolicy";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
-import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
+import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
 
 export type StaffDirectoryPageResult = {
@@ -54,7 +54,7 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     if (row && isCrmStaffManageRole(row.role)) canManageStaff = true;
     if (!canManageStaff) {
       const os = await loadFiOsIdentity(authId);
-      if (normalizeFiOsRole(os?.osRole) === "fi_admin") canManageStaff = true;
+      if (isFiOsElevatedOsOperatorRole(os?.osRole)) canManageStaff = true;
     }
     if (row) {
       const mine = staffRes.find((s) => (s.fi_user_id?.trim() ?? "") === row.id);

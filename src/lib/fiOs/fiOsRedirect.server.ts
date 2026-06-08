@@ -17,7 +17,7 @@ export async function resolveFiOsPostLoginRedirect(authUserId: string): Promise<
     return "/hair-audit/admin";
   }
 
-  if (r === "fi_admin") {
+  if (r === "fi_admin" || r === "fi_platform_admin") {
     return "/fi-admin";
   }
 

@@ -3,7 +3,12 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { resolveAuthUserId } from "./crmGate";
+import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
+import {
+  isFiOsPlatformAdminFullSessionBypass,
+  loadProxyFiUserRowForPlatformAdminTenant,
+  resolveAuthUserId,
+} from "./crmGate";
 import { isCrmShellNavRole } from "./crmGatePolicy";
 
 export type CrmShellSession = {
@@ -53,6 +58,11 @@ async function resolveBookingsOperatorEligibleFiUserRow(
   return null;
 }
 
+async function resolveShellNavAuthUserId(sessionAuthUserId: string): Promise<string> {
+  const t = await getFiOsImpersonationTargetAuthUserId(sessionAuthUserId);
+  return t ?? sessionAuthUserId;
+}
+
 /**
  * Whether to show the CRM nav link for this tenant (signed-in + fi_users role).
  */
@@ -61,7 +71,9 @@ export async function getCrmShellNavAllowed(tenantId: string): Promise<boolean> 
   if (!tid) return false;
   const authId = await resolveAuthUserId(null);
   if (!authId) return false;
-  const row = await loadFiUserRow(tid, authId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) return true;
+  const navAuth = await resolveShellNavAuthUserId(authId);
+  const row = await loadFiUserRow(tid, navAuth);
   if (!row) return false;
   return isCrmShellNavRole(row.role);
 }
@@ -79,7 +91,16 @@ export const getCrmShellPageSession = cache(async (tenantId: string): Promise<Cr
     redirect("/fi-admin");
   }
 
-  const row = await loadFiUserRow(tid, authId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authId);
+    if (!proxy) {
+      redirect(`/fi-admin/${tid}/cases`);
+    }
+    return { authUserId: authId, fiUserId: proxy.id, role: "fi_admin" };
+  }
+
+  const navAuth = await resolveShellNavAuthUserId(authId);
+  const row = await loadFiUserRow(tid, navAuth);
   if (!row || !isCrmShellNavRole(row.role)) {
     redirect(`/fi-admin/${tid}/cases`);
   }
@@ -100,7 +121,13 @@ export async function getCrmShellSessionIfAllowed(tenantId: string): Promise<Crm
   if (!tid) return null;
   const authId = await resolveAuthUserId(null);
   if (!authId) return null;
-  const row = await loadFiUserRow(tid, authId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authId);
+    if (!proxy) return null;
+    return { authUserId: authId, fiUserId: proxy.id, role: "fi_admin" };
+  }
+  const navAuth = await resolveShellNavAuthUserId(authId);
+  const row = await loadFiUserRow(tid, navAuth);
   if (!row || !isCrmShellNavRole(row.role)) return null;
   return { authUserId: authId, fiUserId: row.id, role: row.role };
 }
@@ -118,7 +145,9 @@ export async function getBookingsBoardNavAllowed(tenantId: string): Promise<bool
   if (!tid) return false;
   const authId = await resolveAuthUserId(null);
   if (!authId) return false;
-  return (await resolveBookingsOperatorEligibleFiUserRow(tid, authId)) !== null;
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) return true;
+  const navAuth = await resolveShellNavAuthUserId(authId);
+  return (await resolveBookingsOperatorEligibleFiUserRow(tid, navAuth)) !== null;
 }
 
 export const getBookingsOperatorPageSession = cache(async (tenantId: string): Promise<CrmShellSession> => {
@@ -128,7 +157,14 @@ export const getBookingsOperatorPageSession = cache(async (tenantId: string): Pr
   const authId = await resolveAuthUserId(null);
   if (!authId) redirect("/fi-admin");
 
-  const row = await resolveBookingsOperatorEligibleFiUserRow(tid, authId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authId);
+    if (!proxy) redirect(`/fi-admin/${tid}/cases`);
+    return { authUserId: authId, fiUserId: proxy.id, role: "fi_admin" };
+  }
+
+  const navAuth = await resolveShellNavAuthUserId(authId);
+  const row = await resolveBookingsOperatorEligibleFiUserRow(tid, navAuth);
   if (!row) redirect(`/fi-admin/${tid}/cases`);
 
   return { authUserId: authId, fiUserId: row.id, role: row.role };
@@ -143,7 +179,13 @@ export async function getBookingsOperatorSessionIfAllowed(tenantId: string): Pro
   if (!tid) return null;
   const authId = await resolveAuthUserId(null);
   if (!authId) return null;
-  const row = await resolveBookingsOperatorEligibleFiUserRow(tid, authId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authId);
+    if (!proxy) return null;
+    return { authUserId: authId, fiUserId: proxy.id, role: "fi_admin" };
+  }
+  const navAuth = await resolveShellNavAuthUserId(authId);
+  const row = await resolveBookingsOperatorEligibleFiUserRow(tid, navAuth);
   if (!row) return null;
   return { authUserId: authId, fiUserId: row.id, role: row.role };
 }
@@ -156,7 +198,13 @@ export async function getFiTenantMemberSessionIfAllowed(tenantId: string): Promi
   if (!tid) return null;
   const authId = await resolveAuthUserId(null);
   if (!authId) return null;
-  const row = await loadFiUserRow(tid, authId);
+  if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+    const proxy = await loadProxyFiUserRowForPlatformAdminTenant(tid, authId);
+    if (!proxy) return null;
+    return { authUserId: authId, fiUserId: proxy.id, role: proxy.role };
+  }
+  const navAuth = await resolveShellNavAuthUserId(authId);
+  const row = await loadFiUserRow(tid, navAuth);
   if (!row) return null;
   return { authUserId: authId, fiUserId: row.id, role: row.role };
 }

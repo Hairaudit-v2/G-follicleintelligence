@@ -6,9 +6,11 @@ import { Download, Upload } from "lucide-react";
 
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { commitHrStaffImportAction, previewHrStaffImportAction } from "@/src/lib/actions/fi-hr-staff-import-actions";
+import { syncIiohrHrStaffPayloadAction } from "@/src/lib/actions/fi-hr-staff-sync-actions";
 import type { HrStaffImportPageModel } from "@/src/lib/staff/staffHrImportPage.server";
 import type { IiohrHrStaffImportRowPlan } from "@/src/lib/staffImport/iiohrHrStaffImportTypes";
 import type { IiohrHrStaffImportRunResult } from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
+import type { IiohrHrStaffSyncPayload, IiohrHrStaffSyncSummary } from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
 
 /** Sample CSV for Evolved Perth HR import (client download only). */
 const HR_STAFF_IMPORT_SAMPLE_CSV =
@@ -184,6 +186,21 @@ export function StaffImportClient({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  const [syncRawInput, setSyncRawInput] = useState(
+    '[\n  {\n    "external_staff_id": "HR-SYNC-001",\n    "full_name": "Sync Example",\n    "email": "sync@clinic.example",\n    "staff_role": "nurse",\n    "employment_status": "active",\n    "source_url": "https://hr.example/staff/HR-SYNC-001",\n    "metadata_snapshot": { "training": [{ "id": "t1", "label": "CPR", "status": "current" }] }\n  }\n]\n'
+  );
+  const [syncSummary, setSyncSummary] = useState<IiohrHrStaffSyncSummary | null>(null);
+  const [syncLockedPayload, setSyncLockedPayload] = useState<IiohrHrStaffSyncPayload | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [syncPending, startSyncTransition] = useTransition();
+
+  const syncCounts = useMemo(() => {
+    if (!syncSummary) return null;
+    return syncSummary.result.commit && syncSummary.result.appliedCounts
+      ? syncSummary.result.appliedCounts
+      : syncSummary.result.dryRunCounts;
+  }, [syncSummary]);
+
   const groupedRows = useMemo(() => {
     if (!preview?.ok || !preview.plan.perRow.length) return null;
     const m = {
@@ -248,6 +265,57 @@ export function StaffImportClient({
       setPreview(r.result);
       if (r.result.ok && r.result.commit) {
         setLockedRows(null);
+      }
+    });
+  };
+
+  const onSyncPreview = () => {
+    setSyncError(null);
+    const { rows, error: parseErr } = parseInputToRows(syncRawInput);
+    if (parseErr) {
+      setSyncError(parseErr);
+      setSyncSummary(null);
+      setSyncLockedPayload(null);
+      return;
+    }
+    startSyncTransition(async () => {
+      const r = await syncIiohrHrStaffPayloadAction({ tenantId, mode: "preview", rows });
+      if (!r.ok) {
+        setSyncError(r.error);
+        setSyncSummary(null);
+        setSyncLockedPayload(null);
+        return;
+      }
+      setSyncSummary(r.summary);
+      if ("validatedPayload" in r) {
+        setSyncLockedPayload(r.validatedPayload);
+      }
+    });
+  };
+
+  const onSyncCommit = () => {
+    setSyncError(null);
+    if (!syncLockedPayload) {
+      setSyncError("Run Preview sync payload first.");
+      return;
+    }
+    startSyncTransition(async () => {
+      const r = await syncIiohrHrStaffPayloadAction({
+        tenantId,
+        mode: "commit",
+        confirm: true,
+        rows: syncLockedPayload.rows,
+      });
+      if (!r.ok) {
+        setSyncError(r.error);
+        return;
+      }
+      if ("validatedPayload" in r) {
+        return;
+      }
+      setSyncSummary(r.summary);
+      if (r.summary.result.ok && r.summary.result.commit) {
+        setSyncLockedPayload(null);
       }
     });
   };
@@ -351,6 +419,112 @@ export function StaffImportClient({
         <p className="mt-3 text-xs text-[#64748B]">
           Commit uses the exact row set returned from your last successful preview. Edit the text area after preview to discard the lock and preview again.
         </p>
+      </DashboardCard>
+
+      <DashboardCard className="p-5 sm:p-6">
+        <h2 className="text-lg font-semibold text-[#F8FAFC]">IIOHR HR Sync</h2>
+        <div className="mt-3 space-y-2 text-sm leading-relaxed text-[#94A3B8]">
+          <p>
+            <strong className="text-[#E2E8F0]">IIOHR HR</strong> remains the HR system of record. Follicle Intelligence keeps only{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">fi_staff</span> (operational scheduling),{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">fi_users</span> (tenant membership), and the identity bridge{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">fi_staff_source_ids</span> with{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">source_system = iiohr_hr</span> and{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">source_staff_id</span> = your stable{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">external_staff_id</span>.
+          </p>
+          <p>
+            HR documents, contracts, letters, and full training history stay in IIOHR. Optional{" "}
+            <span className="font-mono text-xs text-[#CBD5E1]">metadata_snapshot</span> is merged only into that source-id row as a{" "}
+            <strong className="text-[#E2E8F0]">bounded</strong> JSON snapshot (plus <span className="font-mono text-xs">last_synced_at</span> on each sync).
+          </p>
+        </div>
+
+        {syncError ? (
+          <div className="mt-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100" role="alert">
+            {syncError}
+          </div>
+        ) : null}
+
+        <textarea
+          className="mt-4 h-40 w-full rounded-lg border border-white/10 bg-[#0a1020] p-3 font-mono text-xs text-[#E2E8F0] outline-none ring-[#22C1FF]/40 focus:ring-2 sm:h-48"
+          value={syncRawInput}
+          onChange={(e) => {
+            setSyncRawInput(e.target.value);
+            setSyncSummary(null);
+            setSyncLockedPayload(null);
+          }}
+          spellCheck={false}
+          aria-label="IIOHR HR sync payload"
+        />
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            type="button"
+            disabled={syncPending}
+            onClick={onSyncPreview}
+            className="rounded-xl border border-sky-500/40 bg-sky-500/15 px-4 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-500/25 disabled:opacity-50"
+          >
+            {syncPending ? "Working…" : "Preview sync payload"}
+          </button>
+          <button
+            type="button"
+            disabled={syncPending || syncLockedPayload === null}
+            onClick={onSyncCommit}
+            className="rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/25 disabled:opacity-40"
+            title={!syncSummary ? "Preview sync first" : undefined}
+          >
+            Commit sync payload
+          </button>
+        </div>
+        <p className="mt-3 text-xs text-[#64748B]">
+          Commit applies the same row objects from your last successful sync preview. Uses the same planner as staff import, then stamps sync metadata on{" "}
+          <span className="font-mono text-[#94A3B8]">fi_staff_source_ids</span> only.
+        </p>
+
+        {syncSummary && syncCounts ? (
+          <div className="mt-6 space-y-3 rounded-lg border border-white/[0.06] bg-[#0a1020]/50 p-4">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-[#CBD5E1]">
+              <span className={chipClass(syncSummary.result.commit ? "ok" : "info")}>
+                {syncSummary.result.commit ? "Committed" : "Sync preview"}
+              </span>
+              <span className="text-xs text-[#64748B]">
+                last_synced_at stamp: <span className="font-mono text-[#94A3B8]">{syncSummary.lastSyncedAt}</span>
+              </span>
+            </div>
+            {!syncSummary.result.ok && syncSummary.result.error ? (
+              <p className="text-sm text-rose-200">{syncSummary.result.error}</p>
+            ) : null}
+            <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+              {(
+                [
+                  ["New fi_users", syncCounts.createdUsers],
+                  ["Updated fi_users", syncCounts.updatedUsers],
+                  ["New fi_staff", syncCounts.createdStaff],
+                  ["Updated fi_staff", syncCounts.updatedStaff],
+                  ["Staff ↔ user links", syncCounts.linkedStaff],
+                  ["Deactivated staff", syncCounts.deactivatedStaff],
+                  ["New source ids", syncCounts.createdSourceIds],
+                  ["Updated source ids", syncCounts.updatedSourceIds],
+                ] as const
+              ).map(([k, v]) => (
+                <div key={k} className="rounded border border-white/[0.05] bg-[#0a1020]/40 px-2 py-1.5">
+                  <dt className="text-[10px] font-medium uppercase tracking-wide text-[#64748B]">{k}</dt>
+                  <dd className="font-mono text-sm text-[#F8FAFC]">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            {syncSummary.result.warnings.length > 0 ? (
+              <div>
+                <p className="text-xs font-semibold text-amber-200">Warnings</p>
+                <ul className="mt-1 list-inside list-disc text-xs text-[#94A3B8]">
+                  {syncSummary.result.warnings.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </DashboardCard>
 
       {preview && preview.ok ? (

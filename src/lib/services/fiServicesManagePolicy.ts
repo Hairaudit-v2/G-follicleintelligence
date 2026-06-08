@@ -24,7 +24,7 @@ export function evaluateFiServicesCatalogManageAllowed(snapshot: FiServicesCatal
 
   const os = normalizeFiOsRole(snapshot.osRole);
   if (os === "fi_auditor") return false;
-  if (os === "fi_admin") return true;
+  if (os === "fi_admin" || os === "fi_platform_admin") return true;
 
   return isCrmStaffManageRole(snapshot.tenantUserRole);
 }

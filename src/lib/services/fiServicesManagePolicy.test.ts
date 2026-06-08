@@ -15,6 +15,10 @@ test("FI_ADMIN_API_KEY path allows manage", () => {
   assert.equal(snap({ adminKeyValid: true, osRole: null, tenantUserRole: null }), true);
 });
 
+test("platform OS fi_platform_admin may manage without tenant row", () => {
+  assert.equal(snap({ osRole: "fi_platform_admin", tenantUserRole: null }), true);
+});
+
 test("platform OS fi_admin may manage without tenant row", () => {
   assert.equal(snap({ osRole: "FI_ADMIN", tenantUserRole: null }), true);
 });
