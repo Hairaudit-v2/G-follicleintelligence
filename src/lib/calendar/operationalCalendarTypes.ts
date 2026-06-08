@@ -49,6 +49,11 @@ export type OperationalCalendarPageData = {
   gridConfig: BusinessGridConfig;
   listTruncated: boolean;
   canMutateBookings: boolean;
+  /**
+   * When {@link canMutateBookings} is false, human-readable reason (sign-in, membership, or role).
+   * Shown next to the calendar “Read-only” badge so operators know what to fix.
+   */
+  bookingMutationBlockedReason: string | null;
   /** Serialized map for edit drawer + calendar hints. */
   reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
   /** Tenant procedure catalog — durations, prices, colours for booking UI. */

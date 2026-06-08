@@ -40,7 +40,7 @@ export async function loadCaseTimelineExtraSources(
       .limit(TIMELINE_EVENTS_LIMIT),
     supabase
       .from("fi_crm_activity_events")
-      .select("id, lead_id, activity_kind, title, occurred_at, detail")
+      .select("id, lead_id, patient_id, activity_kind, title, occurred_at, detail")
       .eq("tenant_id", tid)
       .eq("case_id", cid)
       .order("occurred_at", { ascending: false })
@@ -71,7 +71,8 @@ export async function loadCaseTimelineExtraSources(
     const x = r as Record<string, unknown>;
     return {
       id: String(x.id),
-      lead_id: String(x.lead_id ?? ""),
+      lead_id: x.lead_id != null ? String(x.lead_id) : null,
+      patient_id: x.patient_id != null ? String(x.patient_id) : null,
       activity_kind: String(x.activity_kind ?? ""),
       title: x.title != null ? String(x.title) : null,
       occurred_at: String(x.occurred_at ?? ""),

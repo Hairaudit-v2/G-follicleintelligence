@@ -42,7 +42,8 @@ export type CaseTimelineFoundationEventRow = {
 
 export type CaseTimelineCrmActivityRow = {
   id: string;
-  lead_id: string;
+  lead_id: string | null;
+  patient_id: string | null;
   activity_kind: string;
   title: string | null;
   occurred_at: string;

@@ -72,6 +72,8 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/configuration`, base), "configuration");
   assert.equal(getClinicOsShellActiveNavId(`${base}/appointments`, base), "appointments");
   assert.equal(getClinicOsShellActiveNavId(`${base}/appointments/ap-1`, base), "appointments");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/prescriptions`, base), "prescriptions");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/prescriptions/new`, base), "prescriptions");
   assert.equal(getClinicOsShellActiveNavId(`${base}/directory`, base), "patientos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/foundation-integrity`, base), "foundationos");

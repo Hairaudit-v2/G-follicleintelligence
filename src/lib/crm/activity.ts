@@ -6,7 +6,8 @@ import type { FiCrmActivityEventRow } from "./types";
 
 export type AppendCrmActivityEventParams = {
   tenantId: string;
-  leadId: string;
+  /** Nullable for patient-native events (e.g. blood requests) when no lead anchor exists. */
+  leadId?: string | null;
   activityKind: string;
   title?: string | null;
   detail?: Record<string, unknown> | null;
@@ -22,9 +23,12 @@ export async function appendCrmActivityEvent(
 ): Promise<FiCrmActivityEventRow> {
   const supabase: SupabaseClient = client ?? supabaseAdmin();
   const tenantId = params.tenantId.trim();
-  const leadId = params.leadId.trim();
+  const leadIdRaw = params.leadId?.trim() ?? "";
+  const leadId = leadIdRaw.length ? leadIdRaw : null;
+  const patientId = params.patientId?.trim() ?? null;
   const activityKind = params.activityKind.trim();
   if (!activityKind) throw new Error("activityKind is required.");
+  if (!leadId && !patientId) throw new Error("leadId or patientId is required.");
 
   const detail =
     params.detail && typeof params.detail === "object" && !Array.isArray(params.detail)
@@ -41,7 +45,7 @@ export async function appendCrmActivityEvent(
       detail,
       occurred_at: params.occurredAt?.trim() || new Date().toISOString(),
       fi_timeline_event_id: params.fiTimelineEventId?.trim() || null,
-      patient_id: params.patientId?.trim() || null,
+      patient_id: patientId,
       case_id: params.caseId?.trim() || null,
     })
     .select("*")
@@ -55,7 +59,7 @@ function mapActivityRow(row: Record<string, unknown>): FiCrmActivityEventRow {
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
-    lead_id: String(row.lead_id),
+    lead_id: row.lead_id != null ? String(row.lead_id) : null,
     activity_kind: String(row.activity_kind),
     title: row.title != null ? String(row.title) : null,
     detail:

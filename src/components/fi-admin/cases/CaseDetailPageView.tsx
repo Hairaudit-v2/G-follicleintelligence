@@ -25,6 +25,7 @@ import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
 import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
+import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
 
 function caseSelfQuery(casesListReturnQuery?: string, opts?: { foundation?: "1" }): string {
   const p = new URLSearchParams();
@@ -186,6 +187,14 @@ export function CaseDetailPageView({
             <CaseImagesCard tenantId={tenantId} patientId={patientId} images={detail.images} />
           </CaseDetailSection>
         </div>
+
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.prescriptions}>
+          <CasePrescriptionsSection
+            tenantId={tenantId}
+            caseId={detail.id}
+            foundationPatientId={detail.foundation_patient_id ?? detail.patient?.foundation_patient_id ?? null}
+          />
+        </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.notes}>
           <CasePlanningNotesPanel

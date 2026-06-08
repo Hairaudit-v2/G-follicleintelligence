@@ -286,18 +286,47 @@ function anchorLabelForRow(
   return row.title?.trim() || humanizeBookingType(row.booking_type);
 }
 
-async function resolveCanMutateBookings(tenantId: string): Promise<boolean> {
+async function resolveBookingMutationGate(tenantId: string): Promise<{
+  canMutateBookings: boolean;
+  bookingMutationBlockedReason: string | null;
+}> {
+  const tid = tenantId.trim();
   const authUserId = await resolveAuthUserId(null);
-  if (!authUserId?.trim()) return false;
+  if (!authUserId?.trim()) {
+    return {
+      canMutateBookings: false,
+      bookingMutationBlockedReason:
+        "Sign in to create or move appointments. The calendar is view-only until you are authenticated.",
+    };
+  }
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
     .select("role")
-    .eq("tenant_id", tenantId.trim())
+    .eq("tenant_id", tid)
     .eq("auth_user_id", authUserId.trim())
     .maybeSingle();
-  if (error || !data) return false;
-  return isCrmMutationRole((data as { role: string | null }).role);
+  if (error) {
+    return {
+      canMutateBookings: false,
+      bookingMutationBlockedReason: "Could not verify your tenant membership for calendar edits.",
+    };
+  }
+  if (!data) {
+    return {
+      canMutateBookings: false,
+      bookingMutationBlockedReason: "You are not a member of this tenant, so the calendar is read-only.",
+    };
+  }
+  const role = (data as { role: string | null }).role;
+  if (!isCrmMutationRole(role)) {
+    return {
+      canMutateBookings: false,
+      bookingMutationBlockedReason:
+        "Your role can view the calendar but not create or move bookings. Ask a tenant admin to grant admin, fi_admin, or crm_operator access.",
+    };
+  }
+  return { canMutateBookings: true, bookingMutationBlockedReason: null };
 }
 
 /**
@@ -319,12 +348,13 @@ export async function loadOperationalCalendarPageData(
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
-  const [rawBookings, resources, canMutateBookings, services] = await Promise.all([
+  const [rawBookings, resources, mutationGate, services] = await Promise.all([
     loadBookingsForTenantRange(tid, rangeStartIso, rangeEndIso),
     loadTenantStaffAndClinics(tid),
-    resolveCanMutateBookings(tid),
+    resolveBookingMutationGate(tid),
     loadFiServicesForTenant(tid),
   ]);
+  const { canMutateBookings, bookingMutationBlockedReason } = mutationGate;
   const gridConfig = calendarSettings.gridConfig;
 
   const structured = applyStructuredFilters(rawBookings, query, resources.staffUserByStaffId, resources.staffDirectory);
@@ -435,6 +465,7 @@ export async function loadOperationalCalendarPageData(
     gridConfig,
     listTruncated,
     canMutateBookings,
+    bookingMutationBlockedReason,
     reminderJobsByBookingId,
     services,
   };

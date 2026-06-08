@@ -54,7 +54,8 @@ export type PatientTimelineActivityInput = {
   activity_kind: string;
   /** Ignored for display — titles may contain unsafe/custom text. */
   title: string | null;
-  lead_id: string;
+  /** Nullable for patient-native CRM events (e.g. blood requests) with no lead anchor. */
+  lead_id: string | null;
   case_id: string | null;
   patient_id: string | null;
   detail: Record<string, unknown>;

@@ -97,6 +97,7 @@ export function CalendarQuickCreateDrawer({
   staffDirectory,
   onCreated,
   workflowVariant = "default",
+  canMutateBookings = true,
 }: {
   tenantId: string;
   open: boolean;
@@ -109,6 +110,8 @@ export function CalendarQuickCreateDrawer({
   onCreated: (booking: FiBookingRow) => void;
   /** FI OS: condensed type row + collapsible time/location. */
   workflowVariant?: "default" | "fiOs";
+  /** Mirrors server gate — logged in development with each save attempt. */
+  canMutateBookings?: boolean;
 }) {
   const toast = useCalendarToastOptional();
   const titleId = useId();
@@ -362,6 +365,20 @@ export function CalendarQuickCreateDrawer({
 
     const { assignedStaffId, assignedUserId } = parseAssigneeSelect(assigneeSelect);
 
+    if (process.env.NODE_ENV === "development") {
+      console.debug("[CalendarQuickCreate] submit", {
+        tenantId: tenantId.trim(),
+        clinicId: clinicId.trim() || null,
+        columnId: prefill?.columnId ?? null,
+        selectedTemplate: tpl.id,
+        patientId: anchor.kind === "patient" ? anchor.patientId : null,
+        leadId: anchor.kind === "lead" ? anchor.leadId : null,
+        assigned_staff_id: assignedStaffId.trim() || null,
+        assigned_user_id: assignedUserId.trim() || null,
+        canMutateBookings,
+      });
+    }
+
     setBusy(true);
     try {
       const r = await calendarQuickCreateBookingAction(tenantId.trim(), {
@@ -380,6 +397,16 @@ export function CalendarQuickCreateDrawer({
       if (!r.ok) {
         setFormErr(r.error);
         toast?.error(r.error);
+        if (process.env.NODE_ENV === "development") {
+          console.error("[CalendarQuickCreate] server action returned error", {
+            tenantId: tenantId.trim(),
+            clinicId: clinicId.trim() || null,
+            columnId: prefill?.columnId ?? null,
+            templateId: tpl.id,
+            error: r.error,
+            canMutateBookings,
+          });
+        }
         return;
       }
       logFiCalendarTimezoneDebug("quick-create-booking-returned", {
@@ -391,6 +418,20 @@ export function CalendarQuickCreateDrawer({
       toast?.success("Appointment created.");
       onCreated(r.booking);
       onClose();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Unexpected error while saving.";
+      setFormErr(msg);
+      toast?.error(msg);
+      if (process.env.NODE_ENV === "development") {
+        console.error("[CalendarQuickCreate] submit threw", {
+          tenantId: tenantId.trim(),
+          clinicId: clinicId.trim() || null,
+          columnId: prefill?.columnId ?? null,
+          templateId: tpl.id,
+          canMutateBookings,
+          err: e,
+        });
+      }
     } finally {
       setBusy(false);
     }

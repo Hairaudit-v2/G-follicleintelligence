@@ -5,6 +5,7 @@ export const PATIENT_DETAIL_TABS = [
   "gallery",
   "treatment_history",
   "timeline",
+  "prescriptions",
   "documents",
 ] as const;
 
@@ -19,6 +20,7 @@ export const PATIENT_DETAIL_TAB_LABELS: Record<PatientDetailTabId, string> = {
   gallery: "Gallery",
   treatment_history: "Treatment history",
   timeline: "Timeline",
+  prescriptions: "Prescriptions",
   documents: "Documents",
 };
 

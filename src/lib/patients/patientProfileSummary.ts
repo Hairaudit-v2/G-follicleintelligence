@@ -10,7 +10,10 @@ export type ActivityLike = {
   occurred_at: string;
   activity_kind: string;
   title: string | null;
-  lead_id?: string;
+  lead_id?: string | null;
+  case_id?: string | null;
+  leadTitle?: string | null;
+  linkedToThisPatient?: boolean;
 };
 
 export type PatientProfileSummaryMetrics = {

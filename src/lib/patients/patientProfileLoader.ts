@@ -75,7 +75,7 @@ export type PatientProfileActivityItem = {
   occurred_at: string;
   activity_kind: string;
   title: string | null;
-  lead_id: string;
+  lead_id: string | null;
   case_id: string | null;
 };
 
@@ -373,7 +373,7 @@ export async function loadPatientProfile(
     occurred_at: String((a as { occurred_at: string }).occurred_at),
     activity_kind: String((a as { activity_kind: string }).activity_kind),
     title: (a as { title: string | null }).title != null ? String((a as { title: string | null }).title) : null,
-    lead_id: String((a as { lead_id: string }).lead_id),
+    lead_id: (a as { lead_id: string | null }).lead_id != null ? String((a as { lead_id: string | null }).lead_id) : null,
     case_id: (a as { case_id: string | null }).case_id != null ? String((a as { case_id: string | null }).case_id) : null,
   }));
 

@@ -100,6 +100,28 @@ describe("Stage 4D — patient treatment timeline (pure)", () => {
     assert.equal(oldest.items[0]?.id, "case_created:case-1");
   });
 
+  it("links patient-only CRM activity to the patient profile route", () => {
+    const bundle = minimalBundle({
+      activity: [
+        {
+          id: "act-br",
+          occurred_at: "2026-05-01T12:00:00.000Z",
+          activity_kind: "pathology.blood_request.created",
+          title: "Blood request created",
+          lead_id: null,
+          case_id: null,
+          patient_id: "patient-1",
+          detail: { template_used: "hair_loss_investigation", test_count: 3 },
+        },
+      ],
+    });
+    const { items } = buildPatientTimeline(bundle, { hrefContext: href });
+    const row = items.find((i) => i.id === "crm_activity:act-br");
+    assert.ok(row);
+    assert.equal(row!.href, "/fi-admin/tid-1/patients/patient-1");
+    assert.equal(row!.title, "Blood request created");
+  });
+
   it("does not leak note bodies or admin narrative via CRM activity titles", () => {
     const bundle = minimalBundle({
       leads: [

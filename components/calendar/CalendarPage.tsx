@@ -98,8 +98,15 @@ export function CalendarPage({
   }, [data.query.staffId, data.query.assignedUserId, data.query.clinicId]);
 
   const quickCallInEnabled = Boolean(data.canMutateBookings && crmShellSession);
-  /** FI OS: slot quick-create uses tenant booking rights; CRM session is only required for call-in + slide-over. */
-  const quickCreateEnabled = Boolean(data.canMutateBookings && (workspaceVariant === "fiOs" || crmShellSession));
+  /**
+   * FI OS shell: quick-create from slots without a CRM shell session.
+   * Dashboard portal: same tenant booking rights, no CRM chrome required.
+   * Legacy FI Admin (non-OS) calendar: keep quick-create behind CRM shell when present.
+   */
+  const quickCreateEnabled = Boolean(
+    data.canMutateBookings &&
+      (workspaceVariant === "fiOs" || route === "dashboard" || crmShellSession)
+  );
   const isFiOsWorkspace = workspaceVariant === "fiOs";
 
   const dismissFiOsCalendarDrawers = useCallback(() => {
@@ -235,6 +242,7 @@ export function CalendarPage({
         staffDirectory={data.staffDirectory}
         clinics={data.clinics}
         canMutateBookings={data.canMutateBookings}
+        bookingMutationBlockedReason={data.bookingMutationBlockedReason}
         route={route}
         variant={isFiOsWorkspace ? "fiOs" : "default"}
         fiOsPanelControls={
@@ -502,6 +510,7 @@ export function CalendarPage({
           clinics={data.clinics}
           assignees={data.assignees}
           staffDirectory={data.staffDirectory}
+          canMutateBookings={data.canMutateBookings}
           workflowVariant={isFiOsWorkspace ? "fiOs" : "default"}
           onCreated={(booking) => {
             upsertBooking(booking);

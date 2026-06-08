@@ -14,7 +14,7 @@ export type PatientPersonCrmActivityItem = {
   occurred_at: string;
   activity_kind: string;
   title: string | null;
-  lead_id: string;
+  lead_id: string | null;
   leadTitle: string | null;
   linkedToThisPatient: boolean;
 };
@@ -79,15 +79,16 @@ export function mapPersonCrmActivityRows(
   const linkedByLeadId = new Map(leadItems.map((i) => [i.lead.id, i.linkedToThisPatient]));
 
   const mapped = rawRows.map((r) => {
-    const leadId = String(r.lead_id);
+    const leadIdRaw = r.lead_id;
+    const leadId = leadIdRaw != null && String(leadIdRaw).trim() ? String(leadIdRaw) : null;
     return {
       id: String(r.id),
       occurred_at: String(r.occurred_at),
       activity_kind: String(r.activity_kind),
       title: r.title != null ? String(r.title) : null,
       lead_id: leadId,
-      leadTitle: titleByLeadId.get(leadId) ?? null,
-      linkedToThisPatient: linkedByLeadId.get(leadId) ?? false,
+      leadTitle: leadId ? titleByLeadId.get(leadId) ?? null : null,
+      linkedToThisPatient: leadId ? linkedByLeadId.get(leadId) ?? false : true,
     };
   });
 

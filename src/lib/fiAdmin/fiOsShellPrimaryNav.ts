@@ -64,6 +64,13 @@ export function resolveFiOsPrimarySidebarItems(
       disabled: false,
     },
     {
+      id: "prescriptions",
+      label: "Prescriptions",
+      shortLabel: "Rx",
+      href: hrefFor(b, "prescriptions"),
+      disabled: false,
+    },
+    {
       id: "patient-twin",
       label: "Patient Twin",
       shortLabel: "Twin",
@@ -112,6 +119,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "staff" || legacy === "services" || legacy === "configuration") return "settings";
   if (legacy === "leadflow") return "crm";
   if (legacy === "surgeryos") return "cases";
+  if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";
   if (legacy === "dashboard") return "dashboard";

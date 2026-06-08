@@ -96,17 +96,27 @@ export function PatientPersonLeadHistoryCard({
                     </div>
                     <p className="text-xs text-gray-600">
                       {a.activity_kind}
-                      {a.leadTitle ? (
+                      {a.lead_id ? (
                         <>
                           {" · "}
                           <Link
                             href={`/fi-admin/${tenantId}/crm/leads/${a.lead_id}`}
                             className="text-blue-600 hover:underline"
                           >
-                            {a.leadTitle}
+                            {a.leadTitle?.trim() || `Lead ${a.lead_id.slice(0, 8)}…`}
                           </Link>
                         </>
-                      ) : null}
+                      ) : (
+                        <>
+                          {" · "}
+                          <Link
+                            href={`/fi-admin/${tenantId}/patients/${currentPatientId}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            Patient record
+                          </Link>
+                        </>
+                      )}
                       {!a.linkedToThisPatient ? (
                         <span className="ml-1 rounded bg-amber-50 px-1 text-[10px] font-semibold uppercase text-amber-900">
                           Other enquiry

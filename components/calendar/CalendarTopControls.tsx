@@ -37,6 +37,7 @@ export function CalendarTopControls({
   staffDirectory,
   clinics,
   canMutateBookings,
+  bookingMutationBlockedReason = null,
   route = "fi-admin",
   variant = "default",
   fiOsPanelControls,
@@ -48,6 +49,8 @@ export function CalendarTopControls({
   staffDirectory: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   canMutateBookings: boolean;
+  /** Shown when {@link canMutateBookings} is false — sign-in, membership, or role. */
+  bookingMutationBlockedReason?: string | null;
   route?: CalendarRoute;
   variant?: "default" | "fiOs";
   fiOsPanelControls?: {
@@ -96,7 +99,8 @@ export function CalendarTopControls({
   const viewOpts = isFiOs ? VIEW_OPTIONS_FI_OS : VIEW_OPTIONS.map((o) => ({ ...o, active: (q: ParsedCalendarQuery) => q.view === o.id }));
 
   return (
-    <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", shell)}>
+    <>
+      <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", shell)}>
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         {isFiOs && fiOsPanelControls ? (
           <div
@@ -262,6 +266,11 @@ export function CalendarTopControls({
                 ? "bg-white/[0.04] text-slate-400 ring-1 ring-white/[0.08]"
                 : "bg-slate-800 text-slate-400 ring-1 ring-slate-600/40"
           )}
+          title={
+            canMutateBookings
+              ? "You can create and move appointments."
+              : bookingMutationBlockedReason?.trim() || "Calendar is read-only."
+          }
         >
           {canMutateBookings ? "Live" : "Read-only"}
         </span>
@@ -292,6 +301,20 @@ export function CalendarTopControls({
       </div>
 
       <p className={cn("text-sm font-medium lg:hidden", isFiOs ? "text-slate-200" : "text-slate-300")}>{rangeTitle}</p>
-    </div>
+      </div>
+      {!canMutateBookings && bookingMutationBlockedReason?.trim() ? (
+        <div
+          className={cn(
+            "border-b px-4 py-2 text-xs font-medium leading-snug",
+            isFiOs
+              ? "border-amber-500/35 bg-amber-950/35 text-amber-100"
+              : "border-amber-500/30 bg-amber-950/40 text-amber-100"
+          )}
+          role="status"
+        >
+          {bookingMutationBlockedReason.trim()}
+        </div>
+      ) : null}
+    </>
   );
 }

@@ -100,7 +100,7 @@ export type FiCrmLeadStageHistoryRow = {
 export type FiCrmActivityEventRow = {
   id: string;
   tenant_id: string;
-  lead_id: string;
+  lead_id: string | null;
   activity_kind: string;
   title: string | null;
   detail: JsonObject;

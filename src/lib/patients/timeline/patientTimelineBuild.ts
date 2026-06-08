@@ -82,6 +82,14 @@ function safeActivityMetadataSummary(kind: string, detail: Record<string, unknow
     const ch = readString(detail, "channel");
     return ch ? `Channel: ${ch}` : "Message logged";
   }
+  if (k === "pathology.blood_request.created") {
+    const tpl = readString(detail, "template_used");
+    const n = detail.test_count;
+    const count = typeof n === "number" && Number.isFinite(n) ? n : null;
+    if (tpl && count != null) return `Template: ${tpl.replace(/_/g, " ")} · ${count} test(s)`;
+    if (tpl) return `Template: ${tpl.replace(/_/g, " ")}`;
+    return "Blood request";
+  }
   return null;
 }
 
@@ -133,8 +141,10 @@ export function buildPatientTimeline(
     const sens = isSensitiveActivityKind(ev.activity_kind);
     const meta = ev.detail && typeof ev.detail === "object" && !Array.isArray(ev.detail) ? ev.detail : {};
     const summary = safeActivityMetadataSummary(ev.activity_kind, meta as Record<string, unknown>);
-    let href: string | null = hrefForLead(ctx, ev.lead_id);
+    let href: string | null = null;
     if (ev.case_id) href = hrefForCase(ctx, ev.case_id);
+    else if (ev.lead_id) href = hrefForLead(ctx, ev.lead_id);
+    else if (ev.patient_id) href = `/fi-admin/${ctx.tenantId.trim()}/patients/${ev.patient_id}`;
     items.push({
       id: `crm_activity:${ev.id}`,
       occurred_at: ev.occurred_at,
@@ -342,7 +352,7 @@ export function mapActivityRowForTimeline(row: Record<string, unknown>): Patient
     occurred_at: String(row.occurred_at),
     activity_kind: String(row.activity_kind),
     title: row.title != null ? String(row.title) : null,
-    lead_id: String(row.lead_id),
+    lead_id: row.lead_id != null ? String(row.lead_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     detail,

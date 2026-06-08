@@ -147,3 +147,16 @@ export async function getBookingsOperatorSessionIfAllowed(tenantId: string): Pro
   if (!row) return null;
   return { authUserId: authId, fiUserId: row.id, role: row.role };
 }
+
+/**
+ * Any tenant `fi_users` row (for modules that are not restricted to CRM/bookings-operator roles).
+ */
+export async function getFiTenantMemberSessionIfAllowed(tenantId: string): Promise<CrmShellSession | null> {
+  const tid = tenantId.trim();
+  if (!tid) return null;
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return null;
+  const row = await loadFiUserRow(tid, authId);
+  if (!row) return null;
+  return { authUserId: authId, fiUserId: row.id, role: row.role };
+}

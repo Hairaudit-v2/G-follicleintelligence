@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense } from "react";
 import type { PatientDetailTabId } from "@/src/lib/patients/patientDetailTabs";
 import type { PatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
@@ -20,6 +21,7 @@ import { PatientPreviousProceduresCard } from "./PatientPreviousProceduresCard";
 import { PatientProgressCompare } from "../progress/PatientProgressCompare";
 import { PatientAppointmentsTab } from "./PatientAppointmentsTab";
 import { PatientDocumentsTab } from "./PatientDocumentsTab";
+import { PatientPrescriptionsTab } from "@/src/components/fi-admin/prescribing/PatientPrescriptionsTab";
 
 export function PatientDetailPageView({
   tenantId,
@@ -54,6 +56,16 @@ export function PatientDetailPageView({
       <Suspense fallback={<div className="h-10 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
         <PatientDetailTabNav tenantId={tenantId} patientId={patientId} activeTab={activeTab} />
       </Suspense>
+
+      <div className="flex flex-wrap items-center gap-2 rounded border border-gray-200 bg-gray-50/80 px-3 py-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</span>
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}/blood-request`}
+          className="rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
+        >
+          Request blood tests
+        </Link>
+      </div>
 
       {activeTab === "overview" ? (
         <div className="space-y-4">
@@ -110,6 +122,8 @@ export function PatientDetailPageView({
       {activeTab === "timeline" ? (
         <PatientTreatmentTimelineCard patientTimeline={profile.patientTimeline} patientImages={profile.patientImages} />
       ) : null}
+
+      {activeTab === "prescriptions" ? <PatientPrescriptionsTab tenantId={tenantId} patientId={patientId} /> : null}
 
       {activeTab === "documents" ? <PatientDocumentsTab tenantId={tenantId} data={profile} /> : null}
     </div>

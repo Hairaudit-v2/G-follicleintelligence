@@ -23,10 +23,21 @@ export function PatientActivityCard({ tenantId, data }: { tenantId: string; data
               </div>
               <p className="text-xs text-gray-600">
                 {a.activity_kind}
-                {" · "}
-                <Link href={`/fi-admin/${tenantId}/crm/leads/${a.lead_id}`} className="text-blue-600 hover:underline">
-                  Lead
-                </Link>
+                {a.lead_id ? (
+                  <>
+                    {" · "}
+                    <Link href={`/fi-admin/${tenantId}/crm/leads/${a.lead_id}`} className="text-blue-600 hover:underline">
+                      Lead
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    {" · "}
+                    <Link href={`/fi-admin/${tenantId}/patients/${data.foundationPatientId}`} className="text-blue-600 hover:underline">
+                      Patient record
+                    </Link>
+                  </>
+                )}
               </p>
             </li>
           ))}

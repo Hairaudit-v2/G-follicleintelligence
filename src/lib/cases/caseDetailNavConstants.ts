@@ -10,6 +10,7 @@ export const CASE_DETAIL_SECTION_IDS = {
   lead: "case-lead",
   bookings: "case-bookings",
   images: "case-images",
+  prescriptions: "case-prescriptions",
   notes: "case-notes",
 } as const;
 
@@ -32,5 +33,6 @@ export const CASE_DETAIL_NAV_SECTIONS: { id: CaseDetailSectionId; label: string 
   { id: CASE_DETAIL_SECTION_IDS.lead, label: "Lead" },
   { id: CASE_DETAIL_SECTION_IDS.bookings, label: "Appointments" },
   { id: CASE_DETAIL_SECTION_IDS.images, label: "Images" },
+  { id: CASE_DETAIL_SECTION_IDS.prescriptions, label: "Prescriptions" },
   { id: CASE_DETAIL_SECTION_IDS.notes, label: "Notes" },
 ];

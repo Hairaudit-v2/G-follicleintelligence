@@ -1,0 +1,507 @@
+"use client";
+
+import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import {
+  cancelPrescriptionAction,
+  markPrescriptionReadyForPharmacyAction,
+  savePrescriptionDraftAction,
+  signPrescriptionAction,
+} from "@/lib/actions/fi-prescribing-actions";
+import { FiCard } from "@/src/components/fi-design/FiCard";
+import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
+import type { FiMedicationCatalogueRow, FiPrescriptionStatusEventRow, MedicationCatalogueCategory, PrescriptionStatus } from "@/src/lib/prescribing/fiPrescribingTypes";
+import {
+  MEDICATION_CATALOGUE_CATEGORIES,
+  MEDICATION_CATEGORY_LABELS,
+  PRESCRIPTION_STATUS_LABELS,
+} from "@/src/lib/prescribing/fiPrescribingTypes";
+
+export type PrescriptionEditorLine = {
+  key: string;
+  catalogueId: string;
+  doseInstructions: string;
+  repeatsInstructions: string;
+  reorderRule: string;
+};
+
+export type PrescriptionEditorStaffOption = { id: string; label: string };
+
+export function PrescriptionEditorClient({
+  tenantId,
+  patientId,
+  caseId,
+  initialPrescriptionId,
+  initialStatus,
+  initialDoctorId,
+  initialClinicalNotes,
+  initialDeliveryType,
+  initialPatientShippingAddress,
+  initialPharmacyName,
+  initialReadyForPharmacyAt,
+  initialSignedAt,
+  initialItems,
+  catalogue,
+  staffOptions,
+  initialEvents,
+}: {
+  tenantId: string;
+  patientId: string;
+  caseId: string | null;
+  initialPrescriptionId: string | null;
+  initialStatus: PrescriptionStatus;
+  initialDoctorId: string;
+  initialClinicalNotes: string;
+  initialDeliveryType: string;
+  initialPatientShippingAddress: string;
+  initialPharmacyName: string;
+  initialReadyForPharmacyAt: string | null;
+  initialSignedAt: string | null;
+  initialItems: PrescriptionEditorLine[];
+  catalogue: FiMedicationCatalogueRow[];
+  staffOptions: PrescriptionEditorStaffOption[];
+  initialEvents: FiPrescriptionStatusEventRow[];
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  const [prescriptionId, setPrescriptionId] = useState<string | null>(initialPrescriptionId);
+  const [status, setStatus] = useState<PrescriptionStatus>(initialStatus);
+  const [doctorId, setDoctorId] = useState(initialDoctorId);
+  const [clinicalNotes, setClinicalNotes] = useState(initialClinicalNotes);
+  const [deliveryType, setDeliveryType] = useState(initialDeliveryType);
+  const [patientShippingAddress, setPatientShippingAddress] = useState(initialPatientShippingAddress);
+  const [pharmacyName, setPharmacyName] = useState(initialPharmacyName);
+  const [readyForPharmacyAt, setReadyForPharmacyAt] = useState<string | null>(initialReadyForPharmacyAt);
+  const [signedAt, setSignedAt] = useState<string | null>(initialSignedAt);
+  const [events, setEvents] = useState(initialEvents);
+
+  const [lines, setLines] = useState<PrescriptionEditorLine[]>(() =>
+    initialItems.length
+      ? initialItems
+      : [
+          {
+            key: crypto.randomUUID(),
+            catalogueId: "",
+            doseInstructions: "",
+            repeatsInstructions: "",
+            reorderRule: "",
+          },
+        ]
+  );
+
+  const isDraft = status === "draft";
+  const isSigned = status === "signed";
+  const isCancelled = status === "cancelled";
+
+  const catalogueByCategory = useMemo(() => {
+    const m = new Map<MedicationCatalogueCategory, FiMedicationCatalogueRow[]>();
+    for (const row of catalogue) {
+      const k = row.category;
+      const arr = m.get(k) ?? [];
+      arr.push(row);
+      m.set(k, arr);
+    }
+    return m;
+  }, [catalogue]);
+
+  function addLine() {
+    setLines((prev) => [
+      ...prev,
+      {
+        key: crypto.randomUUID(),
+        catalogueId: "",
+        doseInstructions: "",
+        repeatsInstructions: "",
+        reorderRule: "",
+      },
+    ]);
+  }
+
+  function removeLine(key: string) {
+    setLines((prev) => (prev.length <= 1 ? prev : prev.filter((l) => l.key !== key)));
+  }
+
+  function updateLine(key: string, patch: Partial<Omit<PrescriptionEditorLine, "key">>) {
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
+  }
+
+  function saveDraft() {
+    setErr(null);
+    setMsg(null);
+    startTransition(async () => {
+      const items = lines
+        .filter((l) => l.catalogueId.trim())
+        .map((l, idx) => ({
+          catalogueId: l.catalogueId.trim(),
+          doseInstructions: l.doseInstructions,
+          repeatsInstructions: l.repeatsInstructions.trim() || null,
+          reorderRule: l.reorderRule.trim() || null,
+          sortOrder: idx,
+        }));
+      const res = await savePrescriptionDraftAction({
+        tenantId,
+        prescriptionId: prescriptionId ?? undefined,
+        patientId,
+        doctorId,
+        caseId: caseId ?? undefined,
+        clinicalNotes: clinicalNotes.trim() || null,
+        deliveryType: deliveryType.trim() || null,
+        patientShippingAddress: patientShippingAddress.trim() || null,
+        pharmacyName: pharmacyName.trim() || null,
+        items,
+      });
+      if (!res.ok) {
+        setErr(res.error);
+        return;
+      }
+      setMsg("Draft saved.");
+      if (!prescriptionId) {
+        setPrescriptionId(res.id);
+        router.replace(`/fi-admin/${tenantId.trim()}/prescriptions/${res.id}`);
+      } else {
+        router.refresh();
+      }
+    });
+  }
+
+  function sign() {
+    setErr(null);
+    setMsg(null);
+    if (!prescriptionId) {
+      setErr("Save the draft first.");
+      return;
+    }
+    startTransition(async () => {
+      const res = await signPrescriptionAction({ tenantId, prescriptionId });
+      if (!res.ok) {
+        setErr(res.error);
+        return;
+      }
+      setStatus("signed");
+      setSignedAt(new Date().toISOString());
+      setEvents((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          tenant_id: tenantId,
+          prescription_id: prescriptionId,
+          from_status: "draft",
+          to_status: "signed",
+          actor_fi_user_id: null,
+          note: "Prescription signed",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      setMsg("Prescription signed.");
+      router.refresh();
+    });
+  }
+
+  function markReady() {
+    setErr(null);
+    setMsg(null);
+    if (!prescriptionId) return;
+    startTransition(async () => {
+      const res = await markPrescriptionReadyForPharmacyAction({ tenantId, prescriptionId });
+      if (!res.ok) {
+        setErr(res.error);
+        return;
+      }
+      const ts = new Date().toISOString();
+      setReadyForPharmacyAt(ts);
+      setEvents((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          tenant_id: tenantId,
+          prescription_id: prescriptionId,
+          from_status: "signed",
+          to_status: "ready_for_pharmacy",
+          actor_fi_user_id: null,
+          note: "Marked ready for pharmacy (internal queue — not transmitted)",
+          created_at: ts,
+        },
+      ]);
+      setMsg("Marked ready for pharmacy (internal queue).");
+      router.refresh();
+    });
+  }
+
+  function cancel() {
+    if (!window.confirm("Cancel this prescription?")) return;
+    setErr(null);
+    setMsg(null);
+    if (!prescriptionId) return;
+    startTransition(async () => {
+      const res = await cancelPrescriptionAction({ tenantId, prescriptionId });
+      if (!res.ok) {
+        setErr(res.error);
+        return;
+      }
+      setStatus("cancelled");
+      setMsg("Prescription cancelled.");
+      router.refresh();
+    });
+  }
+
+  const canEditBody = isDraft && !pending;
+  const canSign = isDraft && prescriptionId && lines.some((l) => l.catalogueId.trim());
+  const canMarkReady = isSigned && prescriptionId && !readyForPharmacyAt;
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6 py-6">
+      <p className="text-sm text-slate-600">
+        <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId}`} className="text-sky-700 hover:underline">
+          ← Patient profile
+        </Link>
+        {caseId ? (
+          <>
+            <span className="mx-2 text-slate-300">·</span>
+            <Link href={`/fi-admin/${tenantId.trim()}/cases/${caseId}`} className="text-sky-700 hover:underline">
+              Case
+            </Link>
+          </>
+        ) : null}
+        <span className="mx-2 text-slate-300">·</span>
+        <Link href={`/fi-admin/${tenantId.trim()}/prescriptions`} className="text-sky-700 hover:underline">
+          Prescriptions workspace
+        </Link>
+      </p>
+
+      <FiCard>
+        <FiPageHeader
+          titleId="rx-editor-heading"
+          eyebrow="DoctorOS"
+          title={prescriptionId ? "Edit prescription" : "New prescription"}
+          description={`Status: ${PRESCRIPTION_STATUS_LABELS[status]}${
+            signedAt ? ` · Signed ${new Date(signedAt).toLocaleString()}` : ""
+          }${readyForPharmacyAt ? " · Ready for pharmacy (queued internally)" : ""}`}
+        />
+        {err ? <p className="mt-2 text-sm text-red-600">{err}</p> : null}
+        {msg ? <p className="mt-2 text-sm text-emerald-800">{msg}</p> : null}
+      </FiCard>
+
+      <FiCard>
+        <h2 className="text-sm font-semibold text-slate-900">Prescriber & logistics</h2>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <label className="block text-xs font-medium text-slate-700">
+            Doctor (fi_staff)
+            <select
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              value={doctorId}
+              disabled={!canEditBody}
+              onChange={(e) => setDoctorId(e.target.value)}
+            >
+              {staffOptions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-xs font-medium text-slate-700">
+            Delivery type
+            <input
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              value={deliveryType}
+              disabled={!canEditBody}
+              onChange={(e) => setDeliveryType(e.target.value)}
+              placeholder="e.g. Standard / Express"
+            />
+          </label>
+          <label className="block text-xs font-medium text-slate-700 md:col-span-2">
+            Pharmacy name (optional)
+            <input
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              value={pharmacyName}
+              disabled={!canEditBody}
+              onChange={(e) => setPharmacyName(e.target.value)}
+              placeholder="Compound partner label"
+            />
+          </label>
+          <label className="block text-xs font-medium text-slate-700 md:col-span-2">
+            Patient shipping address
+            <textarea
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              rows={3}
+              value={patientShippingAddress}
+              disabled={!canEditBody}
+              onChange={(e) => setPatientShippingAddress(e.target.value)}
+              placeholder="Full postal address for delivery when you send to pharmacy in a later stage."
+            />
+          </label>
+          <label className="block text-xs font-medium text-slate-700 md:col-span-2">
+            Clinical notes
+            <textarea
+              className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+              rows={4}
+              value={clinicalNotes}
+              disabled={!canEditBody}
+              onChange={(e) => setClinicalNotes(e.target.value)}
+              placeholder="Indications, monitoring, counselling points…"
+            />
+          </label>
+        </div>
+      </FiCard>
+
+      <FiCard>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-900">Medication lines</h2>
+          {canEditBody ? (
+            <button
+              type="button"
+              onClick={addLine}
+              className="rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50"
+            >
+              Add line
+            </button>
+          ) : null}
+        </div>
+        <div className="mt-4 space-y-4">
+          {lines.map((line) => (
+            <div key={line.key} className="rounded border border-slate-200 bg-slate-50/60 p-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <label className="block min-w-[12rem] flex-1 text-xs font-medium text-slate-700">
+                  Catalogue item
+                  <select
+                    className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                    value={line.catalogueId}
+                    disabled={!canEditBody}
+                    onChange={(e) => updateLine(line.key, { catalogueId: e.target.value })}
+                  >
+                    <option value="">Select…</option>
+                    {MEDICATION_CATALOGUE_CATEGORIES.map((cat) => {
+                      const rows = catalogueByCategory.get(cat) ?? [];
+                      if (!rows.length) return null;
+                      return (
+                      <optgroup key={cat} label={MEDICATION_CATEGORY_LABELS[cat]}>
+                        {rows.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.medication_name} — {r.quantity_label} (${Number(r.base_price).toFixed(2)})
+                            {r.requires_doctor_approval ? " (MD approval)" : ""}
+                          </option>
+                        ))}
+                      </optgroup>
+                      );
+                    })}
+                  </select>
+                </label>
+                {canEditBody ? (
+                  <button
+                    type="button"
+                    onClick={() => removeLine(line.key)}
+                    className="text-xs font-medium text-red-700 hover:underline"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+              <label className="mt-3 block text-xs font-medium text-slate-700">
+                Dose instructions
+                <textarea
+                  className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                  rows={2}
+                  value={line.doseInstructions}
+                  disabled={!canEditBody}
+                  onChange={(e) => updateLine(line.key, { doseInstructions: e.target.value })}
+                  placeholder="e.g. 1 capsule daily with food"
+                />
+              </label>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <label className="block text-xs font-medium text-slate-700">
+                  Repeats / refill instructions
+                  <textarea
+                    className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                    rows={2}
+                    value={line.repeatsInstructions}
+                    disabled={!canEditBody}
+                    onChange={(e) => updateLine(line.key, { repeatsInstructions: e.target.value })}
+                    placeholder="e.g. 2 repeats; contact clinic before final repeat"
+                  />
+                </label>
+                <label className="block text-xs font-medium text-slate-700">
+                  Reorder rule
+                  <textarea
+                    className="mt-1 block w-full rounded border border-slate-300 bg-white px-2 py-2 text-sm"
+                    rows={2}
+                    value={line.reorderRule}
+                    disabled={!canEditBody}
+                    onChange={(e) => updateLine(line.key, { reorderRule: e.target.value })}
+                    placeholder="e.g. Allow early refill if travelling"
+                  />
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      </FiCard>
+
+      <div className="flex flex-wrap gap-2">
+        {canEditBody ? (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={saveDraft}
+            className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:bg-slate-400"
+          >
+            {pending ? "Saving…" : "Save draft"}
+          </button>
+        ) : null}
+        {canSign ? (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={sign}
+            className="rounded bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:bg-slate-400"
+          >
+            Sign prescription
+          </button>
+        ) : null}
+        {canMarkReady ? (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={markReady}
+            className="rounded border border-sky-600 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+          >
+            Mark ready for pharmacy
+          </button>
+        ) : null}
+        {!isCancelled ? (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={cancel}
+            className="rounded border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
+          >
+            Cancel prescription
+          </button>
+        ) : null}
+      </div>
+
+      <FiCard>
+        <h2 className="text-sm font-semibold text-slate-900">Workflow log</h2>
+        <ul className="mt-3 space-y-2 text-sm text-slate-700">
+          {events.map((ev) => (
+            <li key={ev.id} className="border-b border-slate-100 pb-2 last:border-0">
+              <span className="font-mono text-xs text-slate-500">{new Date(ev.created_at).toLocaleString()}</span>
+              {ev.from_status ? (
+                <span className="ml-2 text-xs">
+                  {ev.from_status} → {ev.to_status}
+                </span>
+              ) : (
+                <span className="ml-2 text-xs">{ev.to_status}</span>
+              )}
+              {ev.note ? <p className="mt-0.5 text-xs text-slate-600">{ev.note}</p> : null}
+            </li>
+          ))}
+        </ul>
+      </FiCard>
+    </div>
+  );
+}

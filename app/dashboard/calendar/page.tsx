@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
+import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 import { CalendarPage } from "@/components/calendar/CalendarPage";
 import { loadOperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarLoader.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
@@ -30,5 +31,9 @@ export default async function DashboardCalendarPage({
   await assertFiTenantPortalAccess(tenantId);
   const data = await loadOperationalCalendarPageData(tenantId, sp);
 
-  return <CalendarPage data={data} route="dashboard" />;
+  return (
+    <CalendarToastProvider>
+      <CalendarPage data={data} route="dashboard" />
+    </CalendarToastProvider>
+  );
 }

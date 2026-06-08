@@ -304,6 +304,9 @@ export async function calendarQuickCreateBookingAction(
 
     return { ok: true, booking };
   } catch (e) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[calendarQuickCreateBookingAction] error", { tenantId: tenantId.trim(), err: e });
+    }
     return { ok: false, error: errMsg(e) };
   }
 }

@@ -287,6 +287,18 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
   }
 
   for (const act of extra.crmActivityEvents) {
+    const href =
+      act.lead_id != null
+        ? crmLeadHref(act.lead_id)
+        : act.patient_id != null
+          ? `/fi-admin/${tenantId}/patients/${act.patient_id}`
+          : null;
+    const meta =
+      act.lead_id != null
+        ? `lead ${act.lead_id.slice(0, 8)}…`
+        : act.patient_id != null
+          ? "Patient-scoped activity"
+          : null;
     push(out, {
       id: `crm-act-${act.id}`,
       kind: "crm_activity",
@@ -295,8 +307,8 @@ export function buildCaseTimeline(input: CaseTimelineBuildInput): CaseTimelineIt
       description: detailSummary(act.detail),
       occurred_at: act.occurred_at,
       status: act.activity_kind,
-      href: crmLeadHref(act.lead_id),
-      metadata_summary: `lead ${act.lead_id.slice(0, 8)}…`,
+      href,
+      metadata_summary: meta,
       is_sensitive: crmActivitySensitive(act.activity_kind),
     });
   }

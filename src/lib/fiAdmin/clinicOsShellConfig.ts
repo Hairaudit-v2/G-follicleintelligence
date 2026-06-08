@@ -108,6 +108,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         description: "Consultation workspace.",
       },
       {
+        id: "prescriptions",
+        label: "Prescriptions",
+        path: "prescriptions",
+        permissionHint: {},
+        description: "DoctorOS prescribing workspace (internal drafts and signing).",
+      },
+      {
         id: "messages",
         label: "Messages",
         path: "",
@@ -279,6 +286,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "staff") return "staff";
   if (first === "services") return "services";
   if (first === "consultations") return "consultations";
+  if (first === "prescriptions") return "prescriptions";
   if (first === "cases") return "surgeryos";
   if (first === "crm") return "leadflow";
   if (first === "analytics") return "analyticsos";
