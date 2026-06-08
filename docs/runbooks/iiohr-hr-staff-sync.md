@@ -1,6 +1,6 @@
 # Runbook: IIOHR HR → Follicle Intelligence staff sync
 
-Operational guide for the Evolved Perth HR feed → FI staff pipeline (manual outbound, scheduled cron, and the FI `staff-sync` API).
+Operational guide for the Evolved Perth HR feed → FI staff pipeline (manual outbound, scheduled cron, and the FI `staff-sync` API). For **production go-live**, use **`docs/runbooks/iiohr-hr-staff-sync-production-activation.md`**.
 
 ## Scope
 
