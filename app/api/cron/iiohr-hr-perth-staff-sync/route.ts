@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 
 import { handleIiohrHrPerthStaffSyncCronPost } from "@/src/lib/hr/iiohrHrPerthStaffSyncCron";
 import { runScheduledIiohrHrStaffSync } from "@/src/lib/hr/runScheduledIiohrHrStaffSync.server";
+import { maybeStaffSyncAlertAfterCronRun } from "@/src/lib/hr/staffSyncAlertIntent.server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export async function POST(req: Request) {
     getEnv: (k) => process.env[k],
     runScheduled: runScheduledIiohrHrStaffSync,
     timeoutMs: 55_000,
+    afterRun: maybeStaffSyncAlertAfterCronRun,
   });
 }
 

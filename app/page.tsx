@@ -5,6 +5,7 @@ import Link from "next/link";
 import { IiohrSeal } from "@/components/brand/iiohr-logo";
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { FiHomeEcosystemSection } from "@/components/home/FiHomeEcosystemSection";
+import { FiHomeGlobalIntelligenceSection } from "@/components/home/FiHomeGlobalIntelligenceSection";
 import { FiHomePatientTwinSection } from "@/components/home/FiHomePatientTwinSection";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
@@ -365,6 +366,8 @@ export default function HomePage() {
       <FiHomeEcosystemSection />
 
       <FiHomePatientTwinSection />
+
+      <FiHomeGlobalIntelligenceSection />
 
       <Section className="border-b border-border/50 py-14 md:py-16">
         <FadeIn>

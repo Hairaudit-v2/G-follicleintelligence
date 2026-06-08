@@ -35,6 +35,8 @@ export type IiohrHrPerthStaffSyncCronPostOptions = {
   runScheduled: () => Promise<ScheduledIiohrHrStaffSyncCoreResult>;
   /** Wall-clock cap for the scheduled job (feed + FI POST). */
   timeoutMs?: number;
+  /** Optional hook after a scheduled result is known (e.g. alert intent logging). */
+  afterRun?: (result: ScheduledIiohrHrStaffSyncCoreResult, getEnv: (key: string) => string | undefined) => void | Promise<void>;
 };
 
 function sleep(ms: number): Promise<never> {
@@ -96,12 +98,29 @@ export async function handleIiohrHrPerthStaffSyncCronPost(
   try {
     const result = await Promise.race([opts.runScheduled(), sleep(timeoutMs)]);
     const httpStatus = !result.ok && result.error?.includes("refusing sync") ? 400 : 200;
+    if (opts.afterRun) {
+      await opts.afterRun(result, opts.getEnv);
+    }
     return jsonBody(result, httpStatus);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Request failed.";
     const isTimeout = msg.includes("timed out");
+    const failureResult: ScheduledIiohrHrStaffSyncCoreResult = {
+      ok: false,
+      rowsSent: 0,
+      runId: null,
+      created: null,
+      updated: null,
+      linked: null,
+      skipped: null,
+      warnings: [],
+      error: isTimeout ? "Scheduled staff sync timed out." : "Scheduled staff sync failed.",
+    };
+    if (opts.afterRun) {
+      await opts.afterRun(failureResult, opts.getEnv);
+    }
     return NextResponse.json(
-      { ok: false, error: isTimeout ? "Scheduled staff sync timed out." : "Scheduled staff sync failed." },
+      { ok: false, error: failureResult.error },
       { status: isTimeout ? 504 : 500 }
     );
   }

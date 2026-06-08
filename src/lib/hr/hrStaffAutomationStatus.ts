@@ -1,14 +1,11 @@
 import { z } from "zod";
 
-/** Minimal run shape for automation hints (matches `FiStaffSyncRunRow` subset). */
-export type HrAutomationStaffSyncRunRef = {
-  status: string;
-  started_at: string;
-  finished_at: string | null;
-  metadata: Record<string, unknown>;
-};
+import {
+  parseStaffSyncStaleWarningHours,
+  type StaffSyncRunHealthRef,
+} from "@/src/lib/hr/iiohrHrStaffSyncHealth";
 
-export const DEFAULT_STAFF_SYNC_STALE_WARNING_HOURS = 48;
+export type HrAutomationStaffSyncRunRef = StaffSyncRunHealthRef;
 
 export type HrStaffAutomationStatus = {
   /** Relative cron URL (POST only). */
@@ -75,26 +72,23 @@ export function buildHrStaffAutomationStatus(input: {
     const trig = triggerOf(r);
     if (lastCron === null && trig === "cron") lastCron = r;
     if (lastProducer === null && trig !== "cron") lastProducer = r;
-    if (r.status === "success") {
+    if (r.status === "success" && trig === "cron") {
       const ct = completionTime(r);
       if (ct && (!lastSuccessfulRunAt || ct > lastSuccessfulRunAt)) lastSuccessfulRunAt = ct;
     }
   }
 
-  const rawHours = input.getEnv("STAFF_SYNC_STALE_WARNING_HOURS")?.trim();
-  const parsedHours = rawHours ? Number.parseInt(rawHours, 10) : DEFAULT_STAFF_SYNC_STALE_WARNING_HOURS;
-  const staleHours =
-    Number.isFinite(parsedHours) && parsedHours > 0 ? parsedHours : DEFAULT_STAFF_SYNC_STALE_WARNING_HOURS;
+  const staleHours = parseStaffSyncStaleWarningHours(input.getEnv);
   const now = input.nowMs ?? Date.now();
 
   let staleSyncWarning: string | null = null;
   if (pageMatches && allCron) {
     if (!lastSuccessfulRunAt) {
-      staleSyncWarning = "No successful staff sync recorded yet for this tenant.";
+      staleSyncWarning = "No successful cron staff sync recorded yet for this tenant.";
     } else {
       const ms = new Date(lastSuccessfulRunAt).getTime();
       if (Number.isFinite(ms) && now - ms > staleHours * 3_600_000) {
-        staleSyncWarning = `No successful staff sync in the last ${staleHours}h (check cron and HR feed).`;
+        staleSyncWarning = `No successful cron staff sync in the last ${staleHours}h (check cron and HR feed).`;
       }
     }
   }

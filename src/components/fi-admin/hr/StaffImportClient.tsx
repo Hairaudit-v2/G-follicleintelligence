@@ -394,12 +394,28 @@ export function StaffImportClient({
         </InfoNotice>
       </header>
 
+      {pageModel.cronBanner ? (
+        <InfoNotice
+          variant={
+            pageModel.cronBanner.variant === "danger"
+              ? "danger"
+              : pageModel.cronBanner.variant === "success"
+                ? "success"
+                : "warning"
+          }
+          title={pageModel.cronBanner.title}
+        >
+          {pageModel.cronBanner.message}
+        </InfoNotice>
+      ) : null}
+
       <DashboardCard className="p-4 sm:p-5">
         <h2 className="text-sm font-semibold text-[#F8FAFC]">Automation status</h2>
         <p className="mt-1 text-xs text-[#64748B]">
           Scheduled job: <span className="font-mono text-[#94A3B8]">POST {pageModel.automation.cronPath}</span> with{" "}
           <span className="font-mono text-[#94A3B8]">Authorization: Bearer CRON_SECRET</span>. See{" "}
-          <span className="font-mono text-[#94A3B8]">docs/iiohr-hr-perth-staff-sync-cron.md</span>.
+          <span className="font-mono text-[#94A3B8]">docs/iiohr-hr-perth-staff-sync-cron.md</span> and{" "}
+          <span className="font-mono text-[#94A3B8]">docs/runbooks/iiohr-hr-staff-sync.md</span>.
         </p>
         <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
           {(
@@ -442,16 +458,11 @@ export function StaffImportClient({
           </p>
           {pageModel.automation.lastSuccessfulRunAt ? (
             <p>
-              <span className="text-[#64748B]">Last successful sync</span>{" "}
+              <span className="text-[#64748B]">Last successful cron sync</span>{" "}
               <span className="font-mono text-[#CBD5E1]">{formatStaffSyncRunTime(pageModel.automation.lastSuccessfulRunAt)}</span>
             </p>
           ) : null}
         </div>
-        {pageModel.automation.staleSyncWarning ? (
-          <InfoNotice variant="warning" title="Sync freshness" className="mt-3">
-            {pageModel.automation.staleSyncWarning}
-          </InfoNotice>
-        ) : null}
       </DashboardCard>
 
       {error ? (

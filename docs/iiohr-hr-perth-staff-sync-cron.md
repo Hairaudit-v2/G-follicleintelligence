@@ -23,7 +23,16 @@ Evolved Hair Restoration Perth staff are read from the IIOHR HR JSON feed and pu
 |----------|---------|
 | `IIOHR_HR_PERTH_STAFF_FEED_KEY` | If set, sent as `Authorization: Bearer` when fetching the HR feed. |
 | `ALLOW_EMPTY_HR_SYNC` | When `true`, an empty HR feed returns success with zero rows and **does not** call the staff-sync API (non-empty rows are still required by the API). |
-| `STAFF_SYNC_STALE_WARNING_HOURS` | Hours without a successful run before the HR Staff Import page shows a stale warning (default `48`). |
+| `STAFF_SYNC_STALE_WARNING_HOURS` | Hours without a successful **cron** staff sync before staleness / admin warnings (default `48`). |
+| `STAFF_SYNC_ALERT_EMAIL` | If set, cron logs **alert intent** after failed or degraded runs (placeholder; email not sent yet). See `docs/runbooks/iiohr-hr-staff-sync.md`. |
+
+## Health JSON
+
+- **GET** `/api/health/iiohr-hr-staff-sync` — aggregate cron health from `fi_staff_sync_runs` (no secrets).
+
+## Runbook
+
+- **`docs/runbooks/iiohr-hr-staff-sync.md`** — manual sync, cron curl, reading runs, rollback, disabling cron.
 
 ## Safety
 
