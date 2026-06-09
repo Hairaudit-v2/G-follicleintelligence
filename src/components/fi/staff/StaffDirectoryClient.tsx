@@ -72,7 +72,6 @@ export function StaffDirectoryClient({
   initialFilters: StaffDirectoryFilterState;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const base = `/fi-admin/${tenantId}`;
   const [filters, setFilters] = useState<StaffDirectoryFilterState>(initialFilters);
   const [mode, setMode] = useState<Mode>("idle");

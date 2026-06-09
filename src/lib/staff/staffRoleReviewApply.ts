@@ -84,7 +84,9 @@ export function validateStaffRoleReviewSave(row: Pick<StaffRoleReviewEditableRow
   return null;
 }
 
-export function validateStaffRoleReviewSaveAll(rows: StaffRoleReviewEditableRow[]): string | null {
+export function validateStaffRoleReviewSaveAll(
+  rows: Pick<StaffRoleReviewEditableRow, "staff_role">[]
+): string | null {
   const pending = rows.filter((r) => isStaffRoleNeedsReview(r.staff_role));
   if (pending.length === 0) return null;
   return `${pending.length} staff member${pending.length === 1 ? "" : "s"} still ha${pending.length === 1 ? "s" : "ve"} role needs_review. Assign roles before saving all.`;

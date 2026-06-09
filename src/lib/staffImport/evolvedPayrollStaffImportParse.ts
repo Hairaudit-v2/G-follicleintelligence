@@ -165,7 +165,7 @@ export function parseEvolvedPayrollExportRows(rows: unknown[]): EvolvedPayrollSt
     rows: parsed,
     sourceRowIndices,
     validationErrors,
-    skippedSensitiveFields: [...sensitiveSet].sort(),
+    skippedSensitiveFields: Array.from(sensitiveSet).sort(),
     isPayrollExport,
   };
 }

@@ -86,7 +86,8 @@ export function PayrollStaffImportClient({
           setError("Could not read file.");
           return;
         }
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+        const bytes = new Uint8Array(buf);
+        const base64 = btoa(Array.from(bytes, (b) => String.fromCharCode(b)).join(""));
         startTransition(async () => {
           const parsed = await parseEvolvedPayrollXlsxAction({ tenantId, fileBase64: base64 });
           if (!parsed.ok) {

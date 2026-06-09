@@ -14,6 +14,7 @@ import {
   listPresentSensitivePayrollFields,
   parseEvolvedPayrollExportRow,
   parseEvolvedPayrollExportRows,
+  parseEvolvedPayrollExportXlsxBuffer,
 } from "./evolvedPayrollStaffImportParse";
 import { EVOLVED_PAYROLL_SOURCE_SYSTEM_NORMALIZED, planEvolvedPayrollStaffImport } from "./evolvedPayrollStaffImportPlan";
 import type { EvolvedPayrollImportExistingStaff, EvolvedPayrollStaffImportRow } from "./evolvedPayrollStaffImportTypes";
@@ -170,7 +171,7 @@ test("duplicate email in import file does not create duplicate staff", () => {
 test("existing staff email match does not create duplicate fi_staff", async () => {
   const inserts: { table: string }[] = [];
   const mockFrom = (table: string) => ({
-    insert(payload: Record<string, unknown>) {
+    insert() {
       inserts.push({ table });
       return {
         select: () => ({
@@ -260,7 +261,6 @@ test("real export sample parses 10 Perth staff rows", () => {
   } catch {
     return;
   }
-  const { parseEvolvedPayrollExportXlsxBuffer } = require("./evolvedPayrollStaffImportParse") as typeof import("./evolvedPayrollStaffImportParse");
   const parsed = parseEvolvedPayrollExportXlsxBuffer(buffer);
   assert.equal(parsed.rows.length, 10);
   assert.ok(parsed.rows.some((r) => r.full_name.includes("Popadinoski")));

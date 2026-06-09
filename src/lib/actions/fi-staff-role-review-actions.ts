@@ -103,20 +103,7 @@ export async function saveAllStaffRoleReviewAction(
     await assertCrmTenantStaffManageAllowed({ tenantId: tid, request: undefined });
     const parsed = z.object({ rows: z.array(reviewRowSchema).min(1) }).parse(body);
 
-    const saveAllErr = validateStaffRoleReviewSaveAll(
-      parsed.rows.map((r) => ({
-        staffId: r.staffId,
-        full_name: "",
-        email: null,
-        mobile: null,
-        staff_role: r.staff_role,
-        position_title: null,
-        primary_clinic_id: null,
-        weekly: parseWeekly(r.weekly),
-        is_active: r.is_active,
-        payroll: null,
-      }))
-    );
+    const saveAllErr = validateStaffRoleReviewSaveAll(parsed.rows);
     if (saveAllErr) return { ok: false, error: saveAllErr };
 
     for (const row of parsed.rows) {

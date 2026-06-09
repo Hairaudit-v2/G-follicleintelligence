@@ -100,7 +100,7 @@ export async function loadBookingDisplayContextMaps(
 
   const persons = await loadPersonMetaMap(tid, Array.from(personIds));
 
-  for (const [patientId, record] of patients) {
+  for (const [patientId, record] of Array.from(patients.entries())) {
     const personId = patientPersonByPatientId.get(patientId);
     patients.set(patientId, {
       ...record,
@@ -108,7 +108,7 @@ export async function loadBookingDisplayContextMaps(
     });
   }
 
-  for (const [leadId, record] of leads) {
+  for (const [leadId, record] of Array.from(leads.entries())) {
     const personId = leadPersonByLeadId.get(leadId);
     leads.set(leadId, {
       ...record,
