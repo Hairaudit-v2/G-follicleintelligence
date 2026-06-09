@@ -41,7 +41,7 @@ export async function resolveStaffPinFloorMutation(
   const pin = await getStaffPinClinicSessionIfValid(tenantId.trim());
   const decision = evaluateStaffPinMutationAccess(pin, floorAction);
   assertStaffPinMutationDecision(decision);
-  if (decision.allowed && decision.via === "staff_pin_floor") {
+  if (decision.via === "staff_pin_floor") {
     return "pin_floor";
   }
   return "none";

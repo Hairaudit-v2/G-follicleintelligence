@@ -15,10 +15,11 @@ export class StaffPinMutationBlockedError extends Error {
   }
 }
 
-export type StaffPinMutationDecision =
+export type AllowedStaffPinMutationDecision =
   | { allowed: true; via: "no_pin_session" }
-  | { allowed: true; via: "staff_pin_floor"; staffId: string }
-  | { blocked: true; message: string };
+  | { allowed: true; via: "staff_pin_floor"; staffId: string };
+
+export type StaffPinMutationDecision = AllowedStaffPinMutationDecision | { blocked: true; message: string };
 
 /**
  * Pure evaluator for PIN session mutation policy (testable without cookies/DB).
@@ -36,7 +37,9 @@ export function evaluateStaffPinMutationAccess(
   return { blocked: true, message: STAFF_PIN_RESTRICTED_MUTATION_MESSAGE };
 }
 
-export function assertStaffPinMutationDecision(decision: StaffPinMutationDecision): void {
+export function assertStaffPinMutationDecision(
+  decision: StaffPinMutationDecision
+): asserts decision is AllowedStaffPinMutationDecision {
   if ("blocked" in decision && decision.blocked) {
     throw new StaffPinMutationBlockedError(decision.message);
   }
