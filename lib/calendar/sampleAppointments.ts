@@ -34,6 +34,8 @@ function baseRow(
         | "location"
         | "assigned_staff_id"
         | "assigned_user_id"
+        | "room_id"
+        | "room_required"
         | "clinic_id"
         | "metadata"
         | "description"
@@ -52,6 +54,8 @@ function baseRow(
     clinic_id: partial.clinic_id ?? null,
     assigned_staff_id: partial.assigned_staff_id ?? null,
     assigned_user_id: partial.assigned_user_id ?? null,
+    room_id: partial.room_id ?? null,
+    room_required: partial.room_required ?? true,
     booking_type: partial.booking_type,
     booking_status: partial.booking_status,
     title: partial.title,

@@ -97,7 +97,7 @@ export async function getRoomSchedulingReadiness(args: {
   if (staffRes.error) throw new Error(staffRes.error.message);
 
   const roomEligibilityByServiceId = new Map<string, RoomSchedulingReadinessRoomEligibilityRow[]>();
-  for (const [serviceId, rows] of eligibilityMaps.roomByServiceId) {
+  for (const [serviceId, rows] of Array.from(eligibilityMaps.roomByServiceId.entries())) {
     roomEligibilityByServiceId.set(
       serviceId,
       rows.map((r) => ({ room_id: r.room_id, is_preferred: r.is_preferred, is_active: r.is_active }))
@@ -105,7 +105,7 @@ export async function getRoomSchedulingReadiness(args: {
   }
 
   const staffEligibilityByServiceId = new Map<string, RoomSchedulingReadinessStaffEligibilityRow[]>();
-  for (const [serviceId, rows] of eligibilityMaps.staffByServiceId) {
+  for (const [serviceId, rows] of Array.from(eligibilityMaps.staffByServiceId.entries())) {
     staffEligibilityByServiceId.set(
       serviceId,
       rows.map((r) => ({

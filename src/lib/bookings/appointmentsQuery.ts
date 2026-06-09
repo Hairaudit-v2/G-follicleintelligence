@@ -113,6 +113,7 @@ export type AppointmentsHrefQuery = {
   status?: string;
   type?: string;
   assignedStaffId?: string;
+  assignedUserId?: string;
   clinicId?: string;
   includeCancelled?: boolean;
   create?: boolean;
@@ -133,6 +134,7 @@ export function buildAppointmentsHref(tenantId: string, q: AppointmentsHrefQuery
   if (q.status?.trim()) sp.set("status", q.status.trim());
   if (q.type?.trim()) sp.set("type", q.type.trim());
   if (q.assignedStaffId?.trim()) sp.set("staffId", q.assignedStaffId.trim());
+  if (q.assignedUserId?.trim()) sp.set("assignedUserId", q.assignedUserId.trim());
   if (q.clinicId?.trim()) sp.set("clinicId", q.clinicId.trim());
   if (q.includeCancelled) sp.set("includeCancelled", "1");
   if (q.create) sp.set("create", "1");

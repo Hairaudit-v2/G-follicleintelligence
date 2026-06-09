@@ -8,7 +8,7 @@ import { crmMoveLeadStageAction } from "@/lib/actions/fi-crm-actions";
 import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
 import type { CrmKanbanLeadCard } from "@/src/lib/crm/types";
 import type { CrmShellLeadListItem } from "@/src/lib/crm/types";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import { FI_CRM_KANBAN_REFRESH_EVENT } from "@/src/lib/calendar/quickCallInConstants";
 import { useCrmLeadSlideOver } from "./LeadSlideOver";
@@ -27,7 +27,6 @@ export function CrmKanbanBoard({
   total,
   truncated,
   clinics = [],
-  assignees = [],
 }: {
   tenantId: string;
   stages: FiCrmPipelineStageRow[];
@@ -35,7 +34,6 @@ export function CrmKanbanBoard({
   total: number;
   truncated: boolean;
   clinics?: CrmShellClinicOption[];
-  assignees?: CrmShellUserPickerOption[];
 }) {
   const router = useRouter();
   const { openLead, operatorFiUserId, userRole, canUseClinicFeatures } = useCrmLeadSlideOver();

@@ -155,7 +155,7 @@ export function buildLegacyUserResourceColumns(input: {
   }
 
   const cols: OperationalCalendarResourceColumn[] = [];
-  for (const uid of userIds) {
+  for (const uid of Array.from(userIds)) {
     const u = input.userAssignees.find((x) => x.id === uid);
     const label =
       u?.full_name?.trim() || u?.email?.trim() || `User ${uid.slice(0, 8)}…`;

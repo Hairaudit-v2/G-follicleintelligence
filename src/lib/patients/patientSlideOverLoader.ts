@@ -74,6 +74,8 @@ function mapBookingRow(raw: Record<string, unknown>): FiBookingRow {
     clinic_id: raw.clinic_id != null ? String(raw.clinic_id) : null,
     assigned_staff_id: raw.assigned_staff_id != null ? String(raw.assigned_staff_id) : null,
     assigned_user_id: raw.assigned_user_id != null ? String(raw.assigned_user_id) : null,
+    room_id: raw.room_id != null ? String(raw.room_id) : null,
+    room_required: raw.room_required == null ? true : Boolean(raw.room_required),
     booking_type: String(raw.booking_type),
     booking_status: String(raw.booking_status),
     title: raw.title != null ? String(raw.title) : null,

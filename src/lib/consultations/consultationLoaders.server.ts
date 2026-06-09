@@ -6,6 +6,7 @@ import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 
 import { resolveConsultationConsultantDisplayName } from "./consultationConsultantDisplay";
+import { CONSULTATION_TYPE_DEFINITIONS } from "./consultationTypeConfig";
 import type { ConsultationRow, ConsultationStatus, ConsultationTypeId } from "./consultationTypes";
 
 function mapRow(raw: Record<string, unknown>): ConsultationRow {

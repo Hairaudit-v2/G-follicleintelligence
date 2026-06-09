@@ -36,7 +36,8 @@ import { isBookingCancelled } from "@/src/lib/bookings";
 import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCreateTypes";
 import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption } from "@/src/lib/crm/types";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import { AppointmentCreateSlideOver } from "./AppointmentCreateSlideOver";
@@ -118,7 +119,7 @@ export function AppointmentSlideOverProvider({
   userRole: string;
   canUseClinicFeatures?: boolean;
   children: ReactNode;
-  assignees?: CrmShellUserPickerOption[];
+  assignees?: ClinicalStaffPickerOption[];
   clinics?: CrmShellClinicOption[];
   /** Bookings in the visible range — used for availability + drag checks in calendar. */
   existingBookings?: FiBookingRow[];
@@ -223,7 +224,7 @@ function AppointmentSlideOverShell({
   operatorFiUserId: string;
   userRole: string;
   canUseClinicFeatures?: boolean;
-  assignees: CrmShellUserPickerOption[];
+  assignees: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   existingBookings: FiBookingRow[];
   calendarTimezone: string;

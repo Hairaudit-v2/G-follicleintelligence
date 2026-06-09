@@ -99,7 +99,6 @@ export default async function CrmShellPage({
               total={board.total}
               truncated={board.truncated}
               clinics={scope.clinics}
-              assignees={owners}
             />
           )}
         </section>

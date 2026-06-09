@@ -19,6 +19,8 @@ function todayUtcDayQuery(now: Date): ParsedCalendarQuery {
     assignedUserId: null,
     staffId: null,
     clinicId: null,
+    roomId: null,
+    resourceView: "staff",
     includeCancelled: false,
     search: null,
     sampleMode: false,

@@ -12,6 +12,7 @@ import { parsePatientDetailTab } from "@/src/lib/patients/patientDetailTabs";
 import { parsePatientPreviewSearchParam } from "@/src/lib/patients/patientPreviewQuery";
 import { loadPatientProfile } from "@/src/lib/patients/patientProfileLoader";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -68,7 +69,10 @@ export default async function PatientProfileRoutePage({
   const payload = await loadPatientDetailPayload(tenantId, patientId);
   if (!payload) notFound();
 
-  const services = await loadFiServicesForTenant(tenantId.trim());
+  const [services, clinicalStaffOptions] = await Promise.all([
+    loadFiServicesForTenant(tenantId.trim()),
+    loadClinicalStaffPickerOptions(tenantId.trim()),
+  ]);
 
   return (
     <AppointmentSlideOverProvider
@@ -76,7 +80,7 @@ export default async function PatientProfileRoutePage({
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
       canUseClinicFeatures={session.canUseClinicFeatures}
-      assignees={payload.assignees}
+      assignees={clinicalStaffOptions}
       clinics={payload.clinics}
       existingBookings={payload.bookingRows}
       calendarTimezone={payload.calendarTimezone}

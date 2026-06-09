@@ -4,19 +4,22 @@ import { utcDayBoundsMs } from "@/src/lib/bookings/operatorBookingQuery";
 import { sortBookingsByStartAt } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { useMemo } from "react";
 import { AppointmentListTable } from "./AppointmentListTable";
 
 export function AppointmentTodayView({
   tenantId,
   bookings,
-  assignees,
+  clinicalStaffOptions,
+  userAssignees,
   clinics,
   nowIso,
 }: {
   tenantId: string;
   bookings: FiBookingRow[];
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
+  userAssignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   nowIso: string;
 }) {
@@ -35,7 +38,13 @@ export function AppointmentTodayView({
       <p className="text-sm text-gray-600">
         Appointments starting today (UTC). Use Calendar for drag-and-drop scheduling or List for a wider date range.
       </p>
-      <AppointmentListTable tenantId={tenantId} bookings={todayRows} assignees={assignees} clinics={clinics} />
+      <AppointmentListTable
+        tenantId={tenantId}
+        bookings={todayRows}
+        clinicalStaffOptions={clinicalStaffOptions}
+        userAssignees={userAssignees}
+        clinics={clinics}
+      />
     </div>
   );
 }

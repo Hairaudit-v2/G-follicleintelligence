@@ -6,7 +6,8 @@ import { loadCaseAppointmentBookingsForShell } from "@/src/lib/cases/caseAppoint
 import { loadCaseAdminDetail } from "@/src/lib/cases/caseLoaders";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
-import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
 import { loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
@@ -93,7 +94,7 @@ export default async function CaseDetailRoutePage({
     loadCaseAppointmentBookingsForShell(tenantId, caseId, linkedFiPatientId),
     loadFiServicesForTenant(tenantId.trim()),
     loadTenantOperationalCalendarSettings(tenantId.trim()),
-    loadCrmShellStaffPickerOptions(tenantId.trim()),
+    loadClinicalStaffPickerOptions(tenantId.trim()),
     loadCrmShellScopePickerOptions(tenantId.trim()),
     getBookingsOperatorSessionIfAllowed(tenantId.trim()),
   ]);

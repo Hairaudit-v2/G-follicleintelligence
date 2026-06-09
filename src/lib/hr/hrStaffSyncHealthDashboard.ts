@@ -201,7 +201,6 @@ export function buildHrSyncHealthOverview(input: {
   envChecklist: HrSyncEnvChecklistItem[];
   now?: Date;
 }): HrSyncHealthOverview {
-  const now = input.now ?? new Date();
   const latest = input.runs[0] ?? null;
   const latestSuccess = pickLatestSuccessfulSyncRun(input.runs);
   const staleStaffCount = input.staffIssueRows.filter((r) => r.issues.includes("stale_hr_sync")).length;

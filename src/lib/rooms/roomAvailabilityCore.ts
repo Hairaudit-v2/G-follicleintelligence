@@ -55,9 +55,9 @@ export function roomIdsSharingPhysicalSpace(roomId: string, ctx: RoomOverlapCont
   return ctx.roomIdsByPhysicalKey.get(key) ?? [room.id];
 }
 
-function isActiveBookingRow(row: RoomOverlapBookingLike | FiBookingRow): boolean {
-  if ("cancelled_at" in row && row.cancelled_at) return false;
-  if (isBookingCancelled(row as FiBookingRow)) return false;
+function isActiveBookingRow(row: { booking_status: string; cancelled_at?: string | null }): boolean {
+  if (row.cancelled_at?.trim()) return false;
+  if (isBookingCancelled({ booking_status: row.booking_status, cancelled_at: row.cancelled_at ?? null })) return false;
   if (row.booking_status === "completed") return false;
   return true;
 }

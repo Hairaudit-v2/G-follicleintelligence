@@ -4,6 +4,7 @@ import { loadSurgeryPlanForCase, type CaseSurgeryPlanRow } from "@/src/lib/cases
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadCrmShellPipelineStages, loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
   loadCrmActivityTimelineForLead,
   loadCrmLeadById,
@@ -16,7 +17,6 @@ import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import type {
   CrmLeadConversionState,
   CrmShellClinicOption,
-  CrmShellUserPickerOption,
   FiCrmActivityEventRow,
   FiCrmLeadNoteRow,
   FiCrmLeadRow,
@@ -59,7 +59,7 @@ export type AppointmentSlideOverTimeline = {
 
 export type AppointmentSlideOverPayload = {
   booking: FiBookingRow;
-  assignees: CrmShellUserPickerOption[];
+  assignees: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   reminderJobs: FiReminderJobWithTemplate[];
   clinicalScalesSummary: string | null;

@@ -64,7 +64,7 @@ export function buildRelinkSyncRowsBySourceStaffId(input: {
   const matchedStaffIds: string[] = [];
   const seenExt = new Set<string>();
 
-  for (const [staffId, ext] of hrExtByStaffId) {
+  for (const [staffId, ext] of Array.from(hrExtByStaffId.entries())) {
     if (!staffById.has(staffId)) continue;
     const row = feedByExt.get(ext);
     if (!row) continue;

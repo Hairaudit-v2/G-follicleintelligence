@@ -2,6 +2,12 @@ import "server-only";
 
 import type { IiohrHrPortalStaffRecord } from "@/src/lib/hr/iiohrFiStaffSyncMapper";
 
+function optionalCount(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
 /**
  * Loads Evolved Hair Restoration Perth staff rows from the IIOHR HR portal export feed.
  *
@@ -71,9 +77,9 @@ export async function loadEvolvedPerthHrStaffRecordsForFiPush(): Promise<IiohrHr
       onboarding_status: r.onboarding_status != null ? String(r.onboarding_status).trim() : null,
       onboarding_completed_at:
         r.onboarding_completed_at != null ? String(r.onboarding_completed_at).trim() : null,
-      required_documents_missing_count: r.required_documents_missing_count,
-      training_required_count: r.training_required_count,
-      certificates_outstanding_count: r.certificates_outstanding_count,
+      required_documents_missing_count: optionalCount(r.required_documents_missing_count),
+      training_required_count: optionalCount(r.training_required_count),
+      certificates_outstanding_count: optionalCount(r.certificates_outstanding_count),
       hr_profile_url: r.hr_profile_url != null ? String(r.hr_profile_url).trim() : null,
     });
   }

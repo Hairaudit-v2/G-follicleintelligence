@@ -425,7 +425,7 @@ function WeekViewInner({
       const message = waitlistBookingId ? "Scheduled from waitlist" : "Appointment moved";
       void rescheduleWithToast(booking, startIso, endIso, meta, message);
     },
-    [bookings, canMutateBookings, columnsForView, gridConfig, lanes, rescheduleWithToast, view]
+    [bookings, canMutateBookings, columnsForView, gridConfig, lanes, rescheduleWithToast, staffIdByUserId, view]
   );
 
   const onResizeAppointment = useCallback(

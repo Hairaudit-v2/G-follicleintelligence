@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { PatientSlideOverProvider } from "@/src/components/fi/patients/PatientSlideOver";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
@@ -18,7 +19,7 @@ export default async function PatientsShellLayout({ children, params }: Patients
   const { tenantId } = await params;
   const session = await getClinicFloorPageSession(tenantId);
   const [assignees, scope, calendarSettings, services] = await Promise.all([
-    loadCrmShellStaffPickerOptions(tenantId),
+    loadClinicalStaffPickerOptions(tenantId),
     loadCrmShellScopePickerOptions(tenantId),
     loadTenantOperationalCalendarSettings(tenantId),
     loadFiServicesForTenant(tenantId),

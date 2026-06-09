@@ -8,6 +8,7 @@ import { parseCrmLeadDetailTab } from "@/src/lib/crm/crmLeadDetailTabs";
 import { parseCrmLeadPreviewSearchParam } from "@/src/lib/crm/crmLeadPreviewQuery";
 import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmShellLeadDetailPagePayload } from "@/src/lib/crm/crmShellLoaders";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export const dynamic = "force-dynamic";
@@ -39,9 +40,10 @@ export default async function CrmLeadShellPage({
   const sp = (await searchParams) ?? {};
   const previewLeadId = parseCrmLeadPreviewSearchParam(sp.preview);
   const activeTab = parseCrmLeadDetailTab(sp.tab);
-  const [payload, services] = await Promise.all([
+  const [payload, services, clinicalStaffOptions] = await Promise.all([
     loadCrmShellLeadDetailPagePayload(tenantId, leadId),
     loadFiServicesForTenant(tenantId.trim()),
+    loadClinicalStaffPickerOptions(tenantId.trim()),
   ]);
   if (!payload) {
     return (
@@ -65,7 +67,7 @@ export default async function CrmLeadShellPage({
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
       canUseClinicFeatures={session.canUseClinicFeatures}
-      assignees={payload.detail.staffDirectory}
+      assignees={clinicalStaffOptions}
       clinics={payload.detail.clinics}
       existingBookings={payload.detail.leadBookings}
       calendarTimezone={payload.calendarTimezone}
@@ -80,6 +82,7 @@ export default async function CrmLeadShellPage({
           previewLeadId={previewLeadId}
           groupingNowIso={groupingNowIso}
           services={services}
+          clinicalStaffOptions={clinicalStaffOptions}
         />
       </Suspense>
     </AppointmentSlideOverProvider>

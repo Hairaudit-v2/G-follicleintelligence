@@ -21,6 +21,7 @@ import {
   LeadTasksSection,
 } from "../shared";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { CrmLeadDetailTabNav } from "./CrmLeadDetailTabNav";
 import { CrmLeadDetailBreadcrumbs } from "./CrmLeadDetailBreadcrumbs";
 import { LeadClinicalDetailsPanel } from "./LeadClinicalDetailsPanel";
@@ -39,6 +40,7 @@ export function CrmLeadDetailPageView({
   previewLeadId,
   groupingNowIso,
   services = [],
+  clinicalStaffOptions = [],
 }: {
   tenantId: string;
   leadId: string;
@@ -47,6 +49,7 @@ export function CrmLeadDetailPageView({
   previewLeadId?: string;
   groupingNowIso: string;
   services?: FiServiceRow[];
+  clinicalStaffOptions?: ClinicalStaffPickerOption[];
 }) {
   const state = useCrmLeadDetailState(tenantId, leadId, initialPayload);
   const { payload, lead, personName } = state;
@@ -127,7 +130,7 @@ export function CrmLeadDetailPageView({
             tenantId={tenantId}
             lead={lead}
             bookings={payload.detail.leadBookings}
-            assigneeOptions={payload.detail.owners}
+            assigneeOptions={clinicalStaffOptions}
             clinicOptions={payload.detail.clinics}
             groupingNowIso={groupingNowIso}
             calendarTimezone={payload.calendarTimezone}
@@ -182,7 +185,7 @@ export function CrmLeadDetailPageView({
             tenantId={tenantId}
             leadId={lead.id}
             tasks={payload.detail.tasks}
-            assigneeOptions={payload.detail.owners}
+            assigneeOptions={clinicalStaffOptions}
             groupingNowIso={groupingNowIso}
           />
           <LeadRemindersSection reminderJobs={payload.reminderJobs} limit={20} />

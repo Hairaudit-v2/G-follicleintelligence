@@ -103,6 +103,8 @@ async function loadPatientBookingRows(
       clinic_id: r.clinic_id != null ? String(r.clinic_id) : null,
       assigned_staff_id: r.assigned_staff_id != null ? String(r.assigned_staff_id) : null,
       assigned_user_id: r.assigned_user_id != null ? String(r.assigned_user_id) : null,
+      room_id: r.room_id != null ? String(r.room_id) : null,
+      room_required: r.room_required == null ? true : Boolean(r.room_required),
       booking_type: String(r.booking_type),
       booking_status: String(r.booking_status),
       title: r.title != null ? String(r.title) : null,

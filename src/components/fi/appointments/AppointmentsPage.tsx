@@ -96,7 +96,8 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
         <AppointmentTodayView
           tenantId={tenantId}
           bookings={operator.bookings}
-          assignees={operator.assignees}
+          clinicalStaffOptions={operator.clinicalStaffOptions}
+          userAssignees={operator.assignees}
           clinics={operator.clinics}
           nowIso={operator.groupingNowIso}
         />
