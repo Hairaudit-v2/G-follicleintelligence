@@ -1,4 +1,5 @@
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
+import { isUuidTruncationDisplayLabel } from "@/src/lib/bookings/bookingDisplayName";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 /** Keep client-upserted rows when a soft refresh omits them (e.g. active staff/clinic URL filters). */
@@ -20,8 +21,15 @@ export function mergeCalendarBookingDisplayOnHydrate(
 ): Record<string, OperationalCalendarBookingDisplay> {
   const out = { ...serverDisplay };
   for (const row of mergedBookings) {
-    const hint = clientDisplay[row.id];
-    if (hint && !serverDisplay[row.id]) out[row.id] = hint;
+    const clientHint = clientDisplay[row.id];
+    const serverHint = serverDisplay[row.id];
+    if (clientHint && !serverHint) {
+      out[row.id] = clientHint;
+      continue;
+    }
+    if (clientHint && serverHint && isUuidTruncationDisplayLabel(serverHint.anchorLabel)) {
+      out[row.id] = { ...serverHint, anchorLabel: clientHint.anchorLabel };
+    }
   }
   return out;
 }

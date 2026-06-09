@@ -7,6 +7,7 @@ import {
   mergeCalendarBookingsOnHydrate,
 } from "@/lib/calendar/calendarAppointmentsMerge";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
+import { optimisticBookingAnchorLabel } from "@/src/lib/bookings/bookingDisplayName";
 import {
   bookingDurationMinutesUtc,
   DEFAULT_CALENDAR_TIMEZONE,
@@ -122,14 +123,17 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
       const has = state.bookings.some((b) => b.id === row.id);
       const bookings = has ? state.bookings.map((b) => (b.id === row.id ? row : b)) : [...state.bookings, row];
       const durationMin = bookingDurationMinutesUtc(row.start_at, row.end_at) ?? 30;
+      const existing = state.bookingDisplay[row.id];
       const hint: OperationalCalendarBookingDisplay =
         display ??
-        ({
-          anchorLabel: row.title?.trim() || row.booking_type || "Booking",
-          scalesSummary: null,
-          durationMin,
-          reminderHint: null,
-        } satisfies OperationalCalendarBookingDisplay);
+        (existing
+          ? { ...existing, durationMin }
+          : {
+              anchorLabel: optimisticBookingAnchorLabel(row),
+              scalesSummary: null,
+              durationMin,
+              reminderHint: null,
+            });
       return {
         bookings,
         bookingDisplay: { ...state.bookingDisplay, [row.id]: hint },

@@ -28,72 +28,17 @@ import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellStaffPickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
-import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
-
-function readPatientLabel(metadata: Record<string, unknown> | null | undefined): string | null {
-  if (!metadata || typeof metadata !== "object") return null;
-  const dn = metadata.display_name;
-  const pn = metadata.patient_name;
-  if (typeof dn === "string" && dn.trim()) return dn.trim();
-  if (typeof pn === "string" && pn.trim()) return pn.trim();
-  return null;
-}
-
-async function loadPatientNameAndContactMaps(
-  tenantId: string,
-  patientIds: string[]
-): Promise<{
-  labels: Map<string, string>;
-  contacts: Map<string, { email: string | null; phone: string | null }>;
-}> {
-  const labels = new Map<string, string>();
-  const contacts = new Map<string, { email: string | null; phone: string | null }>();
-  const ids = Array.from(new Set(patientIds.map((x) => x.trim()).filter(Boolean)));
-  if (!ids.length) return { labels, contacts };
-
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_patients")
-    .select("id, metadata")
-    .eq("tenant_id", tenantId.trim())
-    .in("id", ids);
-  if (error) throw new Error(error.message);
-  for (const raw of data ?? []) {
-    const r = raw as { id: string; metadata: unknown };
-    const meta = (r.metadata ?? {}) as Record<string, unknown>;
-    const label = readPatientLabel(meta);
-    if (label) labels.set(String(r.id), label);
-    const { email, phone } = displayFromPersonMetadata(meta);
-    contacts.set(String(r.id), { email, phone });
-  }
-  return { labels, contacts };
-}
-
-async function loadLeadTitleMap(tenantId: string, leadIds: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
-  const ids = Array.from(new Set(leadIds.map((x) => x.trim()).filter(Boolean)));
-  if (!ids.length) return out;
-
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_crm_leads")
-    .select("id, summary")
-    .eq("tenant_id", tenantId.trim())
-    .in("id", ids);
-  if (error) throw new Error(error.message);
-  for (const raw of data ?? []) {
-    const r = raw as { id: string; summary: string | null };
-    const s = r.summary?.trim();
-    if (s) out.set(String(r.id), s);
-  }
-  return out;
-}
+import {
+  anchorLabelForBookingRow,
+  patientContactForBookingRow,
+} from "@/src/lib/bookings/bookingDisplayContext";
+import { loadBookingDisplayContextMaps } from "@/src/lib/bookings/bookingDisplayContext.server";
 
 type ClinicalLite = {
   norwood_scale: string | null;
@@ -266,26 +211,6 @@ function humanizeBookingType(type: string): string {
   return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function anchorLabelForRow(
-  row: FiBookingRow,
-  patientLabels: Map<string, string>,
-  leadTitles: Map<string, string>
-): string {
-  if (row.patient_id?.trim()) {
-    const lab = patientLabels.get(row.patient_id.trim());
-    if (lab) return lab;
-    return `Patient ${row.patient_id.trim().slice(0, 8)}…`;
-  }
-  if (row.lead_id?.trim()) {
-    const t = leadTitles.get(row.lead_id.trim());
-    if (t) return t;
-    return `Lead ${row.lead_id.trim().slice(0, 8)}…`;
-  }
-  if (row.person_id?.trim()) return `Person ${row.person_id.trim().slice(0, 8)}…`;
-  if (row.case_id?.trim()) return `Case ${row.case_id.trim().slice(0, 8)}…`;
-  return row.title?.trim() || humanizeBookingType(row.booking_type);
-}
-
 function staffHasConfiguredHours(staffDirectory: CrmShellUserPickerOption[]): boolean {
   for (const s of staffDirectory) {
     const summary = formatStaffWeeklyHoursSummary(parseStaffWeeklyHours(s.working_hours ?? undefined)).trim();
@@ -355,16 +280,13 @@ export async function loadOperationalCalendarPageData(
 
   const structured = applyStructuredFilters(rawBookings, query, resources.staffUserByStaffId, resources.staffDirectory);
 
-  const patientIds = structured.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()));
-  const leadIds = structured.map((b) => b.lead_id).filter((x): x is string => Boolean(x?.trim()));
-
-  const [patientMaps, leadTitles, clinicalMap] = await Promise.all([
-    loadPatientNameAndContactMaps(tid, patientIds),
-    loadLeadTitleMap(tid, leadIds),
-    loadClinicalDetailsMap(tid, patientIds),
+  const [displayMaps, clinicalMap] = await Promise.all([
+    loadBookingDisplayContextMaps(tid, structured),
+    loadClinicalDetailsMap(
+      tid,
+      structured.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()))
+    ),
   ]);
-  const patientLabels = patientMaps.labels;
-  const patientContacts = patientMaps.contacts;
 
   const bookingDisplay: Record<string, OperationalCalendarBookingDisplay> = {};
   for (const row of structured) {
@@ -384,18 +306,17 @@ export async function loadOperationalCalendarPageData(
       : null;
 
     const cat = serviceForBookingType(services, row.booking_type);
-    const pid = row.patient_id?.trim();
-    const contact = pid ? patientContacts.get(pid) : undefined;
+    const contact = patientContactForBookingRow(row, displayMaps);
     bookingDisplay[row.id] = {
-      anchorLabel: anchorLabelForRow(row, patientLabels, leadTitles),
+      anchorLabel: anchorLabelForBookingRow(row, displayMaps),
       scalesSummary,
       durationMin,
       reminderHint: null,
       procedureCatalogName: cat?.name ?? null,
       procedureCatalogHex: cat?.color ?? null,
       suggestedPrice: cat != null ? cat.base_price : null,
-      patientEmail: contact?.email ?? null,
-      patientPhone: contact?.phone ?? null,
+      patientEmail: contact.email,
+      patientPhone: contact.phone,
     };
   }
 

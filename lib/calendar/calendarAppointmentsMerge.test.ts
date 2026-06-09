@@ -76,4 +76,26 @@ describe("mergeCalendarBookingDisplayOnHydrate", () => {
     const merged = mergeCalendarBookingDisplayOnHydrate(server, client, bookings);
     assert.equal(merged.b?.anchorLabel, "Quick book");
   });
+
+  it("prefers client anchor label when server sends uuid truncation", () => {
+    const bookings = [row("a", "2026-06-10T01:00:00.000Z")];
+    const server: Record<string, OperationalCalendarBookingDisplay> = {
+      a: {
+        anchorLabel: "Patient 8ebbba…",
+        scalesSummary: null,
+        durationMin: 30,
+        reminderHint: null,
+      },
+    };
+    const client: Record<string, OperationalCalendarBookingDisplay> = {
+      a: {
+        anchorLabel: "Jamie Fox",
+        scalesSummary: null,
+        durationMin: 30,
+        reminderHint: null,
+      },
+    };
+    const merged = mergeCalendarBookingDisplayOnHydrate(server, client, bookings);
+    assert.equal(merged.a?.anchorLabel, "Jamie Fox");
+  });
 });

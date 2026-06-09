@@ -1,12 +1,13 @@
 import "server-only";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadCalendarBookings, loadCalendarResources } from "@/src/lib/bookings/calendarLoader";
 import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import { utcCalendarDateStringFromDate } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { ClinicOsCalendarColumnId, ClinicOsCalendarLiveBookingDTO, ClinicOsCalendarReadOnlyPayload } from "./clinicOsCalendarTypes";
+import { anchorLabelForBookingRow } from "@/src/lib/bookings/bookingDisplayContext";
+import { loadBookingDisplayContextMaps } from "@/src/lib/bookings/bookingDisplayContext.server";
 
 function todayUtcDayQuery(now: Date): ParsedCalendarQuery {
   return {
@@ -57,46 +58,6 @@ function mapBookingToGridColumn(row: FiBookingRow): ClinicOsCalendarColumnId {
   return "doctor";
 }
 
-function readPatientLabel(metadata: Record<string, unknown> | null | undefined): string | null {
-  if (!metadata || typeof metadata !== "object") return null;
-  const dn = metadata.display_name;
-  const pn = metadata.patient_name;
-  if (typeof dn === "string" && dn.trim()) return dn.trim();
-  if (typeof pn === "string" && pn.trim()) return pn.trim();
-  return null;
-}
-
-async function loadPatientNameMap(tenantId: string, patientIds: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
-  const ids = Array.from(new Set(patientIds.map((x) => x.trim()).filter(Boolean)));
-  if (!ids.length) return out;
-
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_patients")
-    .select("id, metadata")
-    .eq("tenant_id", tenantId.trim())
-    .in("id", ids);
-  if (error) throw new Error(error.message);
-  for (const raw of data ?? []) {
-    const r = raw as { id: string; metadata: unknown };
-    const label = readPatientLabel(r.metadata as Record<string, unknown>);
-    if (label) out.set(String(r.id), label);
-  }
-  return out;
-}
-
-function patientNameForRow(row: FiBookingRow, patientLabels: Map<string, string>): string {
-  if (row.patient_id?.trim()) {
-    const lab = patientLabels.get(row.patient_id.trim());
-    if (lab) return lab;
-    return `Patient ${row.patient_id.trim().slice(0, 8)}…`;
-  }
-  if (row.lead_id?.trim()) return `Lead ${row.lead_id.trim().slice(0, 8)}…`;
-  if (row.person_id?.trim()) return `Person ${row.person_id.trim().slice(0, 8)}…`;
-  return "Unassigned guest";
-}
-
 /**
  * Read-only bookings for the Clinic OS calendar day view: today's UTC window via
  * {@link loadCalendarBookings} / {@link loadBookingsForCalendarOverlap} — no mutations.
@@ -113,8 +74,7 @@ export async function loadClinicOsCalendarTodayReadOnly(
     loadCalendarResources(tid),
   ]);
 
-  const patientIds = bookings.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()));
-  const patientLabels = await loadPatientNameMap(tid, patientIds);
+  const displayMaps = await loadBookingDisplayContextMaps(tid, bookings);
 
   /** Must match `ClinicOsCalendarHome` grid (8:00–18:00 UTC when live data is shown). */
   const dayStartHourUtc = 8;
@@ -139,7 +99,7 @@ export async function loadClinicOsCalendarTodayReadOnly(
     liveBookings.push({
       id: row.id,
       title: row.title?.trim() || humanizeBookingType(row.booking_type),
-      patientName: patientNameForRow(row, patientLabels),
+      patientName: anchorLabelForBookingRow(row, displayMaps),
       appointmentType: humanizeBookingType(row.booking_type),
       startTime: row.start_at,
       endTime: row.end_at,
