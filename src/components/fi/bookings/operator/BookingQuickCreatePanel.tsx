@@ -10,7 +10,9 @@ import {
 } from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption } from "@/src/lib/crm/types";
+import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import { canSelectStaffForClinicalPicker, type ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
   defaultRangeIso,
   endLocalFromStartLocalAndProcedure,
@@ -30,7 +32,7 @@ const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
 
 export function BookingQuickCreatePanel({
   tenantId,
-  assignees,
+  clinicalStaffOptions,
   clinics,
   adminKey,
   onCreated,
@@ -39,13 +41,11 @@ export function BookingQuickCreatePanel({
   services = [],
 }: {
   tenantId: string;
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
   onCreated: () => void;
-  /** When set (e.g. empty slot click), overwrites start/end datetime fields. */
   slotPrefill?: { startIso: string; endIso: string } | null;
-  /** From `fi_tenant_settings.default_timezone` — wall times use this zone. */
   calendarTimezone?: string | null;
   services?: FiServiceRow[];
 }) {
@@ -58,7 +58,7 @@ export function BookingQuickCreatePanel({
   const [title, setTitle] = useState("");
   const [startLocal, setStartLocal] = useState(() => toDatetimeLocalValue(def.start, tz));
   const [endLocal, setEndLocal] = useState(() => toDatetimeLocalValue(def.end, tz));
-  const [assignee, setAssignee] = useState("");
+  const [assignedStaffId, setAssignedStaffId] = useState("");
   const [location, setLocation] = useState("");
   const [clinicId, setClinicId] = useState("");
   const [anchorKind, setAnchorKind] = useState<"lead" | "person" | "patient" | "case">("lead");
@@ -83,6 +83,11 @@ export function BookingQuickCreatePanel({
 
   const selectedCatalog = useMemo(() => serviceForBookingType(services, bookingType), [services, bookingType]);
 
+  const selectedStaff = useMemo(
+    () => clinicalStaffOptions.find((o) => o.id === assignedStaffId.trim()) ?? null,
+    [clinicalStaffOptions, assignedStaffId]
+  );
+
   function onProcedureTypeChange(nextType: string) {
     setBookingType(nextType);
     const nextEnd = endLocalFromStartLocalAndProcedure(startLocal, nextType, tz, services);
@@ -105,6 +110,11 @@ export function BookingQuickCreatePanel({
         setFeedback("Enter a valid UUID for the selected anchor.");
         return;
       }
+      const sid = assignedStaffId.trim();
+      if (sid && selectedStaff && !canSelectStaffForClinicalPicker(selectedStaff)) {
+        setFeedback(selectedStaff.clinical_readiness.block_reason ?? "Selected staff is not clinically available.");
+        return;
+      }
 
       const anchors =
         anchorKind === "lead"
@@ -123,7 +133,7 @@ export function BookingQuickCreatePanel({
           title: title.trim() || null,
           startAt: startIso,
           endAt: endIso,
-          assignedUserId: assignee.trim() || null,
+          assignedStaffId: sid || null,
           location: location.trim() || null,
           clinicId: clinicId.trim() || null,
           timezone: tz,
@@ -136,6 +146,7 @@ export function BookingQuickCreatePanel({
         onCreated();
         setTitle("");
         setAnchorId("");
+        setAssignedStaffId("");
         const d = defaultRangeIso(tz);
         setStartLocal(toDatetimeLocalValue(d.start, tz));
         setEndLocal(toDatetimeLocalValue(d.end, tz));
@@ -222,19 +233,14 @@ export function BookingQuickCreatePanel({
           </p>
         </label>
         <label className="block text-xs font-medium text-gray-700">
-          Assigned user
-          <select
-            value={assignee}
-            onChange={(e) => setAssignee(e.target.value)}
+          Clinical provider
+          <StaffClinicalSelect
+            tenantId={tenantId}
+            options={clinicalStaffOptions}
+            value={assignedStaffId}
+            onChange={setAssignedStaffId}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm"
-          >
-            <option value="">Unassigned</option>
-            {assignees.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.email ?? u.id.slice(0, 8)}
-              </option>
-            ))}
-          </select>
+          />
         </label>
         <label className="block text-xs font-medium text-gray-700">
           Clinic (optional)

@@ -10,6 +10,7 @@ import {
 } from "@/src/lib/bookings/calendarView";
 import { calendarDayHeading } from "@/src/lib/bookings/calendarLabels";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCalendarEventCard } from "./BookingCalendarEventCard";
@@ -19,14 +20,16 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i);
 export function BookingCalendarDayView({
   lane,
   events,
-  assignees,
+  clinicalStaffOptions,
+  userAssignees = [],
   services = [],
   onSelectBooking,
   onEmptySlot,
 }: {
   lane: CalendarDayLane;
   events: FiBookingRow[];
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
+  userAssignees?: CrmShellUserPickerOption[];
   services?: FiServiceRow[];
   onSelectBooking: (b: FiBookingRow) => void;
   onEmptySlot: (dayKey: string, hour: number) => void;
@@ -72,7 +75,8 @@ export function BookingCalendarDayView({
               <BookingCalendarEventCard
                 key={b.id}
                 booking={b}
-                assignees={assignees}
+                clinicalStaffOptions={clinicalStaffOptions}
+                userAssignees={userAssignees}
                 layout={layout}
                 calendarTimezone={lane.timeZone}
                 services={services}

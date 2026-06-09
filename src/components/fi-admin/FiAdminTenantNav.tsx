@@ -172,17 +172,29 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
 
   const settingsItems: NavLink[] = [];
   if (showCrmNav || showBookingsBoard) {
-    settingsItems.push({
-      href: `${base}/staff`,
-      label: "Staff",
-      title: "Settings — staff directory, working hours, and calendar assignment.",
-    });
+    settingsItems.push(
+      {
+        href: `${base}/staff`,
+        label: "Staff",
+        title: "Settings — staff directory, working hours, and calendar assignment.",
+      },
+      {
+        href: `${base}/staff/link-users`,
+        label: "Link users",
+        title: "Settings — repair staff profiles missing fi_user login links.",
+      }
+    );
   }
   settingsItems.push(
     {
       href: `${base}/services`,
       label: "Services",
       title: "Settings — procedure catalog (durations, types, pricing hints).",
+    },
+    {
+      href: `${base}/rooms`,
+      label: "Rooms",
+      title: "Settings — clinic rooms and physical room keys for scheduling.",
     },
     {
       href: `${base}/configuration`,

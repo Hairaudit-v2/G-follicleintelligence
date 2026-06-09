@@ -20,7 +20,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
     router.refresh();
   }
 
-  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinics, summaryCounts, summaryTruncated, listTruncated, calendarTimezone, services } = data;
+  const { tenantId, query, bookings, reminderJobsByBookingId, assignees, clinicalStaffOptions, clinics, summaryCounts, summaryTruncated, listTruncated, calendarTimezone, services } = data;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
@@ -85,13 +85,14 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
         </p>
       ) : null}
 
-      <BookingFiltersBar tenantId={tenantId} query={query} assignees={assignees} clinics={clinics} />
+      <BookingFiltersBar tenantId={tenantId} query={query} clinicalStaffOptions={clinicalStaffOptions} clinics={clinics} />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_minmax(16rem,22rem)]">
         <BookingOperatorTable
           tenantId={tenantId}
           bookings={bookings}
-          assignees={assignees}
+          clinicalStaffOptions={clinicalStaffOptions}
+          userAssignees={assignees}
           clinics={clinics}
           adminKey={adminKey}
           onEdit={setEditing}
@@ -99,7 +100,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
         />
         <BookingQuickCreatePanel
           tenantId={tenantId}
-          assignees={assignees}
+          clinicalStaffOptions={clinicalStaffOptions}
           clinics={clinics}
           adminKey={adminKey}
           calendarTimezone={calendarTimezone}
@@ -112,7 +113,7 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
         tenantId={tenantId}
         booking={editing}
         reminderJobs={editing ? reminderJobsByBookingId[editing.id] ?? [] : []}
-        assignees={assignees}
+        clinicalStaffOptions={clinicalStaffOptions}
         clinics={clinics}
         adminKey={adminKey}
         clinicCalendarTimezone={calendarTimezone}

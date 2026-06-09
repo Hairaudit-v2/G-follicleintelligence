@@ -9,6 +9,10 @@ export type FiBookingRow = {
   patient_id: string | null;
   case_id: string | null;
   clinic_id: string | null;
+  /** Assigned clinic room (`fi_clinic_rooms`). */
+  room_id: string | null;
+  /** When false, room assignment is optional (non-room workflows). */
+  room_required: boolean;
   /** Primary calendar assignee (`fi_staff`); optional link to `fi_users` via `fi_staff.fi_user_id`. */
   assigned_staff_id: string | null;
   assigned_user_id: string | null;

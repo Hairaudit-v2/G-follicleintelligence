@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
 import { OperationalCalendarPage } from "@/src/components/fi-admin/calendar/OperationalCalendarPage";
@@ -25,9 +25,11 @@ export default async function TenantCalendarPage({
 
   const sp = (await searchParams) ?? {};
   const [data, session] = await Promise.all([
-    loadOperationalCalendarPageData(tenantId.trim(), sp),
+    loadOperationalCalendarPageData(tenantId.trim(), sp, { route: "fi-admin" }),
     getClinicFloorSessionIfAllowed(tenantId.trim()),
   ]);
+
+  if (data.canonicalRedirectHref) redirect(data.canonicalRedirectHref);
 
   return <OperationalCalendarPage data={data} session={session} />;
 }

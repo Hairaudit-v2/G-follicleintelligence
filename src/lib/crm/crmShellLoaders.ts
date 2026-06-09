@@ -203,7 +203,7 @@ export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff")
-    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id, default_timezone, working_hours, is_active")
+    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id, default_timezone, working_hours, is_active, calendar_visible")
     .eq("tenant_id", tenantId.trim())
     .eq("is_active", true)
     .order("full_name", { ascending: true });
@@ -221,6 +221,7 @@ export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<
       default_timezone: string | null;
       working_hours: Record<string, unknown> | null;
       is_active: boolean;
+      calendar_visible: boolean | null;
     };
     const wh =
       r.working_hours && typeof r.working_hours === "object" && !Array.isArray(r.working_hours)
@@ -237,6 +238,7 @@ export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<
       default_timezone: r.default_timezone != null ? String(r.default_timezone).trim() || null : null,
       working_hours: wh,
       is_active: Boolean(r.is_active),
+      calendar_visible: r.calendar_visible == null ? null : Boolean(r.calendar_visible),
     };
   })
     .filter((s) => isStaffBookableForClinicalWorkflow({ is_active: s.is_active, staff_role: s.staff_role }));

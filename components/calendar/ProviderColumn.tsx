@@ -246,11 +246,15 @@ export function ProviderColumnHeader({
   role,
   photoUrl,
   highlighted,
+  readinessWarning,
+  ownerColumn,
 }: {
   name: string;
   role?: string | null;
   photoUrl?: string | null;
   highlighted?: boolean;
+  readinessWarning?: string | null;
+  ownerColumn?: boolean;
 }) {
   return (
     <div
@@ -268,9 +272,24 @@ export function ProviderColumnHeader({
           {providerInitials(name)}
         </AvatarFallback>
       </Avatar>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold tracking-tight text-slate-100">{name}</p>
-        {role ? <p className="truncate text-[11px] font-medium text-slate-400">{role}</p> : null}
+        <div className="flex min-w-0 flex-wrap items-center gap-1">
+          {role ? <p className="truncate text-[11px] font-medium text-slate-400">{role}</p> : null}
+          {ownerColumn ? (
+            <span className="shrink-0 rounded bg-slate-700/80 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-300">
+              Owner
+            </span>
+          ) : null}
+          {readinessWarning ? (
+            <span
+              className="shrink-0 rounded bg-amber-950/70 px-1.5 py-0.5 text-[9px] font-medium text-amber-200 ring-1 ring-amber-500/35"
+              title={readinessWarning}
+            >
+              Blocked
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -288,6 +307,8 @@ export type ProviderColumnProps = {
   name: string;
   role?: string | null;
   photoUrl?: string | null;
+  readinessWarning?: string | null;
+  ownerColumn?: boolean;
   appointments: FiBookingRow[];
   lane: CalendarDayLane;
   gridConfig: BusinessGridConfig;
@@ -329,6 +350,8 @@ export function ProviderColumn({
   name,
   role,
   photoUrl,
+  readinessWarning,
+  ownerColumn,
   appointments,
   lane,
   gridConfig,
@@ -423,7 +446,14 @@ export function ProviderColumn({
       )}
       style={{ "--col-min": stacked ? "100%" : `${minWidthPx}px` } as React.CSSProperties}
     >
-      <ProviderColumnHeader name={name} role={role} photoUrl={photoUrl} highlighted={highlighted || isOver} />
+      <ProviderColumnHeader
+        name={name}
+        role={role}
+        photoUrl={photoUrl}
+        highlighted={highlighted || isOver}
+        readinessWarning={readinessWarning}
+        ownerColumn={ownerColumn}
+      />
 
       <div
         ref={setNodeRef}
@@ -466,7 +496,7 @@ export function ProviderColumn({
                       anchorLabel: d?.anchorLabel,
                       durationMin: d?.durationMin,
                       providerName: name,
-                      roomName: booking.location,
+                      roomName: d?.roomLabel ?? booking.location,
                       procedureCatalogName: d?.procedureCatalogName,
                       procedureCatalogHex: d?.procedureCatalogHex,
                       suggestedPrice: d?.suggestedPrice,

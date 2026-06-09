@@ -114,6 +114,7 @@ export type MonthViewProps = {
   bookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
   resourceColumns: OperationalCalendarResourceColumn[];
+  staffIdByUserId?: Map<string, string>;
   gridConfig: BusinessGridConfig;
   canMutateBookings: boolean;
   onSelectBooking: (b: FiBookingRow) => void;
@@ -258,12 +259,13 @@ type ProviderDaySummary = {
 
 function summarizeProvidersForDay(
   dayBookings: FiBookingRow[],
-  resourceColumns: OperationalCalendarResourceColumn[]
+  resourceColumns: OperationalCalendarResourceColumn[],
+  staffIdByUserId?: Map<string, string>
 ): ProviderDaySummary[] {
   const counts = new Map<string, number>();
 
   for (const booking of dayBookings) {
-    const colId = resourceColumnIdForBooking(booking);
+    const colId = resourceColumnIdForBooking(booking, { staffIdByUserId });
     counts.set(colId, (counts.get(colId) ?? 0) + 1);
   }
 
@@ -365,6 +367,7 @@ function MonthDayCell({
   dayBookings,
   bookingDisplay,
   resourceColumns,
+  staffIdByUserId,
   droppable,
   draggableAppointments,
   pendingAppointmentIds,
@@ -377,6 +380,7 @@ function MonthDayCell({
   dayBookings: FiBookingRow[];
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
   resourceColumns: OperationalCalendarResourceColumn[];
+  staffIdByUserId?: Map<string, string>;
   droppable: boolean;
   draggableAppointments: boolean;
   pendingAppointmentIds?: ReadonlySet<string>;
@@ -394,7 +398,7 @@ function MonthDayCell({
 
   const visible = dayBookings.slice(0, MONTH_MAX_VISIBLE_APPOINTMENTS);
   const overflow = dayBookings.length - visible.length;
-  const providerSummary = summarizeProvidersForDay(dayBookings, resourceColumns);
+  const providerSummary = summarizeProvidersForDay(dayBookings, resourceColumns, staffIdByUserId);
   const visibleProviders = providerSummary.slice(0, 4);
   const overflowProviders = providerSummary.length - visibleProviders.length;
   const isQuietDay = cell.inCurrentMonth && dayBookings.length === 0;
@@ -505,6 +509,7 @@ function MonthViewInner({
   bookings,
   bookingDisplay,
   resourceColumns,
+  staffIdByUserId,
   gridConfig,
   canMutateBookings,
   onSelectBooking,
@@ -730,6 +735,7 @@ function MonthViewInner({
             dayBookings={buckets.get(cell.dayKey) ?? []}
             bookingDisplay={bookingDisplay}
             resourceColumns={resourceColumns}
+            staffIdByUserId={staffIdByUserId}
             droppable={canMutateBookings}
             draggableAppointments={canMutateBookings}
             pendingAppointmentIds={pendingAppointmentIds}

@@ -12,7 +12,9 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import type { CrmShellClinicOption } from "@/src/lib/crm/types";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
   endLocalFromStartLocalAndProcedure,
   fromDatetimeLocalValue,
@@ -26,7 +28,7 @@ export function BookingEditDrawer({
   tenantId,
   booking,
   reminderJobs,
-  assignees,
+  clinicalStaffOptions,
   clinics,
   adminKey,
   clinicCalendarTimezone,
@@ -37,7 +39,7 @@ export function BookingEditDrawer({
   tenantId: string;
   booking: FiBookingRow | null;
   reminderJobs: FiReminderJobWithTemplate[];
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
   /** Tenant/clinic IANA timezone for datetime-local fields. */
@@ -57,7 +59,7 @@ export function BookingEditDrawer({
   const [endLocal, setEndLocal] = useState("");
   const [timezone, setTimezone] = useState("");
   const [location, setLocation] = useState("");
-  const [assignee, setAssignee] = useState("");
+  const [assignedStaffId, setAssignedStaffId] = useState("");
   const [clinicId, setClinicId] = useState("");
 
   useEffect(() => {
@@ -70,7 +72,7 @@ export function BookingEditDrawer({
     setEndLocal(toDatetimeLocalValue(booking.end_at, clinicCalendarTimezone ?? booking.timezone));
     setTimezone(booking.timezone ?? clinicCalendarTimezone ?? "");
     setLocation(booking.location ?? "");
-    setAssignee(booking.assigned_user_id ?? "");
+    setAssignedStaffId(booking.assigned_staff_id ?? "");
     setClinicId(booking.clinic_id ?? "");
     setFeedback(null);
   }, [booking, clinicCalendarTimezone]);
@@ -138,7 +140,7 @@ export function BookingEditDrawer({
           timezone: timezone.trim() || null,
           location: location.trim() || null,
           clinicId: clinicId.trim() || null,
-          assignedUserId: assignee.trim() || null,
+          assignedStaffId: assignedStaffId.trim() || null,
           metadata: booking.metadata ?? {},
         })
       );
@@ -298,19 +300,14 @@ export function BookingEditDrawer({
                 </select>
               </label>
               <label className="block text-xs font-medium text-gray-700">
-                Assigned user
-                <select
-                  value={assignee}
-                  onChange={(e) => setAssignee(e.target.value)}
+                Assigned staff
+                <StaffClinicalSelect
+                  tenantId={tenantId}
+                  options={clinicalStaffOptions}
+                  value={assignedStaffId}
+                  onChange={setAssignedStaffId}
                   className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
-                >
-                  <option value="">Unassigned</option>
-                  {assignees.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.email ?? u.id.slice(0, 8)}
-                    </option>
-                  ))}
-                </select>
+                />
               </label>
               <button
                 type="submit"

@@ -40,6 +40,8 @@ function tryParseIso(s: string): string | null {
   return new Date(ms).toISOString();
 }
 
+export type CalendarResourceView = "staff" | "room" | "clinic";
+
 export type ParsedCalendarQuery = {
   view: CalendarViewMode;
   /** Clinic-local calendar anchor `YYYY-MM-DD` (midnight boundary in {@link calendarTimezone}). */
@@ -52,6 +54,10 @@ export type ParsedCalendarQuery = {
   /** `fi_staff.id` filter (calendar / bookings). */
   staffId: string | null;
   clinicId: string | null;
+  /** `fi_clinic_rooms.id` filter. */
+  roomId: string | null;
+  /** Day-view column mode: staff providers, rooms, or clinic sites. */
+  resourceView: CalendarResourceView;
   includeCancelled: boolean;
   /** Substring match against title, type, patient/lead label (server-side). */
   search: string | null;
@@ -127,13 +133,23 @@ export function parseCalendarSearchParams(
   const bookingType = typeRaw && isAllowedBookingType(typeRaw) ? typeRaw : null;
 
   const assignedRaw = firstString(searchParams.assignedUserId).trim();
-  const assignedUserId = assignedRaw && isUuid(assignedRaw) ? assignedRaw : null;
+  const userIdRaw = firstString(searchParams.userId).trim();
+  const assignedUserId =
+    (assignedRaw && isUuid(assignedRaw) ? assignedRaw : null) ??
+    (userIdRaw && isUuid(userIdRaw) ? userIdRaw : null);
 
   const staffRaw = firstString(searchParams.staffId).trim();
   const staffId = staffRaw && isUuid(staffRaw) ? staffRaw : null;
 
   const clinicRaw = firstString(searchParams.clinicId).trim();
   const clinicId = clinicRaw && isUuid(clinicRaw) ? clinicRaw : null;
+
+  const roomRaw = firstString(searchParams.roomId).trim();
+  const roomId = roomRaw && isUuid(roomRaw) ? roomRaw : null;
+
+  const resourceViewRaw = firstString(searchParams.resourceView).trim().toLowerCase();
+  const resourceView: CalendarResourceView =
+    resourceViewRaw === "room" || resourceViewRaw === "clinic" ? resourceViewRaw : "staff";
 
   let includeCancelled = parseBoolParam(searchParams.includeCancelled);
   if (status === "cancelled") includeCancelled = true;
@@ -159,6 +175,8 @@ export function parseCalendarSearchParams(
     assignedUserId,
     staffId,
     clinicId,
+    roomId,
+    resourceView,
     includeCancelled,
     search,
     sampleMode,
@@ -179,6 +197,8 @@ export type CalendarHrefQuery = {
   staffId?: string | null | "";
   /** Pass `null` or `""` to clear the location filter (`All locations`). */
   clinicId?: string | null | "";
+  roomId?: string | null | "";
+  resourceView?: CalendarResourceView | null | "";
   /** Set to `null` or `""` to clear `role=` from the URL. */
   role?: CalendarStaffRoleBucket | null | "";
   includeCancelled?: boolean;
@@ -207,6 +227,8 @@ export function buildCalendarHref(
   if (q.assignedUserId?.trim()) sp.set("assignedUserId", q.assignedUserId.trim());
   if (q.staffId?.trim()) sp.set("staffId", q.staffId.trim());
   if (q.clinicId?.trim()) sp.set("clinicId", q.clinicId.trim());
+  if (q.roomId?.trim()) sp.set("roomId", q.roomId.trim());
+  if (q.resourceView && q.resourceView !== "staff") sp.set("resourceView", q.resourceView);
   if (q.role === "doctor" || q.role === "nurse") sp.set("role", q.role);
   if (q.includeCancelled) sp.set("includeCancelled", "1");
   if (q.q?.trim()) sp.set("q", q.q.trim());
@@ -246,6 +268,22 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
         ? undefined
         : String(patch.clinicId).trim() || undefined
       : current.clinicId ?? undefined;
+
+  const roomId: string | undefined =
+    patch.roomId !== undefined
+      ? cleared(patch.roomId)
+        ? undefined
+        : String(patch.roomId).trim() || undefined
+      : current.roomId ?? undefined;
+
+  const resourceView: CalendarResourceView | undefined =
+    patch.resourceView !== undefined
+      ? cleared(patch.resourceView)
+        ? undefined
+        : patch.resourceView === "room" || patch.resourceView === "clinic"
+          ? patch.resourceView
+          : "staff"
+      : current.resourceView;
 
   let waitingOnly =
     patch.waiting !== undefined ? Boolean(patch.waiting) : current.waitingOnly;
@@ -289,6 +327,8 @@ export function mergeCalendarHrefQuery(current: ParsedCalendarQuery, patch: Cale
     assignedUserId: assignedUserIdOut,
     staffId,
     clinicId,
+    roomId,
+    resourceView,
     role,
     includeCancelled: patch.includeCancelled !== undefined ? patch.includeCancelled : current.includeCancelled,
     q: patch.q !== undefined ? patch.q : current.search ?? undefined,

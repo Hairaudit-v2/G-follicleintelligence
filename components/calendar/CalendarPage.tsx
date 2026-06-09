@@ -17,6 +17,7 @@ import {
   type CalendarRoute,
 } from "@/src/lib/bookings/calendarQuery";
 import type { OperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarTypes";
+import { buildStaffUserLinkIndex, calendarFilterColumnId } from "@/src/lib/calendar/operationalCalendarColumns";
 import { monthEmptyDayQuickCreateLocalStart } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { BookingCalendarDrawer } from "@/src/components/fi/bookings/calendar/BookingCalendarDrawer";
@@ -69,7 +70,7 @@ export function CalendarPage({
   const [callInPrefill, setCallInPrefill] = useState<{
     localStart?: string;
     clinicId?: string;
-    assignedUserId?: string;
+    assignedStaffId?: string;
   }>({});
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
   const [quickCreatePrefill, setQuickCreatePrefill] = useState<CalendarQuickCreatePrefill | null>(null);
@@ -94,12 +95,19 @@ export function CalendarPage({
 
   const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
 
+  const { staffIdByUserId } = useMemo(() => buildStaffUserLinkIndex(data.staffDirectory), [data.staffDirectory]);
+
   const quickCreateColumnIdFromFilters = useMemo(() => {
-    if (data.query.staffId?.trim()) return `s:${data.query.staffId.trim()}`;
-    if (data.query.assignedUserId?.trim()) return `u:${data.query.assignedUserId.trim()}`;
+    const fromStaff = calendarFilterColumnId(data.query, staffIdByUserId);
+    if (fromStaff) return fromStaff;
     if (data.query.clinicId?.trim()) return `c:${data.query.clinicId.trim()}`;
     return undefined;
-  }, [data.query.staffId, data.query.assignedUserId, data.query.clinicId]);
+  }, [data.query, staffIdByUserId]);
+
+  const highlightedColumnId = useMemo(
+    () => calendarFilterColumnId(data.query, staffIdByUserId) ?? null,
+    [data.query, staffIdByUserId]
+  );
 
   const quickCallInEnabled = Boolean(
     data.canMutateBookings && crmShellSession && (crmShellSession.canUseClinicFeatures ?? true)
@@ -300,6 +308,7 @@ export function CalendarPage({
                 bookings={bookings}
                 bookingDisplay={bookingDisplay}
                 resourceColumns={data.resourceColumns}
+                staffIdByUserId={staffIdByUserId}
                 gridConfig={data.gridConfig}
                 canMutateBookings={data.canMutateBookings}
                 onSelectBooking={(b) => setDrawer(b)}
@@ -324,15 +333,11 @@ export function CalendarPage({
                 gridConfig={data.gridConfig}
                 bookingDisplay={bookingDisplay}
                 resourceColumns={data.resourceColumns}
+                resourceView={data.query.resourceView}
+                staffIdByUserId={staffIdByUserId}
                 canMutateBookings={data.canMutateBookings}
                 bookings={bookings}
-                highlightedColumnId={
-                  data.query.staffId
-                    ? `s:${data.query.staffId}`
-                    : data.query.assignedUserId
-                      ? `u:${data.query.assignedUserId}`
-                      : null
-                }
+                highlightedColumnId={highlightedColumnId}
                 onSelectBooking={(b) => setDrawer(b)}
                 onRescheduleBooking={rescheduleBooking}
                 pendingAppointmentIds={pendingIds}
@@ -446,7 +451,7 @@ export function CalendarPage({
         tenantId={data.tenantId}
         booking={editing}
         reminderJobs={editing ? data.reminderJobsByBookingId[editing.id] ?? [] : []}
-        assignees={data.assignees}
+        clinicalStaffOptions={data.staffDirectory}
         clinics={data.clinics}
         adminKey=""
         clinicCalendarTimezone={data.calendarTimezone}
@@ -504,9 +509,9 @@ export function CalendarPage({
             calendarTimezone={data.calendarTimezone}
             initialLocalStart={callInPrefill.localStart ?? slotPrefillLocal}
             initialClinicId={callInPrefill.clinicId ?? null}
-            initialAssignedUserId={callInPrefill.assignedUserId ?? null}
+            initialAssignedStaffId={callInPrefill.assignedStaffId ?? null}
             clinics={data.clinics}
-            assignees={data.assignees}
+            clinicalStaffOptions={data.staffDirectory}
             services={data.services}
             onCreated={({ booking }) => {
               upsertBooking(booking);

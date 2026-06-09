@@ -5,6 +5,8 @@ import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingT
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { useAppointmentSlideOverOptional } from "./AppointmentSlideOver";
 import { AppointmentSlideOverTrigger } from "./AppointmentSlideOverTrigger";
 
@@ -14,10 +16,12 @@ function fmtTs(iso: string): string {
   return d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
 }
 
-function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
-  if (!id) return "—";
-  const o = options.find((x) => x.id === id);
-  return o?.email?.trim() || id.slice(0, 8);
+function assigneeLabel(
+  clinicalStaffOptions: ClinicalStaffPickerOption[],
+  userAssignees: CrmShellUserPickerOption[],
+  row: FiBookingRow
+): string {
+  return bookingAssignmentDisplay(clinicalStaffOptions, userAssignees, row).summaryLine;
 }
 
 function clinicLabel(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
@@ -31,12 +35,14 @@ function clinicLabel(clinics: CrmShellClinicOption[], row: FiBookingRow): string
 export function AppointmentListTable({
   tenantId,
   bookings,
-  assignees,
+  clinicalStaffOptions,
+  userAssignees,
   clinics,
 }: {
   tenantId: string;
   bookings: FiBookingRow[];
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
+  userAssignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
 }) {
   const slide = useAppointmentSlideOverOptional();
@@ -58,7 +64,7 @@ export function AppointmentListTable({
             <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Appointment</th>
             <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Type</th>
             <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Staff</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Provider</th>
             <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Clinic</th>
           </tr>
         </thead>
@@ -95,7 +101,7 @@ export function AppointmentListTable({
                 <td className="px-3 py-2">
                   <BookingStatusBadge status={row.booking_status} />
                 </td>
-                <td className="px-3 py-2 text-gray-700">{assigneeLabel(assignees, row.assigned_user_id)}</td>
+                <td className="px-3 py-2 text-gray-700">{assigneeLabel(clinicalStaffOptions, userAssignees, row)}</td>
                 <td className="px-3 py-2 text-gray-700">{clinicLabel(clinics, row)}</td>
               </tr>
             );

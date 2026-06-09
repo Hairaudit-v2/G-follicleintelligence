@@ -65,6 +65,7 @@ import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { resourceColumnIdForBooking, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import { assigneeMetaFromResourceColumnId } from "@/src/lib/calendar/operationalCalendarColumns";
 import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarResourceColumn,
@@ -94,6 +95,10 @@ export type WeekViewProps = {
   gridConfig: BusinessGridConfig;
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
   resourceColumns: OperationalCalendarResourceColumn[];
+  /** Day-view column assignment mode from URL `resourceView`. */
+  resourceView?: ParsedCalendarQuery["resourceView"];
+  /** Maps linked `fi_users.id` → `fi_staff.id` for column placement and drag assignee. */
+  staffIdByUserId?: Map<string, string>;
   canMutateBookings: boolean;
   bookings: FiBookingRow[];
   /** Highlight a provider column by id (day view). */
@@ -131,6 +136,8 @@ type CalendarColumn = {
   subtitle: string | null;
   dayKey: string;
   photoUrl?: string | null;
+  readinessWarning?: string | null;
+  columnKind?: OperationalCalendarResourceColumn["kind"];
 };
 
 function snapToQuarterHourModifier(): Modifier {
@@ -141,20 +148,11 @@ function snapToQuarterHourModifier(): Modifier {
   });
 }
 
-function assigneeFromColumn(column: CalendarColumn): WeekViewRescheduleMeta {
-  if (column.id.startsWith("s:")) {
-    return { assignedStaffId: column.id.slice(2) };
-  }
-  if (column.id.startsWith("u:")) {
-    return { assignedUserId: column.id.slice(2), clinicId: null };
-  }
-  if (column.id.startsWith("c:")) {
-    return { assignedStaffId: null, clinicId: column.id.slice(2) };
-  }
-  if (column.id === "unassigned") {
-    return { assignedStaffId: null, clinicId: null };
-  }
-  return {};
+function assigneeFromColumn(
+  column: CalendarColumn,
+  staffIdByUserId: Map<string, string>
+): WeekViewRescheduleMeta {
+  return assigneeMetaFromResourceColumnId(column.id, staffIdByUserId);
 }
 
 function WeekViewInner({
@@ -166,6 +164,8 @@ function WeekViewInner({
   gridConfig,
   bookingDisplay,
   resourceColumns,
+  resourceView = "staff",
+  staffIdByUserId = new Map(),
   canMutateBookings,
   bookings,
   highlightedColumnId,
@@ -222,6 +222,8 @@ function WeekViewInner({
         subtitle: col.subtitle,
         dayKey,
         photoUrl: null,
+        readinessWarning: col.readinessWarning ?? null,
+        columnKind: col.kind,
       }));
     }
     return lanes.map((lane) => ({
@@ -415,7 +417,7 @@ function WeekViewInner({
       const targetColumn = columnsForView.find((c) => c.id === drop.columnId && c.dayKey === drop.dayKey);
       const meta: WeekViewRescheduleMeta | undefined =
         usesProviderColumns(view) && targetColumn
-          ? { ...assigneeFromColumn(targetColumn), clearWaitlist: Boolean(waitlistBookingId) }
+          ? { ...assigneeFromColumn(targetColumn, staffIdByUserId), clearWaitlist: Boolean(waitlistBookingId) }
           : waitlistBookingId
             ? { clearWaitlist: true }
             : undefined;
@@ -440,7 +442,9 @@ function WeekViewInner({
 
       const dayBookings = buckets[lane.dayKey] ?? [];
       const colBookings = usesProviderColumns(view)
-        ? dayBookings.filter((b) => resourceColumnIdForBooking(b) === col.id)
+        ? dayBookings.filter(
+            (b) => resourceColumnIdForBooking(b, { resourceView, staffIdByUserId }) === col.id
+          )
         : dayBookings;
 
       return (
@@ -451,6 +455,8 @@ function WeekViewInner({
           name={col.label}
           role={col.subtitle}
           photoUrl={col.photoUrl}
+          readinessWarning={col.readinessWarning}
+          ownerColumn={col.columnKind === "fi_user"}
           appointments={colBookings}
           lane={lane}
           gridConfig={gridConfig}
@@ -490,6 +496,8 @@ function WeekViewInner({
       onSelectBooking,
       pendingAppointmentIds,
       primaryLane,
+      resourceView,
+      staffIdByUserId,
       swipeLayout,
       view,
       viewportRange,

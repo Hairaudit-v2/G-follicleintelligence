@@ -49,6 +49,7 @@ export async function createStaffAction(
 
     const tid = tenantId.trim();
     revalidatePath(`/fi-admin/${tid}/staff`);
+    revalidatePath(`/fi-admin/${tid}/staff/link-users`);
     revalidatePath(`/fi-admin/${tid}/staff/role-review`);
     revalidatePath(`/fi-admin/${tid}/hr/staff-readiness`);
     revalidatePath(`/fi-admin/${tid}/calendar`);
@@ -83,6 +84,7 @@ export async function updateStaffAction(
 
     const tid = tenantId.trim();
     revalidatePath(`/fi-admin/${tid}/staff`);
+    revalidatePath(`/fi-admin/${tid}/staff/link-users`);
     revalidatePath(`/fi-admin/${tid}/staff/role-review`);
     revalidatePath(`/fi-admin/${tid}/hr/staff-readiness`);
     revalidatePath(`/fi-admin/${tid}/calendar`);

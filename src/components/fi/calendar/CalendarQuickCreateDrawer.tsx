@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { X } from "lucide-react";
 
 import { calendarQuickCreateBookingAction } from "@/lib/actions/fi-calendar-quick-create-actions";
+import { loadRoomPickerOptionsAction } from "@/lib/actions/fi-rooms-actions";
 import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import {
   addUtcMinutesToIso,
@@ -24,13 +25,17 @@ import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/c
 import { quickTemplateDurationMinutes } from "@/src/lib/bookings/servicesCatalog";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
+import type { RoomPickerOption } from "@/src/lib/rooms/roomTypes";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import {
+  buildStaffUserLinkIndex,
+  columnPrefillAssignment,
+} from "@/src/lib/calendar/operationalCalendarColumns";
+import {
   canSelectStaffForClinicalPicker,
-  formatClinicalPickerOptionLabel,
   type ClinicalStaffPickerOption,
 } from "@/src/lib/staff/clinicalStaffPicker";
-import { StaffReadinessPickerWarning } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import {
   fiButtonVariantClassNames,
   fiPageHeaderVariantClassNames,
@@ -60,23 +65,29 @@ type AnchorSelection =
   | { kind: "patient"; hit: ConsultationLinkSearchPatientHit }
   | { kind: "lead"; hit: ConsultationLinkSearchLeadHit };
 
-function columnResourceDefaults(columnId?: string): {
+function columnResourceDefaults(
+  columnId: string | undefined,
+  staffIdByUserId: Map<string, string>
+): {
   clinicId: string;
+  roomId: string;
   assignedStaffId: string;
-  assignedUserId: string;
-  assigneeSelect: string;
+  legacyOwnerUserId: string;
 } {
   const col = columnId?.trim() ?? "";
+  const assignment = columnPrefillAssignment(col, staffIdByUserId);
+  if (col.startsWith("r:")) {
+    return { clinicId: "", roomId: col.slice(2), assignedStaffId: assignment.assignedStaffId, legacyOwnerUserId: assignment.legacyOwnerUserId };
+  }
   if (col.startsWith("c:")) {
-    return { clinicId: col.slice(2), assignedStaffId: "", assignedUserId: "", assigneeSelect: "" };
+    return { clinicId: col.slice(2), roomId: "", assignedStaffId: assignment.assignedStaffId, legacyOwnerUserId: assignment.legacyOwnerUserId };
   }
-  if (col.startsWith("s:")) {
-    return { clinicId: "", assignedStaffId: col.slice(2), assignedUserId: "", assigneeSelect: `s:${col.slice(2)}` };
-  }
-  if (col.startsWith("u:")) {
-    return { clinicId: "", assignedStaffId: "", assignedUserId: col.slice(2), assigneeSelect: `u:${col.slice(2)}` };
-  }
-  return { clinicId: "", assignedStaffId: "", assignedUserId: "", assigneeSelect: "" };
+  return {
+    clinicId: "",
+    roomId: "",
+    assignedStaffId: assignment.assignedStaffId,
+    legacyOwnerUserId: assignment.legacyOwnerUserId,
+  };
 }
 
 export function CalendarQuickCreateDrawer({
@@ -99,10 +110,10 @@ export function CalendarQuickCreateDrawer({
   calendarTimezone: string;
   prefill: CalendarQuickCreatePrefill | null;
   clinics: CrmShellClinicOption[];
+  /** Legacy fi_users — owner column labels only. */
   assignees: CrmShellUserPickerOption[];
   staffDirectory: ClinicalStaffPickerOption[];
   setupRecommendations?: string[];
-  /** Tenant procedure catalog — durations override template defaults when present. */
   services?: FiServiceRow[];
   onCreated: (booking: FiBookingRow, displayLabel: string) => void;
   workflowVariant?: "default" | "fiOs";
@@ -111,12 +122,17 @@ export function CalendarQuickCreateDrawer({
   const titleId = useId();
   const tz = calendarTimezone.trim();
   const tzLabel = displayCalendarTimezoneSubtitle(tz);
+  const { staffIdByUserId } = useMemo(() => buildStaffUserLinkIndex(staffDirectory), [staffDirectory]);
 
   const [templateId, setTemplateId] = useState<CalendarQuickTemplateId>("consultation");
   const [startLocal, setStartLocal] = useState("");
   const [endLocal, setEndLocal] = useState("");
   const [clinicId, setClinicId] = useState("");
-  const [assigneeSelect, setAssigneeSelect] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [roomOptions, setRoomOptions] = useState<RoomPickerOption[]>([]);
+  const [roomLoading, setRoomLoading] = useState(false);
+  const [assignedStaffId, setAssignedStaffId] = useState("");
+  const [legacyOwnerUserId, setLegacyOwnerUserId] = useState("");
   const [patientName, setPatientName] = useState("");
   const [patientMobile, setPatientMobile] = useState("");
   const [patientEmail, setPatientEmail] = useState("");
@@ -130,12 +146,21 @@ export function CalendarQuickCreateDrawer({
   const [busy, setBusy] = useState(false);
   const [formErr, setFormErr] = useState<string | null>(null);
 
+  const legacyOwnerLabel = useMemo(() => {
+    const uid = legacyOwnerUserId.trim();
+    if (!uid) return null;
+    const u = assignees.find((x) => x.id === uid);
+    return u?.full_name?.trim() || u?.email?.trim() || `User ${uid.slice(0, 8)}…`;
+  }, [assignees, legacyOwnerUserId]);
+
   const resetFromPrefill = useCallback(() => {
     if (!prefill?.localStart?.trim()) return;
-    const colDefaults = columnResourceDefaults(prefill.columnId);
+    const colDefaults = columnResourceDefaults(prefill.columnId, staffIdByUserId);
     const clinicFromFilter = prefill.defaultClinicId?.trim() ?? "";
     setClinicId(colDefaults.clinicId || clinicFromFilter || "");
-    setAssigneeSelect(colDefaults.assigneeSelect);
+    setRoomId(colDefaults.roomId || "");
+    setAssignedStaffId(colDefaults.assignedStaffId);
+    setLegacyOwnerUserId(colDefaults.legacyOwnerUserId);
     const tpl = prefill.templateId ? calendarQuickTemplateById(prefill.templateId) : null;
     const nextTpl = tpl?.id ?? "consultation";
     setTemplateId(nextTpl);
@@ -170,7 +195,7 @@ export function CalendarQuickCreateDrawer({
       selectedSlotUtcIso: startIso,
       endUtcIso: endIso,
     });
-  }, [prefill, services, tz]);
+  }, [prefill, services, staffIdByUserId, tz]);
 
   useEffect(() => {
     if (!open) return;
@@ -217,8 +242,52 @@ export function CalendarQuickCreateDrawer({
     };
   }, [open, tenantId, debouncedPatientQ]);
 
+  const tplForRooms = useMemo(() => calendarQuickTemplateById(templateId), [templateId]);
+
+  useEffect(() => {
+    if (!open) return;
+    const cid = clinicId.trim();
+    const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
+    const endIso = fromDatetimeLocalValueInTimezone(endLocal, tz);
+    if (!cid || !startIso || !endIso || !tplForRooms) {
+      setRoomOptions([]);
+      return;
+    }
+    let cancelled = false;
+    setRoomLoading(true);
+    void (async () => {
+      const r = await loadRoomPickerOptionsAction(tenantId.trim(), {
+        clinicId: cid,
+        bookingType: tplForRooms.bookingType,
+        startAt: startIso,
+        endAt: endIso,
+      });
+      if (cancelled) return;
+      if (!r.ok) {
+        setRoomOptions([]);
+        setRoomLoading(false);
+        return;
+      }
+      setRoomOptions(r.options);
+      const auto = r.options.find((o) => o.eligible && o.available && o.room.is_active && o.preferred);
+      const only = r.options.filter((o) => o.eligible && o.available && o.room.is_active);
+      if (!roomId.trim()) {
+        if (auto) setRoomId(auto.room.id);
+        else if (only.length === 1) setRoomId(only[0]!.room.id);
+      } else {
+        const current = r.options.find((o) => o.room.id === roomId.trim());
+        if (current && current.disabledReason) setRoomId("");
+      }
+      setRoomLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, tenantId, clinicId, startLocal, endLocal, tz, tplForRooms, templateId, roomId]);
+
   const onTemplateChange = useCallback(
     (id: CalendarQuickTemplateId) => {
+      setRoomId("");
       setTemplateId(id);
       const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
       const t = calendarQuickTemplateById(id);
@@ -241,31 +310,10 @@ export function CalendarQuickCreateDrawer({
     [services, templateId, tz]
   );
 
-  const selectedStaff = useMemo(() => {
-    const m = assigneeSelect.match(/^s:(.+)$/);
-    if (!m) return null;
-    return staffDirectory.find((s) => s.id === m[1]) ?? null;
-  }, [assigneeSelect, staffDirectory]);
-
-  const assigneeOptions = useMemo(() => {
-    const rows: { value: string; label: string; disabled?: boolean }[] = [{ value: "", label: "Unassigned" }];
-    for (const s of staffDirectory) {
-      const sid = s.id?.trim();
-      if (!sid) continue;
-      const selectable = canSelectStaffForClinicalPicker(s);
-      rows.push({
-        value: `s:${sid}`,
-        label: `${formatClinicalPickerOptionLabel(s)} (staff)`,
-        disabled: !selectable,
-      });
-    }
-    for (const u of assignees) {
-      const uid = u.id?.trim();
-      if (!uid) continue;
-      rows.push({ value: `u:${uid}`, label: u.email?.trim() || uid.slice(0, 8) });
-    }
-    return rows;
-  }, [assignees, staffDirectory]);
+  const selectedStaff = useMemo(
+    () => staffDirectory.find((s) => s.id === assignedStaffId.trim()) ?? null,
+    [assignedStaffId, staffDirectory]
+  );
 
   const isFiOsFlow = workflowVariant === "fiOs";
 
@@ -275,19 +323,12 @@ export function CalendarQuickCreateDrawer({
     const tStart = startLocal.slice(11, 16);
     const tEnd = endLocal.slice(11, 16);
     const c = clinics.find((x) => x.id === clinicId)?.display_name?.trim();
-    const assigneeLabel =
-      assigneeOptions.find((o) => o.value === assigneeSelect)?.label?.trim().replace(/\s*\(staff\)\s*$/, "") ?? "";
+    const providerLabel = selectedStaff?.full_name?.trim() || selectedStaff?.email?.trim() || legacyOwnerLabel;
     const parts: string[] = [datePart, `${tStart}–${tEnd}`];
     if (c) parts.push(c);
-    if (assigneeLabel && assigneeLabel !== "Unassigned") parts.push(assigneeLabel);
+    if (providerLabel) parts.push(providerLabel);
     return parts.join(" · ");
-  }, [assigneeOptions, assigneeSelect, clinicId, clinics, endLocal, startLocal]);
-
-  const parseAssigneeSelect = useCallback((v: string) => {
-    if (v.startsWith("s:")) return { assignedStaffId: v.slice(2), assignedUserId: "" };
-    if (v.startsWith("u:")) return { assignedStaffId: "", assignedUserId: v.slice(2) };
-    return { assignedStaffId: "", assignedUserId: "" };
-  }, []);
+  }, [clinicId, clinics, endLocal, legacyOwnerLabel, selectedStaff, startLocal]);
 
   const clearExistingSelection = useCallback(() => {
     setSelection(null);
@@ -343,6 +384,15 @@ export function CalendarQuickCreateDrawer({
       return;
     }
 
+    const staffId = assignedStaffId.trim();
+    if (staffId) {
+      const staff = staffDirectory.find((s) => s.id === staffId);
+      if (staff && !canSelectStaffForClinicalPicker(staff)) {
+        setFormErr(staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available.");
+        return;
+      }
+    }
+
     let anchor:
       | { kind: "lead"; leadId: string }
       | { kind: "patient"; patientId: string; personId: string }
@@ -361,7 +411,7 @@ export function CalendarQuickCreateDrawer({
       };
     }
 
-    const { assignedStaffId, assignedUserId } = parseAssigneeSelect(assigneeSelect);
+    const assignedUserId = staffId ? null : legacyOwnerUserId.trim() || null;
 
     setBusy(true);
     try {
@@ -372,8 +422,9 @@ export function CalendarQuickCreateDrawer({
         bookingType: tpl.bookingType,
         title: tpl.title,
         clinicId: clinicId.trim() || null,
-        assignedStaffId: assignedStaffId.trim() || null,
-        assignedUserId: assignedUserId.trim() || null,
+        roomId: roomId.trim() || null,
+        assignedStaffId: staffId || null,
+        assignedUserId,
         templateId: tpl.id,
         anchor,
         metadata: { template_label: tpl.label },
@@ -623,7 +674,14 @@ export function CalendarQuickCreateDrawer({
                 {clinics.length > 0 ? (
                   <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
                     Clinic
-                    <select className={inputClass} value={clinicId} onChange={(e) => setClinicId(e.target.value)}>
+                    <select
+                      className={inputClass}
+                      value={clinicId}
+                      onChange={(e) => {
+                        setClinicId(e.target.value);
+                        setRoomId("");
+                      }}
+                    >
                       <option value="">—</option>
                       {clinics.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -633,21 +691,40 @@ export function CalendarQuickCreateDrawer({
                     </select>
                   </label>
                 ) : null}
-                {assigneeOptions.length > 1 ? (
+                {clinicId.trim() ? (
                   <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                    Provider / resource
-                    <select className={inputClass} value={assigneeSelect} onChange={(e) => setAssigneeSelect(e.target.value)}>
-                      {assigneeOptions.map((o) => (
-                        <option key={o.value || "none"} value={o.value} disabled={o.disabled}>
-                          {o.label}
+                    Room
+                    <select
+                      className={inputClass}
+                      value={roomId}
+                      onChange={(e) => setRoomId(e.target.value)}
+                      disabled={roomLoading}
+                    >
+                      <option value="">{roomLoading ? "Loading rooms…" : "Select room"}</option>
+                      {roomOptions.map((o) => (
+                        <option key={o.room.id} value={o.room.id} disabled={Boolean(o.disabledReason)}>
+                          {o.room.display_name}
+                          {o.disabledReason ? ` — ${o.disabledReason}` : o.preferred ? " (preferred)" : ""}
                         </option>
                       ))}
                     </select>
-                    {selectedStaff && !selectedStaff.clinical_readiness.clinically_available ? (
-                      <StaffReadinessPickerWarning
-                        tenantId={tenantId}
-                        blockReason={selectedStaff.clinical_readiness.block_reason}
-                      />
+                  </label>
+                ) : null}
+                {staffDirectory.length > 0 ? (
+                  <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                    Clinical provider
+                    <StaffClinicalSelect
+                      tenantId={tenantId}
+                      options={staffDirectory}
+                      value={assignedStaffId}
+                      onChange={setAssignedStaffId}
+                      emptyLabel="Unassigned"
+                      className={inputClass}
+                    />
+                    {legacyOwnerLabel && !assignedStaffId.trim() ? (
+                      <p className="mt-1 text-[11px] text-slate-500">
+                        Calendar column owner: {legacyOwnerLabel} (assign a clinical provider above when possible)
+                      </p>
                     ) : null}
                   </label>
                 ) : null}

@@ -7,23 +7,77 @@ function humanizeRole(role: string | null | undefined): string {
   return t.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** Primary label for calendar / booking UIs (staff directory first, then legacy user id match). */
+function userDisplayLabel(users: CrmShellUserPickerOption[], userId: string | null | undefined): string | null {
+  const uid = userId?.trim() || null;
+  if (!uid) return null;
+  const u = users.find((x) => x.id === uid);
+  if (u?.full_name?.trim()) return u.full_name.trim();
+  if (u?.email?.trim()) return u.email.trim();
+  return `User ${uid.slice(0, 8)}…`;
+}
+
+function staffDisplayLabel(staffOptions: CrmShellUserPickerOption[], staffId: string | null | undefined): string | null {
+  const sid = staffId?.trim() || null;
+  if (!sid) return null;
+  const s = staffOptions.find((x) => x.id === sid);
+  if (s) return staffOptionPrimaryLabel(s);
+  return `Staff ${sid.slice(0, 8)}…`;
+}
+
+export type BookingAssignmentDisplay = {
+  providerLabel: string;
+  ownerLabel: string | null;
+  /** Compact line for table cells and calendar chips. */
+  summaryLine: string;
+};
+
+/**
+ * Resolve booking assignee for display — clinical staff provider first, legacy fi_user fallback,
+ * optional owner when staff and user diverge (audit / ownership).
+ */
+export function bookingAssignmentDisplay(
+  staffOptions: CrmShellUserPickerOption[],
+  userOptions: CrmShellUserPickerOption[],
+  row: Pick<FiBookingRow, "assigned_staff_id" | "assigned_user_id">
+): BookingAssignmentDisplay {
+  const staffId = row.assigned_staff_id?.trim() || null;
+  const userId = row.assigned_user_id?.trim() || null;
+
+  let providerLabel = "Unassigned";
+  let ownerLabel: string | null = null;
+
+  if (staffId) {
+    providerLabel = staffDisplayLabel(staffOptions, staffId) ?? providerLabel;
+    const staff = staffOptions.find((x) => x.id === staffId);
+    const linkedUserId = staff?.fi_user_id?.trim() || null;
+    if (userId && userId !== linkedUserId) {
+      ownerLabel = userDisplayLabel(userOptions, userId);
+    }
+  } else if (userId) {
+    const linkedStaff = staffOptions.find((x) => x.fi_user_id?.trim() === userId);
+    if (linkedStaff) {
+      providerLabel = staffOptionPrimaryLabel(linkedStaff);
+    } else {
+      providerLabel = userDisplayLabel(userOptions, userId) ?? `User ${userId.slice(0, 8)}…`;
+    }
+  }
+
+  let summaryLine = providerLabel;
+  if (ownerLabel) {
+    summaryLine = `Provider: ${providerLabel} · Owner: ${ownerLabel}`;
+  } else if (providerLabel !== "Unassigned") {
+    summaryLine = `Provider: ${providerLabel}`;
+  }
+
+  return { providerLabel, ownerLabel, summaryLine };
+}
+
+/** @deprecated Prefer {@link bookingAssignmentDisplay} — kept for calendar drawer compatibility. */
 export function bookingAssigneeDisplayLabel(
   staffOptions: CrmShellUserPickerOption[],
   row: Pick<FiBookingRow, "assigned_staff_id" | "assigned_user_id">
 ): string {
-  const sid = row.assigned_staff_id?.trim() || null;
-  if (sid) {
-    const s = staffOptions.find((x) => x.id === sid);
-    if (s) return (s.full_name?.trim() || s.email?.trim() || `Staff ${sid.slice(0, 8)}…`);
-  }
-  const uid = row.assigned_user_id?.trim() || null;
-  if (uid) {
-    const linked = staffOptions.find((x) => x.fi_user_id === uid);
-    if (linked) return (linked.full_name?.trim() || linked.email?.trim() || `Staff ${linked.id.slice(0, 8)}…`);
-    return `User ${uid.slice(0, 8)}…`;
-  }
-  return "Unassigned";
+  return bookingAssignmentDisplay(staffOptions, [], row).providerLabel;
 }
 
 export function staffOptionPrimaryLabel(s: CrmShellUserPickerOption): string {

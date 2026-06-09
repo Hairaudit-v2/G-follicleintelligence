@@ -183,7 +183,9 @@ export function ConsultationOsWorkspace({
     mode === "edit" && initialRow ? initialRow.status : "draft"
   );
   const [consultantName, setConsultantName] = useState(mode === "edit" && initialRow ? initialRow.consultant_name ?? "" : "");
-  const [consultantStaffId, setConsultantStaffId] = useState("");
+  const [consultantStaffId, setConsultantStaffId] = useState(
+    mode === "edit" && initialRow?.consultant_staff_id?.trim() ? initialRow.consultant_staff_id.trim() : ""
+  );
   const [consultationDate, setConsultationDate] = useState(
     mode === "edit" && initialRow ? initialRow.consultation_date ?? "" : ""
   );
@@ -289,7 +291,7 @@ export function ConsultationOsWorkspace({
       consultation_type: consultationTypeId,
       status,
       consultant_name: consultantName.trim() === "" ? null : consultantName.trim(),
-      consultant_staff_id: consultantStaffId.trim() || undefined,
+      consultant_staff_id: consultantStaffId.trim() || null,
       consultation_date: consultationDate.trim() === "" ? null : consultationDate.trim(),
       structured_data: structuredPayload,
       live_notes: liveNotes.trim() === "" ? null : liveNotes,

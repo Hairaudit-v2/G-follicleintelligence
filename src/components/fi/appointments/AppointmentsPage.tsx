@@ -46,7 +46,11 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
           <button
             type="button"
             className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800"
-            onClick={() => slide.openCreateAppointment({ assignedUserId: operator.query.assignedUserId })}
+            onClick={() =>
+              slide.openCreateAppointment({
+                assignedStaffId: operator.query.assignedStaffId ?? undefined,
+              })
+            }
           >
             New appointment
           </button>
@@ -65,7 +69,7 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
           tenantId={tenantId}
           tab={query.tab}
           query={query}
-          assignees={operator.assignees}
+          clinicalStaffOptions={operator.clinicalStaffOptions}
           clinics={operator.clinics}
         />
       ) : null}
@@ -82,7 +86,8 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
         <AppointmentListTable
           tenantId={tenantId}
           bookings={sortedList}
-          assignees={operator.assignees}
+          clinicalStaffOptions={operator.clinicalStaffOptions}
+          userAssignees={operator.assignees}
           clinics={operator.clinics}
         />
       ) : null}

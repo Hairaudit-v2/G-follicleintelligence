@@ -211,6 +211,9 @@ export type CrmShellUserPickerOption = {
   default_timezone?: string | null;
   /** `fi_staff.working_hours` — e.g. `{ weekly: { mon: { start, end, enabled } } }`. */
   working_hours?: Record<string, unknown> | null;
+  /** When set on `fi_staff`, overrides calendar column visibility by role. */
+  calendar_visible?: boolean | null;
+  is_active?: boolean;
 };
 
 /** FI Admin CRM shell: organisation row for lead scope picker (Stage 2G). */

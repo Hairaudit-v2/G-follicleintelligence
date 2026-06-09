@@ -12,13 +12,7 @@ import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/c
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingTypeBadge";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
-import { bookingAssigneeDisplayLabel } from "@/src/lib/staff/staffAssigneeDisplay";
-
-function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
-  if (!id) return "Unassigned";
-  const o = options.find((x) => x.id === id);
-  return o?.email?.trim() || o?.id.slice(0, 8) || id.slice(0, 8);
-}
+import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 
 function clinicName(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
   if (row.clinic_id) {
@@ -178,7 +172,8 @@ export function BookingCalendarDrawer({
   const whenOneLine = formatOsWhenSummary(row.start_at, row.end_at, tz);
 
   const staffOptions = staffDirectory?.length ? staffDirectory : assignees;
-  const providerLabel = bookingAssigneeDisplayLabel(staffOptions, row);
+  const assignment = bookingAssignmentDisplay(staffOptions, assignees, row);
+  const providerLabel = assignment.summaryLine;
   const clinicLabel = clinicName(clinics, row);
   const roomLabel = row.location?.trim() || "—";
   const typeLabel = procedureLabel?.trim() || humanizeBookingType(row.booking_type);
@@ -484,8 +479,8 @@ export function BookingCalendarDrawer({
               </div>
 
               <div>
-                <p className="text-xs font-medium uppercase text-gray-500">Assigned</p>
-                <p className="mt-1">{assigneeLabel(assignees, row.assigned_user_id)}</p>
+                <p className="text-xs font-medium uppercase text-gray-500">Provider</p>
+                <p className="mt-1">{assignment.summaryLine}</p>
               </div>
 
               <div>

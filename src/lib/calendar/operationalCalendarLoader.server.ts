@@ -7,7 +7,8 @@ import {
   bucketBookingsIntoCalendar,
   buildCalendarLanesForView,
 } from "@/src/lib/bookings/calendarView";
-import { calendarRangeIsoForQuery, parseCalendarSearchParams, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
+import { calendarRangeIsoForQuery, parseCalendarSearchParams, type CalendarRoute, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
+import { buildCalendarHref, mergeCalendarHrefQuery } from "@/src/lib/bookings/calendarQuery";
 import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "@/src/lib/bookings/operatorBookingConstants";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
@@ -28,13 +29,22 @@ import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
-import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import {
+  buildLegacyUserResourceColumns,
+  buildStaffResourceColumns,
+  buildStaffUserLinkIndex,
+  normalizeCalendarStaffFilter,
+} from "@/src/lib/calendar/operationalCalendarColumns";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
+import { loadClinicRoomsForTenant } from "@/src/lib/rooms/fiClinicRooms.server";
+import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
+import { isCalendarVisibleClinicalStaff } from "@/src/lib/staff/calendarVisibleStaff";
 import {
   anchorLabelForBookingRow,
   patientContactForBookingRow,
@@ -78,15 +88,24 @@ async function loadClinicalDetailsMap(tenantId: string, patientIds: string[]): P
   return out;
 }
 
-async function loadTenantStaffAndClinics(tenantId: string): Promise<{
+async function loadTenantStaffAndClinics(
+  tenantId: string,
+  opts?: { resourceView?: ParsedCalendarQuery["resourceView"]; clinicId?: string | null }
+): Promise<{
   assignees: CrmShellUserPickerOption[];
-  staffDirectory: CrmShellUserPickerOption[];
+  staffDirectory: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
+  rooms: FiClinicRoomRow[];
   resourceColumns: OperationalCalendarResourceColumn[];
   staffUserByStaffId: Map<string, string | null>;
+  staffIdByUserId: Map<string, string>;
+  roomDisplayById: Record<string, string>;
 }> {
   const tid = tenantId.trim();
-  const [userAssignees, staffDirectory, clinicsRes] = await Promise.all([
+  const resourceView = opts?.resourceView ?? "staff";
+  const clinicFilter = opts?.clinicId?.trim() || null;
+
+  const [userAssignees, staffDirectory, clinicsRes, allRooms] = await Promise.all([
     loadCrmShellUserPickerOptions(tid),
     loadClinicalStaffPickerOptions(tid),
     supabaseAdmin()
@@ -94,11 +113,24 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
       .select("id, display_name, organisation_id")
       .eq("tenant_id", tid)
       .order("display_name", { ascending: true }),
+    loadClinicRoomsForTenant(tid, { clinicId: clinicFilter }),
   ]);
   if (clinicsRes.error) throw new Error(clinicsRes.error.message);
 
+  const rooms =
+    resourceView === "room" ? allRooms.filter((r) => r.is_active) : allRooms;
+
+  const calendarStaff = staffDirectory.filter((s) =>
+    isCalendarVisibleClinicalStaff({
+      is_active: s.is_active ?? true,
+      staff_role: s.staff_role,
+      calendar_visible: s.calendar_visible,
+    })
+  );
+
   const staffUserByStaffId = new Map<string, string | null>();
-  for (const s of staffDirectory) {
+  const { staffIdByUserId } = buildStaffUserLinkIndex(calendarStaff);
+  for (const s of calendarStaff) {
     staffUserByStaffId.set(s.id, s.fi_user_id?.trim() || null);
   }
 
@@ -111,30 +143,76 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
     };
   });
 
-  const resourceColumns: OperationalCalendarResourceColumn[] = [
-    ...staffDirectory.map((s) => ({
-      id: `s:${String(s.id)}`,
-      kind: "fi_staff" as const,
-      label: staffOptionPrimaryLabel(s),
-      subtitle: staffOptionSubtitle(s),
-    })),
-    ...clinics.map((c) => ({
-      id: `c:${c.id}`,
-      kind: "clinic" as const,
-      label: c.display_name,
-      subtitle: "Room / site",
-    })),
-    { id: "unassigned", kind: "unassigned" as const, label: "Unassigned", subtitle: "No staff column" },
-  ];
+  const roomDisplayById: Record<string, string> = {};
+  for (const room of allRooms) {
+    roomDisplayById[room.id] = room.display_name;
+  }
 
-  return { assignees: userAssignees, staffDirectory, clinics, resourceColumns, staffUserByStaffId };
+  const staffColumns = buildStaffResourceColumns(calendarStaff);
+
+  const roomColumns: OperationalCalendarResourceColumn[] = rooms.map((room) => ({
+    id: `r:${room.id}`,
+    kind: "room" as const,
+    label: room.display_name,
+    subtitle: room.room_type.replace(/_/g, " "),
+  }));
+
+  const clinicColumns: OperationalCalendarResourceColumn[] = clinics.map((c) => ({
+    id: `c:${c.id}`,
+    kind: "clinic" as const,
+    label: c.display_name,
+    subtitle: "Clinic site",
+  }));
+
+  let resourceColumns: OperationalCalendarResourceColumn[];
+  if (resourceView === "room") {
+    resourceColumns = [...roomColumns, { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No room" }];
+  } else if (resourceView === "clinic") {
+    resourceColumns = [
+      ...clinicColumns,
+      { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No clinic" },
+    ];
+  } else {
+    resourceColumns = [
+      ...staffColumns,
+      { id: "unassigned", kind: "unassigned", label: "Unassigned", subtitle: "No staff column" },
+    ];
+  }
+
+  return {
+    assignees: userAssignees,
+    staffDirectory: calendarStaff,
+    clinics,
+    rooms,
+    resourceColumns,
+    staffUserByStaffId,
+    staffIdByUserId,
+    roomDisplayById,
+  };
+}
+
+function appendLegacyUserColumns(
+  columns: OperationalCalendarResourceColumn[],
+  input: {
+    userAssignees: CrmShellUserPickerOption[];
+    staffIdByUserId: Map<string, string>;
+    bookings: FiBookingRow[];
+    filterUserId?: string | null;
+  }
+): OperationalCalendarResourceColumn[] {
+  const legacy = buildLegacyUserResourceColumns(input);
+  if (!legacy.length) return columns;
+  const unassigned = columns.find((c) => c.id === "unassigned");
+  const withoutUnassigned = columns.filter((c) => c.id !== "unassigned");
+  return [...withoutUnassigned, ...legacy, ...(unassigned ? [unassigned] : [])];
 }
 
 function applyStructuredFilters(
   rows: FiBookingRow[],
   q: ParsedCalendarQuery,
   staffUserByStaffId: Map<string, string | null>,
-  staffDirectory: CrmShellUserPickerOption[]
+  staffIdByUserId: Map<string, string>,
+  staffDirectory: ClinicalStaffPickerOption[]
 ): FiBookingRow[] {
   const roleBucketIds =
     q.staffRoleBucket && !q.staffId?.trim() ? staffIdsMatchingRoleBucket(staffDirectory, q.staffRoleBucket) : null;
@@ -171,8 +249,15 @@ function applyStructuredFilters(
         if (!ok) return false;
       }
     }
-    if (q.assignedUserId?.trim() && b.assigned_user_id !== q.assignedUserId.trim()) return false;
+    if (q.assignedUserId?.trim()) {
+      const uid = q.assignedUserId.trim();
+      if (b.assigned_user_id?.trim() === uid) return true;
+      const linkedStaffId = staffIdByUserId.get(uid);
+      if (linkedStaffId && b.assigned_staff_id?.trim() === linkedStaffId) return true;
+      return false;
+    }
     if (q.clinicId?.trim() && b.clinic_id !== q.clinicId.trim()) return false;
+    if (q.roomId?.trim() && b.room_id !== q.roomId.trim()) return false;
     if (q.waitingOnly) {
       const st = b.booking_status.trim();
       if (st !== "scheduled" && st !== "confirmed") return false;
@@ -185,7 +270,7 @@ function applyStructuredFilters(
 }
 
 function staffIdsMatchingRoleBucket(
-  staffDirectory: CrmShellUserPickerOption[],
+  staffDirectory: ClinicalStaffPickerOption[],
   bucket: "doctor" | "nurse"
 ): Set<string> {
   const out = new Set<string>();
@@ -222,7 +307,7 @@ function staffHasConfiguredHours(staffDirectory: CrmShellUserPickerOption[]): bo
 
 function buildSetupRecommendations(input: {
   servicesCount: number;
-  staffDirectory: CrmShellUserPickerOption[];
+  staffDirectory: ClinicalStaffPickerOption[];
   timezoneConfigured: boolean;
 }): string[] {
   const out: string[] = [];
@@ -257,29 +342,57 @@ async function resolveBookingMutationGate(tenantId: string): Promise<{
  */
 export async function loadOperationalCalendarPageData(
   tenantId: string,
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Record<string, string | string[] | undefined>,
+  opts?: { route?: CalendarRoute }
 ): Promise<OperationalCalendarPageData> {
+  const route = opts?.route ?? "fi-admin";
   const tid = tenantId.trim();
   const calendarSettings = await loadTenantOperationalCalendarSettings(tid);
   const parsed = parseCalendarSearchParams(searchParams, new Date(), {
     calendarTimezone: calendarSettings.calendarTimezone,
   });
   const viewRaw = Array.isArray(searchParams.view) ? searchParams.view[0] : searchParams.view;
-  const query =
+  let query =
     typeof viewRaw === "string" && viewRaw.trim() ? parsed : { ...parsed, view: "day" as const };
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
   const [rawBookings, resources, mutationGate, services] = await Promise.all([
     loadBookingsForTenantRange(tid, rangeStartIso, rangeEndIso),
-    loadTenantStaffAndClinics(tid),
+    loadTenantStaffAndClinics(tid, { resourceView: query.resourceView, clinicId: query.clinicId }),
     resolveBookingMutationGate(tid),
     loadFiServicesForTenant(tid),
   ]);
+
+  const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
+  query = normalized.query;
+  const canonicalRedirectHref = normalized.shouldCanonicalizeToStaffId
+    ? buildCalendarHref(
+        tid,
+        mergeCalendarHrefQuery(parsed, { staffId: query.staffId, assignedUserId: null }),
+        { route }
+      )
+    : null;
+
+  const resourceColumns =
+    query.resourceView === "staff"
+      ? appendLegacyUserColumns(resources.resourceColumns, {
+          userAssignees: resources.assignees,
+          staffIdByUserId: resources.staffIdByUserId,
+          bookings: rawBookings,
+          filterUserId: parsed.assignedUserId,
+        })
+      : resources.resourceColumns;
   const { canMutateBookings, bookingMutationBlockedReason } = mutationGate;
   const gridConfig = calendarSettings.gridConfig;
 
-  const structured = applyStructuredFilters(rawBookings, query, resources.staffUserByStaffId, resources.staffDirectory);
+  const structured = applyStructuredFilters(
+    rawBookings,
+    query,
+    resources.staffUserByStaffId,
+    resources.staffIdByUserId,
+    resources.staffDirectory
+  );
 
   const [displayMaps, clinicalMap] = await Promise.all([
     loadBookingDisplayContextMaps(tid, structured),
@@ -318,6 +431,10 @@ export async function loadOperationalCalendarPageData(
       suggestedPrice: cat != null ? cat.base_price : null,
       patientEmail: contact.email,
       patientPhone: contact.phone,
+      roomLabel:
+        (row.room_id?.trim() ? resources.roomDisplayById[row.room_id.trim()] : null) ??
+        row.location?.trim() ??
+        null,
     };
   }
 
@@ -385,7 +502,9 @@ export async function loadOperationalCalendarPageData(
     assignees: resources.assignees,
     staffDirectory: resources.staffDirectory,
     clinics: resources.clinics,
-    resourceColumns: resources.resourceColumns,
+    rooms: resources.rooms,
+    roomDisplayById: resources.roomDisplayById,
+    resourceColumns,
     gridConfig,
     listTruncated,
     canMutateBookings,
@@ -393,5 +512,6 @@ export async function loadOperationalCalendarPageData(
     reminderJobsByBookingId,
     services,
     setupRecommendations,
+    canonicalRedirectHref,
   };
 }

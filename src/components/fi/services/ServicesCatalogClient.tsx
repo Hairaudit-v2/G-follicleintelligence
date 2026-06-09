@@ -12,6 +12,7 @@ import {
   loadDefaultClinicServicesAction,
   updateServiceAction,
 } from "@/lib/actions/fi-services-actions";
+import { saveServiceRoomEligibilityAction, saveServiceStaffEligibilityAction } from "@/lib/actions/fi-rooms-actions";
 import { DEFAULT_CLINIC_SERVICE_LIBRARY } from "@/src/lib/services/defaultClinicServices";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
@@ -62,6 +63,9 @@ export function ServicesCatalogClient({
   const [error, setError] = useState<string | null>(null);
   const [seedMessage, setSeedMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [eligibleRoomIds, setEligibleRoomIds] = useState<string[]>([]);
+  const [preferredRoomId, setPreferredRoomId] = useState<string>("");
+  const [staffRoles, setStaffRoles] = useState<string>("");
 
   const canManage = data.canManageServices;
   const showEmptyCatalogBanner = data.activeServiceCount === 0;
@@ -77,6 +81,9 @@ export function ServicesCatalogClient({
     setError(null);
     setForm(rowToForm(row));
     setEditingId(row.id);
+    setEligibleRoomIds(data.roomEligibilityByServiceId[row.id] ?? []);
+    setPreferredRoomId(data.preferredRoomByServiceId[row.id] ?? "");
+    setStaffRoles((data.staffRolesByServiceId[row.id] ?? []).join(", "));
     setMode("edit");
   };
 
@@ -165,6 +172,18 @@ export function ServicesCatalogClient({
           setError(r.error);
           return;
         }
+        const roomRows = eligibleRoomIds.map((roomId) => ({
+          roomId,
+          isPreferred: preferredRoomId === roomId,
+          isActive: true,
+        }));
+        const staffRows = staffRoles
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .map((staffRole) => ({ staffRole, isActive: true }));
+        await saveServiceRoomEligibilityAction(tenantId, editingId, { rows: roomRows });
+        await saveServiceStaffEligibilityAction(tenantId, editingId, { rows: staffRows });
         closePanel();
         router.refresh();
       }
@@ -331,6 +350,67 @@ export function ServicesCatalogClient({
               Active
             </label>
           </div>
+          {mode === "edit" ? (
+            <div className="mt-4 space-y-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Scheduling eligibility</p>
+              {data.rooms.length === 0 ? (
+                <p className="text-xs text-gray-500">
+                  No rooms configured. Add rooms in{" "}
+                  <Link href={`${base}/rooms`} className="text-sky-700 underline">
+                    Settings → Rooms
+                  </Link>
+                  .
+                </p>
+              ) : (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {data.rooms.map((room) => (
+                    <label key={room.id} className="flex items-center gap-2 text-xs text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={eligibleRoomIds.includes(room.id)}
+                        onChange={(e) => {
+                          setEligibleRoomIds((ids) =>
+                            e.target.checked ? [...ids, room.id] : ids.filter((id) => id !== room.id)
+                          );
+                          if (!e.target.checked && preferredRoomId === room.id) setPreferredRoomId("");
+                        }}
+                      />
+                      {room.display_name}
+                    </label>
+                  ))}
+                </div>
+              )}
+              {eligibleRoomIds.length > 0 ? (
+                <label className="block text-xs font-medium text-gray-700">
+                  Preferred room
+                  <select
+                    className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                    value={preferredRoomId}
+                    onChange={(e) => setPreferredRoomId(e.target.value)}
+                  >
+                    <option value="">None</option>
+                    {eligibleRoomIds.map((id) => {
+                      const room = data.rooms.find((r) => r.id === id);
+                      return (
+                        <option key={id} value={id}>
+                          {room?.display_name ?? id}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
+              ) : null}
+              <label className="block text-xs font-medium text-gray-700">
+                Eligible staff roles (comma-separated)
+                <input
+                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                  value={staffRoles}
+                  onChange={(e) => setStaffRoles(e.target.value)}
+                  placeholder="consultant, nurse, doctor, technician"
+                />
+              </label>
+            </div>
+          ) : null}
           <div className="mt-4 flex gap-2">
             <Button type="button" onClick={submit} disabled={pending || !form.name.trim()}>
               {pending ? "Saving…" : mode === "create" ? "Create" : "Save"}

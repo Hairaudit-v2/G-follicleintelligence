@@ -26,6 +26,7 @@ const quickCallInBodySchema = z
     bookingType: procedureSchema.optional(),
     notes: z.string().max(8000).optional().nullable(),
     clinicId: z.string().uuid().optional().nullable(),
+    assignedStaffId: z.string().uuid().optional().nullable(),
     assignedUserId: z.string().uuid().optional().nullable(),
     /** Stored on `fi_bookings.timezone` (clinic-local scheduling). */
     calendarTimezone: z.string().min(1).max(128).optional(),
@@ -125,6 +126,7 @@ export async function quickCallInConsultationAction(
       patientId: patient.id,
       caseId: null,
       clinicId: parsed.clinicId?.trim() || null,
+      assignedStaffId: parsed.assignedStaffId?.trim() || null,
       assignedUserId: parsed.assignedUserId?.trim() || null,
       bookingType,
       title,

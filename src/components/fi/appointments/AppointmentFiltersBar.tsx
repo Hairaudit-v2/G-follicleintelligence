@@ -7,19 +7,20 @@ import {
   allBookingTypeOptions,
 } from "@/src/lib/bookings/operatorBookingLabels";
 import { toDatetimeLocalValue } from "@/src/components/fi/bookings/bookingFormUtils";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { formatClinicalPickerOptionLabel, type ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 
 export function AppointmentFiltersBar({
   tenantId,
   tab,
   query,
-  assignees,
+  clinicalStaffOptions,
   clinics,
 }: {
   tenantId: string;
   tab: AppointmentsTab;
   query: ParsedAppointmentsQuery;
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
 }) {
   const action = buildAppointmentsHref(tenantId, { tab });
@@ -57,16 +58,16 @@ export function AppointmentFiltersBar({
           </>
         ) : null}
         <label className="block text-xs font-medium text-gray-700">
-          Staff
+          Clinical provider
           <select
-            name="assignedUserId"
-            defaultValue={query.operator.assignedUserId ?? query.calendar.assignedUserId ?? ""}
+            name="staffId"
+            defaultValue={query.operator.assignedStaffId ?? query.calendar.staffId ?? ""}
             className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
           >
-            <option value="">All staff</option>
-            {assignees.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.email?.trim() || u.id.slice(0, 8)}
+            <option value="">Any provider</option>
+            {clinicalStaffOptions.map((s) => (
+              <option key={s.id} value={s.id}>
+                {formatClinicalPickerOptionLabel(s)}
               </option>
             ))}
           </select>

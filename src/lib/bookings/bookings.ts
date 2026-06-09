@@ -28,6 +28,11 @@ import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffS
 import { syncBookingReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "./appointmentAvailability";
 import { AppointmentConflictError } from "./bookingErrors";
+import {
+  assertBookingResourceAvailability,
+  resolveDefaultRoomForService,
+} from "@/src/lib/rooms/roomAvailability.server";
+import { loadClinicRoomForTenant } from "@/src/lib/rooms/fiClinicRooms.server";
 import { parseUtcCalendarDateString } from "./calendarQuery";
 import { sortBookingsByStartAt } from "./bookingTime";
 import {
@@ -50,6 +55,8 @@ function mapBookingRow(row: Record<string, unknown>): FiBookingRow {
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
     clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+    room_id: row.room_id != null ? String(row.room_id) : null,
+    room_required: row.room_required == null ? true : Boolean(row.room_required),
     assigned_staff_id: row.assigned_staff_id != null ? String(row.assigned_staff_id) : null,
     assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
     booking_type: String(row.booking_type),
@@ -99,6 +106,15 @@ async function assertClinicBelongsToTenant(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Clinic is missing or does not belong to this tenant. Choose a clinic from your tenant list.");
+}
+
+async function loadRoomDisplayName(
+  supabase: SupabaseClient,
+  tenantId: string,
+  roomId: string
+): Promise<string | null> {
+  const room = await loadClinicRoomForTenant(tenantId, roomId, supabase);
+  return room?.display_name?.trim() || null;
 }
 
 async function assertPersonBelongsToTenant(
@@ -325,7 +341,7 @@ export async function loadBookingsForOperatorView(
 }
 
 const CALENDAR_BOOKING_SELECT =
-  "id, tenant_id, lead_id, person_id, patient_id, case_id, clinic_id, assigned_staff_id, assigned_user_id, booking_type, booking_status, title, description, start_at, end_at, timezone, location, metadata, cancelled_at, cancelled_by_user_id, cancellation_reason";
+  "id, tenant_id, lead_id, person_id, patient_id, case_id, clinic_id, room_id, room_required, assigned_staff_id, assigned_user_id, booking_type, booking_status, title, description, start_at, end_at, timezone, location, metadata, cancelled_at, cancelled_by_user_id, cancellation_reason";
 
 function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
   const meta = row.metadata;
@@ -339,6 +355,8 @@ function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
     clinic_id: row.clinic_id != null ? String(row.clinic_id) : null,
+    room_id: row.room_id != null ? String(row.room_id) : null,
+    room_required: row.room_required == null ? true : Boolean(row.room_required),
     assigned_staff_id: row.assigned_staff_id != null ? String(row.assigned_staff_id) : null,
     assigned_user_id: row.assigned_user_id != null ? String(row.assigned_user_id) : null,
     booking_type: String(row.booking_type),
@@ -530,6 +548,8 @@ export type CreateBookingParams = BookingAnchorInput & {
   location?: string | null;
   metadata?: Record<string, unknown> | null;
   clinicId?: string | null;
+  roomId?: string | null;
+  roomRequired?: boolean;
   assignedStaffId?: string | null;
   assignedUserId?: string | null;
   /** Server-resolved fi_users.id; never from client JSON. */
@@ -592,13 +612,43 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
     );
   }
 
+  const roomRequired = params.roomRequired !== false;
+  let resolvedRoomId = params.roomId?.trim() || null;
+  const clinicId = params.clinicId?.trim() || null;
+  if (roomRequired && !resolvedRoomId && clinicId) {
+    resolvedRoomId = await resolveDefaultRoomForService({
+      tenantId: tid,
+      clinicId,
+      bookingType: params.bookingType,
+      startAt: params.startAt.trim(),
+      endAt: params.endAt.trim(),
+      client: supabase,
+    });
+  }
+
+  await assertBookingResourceAvailability({
+    tenantId: tid,
+    clinicId,
+    bookingType: params.bookingType,
+    roomId: resolvedRoomId,
+    roomRequired,
+    staffId: assign.assigned_staff_id,
+    startAt: params.startAt.trim(),
+    endAt: params.endAt.trim(),
+    client: supabase,
+  });
+
+  const assignedRoom = resolvedRoomId ? await loadRoomDisplayName(supabase, tid, resolvedRoomId) : null;
+
   const insertRow = {
     tenant_id: tid,
     lead_id: params.leadId?.trim() || null,
     person_id: params.personId?.trim() || null,
     patient_id: params.patientId?.trim() || null,
     case_id: params.caseId?.trim() || null,
-    clinic_id: params.clinicId?.trim() || null,
+    clinic_id: clinicId,
+    room_id: resolvedRoomId,
+    room_required: roomRequired,
     assigned_staff_id: assign.assigned_staff_id,
     assigned_user_id: assign.assigned_user_id,
     booking_type: params.bookingType.trim(),
@@ -608,7 +658,7 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
     start_at: params.startAt.trim(),
     end_at: params.endAt.trim(),
     timezone: params.timezone?.trim() || null,
-    location: params.location?.trim() || null,
+    location: params.location?.trim() || assignedRoom || null,
     metadata,
     created_by_user_id: params.createdByUserId?.trim() || null,
   };
@@ -715,6 +765,8 @@ export type UpdateBookingParams = BookingAnchorInput & {
   location?: string | null;
   metadata?: Record<string, unknown> | null;
   clinicId?: string | null;
+  roomId?: string | null;
+  roomRequired?: boolean | null;
   assignedStaffId?: string | null;
   assignedUserId?: string | null;
 };
@@ -744,7 +796,7 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
     next_user = params.assignedUserId?.trim() || null;
   }
 
-  const next: FiBookingRow = {
+  let next: FiBookingRow = {
     ...existing,
     lead_id: params.leadId !== undefined ? (params.leadId?.trim() || null) : existing.lead_id,
     person_id: params.personId !== undefined ? (params.personId?.trim() || null) : existing.person_id,
@@ -764,6 +816,11 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
     location: params.location !== undefined ? (params.location?.trim() || null) : existing.location,
     metadata: params.metadata !== undefined ? params.metadata ?? {} : existing.metadata,
     clinic_id: params.clinicId !== undefined ? (params.clinicId?.trim() || null) : existing.clinic_id,
+    room_id: params.roomId !== undefined ? (params.roomId?.trim() || null) : existing.room_id,
+    room_required:
+      params.roomRequired !== undefined && params.roomRequired !== null
+        ? Boolean(params.roomRequired)
+        : existing.room_required,
     assigned_staff_id: next_staff,
     assigned_user_id: next_user,
   };
@@ -808,7 +865,10 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
     params.startAt !== undefined ||
     params.endAt !== undefined ||
     params.assignedStaffId !== undefined ||
-    params.assignedUserId !== undefined;
+    params.assignedUserId !== undefined ||
+    params.roomId !== undefined ||
+    params.clinicId !== undefined ||
+    params.bookingType !== undefined;
 
   if (scheduleTouched) {
     if (next.assigned_staff_id?.trim()) {
@@ -829,6 +889,38 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
       next.assigned_user_id,
       bid
     );
+
+    let nextRoomId = next.room_id?.trim() || null;
+    if (next.room_required && !nextRoomId && next.clinic_id?.trim()) {
+      nextRoomId = await resolveDefaultRoomForService({
+        tenantId: tid,
+        clinicId: next.clinic_id.trim(),
+        bookingType: next.booking_type,
+        startAt: next.start_at,
+        endAt: next.end_at,
+        bookingId: bid,
+        client: supabase,
+      });
+      next = { ...next, room_id: nextRoomId };
+    }
+
+    await assertBookingResourceAvailability({
+      tenantId: tid,
+      clinicId: next.clinic_id,
+      bookingType: next.booking_type,
+      roomId: next.room_id,
+      roomRequired: next.room_required,
+      staffId: next.assigned_staff_id,
+      bookingId: bid,
+      startAt: next.start_at,
+      endAt: next.end_at,
+      client: supabase,
+    });
+
+    if (next.room_id?.trim() && params.location === undefined) {
+      const roomLabel = await loadRoomDisplayName(supabase, tid, next.room_id.trim());
+      if (roomLabel) next = { ...next, location: roomLabel };
+    }
   }
 
   const nowIso = new Date().toISOString();
@@ -843,6 +935,8 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
       patient_id: next.patient_id,
       case_id: next.case_id,
       clinic_id: next.clinic_id,
+      room_id: next.room_id,
+      room_required: next.room_required,
       assigned_staff_id: next.assigned_staff_id,
       assigned_user_id: next.assigned_user_id,
       booking_type: next.booking_type,

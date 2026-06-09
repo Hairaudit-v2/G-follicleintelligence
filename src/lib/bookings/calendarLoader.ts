@@ -15,6 +15,8 @@ import type { FiBookingRow } from "./types";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type CalendarResources = {
@@ -32,6 +34,7 @@ export type CalendarViewData = {
   /** Day key → bookings for client grid (serialisable). */
   buckets: Record<string, FiBookingRow[]>;
   assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   listTruncated: boolean;
   /** Human-readable range heading for the toolbar (clinic-local when tenant timezone is set). */
@@ -42,10 +45,14 @@ export type CalendarViewData = {
   services: FiServiceRow[];
 };
 
-export async function loadCalendarResources(tenantId: string): Promise<CalendarResources> {
+export async function loadCalendarResources(tenantId: string): Promise<CalendarResources & { clinicalStaffOptions: ClinicalStaffPickerOption[] }> {
   const tid = tenantId.trim();
-  const [assignees, scope] = await Promise.all([loadCrmShellUserPickerOptions(tid), loadCrmShellScopePickerOptions(tid)]);
-  return { assignees, clinics: scope.clinics };
+  const [assignees, clinicalStaffOptions, scope] = await Promise.all([
+    loadCrmShellUserPickerOptions(tid),
+    loadClinicalStaffPickerOptions(tid),
+    loadCrmShellScopePickerOptions(tid),
+  ]);
+  return { assignees, clinicalStaffOptions, clinics: scope.clinics };
 }
 
 export async function loadCalendarBookings(
@@ -61,8 +68,8 @@ export async function loadCalendarBookings(
     rangeEndIso,
     status: query.status,
     bookingType: query.bookingType,
-    assignedStaffId: query.staffId,
-    assignedUserId: query.staffId ? null : query.assignedUserId,
+    assignedStaffId: query.staffId?.trim() || null,
+    assignedUserId: null,
     clinicId: query.clinicId,
     includeCancelled: query.includeCancelled,
   });
@@ -119,6 +126,7 @@ export async function loadCalendarViewData(
     bookings,
     buckets,
     assignees: resources.assignees,
+    clinicalStaffOptions: resources.clinicalStaffOptions,
     clinics: resources.clinics,
     listTruncated,
     rangeTitle,

@@ -7,6 +7,7 @@ import { consultationTypeForBookingType } from "./consultationBookingLink";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { syncConsultationMedicalHairLossToPatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsConsultationSync";
 import { syncPostConsultReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
+import { assertFiStaffBelongsToTenant } from "@/src/lib/staff/staff.server";
 import {
   CONSULTATION_EDITABLE_STATUSES,
   type ConsultationCreateDraftBody,
@@ -179,6 +180,16 @@ export async function updateConsultationDraft(
 
   if (patch.consultant_name !== undefined) {
     updatePayload.consultant_name = patch.consultant_name;
+  }
+
+  if (patch.consultant_staff_id !== undefined) {
+    if (patch.consultant_staff_id === null) {
+      updatePayload.consultant_staff_id = null;
+    } else {
+      const staffId = patch.consultant_staff_id.trim();
+      await assertFiStaffBelongsToTenant(supabaseAdmin(), tid, staffId);
+      updatePayload.consultant_staff_id = staffId;
+    }
   }
 
   if (patch.consultation_date !== undefined) {

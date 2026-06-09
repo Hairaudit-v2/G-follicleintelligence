@@ -61,10 +61,10 @@ export async function updateConsultationDraftAction(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
 
     const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
-    const { adminKey, consultant_staff_id, ...patch } = parsed;
+    const { adminKey, ...patch } = parsed;
     void adminKey;
-    if (consultant_staff_id?.trim()) {
-      await assertStaffClinicallyAvailableForAssignment(tenantId.trim(), consultant_staff_id.trim());
+    if (patch.consultant_staff_id?.trim()) {
+      await assertStaffClinicallyAvailableForAssignment(tenantId.trim(), patch.consultant_staff_id.trim());
     }
     await updateConsultationDraft(tenantId, consultationId, {
       ...patch,

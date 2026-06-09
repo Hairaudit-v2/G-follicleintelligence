@@ -11,12 +11,13 @@ export function AppointmentViewTabs({
   tenantId: string;
   query: ParsedAppointmentsQuery;
 }) {
+  const staffFilter = query.operator.assignedStaffId ?? query.calendar.staffId ?? undefined;
   const baseFilters = {
     view: query.calendar.view,
     date: query.calendar.dateAnchor,
     status: query.operator.status ?? undefined,
     type: query.operator.bookingType ?? undefined,
-    assignedUserId: query.operator.assignedUserId ?? undefined,
+    assignedStaffId: staffFilter,
     clinicId: query.operator.clinicId ?? undefined,
     includeCancelled: query.operator.includeCancelled ? true : undefined,
   };
@@ -28,13 +29,13 @@ export function AppointmentViewTabs({
     end: query.operator.endIso,
     status: baseFilters.status,
     type: baseFilters.type,
-    assignedUserId: baseFilters.assignedUserId,
+    assignedStaffId: baseFilters.assignedStaffId,
     clinicId: baseFilters.clinicId,
     includeCancelled: baseFilters.includeCancelled,
   });
   const todayHref = buildAppointmentsHref(tenantId, {
     tab: "today",
-    assignedUserId: baseFilters.assignedUserId,
+    assignedStaffId: baseFilters.assignedStaffId,
     type: baseFilters.type,
     status: baseFilters.status,
     clinicId: baseFilters.clinicId,

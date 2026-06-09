@@ -8,14 +8,10 @@ import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { BookingStatusBadge } from "./BookingStatusBadge";
 import { BookingTypeBadge } from "./BookingTypeBadge";
-
-function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
-  if (!id) return "—";
-  const o = options.find((x) => x.id === id);
-  return o?.email?.trim() || o?.id.slice(0, 8) || id.slice(0, 8);
-}
 
 function clinicOrLocation(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
   if (row.clinic_id) {
@@ -67,7 +63,8 @@ function anchorSummary(tenantId: string, row: FiBookingRow): ReactNode {
 export function BookingOperatorRow({
   tenantId,
   booking,
-  assignees,
+  clinicalStaffOptions,
+  userAssignees,
   clinics,
   adminKey,
   onEdit,
@@ -75,7 +72,8 @@ export function BookingOperatorRow({
 }: {
   tenantId: string;
   booking: FiBookingRow;
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
+  userAssignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
   onEdit: () => void;
@@ -85,6 +83,7 @@ export function BookingOperatorRow({
   const [feedback, setFeedback] = useState<string | null>(null);
   const cancelled = isBookingCancelled(booking);
   const completed = booking.booking_status === "completed";
+  const assignment = bookingAssignmentDisplay(clinicalStaffOptions, userAssignees, booking);
 
   function withAdmin<T extends Record<string, unknown>>(body: T): T & { adminKey?: string } {
     if (adminKey.trim()) return { ...body, adminKey: adminKey.trim() };
@@ -139,7 +138,9 @@ export function BookingOperatorRow({
         ) : null}
       </td>
       <td className="px-3 py-2 align-top">{anchorSummary(tenantId, booking)}</td>
-      <td className="whitespace-nowrap px-3 py-2 align-top text-gray-700">{assigneeLabel(assignees, booking.assigned_user_id)}</td>
+      <td className="max-w-[14rem] px-3 py-2 align-top text-gray-700">
+        <span className="block text-xs leading-snug">{assignment.summaryLine}</span>
+      </td>
       <td className="max-w-[10rem] px-3 py-2 align-top text-gray-700">{clinicOrLocation(clinics, booking)}</td>
       <td className="whitespace-nowrap px-3 py-2 align-top">
         <div className="flex flex-wrap gap-1">

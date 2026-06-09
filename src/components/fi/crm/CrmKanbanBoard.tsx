@@ -254,7 +254,7 @@ export function CrmKanbanBoard({
         open={callInOpen}
         onClose={() => setCallInOpen(false)}
         clinics={clinics}
-        assignees={assignees}
+        clinicalStaffOptions={[]}
       />
     </div>
   );

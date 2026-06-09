@@ -52,6 +52,8 @@ const bodySchema = z
     bookingType: procedureSchema,
     title: z.string().max(2000).optional().nullable(),
     clinicId: optionalUuid,
+    roomId: optionalUuid,
+    roomRequired: z.boolean().optional(),
     assignedStaffId: optionalUuid,
     assignedUserId: optionalUuid,
     templateId: z.string().max(80).optional().nullable(),
@@ -209,6 +211,7 @@ export async function calendarQuickCreateBookingAction(
 
     const createdByUserId = await tryResolveFiUserIdForTenant(tenantId, undefined);
     const clinicId = parsed.clinicId?.trim() || null;
+    const roomId = parsed.roomId?.trim() || null;
     const assignedStaffId = parsed.assignedStaffId?.trim() || null;
     const assignedUserId = parsed.assignedUserId?.trim() || null;
 
@@ -332,6 +335,8 @@ export async function calendarQuickCreateBookingAction(
       patientId,
       caseId,
       clinicId,
+      roomId,
+      roomRequired: parsed.roomRequired,
       assignedStaffId,
       assignedUserId,
       bookingType: parsed.bookingType.trim(),

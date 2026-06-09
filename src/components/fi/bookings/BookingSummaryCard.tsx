@@ -6,26 +6,24 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 
 const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
-
-function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
-  if (!id) return "Unassigned";
-  const o = options.find((x) => x.id === id);
-  return o?.email?.trim() || o?.id || id;
-}
 
 export function BookingSummaryCard({
   tenantId,
   booking,
   assigneeOptions,
+  userAssignees = [],
   onEdit,
   onChanged,
   adminKey,
 }: {
   tenantId: string;
   booking: FiBookingRow;
-  assigneeOptions: CrmShellUserPickerOption[];
+  assigneeOptions: ClinicalStaffPickerOption[];
+  userAssignees?: CrmShellUserPickerOption[];
   onEdit: () => void;
   onChanged: () => void;
   adminKey: string;
@@ -70,6 +68,11 @@ export function BookingSummaryCard({
     return formatBookingWindowInTimezone(booking.start_at, booking.end_at, tz, { endPart: "timeOnly" });
   }, [booking.start_at, booking.end_at, booking.timezone]);
 
+  const assignment = useMemo(
+    () => bookingAssignmentDisplay(assigneeOptions, userAssignees, booking),
+    [assigneeOptions, userAssignees, booking]
+  );
+
   return (
     <div className={card}>
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -80,7 +83,7 @@ export function BookingSummaryCard({
           <p className="text-xs text-gray-500">
             {bookingStatusLabel(booking.booking_status)}
             {" · "}
-            {assigneeLabel(assigneeOptions, booking.assigned_user_id)}
+            {assignment.summaryLine}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

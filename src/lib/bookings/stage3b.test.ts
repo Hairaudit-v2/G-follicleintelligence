@@ -83,13 +83,14 @@ describe("Stage 3B — operator query parsing", () => {
         status: "nope",
         type: "invalid",
         assignedUserId: "not-a-uuid",
+        staffId: "not-a-uuid",
         clinicId: "x",
       },
       now
     );
     assert.equal(q.status, null);
     assert.equal(q.bookingType, null);
-    assert.equal(q.assignedUserId, null);
+    assert.equal(q.assignedStaffId, null);
     assert.equal(q.clinicId, null);
   });
 

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   buildCalendarHref,
   mergeCalendarHrefQuery,
+  type CalendarResourceView,
   type CalendarRoute,
   type CalendarStaffRoleBucket,
   type ParsedCalendarQuery,
@@ -69,9 +70,54 @@ export function FiOsCalendarQuickFilters({
     router.push(href);
   }
 
+  function resourceViewHref(view: CalendarResourceView): string {
+    const active = query.resourceView === view;
+    return buildCalendarHref(
+      tenantId,
+      mergeCalendarHrefQuery(query, {
+        resourceView: active && view !== "staff" ? null : view,
+        view: "day",
+      }),
+      hrefOpts
+    );
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] bg-[#060d18]/80 px-3 py-2.5 backdrop-blur-md sm:px-4">
       <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Quick filters</span>
+      <Link
+        href={resourceViewHref("staff")}
+        className={cn(
+          "rounded-full border px-3 py-1 text-xs font-medium transition",
+          query.resourceView === "staff"
+            ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-100"
+            : "border-white/[0.08] bg-white/[0.03] text-slate-300 hover:border-cyan-500/25 hover:text-white"
+        )}
+      >
+        By staff
+      </Link>
+      <Link
+        href={resourceViewHref("room")}
+        className={cn(
+          "rounded-full border px-3 py-1 text-xs font-medium transition",
+          query.resourceView === "room"
+            ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-100"
+            : "border-white/[0.08] bg-white/[0.03] text-slate-300 hover:border-cyan-500/25 hover:text-white"
+        )}
+      >
+        By room
+      </Link>
+      <Link
+        href={resourceViewHref("clinic")}
+        className={cn(
+          "rounded-full border px-3 py-1 text-xs font-medium transition",
+          query.resourceView === "clinic"
+            ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-100"
+            : "border-white/[0.08] bg-white/[0.03] text-slate-300 hover:border-cyan-500/25 hover:text-white"
+        )}
+      >
+        By clinic
+      </Link>
       {TYPE_CHIPS.map((c) => {
         const active = query.bookingType?.trim() === c.type;
         return (

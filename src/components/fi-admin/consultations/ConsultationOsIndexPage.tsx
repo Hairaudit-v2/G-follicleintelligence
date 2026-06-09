@@ -141,7 +141,7 @@ export function ConsultationOsIndexPage({ tenantId, rows, activeStatus }: Consul
                     </div>
                     <div>
                       <dt className="inline font-medium text-slate-600">Consultant: </dt>
-                      <dd className="inline">{row.consultant_name?.trim() || "—"}</dd>
+                      <dd className="inline">{row.consultant_display_name?.trim() || "—"}</dd>
                     </div>
                     <div className="sm:col-span-2">
                       <dt className="inline font-medium text-slate-600">Updated: </dt>

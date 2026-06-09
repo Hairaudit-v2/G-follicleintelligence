@@ -2,12 +2,14 @@
 
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { BookingOperatorRow } from "./BookingOperatorRow";
 
 export function BookingOperatorTable({
   tenantId,
   bookings,
-  assignees,
+  clinicalStaffOptions,
+  userAssignees,
   clinics,
   adminKey,
   onEdit,
@@ -15,7 +17,8 @@ export function BookingOperatorTable({
 }: {
   tenantId: string;
   bookings: FiBookingRow[];
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
+  userAssignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
   onEdit: (b: FiBookingRow) => void;
@@ -39,7 +42,7 @@ export function BookingOperatorTable({
             <th className="px-3 py-2">Status</th>
             <th className="px-3 py-2">Title</th>
             <th className="px-3 py-2">Linked</th>
-            <th className="px-3 py-2">Assigned</th>
+            <th className="px-3 py-2">Provider</th>
             <th className="px-3 py-2">Clinic / location</th>
             <th className="px-3 py-2">Actions</th>
           </tr>
@@ -50,7 +53,8 @@ export function BookingOperatorTable({
               key={b.id}
               tenantId={tenantId}
               booking={b}
-              assignees={assignees}
+              clinicalStaffOptions={clinicalStaffOptions}
+              userAssignees={userAssignees}
               clinics={clinics}
               adminKey={adminKey}
               onEdit={() => onEdit(b)}

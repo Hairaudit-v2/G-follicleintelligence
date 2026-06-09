@@ -6,26 +6,23 @@ import { bookingCalendarChipSurface, bookingTypeCalendarLegendLabel } from "@/sr
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/BookingStatusBadge";
 import { formatTimeRangeInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 
-function assigneeLabel(options: CrmShellUserPickerOption[], id: string | null): string {
-  if (!id) return "Unassigned";
-  const o = options.find((x) => x.id === id);
-  return o?.email?.trim() || o?.id.slice(0, 8) || id.slice(0, 8);
-}
-
 export function BookingCalendarEventCard({
   booking,
-  assignees,
+  clinicalStaffOptions,
+  userAssignees = [],
   layout,
   onClick,
-  /** Same IANA zone as the day column (tenant clinic clock). */
   calendarTimezone,
   services = [],
 }: {
   booking: FiBookingRow;
-  assignees: CrmShellUserPickerOption[];
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
+  userAssignees?: CrmShellUserPickerOption[];
   layout: { topPx: number; heightPx: number };
   onClick: () => void;
   calendarTimezone?: string | null;
@@ -36,6 +33,7 @@ export function BookingCalendarEventCard({
   const typeLabel = cat?.name?.trim() || bookingTypeCalendarLegendLabel(booking.booking_type);
   const tz = normalizeCalendarTimezone(calendarTimezone ?? booking.timezone);
   const range = formatTimeRangeInTimezone(booking.start_at, booking.end_at, tz);
+  const assignment = bookingAssignmentDisplay(clinicalStaffOptions, userAssignees, booking);
 
   return (
     <button
@@ -53,7 +51,7 @@ export function BookingCalendarEventCard({
         <BookingStatusBadge status={booking.booking_status} />
       </div>
       <div className="mt-0.5 truncate text-[10px] opacity-90">{range}</div>
-      <div className="truncate text-[10px] opacity-90">{assigneeLabel(assignees, booking.assigned_user_id)}</div>
+      <div className="truncate text-[10px] opacity-90">{assignment.summaryLine}</div>
     </button>
   );
 }

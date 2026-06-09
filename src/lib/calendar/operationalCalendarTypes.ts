@@ -1,7 +1,9 @@
+import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
@@ -19,13 +21,21 @@ export type OperationalCalendarBookingDisplay = {
   /** From `fi_patients.metadata` when the booking is anchored to a patient. */
   patientEmail?: string | null;
   patientPhone?: string | null;
+  /** Assigned room display name when `room_id` is set. */
+  roomLabel?: string | null;
 };
 
 export type OperationalCalendarResourceColumn = {
   id: string;
-  kind: "fi_staff" | "fi_user" | "clinic" | "unassigned";
+  kind: "fi_staff" | "fi_user" | "clinic" | "room" | "unassigned";
   label: string;
   subtitle: string | null;
+  /** Present on `fi_staff` columns. */
+  staffId?: string;
+  /** Present on legacy `fi_user` owner columns. */
+  legacyUserId?: string;
+  clinicallyAvailable?: boolean;
+  readinessWarning?: string | null;
 };
 
 export type OperationalCalendarPageData = {
@@ -42,9 +52,11 @@ export type OperationalCalendarPageData = {
   bookingDisplay: Record<string, OperationalCalendarBookingDisplay>;
   /** `fi_users` — booking drawers, quick call-in, and legacy user pickers. */
   assignees: CrmShellUserPickerOption[];
-  /** Active `fi_staff` — day columns, staff URL filter, overlap map (`staffId` → `fi_user_id`). */
-  staffDirectory: CrmShellUserPickerOption[];
+  /** Active `fi_staff` with readiness — day columns, staff URL filter, clinical pickers. */
+  staffDirectory: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
+  rooms: FiClinicRoomRow[];
+  roomDisplayById: Record<string, string>;
   resourceColumns: OperationalCalendarResourceColumn[];
   gridConfig: BusinessGridConfig;
   listTruncated: boolean;
@@ -63,4 +75,6 @@ export type OperationalCalendarPageData = {
    * Bookings can still be created when these are present.
    */
   setupRecommendations: string[];
+  /** When set, the server page should redirect to canonical `staffId` (legacy `assignedUserId` resolved). */
+  canonicalRedirectHref?: string | null;
 };

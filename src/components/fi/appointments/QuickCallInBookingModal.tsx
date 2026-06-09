@@ -9,8 +9,13 @@ import { fromDatetimeLocalValue } from "@/src/components/fi/bookings/bookingForm
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
 import { activeBookableServices, formatPriceAud, serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
+import {
+  canSelectStaffForClinicalPicker,
+  type ClinicalStaffPickerOption,
+} from "@/src/lib/staff/clinicalStaffPicker";
+import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import { QUICK_CALL_IN_DEFAULT_TIMEZONE, dispatchCrmKanbanRefresh } from "@/src/lib/calendar/quickCallInConstants";
 import { localNowForDatetimePicker, nextQuarterHourLocalString } from "@/src/lib/calendar/quickCallInDatetime";
 
@@ -30,10 +35,12 @@ export type QuickCallInBookingModalProps = {
   initialLocalStart?: string | null;
   /** Prefill clinic when opening from a site column. */
   initialClinicId?: string | null;
-  /** Prefill assignee (`fi_users.id`) when opening from a staff column with a linked user. */
+  /** Prefill clinical provider (`fi_staff.id`) when opening from a staff column. */
+  initialAssignedStaffId?: string | null;
+  /** @deprecated Legacy alias — resolved to staff when linked. */
   initialAssignedUserId?: string | null;
   clinics?: CrmShellClinicOption[];
-  assignees?: CrmShellUserPickerOption[];
+  clinicalStaffOptions?: ClinicalStaffPickerOption[];
   adminKey?: string;
   /** Tenant procedure catalog — drives procedure labels and suggested pricing. */
   services?: FiServiceRow[];
@@ -50,9 +57,10 @@ export function QuickCallInBookingModal({
   calendarTimezone = QUICK_CALL_IN_DEFAULT_TIMEZONE,
   initialLocalStart,
   initialClinicId = null,
+  initialAssignedStaffId = null,
   initialAssignedUserId = null,
   clinics = [],
-  assignees = [],
+  clinicalStaffOptions = [],
   adminKey = "",
   services = [],
   onCreated,
@@ -68,7 +76,7 @@ export function QuickCallInBookingModal({
   const [bookingType, setBookingType] = useState("consultation");
   const [notes, setNotes] = useState("");
   const [clinicId, setClinicId] = useState("");
-  const [assignedUserId, setAssignedUserId] = useState("");
+  const [assignedStaffId, setAssignedStaffId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,9 +90,15 @@ export function QuickCallInBookingModal({
     setBookingType("consultation");
     setNotes("");
     setClinicId(initialClinicId?.trim() ?? "");
-    setAssignedUserId(initialAssignedUserId?.trim() ?? "");
+    const staffPrefill =
+      initialAssignedStaffId?.trim() ||
+      (initialAssignedUserId?.trim()
+        ? clinicalStaffOptions.find((s) => s.fi_user_id?.trim() === initialAssignedUserId.trim())?.id
+        : "") ||
+      "";
+    setAssignedStaffId(staffPrefill);
     setError(null);
-  }, [initialAssignedUserId, initialClinicId, initialLocalStart, tz]);
+  }, [clinicalStaffOptions, initialAssignedStaffId, initialAssignedUserId, initialClinicId, initialLocalStart, tz]);
 
   useEffect(() => {
     if (!open) return;
@@ -111,6 +125,15 @@ export function QuickCallInBookingModal({
       return;
     }
 
+    const staffId = assignedStaffId.trim();
+    if (staffId) {
+      const staff = clinicalStaffOptions.find((s) => s.id === staffId);
+      if (staff && !canSelectStaffForClinicalPicker(staff)) {
+        setError(staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available.");
+        return;
+      }
+    }
+
     setBusy(true);
     try {
       const body: Record<string, unknown> = {
@@ -122,7 +145,7 @@ export function QuickCallInBookingModal({
         bookingType,
         notes: notes.trim() || undefined,
         clinicId: clinicId.trim() || null,
-        assignedUserId: assignedUserId.trim() || null,
+        assignedStaffId: staffId || null,
         calendarTimezone: tz,
       };
       if (adminKey.trim()) body.adminKey = adminKey.trim();
@@ -294,21 +317,17 @@ export function QuickCallInBookingModal({
               </label>
             ) : null}
 
-            {assignees.length > 0 ? (
+            {clinicalStaffOptions.length > 0 ? (
               <label className="block text-sm">
-                <span className="font-medium text-slate-800">Assign to (optional)</span>
-                <select
+                <span className="font-medium text-slate-800">Clinical provider (optional)</span>
+                <StaffClinicalSelect
+                  tenantId={tenantId}
+                  options={clinicalStaffOptions}
+                  value={assignedStaffId}
+                  onChange={setAssignedStaffId}
+                  emptyLabel="—"
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  value={assignedUserId}
-                  onChange={(e) => setAssignedUserId(e.target.value)}
-                >
-                  <option value="">—</option>
-                  {assignees.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.email ?? u.id.slice(0, 8)}
-                    </option>
-                  ))}
-                </select>
+                />
               </label>
             ) : null}
 

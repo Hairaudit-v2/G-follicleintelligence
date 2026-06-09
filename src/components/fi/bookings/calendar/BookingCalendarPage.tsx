@@ -25,7 +25,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
     router.refresh();
   }, [router]);
 
-  const { tenantId, query, lanes, buckets, assignees, clinics, listTruncated, rangeTitle } = data;
+  const { tenantId, query, lanes, buckets, assignees, clinicalStaffOptions, clinics, listTruncated, rangeTitle } = data;
 
   function scrollToCreate() {
     createRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -70,14 +70,20 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       />
 
       {showFilters ? (
-        <BookingCalendarFilters tenantId={tenantId} query={query} assignees={assignees} clinics={clinics} />
+        <BookingCalendarFilters
+          tenantId={tenantId}
+          query={query}
+          clinicalStaffOptions={clinicalStaffOptions}
+          clinics={clinics}
+        />
       ) : null}
 
       <BookingCalendarGrid
         view={query.view}
         lanes={lanes}
         buckets={buckets}
-        assignees={assignees}
+        clinicalStaffOptions={clinicalStaffOptions}
+        userAssignees={assignees}
         services={data.services}
         onSelectBooking={(b) => setDrawer(b)}
         onEmptySlot={(dayKey, hour) => {
@@ -92,7 +98,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       <div ref={createRef}>
         <BookingQuickCreatePanel
           tenantId={tenantId}
-          assignees={assignees}
+          clinicalStaffOptions={clinicalStaffOptions}
           clinics={clinics}
           adminKey={adminKey}
           calendarTimezone={query.calendarTimezone}
@@ -109,6 +115,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
         tenantId={tenantId}
         booking={drawer}
         assignees={assignees}
+        staffDirectory={clinicalStaffOptions}
         clinics={clinics}
         adminKey={adminKey}
         calendarTimezone={query.calendarTimezone}
@@ -121,7 +128,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
         tenantId={tenantId}
         booking={editing}
         reminderJobs={editing ? data.reminderJobsByBookingId[editing.id] ?? [] : []}
-        assignees={assignees}
+        clinicalStaffOptions={clinicalStaffOptions}
         clinics={clinics}
         adminKey={adminKey}
         clinicCalendarTimezone={query.calendarTimezone}

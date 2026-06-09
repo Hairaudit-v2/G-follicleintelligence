@@ -16,6 +16,7 @@ import {
   parseCalendarDateString,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
+import type { CalendarResourceView } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 export type BusinessGridConfig = {
@@ -174,10 +175,30 @@ export function bookingConflictsForOperationalCalendar(
   return out;
 }
 
-/** Maps a booking to a resource column id (`s:…`, `u:…`, `c:…`, or `unassigned`) for day view. */
-export function resourceColumnIdForBooking(b: FiBookingRow): string {
+/** Maps a booking to a resource column id for day view (`s:…`, `r:…`, `u:…`, `c:…`, or `unassigned`). */
+export function resourceColumnIdForBooking(
+  b: FiBookingRow,
+  opts?: { resourceView?: CalendarResourceView; staffIdByUserId?: Map<string, string> }
+): string {
+  const view = opts?.resourceView ?? "staff";
+
+  if (view === "room") {
+    if (b.room_id?.trim()) return `r:${b.room_id.trim()}`;
+    return "unassigned";
+  }
+
+  if (view === "clinic") {
+    if (b.clinic_id?.trim()) return `c:${b.clinic_id.trim()}`;
+    return "unassigned";
+  }
+
   if (b.assigned_staff_id?.trim()) return `s:${b.assigned_staff_id.trim()}`;
-  if (b.assigned_user_id?.trim()) return `u:${b.assigned_user_id.trim()}`;
+  if (b.assigned_user_id?.trim()) {
+    const uid = b.assigned_user_id.trim();
+    const linkedStaffId = opts?.staffIdByUserId?.get(uid);
+    if (linkedStaffId) return `s:${linkedStaffId}`;
+    return `u:${uid}`;
+  }
   if (b.clinic_id?.trim()) return `c:${b.clinic_id.trim()}`;
   return "unassigned";
 }

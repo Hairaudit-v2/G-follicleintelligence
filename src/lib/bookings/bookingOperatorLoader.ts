@@ -13,6 +13,8 @@ import { computeOperatorBookingSummaryCounts, type OperatorBookingSummaryCounts 
 import { DEFAULT_OPERATOR_BOOKINGS_LIMIT, MAX_OPERATOR_BOOKINGS_LIMIT } from "./operatorBookingConstants";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { calendarDateStringFromInstant, zonedMidnightUtcMs, zonedNextDayUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
 import { loadBookingsForOperatorView } from "./bookings";
@@ -32,6 +34,8 @@ export type BookingsOperatorPageData = {
   /** Serialized map: booking id → reminder jobs (pending/sent/failed). */
   reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
   assignees: CrmShellUserPickerOption[];
+  /** Readiness-enriched staff picker for booking edit drawer assignee field. */
+  clinicalStaffOptions: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   summaryCounts: OperatorBookingSummaryCounts;
   /** True when the summary query hit {@link MAX_OPERATOR_BOOKINGS_LIMIT} rows. */
@@ -73,12 +77,12 @@ export async function loadBookingsOperatorPageData(
     rangeEndIso: query.endIso,
     status: query.status,
     bookingType: query.bookingType,
-    assignedUserId: query.assignedUserId,
+    assignedStaffId: query.assignedStaffId,
     clinicId: query.clinicId,
     includeCancelled: query.includeCancelled,
   });
 
-  const [summaryRows, assignees, scope, reminderMap, services] = await Promise.all([
+  const [summaryRows, assignees, clinicalStaffOptions, scope, reminderMap, services] = await Promise.all([
     loadBookingsForOperatorView({
       tenantId: tid,
       rangeStartIso: summaryStartIso,
@@ -87,6 +91,7 @@ export async function loadBookingsOperatorPageData(
       limit: MAX_OPERATOR_BOOKINGS_LIMIT,
     }),
     loadCrmShellUserPickerOptions(tid),
+    loadClinicalStaffPickerOptions(tid),
     loadCrmShellScopePickerOptions(tid),
     loadReminderJobsForBookings(
       tid,
@@ -112,6 +117,7 @@ export async function loadBookingsOperatorPageData(
     bookings,
     reminderJobsByBookingId,
     assignees,
+    clinicalStaffOptions,
     clinics: scope.clinics,
     summaryCounts,
     summaryTruncated: summaryRows.length >= MAX_OPERATOR_BOOKINGS_LIMIT,

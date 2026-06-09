@@ -9,7 +9,8 @@ export type ParsedOperatorBookingQuery = {
   endIso: string;
   status: string | null;
   bookingType: string | null;
-  assignedUserId: string | null;
+  /** Filter by clinical provider (`fi_staff.id`). URL param `staffId`. */
+  assignedStaffId: string | null;
   clinicId: string | null;
   includeCancelled: boolean;
 };
@@ -86,8 +87,9 @@ export function parseOperatorBookingSearchParams(
   const typeRaw = firstString(searchParams.type).trim();
   const bookingType = typeRaw && isAllowedBookingType(typeRaw) ? typeRaw : null;
 
-  const assignedRaw = firstString(searchParams.assignedUserId).trim();
-  const assignedUserId = assignedRaw && isUuid(assignedRaw) ? assignedRaw : null;
+  const assignedRaw =
+    firstString(searchParams.staffId).trim() || firstString(searchParams.assignedStaffId).trim();
+  const assignedStaffId = assignedRaw && isUuid(assignedRaw) ? assignedRaw : null;
 
   const clinicRaw = firstString(searchParams.clinicId).trim();
   const clinicId = clinicRaw && isUuid(clinicRaw) ? clinicRaw : null;
@@ -100,7 +102,7 @@ export function parseOperatorBookingSearchParams(
     endIso: end,
     status,
     bookingType,
-    assignedUserId,
+    assignedStaffId,
     clinicId,
     includeCancelled,
   };
@@ -111,7 +113,7 @@ export type OperatorBookingHrefQuery = {
   end?: string;
   status?: string;
   type?: string;
-  assignedUserId?: string;
+  assignedStaffId?: string;
   clinicId?: string;
   includeCancelled?: boolean;
 };
@@ -130,7 +132,7 @@ export function buildOperatorBookingsHref(tenantId: string, q: OperatorBookingHr
   if (q.end?.trim()) sp.set("end", q.end.trim());
   if (q.status?.trim()) sp.set("status", q.status.trim());
   if (q.type?.trim()) sp.set("type", q.type.trim());
-  if (q.assignedUserId?.trim()) sp.set("assignedUserId", q.assignedUserId.trim());
+  if (q.assignedStaffId?.trim()) sp.set("staffId", q.assignedStaffId.trim());
   if (q.clinicId?.trim()) sp.set("clinicId", q.clinicId.trim());
   if (q.includeCancelled) sp.set("includeCancelled", "1");
   const qs = sp.toString();

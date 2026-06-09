@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 
-import { CONSULTATION_TYPE_DEFINITIONS } from "./consultationTypeConfig";
+import { resolveConsultationConsultantDisplayName } from "./consultationConsultantDisplay";
 import type { ConsultationRow, ConsultationStatus, ConsultationTypeId } from "./consultationTypes";
 
 function mapRow(raw: Record<string, unknown>): ConsultationRow {
@@ -20,6 +20,7 @@ function mapRow(raw: Record<string, unknown>): ConsultationRow {
     consultation_type: raw.consultation_type as ConsultationTypeId,
     status: raw.status as ConsultationStatus,
     consultant_name: raw.consultant_name == null ? null : String(raw.consultant_name),
+    consultant_staff_id: raw.consultant_staff_id == null ? null : String(raw.consultant_staff_id),
     consultation_date: raw.consultation_date == null ? null : String(raw.consultation_date),
     structured_data: (raw.structured_data && typeof raw.structured_data === "object"
       ? (raw.structured_data as Record<string, unknown>)
@@ -86,6 +87,7 @@ export type ConsultationIndexRow = ConsultationRow & {
   patient_display_name: string | null;
   lead_display_name: string | null;
   link_headline: string;
+  consultant_display_name: string | null;
 };
 
 export type ConsultationWorkspaceDisplay = {
@@ -283,6 +285,64 @@ async function resolveConsultationLinkIndexMaps(
   return { patientLabelById, leadTitleById };
 }
 
+async function resolveConsultantStaffNameById(
+  tenantId: string,
+  rows: ConsultationRow[]
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const staffIds = new Set<string>();
+  for (const r of rows) {
+    if (r.consultant_staff_id?.trim()) staffIds.add(r.consultant_staff_id.trim());
+  }
+  if (staffIds.size === 0) return out;
+
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("id, full_name, email")
+    .eq("tenant_id", tenantId.trim())
+    .in("id", Array.from(staffIds));
+  if (error) throw new Error(error.message);
+  for (const raw of data ?? []) {
+    const r = raw as { id: string; full_name: string | null; email: string | null };
+    const label = String(r.full_name ?? "").trim() || String(r.email ?? "").trim();
+    if (label) out.set(String(r.id), label);
+  }
+  return out;
+}
+
+function mapConsultationIndexRow(
+  r: ConsultationRow,
+  subjectById: Map<string, string>,
+  patientLabelById: Map<string, string>,
+  leadTitleById: Map<string, string>,
+  consultantStaffNameById: Map<string, string>
+): ConsultationIndexRow {
+  const patient_display_name = r.patient_id?.trim()
+    ? patientLabelById.get(r.patient_id.trim()) ?? `Patient ${r.patient_id.trim().slice(0, 8)}…`
+    : null;
+  const lead_display_name = r.lead_id?.trim()
+    ? leadTitleById.get(r.lead_id.trim()) ?? `Lead ${r.lead_id.trim().slice(0, 8)}…`
+    : null;
+  const link_headline = patient_display_name ?? lead_display_name ?? "Unlinked";
+  const linkedStaffName = r.consultant_staff_id?.trim()
+    ? consultantStaffNameById.get(r.consultant_staff_id.trim()) ?? null
+    : null;
+  return {
+    ...r,
+    consultation_type_label: consultationTypeLabel(r.consultation_type),
+    subject_line: subjectById.get(r.id) ?? link_headline,
+    patient_display_name,
+    lead_display_name,
+    link_headline,
+    consultant_display_name: resolveConsultationConsultantDisplayName({
+      consultant_staff_id: r.consultant_staff_id,
+      consultant_name: r.consultant_name,
+      linkedStaffName,
+    }),
+  };
+}
+
 /** Consultations linked to a foundation patient (or same person when patient_id unset). */
 export async function loadConsultationsForPatient(
   tenantId: string,
@@ -309,23 +369,10 @@ export async function loadConsultationsForPatient(
   const rows = data.map((row) => mapRow(row as Record<string, unknown>));
   const subjectById = await resolveConsultationSubjectLines(tid, rows);
   const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
-  return rows.map((r) => {
-    const patient_display_name = r.patient_id?.trim()
-      ? patientLabelById.get(r.patient_id.trim()) ?? `Patient ${r.patient_id.trim().slice(0, 8)}…`
-      : null;
-    const lead_display_name = r.lead_id?.trim()
-      ? leadTitleById.get(r.lead_id.trim()) ?? `Lead ${r.lead_id.trim().slice(0, 8)}…`
-      : null;
-    const link_headline = patient_display_name ?? lead_display_name ?? "Unlinked";
-    return {
-      ...r,
-      consultation_type_label: consultationTypeLabel(r.consultation_type),
-      subject_line: subjectById.get(r.id) ?? link_headline,
-      patient_display_name,
-      lead_display_name,
-      link_headline,
-    };
-  });
+  const consultantStaffNameById = await resolveConsultantStaffNameById(tid, rows);
+  return rows.map((r) =>
+    mapConsultationIndexRow(r, subjectById, patientLabelById, leadTitleById, consultantStaffNameById)
+  );
 }
 
 export async function listConsultationsForTenant(
@@ -353,21 +400,8 @@ export async function listConsultationsForTenant(
   const rows = data.map((row) => mapRow(row as Record<string, unknown>));
   const subjectById = await resolveConsultationSubjectLines(tid, rows);
   const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
-  return rows.map((r) => {
-    const patient_display_name = r.patient_id?.trim()
-      ? patientLabelById.get(r.patient_id.trim()) ?? `Patient ${r.patient_id.trim().slice(0, 8)}…`
-      : null;
-    const lead_display_name = r.lead_id?.trim()
-      ? leadTitleById.get(r.lead_id.trim()) ?? `Lead ${r.lead_id.trim().slice(0, 8)}…`
-      : null;
-    const link_headline = patient_display_name ?? lead_display_name ?? "Unlinked";
-    return {
-      ...r,
-      consultation_type_label: consultationTypeLabel(r.consultation_type),
-      subject_line: subjectById.get(r.id) ?? link_headline,
-      patient_display_name,
-      lead_display_name,
-      link_headline,
-    };
-  });
+  const consultantStaffNameById = await resolveConsultantStaffNameById(tid, rows);
+  return rows.map((r) =>
+    mapConsultationIndexRow(r, subjectById, patientLabelById, leadTitleById, consultantStaffNameById)
+  );
 }

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
@@ -29,7 +29,9 @@ export default async function DashboardCalendarPage({
   if (!tenantId) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
-  const data = await loadOperationalCalendarPageData(tenantId, sp);
+  const data = await loadOperationalCalendarPageData(tenantId, sp, { route: "dashboard" });
+
+  if (data.canonicalRedirectHref) redirect(data.canonicalRedirectHref);
 
   return (
     <CalendarToastProvider>
