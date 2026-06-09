@@ -15,6 +15,9 @@ export type CalendarQuickTemplate = {
   label: string;
   /** Stored `fi_bookings.booking_type` — must be an allowed platform type. */
   bookingType: BookingType;
+  /** Preferred `fi_services.name` when resolving duration from the tenant catalog. */
+  catalogName?: string;
+  catalogCategory?: string;
   durationMinutes: number;
   /** Preferred card title; falls back to label. */
   title: string;
@@ -26,6 +29,8 @@ export const CALENDAR_QUICK_TEMPLATES: CalendarQuickTemplate[] = [
     id: "phone_consult",
     label: "Phone Consultation",
     bookingType: "consultation",
+    catalogName: "Phone Consultation",
+    catalogCategory: "Consultation",
     durationMinutes: 30,
     title: "Phone Consultation",
   },
@@ -33,42 +38,54 @@ export const CALENDAR_QUICK_TEMPLATES: CalendarQuickTemplate[] = [
     id: "consultation",
     label: "Consultation",
     bookingType: "consultation",
-    durationMinutes: 30,
+    catalogName: "In-Clinic Consultation",
+    catalogCategory: "Consultation",
+    durationMinutes: 45,
     title: "Consultation",
   },
   {
     id: "prp",
     label: "PRP",
     bookingType: "prp",
-    durationMinutes: 30,
+    catalogName: "PRP Treatment",
+    catalogCategory: "Treatment",
+    durationMinutes: 60,
     title: "PRP",
   },
   {
     id: "exosomes",
     label: "Exosomes",
     bookingType: "exosomes",
-    durationMinutes: 30,
+    catalogName: "Exosomes Treatment",
+    catalogCategory: "Treatment",
+    durationMinutes: 45,
     title: "Exosomes",
   },
   {
     id: "follow_up",
     label: "Follow Up",
     bookingType: "follow_up",
-    durationMinutes: 15,
+    catalogName: "Follow-Up Review",
+    catalogCategory: "Follow-up",
+    durationMinutes: 30,
     title: "Follow Up",
   },
   {
     id: "surgery_review",
     label: "Surgery Review",
     bookingType: "review",
-    durationMinutes: 20,
+    catalogName: "Surgery Review",
+    catalogCategory: "Follow-up",
+    durationMinutes: 30,
     title: "Surgery Review",
   },
   {
     id: "surgery",
     label: "Surgery",
     bookingType: "surgery",
-    durationMinutes: 240,
+    catalogName: "Hair Transplant Surgery - One Day",
+    catalogCategory: "Surgery",
+    durationMinutes: 480,
     title: "Surgery",
   },
 ];

@@ -24,6 +24,7 @@ describe("CALENDAR_QUICK_TEMPLATES (Stage 2A MVP)", () => {
       assert.ok(BOOKING_TYPES.includes(tpl.bookingType));
       assert.ok(tpl.durationMinutes > 0, tpl.id);
     }
-    assert.equal(CALENDAR_QUICK_TEMPLATES.find((t) => t.id === "surgery")?.durationMinutes, 240);
+    assert.equal(CALENDAR_QUICK_TEMPLATES.find((t) => t.id === "surgery")?.durationMinutes, 480);
+    assert.equal(CALENDAR_QUICK_TEMPLATES.find((t) => t.id === "phone_consult")?.catalogName, "Phone Consultation");
   });
 });

@@ -3,8 +3,10 @@
  * with conservative fallbacks when the catalog is empty or a type has no row.
  */
 
-import type { BookingType } from "./bookingPolicy";
+import type { CalendarQuickTemplate } from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
+
+import type { BookingType } from "./bookingPolicy";
 
 /** Last-resort minutes per canonical `booking_type` when no `fi_services` row exists. */
 export const FALLBACK_PROCEDURE_DURATION_MINUTES: Record<BookingType, number> = {
@@ -37,6 +39,39 @@ export function servicesByBookingType(services: FiServiceRow[]): Map<string, FiS
 
 export function serviceForBookingType(services: FiServiceRow[], bookingType: string): FiServiceRow | null {
   return servicesByBookingType(services).get(bookingType.trim()) ?? null;
+}
+
+/** Match an active catalog row by display name (and optional category). */
+export function serviceForCatalogName(
+  services: FiServiceRow[],
+  name: string,
+  category?: string | null
+): FiServiceRow | null {
+  const wantName = name.trim();
+  const wantCat = category?.trim() || null;
+  for (const s of services) {
+    if (!s.is_active) continue;
+    if (s.name.trim() !== wantName) continue;
+    if (wantCat && (s.category?.trim() ?? "") !== wantCat) continue;
+    return s;
+  }
+  return null;
+}
+
+/** Resolve quick-book duration: catalog name → booking_type → template fallback. */
+export function quickTemplateDurationMinutes(
+  template: CalendarQuickTemplate,
+  services?: FiServiceRow[] | null
+): number {
+  if (services?.length) {
+    if (template.catalogName?.trim()) {
+      const byName = serviceForCatalogName(services, template.catalogName, template.catalogCategory ?? null);
+      if (byName && byName.duration_minutes > 0) return byName.duration_minutes;
+    }
+    const byType = serviceForBookingType(services, template.bookingType);
+    if (byType && byType.duration_minutes > 0) return byType.duration_minutes;
+  }
+  return template.durationMinutes;
 }
 
 export function defaultProcedureDurationMinutes(

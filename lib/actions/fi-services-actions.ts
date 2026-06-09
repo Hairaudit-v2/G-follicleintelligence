@@ -10,6 +10,7 @@ import {
   fiServiceDeactivateBodySchema,
   fiServicePatchBodySchema,
 } from "@/src/lib/services/fiServicesSchemas";
+import { seedDefaultClinicServicesForTenant } from "@/src/lib/services/defaultClinicServicesSeed";
 import { insertFiService, updateFiService } from "@/src/lib/services/fiServices.server";
 
 function revalidateFiServicesSurfaces(tenantId: string): void {
@@ -96,6 +97,26 @@ export async function updateServiceAction(
 /**
  * Soft-deactivate a catalogue row (`is_active = false`). Bookings continue to resolve by `booking_type` / fallbacks.
  */
+export async function loadDefaultClinicServicesAction(
+  tenantId: string,
+  body: unknown = {}
+): Promise<
+  | { ok: true; created: number; updated: number; skipped: number; warnings: string[] }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = fiServiceDeactivateBodySchema.parse(body ?? {});
+    await assertFiServicesManageAllowed({ tenantId, adminKey: parsed.adminKey, request: null });
+
+    const result = await seedDefaultClinicServicesForTenant(tenantId.trim());
+    revalidateFiServicesSurfaces(tenantId.trim());
+    return { ok: true, ...result };
+  } catch (e) {
+    const u = pgUniqueMessage(e);
+    return { ok: false, error: u ?? errMsg(e) };
+  }
+}
+
 export async function deactivateServiceAction(
   tenantId: string,
   serviceId: string,

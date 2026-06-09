@@ -7,6 +7,7 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 export type ServicesCatalogPageResult = {
   services: FiServiceRow[];
+  activeServiceCount: number;
   canManageServices: boolean;
 };
 
@@ -15,6 +16,7 @@ export async function loadServicesCatalogPage(tenantId: string): Promise<Service
   const services = await loadFiServicesForTenant(tid);
 
   const canManageServices = await canManageFiServicesCatalog({ tenantId: tid, request: null });
+  const activeServiceCount = services.filter((s) => s.is_active).length;
 
-  return { services, canManageServices };
+  return { services, activeServiceCount, canManageServices };
 }

@@ -6,7 +6,13 @@ import { useCallback, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { createServiceAction, deactivateServiceAction, updateServiceAction } from "@/lib/actions/fi-services-actions";
+import {
+  createServiceAction,
+  deactivateServiceAction,
+  loadDefaultClinicServicesAction,
+  updateServiceAction,
+} from "@/lib/actions/fi-services-actions";
+import { DEFAULT_CLINIC_SERVICE_LIBRARY } from "@/src/lib/services/defaultClinicServices";
 import { BOOKING_TYPES } from "@/src/lib/bookings/bookingPolicy";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { formatPriceAud } from "@/src/lib/bookings/servicesCatalog";
@@ -54,9 +60,11 @@ export function ServicesCatalogClient({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Record<string, string>>(emptyForm());
   const [error, setError] = useState<string | null>(null);
+  const [seedMessage, setSeedMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const canManage = data.canManageServices;
+  const showEmptyCatalogBanner = data.activeServiceCount === 0;
 
   const openCreate = () => {
     setError(null);
@@ -103,6 +111,23 @@ export function ServicesCatalogClient({
         setError(r.error);
         return;
       }
+      router.refresh();
+    });
+  };
+
+  const loadDefaults = () => {
+    setError(null);
+    setSeedMessage(null);
+    startTransition(async () => {
+      const r = await loadDefaultClinicServicesAction(tenantId, {});
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      const parts = [`${r.created} created`];
+      if (r.updated) parts.push(`${r.updated} updated`);
+      if (r.skipped) parts.push(`${r.skipped} unchanged`);
+      setSeedMessage(`Default clinic services loaded (${parts.join(", ")}). Existing prices were kept.`);
       router.refresh();
     });
   };
@@ -179,15 +204,45 @@ export function ServicesCatalogClient({
           </p>
         </div>
         {canManage ? (
-          <Button type="button" onClick={openCreate} className="shrink-0">
-            Add service
-          </Button>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button type="button" variant="outline" onClick={loadDefaults} disabled={pending}>
+              Load Default Clinic Services
+            </Button>
+            <Button type="button" onClick={openCreate} disabled={pending}>
+              Add service
+            </Button>
+          </div>
         ) : (
           <p className="text-xs text-gray-500">
             View only — tenant admin, platform FI OS admin, or valid admin API access can edit the catalogue.
           </p>
         )}
       </header>
+
+      {showEmptyCatalogBanner ? (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          role="status"
+        >
+          <p className="font-medium">No active services in your catalog</p>
+          <p className="mt-1 text-amber-900/90">
+            Calendar and bookings still work with built-in fallbacks, but procedure colours, durations, and price hints
+            work best with a service library. Load the {DEFAULT_CLINIC_SERVICE_LIBRARY.length} Evolved defaults or add
+            your own rows.
+          </p>
+          {canManage ? (
+            <Button type="button" variant="outline" className="mt-3" onClick={loadDefaults} disabled={pending}>
+              Load Default Clinic Services
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {seedMessage ? (
+        <div className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900" role="status">
+          {seedMessage}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">

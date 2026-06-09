@@ -397,6 +397,7 @@ export function CalendarPage({
           assignees={data.assignees}
           staffDirectory={data.staffDirectory}
           setupRecommendations={data.setupRecommendations}
+          services={data.services}
           workflowVariant={isFiOsWorkspace ? "fiOs" : "default"}
           onCreated={(booking, displayLabel) => {
             const tpl = calendarQuickTemplateById(

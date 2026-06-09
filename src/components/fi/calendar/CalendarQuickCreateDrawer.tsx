@@ -21,7 +21,9 @@ import {
 } from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
+import { quickTemplateDurationMinutes } from "@/src/lib/bookings/servicesCatalog";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import {
   fiButtonVariantClassNames,
@@ -81,6 +83,7 @@ export function CalendarQuickCreateDrawer({
   assignees,
   staffDirectory,
   setupRecommendations = [],
+  services = [],
   onCreated,
   workflowVariant = "default",
 }: {
@@ -93,6 +96,8 @@ export function CalendarQuickCreateDrawer({
   assignees: CrmShellUserPickerOption[];
   staffDirectory: CrmShellUserPickerOption[];
   setupRecommendations?: string[];
+  /** Tenant procedure catalog — durations override template defaults when present. */
+  services?: FiServiceRow[];
   onCreated: (booking: FiBookingRow, displayLabel: string) => void;
   workflowVariant?: "default" | "fiOs";
 }) {
@@ -135,7 +140,7 @@ export function CalendarQuickCreateDrawer({
     let endIso: string | null = null;
     if (startIso && t) {
       try {
-        endIso = addUtcMinutesToIso(startIso, t.durationMinutes);
+        endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(t, services));
       } catch {
         endIso = null;
       }
@@ -159,7 +164,7 @@ export function CalendarQuickCreateDrawer({
       selectedSlotUtcIso: startIso,
       endUtcIso: endIso,
     });
-  }, [prefill, tz]);
+  }, [prefill, services, tz]);
 
   useEffect(() => {
     if (!open) return;
@@ -212,10 +217,10 @@ export function CalendarQuickCreateDrawer({
       const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
       const t = calendarQuickTemplateById(id);
       if (!startIso || !t) return;
-      const endIso = addUtcMinutesToIso(startIso, t.durationMinutes);
+      const endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(t, services));
       setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     },
-    [startLocal, tz]
+    [services, startLocal, tz]
   );
 
   const onStartChange = useCallback(
@@ -224,10 +229,10 @@ export function CalendarQuickCreateDrawer({
       const tpl = calendarQuickTemplateById(templateId);
       const startIso = fromDatetimeLocalValueInTimezone(nextStart, tz);
       if (!startIso || !tpl) return;
-      const endIso = addUtcMinutesToIso(startIso, tpl.durationMinutes);
+      const endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(tpl, services));
       setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     },
-    [templateId, tz]
+    [services, templateId, tz]
   );
 
   const assigneeOptions = useMemo(() => {
@@ -561,7 +566,9 @@ export function CalendarQuickCreateDrawer({
                     )}
                   >
                     {t.label}
-                    <span className="mt-0.5 block text-xs font-normal tabular-nums text-slate-400">{t.durationMinutes} min</span>
+                    <span className="mt-0.5 block text-xs font-normal tabular-nums text-slate-400">
+                      {quickTemplateDurationMinutes(t, services)} min
+                    </span>
                   </button>
                 ))}
               </div>
