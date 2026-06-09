@@ -15,6 +15,7 @@ export type PatientShellOperatorContext = {
   tenantId: string;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
 };
 
 type SlideOverCtx = PatientShellOperatorContext & {
@@ -40,11 +41,13 @@ export function PatientSlideOverProvider({
   tenantId,
   operatorFiUserId,
   userRole,
+  canUseClinicFeatures,
   children,
 }: {
   tenantId: string;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
   children: ReactNode;
 }) {
   const [patientId, setPatientId] = useState<string | null>(null);
@@ -52,8 +55,8 @@ export function PatientSlideOverProvider({
   const close = useCallback(() => setPatientId(null), []);
 
   const value = useMemo(
-    () => ({ tenantId, operatorFiUserId, userRole, activePatientId: patientId, openPatient, close }),
-    [tenantId, operatorFiUserId, userRole, patientId, openPatient, close]
+    () => ({ tenantId, operatorFiUserId, userRole, canUseClinicFeatures, activePatientId: patientId, openPatient, close }),
+    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, patientId, openPatient, close]
   );
 
   return (
