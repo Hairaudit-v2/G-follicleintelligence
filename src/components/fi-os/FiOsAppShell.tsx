@@ -8,10 +8,12 @@ import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/fou
 import { getFiOsShellActiveSidebarId, resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
+import { CLINIC_OS_OPEN_CREATE_LEAD_EVENT } from "@/src/lib/fiAdmin/clinicOsShellCreateLeadEvent";
 
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 import { FiOsClinicSettingsNav } from "@/src/components/fi-os/FiOsClinicSettingsNav";
+import { FiOsCreateLeadModal } from "@/src/components/fi-os/FiOsCreateLeadModal";
 import { FiOsQuickCreatePalette } from "@/src/components/fi-os/FiOsQuickCreatePalette";
 import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
@@ -73,6 +75,7 @@ export function FiOsAppShell({
   const isCalendarMainLocked = useMemo(() => isFiOsTenantCalendarPath(pathname), [pathname]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+  const [createLeadOpen, setCreateLeadOpen] = useState(false);
   const quickCreateOpenRef = useRef(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [kbdHint, setKbdHint] = useState("Ctrl+K");
@@ -132,6 +135,14 @@ export function FiOsAppShell({
     }
     window.addEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
     return () => window.removeEventListener(CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT, onOpenSearchEvent);
+  }, []);
+
+  useEffect(() => {
+    function onOpenCreateLeadEvent() {
+      setCreateLeadOpen(true);
+    }
+    window.addEventListener(CLINIC_OS_OPEN_CREATE_LEAD_EVENT, onOpenCreateLeadEvent);
+    return () => window.removeEventListener(CLINIC_OS_OPEN_CREATE_LEAD_EVENT, onOpenCreateLeadEvent);
   }, []);
 
   useEffect(() => {
@@ -228,7 +239,12 @@ export function FiOsAppShell({
         onOpenChange={setQuickCreateOpen}
         showCrmNav={showCrmNav}
         showBookingsBoard={showBookingsBoard}
+        onOpenCreateLead={() => setCreateLeadOpen(true)}
       />
+
+      {showCrmNav ? (
+        <FiOsCreateLeadModal tenantId={tenantId} open={createLeadOpen} onOpenChange={setCreateLeadOpen} />
+      ) : null}
     </div>
   );
 }

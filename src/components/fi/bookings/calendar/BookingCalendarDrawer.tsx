@@ -2,8 +2,10 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cancelBookingAction, completeBookingAction, updateBookingAction } from "@/lib/actions/fi-booking-actions";
+import { createConsultationFromBookingAction } from "@/lib/actions/fi-consultation-actions";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
@@ -141,6 +143,7 @@ export function BookingCalendarDrawer({
   patientContactPhone?: string | null;
   onBookingUpdated?: (b: FiBookingRow) => void;
 }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const os = variant === "fiOs";
@@ -231,6 +234,22 @@ export function BookingCalendarDrawer({
     }
   }
 
+  async function onStartConsultation() {
+    setBusy(true);
+    setFeedback(null);
+    try {
+      const r = await createConsultationFromBookingAction(tenantId, row.id, withAdmin({}));
+      if (!r.ok) {
+        setFeedback(r.error);
+        return;
+      }
+      onClose();
+      router.push(`/fi-admin/${tenantId.trim()}/consultations/${encodeURIComponent(r.consultationId)}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const mut = canMutateBookings;
   const canMarkArrived =
     mut && !cancelled && !completed && (row.booking_status === "scheduled" || row.booking_status === "confirmed");
@@ -299,6 +318,15 @@ export function BookingCalendarDrawer({
                     Open patient
                   </span>
                 )}
+                <button
+                  type="button"
+                  className={osActionClass}
+                  disabled={busy || !mut}
+                  title={!mut ? "No booking edit permission" : undefined}
+                  onClick={() => void onStartConsultation()}
+                >
+                  Start consultation
+                </button>
                 <Link href={`/fi-admin/${tenantId}/foundation-integrity`} className={osActionClass}>
                   Patient twin
                 </Link>

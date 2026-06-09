@@ -3,7 +3,7 @@ import { AppointmentsPage } from "@/src/components/fi/appointments/AppointmentsP
 import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { loadAppointmentsPageData } from "@/src/lib/bookings/appointmentsPageLoader";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { getBookingsOperatorPageSession } from "@/src/lib/crm/crmShellAccess";
+import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 
 export const metadata = {
   title: "Appointments",
@@ -27,7 +27,7 @@ export default async function AppointmentsOperatorRoutePage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId } = await params;
-  const session = await getBookingsOperatorPageSession(tenantId);
+  const session = await getClinicFloorPageSession(tenantId);
   const sp = (await searchParams) ?? {};
   const data = await loadAppointmentsPageData(tenantId, sp);
   const existingBookings = mergeBookingsForAvailability(data.operator.bookings, data.calendar?.bookings ?? null);

@@ -7,7 +7,7 @@ import { appointmentTitleFromBooking } from "@/src/lib/bookings/appointmentDispl
 import { parseAppointmentDetailTab } from "@/src/lib/bookings/appointmentDetailTabs";
 import { parseAppointmentPreviewSearchParam } from "@/src/lib/bookings/appointmentPreviewQuery";
 import { loadAppointmentShellDetailPagePayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
-import { getBookingsOperatorPageSession } from "@/src/lib/crm/crmShellAccess";
+import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +34,7 @@ export default async function AppointmentDetailRoutePage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId, appointmentId } = await params;
-  const session = await getBookingsOperatorPageSession(tenantId);
+  const session = await getClinicFloorPageSession(tenantId);
   const sp = (await searchParams) ?? {};
   const previewAppointmentId = parseAppointmentPreviewSearchParam(sp.preview);
   const activeTab = parseAppointmentDetailTab(sp.tab);

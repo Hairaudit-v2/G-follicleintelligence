@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { NewPatientEntryPage } from "@/src/components/fi-admin/patients/NewPatientEntryPage";
-import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
-import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 
 export const metadata = {
   title: "Add new patient",
@@ -15,11 +14,7 @@ export default async function NewPatientEntryRoutePage({ params }: { params: Pro
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  await assertFiTenantPortalAccess(tenantId);
-  const [showCrmNav, showBookingsBoard] = await Promise.all([
-    getCrmShellNavAllowed(tenantId),
-    getBookingsBoardNavAllowed(tenantId),
-  ]);
+  await getClinicFloorPageSession(tenantId);
 
-  return <NewPatientEntryPage tenantId={tenantId} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />;
+  return <NewPatientEntryPage tenantId={tenantId} />;
 }

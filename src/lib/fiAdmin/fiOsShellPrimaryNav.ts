@@ -112,6 +112,14 @@ export function resolveFiOsPrimarySidebarItems(
       hint: !showCrmNav ? "Requires CRM shell role for this tenant." : undefined,
     },
     {
+      id: "consultations",
+      label: "Consultations",
+      shortLabel: "Consult",
+      href: hrefFor(b, "consultations"),
+      disabled: !showBookingsBoard,
+      hint: !showBookingsBoard ? "Requires bookings operator access for this tenant." : undefined,
+    },
+    {
       id: "cases",
       label: "Cases / SurgeryOS",
       shortLabel: "Cases",
@@ -193,10 +201,11 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";
+  if (legacy === "consultations") return "consultations";
   if (legacy === "dashboard") return "dashboard";
   if (legacy === "auditos") return "auditos";
   if (legacy === "analyticsos") return "analytics";
-  if (legacy === "appointments" || legacy === "bookings" || legacy === "consultations") return "calendar";
+  if (legacy === "appointments" || legacy === "bookings") return "calendar";
 
   if (npRaw.startsWith(nb)) {
     const rest = npRaw.slice(nb.length).replace(/^\//, "");

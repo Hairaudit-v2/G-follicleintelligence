@@ -11,6 +11,8 @@ import { patientClinicalDetailsPatchBodySchema } from "@/src/lib/patients/clinic
 import { patientAdminPatchBodySchema } from "@/src/lib/patients/patientApiSchemas";
 import { updatePatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsServer";
 import { updatePatientAdminDetails } from "@/src/lib/patients/server";
+import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
+import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
 import { ZodError } from "zod";
 
 function errMsg(e: unknown): string {
@@ -151,6 +153,73 @@ export async function loadPatientSlideOverBundleAction(
     const data = await loadPatientSlideOverPayload(parsed.tenantId, parsed.patientId);
     if (!data) return { ok: false, error: "Patient not found." };
     return { ok: true, data };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const createDirectPatientBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    firstName: z.string().min(1, "First name is required.").max(120),
+    lastName: z.string().min(1, "Last name is required.").max(120),
+    mobile: z.string().min(6, "Mobile is required.").max(40),
+    email: z.string().email("A valid email is required."),
+    dateOfBirth: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be YYYY-MM-DD."),
+  })
+  .strict();
+
+export type CreateDirectPatientResult =
+  | { ok: true; patientId: string; personId: string; created: boolean }
+  | { ok: false; error: string };
+
+/**
+ * Direct walk-in / admin patient registration — creates fi_person + fi_patient.
+ */
+export async function createDirectPatientAction(tenantId: string, body: unknown): Promise<CreateDirectPatientResult> {
+  try {
+    const parsed = createDirectPatientBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+
+    const tid = tenantId.trim();
+    const displayName = `${parsed.firstName.trim()} ${parsed.lastName.trim()}`.trim();
+
+    const { person, created: personCreated } = await resolveOrCreatePerson(
+      {
+        tenant_id: tid,
+        source_system: "fi_direct_patient_create",
+        display_name: displayName,
+        phone: parsed.mobile.trim(),
+        email: parsed.email.trim(),
+        date_of_birth: parsed.dateOfBirth.trim(),
+        metadata: {
+          first_name: parsed.firstName.trim(),
+          last_name: parsed.lastName.trim(),
+          surname: parsed.lastName.trim(),
+        },
+      },
+      undefined
+    );
+
+    const { patient, created: patientCreated } = await resolveOrCreatePatient(
+      {
+        tenant_id: tid,
+        person_id: person.id,
+        source_system: "fi_direct_patient_create",
+      },
+      undefined
+    );
+
+    revalidatePath(`/fi-admin/${tid}/patients`);
+    revalidatePath(`/fi-admin/${tid}/patients/${patient.id}`);
+    return {
+      ok: true,
+      patientId: patient.id,
+      personId: person.id,
+      created: personCreated || patientCreated,
+    };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

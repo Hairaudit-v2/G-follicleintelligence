@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
-import { completeConsultationDraft, createConsultationDraft, updateConsultationDraft } from "@/src/lib/consultations/consultationMutations.server";
+import { completeConsultationDraft, createConsultationDraft, createConsultationFromBooking, updateConsultationDraft } from "@/src/lib/consultations/consultationMutations.server";
 import {
   consultationCompleteBodySchema,
   consultationCreateDraftBodySchema,
@@ -37,6 +37,7 @@ export async function createConsultationDraftAction(
       patient_id: parsed.patient_id,
       person_id: parsed.person_id,
       lead_id: parsed.lead_id,
+      booking_id: parsed.booking_id,
     });
 
     const tid = tenantId.trim();
@@ -92,6 +93,37 @@ export async function completeConsultationDraftAction(
     revalidatePath(`/fi-admin/${tid}/consultations`);
     revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
     return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function createConsultationFromBookingAction(
+  tenantId: string,
+  bookingId: string,
+  body?: unknown
+): Promise<
+  | { ok: true; consultationId: string; created: boolean }
+  | { ok: false; error: string }
+> {
+  try {
+    const adminKey =
+      body && typeof body === "object" && body !== null && "adminKey" in body
+        ? String((body as { adminKey?: string }).adminKey ?? "")
+        : undefined;
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
+
+    const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const { consultation, created } = await createConsultationFromBooking(tenantId.trim(), bookingId.trim(), {
+      createdByFiUserId: fiUserId,
+    });
+
+    const tid = tenantId.trim();
+    const cid = consultation.id;
+    revalidatePath(`/fi-admin/${tid}/consultations`);
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
+    revalidatePath(`/fi-admin/${tid}/calendar`);
+    return { ok: true, consultationId: cid, created };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

@@ -66,6 +66,7 @@ export type ConsultationRow = {
   patient_id: string | null;
   lead_id: string | null;
   case_id: string | null;
+  booking_id: string | null;
   consultation_type: ConsultationTypeId;
   status: ConsultationStatus;
   consultant_name: string | null;
@@ -99,6 +100,8 @@ export const consultationCreateDraftBodySchema = z
     person_id: optionalUuid.optional(),
     /** Optional CRM lead link (`fi_crm_leads.id`). */
     lead_id: optionalUuid.optional(),
+    /** Optional calendar booking link (`fi_bookings.id`). */
+    booking_id: optionalUuid.optional(),
   })
   .strict();
 

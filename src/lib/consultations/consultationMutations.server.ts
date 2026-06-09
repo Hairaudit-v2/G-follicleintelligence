@@ -3,6 +3,8 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { loadConsultationForTenant } from "./consultationLoaders.server";
+import { consultationTypeForBookingType } from "./consultationBookingLink";
+import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { syncConsultationMedicalHairLossToPatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsConsultationSync";
 import { syncPostConsultReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
 import {
@@ -57,6 +59,35 @@ async function assertLeadInTenant(tenantId: string, leadId: string): Promise<voi
   if (!data) throw new Error("Lead not found for this tenant.");
 }
 
+async function assertBookingInTenant(tenantId: string, bookingId: string): Promise<void> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const id = bookingId.trim();
+  const { data, error } = await supabase.from("fi_bookings").select("id").eq("tenant_id", tid).eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Booking not found for this tenant.");
+}
+
+export async function loadConsultationByBookingId(tenantId: string, bookingId: string): Promise<ConsultationRow | null> {
+  const tid = tenantId.trim();
+  const bid = bookingId.trim();
+  if (!tid || !bid) return null;
+
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_consultations")
+    .select("*")
+    .eq("tenant_id", tid)
+    .eq("booking_id", bid)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data || typeof data !== "object") return null;
+  return loadConsultationForTenant(tid, String((data as { id: string }).id));
+}
+
 export type CreateConsultationDraftInput = ConsultationCreateDraftBody & {
   createdByFiUserId?: string | null;
 };
@@ -93,6 +124,11 @@ export async function createConsultationDraft(
   if (input.lead_id?.trim()) {
     await assertLeadInTenant(tid, input.lead_id);
     insertRow.lead_id = input.lead_id.trim();
+  }
+
+  if (input.booking_id?.trim()) {
+    await assertBookingInTenant(tid, input.booking_id);
+    insertRow.booking_id = input.booking_id.trim();
   }
 
   const supabase = supabaseAdmin();
@@ -223,6 +259,46 @@ export async function updateConsultationDraft(
   }
 
   return loaded;
+}
+
+/**
+ * Find or create a consultation linked to a calendar booking.
+ */
+export async function createConsultationFromBooking(
+  tenantId: string,
+  bookingId: string,
+  opts?: { createdByFiUserId?: string | null }
+): Promise<{ consultation: ConsultationRow; created: boolean }> {
+  const tid = tenantId.trim();
+  const bid = bookingId.trim();
+  if (!tid || !bid) throw new Error("tenantId and bookingId are required.");
+
+  const existing = await loadConsultationByBookingId(tid, bid);
+  if (existing) return { consultation: existing, created: false };
+
+  const booking = await loadBookingForTenant(tid, bid);
+  if (!booking) throw new Error("Booking not found.");
+
+  const consultationDate = booking.start_at?.trim().slice(0, 10) || null;
+
+  const row = await createConsultationDraft(tid, {
+    consultation_type: consultationTypeForBookingType(booking.booking_type),
+    patient_id: booking.patient_id?.trim() || undefined,
+    person_id: !booking.patient_id?.trim() && booking.person_id?.trim() ? booking.person_id.trim() : undefined,
+    lead_id: booking.lead_id?.trim() || undefined,
+    booking_id: bid,
+    createdByFiUserId: opts?.createdByFiUserId ?? null,
+  });
+
+  if (consultationDate) {
+    const updated = await updateConsultationDraft(tid, row.id, {
+      consultation_date: consultationDate,
+      updatedByFiUserId: opts?.createdByFiUserId ?? null,
+    });
+    return { consultation: updated, created: true };
+  }
+
+  return { consultation: row, created: true };
 }
 
 /**

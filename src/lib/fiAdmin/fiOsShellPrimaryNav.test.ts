@@ -33,6 +33,18 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");
 });
 
+test("getFiOsShellActiveSidebarId: consultations maps to consultations tab", () => {
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/consultations`, base), "consultations");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/consultations/new`, base), "consultations");
+});
+
+test("resolveFiOsPrimarySidebarItems: consultations follows bookings board flag", () => {
+  const on = resolveFiOsPrimarySidebarItems(base, true, true);
+  assert.ok(on.find((i) => i.id === "consultations" && !i.disabled));
+  const off = resolveFiOsPrimarySidebarItems(base, true, false);
+  assert.ok(off.find((i) => i.id === "consultations" && i.disabled));
+});
+
 test("resolveFiOsPrimarySidebarItems: dashboard_viewer AuditOS disabled when shell strips security nav", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true, "dashboard_viewer", false);
   const audit = items.find((i) => i.id === "auditos");

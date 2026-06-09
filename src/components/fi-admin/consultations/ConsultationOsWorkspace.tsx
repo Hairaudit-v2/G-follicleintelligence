@@ -421,6 +421,11 @@ export function ConsultationOsWorkspace({
     return "Saved";
   })();
 
+  const linkedBookingId = mode === "edit" && initialRow?.booking_id?.trim() ? initialRow.booking_id.trim() : null;
+  const appointmentHref = linkedBookingId
+    ? `${base}/appointments/${encodeURIComponent(linkedBookingId)}`
+    : null;
+
   return (
     <div className="space-y-5">
       <FiCard>
@@ -473,12 +478,22 @@ export function ConsultationOsWorkspace({
             )
           }
           secondaryAction={
-            <Link
-              href={patientsHref}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
-            >
-              Back to patients
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              {appointmentHref ? (
+                <Link
+                  href={appointmentHref}
+                  className="inline-flex items-center justify-center rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-900 shadow-sm transition hover:border-sky-300 hover:bg-sky-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+                >
+                  Open appointment
+                </Link>
+              ) : null}
+              <Link
+                href={patientsHref}
+                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+              >
+                Back to patients
+              </Link>
+            </div>
           }
         />
         {linkedPatientId || linkedLeadId ? (
@@ -503,7 +518,7 @@ export function ConsultationOsWorkspace({
       >
         <strong className="font-semibold">Early workflow.</strong> ConsultationOS is under active development. Drafts
         autosave on this page when status is draft or in progress; there is no AI summary, voice dictation, quote
-        automation, case conversion, or calendar integration in this stage.
+        automation, or case conversion in this stage.
       </div>
 
       {error ? (

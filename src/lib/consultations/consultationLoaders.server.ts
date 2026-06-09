@@ -16,6 +16,7 @@ function mapRow(raw: Record<string, unknown>): ConsultationRow {
     patient_id: raw.patient_id == null ? null : String(raw.patient_id),
     lead_id: raw.lead_id == null ? null : String(raw.lead_id),
     case_id: raw.case_id == null ? null : String(raw.case_id),
+    booking_id: raw.booking_id == null ? null : String(raw.booking_id),
     consultation_type: raw.consultation_type as ConsultationTypeId,
     status: raw.status as ConsultationStatus,
     consultant_name: raw.consultant_name == null ? null : String(raw.consultant_name),

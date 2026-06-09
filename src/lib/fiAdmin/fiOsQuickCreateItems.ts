@@ -35,7 +35,7 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
   {
     id: "lead",
     label: "New lead",
-    description: "Jump to LeadFlow — create lead form is on the CRM page.",
+    description: "Open a quick lead form (name, contact, notes).",
     keywords: ["crm", "enquiry", "pipeline", "leadflow"],
     path: "crm",
     hash: "fi-os-crm-create-lead",

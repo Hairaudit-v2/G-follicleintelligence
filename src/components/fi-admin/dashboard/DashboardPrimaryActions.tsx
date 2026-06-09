@@ -1,6 +1,8 @@
-import { Calendar, Stethoscope, UserPlus, Users } from "lucide-react";
+import { Calendar, Stethoscope, Users } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { QuickActionCard } from "@/src/components/fi-admin/dashboard-ui";
+import { DashboardAddLeadAction } from "@/src/components/fi-admin/dashboard/DashboardAddLeadAction";
 
 export function DashboardPrimaryActions(props: {
   base: string;
@@ -31,8 +33,7 @@ export function DashboardPrimaryActions(props: {
       key: "lead",
       title: "Add Lead",
       description: "Capture a new enquiry in LeadFlow.",
-      href: `${base}/crm#fi-os-crm-create-lead`,
-      icon: <UserPlus className="h-5 w-5" strokeWidth={1.75} aria-hidden />,
+      modal: true as const,
       enabled: showCrmNav,
       disabledReason: "Requires CRM access.",
     },
@@ -52,14 +53,28 @@ export function DashboardPrimaryActions(props: {
         Primary actions
       </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {actions.map((action) =>
-          action.enabled ? (
+        {actions.map((action) => {
+          if ("modal" in action && action.modal) {
+            return action.enabled ? (
+              <DashboardAddLeadAction key={action.key} />
+            ) : (
+              <div
+                key={action.key}
+                title={action.disabledReason}
+                className="flex min-h-[8.5rem] cursor-not-allowed flex-col rounded-2xl border border-dashed border-white/[0.08] bg-black/20 p-5 opacity-55"
+              >
+                <div className="text-sm font-semibold tracking-tight text-slate-300 sm:text-base">{action.title}</div>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{action.description}</p>
+              </div>
+            );
+          }
+          return action.enabled ? (
             <QuickActionCard
               key={action.key}
-              href={action.href}
+              href={(action as { href: string }).href}
               title={action.title}
               description={action.description}
-              icon={action.icon}
+              icon={(action as { icon: ReactNode }).icon}
               className="min-h-[8.5rem] p-5"
             />
           ) : (
@@ -69,13 +84,13 @@ export function DashboardPrimaryActions(props: {
               className="flex min-h-[8.5rem] cursor-not-allowed flex-col rounded-2xl border border-dashed border-white/[0.08] bg-black/20 p-5 opacity-55"
             >
               <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-slate-500">
-                {action.icon}
+                {(action as { icon?: ReactNode }).icon}
               </span>
               <div className="text-sm font-semibold tracking-tight text-slate-300 sm:text-base">{action.title}</div>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{action.description}</p>
             </div>
-          ),
-        )}
+          );
+        })}
       </div>
     </section>
   );

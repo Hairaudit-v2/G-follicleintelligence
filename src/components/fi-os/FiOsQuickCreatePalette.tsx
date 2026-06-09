@@ -38,12 +38,14 @@ export function FiOsQuickCreatePalette({
   onOpenChange,
   showCrmNav,
   showBookingsBoard,
+  onOpenCreateLead,
 }: {
   tenantId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   showCrmNav: boolean;
   showBookingsBoard: boolean;
+  onOpenCreateLead?: () => void;
 }) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -83,10 +85,15 @@ export function FiOsQuickCreatePalette({
   const go = useCallback(
     (it: ResolvedFiOsQuickCreateItem) => {
       if (!it.enabled || it.href === "#") return;
+      if (it.id === "lead" && onOpenCreateLead) {
+        onOpenCreateLead();
+        close();
+        return;
+      }
       router.push(it.href);
       close();
     },
-    [router, close]
+    [router, close, onOpenCreateLead]
   );
 
   useEffect(() => {
