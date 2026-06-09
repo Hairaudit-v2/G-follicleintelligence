@@ -2,6 +2,8 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
+
 import { CrmAccessError, parseAdminKeyFromUnknown } from "./crmGate";
 
 export function extractAdminKeyFromRequest(req: Request, body?: unknown): string | undefined {
@@ -22,6 +24,9 @@ export function crmJsonError(status: number, message: string): NextResponse {
 }
 
 export function mapCrmRouteError(e: unknown): NextResponse {
+  if (e instanceof StaffPinMutationBlockedError) {
+    return crmJsonError(e.status, e.message);
+  }
   if (e instanceof CrmAccessError) {
     return crmJsonError(e.status, e.message);
   }

@@ -4,6 +4,7 @@ import { z, ZodError } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import { createCrmLeadWithPerson, loadCrmLeadById } from "@/src/lib/crm/leads";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
@@ -61,6 +62,7 @@ const bodySchema = z
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
+  if (e instanceof StaffPinMutationBlockedError) return e.message;
   if (e instanceof CrmAccessError) {
     return e.message.includes("write") || e.message.includes("permission")
       ? "You don't have permission to create bookings for this clinic."
@@ -182,7 +184,12 @@ export async function calendarQuickCreateBookingAction(
 ): Promise<CalendarQuickCreateBookingResult> {
   try {
     const parsed = bodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+      staffPinFloorAction: "calendar.quick_book",
+    });
 
     const tid = tenantId.trim();
     if (!isAllowedBookingType(parsed.bookingType)) {

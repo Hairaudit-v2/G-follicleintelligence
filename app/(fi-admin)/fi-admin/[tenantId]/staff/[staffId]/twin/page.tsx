@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { ExternalLink } from "lucide-react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
+import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffTwinIiohrComplianceCard } from "@/src/components/staff/staffComplianceReadOnly";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import { loadStaffTwinPage } from "@/src/lib/staff/staffTwinLoader.server";
@@ -30,7 +31,16 @@ export default async function StaffTwinPage({
   if (!data) notFound();
 
   const base = `/fi-admin/${tid}`;
-  const { staff, linkedUser, sourceIds, workingHoursSummary, schedulingTimezoneLabel, complianceSummary } = data;
+  const {
+    staff,
+    linkedUser,
+    sourceIds,
+    workingHoursSummary,
+    schedulingTimezoneLabel,
+    complianceSummary,
+    canManageStaffPin,
+    pinMetadata,
+  } = data;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -162,6 +172,17 @@ export default async function StaffTwinPage({
           </div>
         </dl>
       </DashboardCard>
+
+      {canManageStaffPin && pinMetadata ? (
+        <DashboardCard className="p-6 sm:p-8">
+          <StaffPinSettingsPanel
+            tenantId={tid}
+            staffId={staff.id}
+            staffName={staff.full_name}
+            metadata={pinMetadata}
+          />
+        </DashboardCard>
+      ) : null}
 
       <DashboardCard className="p-6 sm:p-8">
         <StaffTwinIiohrComplianceCard summary={complianceSummary} />

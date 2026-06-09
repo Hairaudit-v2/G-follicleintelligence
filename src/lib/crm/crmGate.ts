@@ -8,7 +8,15 @@ import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImperso
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
+import type { StaffPinClinicAction } from "@/src/lib/staffPin/staffPinPermissions";
+import {
+  rejectStaffPinSessionForRestrictedMutation,
+  resolveStaffPinFloorMutation,
+} from "@/src/lib/staffPin/staffPinMutationGuard.server";
+
 import { isCrmStaffManageRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+
+export type { StaffPinClinicAction };
 
 export { CRM_MUTATION_ROLES_LOWER } from "./crmGatePolicy";
 
@@ -180,11 +188,19 @@ export async function assertCrmTenantWriteAllowed(opts: {
   tenantId: string;
   adminKey?: string | null;
   request?: Request | null;
+  /** When set, an active clinic-floor PIN session may perform this mutation. */
+  staffPinFloorAction?: StaffPinClinicAction;
 }): Promise<void> {
   const tenantId = opts.tenantId.trim();
   if (!tenantId) throw new CrmAccessError(400, "tenantId is required.");
 
   if (requireFiAdminKey(opts.adminKey ?? undefined)) {
+    await assertTenantRowExists(tenantId);
+    return;
+  }
+
+  const pinMode = await resolveStaffPinFloorMutation(tenantId, opts.staffPinFloorAction);
+  if (pinMode === "pin_floor") {
     await assertTenantRowExists(tenantId);
     return;
   }
@@ -237,6 +253,8 @@ export async function assertCrmTenantStaffManageAllowed(opts: {
     await assertTenantRowExists(tenantId);
     return;
   }
+
+  await rejectStaffPinSessionForRestrictedMutation(tenantId);
 
   const authUserId = await resolveAuthUserId(opts.request ?? null);
   if (!authUserId) {

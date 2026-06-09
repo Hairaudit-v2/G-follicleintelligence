@@ -40,7 +40,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
     const body = await req.json().catch(() => ({}));
     const adminKey = extractAdminKeyFromRequest(req, body);
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: req });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey,
+      request: req,
+      staffPinFloorAction: "calendar.quick_book",
+    });
 
     const parsed = bookingCreateBodySchema.parse(body);
     const createdByUserId = await tryResolveFiUserIdForTenant(tenantId, req);

@@ -38,6 +38,8 @@ export function FiOsAppShell({
   userEmail,
   impersonationDisplayName,
   showFiPlatformSystemLink = false,
+  staffPinSessionLabel = null,
+  staffPinLogoutTenantId = null,
   children,
 }: {
   tenantId: string;
@@ -62,6 +64,9 @@ export function FiOsAppShell({
   userEmail: string | null;
   impersonationDisplayName?: string | null;
   showFiPlatformSystemLink?: boolean;
+  /** Limited clinic-floor PIN session label in the top bar. */
+  staffPinSessionLabel?: string | null;
+  staffPinLogoutTenantId?: string | null;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
@@ -165,6 +170,8 @@ export function FiOsAppShell({
             onOpenQuickCreate={() => setQuickCreateOpen(true)}
             impersonationDisplayName={impersonationDisplayName ?? null}
             showFiPlatformSystemLink={showFiPlatformSystemLink}
+            staffPinSessionLabel={staffPinSessionLabel}
+            staffPinLogoutTenantId={staffPinLogoutTenantId}
           />
           <main
             className={cn(

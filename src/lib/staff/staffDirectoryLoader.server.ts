@@ -7,6 +7,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
+import { loadStaffPinMetadataMap, type StaffPinMetadata } from "@/src/lib/staffPin/staffPin.server";
 
 export type StaffDirectoryPageResult = {
   staff: FiStaffRow[];
@@ -14,6 +15,7 @@ export type StaffDirectoryPageResult = {
   /** Staff profile id linked to the signed-in tenant user (`fi_staff.fi_user_id` = `fi_users.id`), if any. */
   viewerStaffId: string | null;
   fiUsersForLink: { id: string; email: string | null }[];
+  pinMetadataByStaffId: Record<string, StaffPinMetadata>;
 };
 
 async function loadFiUserRow(
@@ -62,5 +64,13 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     }
   }
 
-  return { staff: staffRes, canManageStaff, viewerStaffId, fiUsersForLink };
+  const pinMap = canManageStaff
+    ? await loadStaffPinMetadataMap(
+        tid,
+        staffRes.map((s) => s.id)
+      )
+    : new Map<string, StaffPinMetadata>();
+  const pinMetadataByStaffId = Object.fromEntries(pinMap.entries());
+
+  return { staff: staffRes, canManageStaff, viewerStaffId, fiUsersForLink, pinMetadataByStaffId };
 }

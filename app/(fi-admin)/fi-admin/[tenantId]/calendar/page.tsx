@@ -3,8 +3,7 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { OperationalCalendarPage } from "@/src/components/fi-admin/calendar/OperationalCalendarPage";
 import { loadOperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarLoader.server";
-import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
-import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { getClinicFloorSessionIfAllowed } from "@/src/lib/staffPin/clinicFloorAccess";
 
 export const metadata = {
   title: "Calendar",
@@ -24,11 +23,10 @@ export default async function TenantCalendarPage({
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  await assertFiTenantPortalAccess(tenantId);
   const sp = (await searchParams) ?? {};
   const [data, session] = await Promise.all([
     loadOperationalCalendarPageData(tenantId.trim(), sp),
-    getBookingsOperatorSessionIfAllowed(tenantId.trim()),
+    getClinicFloorSessionIfAllowed(tenantId.trim()),
   ]);
 
   return <OperationalCalendarPage data={data} session={session} />;

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { getBookingsOperatorPageSession } from "@/src/lib/crm/crmShellAccess";
+import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,6 @@ type AppointmentsShellLayoutProps = {
 /** Auth gate; slide-over provider is mounted on the page with booking context. */
 export default async function AppointmentsShellLayout({ children, params }: AppointmentsShellLayoutProps) {
   const { tenantId } = await params;
-  await getBookingsOperatorPageSession(tenantId);
+  await getClinicFloorPageSession(tenantId);
   return children;
 }

@@ -3,7 +3,7 @@ import { AppointmentSlideOverProvider } from "@/src/components/fi/appointments/A
 import { PatientSlideOverProvider } from "@/src/components/fi/patients/PatientSlideOver";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
-import { getBookingsOperatorPageSession } from "@/src/lib/crm/crmShellAccess";
+import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ type PatientsShellLayoutProps = {
 /** CRM shell session gate + patient + appointment slide-overs for directory and profile routes. */
 export default async function PatientsShellLayout({ children, params }: PatientsShellLayoutProps) {
   const { tenantId } = await params;
-  const session = await getBookingsOperatorPageSession(tenantId);
+  const session = await getClinicFloorPageSession(tenantId);
   const [assignees, scope, calendarSettings, services] = await Promise.all([
     loadCrmShellStaffPickerOptions(tenantId),
     loadCrmShellScopePickerOptions(tenantId),

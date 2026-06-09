@@ -10,6 +10,8 @@ import {
   getTenantAdminUsersManageAllowed,
   resolveActorFiUserIdForTenantAdminActions,
 } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
+import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 
 function firstForwardedValue(raw: string | null): string | null {
   if (!raw) return null;
@@ -28,7 +30,12 @@ function getRequestOrigin(): string {
 }
 
 function errMsg(e: unknown): string {
+  if (e instanceof StaffPinMutationBlockedError) return e.message;
   return e instanceof Error ? e.message : String(e);
+}
+
+async function rejectStaffPinForTenantAdminMutation(tenantId: string): Promise<void> {
+  await rejectStaffPinSessionForRestrictedMutation(tenantId);
 }
 
 const adminRoleSchema = z.enum([
@@ -62,6 +69,7 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
   try {
     const parsed = inviteBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
+    await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
       return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
     }
@@ -189,6 +197,7 @@ export async function updateTenantAdminUserRoleAction(body: unknown): Promise<Fi
   try {
     const parsed = roleBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
+    await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
       return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
     }
@@ -236,6 +245,7 @@ export async function suspendTenantAdminUserAction(body: unknown): Promise<FiTen
   try {
     const parsed = idBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
+    await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
       return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
     }
@@ -282,6 +292,7 @@ export async function reactivateTenantAdminUserAction(body: unknown): Promise<Fi
   try {
     const parsed = idBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
+    await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
       return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
     }
@@ -346,6 +357,7 @@ export async function revokeTenantAdminUserAccessAction(body: unknown): Promise<
   try {
     const parsed = idBodySchema.parse(body);
     const tid = parsed.tenantId.trim();
+    await rejectStaffPinForTenantAdminMutation(tid);
     if (!(await getTenantAdminUsersManageAllowed(tid))) {
       return { ok: false, error: "You do not have permission to manage admin users for this clinic." };
     }

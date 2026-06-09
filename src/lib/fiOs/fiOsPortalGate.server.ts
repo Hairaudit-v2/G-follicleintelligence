@@ -92,6 +92,14 @@ function loginUrl(nextPath: string): string {
   return `/follicle-intelligence/login?${q.toString()}`;
 }
 
+/** Tenant row must exist (kiosk PIN entry and PIN sessions do not require Supabase membership). */
+export async function assertFiTenantExists(tenantId: string): Promise<void> {
+  const tid = tenantId.trim();
+  if (!tid) redirect("/fi-admin");
+  const exists = await assertTenantRowExists(tid);
+  if (!exists) redirect("/fi-admin");
+}
+
 /**
  * FI Admin shell: in production, require Supabase session + FI staff (OS identity or fi_users).
  * Non-production keeps legacy open access for local workflows.

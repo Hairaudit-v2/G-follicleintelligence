@@ -1,3 +1,6 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
 import { cn } from "@/lib/utils";
 import { fiAdminAmbientBackgroundStyle } from "@/src/components/fi-admin/dashboard-ui";
 import { FiOsAppShell } from "@/src/components/fi-os/FiOsAppShell";
@@ -11,7 +14,9 @@ import { resolveFiOsAuthUserDisplayNameById, resolveFiOsAuthUserEmail } from "@/
 import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
-import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { assertFiTenantExists, assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermissions";
+import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
 import {
   canAccessTenantReminderSettings,
   canManageTenantAdminUsersRoute,
@@ -47,8 +52,25 @@ export default async function TenantAdminLayout({
   params: Promise<{ tenantId: string }>;
 }) {
   const { tenantId } = await params;
-  await assertFiTenantPortalAccess(tenantId);
   const base = `/fi-admin/${tenantId}`;
+  const pathname = headers().get("x-pathname") ?? "";
+  const isStaffPinLogin = pathname.includes("/staff-pin-login");
+  const pinSession = isStaffPinLogin ? null : await getStaffPinClinicSessionIfValid(tenantId);
+
+  if (isStaffPinLogin) {
+    await assertFiTenantExists(tenantId);
+    return <>{children}</>;
+  }
+
+  if (pinSession) {
+    await assertFiTenantExists(tenantId);
+    if (isStaffPinRestrictedRoute(pathname, base)) {
+      redirect(`${base}/calendar`);
+    }
+  } else {
+    await assertFiTenantPortalAccess(tenantId);
+  }
+
   const sessionAuthId = await resolveAuthUserId(null);
   let impersonationDisplayName: string | null = null;
   let showFiPlatformSystemLink = false;
@@ -60,6 +82,7 @@ export default async function TenantAdminLayout({
       impersonationDisplayName = await resolveFiOsAuthUserDisplayNameById(target);
     }
   }
+  const pinFloorMode = Boolean(pinSession);
   const [
     showCrmNav,
     showBookingsBoard,
@@ -70,21 +93,23 @@ export default async function TenantAdminLayout({
     showRemindersSettingsNav,
     showAuditOsNav,
     showConfigurationHubNav,
-  ] = await Promise.all([
-    getCrmShellNavAllowed(tenantId),
-    getBookingsBoardNavAllowed(tenantId),
-    resolveFiOsAuthUserEmail(),
-    canManageTenantAdminUsersRoute(tenantId),
-    sessionAuthId
-      ? loadActiveTenantAdminProfileForSession(tenantId, sessionAuthId)
-      : Promise.resolve(null),
-    canViewTaxLocalisationRoute(tenantId),
-    canAccessTenantReminderSettings(tenantId),
-    canViewSecurityAuditNav(tenantId),
-    canViewTenantConfigurationHub(tenantId),
-  ]);
-  const tenantBackendAdminRole = adminProf?.adminRole ?? null;
-  const showStaffAndServicesNav = showCrmNav || showBookingsBoard;
+  ] = pinFloorMode
+    ? [false, true, pinSession!.staffName, false, null, false, false, false, false]
+    : await Promise.all([
+        getCrmShellNavAllowed(tenantId),
+        getBookingsBoardNavAllowed(tenantId),
+        resolveFiOsAuthUserEmail(),
+        canManageTenantAdminUsersRoute(tenantId),
+        sessionAuthId
+          ? loadActiveTenantAdminProfileForSession(tenantId, sessionAuthId)
+          : Promise.resolve(null),
+        canViewTaxLocalisationRoute(tenantId),
+        canAccessTenantReminderSettings(tenantId),
+        canViewSecurityAuditNav(tenantId),
+        canViewTenantConfigurationHub(tenantId),
+      ]);
+  const tenantBackendAdminRole = pinFloorMode ? null : adminProf?.adminRole ?? null;
+  const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
 
   let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
   try {
@@ -124,7 +149,11 @@ export default async function TenantAdminLayout({
         effective={effective}
         userEmail={userEmail}
         impersonationDisplayName={impersonationDisplayName}
-        showFiPlatformSystemLink={showFiPlatformSystemLink}
+        showFiPlatformSystemLink={pinFloorMode ? false : showFiPlatformSystemLink}
+        staffPinSessionLabel={
+          pinFloorMode ? `${pinSession!.staffName} · PIN session` : null
+        }
+        staffPinLogoutTenantId={pinFloorMode ? tenantId : null}
       >
         {mainSurface}
       </FiOsAppShell>

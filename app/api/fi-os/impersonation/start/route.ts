@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { StaffPinMutationBlockedError, STAFF_PIN_RESTRICTED_MUTATION_MESSAGE } from "@/src/lib/staffPin/staffPinMutationGuard";
+import { rejectAnyActiveStaffPinSession } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   endOpenFiOsImpersonationSessions,
@@ -29,6 +31,7 @@ function clientIp(req: Request): string | null {
 
 export async function POST(req: Request) {
   try {
+    await rejectAnyActiveStaffPinSession();
     const sessionId = await resolveAuthUserId(req);
     if (!sessionId) {
       return NextResponse.json({ ok: false, error: "Authentication required." }, { status: 401 });
@@ -71,6 +74,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
+    if (e instanceof StaffPinMutationBlockedError) {
+      return NextResponse.json({ ok: false, error: STAFF_PIN_RESTRICTED_MUTATION_MESSAGE }, { status: 403 });
+    }
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
       { status: 500 }

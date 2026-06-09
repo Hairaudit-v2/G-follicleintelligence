@@ -7,6 +7,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadStaffMemberForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
+import { loadStaffPinMetadataForStaff, type StaffPinMetadata } from "@/src/lib/staffPin/staffPin.server";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
 import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
@@ -36,6 +37,8 @@ export type StaffTwinPageData = {
   schedulingTimezoneLabel: string;
   /** Read-only IIOHR / Academy snapshot from `fi_staff_source_ids.metadata` (not the system of record). */
   complianceSummary: StaffComplianceSummary;
+  canManageStaffPin: boolean;
+  pinMetadata: StaffPinMetadata | null;
 };
 
 async function loadFiUserRowForAuth(
@@ -100,6 +103,12 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
   if (!allowed) {
     return null;
   }
+
+  const fiUser = await loadFiUserRowForAuth(tid, authUserId);
+  const os = await loadFiOsIdentity(authUserId);
+  const canManageStaffPin =
+    Boolean(fiUser && isCrmStaffManageRole(fiUser.role)) || isFiOsElevatedOsOperatorRole(os?.osRole);
+  const pinMetadata = canManageStaffPin ? await loadStaffPinMetadataForStaff(tid, sid) : null;
 
   const supabase = supabaseAdmin();
 
@@ -168,5 +177,7 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
     workingHoursSummary,
     schedulingTimezoneLabel,
     complianceSummary,
+    canManageStaffPin,
+    pinMetadata,
   };
 }

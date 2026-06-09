@@ -5,6 +5,7 @@ import {
   loadProxyFiUserRowForPlatformAdminTenant,
   resolveAuthUserId,
 } from "@/src/lib/crm/crmGate";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 
@@ -18,6 +19,7 @@ export type FiPrescribingActor = {
  */
 export async function requireFiPrescribingActor(tenantId: string): Promise<FiPrescribingActor> {
   const tid = tenantId.trim();
+  await rejectStaffPinSessionForRestrictedMutation(tid);
   const authId = await resolveAuthUserId(null);
   if (!authId) {
     throw new Error("Not signed in.");

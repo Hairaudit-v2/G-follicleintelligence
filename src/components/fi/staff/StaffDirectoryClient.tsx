@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { createStaffAction, updateStaffAction } from "@/lib/actions/fi-staff-actions";
+import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffWeeklyHoursEditor } from "@/src/components/fi/staff/StaffWeeklyHoursEditor";
 import type { StaffDirectoryPageResult } from "@/src/lib/staff/staffDirectoryLoader.server";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
@@ -164,6 +165,10 @@ export function StaffDirectoryClient({
             <Link href={`${base}/patients`} className="text-blue-600 hover:underline">
               Patients
             </Link>
+            <span className="mx-2 text-gray-300">·</span>
+            <Link href={`${base}/staff-pin-login`} className="text-blue-600 hover:underline">
+              Staff PIN login
+            </Link>
             {showCrmNav ? (
               <>
                 <span className="mx-2 text-gray-300">·</span>
@@ -290,7 +295,28 @@ export function StaffDirectoryClient({
             </Button>
           </div>
           {mode === "edit" && editingRow ? (
-            <p className="mt-2 text-xs text-gray-500">Staff id: {editingRow.id}</p>
+            <>
+              <p className="mt-2 text-xs text-gray-500">Staff id: {editingRow.id}</p>
+              <div className="mt-4">
+                <StaffPinSettingsPanel
+                  tenantId={tenantId}
+                  staffId={editingRow.id}
+                  staffName={editingRow.full_name}
+                  metadata={
+                    data.pinMetadataByStaffId[editingRow.id] ?? {
+                      staffId: editingRow.id,
+                      status: "not_set",
+                      isActive: false,
+                      failedAttemptCount: 0,
+                      lockedUntil: null,
+                      lastUsedAt: null,
+                      updatedAt: null,
+                    }
+                  }
+                  onUpdated={() => router.refresh()}
+                />
+              </div>
+            </>
           ) : null}
         </section>
       ) : null}
@@ -320,6 +346,11 @@ export function StaffDirectoryClient({
               <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
                 Active
               </th>
+              {canManage ? (
+                <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
+                  PIN
+                </th>
+              ) : null}
               {showTwinLinks ? (
                 <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
                   Twin
@@ -335,7 +366,10 @@ export function StaffDirectoryClient({
           <tbody className="divide-y divide-gray-100">
             {data.staff.length === 0 ? (
               <tr>
-                <td colSpan={7 + (showTwinLinks ? 1 : 0) + (canManage ? 1 : 0)} className="px-3 py-8 text-center text-gray-600">
+                <td
+                  colSpan={7 + (canManage ? 1 : 0) + (showTwinLinks ? 1 : 0) + (canManage ? 1 : 0)}
+                  className="px-3 py-8 text-center text-gray-600"
+                >
                   <p>No staff rows yet.</p>
                   <p className="mt-2 text-sm">
                     {canManage ? "Use Add staff to create the directory, or run " : "Ask an admin to add staff, or see "}
@@ -367,6 +401,11 @@ export function StaffDirectoryClient({
                     {formatStaffWeeklyHoursSummary(parseStaffWeeklyHours(row.working_hours)) || "—"}
                   </td>
                   <td className="px-3 py-2">{row.is_active ? "Yes" : "No"}</td>
+                  {canManage ? (
+                    <td className="px-3 py-2 text-xs capitalize text-gray-700">
+                      {data.pinMetadataByStaffId[row.id]?.status ?? "not_set"}
+                    </td>
+                  ) : null}
                   {showTwinLinks ? (
                     <td className="px-3 py-2">
                       {canManage || row.id === viewerStaffId ? (

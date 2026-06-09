@@ -26,6 +26,7 @@ function isStaticImageRequest(pathname: string): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
+  response.headers.set("x-pathname", pathname);
 
   if (isStaticImageRequest(pathname)) {
     return withStaticImageHeaders(response);
@@ -36,6 +37,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
     "/_next/image",
     "/evolved-logo.png",
     "/brand/:path*",

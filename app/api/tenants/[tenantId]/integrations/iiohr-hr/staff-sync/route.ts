@@ -2,6 +2,8 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { postIiohrHrStaffSyncHttp } from "@/src/lib/staffImport/iiohrHrStaffSyncPost.server";
+import { StaffPinMutationBlockedError, STAFF_PIN_RESTRICTED_MUTATION_MESSAGE } from "@/src/lib/staffPin/staffPinMutationGuard";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
     }
 
+    await rejectStaffPinSessionForRestrictedMutation(tid);
+
     const { httpStatus, body } = await postIiohrHrStaffSyncHttp(req, tid);
 
     const summary = body.summary as { commit?: boolean } | undefined;
@@ -29,7 +33,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     }
 
     return NextResponse.json(body, { status: httpStatus });
-  } catch {
+  } catch (e: unknown) {
+    if (e instanceof StaffPinMutationBlockedError) {
+      return NextResponse.json({ ok: false, error: STAFF_PIN_RESTRICTED_MUTATION_MESSAGE }, { status: 403 });
+    }
     return NextResponse.json({ ok: false, error: "Request failed." }, { status: 500 });
   }
 }

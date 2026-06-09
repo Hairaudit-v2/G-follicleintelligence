@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Bell, ChevronDown, Menu, Plus, Search } from "lucide-react";
 
 import { fiOsSignOutAction } from "@/lib/actions/fi-os-auth-actions";
+import { staffPinLogoutAction } from "@/lib/actions/fi-staff-pin-actions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +32,8 @@ export function FiOsTopBar({
   onOpenQuickCreate,
   impersonationDisplayName,
   showFiPlatformSystemLink = false,
+  staffPinSessionLabel = null,
+  staffPinLogoutTenantId = null,
 }: {
   tenantId: string;
   clinicLabel: string;
@@ -46,10 +49,36 @@ export function FiOsTopBar({
   /** When set, shows impersonation banner (platform admin). */
   impersonationDisplayName?: string | null;
   showFiPlatformSystemLink?: boolean;
+  staffPinSessionLabel?: string | null;
+  staffPinLogoutTenantId?: string | null;
 }) {
   const router = useRouter();
   return (
     <div className="flex w-full min-w-0 flex-col">
+      {staffPinSessionLabel ? (
+        <div
+          className="flex w-full flex-wrap items-center justify-between gap-2 border-b border-cyan-500/25 bg-cyan-500/10 px-3 py-2 text-sm text-cyan-50 sm:px-4"
+          role="status"
+        >
+          <span>
+            Signed in as <strong className="font-semibold text-cyan-100">{staffPinSessionLabel}</strong>
+          </span>
+          {staffPinLogoutTenantId ? (
+            <button
+              type="button"
+              className="shrink-0 rounded-lg border border-cyan-400/40 bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/30"
+              onClick={() => {
+                void staffPinLogoutAction(staffPinLogoutTenantId).then((r) => {
+                  if (r.ok) router.push(r.redirectTo);
+                  router.refresh();
+                });
+              }}
+            >
+              End PIN session
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       {impersonationDisplayName ? (
         <div
           className="flex w-full flex-wrap items-center justify-between gap-2 border-b border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-amber-50 sm:px-4"

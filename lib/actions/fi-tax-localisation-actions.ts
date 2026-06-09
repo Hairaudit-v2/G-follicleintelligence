@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { isFiOsPlatformAdminFullSessionBypass, loadProxyFiUserRowForPlatformAdminTenant, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { insertFiTaxLocalisationAuditEvent } from "@/src/lib/taxLocalisation/taxLocalisationAudit.server";
 import { getTaxLocalisationAccess } from "@/src/lib/taxLocalisation/taxLocalisationAccess.server";
 import { mergeTaxLocalisationFromStorage } from "@/src/lib/taxLocalisation/taxLocalisationMerge";
@@ -16,6 +18,7 @@ import { FI_TAX_COUNTRY_REGIONS, FI_TAX_CURRENCIES } from "@/src/lib/taxLocalisa
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 function errMsg(e: unknown): string {
+  if (e instanceof StaffPinMutationBlockedError) return e.message;
   return e instanceof Error ? e.message : String(e);
 }
 
@@ -66,6 +69,8 @@ export async function saveTaxLocalisationSettingsAction(body: unknown): Promise<
     const parsed = saveSchema.parse(body);
     const tid = parsed.tenantId.trim();
     const cid = parsed.clinicId?.trim() || null;
+
+    await rejectStaffPinSessionForRestrictedMutation(tid);
 
     const access = await getTaxLocalisationAccess(tid);
     if (!access.canView) {

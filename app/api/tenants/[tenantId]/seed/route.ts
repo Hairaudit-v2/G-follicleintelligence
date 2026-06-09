@@ -4,6 +4,8 @@
  */
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { StaffPinMutationBlockedError, STAFF_PIN_RESTRICTED_MUTATION_MESSAGE } from "@/src/lib/staffPin/staffPinMutationGuard";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     const { tenantId } = await params;
     if (!tenantId)
       return NextResponse.json({ ok: false, error: "Missing tenantId." }, { status: 400 });
+
+    await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
 
     const supabase = supabaseAdmin();
     const { data } = await supabase
@@ -39,6 +43,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
     return NextResponse.json({ ok: true, tenant: data });
   } catch (e: unknown) {
+    if (e instanceof StaffPinMutationBlockedError) {
+      return NextResponse.json({ ok: false, error: STAFF_PIN_RESTRICTED_MUTATION_MESSAGE }, { status: 403 });
+    }
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },
       { status: 500 }

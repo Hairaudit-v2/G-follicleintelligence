@@ -1,6 +1,7 @@
 "use server";
 
 import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import {
   bookingCancelBodySchema,
   bookingCompleteBodySchema,
@@ -23,6 +24,7 @@ import { z, ZodError } from "zod";
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
   if (e instanceof CrmAccessError) return e.message;
+  if (e instanceof StaffPinMutationBlockedError) return e.message;
   if (e instanceof Error) return e.message;
   return "Request failed.";
 }
@@ -33,7 +35,12 @@ export async function createBookingAction(
 ): Promise<{ ok: true; booking: Awaited<ReturnType<typeof createBooking>> } | { ok: false; error: string }> {
   try {
     const parsed = bookingCreateBodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+      staffPinFloorAction: "calendar.quick_book",
+    });
     const createdByUserId = await tryResolveFiUserIdForTenant(tenantId, undefined);
     const booking = await createBooking({
       tenantId,
@@ -122,7 +129,12 @@ export async function completeBookingAction(
 ): Promise<{ ok: true; booking: Awaited<ReturnType<typeof completeBooking>> } | { ok: false; error: string }> {
   try {
     const parsed = bookingCompleteBodySchema.parse(body);
-    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    await assertCrmTenantWriteAllowed({
+      tenantId,
+      adminKey: parsed.adminKey,
+      request: undefined,
+      staffPinFloorAction: "patient.check_in",
+    });
     const booking = await completeBooking({ tenantId, bookingId });
     return { ok: true, booking };
   } catch (e) {

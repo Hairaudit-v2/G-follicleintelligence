@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmGatePolicy";
 import { evaluateFiServicesCatalogManageAllowed } from "@/src/lib/services/fiServicesManagePolicy";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
@@ -44,6 +45,8 @@ export async function assertFiServicesManageAllowed(opts: FiServicesManageAccess
     await assertTenantRowExists(tenantId);
     return;
   }
+
+  await rejectStaffPinSessionForRestrictedMutation(tenantId);
 
   const authUserId = await resolveAuthUserId(opts.request ?? null);
   if (!authUserId) {

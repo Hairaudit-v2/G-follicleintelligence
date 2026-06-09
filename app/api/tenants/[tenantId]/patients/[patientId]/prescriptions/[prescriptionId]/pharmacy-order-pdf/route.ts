@@ -4,6 +4,7 @@
  * Query: `pharmacyId` (live build) **or** `transmissionId` (frozen snapshot from a transmission row).
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 import { resolveEffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import {
@@ -40,6 +41,7 @@ export async function GET(
     }
 
     const adminKey = extractAdminKeyFromRequest(req, null);
+    await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
     await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });
 
     const tid = tenantId.trim();

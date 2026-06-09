@@ -2,6 +2,7 @@
  * GET …/pathology-requests/[requestId]/pdf — download pathology request as PDF (tenant member read).
  */
 import { assertCrmTenantReadAllowed } from "@/src/lib/crm/crmGate";
+import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 import { crmJsonError, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 import {
   buildPathologyPdfInputFromDetail,
@@ -21,6 +22,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ tenantId
     if (!tenantId?.trim() || !patientId?.trim() || !requestId?.trim()) return crmJsonError(400, "Missing route parameters.");
 
     const adminKey = extractAdminKeyFromRequest(req, null);
+    await rejectStaffPinSessionForRestrictedMutation(tenantId.trim());
     await assertCrmTenantReadAllowed({ tenantId, adminKey, request: req });
 
     const bundle = await loadPathologyRequestDetail(tenantId, patientId, requestId);

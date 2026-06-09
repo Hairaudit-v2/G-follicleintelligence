@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 
 import { CrmAccessError } from "@/src/lib/crm/crmGate";
+import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import { assertFiServicesManageAllowed } from "@/src/lib/services/fiServicesManageAccess.server";
 import {
   fiServiceCreateBodySchema,
@@ -25,6 +26,7 @@ function revalidateFiServicesSurfaces(tenantId: string): void {
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
   if (e instanceof CrmAccessError) return e.message;
+  if (e instanceof StaffPinMutationBlockedError) return e.message;
   if (e instanceof Error) return e.message;
   return "Request failed.";
 }
