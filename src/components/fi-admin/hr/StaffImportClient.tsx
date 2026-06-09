@@ -405,9 +405,28 @@ export function StaffImportClient({
           }
           title={pageModel.cronBanner.title}
         >
-          {pageModel.cronBanner.message}
+          {pageModel.cronBanner.message}{" "}
+          <Link href={`${base}/hr/sync-health`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+            Open HR sync health
+          </Link>
+          {" · "}
+          <Link href={`${base}/hr/staff-readiness`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+            Staff readiness
+          </Link>
         </InfoNotice>
-      ) : null}
+      ) : (
+        <InfoNotice variant="info" title="HR sync monitoring">
+          Track cron runs, staff HR link issues, and environment readiness on the{" "}
+          <Link href={`${base}/hr/sync-health`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+            HR sync health
+          </Link>{" "}
+          dashboard, or review operational staff readiness on{" "}
+          <Link href={`${base}/hr/staff-readiness`} className="font-medium text-[#22C1FF] underline-offset-2 hover:underline">
+            Staff readiness
+          </Link>
+          .
+        </InfoNotice>
+      )}
 
       <DashboardCard className="p-4 sm:p-5">
         <h2 className="text-sm font-semibold text-[#F8FAFC]">Automation status</h2>

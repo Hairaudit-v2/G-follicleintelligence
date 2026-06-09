@@ -30,6 +30,8 @@ function revalidateStaffSyncSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
   revalidatePath(`/fi-admin/${tid}/staff`);
   revalidatePath(`/fi-admin/${tid}/hr/staff-import`);
+  revalidatePath(`/fi-admin/${tid}/hr/sync-health`);
+  revalidatePath(`/fi-admin/${tid}/hr/staff-readiness`);
   revalidatePath(`/fi-admin/${tid}/staff/import/iiohr-hr`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}`);

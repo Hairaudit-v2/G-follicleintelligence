@@ -22,6 +22,14 @@ export type IiohrHrStaffSyncRow = {
   working_hours?: unknown;
   /** Correlates with IIOHR identity when known; stored in source-id metadata via import planner. */
   iiohr_user_id?: string | null;
+  /** HR onboarding readiness (also accepted inside `metadata_snapshot`). */
+  onboarding_status?: string | null;
+  onboarding_completed_at?: string | null;
+  required_documents_missing_count?: number | null;
+  training_required_count?: number | null;
+  certificates_outstanding_count?: number | null;
+  /** Preferred HR profile deep link; `source_url` is used when omitted. */
+  hr_profile_url?: string | null;
   /**
    * Optional bounded JSON merged into `fi_staff_source_ids.metadata` at sync time (e.g. training/compliance summaries).
    * Must not be used to duplicate full HR document stores in FI.

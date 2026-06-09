@@ -173,6 +173,14 @@ export function StaffRoleReviewClient({
           <Link href={`${base}/staff`} className="text-blue-600 hover:underline">
             Staff directory
           </Link>
+          <span className="text-gray-300">·</span>
+          <Link href={`${base}/hr/sync-health`} className="text-blue-600 hover:underline">
+            HR sync health
+          </Link>
+          <span className="text-gray-300">·</span>
+          <Link href={`${base}/hr/staff-readiness`} className="text-blue-600 hover:underline">
+            Staff readiness
+          </Link>
         </div>
       </header>
 

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ConsultationOsCreatePage } from "@/src/components/fi-admin/consultations/ConsultationOsCreatePage";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 
 export const metadata = {
   title: "New consultation",
@@ -17,7 +18,16 @@ export default async function ConsultationOsNewRoutePage({ params }: { params: P
 
   await assertFiTenantPortalAccess(tenantId);
 
-  const showCrmNav = await getCrmShellNavAllowed(tenantId.trim());
+  const [showCrmNav, clinicalStaffOptions] = await Promise.all([
+    getCrmShellNavAllowed(tenantId.trim()),
+    loadClinicalStaffPickerOptions(tenantId.trim()),
+  ]);
 
-  return <ConsultationOsCreatePage tenantId={tenantId.trim()} showCrmNav={showCrmNav} />;
+  return (
+    <ConsultationOsCreatePage
+      tenantId={tenantId.trim()}
+      showCrmNav={showCrmNav}
+      clinicalStaffOptions={clinicalStaffOptions}
+    />
+  );
 }

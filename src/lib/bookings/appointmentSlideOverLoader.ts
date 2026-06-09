@@ -2,11 +2,8 @@ import "server-only";
 
 import { loadSurgeryPlanForCase, type CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
-import {
-  loadCrmShellPipelineStages,
-  loadCrmShellScopePickerOptions,
-  loadCrmShellStaffPickerOptions,
-} from "@/src/lib/crm/crmShellLoaders";
+import { loadCrmShellPipelineStages, loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import {
   loadCrmActivityTimelineForLead,
   loadCrmLeadById,
@@ -145,7 +142,7 @@ export async function loadAppointmentSlideOverPayload(
     patientImages,
     surgeryPlan,
   ] = await Promise.all([
-    loadCrmShellStaffPickerOptions(tid),
+    loadClinicalStaffPickerOptions(tid),
     loadCrmShellScopePickerOptions(tid),
     loadTenantOperationalCalendarSettings(tid),
     loadReminderJobsForAppointment(tid, booking.id, leadId),

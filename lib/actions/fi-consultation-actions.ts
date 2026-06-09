@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import { completeConsultationDraft, createConsultationDraft, createConsultationFromBooking, updateConsultationDraft } from "@/src/lib/consultations/consultationMutations.server";
 import {
   consultationCompleteBodySchema,
@@ -60,8 +61,11 @@ export async function updateConsultationDraftAction(
     await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
 
     const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
-    const { adminKey, ...patch } = parsed;
+    const { adminKey, consultant_staff_id, ...patch } = parsed;
     void adminKey;
+    if (consultant_staff_id?.trim()) {
+      await assertStaffClinicallyAvailableForAssignment(tenantId.trim(), consultant_staff_id.trim());
+    }
     await updateConsultationDraft(tenantId, consultationId, {
       ...patch,
       updatedByFiUserId: fiUserId,

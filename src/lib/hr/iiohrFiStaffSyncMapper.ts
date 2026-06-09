@@ -3,6 +3,10 @@
  * Sensitive HR payloads must never be forwarded — strip at this boundary.
  */
 
+import {
+  extractValidatedHrReadinessFields,
+  HR_STAFF_SENSITIVE_METADATA_KEYS,
+} from "@/src/lib/staff/hrStaffReadinessMetadata";
 import type { IiohrHrStaffSyncRow } from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
 
 /** Bounded metadata stored under `metadata_snapshot` (schema_version 1). */
@@ -36,6 +40,12 @@ export type IiohrHrPortalStaffRecord = {
   compliance_summary?: string | null;
   training_summary?: string | null;
   last_hr_updated_at?: string | null;
+  onboarding_status?: string | null;
+  onboarding_completed_at?: string | null;
+  required_documents_missing_count?: number | null;
+  training_required_count?: number | null;
+  certificates_outstanding_count?: number | null;
+  hr_profile_url?: string | null;
   /** Never forwarded — present so callers/tests can assert stripping. */
   contracts?: unknown;
   offer_letters?: unknown;
@@ -48,6 +58,7 @@ export type IiohrHrPortalStaffRecord = {
 };
 
 const SENSITIVE_KEYS = new Set([
+  ...HR_STAFF_SENSITIVE_METADATA_KEYS,
   "contracts",
   "offer_letters",
   "hr_letters",
@@ -91,6 +102,19 @@ export function buildBoundedMetadataSnapshotV1(record: IiohrHrPortalStaffRecord)
   };
 }
 
+/** Validated HR/training readiness fields for FI OS staff directory notifications. */
+export function buildHrReadinessMetadataSnapshot(record: IiohrHrPortalStaffRecord): Record<string, unknown> {
+  return extractValidatedHrReadinessFields({
+    onboarding_status: record.onboarding_status,
+    onboarding_completed_at: record.onboarding_completed_at,
+    required_documents_missing_count: record.required_documents_missing_count,
+    training_required_count: record.training_required_count,
+    certificates_outstanding_count: record.certificates_outstanding_count,
+    hr_profile_url: record.hr_profile_url,
+    source_url: record.source_url,
+  });
+}
+
 /**
  * Maps one IIOHR HR staff record to a single FI `IiohrHrStaffSyncRow` (operational + bounded snapshot only).
  */
@@ -114,7 +138,10 @@ export function mapIiohrHrStaffToFiSyncRow(record: IiohrHrPortalStaffRecord): Ii
       record.working_hours && typeof record.working_hours === "object" && !Array.isArray(record.working_hours)
         ? record.working_hours
         : undefined,
-    metadata_snapshot: { ...buildBoundedMetadataSnapshotV1(record) } as Record<string, unknown>,
+    metadata_snapshot: {
+      ...buildBoundedMetadataSnapshotV1(record),
+      ...buildHrReadinessMetadataSnapshot(record),
+    } as Record<string, unknown>,
   };
 }
 

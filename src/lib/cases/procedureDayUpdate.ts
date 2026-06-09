@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { assertProcedureDayTeamAssignments } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import type { ProcedureDayUpsertPatch } from "./procedureDayTypes";
 
 export type UpsertProcedureDayParams = {
@@ -45,6 +46,14 @@ export async function upsertProcedureDayForCase(params: UpsertProcedureDayParams
   if (p.surgeon_user_id) idsToCheck.push(p.surgeon_user_id);
   if (p.team_member_user_ids) idsToCheck.push(...p.team_member_user_ids);
   await assertFiUserIdsBelongToTenant(supabase, tid, idsToCheck);
+  await assertProcedureDayTeamAssignments(
+    tid,
+    {
+      surgeonUserId: p.surgeon_user_id ?? null,
+      teamMemberUserIds: p.team_member_user_ids ?? null,
+    },
+    supabase
+  );
 
   const { data: existing, error: le } = await supabase
     .from("fi_case_procedures")

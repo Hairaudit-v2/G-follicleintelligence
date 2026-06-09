@@ -10,6 +10,7 @@ import { StaffHrNotificationBadge, StaffHrNotificationDetailCard } from "@/src/c
 import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrollMetadataPanel";
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffWeeklyHoursEditor } from "@/src/components/fi/staff/StaffWeeklyHoursEditor";
+import { detectStaffHrSyncIssues } from "@/src/lib/hr/hrStaffSyncHealthDashboard";
 import type { StaffDirectoryPageResult } from "@/src/lib/staff/staffDirectoryLoader.server";
 import {
   buildStaffDirectorySearchParams,
@@ -94,6 +95,20 @@ export function StaffDirectoryClient({
   const visibleRows = useMemo(() => filterStaffDirectoryRows(enrichedRows, filters), [enrichedRows, filters]);
 
   const needsReviewCount = useMemo(() => enrichedRows.filter((r) => r.needsReview).length, [enrichedRows]);
+
+  const hrSyncIssueCount = useMemo(
+    () =>
+      enrichedRows.filter(
+        (r) =>
+          detectStaffHrSyncIssues({
+            staffId: r.id,
+            fullName: r.full_name,
+            email: r.email,
+            hr: r.hrNotification,
+          }).length > 0
+      ).length,
+    [enrichedRows]
+  );
 
   const applyFilters = useCallback(
     (next: StaffDirectoryFilterState) => {
@@ -210,6 +225,10 @@ export function StaffDirectoryClient({
                 <Link href={`${base}/hr/staff-import/payroll`} className="text-blue-600 hover:underline">
                   Payroll import
                 </Link>
+                <span className="mx-2 text-gray-300">·</span>
+                <Link href={`${base}/hr/staff-readiness`} className="text-blue-600 hover:underline">
+                  Staff readiness
+                </Link>
               </>
             ) : null}
             <span className="mx-2 text-gray-300">·</span>
@@ -271,6 +290,24 @@ export function StaffDirectoryClient({
               </Link>
             </p>
           ) : null}
+        </div>
+      ) : null}
+
+      {canManage && hrSyncIssueCount > 0 ? (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <p>
+            <strong>{hrSyncIssueCount}</strong> active staff member{hrSyncIssueCount === 1 ? "" : "s"} have IIOHR HR
+            sync gaps (missing link, stale metadata, or incomplete readiness fields).
+          </p>
+          <p className="mt-2">
+            <Link href={`${base}/hr/sync-health`} className="font-medium text-amber-900 underline-offset-2 hover:underline">
+              Open HR sync health dashboard
+            </Link>
+            {" · "}
+            <Link href={`${base}/hr/staff-readiness`} className="font-medium text-amber-900 underline-offset-2 hover:underline">
+              Staff readiness dashboard
+            </Link>
+          </p>
         </div>
       ) : null}
 

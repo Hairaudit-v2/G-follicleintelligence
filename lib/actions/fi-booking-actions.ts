@@ -15,6 +15,7 @@ import {
 } from "@/src/lib/bookings/appointmentMetadata";
 import { loadAppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
 import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
+import { assertAppointmentProcedureStaffAssignments } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { cancelBooking, completeBooking, createBooking, updateBooking } from "@/src/lib/bookings/server";
 import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
@@ -194,6 +195,11 @@ export async function updateAppointmentProcedureAction(
     if (parsed.surgeonUserId !== undefined) patch.surgeon_user_id = parsed.surgeonUserId;
     if (parsed.consultantUserId !== undefined) patch.consultant_user_id = parsed.consultantUserId;
     if (parsed.techUserId !== undefined) patch.tech_user_id = parsed.techUserId;
+    await assertAppointmentProcedureStaffAssignments(tenantId, {
+      surgeonStaffId: parsed.surgeonUserId ?? null,
+      consultantStaffId: parsed.consultantUserId ?? null,
+      techStaffId: parsed.techUserId ?? null,
+    });
     const metadata = mergeAppointmentProcedureMetadata(existing.metadata ?? {}, patch);
     const booking = await updateBooking({
       tenantId,

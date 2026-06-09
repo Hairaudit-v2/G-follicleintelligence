@@ -13,9 +13,10 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { AppointmentCreatePrefill } from "@/src/lib/bookings/appointmentCreateTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { CrmShellClinicOption } from "@/src/lib/crm/types";
 import { buildStaffBookingAvailabilityHint } from "@/src/lib/staff/staffWeeklyHours";
-import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
+import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
   endLocalFromStartLocalAndProcedure,
   fromDatetimeLocalValue,
@@ -37,7 +38,7 @@ export function AppointmentCreateSlideOver({
 }: {
   tenantId: string;
   prefill: AppointmentCreatePrefill;
-  assignees: CrmShellUserPickerOption[];
+  assignees: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   existingBookings: FiBookingRow[];
   /** Tenant clinic clock — `datetime-local` values are interpreted in this IANA zone. */
@@ -262,21 +263,15 @@ export function AppointmentCreateSlideOver({
         </label>
         <label className="block text-xs text-gray-600">
           Staff
-          <select
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+          <StaffClinicalSelect
+            tenantId={tenantId}
+            options={assignees}
             value={assignee}
-            onChange={(e) => {
-              setAssignee(e.target.value);
+            onChange={(v) => {
+              setAssignee(v);
               setAvailabilityHint(null);
             }}
-          >
-            <option value="">Unassigned</option>
-            {assignees.map((u) => (
-              <option key={u.id} value={u.id}>
-                {staffOptionPrimaryLabel(u)}
-              </option>
-            ))}
-          </select>
+          />
           <p className="mt-1 text-[11px] leading-snug text-gray-600">{staffScheduleHint}</p>
         </label>
         <label className="block text-xs text-gray-600">

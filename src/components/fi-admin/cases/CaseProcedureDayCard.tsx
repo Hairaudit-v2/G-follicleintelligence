@@ -1,5 +1,6 @@
 import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
-import type { CaseProcedureRow, FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
+import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
+import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { CaseProcedureDayForm } from "./CaseProcedureDayForm";
 
@@ -12,7 +13,7 @@ export function CaseProcedureDayCard({
   tenantId: string;
   caseId: string;
   procedure: CaseProcedureRow | null;
-  teamUserOptions: FiUserPickerOption[];
+  teamUserOptions: ProcedureTeamPickerOption[];
 }) {
   return (
     <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">

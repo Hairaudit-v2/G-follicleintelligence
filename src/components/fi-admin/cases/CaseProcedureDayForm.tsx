@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { upsertCaseProcedureDayAction } from "@/lib/actions/fi-case-procedure-day-actions";
-import type { CaseProcedureRow, FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
+import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import { PROCEDURE_STATUS_VALUES, isProcedureStatus } from "@/src/lib/cases/procedureDayTypes";
+import { ProcedureTeamSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { CaseProcedureTeamPanel } from "./CaseProcedureTeamPanel";
 import { caseFormField } from "./caseFormFieldProps";
 
@@ -62,7 +64,7 @@ export function CaseProcedureDayForm({
   tenantId: string;
   caseId: string;
   initial: CaseProcedureRow | null;
-  teamUserOptions: FiUserPickerOption[];
+  teamUserOptions: ProcedureTeamPickerOption[];
 }) {
   const router = useRouter();
   const [procedureDate, setProcedureDate] = useState(initial?.procedure_date?.slice(0, 10) ?? "");
@@ -205,20 +207,15 @@ export function CaseProcedureDayForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label htmlFor={PROCEDURE_DAY_FIELDS.surgeonId.id} className="block text-xs font-medium text-gray-700">
-          Surgeon (fi_users)
-          <select
-            {...PROCEDURE_DAY_FIELDS.surgeonId}
+          Surgeon
+          <ProcedureTeamSelect
+            id={PROCEDURE_DAY_FIELDS.surgeonId.id}
+            tenantId={tenantId}
+            options={teamUserOptions}
             value={surgeonId}
-            onChange={(e) => setSurgeonId(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
-          >
-            <option value="">—</option>
-            {teamUserOptions.map((u) => (
-              <option key={u.id} value={u.id}>
-                {(u.email ?? u.id.slice(0, 8)) + (u.role ? ` · ${u.role}` : "")}
-              </option>
-            ))}
-          </select>
+            onChange={setSurgeonId}
+            slot="clinical"
+          />
         </label>
         <label htmlFor={PROCEDURE_DAY_FIELDS.room.id} className="block text-xs font-medium text-gray-700">
           Procedure room
@@ -243,7 +240,13 @@ export function CaseProcedureDayForm({
         />
       </label>
 
-      <CaseProcedureTeamPanel teamIds={teamIds} userOptions={teamUserOptions} excludeUserIds={[surgeonId]} onChange={setTeamIds} />
+      <CaseProcedureTeamPanel
+        tenantId={tenantId}
+        teamIds={teamIds}
+        userOptions={teamUserOptions}
+        excludeUserIds={[surgeonId]}
+        onChange={setTeamIds}
+      />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label htmlFor={PROCEDURE_DAY_FIELDS.startLocal.id} className="block text-xs font-medium text-gray-700">

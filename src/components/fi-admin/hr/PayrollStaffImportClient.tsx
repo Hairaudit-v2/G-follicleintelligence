@@ -276,19 +276,32 @@ export function PayrollStaffImportClient({
               </div>
             ))}
           </dl>
-          {buckets.needs_role_assignment.length > 0 ? (
-            <div className="mt-5">
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link
+              href={`${base}/hr/staff-readiness`}
+              className="inline-flex rounded-xl border border-[#22C1FF]/40 bg-[#22C1FF]/15 px-4 py-2.5 text-sm font-semibold text-[#E0F7FF] transition hover:bg-[#22C1FF]/25"
+            >
+              Open staff readiness dashboard
+            </Link>
+            {buckets.needs_role_assignment.length > 0 ? (
               <Link
                 href={`${base}/staff/role-review`}
                 className="inline-flex rounded-xl border border-amber-400/40 bg-amber-500/15 px-4 py-2.5 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/25"
               >
                 Assign staff roles now
               </Link>
-              <p className="mt-2 text-xs text-[#64748B]">
-                Opens the guided role assignment workflow for payroll-imported staff.
-              </p>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
+          {buckets.needs_role_assignment.length > 0 ? (
+            <p className="mt-2 text-xs text-[#64748B]">
+              Staff readiness shows payroll links, HR onboarding, and clinical availability. Assign roles for imported
+              staff with <span className="font-mono">needs_review</span>.
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-[#64748B]">
+              Review operational readiness across payroll, HR, training, and clinical availability.
+            </p>
+          )}
         </DashboardCard>
       ) : null}
 

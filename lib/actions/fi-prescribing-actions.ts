@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { insertPrescriptionStatusAuditEvent } from "@/src/lib/prescribing/prescriptionStatusAudit.server";
 import { requireFiPrescribingActor } from "@/src/lib/prescribing/fiPrescribingAccess.server";
 import { loadPrescriptionDetail } from "@/src/lib/prescribing/fiPrescribingLoaders.server";
+import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import { validateRepeatRulesPrescriberConfirmed } from "@/src/lib/prescribing/prescribingRepeatRules";
 import {
   prescriptionIdBodySchema,
@@ -39,14 +40,7 @@ async function assertPatientTenant(supabase: ReturnType<typeof supabaseAdmin>, t
 }
 
 async function assertStaffTenant(supabase: ReturnType<typeof supabaseAdmin>, tenantId: string, staffId: string) {
-  const { data, error } = await supabase
-    .from("fi_staff")
-    .select("id")
-    .eq("tenant_id", tenantId.trim())
-    .eq("id", staffId.trim())
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Doctor not found for this tenant.");
+  await assertStaffClinicallyAvailableForAssignment(tenantId, staffId, supabase);
 }
 
 async function assertCaseTenantAndPatient(

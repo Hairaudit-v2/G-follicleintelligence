@@ -4,6 +4,7 @@ import { ConsultationOsEditPage } from "@/src/components/fi-admin/consultations/
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadConsultationForTenant, loadConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 
 export const metadata = {
   title: "Consultation",
@@ -27,9 +28,10 @@ export default async function ConsultationOsEditRoutePage({
 
   const tid = tenantId.trim();
   const cid = consultationId.trim();
-  const [showCrmNav, initialWorkspaceDisplay] = await Promise.all([
+  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions] = await Promise.all([
     getCrmShellNavAllowed(tid),
     loadConsultationWorkspaceDisplay(tid, row),
+    loadClinicalStaffPickerOptions(tid),
   ]);
 
   return (
@@ -39,6 +41,7 @@ export default async function ConsultationOsEditRoutePage({
       initialRow={row}
       initialWorkspaceDisplay={initialWorkspaceDisplay}
       showCrmNav={showCrmNav}
+      clinicalStaffOptions={clinicalStaffOptions}
     />
   );
 }

@@ -20,6 +20,8 @@ import { ConsultationOsQuotePanel } from "@/src/components/fi-admin/consultation
 import { ConsultationOsRecommendationsPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRecommendationsPanel";
 import { ConsultationOsRegenerativeAssessmentPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRegenerativeAssessmentPanel";
 import { LabeledTextInput, LabeledTextarea } from "@/src/components/fi-admin/consultations/consultationOsPreviewFields";
+import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
   stableConsultationPayloadSignature,
   useConsultationAutosave,
@@ -114,6 +116,7 @@ export type ConsultationOsWorkspaceProps = {
   initialWorkspaceDisplay?: ConsultationWorkspaceDisplay | null;
   /** When false, lead linking UI is hidden (CRM shell not available). */
   showCrmNav?: boolean;
+  clinicalStaffOptions?: ClinicalStaffPickerOption[];
 };
 
 function renderMainSection(
@@ -158,6 +161,7 @@ export function ConsultationOsWorkspace({
   initialRow,
   initialWorkspaceDisplay = null,
   showCrmNav = false,
+  clinicalStaffOptions = [],
 }: ConsultationOsWorkspaceProps) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -179,6 +183,7 @@ export function ConsultationOsWorkspace({
     mode === "edit" && initialRow ? initialRow.status : "draft"
   );
   const [consultantName, setConsultantName] = useState(mode === "edit" && initialRow ? initialRow.consultant_name ?? "" : "");
+  const [consultantStaffId, setConsultantStaffId] = useState("");
   const [consultationDate, setConsultationDate] = useState(
     mode === "edit" && initialRow ? initialRow.consultation_date ?? "" : ""
   );
@@ -284,6 +289,7 @@ export function ConsultationOsWorkspace({
       consultation_type: consultationTypeId,
       status,
       consultant_name: consultantName.trim() === "" ? null : consultantName.trim(),
+      consultant_staff_id: consultantStaffId.trim() || undefined,
       consultation_date: consultationDate.trim() === "" ? null : consultationDate.trim(),
       structured_data: structuredPayload,
       live_notes: liveNotes.trim() === "" ? null : liveNotes,
@@ -297,6 +303,7 @@ export function ConsultationOsWorkspace({
     consultationTypeId,
     status,
     consultantName,
+    consultantStaffId,
     consultationDate,
     structuredData,
     liveNotes,
@@ -713,13 +720,37 @@ export function ConsultationOsWorkspace({
             }
             disabled={!canEdit}
           />
-          <LabeledTextInput
-            id="cos-sum-consultant"
-            label="Consultant"
-            value={consultantName}
-            onChange={setConsultantName}
-            disabled={!canEdit}
-          />
+          {clinicalStaffOptions.length > 0 ? (
+            <div>
+              <label htmlFor="cos-sum-consultant-staff" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                Consultant (staff)
+              </label>
+              <StaffClinicalSelect
+                id="cos-sum-consultant-staff"
+                tenantId={tenantId}
+                options={clinicalStaffOptions}
+                value={consultantStaffId}
+                allowEmpty
+                emptyLabel="Select consultant…"
+                className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-slate-50"
+                disabled={!canEdit}
+                onChange={(staffId) => {
+                  setConsultantStaffId(staffId);
+                  const picked = clinicalStaffOptions.find((s) => s.id === staffId);
+                  if (picked) setConsultantName(picked.full_name?.trim() || picked.email?.trim() || "");
+                  else if (!staffId) setConsultantName("");
+                }}
+              />
+            </div>
+          ) : (
+            <LabeledTextInput
+              id="cos-sum-consultant"
+              label="Consultant"
+              value={consultantName}
+              onChange={setConsultantName}
+              disabled={!canEdit}
+            />
+          )}
           <div>
             <label htmlFor="cos-sum-date" className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
               Consultation date

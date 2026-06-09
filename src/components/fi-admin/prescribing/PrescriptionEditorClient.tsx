@@ -11,6 +11,7 @@ import {
   signPrescriptionAction,
 } from "@/lib/actions/fi-prescribing-actions";
 import { PrescriptionPharmacySendPanel } from "@/src/components/fi-admin/prescribing/PrescriptionPharmacySendPanel";
+import { StaffReadinessPickerWarning } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import type { FiCompoundPharmacyRow, FiPharmacyTransmissionRow } from "@/src/lib/prescribing/fiPharmacyLoaders.server";
@@ -44,7 +45,12 @@ export type PrescriptionEditorLine = {
   repeatRulesPrescriberConfirmed: boolean;
 };
 
-export type PrescriptionEditorStaffOption = { id: string; label: string };
+export type PrescriptionEditorStaffOption = {
+  id: string;
+  label: string;
+  clinicallyAvailable?: boolean;
+  blockReason?: string | null;
+};
 
 export function PrescriptionEditorClient({
   tenantId,
@@ -359,11 +365,18 @@ export function PrescriptionEditorClient({
               onChange={(e) => setDoctorId(e.target.value)}
             >
               {staffOptions.map((s) => (
-                <option key={s.id} value={s.id}>
+                <option key={s.id} value={s.id} disabled={s.clinicallyAvailable === false}>
                   {s.label}
                 </option>
               ))}
             </select>
+            {(() => {
+              const selected = staffOptions.find((s) => s.id === doctorId);
+              if (!selected || selected.clinicallyAvailable !== false) return null;
+              return (
+                <StaffReadinessPickerWarning tenantId={tenantId} blockReason={selected.blockReason ?? null} />
+              );
+            })()}
           </label>
           <label className="block text-xs font-medium text-slate-700">
             Delivery type

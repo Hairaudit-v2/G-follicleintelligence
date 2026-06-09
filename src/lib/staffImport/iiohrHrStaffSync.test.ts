@@ -62,13 +62,15 @@ test("mapIiohrHrStaffSyncRowToImportRow maps fields; metadata_snapshot excluded 
   assert.equal((r as { metadata_snapshot?: unknown }).metadata_snapshot, undefined);
 });
 
-test("applyIiohrHrStaffSyncStampToPlan sets metadata.last_synced_at and merges metadata_snapshot", () => {
+test("applyIiohrHrStaffSyncStampToPlan sets metadata.last_synced_at and merges readiness metadata", () => {
   const syncRows: IiohrHrStaffSyncRow[] = [
     {
       external_staff_id: "S1",
       full_name: "One",
       email: "one@x.com",
-      metadata_snapshot: { compliance_note: "bounded" },
+      onboarding_status: "pending",
+      training_required_count: 2,
+      metadata_snapshot: { bank_details: { account: "secret" }, schema_version: 1 },
     },
   ];
   const plan = planIiohrHrStaffImport({
@@ -86,7 +88,10 @@ test("applyIiohrHrStaffSyncStampToPlan sets metadata.last_synced_at and merges m
   assert.ok(create && create.type === "create_staff_source_id");
   const md = create.payload.metadata as Record<string, unknown>;
   assert.equal(md.last_synced_at, "2026-06-08T12:00:00.000Z");
-  assert.equal(md.compliance_note, "bounded");
+  assert.equal(md.onboarding_status, "pending");
+  assert.equal(md.training_required_count, 2);
+  assert.equal(md.schema_version, 1);
+  assert.equal(md.bank_details, undefined);
   assert.equal(md.primary_fi_clinic_id, "clinic-1");
 });
 
@@ -165,8 +170,18 @@ test("sync plan + stamp only emits allowed import action types (no HR document t
   applyIiohrHrStaffSyncStampToPlan(
     plan,
     [
-      { external_staff_id: "A1", full_name: "A1", email: "a1@x.com", metadata_snapshot: { letter_count: 0 } },
-      { external_staff_id: "A2", full_name: "A2", email: "a2@x.com", metadata_snapshot: { contract_ids: [] } },
+      {
+        external_staff_id: "A1",
+        full_name: "A1",
+        email: "a1@x.com",
+        required_documents_missing_count: 0,
+      },
+      {
+        external_staff_id: "A2",
+        full_name: "A2",
+        email: "a2@x.com",
+        metadata_snapshot: { compliance_summary: "ok" },
+      },
     ],
     "2026-06-08T00:00:00.000Z"
   );

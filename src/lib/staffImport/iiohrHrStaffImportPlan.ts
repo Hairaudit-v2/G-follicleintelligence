@@ -4,6 +4,7 @@
  */
 
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
+import { hrStaffSourceSystemRank, isHrStaffSourceSystem } from "@/src/lib/staff/hrStaffReadinessMetadata";
 import {
   normalizeFiStaffSourceMetadata,
   normalizeFiStaffSourceStaffId,
@@ -228,11 +229,17 @@ export function planIiohrHrStaffImport(input: IiohrHrStaffImportPlanInput): Iioh
 
   for (const sid of input.existingStaffSourceIds) {
     const sys = normalizeFiStaffSourceSystem(sid.source_system);
-    if (sys !== IIOHR_HR_SOURCE_SYSTEM) continue;
-    const ext = normalizeFiStaffSourceStaffId(sid.source_staff_id);
+    if (sys === IIOHR_HR_SOURCE_SYSTEM) {
+      const ext = normalizeFiStaffSourceStaffId(sid.source_staff_id);
+      const staffId = sid.staff_id.trim();
+      externalIdToStaffId.set(ext, staffId);
+    }
+    if (!isHrStaffSourceSystem(sys)) continue;
     const staffId = sid.staff_id.trim();
-    externalIdToStaffId.set(ext, staffId);
-    staffIdToHrSource.set(staffId, sid);
+    const existing = staffIdToHrSource.get(staffId);
+    if (!existing || hrStaffSourceSystemRank(sys) < hrStaffSourceSystemRank(existing.source_system)) {
+      staffIdToHrSource.set(staffId, sid);
+    }
   }
 
   const consumedStaffIds = new Set<string>();

@@ -68,6 +68,13 @@ export async function loadEvolvedPerthHrStaffRecordsForFiPush(): Promise<IiohrHr
       compliance_summary: r.compliance_summary != null ? String(r.compliance_summary) : null,
       training_summary: r.training_summary != null ? String(r.training_summary) : null,
       last_hr_updated_at: r.last_hr_updated_at != null ? String(r.last_hr_updated_at).trim() : null,
+      onboarding_status: r.onboarding_status != null ? String(r.onboarding_status).trim() : null,
+      onboarding_completed_at:
+        r.onboarding_completed_at != null ? String(r.onboarding_completed_at).trim() : null,
+      required_documents_missing_count: r.required_documents_missing_count,
+      training_required_count: r.training_required_count,
+      certificates_outstanding_count: r.certificates_outstanding_count,
+      hr_profile_url: r.hr_profile_url != null ? String(r.hr_profile_url).trim() : null,
     });
   }
   return out;

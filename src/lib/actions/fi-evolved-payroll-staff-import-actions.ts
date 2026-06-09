@@ -45,6 +45,8 @@ function revalidatePayrollStaffImportSurfaces(tenantId: string): void {
   revalidatePath(`/fi-admin/${tid}/staff`);
   revalidatePath(`/fi-admin/${tid}/hr/staff-import`);
   revalidatePath(`/fi-admin/${tid}/hr/staff-import/payroll`);
+  revalidatePath(`/fi-admin/${tid}/hr/staff-readiness`);
+  revalidatePath(`/fi-admin/${tid}/staff/role-review`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}`);
 }

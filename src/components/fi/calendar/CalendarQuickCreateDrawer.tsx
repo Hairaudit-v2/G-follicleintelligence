@@ -26,6 +26,12 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import {
+  canSelectStaffForClinicalPicker,
+  formatClinicalPickerOptionLabel,
+  type ClinicalStaffPickerOption,
+} from "@/src/lib/staff/clinicalStaffPicker";
+import { StaffReadinessPickerWarning } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import {
   fiButtonVariantClassNames,
   fiPageHeaderVariantClassNames,
   fiSurfaceVariantClassNames,
@@ -94,7 +100,7 @@ export function CalendarQuickCreateDrawer({
   prefill: CalendarQuickCreatePrefill | null;
   clinics: CrmShellClinicOption[];
   assignees: CrmShellUserPickerOption[];
-  staffDirectory: CrmShellUserPickerOption[];
+  staffDirectory: ClinicalStaffPickerOption[];
   setupRecommendations?: string[];
   /** Tenant procedure catalog — durations override template defaults when present. */
   services?: FiServiceRow[];
@@ -235,14 +241,22 @@ export function CalendarQuickCreateDrawer({
     [services, templateId, tz]
   );
 
+  const selectedStaff = useMemo(() => {
+    const m = assigneeSelect.match(/^s:(.+)$/);
+    if (!m) return null;
+    return staffDirectory.find((s) => s.id === m[1]) ?? null;
+  }, [assigneeSelect, staffDirectory]);
+
   const assigneeOptions = useMemo(() => {
-    const rows: { value: string; label: string }[] = [{ value: "", label: "Unassigned" }];
+    const rows: { value: string; label: string; disabled?: boolean }[] = [{ value: "", label: "Unassigned" }];
     for (const s of staffDirectory) {
       const sid = s.id?.trim();
       if (!sid) continue;
+      const selectable = canSelectStaffForClinicalPicker(s);
       rows.push({
         value: `s:${sid}`,
-        label: (s.email?.trim() || s.full_name?.trim() || s.id.slice(0, 8)) + " (staff)",
+        label: `${formatClinicalPickerOptionLabel(s)} (staff)`,
+        disabled: !selectable,
       });
     }
     for (const u of assignees) {
@@ -624,11 +638,17 @@ export function CalendarQuickCreateDrawer({
                     Provider / resource
                     <select className={inputClass} value={assigneeSelect} onChange={(e) => setAssigneeSelect(e.target.value)}>
                       {assigneeOptions.map((o) => (
-                        <option key={o.value || "none"} value={o.value}>
+                        <option key={o.value || "none"} value={o.value} disabled={o.disabled}>
                           {o.label}
                         </option>
                       ))}
                     </select>
+                    {selectedStaff && !selectedStaff.clinical_readiness.clinically_available ? (
+                      <StaffReadinessPickerWarning
+                        tenantId={tenantId}
+                        blockReason={selectedStaff.clinical_readiness.block_reason}
+                      />
+                    ) : null}
                   </label>
                 ) : null}
               </div>

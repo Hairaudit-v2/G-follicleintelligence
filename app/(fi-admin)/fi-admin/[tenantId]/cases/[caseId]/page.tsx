@@ -9,7 +9,8 @@ import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAcces
 import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
-import { loadFiUsersForProcedureTeamPicker, loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
+import { loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
+import { loadProcedureTeamPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
 import { buildCaseTimeline } from "@/src/lib/cases/caseTimelineBuild";
@@ -49,7 +50,7 @@ export default async function CaseDetailRoutePage({
       loadCaseAdminDetail(tenantId, caseId),
       loadSurgeryPlanForCase(tenantId, caseId),
       loadProcedureDayForCase(tenantId, caseId),
-      loadFiUsersForProcedureTeamPicker(tenantId),
+      loadProcedureTeamPickerOptions(tenantId),
       loadPostOpTrackingForCase(tenantId, caseId),
       loadFollowUpsForCase(tenantId, caseId),
       loadCaseTimelineExtraSources(tenantId, caseId),

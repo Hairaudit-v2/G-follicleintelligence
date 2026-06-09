@@ -27,6 +27,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     if (body.ok === true && summary?.commit === true) {
       const base = `/fi-admin/${tid}`;
       revalidatePath(`${base}/hr/staff-import`);
+      revalidatePath(`${base}/hr/sync-health`);
       revalidatePath(`${base}/staff`);
       revalidatePath(`${base}/calendar`);
       revalidatePath(base);

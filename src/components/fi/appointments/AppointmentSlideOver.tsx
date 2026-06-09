@@ -891,6 +891,7 @@ export function AppointmentSlideOverPanel({
               />
 
               <AppointmentProcedureSection
+                tenantId={tenantId}
                 assignees={payload.assignees}
                 graftCountEstimate={graftCountEstimate}
                 donorArea={donorArea}

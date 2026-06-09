@@ -2,10 +2,12 @@
 
 import type { FormEvent } from "react";
 import type { AppointmentProcedureMetadata } from "@/src/lib/bookings/appointmentMetadata";
-import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
+import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { appointmentCardClass } from "./appointmentSharedStyles";
 
 export function AppointmentProcedureSection({
+  tenantId,
   assignees,
   graftCountEstimate,
   donorArea,
@@ -26,7 +28,8 @@ export function AppointmentProcedureSection({
   onTechUserIdChange,
   onSubmit,
 }: {
-  assignees: CrmShellUserPickerOption[];
+  tenantId: string;
+  assignees: ClinicalStaffPickerOption[];
   graftCountEstimate: string;
   donorArea: string;
   technique: string;
@@ -94,48 +97,33 @@ export function AppointmentProcedureSection({
           </label>
           <label className="block text-gray-600">
             Surgeon
-            <select
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            <StaffClinicalSelect
+              tenantId={tenantId}
+              options={assignees}
               value={surgeonUserId}
-              onChange={(e) => onSurgeonUserIdChange(e.target.value)}
-            >
-              <option value="">—</option>
-              {assignees.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.email?.trim() || u.id.slice(0, 8)}
-                </option>
-              ))}
-            </select>
+              onChange={onSurgeonUserIdChange}
+              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            />
           </label>
           <label className="block text-gray-600">
             Consultant
-            <select
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            <StaffClinicalSelect
+              tenantId={tenantId}
+              options={assignees}
               value={consultantUserId}
-              onChange={(e) => onConsultantUserIdChange(e.target.value)}
-            >
-              <option value="">—</option>
-              {assignees.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.email?.trim() || u.id.slice(0, 8)}
-                </option>
-              ))}
-            </select>
+              onChange={onConsultantUserIdChange}
+              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            />
           </label>
           <label className="block text-gray-600">
             Technician
-            <select
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            <StaffClinicalSelect
+              tenantId={tenantId}
+              options={assignees}
               value={techUserId}
-              onChange={(e) => onTechUserIdChange(e.target.value)}
-            >
-              <option value="">—</option>
-              {assignees.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.email?.trim() || u.id.slice(0, 8)}
-                </option>
-              ))}
-            </select>
+              onChange={onTechUserIdChange}
+              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            />
           </label>
           <label className="block text-gray-600">
             Special instructions

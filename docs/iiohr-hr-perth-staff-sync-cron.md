@@ -15,7 +15,7 @@ Evolved Hair Restoration Perth staff are read from the IIOHR HR JSON feed and pu
 | `EVOLVED_PERTH_TENANT_ID` | UUID of the Evolved Perth FI tenant receiving the sync. |
 | `FI_BASE_URL` | Absolute base URL of this FI deployment (used by the outbound client to POST to itself or another FI host). |
 | `IIOHR_HR_SYNC_SECRET` | Must match the FI staff-sync API secret (`x-iiohr-sync-secret`). |
-| `IIOHR_HR_PERTH_STAFF_FEED_URL` | GET URL returning Perth HR staff JSON (`staff`, `rows`, or array). |
+| `IIOHR_HR_PERTH_STAFF_FEED_URL` | GET URL returning Perth HR staff JSON (`staff`, `rows`, or array). Readiness fields optional per row (see runbook). |
 
 ## Optional environment variables
 

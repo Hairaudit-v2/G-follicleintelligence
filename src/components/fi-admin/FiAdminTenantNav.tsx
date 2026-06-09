@@ -122,6 +122,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
           label: "Staff Import",
           title: "Import Evolved HR staff records and link them to FI staff profiles.",
         },
+        {
+          href: `${base}/hr/staff-readiness`,
+          label: "Staff Readiness",
+          title: "Operational staff readiness — roles, HR, training, and clinical availability.",
+        },
       ],
     });
   }

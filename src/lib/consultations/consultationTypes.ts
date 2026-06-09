@@ -119,6 +119,8 @@ export const consultationUpsertBodySchema = z
     consultation_type: consultationTypeIdSchema.optional(),
     status: consultationEditableStatusSchema.optional(),
     consultant_name: z.string().nullable().optional(),
+    /** Optional staff id for server-side clinical readiness validation (not persisted). */
+    consultant_staff_id: optionalUuid.optional(),
     /** ISO date `YYYY-MM-DD` or null / empty to clear */
     consultation_date: z
       .union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.literal(""), z.null()])

@@ -5,7 +5,7 @@ Operational guide for the Evolved Perth HR feed → FI staff pipeline (manual ou
 ## Scope
 
 - **HR remains the system of record** for contracts, letters, payroll, and full training history.
-- FI stores **operational staff** (`fi_staff`, `fi_users`, `fi_staff_source_ids` with `iiohr_hr`) plus a **bounded** `metadata_snapshot` on source ids.
+- FI stores **operational staff** (`fi_staff`, `fi_users`, `fi_staff_source_ids` with `iiohr_hr`) plus a **bounded** metadata snapshot on source ids (readiness + legacy v1 summaries).
 - **Audit:** `fi_staff_sync_runs` records each API/cron execution (counts, status, optional `metadata.trigger` for cron).
 
 ## Required environment variables
@@ -28,6 +28,39 @@ Optional:
 
 See also: `docs/iiohr-hr-perth-staff-sync-cron.md`.
 
+## HR readiness metadata (FI OS)
+
+Each successful staff sync merges **safe** readiness fields into `fi_staff_source_ids.metadata` for `source_system` values `iiohr_hr`, `iiohr`, and `hr`:
+
+| Field | Notes |
+|-------|--------|
+| `onboarding_status` | e.g. `pending`, `complete`, `in_progress` |
+| `onboarding_completed_at` | ISO-8601 date/time |
+| `required_documents_missing_count` | non-negative integer |
+| `training_required_count` | non-negative integer |
+| `certificates_outstanding_count` | non-negative integer |
+| `hr_profile_url` | `http(s)` only; falls back to row `source_url` when valid |
+| `last_synced_at` | ISO timestamp stamped on every successful sync |
+
+Sensitive HR/payroll fields (bank, TFN, super, DOB, home address, pay rate, tax fields, documents) are **never** written. Missing counts are omitted (FI UI treats absent as unknown).
+
+### Feed / API payload (per row)
+
+Operational fields (`external_staff_id`, `full_name`, `email`, …) plus either top-level readiness keys or the same keys inside `metadata_snapshot`. Example:
+
+```json
+{
+  "external_staff_id": "HR-001",
+  "full_name": "Alex Example",
+  "email": "alex@clinic.example",
+  "source_url": "https://hr.example/staff/HR-001",
+  "onboarding_status": "pending",
+  "required_documents_missing_count": 1,
+  "training_required_count": 0,
+  "certificates_outstanding_count": 0
+}
+```
+
 ## Health check
 
 - **GET** `/api/health/iiohr-hr-staff-sync`
@@ -39,6 +72,7 @@ See also: `docs/iiohr-hr-perth-staff-sync-cron.md`.
 1. Open **`/fi-admin/[tenantId]/hr/staff-import`** (tenant must match `EVOLVED_PERTH_TENANT_ID` for cron-focused banners).
 2. Use **Preview FI staff sync** then **Push FI staff sync** (commit uses `confirm: true` server-side).
 3. Review **Automation status** and the **cron health** banner (success / warning / danger).
+4. For a full operational view (run history, staff issues, env checklist, repair actions), open **`/fi-admin/[tenantId]/hr/sync-health`**.
 
 ## Manual cron trigger
 

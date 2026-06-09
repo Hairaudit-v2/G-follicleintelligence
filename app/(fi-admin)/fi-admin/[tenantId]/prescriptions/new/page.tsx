@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 
 import { PrescriptionEditorClient } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
 import { getFiTenantMemberSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
-import { loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { formatClinicalPickerOptionLabel } from "@/src/lib/staff/clinicalStaffPicker";
 import {
   loadMedicationCatalogueForTenant,
   resolveDefaultDoctorStaffIdForFiUser,
@@ -36,7 +37,7 @@ export default async function NewPrescriptionPage({
 
   const [catalogue, staff] = await Promise.all([
     loadMedicationCatalogueForTenant(tenantId.trim()),
-    loadCrmShellStaffPickerOptions(tenantId.trim()),
+    loadClinicalStaffPickerOptions(tenantId.trim()),
   ]);
 
   if (catalogue.length === 0) {
@@ -58,13 +59,15 @@ export default async function NewPrescriptionPage({
 
   const staffOptions = staff.map((s) => ({
     id: s.id,
-    label: `${s.full_name?.trim() || "Staff"} (${s.staff_role})`,
+    label: formatClinicalPickerOptionLabel(s),
+    clinicallyAvailable: s.clinical_readiness.clinically_available,
+    blockReason: s.clinical_readiness.block_reason,
   }));
 
   const doctorId =
     defaultDoctorStaffId && staff.some((s) => s.id === defaultDoctorStaffId)
       ? defaultDoctorStaffId
-      : staff[0]!.id;
+      : (staff.find((s) => s.clinical_readiness.clinically_available)?.id ?? staff[0]!.id);
 
   return (
     <PrescriptionEditorClient

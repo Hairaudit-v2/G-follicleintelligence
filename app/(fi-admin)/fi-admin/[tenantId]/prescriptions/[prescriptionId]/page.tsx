@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 
 import { PrescriptionEditorClient } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
 import type { PrescriptionEditorLine } from "@/src/components/fi-admin/prescribing/PrescriptionEditorClient";
-import { loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { formatClinicalPickerOptionLabel } from "@/src/lib/staff/clinicalStaffPicker";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import {
   loadActiveCompoundPharmaciesForTenant,
   loadPharmacyTransmissionsForPrescription,
@@ -42,7 +43,7 @@ export default async function PrescriptionEditorRoutePage({
   const [bundle, catalogue, staff, pharmacies, transmissions] = await Promise.all([
     loadPrescriptionDetail(tid, rid),
     loadMedicationCatalogueForTenant(tid),
-    loadCrmShellStaffPickerOptions(tid),
+    loadClinicalStaffPickerOptions(tid),
     loadActiveCompoundPharmaciesForTenant(tid),
     loadPharmacyTransmissionsForPrescription(tid, rid),
   ]);
@@ -61,13 +62,17 @@ export default async function PrescriptionEditorRoutePage({
 
   const staffOptions = staff.map((s) => ({
     id: s.id,
-    label: `${s.full_name?.trim() || "Staff"} (${s.staff_role})`,
+    label: formatClinicalPickerOptionLabel(s),
+    clinicallyAvailable: s.clinical_readiness.clinically_available,
+    blockReason: s.clinical_readiness.block_reason,
   }));
 
   if (!staff.some((s) => s.id === p.doctor_id)) {
     staffOptions.unshift({
       id: p.doctor_id,
       label: "Recorded prescriber (not in active staff list)",
+      clinicallyAvailable: true,
+      blockReason: null,
     });
   }
 

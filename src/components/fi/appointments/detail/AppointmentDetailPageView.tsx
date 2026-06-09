@@ -236,6 +236,7 @@ export function AppointmentDetailPageView({
             surgeryPlan={payload.surgeryPlan}
           />
           <AppointmentProcedureSection
+            tenantId={tenantId}
             assignees={payload.assignees}
             graftCountEstimate={state.graftCountEstimate}
             donorArea={state.donorArea}

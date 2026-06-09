@@ -26,7 +26,8 @@ export type {
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { loadCrmShellStaffPickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
 import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
@@ -87,7 +88,7 @@ async function loadTenantStaffAndClinics(tenantId: string): Promise<{
   const tid = tenantId.trim();
   const [userAssignees, staffDirectory, clinicsRes] = await Promise.all([
     loadCrmShellUserPickerOptions(tid),
-    loadCrmShellStaffPickerOptions(tid),
+    loadClinicalStaffPickerOptions(tid),
     supabaseAdmin()
       .from("fi_clinics")
       .select("id, display_name, organisation_id")

@@ -38,6 +38,7 @@ function revalidateStaffRoleReviewSurfaces(tenantId: string): void {
   const tid = tenantId.trim();
   revalidatePath(`/fi-admin/${tid}/staff`);
   revalidatePath(`/fi-admin/${tid}/staff/role-review`);
+  revalidatePath(`/fi-admin/${tid}/hr/staff-readiness`);
   revalidatePath(`/fi-admin/${tid}/hr/staff-import/payroll`);
   revalidatePath(`/fi-admin/${tid}/calendar`);
   revalidatePath(`/fi-admin/${tid}/appointments`);

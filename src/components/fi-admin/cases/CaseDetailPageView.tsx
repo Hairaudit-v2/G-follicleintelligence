@@ -18,7 +18,8 @@ import { CaseProcedureDayCard } from "./CaseProcedureDayCard";
 import { CaseSurgeryPlanningCard } from "./CaseSurgeryPlanningCard";
 import { CaseSummaryCard } from "./CaseSummaryCard";
 import { CaseTimelineCard } from "./CaseTimelineCard";
-import type { CaseProcedureRow, FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
+import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
+import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import type { CaseReadinessReport } from "@/src/lib/cases/caseReadinessTypes";
@@ -54,7 +55,7 @@ export function CaseDetailPageView({
   detail: CaseAdminDetail;
   surgeryPlan: CaseSurgeryPlanRow | null;
   procedureDay: CaseProcedureRow | null;
-  teamUserOptions: FiUserPickerOption[];
+  teamUserOptions: ProcedureTeamPickerOption[];
   postOpTracking: CasePostOpTrackingRow | null;
   followUps: CaseFollowUpRow[];
   timelineItems: CaseTimelineItem[];

@@ -582,6 +582,15 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
   if (assign.assigned_user_id?.trim()) {
     await assertFiUserBelongsToTenant(supabase, tid, assign.assigned_user_id);
   }
+  if (assign.assigned_staff_id?.trim()) {
+    await assertStaffAppointmentWithinWorkingHours(
+      tid,
+      assign.assigned_staff_id,
+      params.startAt.trim(),
+      params.endAt.trim(),
+      supabase
+    );
+  }
 
   const insertRow = {
     tenant_id: tid,

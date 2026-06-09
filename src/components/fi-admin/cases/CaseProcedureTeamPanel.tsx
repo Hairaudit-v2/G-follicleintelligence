@@ -1,36 +1,60 @@
 "use client";
 
-import type { FiUserPickerOption } from "@/src/lib/cases/procedureDayLoaders";
+import {
+  canSelectStaffForProcedureSlot,
+  formatProcedureTeamPickerLabel,
+  type ProcedureTeamPickerOption,
+} from "@/src/lib/staff/clinicalStaffPicker";
+import { StaffReadinessPickerWarning } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 
 import { caseFormField } from "./caseFormFieldProps";
 
 const TEAM_MEMBER_SELECT = caseFormField("procedure-team-add-member");
 
 export function CaseProcedureTeamPanel({
+  tenantId,
   teamIds,
   userOptions,
   excludeUserIds,
   onChange,
 }: {
+  tenantId: string;
   teamIds: string[];
-  userOptions: FiUserPickerOption[];
+  userOptions: ProcedureTeamPickerOption[];
   excludeUserIds?: string[];
   onChange: (next: string[]) => void;
 }) {
   const exclude = new Set((excludeUserIds ?? []).filter(Boolean));
 
-  const available = userOptions.filter((u) => !teamIds.includes(u.id) && !exclude.has(u.id));
+  const available = userOptions.filter(
+    (u) => !teamIds.includes(u.fi_user_id) && !exclude.has(u.fi_user_id)
+  );
 
   function labelFor(id: string): string {
-    const u = userOptions.find((x) => x.id === id);
+    const u = userOptions.find((x) => x.fi_user_id === id);
     if (!u) return id.slice(0, 8) + "…";
-    return u.email?.trim() || u.role?.trim() || `${u.id.slice(0, 8)}…`;
+    return `${u.label} · ${u.staff_role}`;
   }
+
+  function teamSlotFor(u: ProcedureTeamPickerOption): "clinical" | "support" {
+    return u.allowed_slots.includes("clinical") ? "clinical" : "support";
+  }
+
+  const blockedSelected = teamIds
+    .map((id) => {
+      const u = userOptions.find((x) => x.fi_user_id === id);
+      if (!u) return null;
+      const slot = teamSlotFor(u);
+      return canSelectStaffForProcedureSlot(u, slot) ? null : u;
+    })
+    .filter((u): u is ProcedureTeamPickerOption => u != null);
 
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-semibold text-gray-800">Team members (fi_users)</h3>
-      <p className="text-xs text-gray-500">Nurses and additional staff on the procedure record (surgeon is set separately).</p>
+      <h3 className="text-xs font-semibold text-gray-800">Team members</h3>
+      <p className="text-xs text-gray-500">
+        Clinical roles (nurse, technician) or support roles (admin, reception, coordinator). Surgeon is set separately.
+      </p>
       <div className="flex flex-wrap gap-2">
         <label htmlFor={TEAM_MEMBER_SELECT.id} className="sr-only">
           Add team member
@@ -47,13 +71,23 @@ export function CaseProcedureTeamPanel({
           }}
         >
           <option value="">Add team member…</option>
-          {available.map((u) => (
-            <option key={u.id} value={u.id}>
-              {(u.email ?? "—") + (u.role ? ` · ${u.role}` : "")}
-            </option>
-          ))}
+          {available.map((u) => {
+            const slot = u.allowed_slots.includes("support") ? "support" : "clinical";
+            const selectable = canSelectStaffForProcedureSlot(u, slot);
+            return (
+              <option key={u.fi_user_id} value={u.fi_user_id} disabled={!selectable}>
+                {formatProcedureTeamPickerLabel(u, slot)}
+              </option>
+            );
+          })}
         </select>
       </div>
+      {blockedSelected[0] ? (
+        <StaffReadinessPickerWarning
+          tenantId={tenantId}
+          blockReason={blockedSelected[0]!.clinical_readiness.block_reason}
+        />
+      ) : null}
       {teamIds.length === 0 ? (
         <p className="text-xs text-gray-400">No team members selected.</p>
       ) : (
