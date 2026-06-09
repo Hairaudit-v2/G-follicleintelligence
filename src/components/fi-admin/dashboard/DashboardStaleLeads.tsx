@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { UserPlus } from "lucide-react";
 
 import type { StaleLeadItem } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { DashboardEmptyState } from "@/src/components/fi-admin/dashboard/DashboardEmptyState";
 
 export function DashboardStaleLeads(props: {
   tenantId: string;
@@ -20,7 +22,13 @@ export function DashboardStaleLeads(props: {
         className="mb-4"
       />
       {staleLeads.length === 0 ? (
-        <p className="text-sm text-[#94A3B8]">No stale leads right now.</p>
+        <DashboardEmptyState
+          icon={<UserPlus className="h-5 w-5" aria-hidden />}
+          title="Pipeline is moving"
+          description="No leads have been sitting in the same stage beyond your follow-up threshold."
+          actionLabel="Open LeadFlow"
+          actionHref={`/fi-admin/${tenantId}/crm`}
+        />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/[0.08]">
           <table className="w-full min-w-[32rem] border-collapse text-left text-sm">

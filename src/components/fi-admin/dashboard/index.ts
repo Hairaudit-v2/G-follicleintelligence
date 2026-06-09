@@ -3,3 +3,8 @@ export { DashboardStaleLeads } from "./DashboardStaleLeads";
 export { DashboardTasksDue } from "./DashboardTasksDue";
 export { DashboardQuickStats } from "./DashboardQuickStats";
 export { DashboardQuickActions } from "./DashboardQuickActions";
+export { DashboardEmptyState } from "./DashboardEmptyState";
+export { DashboardPrimaryActions } from "./DashboardPrimaryActions";
+export { DashboardClinicToday } from "./DashboardClinicToday";
+export { DashboardActionCentre } from "./DashboardActionCentre";
+export { DashboardClinicMetrics } from "./DashboardClinicMetrics";

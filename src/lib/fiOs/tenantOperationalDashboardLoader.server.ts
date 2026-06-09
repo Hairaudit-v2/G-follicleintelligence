@@ -16,6 +16,14 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
+import {
+  bookingAgendaBucket,
+  computeOperationalAgendaUtcRange,
+  type AgendaBucket,
+} from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
+
+export { bookingAgendaBucket, computeOperationalAgendaUtcRange } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
+export type { AgendaBucket } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
 
 /** Days in current pipeline stage before a lead appears on the dashboard stale list. */
 export const DEFAULT_STALE_LEAD_STAGE_DAYS = 7;
@@ -35,28 +43,11 @@ function addHours(d: Date, hours: number): Date {
   return new Date(d.getTime() + hours * 3_600_000);
 }
 
-/** Same UTC window as the home dashboard agenda (midnight UTC today → +72h). */
-export function computeOperationalAgendaUtcRange(now: Date): { startIso: string; endIso: string } {
-  const dayStart = utcDayStart(now);
-  const rangeEnd = addHours(dayStart, 72);
-  return { startIso: dayStart.toISOString(), endIso: rangeEnd.toISOString() };
-}
-
 function mondayStartUtc(d: Date): Date {
   const day = d.getUTCDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
   const start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + mondayOffset, 0, 0, 0, 0));
   return start;
-}
-
-export type AgendaBucket = "consult" | "surgery" | "follow_up" | "other";
-
-export function bookingAgendaBucket(bookingType: string): AgendaBucket {
-  const t = bookingType.trim();
-  if (t === "consultation") return "consult";
-  if (t === "surgery") return "surgery";
-  if (t === "follow_up" || t === "review") return "follow_up";
-  return "other";
 }
 
 const dashboardBookingItemSchema = z.object({
@@ -124,6 +115,32 @@ const launchControlSchema = z.object({
 
 export type TenantLaunchControl = z.infer<typeof launchControlSchema>;
 
+const clinicTodaySchema = z.object({
+  /** Consultation bookings starting today (tenant IANA calendar day, active statuses). */
+  consultations: z.number().int().nonnegative(),
+  /** PRP bookings starting today. */
+  prp: z.number().int().nonnegative(),
+  /** Follow-up and review bookings starting today. */
+  followUps: z.number().int().nonnegative(),
+  /** Surgery bookings starting today. */
+  surgeries: z.number().int().nonnegative(),
+});
+
+export type TenantClinicToday = z.infer<typeof clinicTodaySchema>;
+
+const actionCentreSchema = z.object({
+  /** Open CRM leads not yet contacted (status open). */
+  leadsAwaitingContact: z.number().int().nonnegative(),
+  /** Consultation workspaces still in draft, in progress, or quoted. */
+  consultationsAwaitingCompletion: z.number().int().nonnegative(),
+  /** Follow-up / review bookings due within 14 days (active statuses). */
+  followUpsDue: z.number().int().nonnegative(),
+  /** Upcoming surgery bookings missing a linked case (next 30 days). */
+  surgeryReadinessAlerts: z.number().int().nonnegative(),
+});
+
+export type TenantActionCentre = z.infer<typeof actionCentreSchema>;
+
 const dashboardReminderItemSchema = z.object({
   jobId: z.string().uuid(),
   scheduled_at: z.string(),
@@ -165,6 +182,8 @@ export const tenantOperationalDashboardSchema = z.object({
   viewerStaffId: z.string().uuid().nullable(),
   canQuickCallIn: z.boolean(),
   launchControl: launchControlSchema,
+  clinicToday: clinicTodaySchema,
+  actionCentre: actionCentreSchema,
   /** DoctorOS 1D: medication reorders awaiting clinic review (requested + doctor_review_required). */
   medicationReorderReviewsPending: z.number().int().nonnegative(),
 });
@@ -389,51 +408,118 @@ async function loadTasksDue(tenantId: string, fiUserId: string | null, now: Date
 
 const ACTIVE_AGENDA_BOOKING_STATUSES = ["scheduled", "confirmed", "arrived"] as const;
 
-async function loadLaunchBookingCounts(
+async function resolveTenantLocalDayWindow(
   tenantId: string,
   now: Date
-): Promise<{ consultationsToday: number; surgeriesThisWeek: number }> {
-  const supabase = supabaseAdmin();
-  const tid = tenantId.trim();
-
-  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
+): Promise<{ localStartIso: string; localEndIso: string }> {
+  const dayStart = utcDayStart(now).toISOString();
+  const dayEnd = addHours(utcDayStart(now), 24).toISOString();
+  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tenantId.trim());
   const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
   const localDayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone);
   const localDayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone);
-  const dayStart = utcDayStart(now).toISOString();
-  const dayEnd = addHours(utcDayStart(now), 24).toISOString();
-  const localStartIso = localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart;
-  const localEndIso = localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd;
+  return {
+    localStartIso: localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart,
+    localEndIso: localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd,
+  };
+}
 
+async function countActiveBookingsInRange(
+  tenantId: string,
+  startIso: string,
+  endIso: string,
+  bookingTypes: string | readonly string[]
+): Promise<number> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const types = typeof bookingTypes === "string" ? [bookingTypes] : [...bookingTypes];
+
+  let q = supabase
+    .from("fi_bookings")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tid)
+    .in("booking_status", [...ACTIVE_AGENDA_BOOKING_STATUSES])
+    .gte("start_at", startIso)
+    .lt("start_at", endIso);
+
+  if (types.length === 1) q = q.eq("booking_type", types[0]!);
+  else q = q.in("booking_type", types);
+
+  const { count, error } = await q;
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
+
+async function loadClinicTodayAndWeekCounts(
+  tenantId: string,
+  now: Date
+): Promise<{ clinicToday: TenantClinicToday; surgeriesThisWeek: number }> {
+  const { localStartIso, localEndIso } = await resolveTenantLocalDayWindow(tenantId, now);
   const weekStartIso = mondayStartUtc(now).toISOString();
   const weekEndIso = addHours(mondayStartUtc(now), 7 * 24).toISOString();
 
-  const [cRes, sRes] = await Promise.all([
+  const [consultations, prp, followUps, surgeries, surgeriesThisWeek] = await Promise.all([
+    countActiveBookingsInRange(tenantId, localStartIso, localEndIso, "consultation"),
+    countActiveBookingsInRange(tenantId, localStartIso, localEndIso, "prp"),
+    countActiveBookingsInRange(tenantId, localStartIso, localEndIso, ["follow_up", "review"]),
+    countActiveBookingsInRange(tenantId, localStartIso, localEndIso, "surgery"),
+    countActiveBookingsInRange(tenantId, weekStartIso, weekEndIso, "surgery"),
+  ]);
+
+  return {
+    clinicToday: clinicTodaySchema.parse({ consultations, prp, followUps, surgeries }),
+    surgeriesThisWeek,
+  };
+}
+
+async function loadActionCentreCounts(tenantId: string, now: Date): Promise<TenantActionCentre> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const horizonIso = addHours(now, 14 * 24).toISOString();
+  const surgeryHorizonIso = addHours(now, 30 * 24).toISOString();
+  const nowIso = now.toISOString();
+
+  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes] = await Promise.all([
+    supabase
+      .from("fi_crm_leads")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("status", "open"),
+    supabase
+      .from("fi_consultations")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .in("status", ["draft", "in_progress", "quoted"]),
     supabase
       .from("fi_bookings")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
-      .eq("booking_type", "consultation")
+      .in("booking_type", ["follow_up", "review"])
       .in("booking_status", [...ACTIVE_AGENDA_BOOKING_STATUSES])
-      .gte("start_at", localStartIso)
-      .lt("start_at", localEndIso),
+      .gte("start_at", nowIso)
+      .lt("start_at", horizonIso),
     supabase
       .from("fi_bookings")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
       .eq("booking_type", "surgery")
       .in("booking_status", [...ACTIVE_AGENDA_BOOKING_STATUSES])
-      .gte("start_at", weekStartIso)
-      .lt("start_at", weekEndIso),
+      .gte("start_at", nowIso)
+      .lt("start_at", surgeryHorizonIso)
+      .is("case_id", null),
   ]);
 
-  if (cRes.error) throw new Error(cRes.error.message);
-  if (sRes.error) throw new Error(sRes.error.message);
+  if (openLeadsRes.error) throw new Error(openLeadsRes.error.message);
+  if (consultRes.error) throw new Error(consultRes.error.message);
+  if (followUpRes.error) throw new Error(followUpRes.error.message);
+  if (surgeryReadyRes.error) throw new Error(surgeryReadyRes.error.message);
 
-  return {
-    consultationsToday: cRes.count ?? 0,
-    surgeriesThisWeek: sRes.count ?? 0,
-  };
+  return actionCentreSchema.parse({
+    leadsAwaitingContact: openLeadsRes.count ?? 0,
+    consultationsAwaitingCompletion: consultRes.count ?? 0,
+    followUpsDue: followUpRes.count ?? 0,
+    surgeryReadinessAlerts: surgeryReadyRes.count ?? 0,
+  });
 }
 
 async function loadOpenCrmTasksCount(tenantId: string, fiUserId: string | null): Promise<number> {
@@ -611,17 +697,27 @@ export async function loadTenantOperationalDashboard(
   if (!tenantRes.data) throw new Error("Tenant not found");
   const tenantName = String((tenantRes.data as { name?: string }).name ?? "").trim() || tid;
 
-  const [agenda, staleLeads, tasksDue, quickStats, upcomingReminders, launchBookings, openTasksCount, medicationReorderReviewsPending] =
-    await Promise.all([
-      loadAgendaBookings(tid, now),
-      loadStaleLeads(tid, staleDays, now),
-      loadTasksDue(tid, viewerFiUserId, now),
-      loadQuickStats(tid, now),
-      loadUpcomingReminders(tid, now),
-      loadLaunchBookingCounts(tid, now),
-      loadOpenCrmTasksCount(tid, viewerFiUserId),
-      loadMedicationReorderPendingReviewCount(tid),
-    ]);
+  const [
+    agenda,
+    staleLeads,
+    tasksDue,
+    quickStats,
+    upcomingReminders,
+    clinicCounts,
+    actionCentre,
+    openTasksCount,
+    medicationReorderReviewsPending,
+  ] = await Promise.all([
+    loadAgendaBookings(tid, now),
+    loadStaleLeads(tid, staleDays, now),
+    loadTasksDue(tid, viewerFiUserId, now),
+    loadQuickStats(tid, now),
+    loadUpcomingReminders(tid, now),
+    loadClinicTodayAndWeekCounts(tid, now),
+    loadActionCentreCounts(tid, now),
+    loadOpenCrmTasksCount(tid, viewerFiUserId),
+    loadMedicationReorderPendingReviewCount(tid),
+  ]);
 
   return tenantOperationalDashboardSchema.parse({
     tenantId: tid,
@@ -637,12 +733,14 @@ export async function loadTenantOperationalDashboard(
     viewerStaffId,
     canQuickCallIn,
     launchControl: {
-      consultationsToday: launchBookings.consultationsToday,
-      surgeriesThisWeek: launchBookings.surgeriesThisWeek,
+      consultationsToday: clinicCounts.clinicToday.consultations,
+      surgeriesThisWeek: clinicCounts.surgeriesThisWeek,
       leadsNeedingFollowUp: staleLeads.length,
       openTasks: openTasksCount,
       revenueAvailable: false,
     },
+    clinicToday: clinicCounts.clinicToday,
+    actionCentre,
     medicationReorderReviewsPending,
   });
 }

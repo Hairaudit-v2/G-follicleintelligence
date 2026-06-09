@@ -3,6 +3,7 @@ import { ListTodo } from "lucide-react";
 
 import type { TaskDueItem } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { DashboardEmptyState } from "@/src/components/fi-admin/dashboard/DashboardEmptyState";
 
 function formatDue(iso: string | null): string {
   if (!iso) return "No due date";
@@ -28,7 +29,13 @@ export function DashboardTasksDue(props: { tenantId: string; tasks: TaskDueItem[
         className="mb-4"
       />
       {tasks.length === 0 ? (
-        <p className="text-sm text-[#94A3B8]">No tasks in this queue.</p>
+        <DashboardEmptyState
+          icon={<ListTodo className="h-5 w-5" aria-hidden />}
+          title="Task queue is clear"
+          description="No open CRM tasks are assigned to you or waiting unassigned in this tenant."
+          actionLabel="View leads"
+          actionHref={`/fi-admin/${tenantId}/crm`}
+        />
       ) : (
         <ul className="space-y-2">
           {tasks.map((t) => (
