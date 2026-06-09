@@ -1,10 +1,11 @@
 import type { BookingType } from "@/src/lib/bookings/bookingPolicy";
 import type { FiServiceApprovedImportRow } from "@/src/lib/timelyImport/buildApprovedFiSeed";
+import type { FiServiceCategory } from "@/src/lib/timelyImport/serviceSalesTypes";
 
 /** Stable Evolved Hair Clinics default procedure catalog (Stage 2F). */
 export type DefaultClinicServiceDefinition = {
   name: string;
-  category: string;
+  category: FiServiceCategory;
   booking_type: BookingType | null;
   duration_minutes: number;
   base_price: number;
