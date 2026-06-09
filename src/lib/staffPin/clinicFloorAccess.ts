@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cache } from "react";
-import { redirect } from "next/navigation";
 
 import {
   getBookingsOperatorPageSession,
