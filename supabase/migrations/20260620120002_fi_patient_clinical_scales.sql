@@ -11,6 +11,11 @@ comment on column fi_patient_clinical_details.ludwig_scale is 'Ludwig classifica
 comment on column fi_patient_clinical_details.hairline_pattern is 'Observed hairline / loss distribution pattern (controlled vocabulary). Nullable.';
 comment on column fi_patient_clinical_details.primary_concern is 'Primary patient-stated clinical concern (bounded free text). Nullable.';
 
+alter table fi_patient_clinical_details drop constraint if exists fi_patient_clinical_details_norwood_scale_len;
+alter table fi_patient_clinical_details drop constraint if exists fi_patient_clinical_details_ludwig_scale_chk;
+alter table fi_patient_clinical_details drop constraint if exists fi_patient_clinical_details_hairline_pattern_chk;
+alter table fi_patient_clinical_details drop constraint if exists fi_patient_clinical_details_primary_concern_len;
+
 alter table fi_patient_clinical_details
   add constraint fi_patient_clinical_details_norwood_scale_len check (
     norwood_scale is null or char_length(norwood_scale) <= 16

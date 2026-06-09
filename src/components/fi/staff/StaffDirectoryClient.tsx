@@ -6,9 +6,19 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { createStaffAction, updateStaffAction } from "@/lib/actions/fi-staff-actions";
+import { StaffHrNotificationBadge, StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHrNotificationBadge";
+import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrollMetadataPanel";
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffWeeklyHoursEditor } from "@/src/components/fi/staff/StaffWeeklyHoursEditor";
 import type { StaffDirectoryPageResult } from "@/src/lib/staff/staffDirectoryLoader.server";
+import {
+  buildStaffDirectorySearchParams,
+  enrichStaffDirectoryRows,
+  filterStaffDirectoryRows,
+  type StaffDirectoryFilterState,
+} from "@/src/lib/staff/staffDirectoryFilters";
+import { mergeStaffWorkingHoursDocument, parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
+import { CLINICAL_STAFF_ROLE_OPTIONS, NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
 import {
   formatStaffWeeklyHoursSummary,
@@ -23,6 +33,8 @@ function emptyForm(): Record<string, string> {
   return {
     full_name: "",
     staff_role: "consultant",
+    position_title: "",
+    primary_clinic_id: "",
     email: "",
     mobile: "",
     default_timezone: "",
@@ -33,9 +45,12 @@ function emptyForm(): Record<string, string> {
 }
 
 function rowToForm(row: FiStaffRow): Record<string, string> {
+  const profile = parseStaffProfileExtras(row.working_hours);
   return {
     full_name: row.full_name,
     staff_role: row.staff_role,
+    position_title: profile.position_title ?? "",
+    primary_clinic_id: profile.primary_clinic_id ?? "",
     email: row.email ?? "",
     mobile: row.mobile ?? "",
     default_timezone: row.default_timezone ?? "",
@@ -49,13 +64,17 @@ export function StaffDirectoryClient({
   tenantId,
   data,
   showCrmNav,
+  initialFilters,
 }: {
   tenantId: string;
   data: StaffDirectoryPageResult;
   showCrmNav: boolean;
+  initialFilters: StaffDirectoryFilterState;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const base = `/fi-admin/${tenantId}`;
+  const [filters, setFilters] = useState<StaffDirectoryFilterState>(initialFilters);
   const [mode, setMode] = useState<Mode>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Record<string, string>>(emptyForm());
@@ -67,6 +86,30 @@ export function StaffDirectoryClient({
     () => (editingId ? data.staff.find((s) => s.id === editingId) ?? null : null),
     [editingId, data.staff]
   );
+
+  const enrichedRows = useMemo(
+    () => enrichStaffDirectoryRows(data.staff, data.payrollByStaffId, data.hrNotificationByStaffId),
+    [data.staff, data.payrollByStaffId, data.hrNotificationByStaffId]
+  );
+
+  const visibleRows = useMemo(() => filterStaffDirectoryRows(enrichedRows, filters), [enrichedRows, filters]);
+
+  const needsReviewCount = useMemo(() => enrichedRows.filter((r) => r.needsReview).length, [enrichedRows]);
+
+  const applyFilters = useCallback(
+    (next: StaffDirectoryFilterState) => {
+      setFilters(next);
+      const q = buildStaffDirectorySearchParams(next);
+      const qs = q.toString();
+      router.replace(qs ? `${base}/staff?${qs}` : `${base}/staff`, { scroll: false });
+    },
+    [base, router]
+  );
+
+  const editingPayroll = editingRow ? data.payrollByStaffId[editingRow.id] ?? null : null;
+  const editingHrNotification = editingRow
+    ? data.hrNotificationByStaffId[editingRow.id] ?? enrichedRows.find((r) => r.id === editingRow.id)?.hrNotification
+    : null;
 
   const canManage = data.canManageStaff;
   const viewerStaffId = data.viewerStaffId;
@@ -101,6 +144,15 @@ export function StaffDirectoryClient({
 
   const submit = () => {
     setError(null);
+    const weeklyDoc = serializeStaffWeeklyHours(weekly);
+    const working_hours = mergeStaffWorkingHoursDocument(
+      weeklyDoc,
+      {
+        position_title: form.position_title.trim() || null,
+        primary_clinic_id: form.primary_clinic_id.trim() || null,
+      },
+      mode === "edit" && editingRow ? editingRow.working_hours : null
+    );
     const body = {
       full_name: form.full_name.trim(),
       staff_role: form.staff_role.trim() || "consultant",
@@ -110,7 +162,7 @@ export function StaffDirectoryClient({
       calendar_color: form.calendar_color.trim() || null,
       fi_user_id: form.fi_user_id.trim() || null,
       is_active: form.is_active === "on",
-      working_hours: serializeStaffWeeklyHours(weekly),
+      working_hours,
     };
 
     startTransition(async () => {
@@ -155,6 +207,10 @@ export function StaffDirectoryClient({
                 <Link href={`${base}/hr/staff-import`} className="text-blue-600 hover:underline">
                   Staff import (HR)
                 </Link>
+                <span className="mx-2 text-gray-300">·</span>
+                <Link href={`${base}/hr/staff-import/payroll`} className="text-blue-600 hover:underline">
+                  Payroll import
+                </Link>
               </>
             ) : null}
             <span className="mx-2 text-gray-300">·</span>
@@ -188,6 +244,101 @@ export function StaffDirectoryClient({
         )}
       </header>
 
+      {needsReviewCount > 0 ? (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <p>
+            <strong>{needsReviewCount}</strong> staff member{needsReviewCount === 1 ? "" : "s"} still have role{" "}
+            <code className="rounded bg-amber-100 px-1 text-xs">needs_review</code> from payroll import. They appear in
+            the directory but cannot be assigned to clinical bookings until you assign a role.
+          </p>
+          {canManage ? (
+            <p className="mt-2">
+              <button
+                type="button"
+                className="font-medium text-amber-900 underline-offset-2 hover:underline"
+                onClick={() =>
+                  applyFilters({
+                    staffRole: NEEDS_REVIEW_STAFF_ROLE,
+                    payrollOnly: false,
+                    activeFilter: "all",
+                  })
+                }
+              >
+                Show role needs review
+              </button>
+              {" · "}
+              <Link href={`${base}/staff/role-review`} className="font-medium text-amber-900 underline-offset-2 hover:underline">
+                Assign roles workflow
+              </Link>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-gray-900">Filters</h2>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <label className="block text-xs font-medium text-gray-700">
+            Role
+            <select
+              className="mt-1 block rounded border border-gray-300 px-2 py-1.5 text-sm"
+              value={filters.staffRole ?? ""}
+              onChange={(e) =>
+                applyFilters({
+                  ...filters,
+                  staffRole: e.target.value.trim() || null,
+                })
+              }
+            >
+              <option value="">All roles</option>
+              <option value={NEEDS_REVIEW_STAFF_ROLE}>Role needs review</option>
+              {CLINICAL_STAFF_ROLE_OPTIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-800 pb-1.5">
+            <input
+              type="checkbox"
+              checked={filters.payrollOnly}
+              onChange={(e) => applyFilters({ ...filters, payrollOnly: e.target.checked })}
+            />
+            Payroll imported
+          </label>
+          <label className="block text-xs font-medium text-gray-700">
+            Status
+            <select
+              className="mt-1 block rounded border border-gray-300 px-2 py-1.5 text-sm"
+              value={filters.activeFilter}
+              onChange={(e) =>
+                applyFilters({
+                  ...filters,
+                  activeFilter: e.target.value as StaffDirectoryFilterState["activeFilter"],
+                })
+              }
+            >
+              <option value="all">Active + inactive</option>
+              <option value="active">Active only</option>
+              <option value="inactive">Inactive only</option>
+            </select>
+          </label>
+          <p className="text-xs text-gray-500 pb-1.5">
+            Showing {visibleRows.length} of {enrichedRows.length}
+            {filters.staffRole === NEEDS_REVIEW_STAFF_ROLE ? (
+              <>
+                {" "}
+                ·{" "}
+                <Link href={`${base}/staff/role-review`} className="text-blue-600 hover:underline">
+                  Open assign roles workflow
+                </Link>
+              </>
+            ) : null}
+          </p>
+        </div>
+      </section>
+
       {error ? (
         <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
           {error}
@@ -217,12 +368,46 @@ export function StaffDirectoryClient({
             </label>
             <label className="block text-xs font-medium text-gray-700">
               Role
-              <input
-                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+              <select
+                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm capitalize"
                 value={form.staff_role}
                 onChange={(e) => onField("staff_role", e.target.value)}
-                placeholder="surgeon, consultant, nurse…"
+              >
+                <option value={NEEDS_REVIEW_STAFF_ROLE}>needs review (payroll default)</option>
+                {CLINICAL_STAFF_ROLE_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+                {form.staff_role !== NEEDS_REVIEW_STAFF_ROLE &&
+                !CLINICAL_STAFF_ROLE_OPTIONS.includes(form.staff_role as (typeof CLINICAL_STAFF_ROLE_OPTIONS)[number]) ? (
+                  <option value={form.staff_role}>{form.staff_role}</option>
+                ) : null}
+              </select>
+            </label>
+            <label className="block text-xs font-medium text-gray-700">
+              Position / title
+              <input
+                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                value={form.position_title}
+                onChange={(e) => onField("position_title", e.target.value)}
+                placeholder="e.g. Senior nurse, Clinic coordinator"
               />
+            </label>
+            <label className="block text-xs font-medium text-gray-700">
+              Primary clinic
+              <select
+                className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                value={form.primary_clinic_id}
+                onChange={(e) => onField("primary_clinic_id", e.target.value)}
+              >
+                <option value="">— None —</option>
+                {data.clinics.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.display_name}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="block text-xs font-medium text-gray-700">
               Email
@@ -283,9 +468,19 @@ export function StaffDirectoryClient({
                 checked={form.is_active === "on"}
                 onChange={(e) => onField("is_active", e.target.checked ? "on" : "")}
               />
-              Active (inactive staff cannot be assigned to new bookings)
+              Active (inactive staff cannot be assigned to new bookings; needs_review staff cannot be clinical providers)
             </label>
           </div>
+          {mode === "edit" && editingHrNotification ? (
+            <div className="mt-4 rounded border border-gray-200 bg-gray-50 p-3">
+              <StaffHrNotificationDetailCard summary={editingHrNotification} variant="light" />
+            </div>
+          ) : null}
+          {mode === "edit" && editingPayroll ? (
+            <div className="mt-4">
+              <StaffPayrollMetadataPanel payroll={editingPayroll} variant="light" />
+            </div>
+          ) : null}
           <div className="mt-4 flex gap-2">
             <Button type="button" disabled={pending || !form.full_name.trim()} onClick={submit}>
               {pending ? "Saving…" : mode === "create" ? "Create" : "Save"}
@@ -332,7 +527,10 @@ export function StaffDirectoryClient({
                 Name
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
-                Role
+                Flags
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
+                HR
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500" scope="col">
                 Contact
@@ -364,13 +562,13 @@ export function StaffDirectoryClient({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {data.staff.length === 0 ? (
+            {visibleRows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7 + (canManage ? 1 : 0) + (showTwinLinks ? 1 : 0) + (canManage ? 1 : 0)}
+                  colSpan={9 + (canManage ? 1 : 0) + (showTwinLinks ? 1 : 0) + (canManage ? 1 : 0)}
                   className="px-3 py-8 text-center text-gray-600"
                 >
-                  <p>No staff rows yet.</p>
+                  <p>{enrichedRows.length === 0 ? "No staff rows yet." : "No staff match the current filters."}</p>
                   <p className="mt-2 text-sm">
                     {canManage ? "Use Add staff to create the directory, or run " : "Ask an admin to add staff, or see "}
                     <Link href={`${base}/calendar/testing`} className="text-blue-600 hover:underline">
@@ -381,8 +579,17 @@ export function StaffDirectoryClient({
                 </td>
               </tr>
             ) : (
-              data.staff.map((row) => (
-                <tr key={row.id} className={row.is_active ? "" : "bg-gray-50 text-gray-500"}>
+              visibleRows.map((row) => (
+                <tr
+                  key={row.id}
+                  className={
+                    row.needsReview
+                      ? "bg-amber-50/80"
+                      : row.is_active
+                        ? ""
+                        : "bg-gray-50 text-gray-500"
+                  }
+                >
                   <td className="px-3 py-2">
                     <span
                       className="inline-block h-4 w-4 rounded border border-gray-200"
@@ -390,8 +597,32 @@ export function StaffDirectoryClient({
                       title={row.calendar_color ?? ""}
                     />
                   </td>
-                  <td className="px-3 py-2 font-medium text-gray-900">{row.full_name}</td>
-                  <td className="px-3 py-2 capitalize text-gray-700">{row.staff_role}</td>
+                  <td className="px-3 py-2 font-medium text-gray-900">
+                    <div>{row.full_name}</div>
+                    <div className="mt-0.5 text-xs capitalize text-gray-600">{row.staff_role}</div>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-wrap gap-1">
+                      {row.needsReview ? (
+                        <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-900">
+                          Needs review
+                        </span>
+                      ) : null}
+                      {row.payrollImported ? (
+                        <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-sky-800">
+                          Payroll
+                        </span>
+                      ) : null}
+                      {!row.is_active ? (
+                        <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-semibold uppercase text-gray-700">
+                          Inactive
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2">
+                    <StaffHrNotificationBadge summary={row.hrNotification} compact />
+                  </td>
                   <td className="px-3 py-2 text-gray-700">
                     <div>{row.email ?? "—"}</div>
                     {row.mobile ? <div className="text-xs text-gray-500">{row.mobile}</div> : null}

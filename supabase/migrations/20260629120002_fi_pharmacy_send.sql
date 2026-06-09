@@ -107,6 +107,7 @@ alter table fi_prescription_status_events
 alter table fi_compound_pharmacies enable row level security;
 alter table fi_pharmacy_transmissions enable row level security;
 
+drop policy if exists fi_compound_pharmacies_select_tenant_member on fi_compound_pharmacies;
 create policy fi_compound_pharmacies_select_tenant_member
   on fi_compound_pharmacies for select to authenticated
   using (
@@ -117,6 +118,7 @@ create policy fi_compound_pharmacies_select_tenant_member
     )
   );
 
+drop policy if exists fi_pharmacy_transmissions_select_tenant_member on fi_pharmacy_transmissions;
 create policy fi_pharmacy_transmissions_select_tenant_member
   on fi_pharmacy_transmissions for select to authenticated
   using (

@@ -147,6 +147,7 @@ alter table fi_patient_prescriptions enable row level security;
 alter table fi_prescription_items enable row level security;
 alter table fi_prescription_status_events enable row level security;
 
+drop policy if exists fi_medication_catalogue_select_tenant_member on fi_medication_catalogue;
 create policy fi_medication_catalogue_select_tenant_member
   on fi_medication_catalogue for select to authenticated
   using (
@@ -157,6 +158,7 @@ create policy fi_medication_catalogue_select_tenant_member
     )
   );
 
+drop policy if exists fi_patient_prescriptions_select_tenant_member on fi_patient_prescriptions;
 create policy fi_patient_prescriptions_select_tenant_member
   on fi_patient_prescriptions for select to authenticated
   using (
@@ -167,6 +169,7 @@ create policy fi_patient_prescriptions_select_tenant_member
     )
   );
 
+drop policy if exists fi_prescription_items_select_tenant_member on fi_prescription_items;
 create policy fi_prescription_items_select_tenant_member
   on fi_prescription_items for select to authenticated
   using (
@@ -177,6 +180,7 @@ create policy fi_prescription_items_select_tenant_member
     )
   );
 
+drop policy if exists fi_prescription_status_events_select_tenant_member on fi_prescription_status_events;
 create policy fi_prescription_status_events_select_tenant_member
   on fi_prescription_status_events for select to authenticated
   using (

@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { pickHrPortalFromSourceIds } from "@/src/lib/staff/myHrPortalSelection";
+import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
+import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
 
@@ -20,6 +22,7 @@ export type MyHrPortalPageState =
       sourceSystem: string | null;
       hasHrLink: boolean;
       complianceSummary: StaffComplianceSummary;
+      hrNotification: StaffHrNotificationSummary;
     };
 
 export type MyHrPortalPageData = {
@@ -94,6 +97,15 @@ export async function loadMyHrPortalPage(tenantId: string): Promise<MyHrPortalPa
     })
   );
 
+  const hrNotification = pickStaffHrNotificationFromSourceRows(
+    rows.map((r) => {
+      const md = r.metadata;
+      const metadata =
+        md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : null;
+      return { source_system: r.source_system, source_url: r.source_url, metadata };
+    })
+  );
+
   return {
     tenantId: tid,
     state: {
@@ -105,6 +117,7 @@ export async function loadMyHrPortalPage(tenantId: string): Promise<MyHrPortalPa
       sourceSystem: picked.sourceSystem,
       hasHrLink: picked.hasHrLink,
       complianceSummary,
+      hrNotification,
     },
   };
 }

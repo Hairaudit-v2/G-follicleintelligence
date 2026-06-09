@@ -79,6 +79,7 @@ export type IiohrHrStaffImportAction =
         full_name: string;
         staff_role: string;
         email: string | null;
+        mobile?: string | null;
         default_timezone: string | null;
         working_hours: Record<string, unknown>;
         is_active: boolean;
@@ -94,6 +95,7 @@ export type IiohrHrStaffImportAction =
         full_name?: string;
         staff_role?: string;
         email?: string | null;
+        mobile?: string | null;
         default_timezone?: string | null;
         working_hours?: Record<string, unknown>;
         is_active?: boolean;

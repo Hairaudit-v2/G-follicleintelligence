@@ -378,7 +378,7 @@ async function updateFiStaffRow(
   if (error) throw new Error(error.message);
 }
 
-async function loadSnapshotsForPlan(tenantId: string): Promise<{
+export async function loadSnapshotsForPlan(tenantId: string): Promise<{
   existingUsers: { id: string; email: string | null; role: string | null }[];
   existingStaff: {
     id: string;
@@ -405,7 +405,7 @@ async function loadSnapshotsForPlan(tenantId: string): Promise<{
     supabase.from("fi_users").select("id, email, role").eq("tenant_id", tid),
     supabase
       .from("fi_staff")
-      .select("id, fi_user_id, full_name, staff_role, email, is_active, default_timezone, working_hours")
+      .select("id, fi_user_id, full_name, staff_role, email, mobile, is_active, default_timezone, working_hours")
       .eq("tenant_id", tid),
     supabase.from("fi_staff_source_ids").select("id, staff_id, source_system, source_staff_id, source_url, metadata").eq("tenant_id", tid),
   ]);
@@ -428,6 +428,7 @@ async function loadSnapshotsForPlan(tenantId: string): Promise<{
       full_name: String(x.full_name ?? ""),
       staff_role: String(x.staff_role ?? "consultant"),
       email: x.email != null ? String(x.email) : null,
+      mobile: x.mobile != null ? String(x.mobile) : null,
       is_active: Boolean(x.is_active),
       default_timezone: x.default_timezone != null ? String(x.default_timezone) : null,
       working_hours,
@@ -514,6 +515,7 @@ export async function applyIiohrHrStaffImportPlanForTests(
           full_name: p.full_name,
           staff_role: p.staff_role,
           email: p.email,
+          mobile: p.mobile,
           default_timezone: p.default_timezone,
           working_hours: p.working_hours,
           is_active: p.is_active,
@@ -585,7 +587,7 @@ export async function applyIiohrHrStaffImportPlanForTests(
   }
 }
 
-async function applyIiohrHrStaffImportPlan(
+export async function applyIiohrHrStaffImportPlan(
   tenantId: string,
   plan: IiohrHrStaffImportPlanResult,
   applied: IiohrHrStaffImportCounts

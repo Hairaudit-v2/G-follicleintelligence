@@ -49,6 +49,7 @@ import { attachSearchPattern, parseCrmLeadListQuery, type ParsedCrmLeadListQuery
 import { enrichCrmKanbanCards } from "./crmKanbanExtras.server";
 import { escapeIlikePattern } from "@/src/lib/fi/foundation/search";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
 
 export type { CrmShellLeadListItem, CrmShellLeadListPage } from "./types";
 
@@ -202,12 +203,13 @@ export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_staff")
-    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id, default_timezone, working_hours")
+    .select("id, full_name, staff_role, email, mobile, calendar_color, fi_user_id, default_timezone, working_hours, is_active")
     .eq("tenant_id", tenantId.trim())
     .eq("is_active", true)
     .order("full_name", { ascending: true });
   if (error) throw new Error(error.message);
-  return (data ?? []).map((raw) => {
+  return (data ?? [])
+    .map((raw) => {
     const r = raw as {
       id: string;
       full_name: string;
@@ -218,6 +220,7 @@ export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<
       fi_user_id: string | null;
       default_timezone: string | null;
       working_hours: Record<string, unknown> | null;
+      is_active: boolean;
     };
     const wh =
       r.working_hours && typeof r.working_hours === "object" && !Array.isArray(r.working_hours)
@@ -233,8 +236,10 @@ export async function loadCrmShellStaffPickerOptions(tenantId: string): Promise<
       fi_user_id: r.fi_user_id != null ? String(r.fi_user_id) : null,
       default_timezone: r.default_timezone != null ? String(r.default_timezone).trim() || null : null,
       working_hours: wh,
+      is_active: Boolean(r.is_active),
     };
-  });
+  })
+    .filter((s) => isStaffBookableForClinicalWorkflow({ is_active: s.is_active, staff_role: s.staff_role }));
 }
 
 export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<{

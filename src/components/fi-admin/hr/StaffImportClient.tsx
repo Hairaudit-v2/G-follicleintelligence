@@ -884,7 +884,11 @@ export function StaffImportClient({
         </DashboardCard>
       ) : null}
 
-      <p className="text-center text-sm text-[#64748B]">
+        <p className="text-center text-sm text-[#64748B]">
+        <Link href={`${base}/hr/staff-import/payroll`} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
+          Evolved payroll import (.xlsx)
+        </Link>
+        <span className="mx-2 text-[#475569]">·</span>
         <Link href={`${base}/staff`} className="text-[#94A3B8] underline-offset-2 hover:text-[#CBD5E1] hover:underline">
           Staff directory
         </Link>

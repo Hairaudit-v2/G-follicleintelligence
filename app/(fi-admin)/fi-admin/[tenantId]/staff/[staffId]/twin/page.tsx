@@ -4,9 +4,14 @@ import { unstable_noStore as noStore } from "next/cache";
 import { ExternalLink } from "lucide-react";
 
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
+import { StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHrNotificationBadge";
+import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrollMetadataPanel";
+import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffTwinIiohrComplianceCard } from "@/src/components/staff/staffComplianceReadOnly";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
+import { pickPayrollSourceDisplayFromRows } from "@/src/lib/staff/staffPayrollSourceDisplay";
+import { isStaffRoleNeedsReview } from "@/src/lib/staff/staffRolePolicy";
 import { loadStaffTwinPage } from "@/src/lib/staff/staffTwinLoader.server";
 
 export const metadata = {
@@ -41,6 +46,14 @@ export default async function StaffTwinPage({
     canManageStaffPin,
     pinMetadata,
   } = data;
+  const payroll = pickPayrollSourceDisplayFromRows(sourceIds);
+  const hrNotification = pickStaffHrNotificationFromSourceRows(
+    sourceIds.map((row) => ({
+      source_system: row.source_system,
+      source_url: row.source_url,
+      metadata: row.metadata,
+    }))
+  );
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -58,15 +71,22 @@ export default async function StaffTwinPage({
           <div>
             <h2 className="text-lg font-semibold text-[#F8FAFC]">Profile</h2>
             <p className="mt-1 text-sm text-[#94A3B8]">From <span className="font-mono text-xs text-[#64748B]">fi_staff</span></p>
+            <p className="mt-2 text-sm">
+            <Link href={`${base}/staff/role-review`} className="text-[#22C1FF] underline-offset-2 hover:underline">
+              Assign roles workflow
+            </Link>
+            </p>
           </div>
           <span
             className={
               staff.is_active
-                ? "rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200"
+                ? isStaffRoleNeedsReview(staff.staff_role)
+                  ? "rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-100"
+                  : "rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200"
                 : "rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-100"
             }
           >
-            {staff.is_active ? "Active" : "Inactive"}
+            {!staff.is_active ? "Inactive" : isStaffRoleNeedsReview(staff.staff_role) ? "Needs review" : "Active"}
           </span>
         </div>
         <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
@@ -100,7 +120,22 @@ export default async function StaffTwinPage({
             </dd>
           </div>
         </dl>
+        {isStaffRoleNeedsReview(staff.staff_role) ? (
+          <p className="mt-4 text-sm text-amber-100/90">
+            This profile cannot be used as a clinical booking assignee until a proper role is set in{" "}
+            <Link href={`${base}/staff?staff_role=needs_review`} className="underline-offset-2 hover:underline">
+              Staff directory
+            </Link>
+            .
+          </p>
+        ) : null}
       </DashboardCard>
+
+      {payroll ? (
+        <DashboardCard className="p-6 sm:p-8">
+          <StaffPayrollMetadataPanel payroll={payroll} variant="dark" />
+        </DashboardCard>
+      ) : null}
 
       <DashboardCard className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-[#F8FAFC]">FI login</h2>
@@ -183,6 +218,10 @@ export default async function StaffTwinPage({
           />
         </DashboardCard>
       ) : null}
+
+      <DashboardCard className="p-6 sm:p-8">
+        <StaffHrNotificationDetailCard summary={hrNotification} variant="dark" />
+      </DashboardCard>
 
       <DashboardCard className="p-6 sm:p-8">
         <StaffTwinIiohrComplianceCard summary={complianceSummary} />

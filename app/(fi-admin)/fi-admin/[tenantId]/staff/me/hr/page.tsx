@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DashboardCard, InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHrNotificationBadge";
 import { MyHrTrainingComplianceCompactCard } from "@/src/components/staff/staffComplianceReadOnly";
 import { loadMyHrPortalPage } from "@/src/lib/staff/myHrPortalLoader.server";
 
@@ -91,6 +92,9 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
           <InfoNotice variant="warning" title="HR portal not linked" className="mt-6">
             <p>Your HR portal has not been linked yet. Please contact administration.</p>
           </InfoNotice>
+          <div className="mt-6 border-t border-white/[0.08] pt-6">
+            <StaffHrNotificationDetailCard summary={state.hrNotification} variant="dark" />
+          </div>
           <MyHrTrainingComplianceCompactCard summary={state.complianceSummary} />
           <p className="mt-6 text-center">
             <Button variant="outline" asChild className="border-white/15 bg-white/[0.04] text-[#E2E8F0] hover:bg-white/[0.08]">
@@ -130,6 +134,9 @@ export default async function MyHrPortalPage({ params }: { params: Promise<{ ten
             </a>
           </div>
           <p className="mt-4 text-xs text-[#64748B]">Opens in a new tab on your organisation&apos;s HR system (not embedded).</p>
+          <div className="mt-6 border-t border-white/[0.08] pt-6">
+            <StaffHrNotificationDetailCard summary={state.hrNotification} variant="dark" />
+          </div>
           <MyHrTrainingComplianceCompactCard summary={state.complianceSummary} />
         </DashboardCard>
       ) : null}

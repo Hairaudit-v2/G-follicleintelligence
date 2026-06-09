@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { AppointmentStaffHoursError } from "@/src/lib/bookings/bookingErrors";
 import {
@@ -59,6 +60,11 @@ export async function assertStaffAppointmentWithinWorkingHours(
   if (!staff.is_active) {
     throw new AppointmentStaffHoursError(
       `${staff.full_name} is inactive and cannot be assigned to appointments. Choose another clinician or reactivate them in Staff settings.`
+    );
+  }
+  if (!isStaffBookableForClinicalWorkflow(staff)) {
+    throw new AppointmentStaffHoursError(
+      `${staff.full_name} still has role “needs review”. Assign a clinical role in Staff before booking them.`
     );
   }
 
