@@ -2,6 +2,10 @@
 
 import { create } from "zustand";
 
+import {
+  mergeCalendarBookingDisplayOnHydrate,
+  mergeCalendarBookingsOnHydrate,
+} from "@/lib/calendar/calendarAppointmentsMerge";
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 import {
   bookingDurationMinutesUtc,
@@ -70,12 +74,18 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
     if (current.pendingIds.size > 0) {
       return;
     }
+    const mergedBookings = mergeCalendarBookingsOnHydrate(bookings, current.bookings);
+    const mergedDisplay = mergeCalendarBookingDisplayOnHydrate(
+      bookingDisplay,
+      current.bookingDisplay,
+      mergedBookings
+    );
     set({
       tenantId,
       syncKey,
       calendarTimezone,
-      bookings,
-      bookingDisplay,
+      bookings: mergedBookings,
+      bookingDisplay: mergedDisplay,
       pendingIds: new Set(),
     });
   },
