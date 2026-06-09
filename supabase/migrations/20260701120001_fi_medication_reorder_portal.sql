@@ -112,6 +112,7 @@ create trigger trg_fi_med_reorder_set_updated_at
 
 alter table fi_medication_reorder_requests enable row level security;
 
+drop policy if exists fi_medication_reorder_requests_select_tenant_member on fi_medication_reorder_requests;
 create policy fi_medication_reorder_requests_select_tenant_member
   on fi_medication_reorder_requests for select to authenticated
   using (

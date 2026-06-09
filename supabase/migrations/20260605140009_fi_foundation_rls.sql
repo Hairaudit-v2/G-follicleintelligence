@@ -18,6 +18,7 @@ alter table fi_media_assets enable row level security;
 -- use fi_cases from API routes; adding RLS without full INSERT/UPDATE policies would be breaking.
 
 -- ---------- fi_organisations ----------
+drop policy if exists fi_organisations_select_tenant_member on fi_organisations;
 create policy fi_organisations_select_tenant_member
   on fi_organisations for select to authenticated
   using (
@@ -29,6 +30,7 @@ create policy fi_organisations_select_tenant_member
   );
 
 -- ---------- fi_clinics ----------
+drop policy if exists fi_clinics_select_tenant_member on fi_clinics;
 create policy fi_clinics_select_tenant_member
   on fi_clinics for select to authenticated
   using (
@@ -40,6 +42,7 @@ create policy fi_clinics_select_tenant_member
   );
 
 -- ---------- fi_clinic_source_ids ----------
+drop policy if exists fi_clinic_source_ids_select_tenant_member on fi_clinic_source_ids;
 create policy fi_clinic_source_ids_select_tenant_member
   on fi_clinic_source_ids for select to authenticated
   using (
@@ -51,6 +54,7 @@ create policy fi_clinic_source_ids_select_tenant_member
   );
 
 -- ---------- fi_persons ----------
+drop policy if exists fi_persons_select_tenant_member on fi_persons;
 create policy fi_persons_select_tenant_member
   on fi_persons for select to authenticated
   using (
@@ -62,6 +66,7 @@ create policy fi_persons_select_tenant_member
   );
 
 -- ---------- fi_person_source_ids ----------
+drop policy if exists fi_person_source_ids_select_tenant_member on fi_person_source_ids;
 create policy fi_person_source_ids_select_tenant_member
   on fi_person_source_ids for select to authenticated
   using (
@@ -73,6 +78,7 @@ create policy fi_person_source_ids_select_tenant_member
   );
 
 -- ---------- fi_person_roles ----------
+drop policy if exists fi_person_roles_select_tenant_member on fi_person_roles;
 create policy fi_person_roles_select_tenant_member
   on fi_person_roles for select to authenticated
   using (
@@ -84,6 +90,7 @@ create policy fi_person_roles_select_tenant_member
   );
 
 -- ---------- fi_patients ----------
+drop policy if exists fi_patients_select_tenant_member on fi_patients;
 create policy fi_patients_select_tenant_member
   on fi_patients for select to authenticated
   using (
@@ -95,6 +102,7 @@ create policy fi_patients_select_tenant_member
   );
 
 -- ---------- fi_patient_source_ids ----------
+drop policy if exists fi_patient_source_ids_select_tenant_member on fi_patient_source_ids;
 create policy fi_patient_source_ids_select_tenant_member
   on fi_patient_source_ids for select to authenticated
   using (
@@ -106,6 +114,7 @@ create policy fi_patient_source_ids_select_tenant_member
   );
 
 -- ---------- fi_timeline_events ----------
+drop policy if exists fi_timeline_events_select_tenant_member on fi_timeline_events;
 create policy fi_timeline_events_select_tenant_member
   on fi_timeline_events for select to authenticated
   using (
@@ -117,6 +126,7 @@ create policy fi_timeline_events_select_tenant_member
   );
 
 -- ---------- fi_media_assets ----------
+drop policy if exists fi_media_assets_select_tenant_member on fi_media_assets;
 create policy fi_media_assets_select_tenant_member
   on fi_media_assets for select to authenticated
   using (

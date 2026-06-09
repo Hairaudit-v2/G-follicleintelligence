@@ -99,6 +99,7 @@ create trigger trg_fi_clinical_notes_set_updated_at
 -- ---------------------------------------------------------------------------
 alter table fi_clinical_notes enable row level security;
 
+drop policy if exists fi_clinical_notes_select_tenant_member on fi_clinical_notes;
 create policy fi_clinical_notes_select_tenant_member
   on fi_clinical_notes for select to authenticated
   using (
@@ -111,6 +112,7 @@ create policy fi_clinical_notes_select_tenant_member
 
 alter table fi_patient_timeline_events enable row level security;
 
+drop policy if exists fi_patient_timeline_events_select_tenant_member on fi_patient_timeline_events;
 create policy fi_patient_timeline_events_select_tenant_member
   on fi_patient_timeline_events for select to authenticated
   using (

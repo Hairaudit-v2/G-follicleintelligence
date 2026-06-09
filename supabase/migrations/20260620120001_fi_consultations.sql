@@ -88,6 +88,7 @@ create trigger trg_fi_consultations_set_updated_at
 -- ---------------------------------------------------------------------------
 alter table fi_consultations enable row level security;
 
+drop policy if exists fi_consultations_select_tenant_member on fi_consultations;
 create policy fi_consultations_select_tenant_member
   on fi_consultations for select to authenticated
   using (

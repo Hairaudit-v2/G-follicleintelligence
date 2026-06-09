@@ -50,6 +50,7 @@ create unique index if not exists idx_fi_services_tenant_booking_type_unique
 
 alter table fi_services enable row level security;
 
+drop policy if exists fi_services_select_tenant_member on fi_services;
 create policy fi_services_select_tenant_member
   on fi_services for select to authenticated
   using (

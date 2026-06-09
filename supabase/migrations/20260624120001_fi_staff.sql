@@ -40,6 +40,7 @@ comment on column fi_bookings.assigned_staff_id is
 
 alter table fi_staff enable row level security;
 
+drop policy if exists fi_staff_select_tenant_member on fi_staff;
 create policy fi_staff_select_tenant_member
   on fi_staff for select to authenticated
   using (

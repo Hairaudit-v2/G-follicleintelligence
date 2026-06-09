@@ -59,6 +59,7 @@ create index if not exists idx_fi_reminder_templates_tenant_active on fi_reminde
 
 alter table fi_reminder_templates enable row level security;
 
+drop policy if exists fi_reminder_templates_select_tenant_member on fi_reminder_templates;
 create policy fi_reminder_templates_select_tenant_member
   on fi_reminder_templates for select to authenticated
   using (
@@ -116,6 +117,7 @@ create index if not exists idx_fi_reminder_jobs_booking on fi_reminder_jobs (ten
 
 alter table fi_reminder_jobs enable row level security;
 
+drop policy if exists fi_reminder_jobs_select_tenant_member on fi_reminder_jobs;
 create policy fi_reminder_jobs_select_tenant_member
   on fi_reminder_jobs for select to authenticated
   using (

@@ -74,6 +74,7 @@ create index if not exists idx_fi_patient_images_tenant_created on fi_patient_im
 
 alter table fi_patient_images enable row level security;
 
+drop policy if exists fi_patient_images_select_tenant_member on fi_patient_images;
 create policy fi_patient_images_select_tenant_member on fi_patient_images for select to authenticated using (
   exists (
     select 1

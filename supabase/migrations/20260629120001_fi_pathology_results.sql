@@ -89,6 +89,7 @@ create trigger trg_fi_pathology_results_set_updated_at
 alter table fi_pathology_results enable row level security;
 alter table fi_pathology_result_items enable row level security;
 
+drop policy if exists fi_pathology_results_select_tenant_member on fi_pathology_results;
 create policy fi_pathology_results_select_tenant_member
   on fi_pathology_results for select to authenticated
   using (
@@ -99,6 +100,7 @@ create policy fi_pathology_results_select_tenant_member
     )
   );
 
+drop policy if exists fi_pathology_result_items_select_tenant_member on fi_pathology_result_items;
 create policy fi_pathology_result_items_select_tenant_member
   on fi_pathology_result_items for select to authenticated
   using (

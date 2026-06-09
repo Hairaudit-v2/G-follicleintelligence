@@ -40,6 +40,7 @@ create unique index if not exists idx_fi_tax_loc_tenant_clinic_unique
 
 alter table fi_tax_localisation_settings enable row level security;
 
+drop policy if exists fi_tax_loc_settings_select_tenant_member on fi_tax_localisation_settings;
 create policy fi_tax_loc_settings_select_tenant_member
   on fi_tax_localisation_settings for select to authenticated
   using (

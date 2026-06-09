@@ -75,6 +75,7 @@ create index if not exists idx_fi_bookings_tenant_clinic on fi_bookings (tenant_
 
 alter table fi_bookings enable row level security;
 
+drop policy if exists fi_bookings_select_tenant_member on fi_bookings;
 create policy fi_bookings_select_tenant_member
   on fi_bookings for select to authenticated
   using (

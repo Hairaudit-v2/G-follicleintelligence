@@ -67,6 +67,7 @@ create index if not exists idx_fi_crm_lead_comm_external_thread
 
 alter table fi_crm_lead_communications enable row level security;
 
+drop policy if exists fi_crm_lead_communications_select_tenant_member on fi_crm_lead_communications;
 create policy fi_crm_lead_communications_select_tenant_member
   on fi_crm_lead_communications for select to authenticated
   using (

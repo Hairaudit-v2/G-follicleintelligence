@@ -27,6 +27,7 @@ create index if not exists idx_fi_staff_source_ids_staff on fi_staff_source_ids 
 
 alter table fi_staff_source_ids enable row level security;
 
+drop policy if exists fi_staff_source_ids_select_tenant_member on fi_staff_source_ids;
 create policy fi_staff_source_ids_select_tenant_member
   on fi_staff_source_ids for select to authenticated
   using (

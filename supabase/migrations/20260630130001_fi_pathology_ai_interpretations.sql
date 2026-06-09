@@ -66,6 +66,7 @@ create trigger trg_fi_pathology_ai_interpretations_set_updated_at
 
 alter table fi_pathology_ai_interpretations enable row level security;
 
+drop policy if exists fi_pathology_ai_interpretations_select_tenant_member on fi_pathology_ai_interpretations;
 create policy fi_pathology_ai_interpretations_select_tenant_member
   on fi_pathology_ai_interpretations for select to authenticated
   using (

@@ -26,6 +26,7 @@ alter table fi_crm_quotes enable row level security;
 alter table fi_crm_lead_source_ids enable row level security;
 
 -- ---------- fi_crm_pipeline_stages ----------
+drop policy if exists fi_crm_pipeline_stages_select_tenant_member on fi_crm_pipeline_stages;
 create policy fi_crm_pipeline_stages_select_tenant_member
   on fi_crm_pipeline_stages for select to authenticated
   using (
@@ -37,6 +38,7 @@ create policy fi_crm_pipeline_stages_select_tenant_member
   );
 
 -- ---------- fi_crm_leads ----------
+drop policy if exists fi_crm_leads_select_tenant_member on fi_crm_leads;
 create policy fi_crm_leads_select_tenant_member
   on fi_crm_leads for select to authenticated
   using (
@@ -48,6 +50,7 @@ create policy fi_crm_leads_select_tenant_member
   );
 
 -- ---------- fi_crm_lead_stage_history ----------
+drop policy if exists fi_crm_lead_stage_history_select_tenant_member on fi_crm_lead_stage_history;
 create policy fi_crm_lead_stage_history_select_tenant_member
   on fi_crm_lead_stage_history for select to authenticated
   using (
@@ -59,6 +62,7 @@ create policy fi_crm_lead_stage_history_select_tenant_member
   );
 
 -- ---------- fi_crm_activity_events ----------
+drop policy if exists fi_crm_activity_events_select_tenant_member on fi_crm_activity_events;
 create policy fi_crm_activity_events_select_tenant_member
   on fi_crm_activity_events for select to authenticated
   using (
@@ -70,6 +74,7 @@ create policy fi_crm_activity_events_select_tenant_member
   );
 
 -- ---------- fi_crm_tasks ----------
+drop policy if exists fi_crm_tasks_select_tenant_member on fi_crm_tasks;
 create policy fi_crm_tasks_select_tenant_member
   on fi_crm_tasks for select to authenticated
   using (
@@ -81,6 +86,7 @@ create policy fi_crm_tasks_select_tenant_member
   );
 
 -- ---------- fi_crm_notes ----------
+drop policy if exists fi_crm_notes_select_tenant_member on fi_crm_notes;
 create policy fi_crm_notes_select_tenant_member
   on fi_crm_notes for select to authenticated
   using (
@@ -92,6 +98,7 @@ create policy fi_crm_notes_select_tenant_member
   );
 
 -- ---------- fi_crm_messages ----------
+drop policy if exists fi_crm_messages_select_tenant_member on fi_crm_messages;
 create policy fi_crm_messages_select_tenant_member
   on fi_crm_messages for select to authenticated
   using (
@@ -103,6 +110,7 @@ create policy fi_crm_messages_select_tenant_member
   );
 
 -- ---------- fi_crm_quote_templates ----------
+drop policy if exists fi_crm_quote_templates_select_tenant_member on fi_crm_quote_templates;
 create policy fi_crm_quote_templates_select_tenant_member
   on fi_crm_quote_templates for select to authenticated
   using (
@@ -114,6 +122,7 @@ create policy fi_crm_quote_templates_select_tenant_member
   );
 
 -- ---------- fi_crm_quotes ----------
+drop policy if exists fi_crm_quotes_select_tenant_member on fi_crm_quotes;
 create policy fi_crm_quotes_select_tenant_member
   on fi_crm_quotes for select to authenticated
   using (
@@ -125,6 +134,7 @@ create policy fi_crm_quotes_select_tenant_member
   );
 
 -- ---------- fi_crm_lead_source_ids ----------
+drop policy if exists fi_crm_lead_source_ids_select_tenant_member on fi_crm_lead_source_ids;
 create policy fi_crm_lead_source_ids_select_tenant_member
   on fi_crm_lead_source_ids for select to authenticated
   using (

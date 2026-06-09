@@ -69,6 +69,7 @@ create index if not exists idx_fi_patient_clinical_details_tenant_updated
 
 alter table fi_patient_clinical_details enable row level security;
 
+drop policy if exists fi_patient_clinical_details_select_tenant_member on fi_patient_clinical_details;
 create policy fi_patient_clinical_details_select_tenant_member
   on fi_patient_clinical_details for select to authenticated
   using (

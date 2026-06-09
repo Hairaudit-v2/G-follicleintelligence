@@ -82,6 +82,7 @@ alter table fi_tenant_settings enable row level security;
 alter table fi_organisation_settings enable row level security;
 alter table fi_clinic_settings enable row level security;
 
+drop policy if exists fi_tenant_settings_select_tenant_member on fi_tenant_settings;
 create policy fi_tenant_settings_select_tenant_member
   on fi_tenant_settings for select to authenticated
   using (
@@ -92,6 +93,7 @@ create policy fi_tenant_settings_select_tenant_member
     )
   );
 
+drop policy if exists fi_organisation_settings_select_tenant_member on fi_organisation_settings;
 create policy fi_organisation_settings_select_tenant_member
   on fi_organisation_settings for select to authenticated
   using (
@@ -102,6 +104,7 @@ create policy fi_organisation_settings_select_tenant_member
     )
   );
 
+drop policy if exists fi_clinic_settings_select_tenant_member on fi_clinic_settings;
 create policy fi_clinic_settings_select_tenant_member
   on fi_clinic_settings for select to authenticated
   using (

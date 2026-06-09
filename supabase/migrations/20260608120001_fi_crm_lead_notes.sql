@@ -27,6 +27,7 @@ create index if not exists idx_fi_crm_lead_notes_tenant_lead_created on fi_crm_l
 
 alter table fi_crm_lead_notes enable row level security;
 
+drop policy if exists fi_crm_lead_notes_select_tenant_member on fi_crm_lead_notes;
 create policy fi_crm_lead_notes_select_tenant_member
   on fi_crm_lead_notes for select to authenticated
   using (

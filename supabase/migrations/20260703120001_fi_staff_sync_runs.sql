@@ -29,6 +29,7 @@ create index if not exists idx_fi_staff_sync_runs_status on fi_staff_sync_runs (
 
 alter table fi_staff_sync_runs enable row level security;
 
+drop policy if exists fi_staff_sync_runs_select_tenant_member on fi_staff_sync_runs;
 create policy fi_staff_sync_runs_select_tenant_member
   on fi_staff_sync_runs for select to authenticated
   using (

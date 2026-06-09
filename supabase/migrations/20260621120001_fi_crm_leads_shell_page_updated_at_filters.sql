@@ -151,7 +151,9 @@ begin
 end;
 $$;
 
-comment on function public.fi_crm_leads_shell_page is
+comment on function public.fi_crm_leads_shell_page(
+  uuid, uuid, text, text, uuid, text, text, int, int, timestamptz, timestamptz
+) is
   'CRM Stage 2F: paginated lead list for one tenant with filters, ILIKE search, safe sort options, and optional updated_at range.';
 
 revoke all on function public.fi_crm_leads_shell_page(
