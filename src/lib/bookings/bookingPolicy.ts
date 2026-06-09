@@ -83,15 +83,20 @@ export function assertMetadataJsonObject(metadata: unknown): asserts metadata is
   }
 }
 
-/** When a lead is not yet converted, only consultation bookings may target that lead. */
+/**
+ * When a lead is not yet converted, only consultation bookings may target that lead alone.
+ * Receptionist quick-book flows that also anchor `patient_id` may schedule any procedure type.
+ */
 export function assertBookingTypeAllowedForLeadConversion(opts: {
   bookingType: string;
   leadId: string | null | undefined;
   leadConverted: boolean;
+  patientId?: string | null | undefined;
 }): void {
   assertAllowedBookingType(opts.bookingType);
   if (!nonEmpty(opts.leadId)) return;
   if (opts.leadConverted) return;
+  if (nonEmpty(opts.patientId)) return;
   if (opts.bookingType.trim() !== "consultation") {
     throw new Error("Only consultation bookings are allowed before the lead is converted.");
   }

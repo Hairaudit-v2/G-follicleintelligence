@@ -55,7 +55,14 @@ export {
   type ParsedCrmLeadListQuery,
 } from "./crmLeadListQuery";
 export { leadTitleFromRow, personMetadataDisplayLabel } from "./crmLeadListDisplay";
-export { CRM_MUTATION_ROLES_LOWER, CRM_SHELL_NAV_ROLES_LOWER, isCrmMutationRole, isCrmShellNavRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+export {
+  CRM_MUTATION_ROLES_LOWER,
+  CRM_SHELL_NAV_ROLES_LOWER,
+  canMutateClinicFromOperatorContext,
+  isCrmMutationRole,
+  isCrmShellNavRole,
+  isFiAdminApiKeyMatch,
+} from "./crmGatePolicy";
 export {
   CRM_LEAD_DETAIL_PRIORITY_VALUES,
   CRM_LEAD_DETAIL_STATUS_VALUES,

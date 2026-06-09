@@ -20,6 +20,7 @@ export default async function CrmShellLayout({ children, params }: CrmShellLayou
         tenantId={tenantId}
         operatorFiUserId={session.fiUserId}
         userRole={session.role}
+        canUseClinicFeatures={session.canUseClinicFeatures}
       >
         {children}
       </CrmLeadSlideOverProvider>

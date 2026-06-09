@@ -20,6 +20,7 @@ export function OperationalCalendarPage({
       tenantId={data.tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
+      canUseClinicFeatures={session.canUseClinicFeatures}
       assignees={data.staffDirectory}
       clinics={data.clinics}
       existingBookings={data.bookings}

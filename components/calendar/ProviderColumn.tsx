@@ -312,6 +312,8 @@ export type ProviderColumnProps = {
   pinnedAppointmentId?: string | null;
   /** Booking ids awaiting PATCH after optimistic reschedule. */
   pendingAppointmentIds?: ReadonlySet<string> | null;
+  /** Emphasise a booking after quick-create save. */
+  highlightedBookingId?: string | null;
   /** Click empty grid area to book (e.g. quick call-in modal). */
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
   /** Right-click empty grid — quick actions menu (e.g. templates + block). */
@@ -342,6 +344,7 @@ export function ProviderColumn({
   viewportRange,
   pinnedAppointmentId,
   pendingAppointmentIds,
+  highlightedBookingId,
   onEmptySlotClick,
   onEmptySlotContextMenu,
   bodyHeightPx: bodyHeightPxProp,
@@ -474,6 +477,7 @@ export function ProviderColumn({
                     touchFriendly={touchFriendly}
                     animateEntry
                     isPendingSave={isPendingSave}
+                    isHighlighted={highlightedBookingId === booking.id}
                     calendarTimezone={gridConfig.timeZone}
                     onResizeEnd={
                       onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined

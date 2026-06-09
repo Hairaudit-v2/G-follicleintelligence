@@ -64,6 +64,7 @@ export default async function CrmLeadShellPage({
       tenantId={tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
+      canUseClinicFeatures={session.canUseClinicFeatures}
       assignees={payload.detail.staffDirectory}
       clinics={payload.detail.clinics}
       existingBookings={payload.detail.leadBookings}

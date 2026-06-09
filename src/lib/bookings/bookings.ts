@@ -214,10 +214,12 @@ async function assertAnchorsTenantConsistent(
   }
 
   if (lead && !leadConverted(lead)) {
-    if (anchors.patientId?.trim() || anchors.caseId?.trim()) {
-      throw new Error("patientId and caseId must be omitted before the lead is converted.");
+    if (anchors.caseId?.trim()) {
+      throw new Error("caseId must be omitted before the lead is converted.");
     }
-    if (anchors.personId?.trim() && anchors.personId.trim() !== lead.person_id) {
+    const leadPerson = lead.person_id?.trim() || null;
+    const gotPerson = anchors.personId?.trim() || null;
+    if (gotPerson && leadPerson && gotPerson !== leadPerson) {
       throw new Error("personId must match the lead's person or be omitted.");
     }
   }
@@ -556,6 +558,7 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
     bookingType: params.bookingType,
     leadId: params.leadId,
     leadConverted: lead ? leadConverted(lead) : false,
+    patientId: params.patientId,
   });
 
   await assertAnchorsTenantConsistent(
@@ -774,6 +777,7 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
     bookingType: next.booking_type,
     leadId: next.lead_id,
     leadConverted: lead ? leadConverted(lead) : false,
+    patientId: next.patient_id,
   });
 
   await assertAnchorsTenantConsistent(

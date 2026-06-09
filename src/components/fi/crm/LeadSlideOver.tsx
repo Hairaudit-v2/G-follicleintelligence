@@ -18,7 +18,7 @@ import {
   CRM_LEAD_DETAIL_STATUS_VALUES,
 } from "@/src/lib/crm/crmLeadDetailsPolicy";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
-import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import type { CrmLeadShellSlideOverPayload } from "@/src/lib/crm/crmShellLoaders";
 import {
   LeadActivityFeed,
@@ -35,6 +35,7 @@ export type CrmShellOperatorContext = {
   tenantId: string;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
 };
 
 type SlideOverCtx = CrmShellOperatorContext & {
@@ -60,11 +61,13 @@ export function CrmLeadSlideOverProvider({
   tenantId,
   operatorFiUserId,
   userRole,
+  canUseClinicFeatures,
   children,
 }: {
   tenantId: string;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
   children: ReactNode;
 }) {
   const [leadId, setLeadId] = useState<string | null>(null);
@@ -72,8 +75,8 @@ export function CrmLeadSlideOverProvider({
   const close = useCallback(() => setLeadId(null), []);
 
   const value = useMemo(
-    () => ({ tenantId, operatorFiUserId, userRole, activeLeadId: leadId, openLead, close }),
-    [tenantId, operatorFiUserId, userRole, leadId, openLead, close]
+    () => ({ tenantId, operatorFiUserId, userRole, canUseClinicFeatures, activeLeadId: leadId, openLead, close }),
+    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, leadId, openLead, close]
   );
 
   return (
@@ -86,6 +89,7 @@ export function CrmLeadSlideOverProvider({
         onClose={close}
         operatorFiUserId={operatorFiUserId}
         userRole={userRole}
+        canUseClinicFeatures={canUseClinicFeatures}
       />
     </CrmLeadSlideOverContext.Provider>
   );
@@ -99,6 +103,7 @@ export function LeadSlideOverPanel({
   onClose,
   operatorFiUserId,
   userRole,
+  canUseClinicFeatures,
 }: {
   tenantId: string;
   leadId: string | null;
@@ -106,9 +111,10 @@ export function LeadSlideOverPanel({
   onClose: () => void;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
 }) {
   const router = useRouter();
-  const canMutate = isCrmMutationRole(userRole);
+  const canMutate = canMutateClinicFromOperatorContext({ userRole, canUseClinicFeatures });
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [payload, setPayload] = useState<CrmLeadShellSlideOverPayload | null>(null);

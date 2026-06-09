@@ -13,7 +13,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadPipelineStages } from "@/src/lib/crm/pipeline";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 
@@ -589,9 +589,10 @@ export async function loadTenantOperationalDashboard(
   const supabase = supabaseAdmin();
 
   const authUserId = await resolveAuthUserId(null);
+  const clinicAccess = await resolveDevelopmentClinicAccessForTenant(tid, authUserId);
   const viewer = await loadFiUserDashboard(tid, authUserId);
-  const viewerFiUserId = viewer?.id ?? null;
-  const canQuickCallIn = isCrmMutationRole(viewer?.role);
+  const viewerFiUserId = clinicAccess.fiUserId ?? viewer?.id ?? null;
+  const canQuickCallIn = clinicAccess.allowed;
 
   let viewerStaffId: string | null = null;
   if (viewerFiUserId) {

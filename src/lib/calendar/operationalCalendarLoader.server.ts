@@ -23,8 +23,8 @@ export type {
   OperationalCalendarPageData,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
-import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
-import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
+import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellStaffPickerOptions, loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { staffOptionPrimaryLabel, staffOptionSubtitle } from "@/src/lib/staff/staffAssigneeDisplay";
@@ -286,47 +286,43 @@ function anchorLabelForRow(
   return row.title?.trim() || humanizeBookingType(row.booking_type);
 }
 
+function staffHasConfiguredHours(staffDirectory: CrmShellUserPickerOption[]): boolean {
+  for (const s of staffDirectory) {
+    const summary = formatStaffWeeklyHoursSummary(parseStaffWeeklyHours(s.working_hours ?? undefined)).trim();
+    if (summary) return true;
+  }
+  return false;
+}
+
+function buildSetupRecommendations(input: {
+  servicesCount: number;
+  staffDirectory: CrmShellUserPickerOption[];
+  timezoneConfigured: boolean;
+}): string[] {
+  const out: string[] = [];
+  if (input.servicesCount === 0) {
+    out.push("Add services in Settings for procedure colours and catalog defaults.");
+  }
+  if (input.staffDirectory.length === 0) {
+    out.push("Add staff members so appointments can be assigned to provider columns.");
+  } else if (!staffHasConfiguredHours(input.staffDirectory)) {
+    out.push("Configure staff working hours for availability guidance (bookings still save).");
+  }
+  if (!input.timezoneConfigured) {
+    out.push("Set the clinic timezone in tenant settings for accurate slot times.");
+  }
+  return out;
+}
+
 async function resolveBookingMutationGate(tenantId: string): Promise<{
   canMutateBookings: boolean;
   bookingMutationBlockedReason: string | null;
 }> {
-  const tid = tenantId.trim();
-  const authUserId = await resolveAuthUserId(null);
-  if (!authUserId?.trim()) {
-    return {
-      canMutateBookings: false,
-      bookingMutationBlockedReason:
-        "Sign in to create or move appointments. The calendar is view-only until you are authenticated.",
-    };
-  }
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_users")
-    .select("role")
-    .eq("tenant_id", tid)
-    .eq("auth_user_id", authUserId.trim())
-    .maybeSingle();
-  if (error) {
-    return {
-      canMutateBookings: false,
-      bookingMutationBlockedReason: "Could not verify your tenant membership for calendar edits.",
-    };
-  }
-  if (!data) {
-    return {
-      canMutateBookings: false,
-      bookingMutationBlockedReason: "You are not a member of this tenant, so the calendar is read-only.",
-    };
-  }
-  const role = (data as { role: string | null }).role;
-  if (!isCrmMutationRole(role)) {
-    return {
-      canMutateBookings: false,
-      bookingMutationBlockedReason:
-        "Your role can view the calendar but not create or move bookings. Ask a tenant admin to grant admin, fi_admin, or crm_operator access.",
-    };
-  }
-  return { canMutateBookings: true, bookingMutationBlockedReason: null };
+  const access = await resolveDevelopmentClinicAccessForTenant(tenantId);
+  return {
+    canMutateBookings: access.allowed,
+    bookingMutationBlockedReason: access.blockedReason,
+  };
 }
 
 /**
@@ -447,6 +443,12 @@ export async function loadOperationalCalendarPageData(
 
   const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
 
+  const setupRecommendations = buildSetupRecommendations({
+    servicesCount: services.length,
+    staffDirectory: resources.staffDirectory,
+    timezoneConfigured: calendarSettings.timezoneConfigured,
+  });
+
   return {
     tenantId: tid,
     query,
@@ -468,5 +470,6 @@ export async function loadOperationalCalendarPageData(
     bookingMutationBlockedReason,
     reminderJobsByBookingId,
     services,
+    setupRecommendations,
   };
 }

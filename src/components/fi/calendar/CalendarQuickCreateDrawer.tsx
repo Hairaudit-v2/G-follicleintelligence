@@ -30,15 +30,6 @@ import {
 } from "@/src/components/fi-design/fiDesignTokens";
 import { cn } from "@/lib/utils";
 
-/** FI OS: primary appointment types (consultation, PRP, surgery, follow-up, block). */
-const FI_OS_PRIMARY_TEMPLATE_IDS: CalendarQuickTemplateId[] = [
-  "consultation_30",
-  "prp_treatment_30",
-  "surgery_default",
-  "follow_up_15",
-  "block_time",
-];
-
 function useDebouncedValue<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -46,10 +37,6 @@ function useDebouncedValue<T>(value: T, ms: number): T {
     return () => window.clearTimeout(t);
   }, [value, ms]);
   return debounced;
-}
-
-function addMinutesToIso(startIso: string, minutes: number): string {
-  return addUtcMinutesToIso(startIso, minutes);
 }
 
 export type CalendarQuickCreatePrefill = {
@@ -63,9 +50,7 @@ export type CalendarQuickCreatePrefill = {
 
 type AnchorSelection =
   | { kind: "patient"; hit: ConsultationLinkSearchPatientHit }
-  | { kind: "lead"; hit: ConsultationLinkSearchLeadHit }
-  | { kind: "new_lead" }
-  | { kind: "block" };
+  | { kind: "lead"; hit: ConsultationLinkSearchLeadHit };
 
 function columnResourceDefaults(columnId?: string): {
   clinicId: string;
@@ -95,9 +80,9 @@ export function CalendarQuickCreateDrawer({
   clinics,
   assignees,
   staffDirectory,
+  setupRecommendations = [],
   onCreated,
   workflowVariant = "default",
-  canMutateBookings = true,
 }: {
   tenantId: string;
   open: boolean;
@@ -107,22 +92,23 @@ export function CalendarQuickCreateDrawer({
   clinics: CrmShellClinicOption[];
   assignees: CrmShellUserPickerOption[];
   staffDirectory: CrmShellUserPickerOption[];
-  onCreated: (booking: FiBookingRow) => void;
-  /** FI OS: condensed type row + collapsible time/location. */
+  setupRecommendations?: string[];
+  onCreated: (booking: FiBookingRow, displayLabel: string) => void;
   workflowVariant?: "default" | "fiOs";
-  /** Mirrors server gate — logged in development with each save attempt. */
-  canMutateBookings?: boolean;
 }) {
   const toast = useCalendarToastOptional();
   const titleId = useId();
   const tz = calendarTimezone.trim();
   const tzLabel = displayCalendarTimezoneSubtitle(tz);
 
-  const [templateId, setTemplateId] = useState<CalendarQuickTemplateId>("consultation_30");
+  const [templateId, setTemplateId] = useState<CalendarQuickTemplateId>("consultation");
   const [startLocal, setStartLocal] = useState("");
   const [endLocal, setEndLocal] = useState("");
   const [clinicId, setClinicId] = useState("");
   const [assigneeSelect, setAssigneeSelect] = useState("");
+  const [patientName, setPatientName] = useState("");
+  const [patientMobile, setPatientMobile] = useState("");
+  const [patientEmail, setPatientEmail] = useState("");
   const [patientQuery, setPatientQuery] = useState("");
   const debouncedPatientQ = useDebouncedValue(patientQuery.trim(), 320);
   const [patientLoading, setPatientLoading] = useState(false);
@@ -130,9 +116,6 @@ export function CalendarQuickCreateDrawer({
   const [patientHits, setPatientHits] = useState<ConsultationLinkSearchPatientHit[]>([]);
   const [leadHits, setLeadHits] = useState<ConsultationLinkSearchLeadHit[]>([]);
   const [selection, setSelection] = useState<AnchorSelection | null>(null);
-  const [newLeadName, setNewLeadName] = useState("");
-  const [newLeadPhone, setNewLeadPhone] = useState("");
-  const [newLeadEmail, setNewLeadEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [formErr, setFormErr] = useState<string | null>(null);
 
@@ -143,18 +126,16 @@ export function CalendarQuickCreateDrawer({
     setClinicId(colDefaults.clinicId || clinicFromFilter || "");
     setAssigneeSelect(colDefaults.assigneeSelect);
     const tpl = prefill.templateId ? calendarQuickTemplateById(prefill.templateId) : null;
-    const nextTpl = tpl?.id ?? "consultation_30";
+    const nextTpl = tpl?.id ?? "consultation";
     setTemplateId(nextTpl);
     const start = prefill.localStart.trim();
     setStartLocal(start);
     const startIso = fromDatetimeLocalValueInTimezone(start, tz);
     const t = calendarQuickTemplateById(nextTpl);
     let endIso: string | null = null;
-    if (t?.isBlock) {
-      endIso = startIso ? addMinutesToIso(startIso, t.durationMinutes) : null;
-    } else if (startIso && t) {
+    if (startIso && t) {
       try {
-        endIso = addMinutesToIso(startIso, t.durationMinutes);
+        endIso = addUtcMinutesToIso(startIso, t.durationMinutes);
       } catch {
         endIso = null;
       }
@@ -164,13 +145,13 @@ export function CalendarQuickCreateDrawer({
     } else {
       setEndLocal("");
     }
+    setPatientName("");
+    setPatientMobile("");
+    setPatientEmail("");
     setPatientQuery("");
     setPatientHits([]);
     setLeadHits([]);
-    setSelection(t?.isBlock ? { kind: "block" } : null);
-    setNewLeadName("");
-    setNewLeadPhone("");
-    setNewLeadEmail("");
+    setSelection(null);
     setFormErr(null);
     logFiCalendarTimezoneDebug("quick-create-drawer-prefill", {
       clinicTimezone: tz,
@@ -228,15 +209,10 @@ export function CalendarQuickCreateDrawer({
   const onTemplateChange = useCallback(
     (id: CalendarQuickTemplateId) => {
       setTemplateId(id);
-      const t = calendarQuickTemplateById(id);
-      setSelection((prev) => {
-        if (t?.isBlock) return { kind: "block" };
-        if (prev?.kind === "block") return null;
-        return prev;
-      });
       const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
+      const t = calendarQuickTemplateById(id);
       if (!startIso || !t) return;
-      const endIso = addMinutesToIso(startIso, t.durationMinutes);
+      const endIso = addUtcMinutesToIso(startIso, t.durationMinutes);
       setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     },
     [startLocal, tz]
@@ -248,7 +224,7 @@ export function CalendarQuickCreateDrawer({
       const tpl = calendarQuickTemplateById(templateId);
       const startIso = fromDatetimeLocalValueInTimezone(nextStart, tz);
       if (!startIso || !tpl) return;
-      const endIso = addMinutesToIso(startIso, tpl.durationMinutes);
+      const endIso = addUtcMinutesToIso(startIso, tpl.durationMinutes);
       setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     },
     [templateId, tz]
@@ -261,7 +237,7 @@ export function CalendarQuickCreateDrawer({
       if (!sid) continue;
       rows.push({
         value: `s:${sid}`,
-        label: (s.email?.trim() || s.id.slice(0, 8)) + " (staff)",
+        label: (s.email?.trim() || s.full_name?.trim() || s.id.slice(0, 8)) + " (staff)",
       });
     }
     for (const u of assignees) {
@@ -273,15 +249,6 @@ export function CalendarQuickCreateDrawer({
   }, [assignees, staffDirectory]);
 
   const isFiOsFlow = workflowVariant === "fiOs";
-
-  const fiOsPrimaryTemplates = useMemo(() => {
-    const out: NonNullable<ReturnType<typeof calendarQuickTemplateById>>[] = [];
-    for (const id of FI_OS_PRIMARY_TEMPLATE_IDS) {
-      const t = calendarQuickTemplateById(id);
-      if (t) out.push(t);
-    }
-    return out;
-  }, []);
 
   const scheduleSummary = useMemo(() => {
     if (!startLocal || !endLocal) return "Time, clinic & provider — tap to adjust";
@@ -303,12 +270,39 @@ export function CalendarQuickCreateDrawer({
     return { assignedStaffId: "", assignedUserId: "" };
   }, []);
 
+  const clearExistingSelection = useCallback(() => {
+    setSelection(null);
+    setPatientQuery("");
+    setPatientHits([]);
+    setLeadHits([]);
+  }, []);
+
+  const selectPatientHit = useCallback((hit: ConsultationLinkSearchPatientHit) => {
+    setSelection({ kind: "patient", hit });
+    setPatientName(hit.name);
+    setPatientMobile(hit.phone?.trim() ?? "");
+    setPatientEmail("");
+    setPatientQuery("");
+    setPatientHits([]);
+    setLeadHits([]);
+  }, []);
+
+  const selectLeadHit = useCallback((hit: ConsultationLinkSearchLeadHit) => {
+    setSelection({ kind: "lead", hit });
+    setPatientName(hit.name);
+    setPatientMobile("");
+    setPatientEmail("");
+    setPatientQuery("");
+    setPatientHits([]);
+    setLeadHits([]);
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormErr(null);
     const tpl = calendarQuickTemplateById(templateId);
     if (!tpl) {
-      setFormErr("Pick a valid template.");
+      setFormErr("Pick an appointment type.");
       return;
     }
     const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
@@ -324,60 +318,31 @@ export function CalendarQuickCreateDrawer({
       return;
     }
 
-    logFiCalendarTimezoneDebug("quick-create-submit", {
-      clinicTimezone: tz,
-      startLocal,
-      endLocal,
-      startUtcIso: startIso,
-      endUtcIso: endIso,
-      renderedStartDisplay: formatClinicTime(startIso, tz),
-    });
+    const displayName = patientName.trim();
+    if (!displayName) {
+      setFormErr("Patient name is required.");
+      return;
+    }
 
     let anchor:
       | { kind: "lead"; leadId: string }
       | { kind: "patient"; patientId: string; personId: string }
-      | { kind: "new_lead"; displayName: string; phone: string; email?: string }
-      | { kind: "block" };
+      | { kind: "new_lead"; displayName: string; phone?: string; email?: string };
 
-    if (tpl.isBlock) {
-      anchor = { kind: "block" };
-    } else if (selection?.kind === "patient") {
+    if (selection?.kind === "patient") {
       anchor = { kind: "patient", patientId: selection.hit.id, personId: selection.hit.person_id };
     } else if (selection?.kind === "lead") {
       anchor = { kind: "lead", leadId: selection.hit.id };
-    } else if (selection?.kind === "new_lead" || (newLeadName.trim() && newLeadPhone.trim())) {
-      const nm = newLeadName.trim();
-      const ph = newLeadPhone.trim();
-      if (!nm || !ph) {
-        setFormErr("Enter name and phone to create a lead, or select an existing patient or lead.");
-        return;
-      }
+    } else {
       anchor = {
         kind: "new_lead",
-        displayName: nm,
-        phone: ph,
-        email: newLeadEmail.trim() || undefined,
+        displayName,
+        phone: patientMobile.trim() || undefined,
+        email: patientEmail.trim() || undefined,
       };
-    } else {
-      setFormErr("Select a patient or lead, create a new lead, or choose Block time.");
-      return;
     }
 
     const { assignedStaffId, assignedUserId } = parseAssigneeSelect(assigneeSelect);
-
-    if (process.env.NODE_ENV === "development") {
-      console.debug("[CalendarQuickCreate] submit", {
-        tenantId: tenantId.trim(),
-        clinicId: clinicId.trim() || null,
-        columnId: prefill?.columnId ?? null,
-        selectedTemplate: tpl.id,
-        patientId: anchor.kind === "patient" ? anchor.patientId : null,
-        leadId: anchor.kind === "lead" ? anchor.leadId : null,
-        assigned_staff_id: assignedStaffId.trim() || null,
-        assigned_user_id: assignedUserId.trim() || null,
-        canMutateBookings,
-      });
-    }
 
     setBusy(true);
     try {
@@ -397,16 +362,6 @@ export function CalendarQuickCreateDrawer({
       if (!r.ok) {
         setFormErr(r.error);
         toast?.error(r.error);
-        if (process.env.NODE_ENV === "development") {
-          console.error("[CalendarQuickCreate] server action returned error", {
-            tenantId: tenantId.trim(),
-            clinicId: clinicId.trim() || null,
-            columnId: prefill?.columnId ?? null,
-            templateId: tpl.id,
-            error: r.error,
-            canMutateBookings,
-          });
-        }
         return;
       }
       logFiCalendarTimezoneDebug("quick-create-booking-returned", {
@@ -415,23 +370,13 @@ export function CalendarQuickCreateDrawer({
         loadedEndAt: r.booking.end_at,
         renderedStartDisplay: formatClinicTime(r.booking.start_at, tz),
       });
-      toast?.success("Appointment created.");
-      onCreated(r.booking);
+      toast?.success("Appointment saved.");
+      onCreated(r.booking, displayName);
       onClose();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Unexpected error while saving.";
       setFormErr(msg);
       toast?.error(msg);
-      if (process.env.NODE_ENV === "development") {
-        console.error("[CalendarQuickCreate] submit threw", {
-          tenantId: tenantId.trim(),
-          clinicId: clinicId.trim() || null,
-          columnId: prefill?.columnId ?? null,
-          templateId: tpl.id,
-          canMutateBookings,
-          err: e,
-        });
-      }
     } finally {
       setBusy(false);
     }
@@ -459,12 +404,9 @@ export function CalendarQuickCreateDrawer({
           <div className={cn(os.root, "min-w-0")}>
             <p className={os.eyebrow}>Scheduling</p>
             <h2 id={titleId} className={cn(os.title, "text-lg sm:text-xl")}>
-              {isFiOsFlow ? "Quick book" : "Quick create appointment"}
+              Quick book
             </h2>
-            <p className={os.description}>
-              {isFiOsFlow ? "Prefilled from the slot and calendar filters. " : null}
-              Times use {tzLabel}.
-            </p>
+            <p className={os.description}>Times use {tzLabel}.</p>
           </div>
           <button
             type="button"
@@ -478,99 +420,185 @@ export function CalendarQuickCreateDrawer({
 
         <form onSubmit={(e) => void onSubmit(e)} className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-5">
           <div className="space-y-4">
+            {setupRecommendations.length > 0 ? (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-950/25 px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-200/90">Setup recommendation</p>
+                <ul className="mt-1.5 list-inside list-disc space-y-0.5 text-xs leading-snug text-amber-100/90">
+                  {setupRecommendations.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
             <div>
-              <p className={cn(os.eyebrow, "mb-2")}>{isFiOsFlow ? "Appointment type" : "Template"}</p>
-              <div className="flex flex-wrap gap-2">
-                {(isFiOsFlow ? fiOsPrimaryTemplates : CALENDAR_QUICK_TEMPLATES).map((t) => (
+              <p className={cn(os.eyebrow, "mb-2")}>Patient details</p>
+              <div className="grid gap-2">
+                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                  Name <span className="text-rose-300">*</span>
+                  <input
+                    className={inputClass}
+                    value={patientName}
+                    onChange={(e) => {
+                      setPatientName(e.target.value);
+                      clearExistingSelection();
+                    }}
+                    placeholder="Full name"
+                    required
+                    autoComplete="name"
+                  />
+                </label>
+                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                  Mobile
+                  <input
+                    className={inputClass}
+                    value={patientMobile}
+                    onChange={(e) => {
+                      setPatientMobile(e.target.value);
+                      clearExistingSelection();
+                    }}
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="Optional"
+                  />
+                </label>
+                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                  Email
+                  <input
+                    type="email"
+                    className={inputClass}
+                    value={patientEmail}
+                    onChange={(e) => {
+                      setPatientEmail(e.target.value);
+                      clearExistingSelection();
+                    }}
+                    autoComplete="email"
+                    placeholder="Optional"
+                  />
+                </label>
+              </div>
+              <p className="mt-2 text-[11px] text-slate-500">
+                {selection
+                  ? `Linked to existing ${selection.kind}. Clear the name field and search below to change.`
+                  : "A new patient record is created automatically when you save with a name and no match selected."}
+              </p>
+            </div>
+
+            <details className="rounded-xl border border-white/[0.1] bg-slate-950/25">
+              <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-slate-200 [&::-webkit-details-marker]:hidden">
+                Find existing patient or lead
+              </summary>
+              <div className="space-y-2 border-t border-white/[0.08] px-3 pb-3 pt-2">
+                <input
+                  className={inputClass}
+                  value={patientQuery}
+                  onChange={(e) => setPatientQuery(e.target.value)}
+                  placeholder="Search name, phone, or email…"
+                  autoComplete="off"
+                />
+                {patientLoading ? <p className="text-xs text-slate-500">Searching…</p> : null}
+                {patientErr ? <p className="text-xs text-rose-300">{patientErr}</p> : null}
+                {patientHits.length > 0 ? (
+                  <ul className="max-h-28 space-y-1 overflow-y-auto rounded-lg border border-white/[0.08] bg-slate-950/40 p-1">
+                    {patientHits.map((h) => (
+                      <li key={h.id}>
+                        <button
+                          type="button"
+                          className={cn(
+                            "w-full rounded-md px-2 py-1.5 text-left text-xs transition",
+                            selection?.kind === "patient" && selection.hit.id === h.id
+                              ? "bg-sky-500/20 text-sky-50"
+                              : "text-slate-200 hover:bg-white/[0.05]"
+                          )}
+                          onClick={() => selectPatientHit(h)}
+                        >
+                          <span className="font-medium">{h.name}</span>
+                          {h.phone ? <span className="ml-1 text-slate-500">{h.phone}</span> : null}
+                          <span className="block text-[10px] text-slate-500">Patient</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {leadHits.length > 0 ? (
+                  <ul className="max-h-24 space-y-1 overflow-y-auto rounded-lg border border-white/[0.08] bg-slate-950/40 p-1">
+                    {leadHits.map((h) => (
+                      <li key={h.id}>
+                        <button
+                          type="button"
+                          className={cn(
+                            "w-full rounded-md px-2 py-1.5 text-left text-xs transition",
+                            selection?.kind === "lead" && selection.hit.id === h.id
+                              ? "bg-sky-500/20 text-sky-50"
+                              : "text-slate-200 hover:bg-white/[0.05]"
+                          )}
+                          onClick={() => selectLeadHit(h)}
+                        >
+                          <span className="font-medium">{h.name}</span>
+                          <span className="ml-1 text-slate-500">{h.stageLabel}</span>
+                          <span className="block text-[10px] text-slate-500">Lead</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            </details>
+
+            <div>
+              <p className={cn(os.eyebrow, "mb-2")}>Appointment type</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+                {CALENDAR_QUICK_TEMPLATES.map((t) => (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => onTemplateChange(t.id)}
                     className={cn(
-                      "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition",
+                      "rounded-xl border px-3 py-3 text-left text-sm font-semibold transition",
                       templateId === t.id
-                        ? "border-[#22C1FF]/50 bg-sky-500/15 text-sky-100"
-                        : "border-white/[0.1] bg-slate-950/30 text-slate-300 hover:border-white/20"
+                        ? "border-[#22C1FF]/50 bg-sky-500/15 text-sky-50 shadow-sm shadow-cyan-950/30"
+                        : "border-white/[0.1] bg-slate-950/30 text-slate-200 hover:border-white/20"
                     )}
                   >
                     {t.label}
-                    <span className="ml-1 tabular-nums text-slate-500">({t.durationMinutes}m)</span>
+                    <span className="mt-0.5 block text-xs font-normal tabular-nums text-slate-400">{t.durationMinutes} min</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {isFiOsFlow ? (
-              <details className="rounded-xl border border-white/[0.1] bg-slate-950/25 open:border-cyan-500/25">
-                <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-slate-200 [&::-webkit-details-marker]:hidden">
-                  <span className="text-slate-500">Time & place · </span>
-                  {scheduleSummary}
-                </summary>
-                <div className="space-y-3 border-t border-white/[0.08] px-3 pb-3 pt-2">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
-                      Start
-                      <input
-                        type="datetime-local"
-                        className={inputClass}
-                        value={startLocal}
-                        onChange={(e) => onStartChange(e.target.value)}
-                        required
-                      />
-                    </label>
-                    <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
-                      End
-                      <input
-                        type="datetime-local"
-                        className={inputClass}
-                        value={endLocal}
-                        onChange={(e) => setEndLocal(e.target.value)}
-                        required
-                      />
-                    </label>
-                  </div>
-
-                  {clinics.length > 0 ? (
-                    <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                      Clinic
-                      <select className={inputClass} value={clinicId} onChange={(e) => setClinicId(e.target.value)}>
-                        <option value="">—</option>
-                        {clinics.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.display_name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
-
-                  {assigneeOptions.length > 1 ? (
-                    <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                      Provider / resource
-                      <select className={inputClass} value={assigneeSelect} onChange={(e) => setAssigneeSelect(e.target.value)}>
-                        {assigneeOptions.map((o) => (
-                          <option key={o.value || "none"} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
-                </div>
-              </details>
-            ) : (
-              <>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
-                    Start
-                    <input type="datetime-local" className={inputClass} value={startLocal} onChange={(e) => onStartChange(e.target.value)} required />
-                  </label>
-                  <label className={cn("block text-xs font-medium text-slate-300 sm:col-span-2", os.meta)}>
-                    End
-                    <input type="datetime-local" className={inputClass} value={endLocal} onChange={(e) => setEndLocal(e.target.value)} required />
-                  </label>
-                </div>
-
+            <details
+              className={cn(
+                "rounded-xl border border-white/[0.1] bg-slate-950/25",
+                isFiOsFlow && "open:border-cyan-500/25"
+              )}
+              open={!isFiOsFlow}
+            >
+              <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-slate-200 [&::-webkit-details-marker]:hidden">
+                <span className="text-slate-500">Time & place · </span>
+                {scheduleSummary}
+              </summary>
+              <div className="space-y-3 border-t border-white/[0.08] px-3 pb-3 pt-2">
+                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                  Start
+                  <input
+                    type="datetime-local"
+                    className={inputClass}
+                    value={startLocal}
+                    onChange={(e) => onStartChange(e.target.value)}
+                    required
+                  />
+                </label>
+                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                  End
+                  <input
+                    type="datetime-local"
+                    className={inputClass}
+                    value={endLocal}
+                    onChange={(e) => setEndLocal(e.target.value)}
+                    required
+                  />
+                </label>
                 {clinics.length > 0 ? (
                   <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
                     Clinic
@@ -584,7 +612,6 @@ export function CalendarQuickCreateDrawer({
                     </select>
                   </label>
                 ) : null}
-
                 {assigneeOptions.length > 1 ? (
                   <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
                     Provider / resource
@@ -597,128 +624,8 @@ export function CalendarQuickCreateDrawer({
                     </select>
                   </label>
                 ) : null}
-              </>
-            )}
-
-            {calendarQuickTemplateById(templateId)?.isBlock ? (
-              <p className="rounded-lg border border-sky-500/25 bg-sky-950/30 px-3 py-2 text-xs text-sky-100">
-                Block time uses an internal calendar hold (no patient). You can adjust the window above.
-              </p>
-            ) : (
-              <>
-                <div>
-                  <p className={cn(os.eyebrow, "mb-1")}>Patient or lead</p>
-                  <p className="mb-2 text-xs text-slate-500">Search by name, phone, or email — or create a new lead below.</p>
-                  <input
-                    className={inputClass}
-                    value={patientQuery}
-                    onChange={(e) => setPatientQuery(e.target.value)}
-                    placeholder="Search…"
-                    autoComplete="off"
-                  />
-                  {patientLoading ? <p className="mt-1 text-xs text-slate-500">Searching…</p> : null}
-                  {patientErr ? <p className="mt-1 text-xs text-rose-300">{patientErr}</p> : null}
-                  {patientHits.length > 0 ? (
-                    <ul className="mt-2 max-h-36 space-y-1 overflow-y-auto rounded-lg border border-white/[0.08] bg-slate-950/40 p-1">
-                      {patientHits.map((h) => (
-                        <li key={h.id}>
-                          <button
-                            type="button"
-                            className={cn(
-                              "w-full rounded-md px-2 py-1.5 text-left text-xs transition",
-                              selection?.kind === "patient" && selection.hit.id === h.id
-                                ? "bg-sky-500/20 text-sky-50"
-                                : "text-slate-200 hover:bg-white/[0.05]"
-                            )}
-                            onClick={() => {
-                              setNewLeadName("");
-                              setNewLeadPhone("");
-                              setNewLeadEmail("");
-                              setSelection({ kind: "patient", hit: h });
-                            }}
-                          >
-                            <span className="font-medium">{h.name}</span>
-                            {h.phone ? <span className="ml-1 text-slate-500">{h.phone}</span> : null}
-                            <span className="block text-[10px] text-slate-500">Patient</span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {leadHits.length > 0 ? (
-                    <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto rounded-lg border border-white/[0.08] bg-slate-950/40 p-1">
-                      {leadHits.map((h) => (
-                        <li key={h.id}>
-                          <button
-                            type="button"
-                            className={cn(
-                              "w-full rounded-md px-2 py-1.5 text-left text-xs transition",
-                              selection?.kind === "lead" && selection.hit.id === h.id
-                                ? "bg-sky-500/20 text-sky-50"
-                                : "text-slate-200 hover:bg-white/[0.05]"
-                            )}
-                            onClick={() => {
-                              setNewLeadName("");
-                              setNewLeadPhone("");
-                              setNewLeadEmail("");
-                              setSelection({ kind: "lead", hit: h });
-                            }}
-                          >
-                            <span className="font-medium">{h.name}</span>
-                            <span className="ml-1 text-slate-500">{h.stageLabel}</span>
-                            <span className="block text-[10px] text-slate-500">Lead</span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-
-                <div className="rounded-xl border border-white/[0.08] bg-slate-950/35 p-3">
-                  <p className={cn(os.eyebrow, "mb-2")}>New lead</p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <label className={cn("block text-xs text-slate-300 sm:col-span-2", os.meta)}>
-                      Name
-                      <input
-                        className={inputClass}
-                        value={newLeadName}
-                        onChange={(e) => {
-                          setNewLeadName(e.target.value);
-                          setSelection({ kind: "new_lead" });
-                        }}
-                        placeholder="Full name"
-                      />
-                    </label>
-                    <label className={cn("block text-xs text-slate-300", os.meta)}>
-                      Phone
-                      <input
-                        className={inputClass}
-                        value={newLeadPhone}
-                        onChange={(e) => {
-                          setNewLeadPhone(e.target.value);
-                          setSelection({ kind: "new_lead" });
-                        }}
-                        inputMode="tel"
-                        autoComplete="tel"
-                      />
-                    </label>
-                    <label className={cn("block text-xs text-slate-300", os.meta)}>
-                      Email
-                      <input
-                        type="email"
-                        className={inputClass}
-                        value={newLeadEmail}
-                        onChange={(e) => {
-                          setNewLeadEmail(e.target.value);
-                          setSelection({ kind: "new_lead" });
-                        }}
-                        autoComplete="email"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </>
-            )}
+              </div>
+            </details>
 
             {formErr ? <p className="text-sm text-rose-300">{formErr}</p> : null}
           </div>
@@ -733,7 +640,7 @@ export function CalendarQuickCreateDrawer({
               Cancel
             </button>
             <button type="submit" className={fiButtonVariantClassNames.osPrimary} disabled={busy}>
-              {busy ? "Saving…" : "Save appointment"}
+              {busy ? "Saving…" : "Save"}
             </button>
           </div>
         </form>

@@ -29,11 +29,13 @@ export default async function PatientsShellLayout({ children, params }: Patients
       tenantId={tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
+      canUseClinicFeatures={session.canUseClinicFeatures}
     >
       <AppointmentSlideOverProvider
         tenantId={tenantId}
         operatorFiUserId={session.fiUserId}
         userRole={session.role}
+        canUseClinicFeatures={session.canUseClinicFeatures}
         assignees={assignees}
         clinics={scope.clinics}
         existingBookings={[]}

@@ -24,7 +24,10 @@ import { BookingEditDrawer } from "@/src/components/fi/bookings/operator/Booking
 import { QuickCallInBookingModal } from "@/src/components/fi/appointments/QuickCallInBookingModal";
 import { CalendarQuickCreateDrawer, type CalendarQuickCreatePrefill } from "@/src/components/fi/calendar/CalendarQuickCreateDrawer";
 import { CalendarSlotContextMenu } from "@/src/components/fi/calendar/CalendarSlotContextMenu";
-import type { CalendarQuickTemplateId } from "@/src/lib/calendar/calendarQuickCreateTemplates";
+import {
+  calendarQuickTemplateById,
+  type CalendarQuickTemplateId,
+} from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { useCalendarAppointments } from "@/hooks/useCalendarAppointments";
 import { cn } from "@/lib/utils";
@@ -79,6 +82,7 @@ export function CalendarPage({
   } | null>(null);
   const [fiOsAgendaOpen, setFiOsAgendaOpen] = useState(false);
   const [fiOsInsightsOpen, setFiOsInsightsOpen] = useState(false);
+  const [highlightedBookingId, setHighlightedBookingId] = useState<string | null>(null);
   const slide = useAppointmentSlideOverOptional();
 
   const sampleMode = Boolean(useSampleData || data.query.sampleMode);
@@ -97,17 +101,18 @@ export function CalendarPage({
     return undefined;
   }, [data.query.staffId, data.query.assignedUserId, data.query.clinicId]);
 
-  const quickCallInEnabled = Boolean(data.canMutateBookings && crmShellSession);
-  /**
-   * FI OS shell: quick-create from slots without a CRM shell session.
-   * Dashboard portal: same tenant booking rights, no CRM chrome required.
-   * Legacy FI Admin (non-OS) calendar: keep quick-create behind CRM shell when present.
-   */
-  const quickCreateEnabled = Boolean(
-    data.canMutateBookings &&
-      (workspaceVariant === "fiOs" || route === "dashboard" || crmShellSession)
+  const quickCallInEnabled = Boolean(
+    data.canMutateBookings && crmShellSession && (crmShellSession.canUseClinicFeatures ?? true)
   );
+  /** Any user who can mutate bookings server-side can open quick-create from slots. */
+  const quickCreateEnabled = data.canMutateBookings;
   const isFiOsWorkspace = workspaceVariant === "fiOs";
+
+  useEffect(() => {
+    if (!highlightedBookingId) return;
+    const t = window.setTimeout(() => setHighlightedBookingId(null), 6000);
+    return () => window.clearTimeout(t);
+  }, [highlightedBookingId]);
 
   const dismissFiOsCalendarDrawers = useCallback(() => {
     setFiOsAgendaOpen(false);
@@ -148,7 +153,7 @@ export function CalendarPage({
           localStart,
           ...(quickCreateColumnIdFromFilters ? { columnId: quickCreateColumnIdFromFilters } : {}),
         },
-        "consultation_30"
+        "consultation"
       );
     },
     [data.gridConfig, openQuickCreateFromSlot, quickCreateColumnIdFromFilters]
@@ -157,7 +162,7 @@ export function CalendarPage({
   const quickCreateFabPrefill = useMemo(
     () => ({
       localStart: slotPrefillLocal,
-      templateId: "consultation_30" as const,
+      templateId: "consultation" as const,
       defaultClinicId: data.query.clinicId?.trim() || undefined,
       columnId: quickCreateColumnIdFromFilters,
     }),
@@ -305,9 +310,7 @@ export function CalendarPage({
                 calendarRoute={route}
                 calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                 fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
-                onEmptyDayQuickCreate={
-                  quickCreateEnabled && isFiOsWorkspace ? openQuickCreateFromMonthEmptyDay : undefined
-                }
+                onEmptyDayQuickCreate={quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined}
               />
             </motion.div>
           ) : (
@@ -338,11 +341,9 @@ export function CalendarPage({
                   query: data.query,
                   addAppointmentHref: `${base}/bookings/new`,
                 }}
+                highlightedBookingId={highlightedBookingId}
                 onEmptySlotClick={
-                  quickCreateEnabled
-                    ? (info) =>
-                        openQuickCreateFromSlot(info, isFiOsWorkspace ? "consultation_30" : undefined)
-                    : undefined
+                  quickCreateEnabled ? (info) => openQuickCreateFromSlot(info, "consultation") : undefined
                 }
                 onEmptySlotContextMenu={
                   quickCreateEnabled
@@ -370,130 +371,15 @@ export function CalendarPage({
           x={slotContextMenu.x}
           y={slotContextMenu.y}
           onClose={() => setSlotContextMenu(null)}
-          items={
-            isFiOsWorkspace
-              ? [
-                  {
-                    id: "consult",
-                    label: "Consultation",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "consultation_30"
-                      ),
-                  },
-                  {
-                    id: "prp",
-                    label: "PRP",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "prp_treatment_30"
-                      ),
-                  },
-                  {
-                    id: "surg",
-                    label: "Surgery",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "surgery_default"
-                      ),
-                  },
-                  {
-                    id: "follow",
-                    label: "Follow-up",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "follow_up_15"
-                      ),
-                  },
-                  {
-                    id: "block",
-                    label: "Block time",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "block_time"
-                      ),
-                  },
-                ]
-              : [
-                  {
-                    id: "consult",
-                    label: "New Consultation",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "consultation_30"
-                      ),
-                  },
-                  {
-                    id: "treat",
-                    label: "New Treatment",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "prp_treatment_30"
-                      ),
-                  },
-                  {
-                    id: "block",
-                    label: "Block Time",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "block_time"
-                      ),
-                  },
-                  {
-                    id: "surg",
-                    label: "Create Surgery",
-                    onSelect: () =>
-                      openQuickCreateFromSlot(
-                        {
-                          dayKey: slotContextMenu.dayKey,
-                          columnId: slotContextMenu.columnId,
-                          localStart: slotContextMenu.localStart,
-                        },
-                        "surgery_default"
-                      ),
-                  },
-                ]
-          }
+          items={[
+            { id: "phone", label: "Phone Consultation", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "phone_consult") },
+            { id: "consult", label: "Consultation", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "consultation") },
+            { id: "prp", label: "PRP", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "prp") },
+            { id: "exo", label: "Exosomes", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "exosomes") },
+            { id: "follow", label: "Follow Up", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "follow_up") },
+            { id: "review", label: "Surgery Review", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "surgery_review") },
+            { id: "surg", label: "Surgery", onSelect: () => openQuickCreateFromSlot({ dayKey: slotContextMenu.dayKey, columnId: slotContextMenu.columnId, localStart: slotContextMenu.localStart }, "surgery") },
+          ]}
         />
       ) : null}
 
@@ -510,10 +396,23 @@ export function CalendarPage({
           clinics={data.clinics}
           assignees={data.assignees}
           staffDirectory={data.staffDirectory}
-          canMutateBookings={data.canMutateBookings}
+          setupRecommendations={data.setupRecommendations}
           workflowVariant={isFiOsWorkspace ? "fiOs" : "default"}
-          onCreated={(booking) => {
-            upsertBooking(booking);
+          onCreated={(booking, displayLabel) => {
+            const tpl = calendarQuickTemplateById(
+              (booking.metadata?.quick_template_id as CalendarQuickTemplateId | undefined) ?? "consultation"
+            );
+            upsertBooking(booking, {
+              anchorLabel: displayLabel.trim() || booking.title?.trim() || tpl?.label || "Booking",
+              scalesSummary: null,
+              durationMin: Math.max(
+                1,
+                Math.round((Date.parse(booking.end_at) - Date.parse(booking.start_at)) / 60000) || tpl?.durationMinutes || 30
+              ),
+              reminderHint: null,
+              procedureCatalogName: tpl?.label ?? null,
+            });
+            setHighlightedBookingId(booking.id);
             refresh();
           }}
         />

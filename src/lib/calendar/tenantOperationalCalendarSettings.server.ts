@@ -40,6 +40,8 @@ function parseGridFromTenantMetadata(metadata: unknown, timeZone: string): Busin
 export async function loadTenantOperationalCalendarSettings(tenantId: string): Promise<{
   gridConfig: BusinessGridConfig;
   calendarTimezone: string;
+  /** True when `fi_tenant_settings.default_timezone` is set (not relying on fallback). */
+  timezoneConfigured: boolean;
 }> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
@@ -53,5 +55,9 @@ export async function loadTenantOperationalCalendarSettings(tenantId: string): P
     row ? { tenant: { default_timezone: row.default_timezone, metadata: row.metadata as Record<string, unknown> } } : null
   );
   const gridConfig = parseGridFromTenantMetadata(row?.metadata, calendarTimezone);
-  return { gridConfig, calendarTimezone };
+  return {
+    gridConfig,
+    calendarTimezone,
+    timezoneConfigured: Boolean(row?.default_timezone?.trim()),
+  };
 }

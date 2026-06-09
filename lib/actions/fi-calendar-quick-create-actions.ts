@@ -36,11 +36,10 @@ const anchorSchema = z.discriminatedUnion("kind", [
     .object({
       kind: z.literal("new_lead"),
       displayName: z.string().min(1, "Name is required.").max(200),
-      phone: z.string().min(6, "Phone is required.").max(40),
+      phone: z.string().max(40).optional(),
       email: z.union([z.string().email(), z.literal("")]).optional(),
     })
     .strict(),
-  z.object({ kind: z.literal("block") }).strict(),
 ]);
 
 const bodySchema = z
@@ -118,23 +117,6 @@ async function ensureOpenLeadForPatient(
   return lead.id;
 }
 
-async function resolveHoldPersonId(tenantId: string): Promise<string> {
-  const tid = tenantId.trim();
-  const { person } = await resolveOrCreatePerson(
-    {
-      tenant_id: tid,
-      source_system: "fi_calendar_hold",
-      source_person_id: tid,
-      display_name: "Calendar hold",
-      phone: null,
-      email: null,
-      metadata: {},
-    },
-    undefined
-  );
-  return person.id;
-}
-
 function bookingAnchorsForLead(lead: {
   id: string;
   person_id: string;
@@ -200,28 +182,24 @@ export async function calendarQuickCreateBookingAction(
       if (!lead || lead.tenant_id.trim() !== tid) {
         return { ok: false, error: "Lead not found for this tenant." };
       }
-      if (!leadIsConverted(lead) && parsed.bookingType.trim() !== "consultation") {
-        return { ok: false, error: "Only consultation bookings are allowed before the lead is converted." };
-      }
       const anchors = bookingAnchorsForLead(lead);
       leadId = anchors.leadId;
-      personId = anchors.personId;
-      patientId = anchors.patientId;
+      personId = anchors.personId ?? lead.person_id?.trim() || null;
+      patientId = anchors.patientId ?? lead.patient_id?.trim() || null;
       caseId = anchors.caseId;
     } else if (parsed.anchor.kind === "patient") {
-      personId = parsed.anchor.personId.trim();
-      patientId = parsed.anchor.patientId.trim();
-      const resolvedLeadId = await ensureOpenLeadForPatient(tid, personId, patientId, clinicId, "Patient");
+      const anchorPersonId = parsed.anchor.personId.trim();
+      const anchorPatientId = parsed.anchor.patientId.trim();
+      const resolvedLeadId = await ensureOpenLeadForPatient(tid, anchorPersonId, anchorPatientId, clinicId, "Patient");
       const lead = await loadCrmLeadById(resolvedLeadId, tid);
       if (!lead) return { ok: false, error: "Could not resolve CRM lead for this patient." };
-      const anchors = bookingAnchorsForLead(lead);
-      leadId = anchors.leadId;
-      personId = anchors.personId;
-      patientId = anchors.patientId;
-      caseId = anchors.caseId;
+      leadId = lead.id;
+      personId = anchorPersonId;
+      patientId = anchorPatientId;
+      caseId = lead.case_id?.trim() || null;
     } else if (parsed.anchor.kind === "new_lead") {
       const dn = parsed.anchor.displayName.trim();
-      const phone = parsed.anchor.phone.trim();
+      const phone = parsed.anchor.phone?.trim() || null;
       const email = parsed.anchor.email?.trim() || null;
       const parts = dn.split(/\s+/).filter(Boolean);
       const firstName = parts[0] ?? "Unknown";
@@ -263,16 +241,12 @@ export async function calendarQuickCreateBookingAction(
         undefined
       );
 
-      const anchors = bookingAnchorsForLead(lead);
-      leadId = anchors.leadId;
-      personId = anchors.personId;
-      patientId = anchors.patientId;
-      caseId = anchors.caseId;
-    } else if (parsed.anchor.kind === "block") {
-      personId = await resolveHoldPersonId(tid);
-      leadId = null;
-      patientId = null;
+      leadId = lead.id;
+      personId = person.id;
+      patientId = patient.id;
       caseId = null;
+    } else {
+      return { ok: false, error: "Patient or lead anchor is required." };
     }
 
     const title = parsed.title?.trim() || null;

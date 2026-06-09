@@ -21,7 +21,7 @@ import {
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { buildAppointmentStatusHistory } from "@/src/lib/bookings/appointmentMetadata";
 import type { AppointmentShellDetailPagePayload } from "@/src/lib/bookings/appointmentSlideOverLoader";
-import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import {
   applyLeadUpdatesAfterAppointmentComplete,
   type AppointmentCompletionLeadOpts,
@@ -38,8 +38,8 @@ export function useAppointmentDetailState(
   initialPayload: AppointmentShellDetailPagePayload
 ) {
   const router = useRouter();
-  const { operatorFiUserId, userRole } = useAppointmentSlideOver();
-  const canMutate = isCrmMutationRole(userRole);
+  const { operatorFiUserId, userRole, canUseClinicFeatures } = useAppointmentSlideOver();
+  const canMutate = canMutateClinicFromOperatorContext({ userRole, canUseClinicFeatures });
 
   const [payload, setPayload] = useState(initialPayload);
   const booking = payload.booking;

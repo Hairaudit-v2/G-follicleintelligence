@@ -58,4 +58,9 @@ export type OperationalCalendarPageData = {
   reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]>;
   /** Tenant procedure catalog — durations, prices, colours for booking UI. */
   services: FiServiceRow[];
+  /**
+   * Non-blocking setup hints (empty services, staff hours, timezone).
+   * Bookings can still be created when these are present.
+   */
+  setupRecommendations: string[];
 };

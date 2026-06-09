@@ -38,7 +38,7 @@ import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointment
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
-import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import { AppointmentCreateSlideOver } from "./AppointmentCreateSlideOver";
 import {
   applyLeadUpdatesAfterAppointmentComplete,
@@ -61,6 +61,7 @@ export type AppointmentShellOperatorContext = {
   tenantId: string;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
 };
 
 type SlideOverCtx = AppointmentShellOperatorContext & {
@@ -104,6 +105,7 @@ export function AppointmentSlideOverProvider({
   tenantId,
   operatorFiUserId,
   userRole,
+  canUseClinicFeatures,
   children,
   assignees = [],
   clinics = [],
@@ -114,6 +116,7 @@ export function AppointmentSlideOverProvider({
   tenantId: string;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
   children: ReactNode;
   assignees?: CrmShellUserPickerOption[];
   clinics?: CrmShellClinicOption[];
@@ -158,13 +161,14 @@ export function AppointmentSlideOverProvider({
       tenantId,
       operatorFiUserId,
       userRole,
+      canUseClinicFeatures,
       activeAppointmentId: appointmentId,
       createPrefill,
       openAppointment,
       openCreateAppointment,
       close,
     }),
-    [tenantId, operatorFiUserId, userRole, appointmentId, createPrefill, openAppointment, openCreateAppointment, close]
+    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, appointmentId, createPrefill, openAppointment, openCreateAppointment, close]
   );
 
   const shellOpen = appointmentId != null || createPrefill != null;
@@ -180,6 +184,7 @@ export function AppointmentSlideOverProvider({
         onClose={close}
         operatorFiUserId={operatorFiUserId}
         userRole={userRole}
+        canUseClinicFeatures={canUseClinicFeatures}
         assignees={assignees}
         clinics={clinics}
         existingBookings={existingBookings}
@@ -202,6 +207,7 @@ function AppointmentSlideOverShell({
   onClose,
   operatorFiUserId,
   userRole,
+  canUseClinicFeatures,
   assignees,
   clinics,
   existingBookings,
@@ -216,6 +222,7 @@ function AppointmentSlideOverShell({
   onClose: () => void;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
   assignees: CrmShellUserPickerOption[];
   clinics: CrmShellClinicOption[];
   existingBookings: FiBookingRow[];
@@ -269,6 +276,7 @@ function AppointmentSlideOverShell({
               onClose={onClose}
               operatorFiUserId={operatorFiUserId}
               userRole={userRole}
+              canUseClinicFeatures={canUseClinicFeatures}
               embedded
             />
           )}
@@ -307,6 +315,7 @@ export function AppointmentSlideOverPanel({
   onClose,
   operatorFiUserId,
   userRole,
+  canUseClinicFeatures,
   embedded = false,
 }: {
   tenantId: string;
@@ -315,11 +324,12 @@ export function AppointmentSlideOverPanel({
   onClose: () => void;
   operatorFiUserId: string;
   userRole: string;
+  canUseClinicFeatures?: boolean;
   /** When true, only render inner content (shell provided by provider). */
   embedded?: boolean;
 }) {
   const router = useRouter();
-  const canMutate = isCrmMutationRole(userRole);
+  const canMutate = canMutateClinicFromOperatorContext({ userRole, canUseClinicFeatures });
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [payload, setPayload] = useState<AppointmentSlideOverPayload | null>(null);

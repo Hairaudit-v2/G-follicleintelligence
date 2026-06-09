@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
+import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import {
   CRM_MUTATION_ROLES_LOWER,
   isCrmStaffManageRole,
@@ -202,15 +203,9 @@ export async function assertCrmTenantWriteAllowed(opts: {
     return;
   }
 
-  const principal = await resolveTenantMembershipAuthUserId(authUserId);
-  const row = await loadFiUserForTenant(tenantId, principal);
-  if (!row) {
-    throw new CrmAccessError(403, "Not a member of this tenant.");
-  }
-
-  const role = row.role.trim().toLowerCase();
-  if (!CRM_MUTATION_ROLES_LOWER.has(role)) {
-    throw new CrmAccessError(403, "CRM operator role required for this action.");
+  const access = await resolveDevelopmentClinicAccessForTenant(tenantId, authUserId);
+  if (!access.allowed) {
+    throw new CrmAccessError(403, access.blockedReason ?? "ClinicOS operator role required for this action.");
   }
 }
 

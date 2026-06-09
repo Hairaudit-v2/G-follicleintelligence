@@ -121,6 +121,7 @@ export default async function CaseDetailRoutePage({
       tenantId={tenantId}
       operatorFiUserId={bookingSession.fiUserId}
       userRole={bookingSession.role}
+      canUseClinicFeatures={bookingSession.canUseClinicFeatures}
       assignees={assignees}
       clinics={scope.clinics}
       existingBookings={caseAppointmentBookings}

@@ -9,7 +9,7 @@ import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
 import type { CrmKanbanLeadCard } from "@/src/lib/crm/types";
 import type { CrmShellLeadListItem } from "@/src/lib/crm/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
-import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import { FI_CRM_KANBAN_REFRESH_EVENT } from "@/src/lib/calendar/quickCallInConstants";
 import { useCrmLeadSlideOver } from "./LeadSlideOver";
 import { CrmKanbanColumn } from "./CrmKanbanColumn";
@@ -38,14 +38,14 @@ export function CrmKanbanBoard({
   assignees?: CrmShellUserPickerOption[];
 }) {
   const router = useRouter();
-  const { openLead, operatorFiUserId, userRole } = useCrmLeadSlideOver();
+  const { openLead, operatorFiUserId, userRole, canUseClinicFeatures } = useCrmLeadSlideOver();
   const [isPending, startTransition] = useTransition();
   const [cards, setCards] = useState<CrmKanbanLeadCard[]>(initialCards);
   const [dropStageId, setDropStageId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
   const [callInOpen, setCallInOpen] = useState(false);
 
-  const canMutate = isCrmMutationRole(userRole);
+  const canMutate = canMutateClinicFromOperatorContext({ userRole, canUseClinicFeatures });
 
   const syncFromServer = useCallback(() => {
     startTransition(() => {

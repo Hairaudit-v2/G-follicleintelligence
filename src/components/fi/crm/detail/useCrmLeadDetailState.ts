@@ -18,7 +18,7 @@ import {
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import { deriveCrmLeadNextAction } from "@/src/lib/crm/crmLeadNextAction";
 import { parseCrmLeadOpportunitySnapshot } from "@/src/lib/crm/crmLeadOpportunityMeta";
-import { isCrmMutationRole } from "@/src/lib/crm/crmGatePolicy";
+import { canMutateClinicFromOperatorContext } from "@/src/lib/crm/crmGatePolicy";
 import type { CrmLeadShellDetailPagePayload } from "@/src/lib/crm/crmShellLoaders";
 import { useCrmLeadSlideOver } from "../LeadSlideOver";
 
@@ -30,8 +30,8 @@ export function useCrmLeadDetailState(
   initialPayload: CrmLeadShellDetailPagePayload
 ) {
   const router = useRouter();
-  const { operatorFiUserId, userRole } = useCrmLeadSlideOver();
-  const canMutate = isCrmMutationRole(userRole);
+  const { operatorFiUserId, userRole, canUseClinicFeatures } = useCrmLeadSlideOver();
+  const canMutate = canMutateClinicFromOperatorContext({ userRole, canUseClinicFeatures });
 
   const [payload, setPayload] = useState(initialPayload);
   const lead = payload.detail.lead!;

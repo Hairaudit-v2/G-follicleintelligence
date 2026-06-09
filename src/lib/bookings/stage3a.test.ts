@@ -118,6 +118,15 @@ describe("Stage 3A — consultation-only before conversion", () => {
       leadConverted: true,
     });
   });
+
+  it("allows non-consultation when unconverted lead also has patient_id (quick book)", () => {
+    assertBookingTypeAllowedForLeadConversion({
+      bookingType: "prp",
+      leadId: "x",
+      leadConverted: false,
+      patientId: "patient-1",
+    });
+  });
 });
 
 describe("Stage 3A — cancelled edit guard", () => {

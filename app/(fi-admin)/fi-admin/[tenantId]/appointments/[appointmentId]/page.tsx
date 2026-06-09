@@ -62,6 +62,7 @@ export default async function AppointmentDetailRoutePage({
       tenantId={tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
+      canUseClinicFeatures={session.canUseClinicFeatures}
       assignees={payload.assignees}
       clinics={payload.clinics}
       existingBookings={[payload.booking]}

@@ -75,6 +75,7 @@ export default async function PatientProfileRoutePage({
       tenantId={tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
+      canUseClinicFeatures={session.canUseClinicFeatures}
       assignees={payload.assignees}
       clinics={payload.clinics}
       existingBookings={payload.bookingRows}

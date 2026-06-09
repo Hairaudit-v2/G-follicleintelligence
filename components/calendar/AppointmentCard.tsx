@@ -85,6 +85,8 @@ export type AppointmentCardProps = {
   animateEntry?: boolean;
   /** Saving server state after optimistic move — dims card and blocks drag. */
   isPendingSave?: boolean;
+  /** Brief emphasis after quick-create save. */
+  isHighlighted?: boolean;
   /** Tenant clinic IANA zone for time labels. */
   calendarTimezone?: string | null;
 };
@@ -313,6 +315,7 @@ function AppointmentCardInner({
   touchFriendly = false,
   animateEntry = false,
   isPendingSave = false,
+  isHighlighted = false,
   calendarTimezone,
 }: AppointmentCardProps) {
   const style = getAppointmentStyle(appointment);
@@ -411,6 +414,7 @@ function AppointmentCardInner({
         isDragPreview && "w-full rotate-[0.5deg] shadow-2xl ring-2 ring-sky-400/30 dark:shadow-black/50",
         isTerminal && "opacity-55 saturate-[0.8]",
         isPendingSave && "opacity-80 ring-2 ring-amber-400/35",
+        isHighlighted && "ring-2 ring-cyan-400/70 shadow-lg shadow-cyan-500/20",
         !layout && "w-full",
         className
       )}
@@ -611,6 +615,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   touchFriendly,
   animateEntry,
   isPendingSave,
+  isHighlighted,
   calendarTimezone,
 }: {
   booking: FiBookingRow;
@@ -634,6 +639,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   animateEntry?: boolean;
   /** Awaiting PATCH confirmation after optimistic reschedule. */
   isPendingSave?: boolean;
+  isHighlighted?: boolean;
   calendarTimezone?: string | null;
 }) {
   const appointment = appointmentCardDataFromBooking(booking, display);
@@ -654,6 +660,7 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
       touchFriendly={touchFriendly}
       animateEntry={animateEntry}
       isPendingSave={isPendingSave}
+      isHighlighted={isHighlighted}
       calendarTimezone={calendarTimezone}
     />
   );

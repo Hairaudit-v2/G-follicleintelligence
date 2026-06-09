@@ -37,6 +37,7 @@ export default async function AppointmentsOperatorRoutePage({
       tenantId={tenantId}
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
+      canUseClinicFeatures={session.canUseClinicFeatures}
       assignees={data.operator.assignees}
       clinics={data.operator.clinics}
       existingBookings={existingBookings}

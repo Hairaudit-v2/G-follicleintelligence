@@ -1,15 +1,14 @@
 import type { BookingType } from "@/src/lib/bookings/bookingPolicy";
 
+/** Stage 2A — receptionist quick-book appointment types. */
 export type CalendarQuickTemplateId =
-  | "consultation_30"
-  | "trichology_consultation_60"
-  | "hair_transplant_consultation_45"
-  | "prp_treatment_30"
-  | "exosome_treatment_30"
-  | "follow_up_15"
-  | "surgery_review_20"
-  | "surgery_default"
-  | "block_time";
+  | "phone_consult"
+  | "consultation"
+  | "prp"
+  | "exosomes"
+  | "follow_up"
+  | "surgery_review"
+  | "surgery";
 
 export type CalendarQuickTemplate = {
   id: CalendarQuickTemplateId;
@@ -19,74 +18,58 @@ export type CalendarQuickTemplate = {
   durationMinutes: number;
   /** Preferred card title; falls back to label. */
   title: string;
-  /** When true, server uses calendar-hold anchor flow. */
-  isBlock?: boolean;
 };
 
+/** Primary quick-book types shown as large buttons in the drawer. */
 export const CALENDAR_QUICK_TEMPLATES: CalendarQuickTemplate[] = [
   {
-    id: "consultation_30",
+    id: "phone_consult",
+    label: "Phone Consultation",
+    bookingType: "consultation",
+    durationMinutes: 30,
+    title: "Phone Consultation",
+  },
+  {
+    id: "consultation",
     label: "Consultation",
     bookingType: "consultation",
     durationMinutes: 30,
     title: "Consultation",
   },
   {
-    id: "trichology_consultation_60",
-    label: "Trichology Consultation",
-    bookingType: "consultation",
-    durationMinutes: 60,
-    title: "Trichology Consultation",
-  },
-  {
-    id: "hair_transplant_consultation_45",
-    label: "Hair Transplant Consultation",
-    bookingType: "consultation",
-    durationMinutes: 45,
-    title: "Hair Transplant Consultation",
-  },
-  {
-    id: "prp_treatment_30",
-    label: "PRP Treatment",
+    id: "prp",
+    label: "PRP",
     bookingType: "prp",
     durationMinutes: 30,
-    title: "PRP Treatment",
+    title: "PRP",
   },
   {
-    id: "exosome_treatment_30",
-    label: "Exosome Treatment",
+    id: "exosomes",
+    label: "Exosomes",
     bookingType: "exosomes",
     durationMinutes: 30,
-    title: "Exosome Treatment",
+    title: "Exosomes",
   },
   {
-    id: "follow_up_15",
+    id: "follow_up",
     label: "Follow Up",
     bookingType: "follow_up",
     durationMinutes: 15,
     title: "Follow Up",
   },
   {
-    id: "surgery_review_20",
+    id: "surgery_review",
     label: "Surgery Review",
     bookingType: "review",
     durationMinutes: 20,
     title: "Surgery Review",
   },
   {
-    id: "surgery_default",
+    id: "surgery",
     label: "Surgery",
     bookingType: "surgery",
-    durationMinutes: 120,
+    durationMinutes: 240,
     title: "Surgery",
-  },
-  {
-    id: "block_time",
-    label: "Block time",
-    bookingType: "other",
-    durationMinutes: 30,
-    title: "Blocked",
-    isBlock: true,
   },
 ];
 
