@@ -129,15 +129,15 @@ async function loadPatientLabelsForBookings(
         const m = r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : {};
         labelByPerson.set(String(r.id), displayFromPersonMetadata(m).name);
       }
-      for (const [pid, personId] of pToPerson) {
+      pToPerson.forEach((personId, pid) => {
         out.set(`patient:${pid}`, labelByPerson.get(personId) ?? "—");
-      }
+      });
     }
   }
   return out;
 }
 
-function uniqueStrings(ids: string[]): string[] {
+function uniqueStrings(ids: (string | null | undefined)[]): string[] {
   const s = new Set<string>();
   for (const id of ids) {
     if (id?.trim()) s.add(id.trim());
