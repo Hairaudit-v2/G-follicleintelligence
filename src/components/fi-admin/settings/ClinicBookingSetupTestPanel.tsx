@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { AlertTriangle, CheckCircle2, Loader2, Wrench, XCircle } from "lucide-react";
 
 import { applyClinicBookingSetupAutoFixAction } from "@/lib/actions/fi-clinic-booking-setup-autofix-actions";
@@ -14,6 +14,9 @@ import type {
   ClinicBookingSetupTestRowStatus,
 } from "@/src/lib/clinicSetup/clinicBookingSetupTestTypes";
 import { cn } from "@/lib/utils";
+
+/** Must match `AUTOFIX_KEY_PERTH_PHYSICAL_ALIASES` in `clinicBookingSetupAutoFix.server.ts` (client-safe). */
+const PERTH_PHYSICAL_ALIASES_FIX_KEY = "perth_physical_aliases";
 
 function rowHeadline(status: ClinicBookingSetupTestRowStatus): string {
   if (status === "pass") return "Ready";
@@ -39,17 +42,31 @@ function overallBadgeClass(status: ClinicBookingSetupTestRowStatus, isDark: bool
   return isDark ? "bg-rose-500/15 text-rose-100 ring-rose-500/35" : "bg-rose-50 text-rose-950 ring-rose-200";
 }
 
-function collectAutoFixKeys(result: ClinicBookingSetupTestResult): string[] {
+function collectAutoFixKeys(
+  result: ClinicBookingSetupTestResult,
+  opts?: { includePerthAliases?: boolean }
+): string[] {
+  const includePerth = Boolean(opts?.includePerthAliases);
   const keys: string[] = [];
   for (const t of result.tests) {
     if (t.status === "pass") continue;
-    for (const k of t.fixKeys ?? []) keys.push(k);
+    for (const k of t.fixKeys ?? []) {
+      if (k === PERTH_PHYSICAL_ALIASES_FIX_KEY && !includePerth) continue;
+      keys.push(k);
+    }
   }
   for (const h of result.hygiene) {
     if (h.status === "pass") continue;
-    for (const k of h.fixKeys ?? []) keys.push(k);
+    for (const k of h.fixKeys ?? []) {
+      if (k === PERTH_PHYSICAL_ALIASES_FIX_KEY && !includePerth) continue;
+      keys.push(k);
+    }
   }
   return Array.from(new Set(keys));
+}
+
+function hygieneRowHasPerthAliasFix(h: ClinicBookingSetupHygieneRow): boolean {
+  return Boolean(h.fixKeys?.includes(PERTH_PHYSICAL_ALIASES_FIX_KEY));
 }
 
 function formatAutofixSummary(outcome: ClinicBookingSetupAutoFixResult): string {
@@ -85,7 +102,12 @@ export function ClinicBookingSetupTestPanel({
   const [result, setResult] = useState<ClinicBookingSetupTestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [autofixSummary, setAutofixSummary] = useState<string | null>(null);
+  const [perthPhysicalAliasConfirmed, setPerthPhysicalAliasConfirmed] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (result) setPerthPhysicalAliasConfirmed(false);
+  }, [result]);
 
   const runTestOnly = async () => {
     const r = await runClinicBookingSetupTestAction(tid, { clinicId: cid });
@@ -125,7 +147,7 @@ export function ClinicBookingSetupTestPanel({
     });
   };
 
-  const allSafeKeys = result ? collectAutoFixKeys(result) : [];
+  const allSafeKeys = result ? collectAutoFixKeys(result, { includePerthAliases: perthPhysicalAliasConfirmed }) : [];
   const showFixAll = allSafeKeys.length >= 2;
 
   return (
@@ -150,7 +172,12 @@ export function ClinicBookingSetupTestPanel({
             <button
               type="button"
               disabled={pending || !cid}
-              onClick={() => applyFixes(allSafeKeys)}
+              onClick={() =>
+                applyFixes(allSafeKeys, {
+                  confirmPerthAliases:
+                    perthPhysicalAliasConfirmed && allSafeKeys.includes(PERTH_PHYSICAL_ALIASES_FIX_KEY),
+                })
+              }
               className={cn(
                 "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50",
                 isDark ? "bg-violet-600 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
@@ -285,11 +312,55 @@ export function ClinicBookingSetupTestPanel({
                           <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-900/90")}>{h.suggestedAction}</p>
                         ) : null}
                         {h.status !== "pass" && h.fixKeys?.length ? (
-                          <div className="mt-2">
+                          <div className="mt-2 space-y-2">
+                            {hygieneRowHasPerthAliasFix(h) ? (
+                              <>
+                                <label
+                                  className={cn(
+                                    "flex cursor-pointer items-start gap-2 text-xs leading-snug",
+                                    isDark ? "text-slate-200" : "text-gray-800"
+                                  )}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className={cn(
+                                      "mt-0.5 h-3.5 w-3.5 shrink-0 rounded border",
+                                      isDark
+                                        ? "border-slate-500 bg-slate-900 accent-violet-400"
+                                        : "border-gray-400 bg-white accent-violet-600"
+                                    )}
+                                    checked={perthPhysicalAliasConfirmed}
+                                    onChange={(e) => setPerthPhysicalAliasConfirmed(e.target.checked)}
+                                  />
+                                  <span>
+                                    Confirm Consult Room 2 / Patient Room 2 and PRP Room 2 / Surgery 2 are shared
+                                    physical rooms.
+                                  </span>
+                                </label>
+                                <p
+                                  className={cn(
+                                    "text-[11px] leading-relaxed pl-5 sm:pl-6",
+                                    isDark ? "text-slate-500" : "text-gray-600"
+                                  )}
+                                >
+                                  This prevents FI OS from double-booking the same physical room under two different
+                                  room names.
+                                </p>
+                              </>
+                            ) : null}
                             <button
                               type="button"
-                              disabled={pending || !cid}
-                              onClick={() => applyFixes(h.fixKeys ?? [])}
+                              disabled={
+                                pending ||
+                                !cid ||
+                                (hygieneRowHasPerthAliasFix(h) && !perthPhysicalAliasConfirmed)
+                              }
+                              onClick={() =>
+                                applyFixes(h.fixKeys ?? [], {
+                                  confirmPerthAliases:
+                                    hygieneRowHasPerthAliasFix(h) && perthPhysicalAliasConfirmed,
+                                })
+                              }
                               className={cn(
                                 "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50",
                                 isDark ? "bg-violet-600/90 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
