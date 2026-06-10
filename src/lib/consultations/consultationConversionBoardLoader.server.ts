@@ -333,7 +333,7 @@ async function loadSurgeryBookingsForAnchors(
 
   const runOr = async (col: "lead_id" | "patient_id" | "case_id" | "person_id", values: string[]) => {
     for (const part of chunk(values, 40)) {
-      let q = supabase
+      const q = supabase
         .from("fi_bookings")
         .select("*")
         .eq("tenant_id", tid)
