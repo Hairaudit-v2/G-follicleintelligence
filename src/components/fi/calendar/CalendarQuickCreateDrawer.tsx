@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 
@@ -17,13 +17,22 @@ import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import {
   addUtcMinutesToIso,
   displayCalendarTimezoneSubtitle,
-  formatCalendarLongWeekdayDate,
-  formatClinicTime,
   fromDatetimeLocalValueInTimezone,
   logFiCalendarTimezoneDebug,
   parseIsoUtcMs,
   toDatetimeLocalValueInTimezone,
 } from "@/src/lib/calendar/calendarTimezone";
+import {
+  formatClinicDate,
+  formatClinicLongDate,
+  formatClinicTime as formatClinicTimeForLocale,
+  resolveClinicLocale,
+} from "@/src/lib/calendar/calendarLocaleFormatting";
+import {
+  buildQuickBookTimeSummary,
+  deriveQuickBookEndLocal,
+  normalizeQuickBookDatetimeLocal,
+} from "@/src/lib/calendar/quickBookTime";
 import {
   CALENDAR_QUICK_TEMPLATES,
   calendarQuickTemplateById,
@@ -142,7 +151,7 @@ function quarterHourStartOptions(cfg: BusinessGridConfig, durationMin: number): 
 }
 
 function mergeDayAndHm(dayKey: string, hm: string): string {
-  return `${dayKey.trim()}T${hm}:00`;
+  return `${dayKey.trim()}T${hm}`;
 }
 
 function clampStartToNearestOption(
@@ -154,7 +163,7 @@ function clampStartToNearestOption(
   const opts = quarterHourStartOptions(cfg, durationMin);
   if (!opts.length) return desiredLocal;
   const wantHm = desiredLocal.slice(11, 16);
-  if (opts.includes(wantHm)) return desiredLocal;
+  if (opts.includes(wantHm)) return normalizeQuickBookDatetimeLocal(desiredLocal);
   const wantMin = hhmmToMinutes(wantHm);
   let bestHm = opts[0]!;
   let bestAbs = Infinity;
@@ -183,6 +192,7 @@ export function CalendarQuickCreateDrawer({
   calendarOperatorPrimaryClinicId = null,
   setupRecommendations = [],
   services = [],
+  tenantMetadata = null,
   onCreated,
   workflowVariant = "default",
 }: {
@@ -198,6 +208,8 @@ export function CalendarQuickCreateDrawer({
   /** Server-resolved primary clinic for the signed-in operator's staff profile. */
   calendarOperatorPrimaryClinicId?: string | null;
   clinics: CrmShellClinicOption[];
+  /** `fi_tenants.metadata` for default locale hints when clinic metadata is absent. */
+  tenantMetadata?: Record<string, unknown> | null;
   /** Legacy fi_users — owner column labels only. */
   assignees: CrmShellUserPickerOption[];
   staffDirectory: ClinicalStaffPickerOption[];
@@ -237,6 +249,9 @@ export function CalendarQuickCreateDrawer({
   const [templateId, setTemplateId] = useState<CalendarQuickTemplateId | null>("consultation");
   const [startLocal, setStartLocal] = useState("");
   const [endLocal, setEndLocal] = useState("");
+  /** When true, end time was edited under Advanced scheduling — do not auto-derive over it. */
+  const [manualEndOverride, setManualEndOverride] = useState(false);
+  const skipOneEndSyncRef = useRef(false);
   const [clinicId, setClinicId] = useState("");
   const [clinicResolveBlocked, setClinicResolveBlocked] = useState<"no_clinics" | "ambiguous" | null>(null);
   const [roomId, setRoomId] = useState("");
@@ -264,6 +279,16 @@ export function CalendarQuickCreateDrawer({
   const [serviceResourceReqs, setServiceResourceReqs] = useState<FiServiceResourceRequirementRow[]>([]);
   const [resourceSuggest, setResourceSuggest] = useState<SuggestResourceAssignmentsResult | null>(null);
   const [resourcePicks, setResourcePicks] = useState<Record<string, string>>({});
+
+  const clinicLocale = useMemo(
+    () =>
+      resolveClinicLocale({
+        clinicMetadata: clinics.find((c) => c.id === clinicId.trim())?.metadata ?? null,
+        tenantMetadata: tenantMetadata ?? null,
+        calendarTimezone: tz,
+      }),
+    [clinicId, clinics, tenantMetadata, tz]
+  );
 
   const legacyOwnerLabel = useMemo(() => {
     const uid = legacyOwnerUserId.trim();
@@ -298,30 +323,16 @@ export function CalendarQuickCreateDrawer({
     const nextTpl: CalendarQuickTemplateId | null = unsetType ? null : explicitTpl?.id ?? "consultation";
     setTemplateId(nextTpl);
     setNotes("");
-    const startRaw = prefill.localStart.trim();
+    setManualEndOverride(false);
+    const startRaw = normalizeQuickBookDatetimeLocal(prefill.localStart.trim());
     const dayKey = startRaw.slice(0, 10);
     const tplForDur = nextTpl ? calendarQuickTemplateById(nextTpl) : null;
     const durMin = tplForDur ? quickTemplateDurationMinutes(tplForDur, services) : PLACEHOLDER_DURATION_MIN;
     const start = clampStartToNearestOption(dayKey, startRaw, gridConfig, durMin);
     setStartLocal(start);
+    const endDerived = deriveQuickBookEndLocal({ startLocal: start, durationMinutes: durMin, timeZone: tz });
+    setEndLocal(endDerived ?? "");
     const startIso = fromDatetimeLocalValueInTimezone(start, tz);
-    if (startIso && tplForDur) {
-      try {
-        const endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(tplForDur, services));
-        setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
-      } catch {
-        setEndLocal("");
-      }
-    } else if (startIso) {
-      try {
-        const endIso = addUtcMinutesToIso(startIso, durMin);
-        setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
-      } catch {
-        setEndLocal("");
-      }
-    } else {
-      setEndLocal("");
-    }
     setPatientName("");
     setPatientMobile("");
     setPatientEmail("");
@@ -398,6 +409,26 @@ export function CalendarQuickCreateDrawer({
     [templateId]
   );
 
+  /** Single resolved quick-book duration (catalog → template → placeholder). */
+  const selectedDurationMinutes = useMemo(() => {
+    if (!tplForRooms) return PLACEHOLDER_DURATION_MIN;
+    return quickTemplateDurationMinutes(tplForRooms, services);
+  }, [services, tplForRooms]);
+
+  useEffect(() => {
+    if (!open || manualEndOverride) return;
+    if (skipOneEndSyncRef.current) {
+      skipOneEndSyncRef.current = false;
+      return;
+    }
+    if (!startLocal.trim().slice(0, 10)) return;
+    const next = deriveQuickBookEndLocal({
+      startLocal,
+      durationMinutes: selectedDurationMinutes,
+      timeZone: tz,
+    });
+    if (next) setEndLocal(next);
+  }, [open, manualEndOverride, selectedDurationMinutes, startLocal, tz]);
   const catalogService = useMemo(() => {
     if (!tplForRooms) return null;
     return serviceForBookingType(services, tplForRooms.bookingType);
@@ -557,12 +588,21 @@ export function CalendarQuickCreateDrawer({
 
   const onApplySuggestedSlot = useCallback(
     (slot: NextAvailableBookingSlot) => {
-      setStartLocal(toDatetimeLocalValueInTimezone(slot.startAt, tz));
-      setEndLocal(toDatetimeLocalValueInTimezone(slot.endAt, tz));
+      setManualEndOverride(false);
+      skipOneEndSyncRef.current = true;
+      const startWall = toDatetimeLocalValueInTimezone(slot.startAt, tz);
+      setStartLocal(startWall);
+      const slotEnd = slot.endAt?.trim();
+      const dur =
+        tplForRooms ? quickTemplateDurationMinutes(tplForRooms, services) : PLACEHOLDER_DURATION_MIN;
+      const endWall = slotEnd
+        ? toDatetimeLocalValueInTimezone(slot.endAt, tz)
+        : deriveQuickBookEndLocal({ startLocal: startWall, durationMinutes: dur, timeZone: tz });
+      setEndLocal(endWall ?? "");
       setRoomId(slot.roomId);
       if (slot.staffId) setAssignedStaffId(slot.staffId);
     },
-    [tz]
+    [services, tplForRooms, tz]
   );
 
   const nextSlotsRequest = useMemo(() => {
@@ -576,12 +616,13 @@ export function CalendarQuickCreateDrawer({
       staffId: assignedStaffId.trim() || null,
       roomId: roomId.trim() || null,
       preferredStartAt: startIso,
-      durationMinutes: quickTemplateDurationMinutes(tplForRooms, services),
+      durationMinutes: selectedDurationMinutes,
     };
-  }, [assignedStaffId, catalogService?.id, clinicId, roomId, services, startLocal, tplForRooms, tz]);
+  }, [assignedStaffId, catalogService?.id, clinicId, roomId, selectedDurationMinutes, startLocal, tplForRooms, tz]);
 
   const onTemplateChange = useCallback(
     (id: CalendarQuickTemplateId) => {
+      setManualEndOverride(false);
       setRoomId("");
       setResourcePicks({});
       setTemplateId(id);
@@ -592,25 +633,14 @@ export function CalendarQuickCreateDrawer({
       if (!dk) return;
       const clamped = clampStartToNearestOption(dk, startLocal, gridConfig, durMin);
       setStartLocal(clamped);
-      const iso2 = fromDatetimeLocalValueInTimezone(clamped, tz);
-      if (!iso2) return;
-      setEndLocal(toDatetimeLocalValueInTimezone(addUtcMinutesToIso(iso2, durMin), tz));
     },
-    [gridConfig, services, startLocal, tz]
+    [gridConfig, services, startLocal]
   );
 
-  const onStartChange = useCallback(
-    (nextStart: string) => {
-      setStartLocal(nextStart);
-      const tpl = templateId ? calendarQuickTemplateById(templateId) : null;
-      const startIso = fromDatetimeLocalValueInTimezone(nextStart, tz);
-      if (!startIso) return;
-      const mins = tpl ? quickTemplateDurationMinutes(tpl, services) : PLACEHOLDER_DURATION_MIN;
-      const endIso = addUtcMinutesToIso(startIso, mins);
-      setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
-    },
-    [services, templateId, tz]
-  );
+  const onStartChange = useCallback((nextStart: string) => {
+    setManualEndOverride(false);
+    setStartLocal(normalizeQuickBookDatetimeLocal(nextStart));
+  }, []);
 
   const bumpStartByClockMinutes = useCallback(
     (deltaMin: number) => {
@@ -651,29 +681,28 @@ export function CalendarQuickCreateDrawer({
 
   const dayKey = startLocal.length >= 10 ? startLocal.slice(0, 10) : "";
 
-  const durationMinutesForUi = useMemo(() => {
-    if (!tplForRooms) return PLACEHOLDER_DURATION_MIN;
-    return quickTemplateDurationMinutes(tplForRooms, services);
-  }, [services, tplForRooms]);
-
   const timeSelectOptions = useMemo(() => {
     if (!dayKey) return [];
-    return quarterHourStartOptions(gridConfig, durationMinutesForUi);
-  }, [dayKey, durationMinutesForUi, gridConfig]);
+    return quarterHourStartOptions(gridConfig, selectedDurationMinutes);
+  }, [dayKey, gridConfig, selectedDurationMinutes]);
 
-  const dateHeading = dayKey ? formatCalendarLongWeekdayDate(dayKey, tz) : "";
+  const dateHeadingLong = dayKey ? formatClinicLongDate(dayKey, clinicLocale) : "";
+  const dateHeadingShort = dayKey ? formatClinicDate(dayKey, clinicLocale) : "";
 
   const clinicLabel = clinics.find((x) => x.id === clinicId)?.display_name?.trim() ?? null;
 
-  const typeScheduleLine = useMemo(() => {
-    if (!startLocal || !endLocal || !dayKey) return "Pick a time slot";
-    const tpl = tplForRooms;
-    const label = tpl?.label ?? "Appointment";
-    const dur = tpl ? quickTemplateDurationMinutes(tpl, services) : PLACEHOLDER_DURATION_MIN;
-    const tStart = formatClockHm(startLocal.slice(11, 16));
-    const tEnd = formatClockHm(endLocal.slice(11, 16));
-    return `${label} · ${dur} min · ${tStart}–${tEnd}`;
-  }, [dayKey, endLocal, services, startLocal, tplForRooms]);
+  const timeSummary = useMemo(
+    () =>
+      buildQuickBookTimeSummary({
+        label: tplForRooms?.label ?? null,
+        startLocal,
+        endLocal,
+        durationMinutes: tplForRooms ? selectedDurationMinutes : null,
+        locale: clinicLocale,
+        timeZone: tz,
+      }),
+    [clinicLocale, endLocal, selectedDurationMinutes, startLocal, tplForRooms, tz]
+  );
 
   const assignedRoomLabel = useMemo(() => {
     const id = roomId.trim();
@@ -723,8 +752,17 @@ export function CalendarQuickCreateDrawer({
       setFormErr("Pick an appointment type.");
       return;
     }
-    const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
-    const endIso = fromDatetimeLocalValueInTimezone(endLocal, tz);
+    const startNorm = normalizeQuickBookDatetimeLocal(startLocal);
+    const resolvedEndLocal =
+      manualEndOverride
+        ? normalizeQuickBookDatetimeLocal(endLocal)
+        : deriveQuickBookEndLocal({
+            startLocal: startNorm,
+            durationMinutes: selectedDurationMinutes,
+            timeZone: tz,
+          }) ?? normalizeQuickBookDatetimeLocal(endLocal);
+    const startIso = fromDatetimeLocalValueInTimezone(startNorm, tz);
+    const endIso = fromDatetimeLocalValueInTimezone(resolvedEndLocal, tz);
     if (!startIso || !endIso) {
       setFormErr("Start and end times are required.");
       return;
@@ -807,7 +845,7 @@ export function CalendarQuickCreateDrawer({
         clinicTimezone: tz,
         loadedStartAt: r.booking.start_at,
         loadedEndAt: r.booking.end_at,
-        renderedStartDisplay: formatClinicTime(r.booking.start_at, tz),
+        renderedStartDisplay: formatClinicTimeForLocale(r.booking.start_at, clinicLocale, tz),
       });
       toast?.success("Appointment saved.");
       onCreated(r.booking, displayName);
@@ -1016,7 +1054,10 @@ export function CalendarQuickCreateDrawer({
             <div>
               <p className={cn(os.eyebrow, "mb-1")}>Time</p>
               <p className="text-xs text-slate-500">Selected from calendar. Adjust if needed.</p>
-              <p className="mt-3 text-base font-semibold leading-snug text-slate-50">{dateHeading}</p>
+              <p className="mt-3 text-base font-semibold leading-snug text-slate-50">{dateHeadingLong}</p>
+              {dateHeadingShort ? (
+                <p className="mt-0.5 text-sm tabular-nums text-slate-400">{dateHeadingShort}</p>
+              ) : null}
               {clinicResolveBlocked ? (
                 <div className="mt-2 rounded-lg border border-amber-500/35 bg-amber-950/25 px-3 py-2 text-xs leading-snug text-amber-100/95">
                   <p>
@@ -1040,12 +1081,17 @@ export function CalendarQuickCreateDrawer({
               ) : (
                 <p className="mt-1 text-xs text-slate-500">{tzLabel}</p>
               )}
-              <p className="mt-2 text-sm font-medium text-sky-100/95 tabular-nums">{typeScheduleLine}</p>
+              <p className="mt-2 text-sm font-medium text-sky-100/95 tabular-nums" role="status">
+                {timeSummary}
+              </p>
               <label className={cn("mt-3 block text-xs font-medium text-slate-300", os.meta)}>
                 Start time
                 <select
                   className={cn(inputClass, "text-base font-semibold tabular-nums")}
-                  value={timeSelectOptions.includes(startLocal.slice(11, 16)) ? startLocal.slice(11, 16) : ""}
+                  value={(() => {
+                    const hm = normalizeQuickBookDatetimeLocal(startLocal).slice(11, 16);
+                    return timeSelectOptions.includes(hm) ? hm : "";
+                  })()}
                   onChange={(e) => {
                     const hm = e.target.value;
                     if (!hm || !dayKey) return;
@@ -1173,8 +1219,11 @@ export function CalendarQuickCreateDrawer({
                   <input
                     type="datetime-local"
                     className={inputClass}
-                    value={startLocal}
-                    onChange={(e) => onStartChange(e.target.value)}
+                    value={normalizeQuickBookDatetimeLocal(startLocal)}
+                    onChange={(e) => {
+                      setManualEndOverride(false);
+                      setStartLocal(normalizeQuickBookDatetimeLocal(e.target.value));
+                    }}
                   />
                 </label>
                 <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
@@ -1182,8 +1231,11 @@ export function CalendarQuickCreateDrawer({
                   <input
                     type="datetime-local"
                     className={inputClass}
-                    value={endLocal}
-                    onChange={(e) => setEndLocal(e.target.value)}
+                    value={normalizeQuickBookDatetimeLocal(endLocal)}
+                    onChange={(e) => {
+                      setManualEndOverride(true);
+                      setEndLocal(normalizeQuickBookDatetimeLocal(e.target.value));
+                    }}
                   />
                 </label>
                 {showClinicOverride ? (

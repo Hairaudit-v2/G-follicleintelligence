@@ -364,7 +364,8 @@ export function toDatetimeLocalValueInTimezone(iso: string, timeZone: string): s
 /** Parse `datetime-local` as clinic-local wall time → ISO UTC. */
 export function fromDatetimeLocalValueInTimezone(local: string, timeZone: string): string | null {
   const t = local.trim();
-  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(t);
+  // Accept optional seconds / fractional seconds (some UI paths append `:00`).
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,3})?)?$/.exec(t);
   if (!m) return null;
   const y = Number(m[1]);
   const mo = Number(m[2]);

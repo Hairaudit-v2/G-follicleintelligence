@@ -254,7 +254,7 @@ export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<
     supabase.from("fi_organisations").select("id, name").eq("tenant_id", tid).order("name", { ascending: true }),
     supabase
       .from("fi_clinics")
-      .select("id, display_name, organisation_id")
+      .select("id, display_name, organisation_id, metadata")
       .eq("tenant_id", tid)
       .order("display_name", { ascending: true }),
   ]);
@@ -265,11 +265,17 @@ export async function loadCrmShellScopePickerOptions(tenantId: string): Promise<
     return { id: String(r.id), name: String(r.name) };
   });
   const clinics = (clinicsRes.data ?? []).map((c) => {
-    const r = c as { id: string; display_name: string; organisation_id: string | null };
+    const r = c as {
+      id: string;
+      display_name: string;
+      organisation_id: string | null;
+      metadata?: unknown;
+    };
     return {
       id: String(r.id),
       display_name: String(r.display_name),
       organisation_id: r.organisation_id != null ? String(r.organisation_id) : null,
+      metadata: r.metadata != null && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : null,
     };
   });
   return { organisations, clinics };

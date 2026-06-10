@@ -44,6 +44,8 @@ export type OperationalCalendarResourceColumn = {
 
 export type OperationalCalendarPageData = {
   tenantId: string;
+  /** `fi_tenants.metadata` — optional `locale` / country hints for clinic UI. */
+  tenantMetadata?: Record<string, unknown> | null;
   query: ParsedCalendarQuery;
   /** Effective IANA timezone for this calendar view. */
   calendarTimezone: string;

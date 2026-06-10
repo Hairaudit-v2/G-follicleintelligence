@@ -409,6 +409,7 @@ export function CalendarPage({
           resourceColumns={data.resourceColumns}
           calendarQueryClinicId={data.query.clinicId?.trim() || undefined}
           calendarOperatorPrimaryClinicId={data.calendarOperatorPrimaryClinicId ?? null}
+          tenantMetadata={data.tenantMetadata ?? null}
           clinics={data.clinics}
           assignees={data.assignees}
           staffDirectory={data.staffDirectory}

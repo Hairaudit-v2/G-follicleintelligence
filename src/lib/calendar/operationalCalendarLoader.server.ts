@@ -116,7 +116,7 @@ async function loadTenantStaffAndClinics(
     loadClinicalStaffPickerOptions(tid),
     supabaseAdmin()
       .from("fi_clinics")
-      .select("id, display_name, organisation_id")
+      .select("id, display_name, organisation_id, metadata")
       .eq("tenant_id", tid)
       .order("display_name", { ascending: true }),
     loadClinicRoomsForTenant(tid, { clinicId: clinicFilter }),
@@ -141,11 +141,17 @@ async function loadTenantStaffAndClinics(
   }
 
   const clinics: CrmShellClinicOption[] = (clinicsRes.data ?? []).map((c) => {
-    const r = c as { id: string; display_name: string; organisation_id: string | null };
+    const r = c as {
+      id: string;
+      display_name: string;
+      organisation_id: string | null;
+      metadata?: unknown;
+    };
     return {
       id: String(r.id),
       display_name: String(r.display_name),
       organisation_id: r.organisation_id != null ? String(r.organisation_id) : null,
+      metadata: r.metadata != null && typeof r.metadata === "object" && !Array.isArray(r.metadata) ? (r.metadata as Record<string, unknown>) : null,
     };
   });
 
@@ -387,12 +393,21 @@ export async function loadOperationalCalendarPageData(
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
-  const [rawBookings, resources, mutationGate, services] = await Promise.all([
+  const [rawBookings, resources, mutationGate, services, tenantRow] = await Promise.all([
     loadBookingsForTenantRange(tid, rangeStartIso, rangeEndIso),
     loadTenantStaffAndClinics(tid, { resourceView: query.resourceView, clinicId: query.clinicId }),
     resolveBookingMutationGate(tid),
     loadFiServicesForTenant(tid),
+    supabaseAdmin().from("fi_tenants").select("metadata").eq("id", tid).maybeSingle(),
   ]);
+
+  const tenantMetaRow = tenantRow.data as { metadata?: unknown } | null;
+  const tenantMetadata =
+    tenantMetaRow?.metadata != null &&
+    typeof tenantMetaRow.metadata === "object" &&
+    !Array.isArray(tenantMetaRow.metadata)
+      ? (tenantMetaRow.metadata as Record<string, unknown>)
+      : null;
 
   const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
   query = normalized.query;
@@ -535,6 +550,7 @@ export async function loadOperationalCalendarPageData(
 
   return {
     tenantId: tid,
+    tenantMetadata,
     query,
     calendarTimezone: query.calendarTimezone,
     rangeStartIso,

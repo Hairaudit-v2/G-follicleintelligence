@@ -102,6 +102,7 @@ describe("calendarTimezone — Australia/Brisbane wall time → UTC", () => {
     const iso = buildClinicZonedDateTime("2026-06-10", { hour: 10, minute: 0 }, tz);
     assert.equal(iso, "2026-06-10T00:00:00.000Z");
     assert.equal(fromDatetimeLocalValueInTimezone("2026-06-10T10:00", tz), iso);
+    assert.equal(fromDatetimeLocalValueInTimezone("2026-06-10T10:00:00", tz), iso);
     assert.equal(toDatetimeLocalValueInTimezone(iso!, tz), "2026-06-10T10:00");
   });
 
