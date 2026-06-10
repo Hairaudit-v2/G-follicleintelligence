@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { SurgeryReadinessBoardCard, SurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
+import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
 import {
   SURGERY_READINESS_ISSUE_LABEL,
   cardMatchesManagerFilter,
@@ -124,11 +125,14 @@ function SurgeryCard({ card }: { card: SurgeryReadinessBoardCard }) {
           ))}
         </ul>
       ) : null}
-      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.7rem] font-semibold">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.7rem] font-semibold">
         {card.hrefs.case ? (
-          <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.case}>
-            Case
-          </Link>
+          <>
+            <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.case}>
+              Case
+            </Link>
+            <CopyProcedureDayLinkButton relativeHref={card.hrefs.case} />
+          </>
         ) : null}
         {card.hrefs.patient ? (
           <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.patient}>

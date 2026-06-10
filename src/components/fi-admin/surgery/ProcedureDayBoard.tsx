@@ -7,6 +7,7 @@ import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboar
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { ProcedureDayBoardPayload, ProcedureDayScheduleCard } from "@/src/lib/surgery/procedureDayBoardLoader.server";
+import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
 import { SURGERY_READINESS_ISSUE_LABEL, type SurgeryReadinessIssueSeverity } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
 function severityChipClass(sev: SurgeryReadinessIssueSeverity): string {
@@ -124,16 +125,22 @@ function ScheduleCard({ c }: { c: ProcedureDayScheduleCard }) {
           ))}
         </ul>
       ) : null}
-      <p className="mt-2 text-[0.65rem] text-slate-600">
+      <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.65rem] text-slate-600">
         <Link href={c.hrefs.calendar} className="text-cyan-200/80 hover:underline">
           Calendar
         </Link>
         {c.hrefs.patient ? (
           <>
-            <span className="text-slate-700"> · </span>
+            <span className="text-slate-700">·</span>
             <Link href={c.hrefs.patient} className="text-cyan-200/80 hover:underline">
               Patient
             </Link>
+          </>
+        ) : null}
+        {c.hrefs.case ? (
+          <>
+            <span className="text-slate-700">·</span>
+            <CopyProcedureDayLinkButton relativeHref={c.hrefs.case} />
           </>
         ) : null}
       </p>
@@ -334,7 +341,7 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
         <SectionHeader
           id="pd-team-heading"
           title="Team assignment"
-          description="Calendar uses fi_staff / fi_users; procedure day uses fi_users on fi_case_procedures. Dedicated nurse role is not stored in V1."
+          description="Calendar uses fi_staff / fi_users; procedure day uses fi_users on fi_case_procedures (surgeon, nurse, technicians, and optional legacy team list)."
         />
         {flatCards.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500">Nothing scheduled.</p>

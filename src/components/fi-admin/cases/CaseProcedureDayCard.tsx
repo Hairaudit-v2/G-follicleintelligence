@@ -1,4 +1,9 @@
-import { CASE_DETAIL_SECTION_IDS, caseDetailSectionHeadingId } from "@/src/lib/cases/caseDetailNavConstants";
+import {
+  CASE_DETAIL_SECTION_IDS,
+  caseDetailSectionHeadingId,
+  caseProcedureDayDetailHref,
+} from "@/src/lib/cases/caseDetailNavConstants";
+import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import { buildProcedureDayMismatchWarnings } from "@/src/lib/cases/procedureDayMismatchModel";
 import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
@@ -26,7 +31,7 @@ export function CaseProcedureDayCard({
   return (
     <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
+        <div className="min-w-0">
           <h2
             id={caseDetailSectionHeadingId(CASE_DETAIL_SECTION_IDS.procedureDay)}
             className="text-sm font-semibold text-gray-900"
@@ -38,15 +43,21 @@ export function CaseProcedureDayCard({
             scoring or formal surgical audit grading — post-op and qualitative outcomes live in Stage 5D below.
           </p>
         </div>
-        {procedure ? (
-          <p className="text-xs text-gray-600">
-            Status:{" "}
-            <span className="font-medium text-gray-900">{procedureStatusLabel(procedure.procedure_status)}</span>
-            <span className="ml-2 text-gray-400">· updated {procedure.updated_at ? procedure.updated_at.slice(0, 10) : "—"}</span>
-          </p>
-        ) : (
-          <p className="text-xs text-amber-800">No procedure-day row yet — save to create one.</p>
-        )}
+        <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+          <CopyProcedureDayLinkButton
+            variant="light"
+            relativeHref={caseProcedureDayDetailHref(tenantId, caseId)}
+          />
+          {procedure ? (
+            <p className="text-xs text-gray-600">
+              Status:{" "}
+              <span className="font-medium text-gray-900">{procedureStatusLabel(procedure.procedure_status)}</span>
+              <span className="ml-2 text-gray-400">· updated {procedure.updated_at ? procedure.updated_at.slice(0, 10) : "—"}</span>
+            </p>
+          ) : (
+            <p className="text-xs text-amber-800">No procedure-day row yet — save to create one.</p>
+          )}
+        </div>
       </div>
 
       {mismatch.length ? (

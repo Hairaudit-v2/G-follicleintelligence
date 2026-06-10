@@ -13,6 +13,7 @@ import { loadCasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders
 import type { CaseWorklistRow } from "@/src/lib/cases/casesIndexTypes";
 import { loadCasesIndexRowsForIds } from "@/src/lib/cases/caseLoaders";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
+import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
@@ -406,7 +407,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
       primaryColumn: primary,
       surgeryDepositLabel: SURGERY_DEPOSIT_BOARD_COPY[depKey],
       hrefs: {
-        case: caseId ? `/fi-admin/${tid}/cases/${encodeURIComponent(caseId)}` : null,
+        case: caseId ? caseProcedureDayDetailHref(tid, caseId) : null,
         patient: patientHref,
         calendar: `/fi-admin/${tid}/calendar?date=${encodeURIComponent(surgeryLocalYmd)}`,
         operationsCentre: `/fi-admin/${tid}/operations`,

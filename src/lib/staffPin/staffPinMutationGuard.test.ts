@@ -26,8 +26,10 @@ function activePinSession(): StaffPinClinicSession {
 describe("evaluateStaffPinMutationAccess", () => {
   it("allows normal mutations when no PIN session is active", () => {
     const decision = evaluateStaffPinMutationAccess(null, "settings.any");
-    assert.equal(decision.allowed, true);
-    if (decision.allowed) assert.equal(decision.via, "no_pin_session");
+    if ("blocked" in decision) {
+      assert.fail("expected allowed");
+    }
+    assert.equal(decision.via, "no_pin_session");
   });
 
   it("blocks services pricing mutations under PIN session", () => {
@@ -82,17 +84,21 @@ describe("evaluateStaffPinMutationAccess", () => {
 
   it("allows basic booking creation under PIN session", () => {
     const decision = evaluateStaffPinMutationAccess(activePinSession(), "calendar.quick_book");
-    assert.equal(decision.allowed, true);
-    if (decision.allowed) {
-      assert.equal(decision.via, "staff_pin_floor");
+    if ("blocked" in decision) {
+      assert.fail("expected allowed");
+    }
+    assert.equal(decision.via, "staff_pin_floor");
+    if (decision.via === "staff_pin_floor") {
       assert.equal(decision.staffId, staffId);
     }
   });
 
   it("allows patient check-in under PIN session", () => {
     const decision = evaluateStaffPinMutationAccess(activePinSession(), "patient.check_in");
-    assert.equal(decision.allowed, true);
-    if (decision.allowed) assert.equal(decision.via, "staff_pin_floor");
+    if ("blocked" in decision) {
+      assert.fail("expected allowed");
+    }
+    assert.equal(decision.via, "staff_pin_floor");
   });
 
   it("does not expose internal permission details in blocked error", () => {

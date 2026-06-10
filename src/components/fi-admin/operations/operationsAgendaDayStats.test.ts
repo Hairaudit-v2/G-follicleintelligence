@@ -14,7 +14,12 @@ const YMD = "2026-06-10";
 function agendaFromBookings(
   rows: Array<{ start_at: string; lead_id: string | null; timezone: string | null; booking_type: string }>
 ): TenantOperationalDashboard["agendaByBucket"] {
-  const empty = { consult: [] as TenantOperationalDashboard["agendaByBucket"]["consult"], surgery: [], follow_up: [], other: [] };
+  const empty: TenantOperationalDashboard["agendaByBucket"] = {
+    consult: [],
+    surgery: [],
+    follow_up: [],
+    other: [],
+  };
   for (const r of rows) {
     const t = r.booking_type.trim();
     const bucket =

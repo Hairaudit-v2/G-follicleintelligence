@@ -17,6 +17,8 @@ function row(id: string, start: string): FiBookingRow {
     patient_id: null,
     case_id: null,
     clinic_id: null,
+    room_id: null,
+    room_required: false,
     assigned_staff_id: null,
     assigned_user_id: null,
     booking_type: "consultation",

@@ -30,6 +30,22 @@ export function caseProcedureDayDetailHref(tenantId: string, caseId: string): st
   return `/fi-admin/${encodeURIComponent(tid)}/cases/${encodeURIComponent(cid)}${CASE_PROCEDURE_DAY_DETAIL_HASH}`;
 }
 
+/**
+ * Clipboard payload for a procedure-day deep link: absolute URL when `origin` is set
+ * (e.g. `window.location.origin` in the browser), otherwise the app-relative href.
+ */
+export function procedureDayLinkForClipboard(relativeHref: string, origin?: string | null): string {
+  const href = relativeHref.trim();
+  if (!href) return href;
+  const o = origin?.trim();
+  if (!o) return href;
+  try {
+    return new URL(href, o).href;
+  } catch {
+    return href;
+  }
+}
+
 /** Order matches main page layout top-to-bottom. */
 export const CASE_DETAIL_NAV_SECTIONS: { id: CaseDetailSectionId; label: string }[] = [
   { id: CASE_DETAIL_SECTION_IDS.summary, label: "Summary" },

@@ -7,6 +7,7 @@ import {
   type RoomSchedulingReadinessCheck,
 } from "@/src/lib/rooms/roomSchedulingReadinessCore";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
+import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 const TENANT = "00000000-0000-4000-8000-000000000001";
 const CLINIC = "00000000-0000-4000-8000-000000000002";
@@ -44,6 +45,21 @@ const PERTH_ROOMS: FiClinicRoomRow[] = [
   room("patient_room_2", "patient", "perth_phys_cons_2"),
 ];
 
+function prpService(overrides?: Partial<FiServiceRow>): FiServiceRow {
+  return {
+    id: "s1",
+    tenant_id: TENANT,
+    name: "PRP Treatment",
+    duration_minutes: 30,
+    base_price: 0,
+    color: null,
+    category: "Treatment",
+    is_active: true,
+    booking_type: "prp",
+    ...overrides,
+  };
+}
+
 describe("roomSchedulingReadinessCore", () => {
   it("shows needs_setup when no rooms exist", () => {
     const result = buildRoomSchedulingReadinessResult({
@@ -51,7 +67,7 @@ describe("roomSchedulingReadinessCore", () => {
       clinicId: CLINIC,
       clinicName: "Perth",
       rooms: [],
-      services: [{ id: "s1", name: "PRP Treatment", booking_type: "prp", category: "Treatment", is_active: true }],
+      services: [prpService()],
       roomEligibilityByServiceId: new Map(),
       staffEligibilityByServiceId: new Map(),
       staff: [],
@@ -66,7 +82,7 @@ describe("roomSchedulingReadinessCore", () => {
       clinicId: CLINIC,
       clinicName: "Perth",
       rooms: PERTH_ROOMS,
-      services: [{ id: "s1", name: "PRP Treatment", booking_type: "prp", category: "Treatment", is_active: true }],
+      services: [prpService()],
       roomEligibilityByServiceId: new Map(),
       staffEligibilityByServiceId: new Map([["s1", [{ staff_id: null, staff_role: "nurse", is_active: true }]]]),
       staff: [{ id: "st1", full_name: "Nurse A", staff_role: "nurse", is_active: true, calendar_visible: null }],
@@ -100,7 +116,7 @@ describe("roomSchedulingReadinessCore", () => {
       clinicId: CLINIC,
       clinicName: "Perth",
       rooms: PERTH_ROOMS,
-      services: [{ id: "s1", name: "PRP Treatment", booking_type: "prp", category: "Treatment", is_active: true }],
+      services: [prpService()],
       roomEligibilityByServiceId: new Map([
         ["s1", [{ room_id: prpRoomId, is_preferred: true, is_active: true }]],
       ]),

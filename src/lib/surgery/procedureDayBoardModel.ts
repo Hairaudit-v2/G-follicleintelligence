@@ -2,6 +2,7 @@
  * Pure model for FI OS Procedure Day Board V1 — today’s surgery bookings, readiness, procedure progress, and actions.
  */
 
+import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
 import { addDaysToCalendarDate, calendarDateStringFromInstant, zonedMidnightUtcMs } from "@/src/lib/calendar/calendarTimezone";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { paymentRecordNeedsCollection } from "@/src/lib/payments/paymentRecordModel";
@@ -123,7 +124,7 @@ export function buildProcedureDayActionItems(input: ProcedureDayActionInput): Pr
   }
 
   const cid = input.caseId.trim();
-  const caseHref = `${base}/cases/${encodeURIComponent(cid)}`;
+  const caseHref = caseProcedureDayDetailHref(tid, cid);
 
   if (input.abnormalPathologyCount > 0) {
     actions.push({

@@ -42,6 +42,8 @@ function row(p: Partial<FiBookingRow> & Pick<FiBookingRow, "id">): FiBookingRow 
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
     ...p,
+    room_id: p.room_id ?? null,
+    room_required: p.room_required ?? false,
   };
 }
 
