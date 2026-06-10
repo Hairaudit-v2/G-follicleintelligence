@@ -116,7 +116,7 @@ export function TimelyZapierSetupGuide({
 
       <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/80 p-4 sm:p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Required header</h2>
-        <MonoBlock>Authorization: Bearer {"<FI_TIMELY_WEBHOOK_SECRET>"}</MonoBlock>
+        <MonoBlock>{`Authorization: Bearer <FI_TIMELY_WEBHOOK_SECRET>`}</MonoBlock>
       </section>
 
       <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/80 p-4 sm:p-5">
