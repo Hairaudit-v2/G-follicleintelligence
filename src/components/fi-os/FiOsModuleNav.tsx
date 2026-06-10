@@ -44,19 +44,28 @@ function iconFor(id: string) {
   }
 }
 
+function normalizePath(p: string): string {
+  const t = p.replace(/\/+$/, "");
+  return t.length === 0 ? "/" : t;
+}
+
 export function FiOsModuleNav({
   items,
   activeId,
+  pathname,
   onNavigate,
   dense,
   className,
 }: {
   items: FiOsPrimarySidebarItem[];
   activeId: string | null;
+  /** Current URL for nested SurgeryOS links (readiness board). */
+  pathname?: string;
   onNavigate?: () => void;
   dense?: boolean;
   className?: string;
 }) {
+  const path = pathname ?? "";
   return (
     <nav className={cn("flex flex-1 flex-col gap-0.5 px-1.5 py-1.5", className)} aria-label="FI OS modules">
       {items.map((item) => {
@@ -81,24 +90,42 @@ export function FiOsModuleNav({
           );
         }
 
+        const sub = item.subItems?.length
+          ? item.subItems.map((subItem) => {
+              const subActive = normalizePath(path) === normalizePath(subItem.href);
+              return (
+                <Link
+                  key={subItem.id}
+                  href={subItem.href}
+                  onClick={onNavigate}
+                  aria-current={subActive ? "page" : undefined}
+                  className={cn(
+                    "ml-6 block rounded-md border border-transparent py-1 pl-2 pr-2 text-[12px] font-medium transition",
+                    subActive
+                      ? "border-cyan-400/20 bg-cyan-500/15 text-cyan-100"
+                      : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-200",
+                  )}
+                >
+                  {subItem.label}
+                </Link>
+              );
+            })
+          : null;
+
         return (
-          <Link
-            key={item.id}
-            href={item.href}
-            className={row}
-            title={item.hint}
-            aria-current={active ? "page" : undefined}
-            onClick={onNavigate}
-          >
-            <Icon
-              className={cn(
-                "h-[1.125rem] w-[1.125rem] shrink-0",
-                active ? "text-cyan-300" : "text-slate-500 group-hover:text-slate-300",
-              )}
-              aria-hidden
-            />
-            <span className="min-w-0 flex-1 truncate">{item.label}</span>
-          </Link>
+          <div key={item.id} className="flex flex-col gap-0.5">
+            <Link href={item.href} className={row} title={item.hint} aria-current={active ? "page" : undefined} onClick={onNavigate}>
+              <Icon
+                className={cn(
+                  "h-[1.125rem] w-[1.125rem] shrink-0",
+                  active ? "text-cyan-300" : "text-slate-500 group-hover:text-slate-300",
+                )}
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+            </Link>
+            {sub}
+          </div>
         );
       })}
     </nav>

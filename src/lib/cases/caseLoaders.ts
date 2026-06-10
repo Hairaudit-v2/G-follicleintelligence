@@ -153,6 +153,80 @@ export async function loadCasesIndexForTenant(tenantId: string, client?: Supabas
   });
 }
 
+/**
+ * Same shape as {@link loadCasesIndexForTenant} but restricted to explicit case ids (Surgery readiness board, etc.).
+ */
+export async function loadCasesIndexRowsForIds(
+  tenantId: string,
+  caseIds: string[],
+  client?: SupabaseClient
+): Promise<CaseIndexRow[]> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = tenantId.trim();
+  const ids = Array.from(new Set(caseIds.map((id) => id.trim()).filter(Boolean)));
+  if (ids.length === 0) return [];
+
+  const { data: caseRows, error } = await supabase
+    .from("fi_cases")
+    .select(
+      "id, status, metadata, external_id, foundation_patient_id, patient_id, treatment_type, planning_notes, created_at, updated_at"
+    )
+    .eq("tenant_id", tid)
+    .in("id", ids);
+  if (error) throw new Error(error.message);
+
+  const rows = caseRows ?? [];
+  if (rows.length === 0) return [];
+
+  const rowCaseIds = rows.map((r) => String((r as { id: string }).id));
+  const foundationIds = uniqueIds(
+    rows.map((r) => (r as { foundation_patient_id: string | null }).foundation_patient_id)
+  );
+  const legacyIds = uniqueIds(rows.map((r) => (r as { patient_id: string | null }).patient_id));
+
+  const patientPersonByFoundation = await loadPatientPersonMap(supabase, tid, foundationIds);
+  const patientPersonByLegacy = await loadPatientPersonMapByLegacyPatientId(supabase, tid, legacyIds);
+
+  const leadByCase = await loadPrimaryLeadLabelsForCases(supabase, tid, rowCaseIds);
+
+  return rows.map((raw) => {
+    const r = raw as Record<string, unknown>;
+    const id = String(r.id);
+    const meta = asObj(r.metadata);
+    const fp = r.foundation_patient_id != null ? String(r.foundation_patient_id) : null;
+    const leg = r.patient_id != null ? String(r.patient_id) : null;
+    const treatment = r.treatment_type != null ? String(r.treatment_type) : null;
+    const ct = caseTypeFromMetadata(meta);
+
+    let person_label = "—";
+    let person_email: string | null = null;
+    if (fp && patientPersonByFoundation.has(fp)) {
+      const p = patientPersonByFoundation.get(fp)!;
+      person_label = p.label;
+      person_email = p.email;
+    } else if (leg && patientPersonByLegacy.has(leg)) {
+      const p = patientPersonByLegacy.get(leg)!;
+      person_label = p.label;
+      person_email = p.email;
+    }
+
+    return {
+      id,
+      status: String(r.status ?? ""),
+      treatment_type: treatment?.trim() ? treatment.trim() : null,
+      case_type: ct,
+      external_id: r.external_id != null ? String(r.external_id) : null,
+      foundation_patient_id: fp,
+      legacy_patient_id: leg,
+      person_label,
+      person_email,
+      lead: leadByCase.get(id) ?? null,
+      created_at: String(r.created_at ?? ""),
+      updated_at: String(r.updated_at ?? ""),
+    };
+  });
+}
+
 export async function loadCaseAdminDetail(
   tenantId: string,
   caseId: string,

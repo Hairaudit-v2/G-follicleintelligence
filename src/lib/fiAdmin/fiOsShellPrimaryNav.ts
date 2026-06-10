@@ -2,6 +2,12 @@ import { getClinicOsShellActiveNavId } from "@/src/lib/fiAdmin/clinicOsShellConf
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
+export type FiOsPrimarySidebarSubItem = {
+  id: string;
+  label: string;
+  href: string;
+};
+
 export type FiOsPrimarySidebarItem = {
   id: string;
   label: string;
@@ -10,6 +16,8 @@ export type FiOsPrimarySidebarItem = {
   disabled: boolean;
   /** Shown when disabled (permissions / coming soon). */
   hint?: string;
+  /** Nested SurgeryOS links (readiness board). */
+  subItems?: FiOsPrimarySidebarSubItem[];
 };
 
 function normalizeBase(base: string): string {
@@ -126,6 +134,12 @@ export function resolveFiOsPrimarySidebarItems(
       href: hrefFor(b, "cases"),
       disabled: blocks.cases,
       hint: blocks.cases ? "SurgeryOS is not enabled for this admin role." : undefined,
+      subItems: blocks.cases
+        ? undefined
+        : [
+            { id: "cases-worklist", label: "Cases", href: hrefFor(b, "cases") },
+            { id: "surgery-readiness-board", label: "Readiness board", href: hrefFor(b, "surgery-readiness") },
+          ],
     },
     {
       id: "prescriptions",
@@ -197,7 +211,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "foundationos") return "patient-twin";
   if (legacy === "staff" || legacy === "services" || legacy === "configuration") return "settings";
   if (legacy === "leadflow") return "crm";
-  if (legacy === "surgeryos") return "cases";
+  if (legacy === "surgeryos" || legacy === "surgery-readiness-board") return "cases";
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";

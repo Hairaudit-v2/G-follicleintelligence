@@ -47,6 +47,7 @@ const PIN_RESTRICTED_ROUTE_PREFIXES = [
   "/analytics",
   "/doctor",
   "/cases",
+  "/surgery-readiness",
   "/crm",
   "/hr/",
 ] as const;

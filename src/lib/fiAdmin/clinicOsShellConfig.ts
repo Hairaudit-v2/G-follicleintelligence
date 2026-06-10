@@ -170,7 +170,16 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     id: "surgeryos",
     label: "SurgeryOS",
     description: "Planning, procedure day, post-op, and follow-up.",
-    items: [{ id: "surgeryos", label: "SurgeryOS", path: "cases", permissionHint: {} }],
+    items: [
+      { id: "surgeryos", label: "SurgeryOS", path: "cases", permissionHint: {} },
+      {
+        id: "surgery-readiness-board",
+        label: "Readiness board",
+        path: "surgery-readiness",
+        permissionHint: {},
+        description: "14-day surgery readiness across bookings, cases, pathology, and consent signals.",
+      },
+    ],
   },
   {
     id: "auditos",
@@ -342,6 +351,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "consultations") return "consultations";
   if (first === "prescriptions") return "prescriptions";
   if (first === "cases") return "surgeryos";
+  if (first === "surgery-readiness") return "surgery-readiness-board";
   if (first === "crm") return "leadflow";
   if (first === "analytics") return "analyticsos";
   if (first === "audit") return "auditos";

@@ -33,9 +33,17 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");
 });
 
-test("getFiOsShellActiveSidebarId: consultations maps to consultations tab", () => {
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/consultations`, base), "consultations");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/consultations/new`, base), "consultations");
+test("getFiOsShellActiveSidebarId: surgery readiness route stays under Cases / SurgeryOS", () => {
+  const base = "/fi-admin/t-1";
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/surgery-readiness`, base), "cases");
+});
+
+test("resolveFiOsPrimarySidebarItems: cases entry includes readiness board sub-link when enabled", () => {
+  const base = "/fi-admin/t-1";
+  const items = resolveFiOsPrimarySidebarItems(base, true, true);
+  const cases = items.find((i) => i.id === "cases");
+  assert.ok(cases?.subItems?.length);
+  assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/surgery-readiness")));
 });
 
 test("resolveFiOsPrimarySidebarItems: consultations follows bookings board flag", () => {

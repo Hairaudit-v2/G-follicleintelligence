@@ -100,6 +100,11 @@ export function AppointmentDetailPageView({
           <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-600 hover:underline">
             All appointments
           </Link>
+          {booking.booking_type.trim().toLowerCase() === "surgery" ? (
+            <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-600 hover:underline">
+              Surgery readiness board
+            </Link>
+          ) : null}
         </div>
       </header>
 

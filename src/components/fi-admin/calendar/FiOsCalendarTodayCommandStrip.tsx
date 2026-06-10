@@ -140,6 +140,15 @@ export function FiOsCalendarTodayCommandStrip({
         <span className="text-slate-400">Surgeries</span>
         <span className="text-slate-100">{counts.surgery}</span>
       </Link>
+      {route === "fi-admin" ? (
+        <Link
+          href={`/fi-admin/${tenantId}/surgery-readiness`}
+          className={chipClass(false)}
+          title="Surgery readiness board — next 14 days"
+        >
+          <span className="text-slate-400">Readiness</span>
+        </Link>
+      ) : null}
       <Link href={statusHref("arrived", cArrived)} className={chipClass(cArrived)} title="Toggle arrived status">
         <span className="text-slate-400">Arrived</span>
         <span className="text-slate-100">{counts.arrived}</span>

@@ -165,6 +165,7 @@ export function FiOsAppShell({
           effective={effective}
           navItems={sidebarItems}
           activeNavId={activeSidebarId}
+          pathname={pathname}
         />
 
         <div className={fiOsChromeClasses.mainColumn}>
@@ -217,6 +218,7 @@ export function FiOsAppShell({
             effective={effective}
             navItems={sidebarItems}
             activeNavId={activeSidebarId}
+            pathname={pathname}
             onNavigate={closeMobile}
             dense
             onDrawerClose={closeMobile}

@@ -76,6 +76,12 @@ export function PatientDetailPageView({
         >
           Upload blood results
         </Link>
+        <Link
+          href={`/fi-admin/${tenantId}/surgery-readiness`}
+          className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-50"
+        >
+          Surgery readiness
+        </Link>
       </div>
 
       {activeTab === "overview" ? (

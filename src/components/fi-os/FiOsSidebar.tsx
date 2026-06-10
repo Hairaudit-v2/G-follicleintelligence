@@ -17,6 +17,7 @@ export function FiOsSidebar({
   effective,
   navItems,
   activeNavId,
+  pathname,
   variant,
   onNavigate,
   dense,
@@ -27,6 +28,7 @@ export function FiOsSidebar({
   effective: EffectiveBranding;
   navItems: FiOsPrimarySidebarItem[];
   activeNavId: string | null;
+  pathname?: string;
   variant: "rail" | "drawer";
   onNavigate?: () => void;
   dense?: boolean;
@@ -84,7 +86,7 @@ export function FiOsSidebar({
     return (
       <div className={fiOsChromeClasses.sidebarDrawer}>
         {brandBlock}
-        <FiOsModuleNav items={navItems} activeId={activeNavId} onNavigate={onNavigate} dense={dense} />
+        <FiOsModuleNav items={navItems} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
       </div>
     );
   }
@@ -102,7 +104,7 @@ export function FiOsSidebar({
       <div className="relative flex min-h-0 flex-1 flex-col px-2.5">
         {brandBlock}
         {logoStrip}
-        <FiOsModuleNav items={navItems} activeId={activeNavId} onNavigate={onNavigate} dense={dense} />
+        <FiOsModuleNav items={navItems} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
       </div>
     </aside>
   );

@@ -168,11 +168,11 @@ export function ClinicOsOperationsCentre(props: {
             id="ops-surgery-readiness-heading"
             kicker="SurgeryOS"
             title="Surgery readiness"
-            description="Upcoming surgery bookings without a linked case — same signal as Action centre."
+            description="Open the 14-day Surgery readiness board — pathology, consent proxy, confirmations, and case linkage."
             className="mb-4"
           />
           <Link
-            href={`${base}/cases`}
+            href={`${base}/surgery-readiness`}
             className={cn(
               "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
               data.actionCentre.surgeryReadinessAlerts > 0
@@ -181,8 +181,8 @@ export function ClinicOsOperationsCentre(props: {
             )}
           >
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-100">Cases missing for booked procedures</p>
-              <p className="mt-0.5 text-xs text-slate-500">Next 30 days · active statuses</p>
+              <p className="text-sm font-semibold text-slate-100">Surgery readiness board</p>
+              <p className="mt-0.5 text-xs text-slate-500">Cases missing for booked procedures (next 30 days) — tap for full board</p>
             </div>
             <span
               className={cn(

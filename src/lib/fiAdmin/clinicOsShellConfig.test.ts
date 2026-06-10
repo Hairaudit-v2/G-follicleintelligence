@@ -28,6 +28,9 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.services?.href, `${base}/services`);
   assert.equal(byId.consultations?.href, `${base}/consultations`);
   assert.equal(byId.surgeryos?.href, `${base}/cases`);
+  const readiness = items.find((i) => i.id === "surgery-readiness-board");
+  assert.ok(readiness);
+  assert.equal(readiness!.href, `${base}/surgery-readiness`);
   assert.equal(byId.auditos?.href, `${base}/audit`);
   assert.equal(byId.analyticsos?.href, `${base}/analytics`);
   assert.equal(byId.foundationos?.href, `${base}/foundation-integrity`);
@@ -88,6 +91,8 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/prescriptions/new`, base), "prescriptions");
   assert.equal(getClinicOsShellActiveNavId(`${base}/directory`, base), "patientos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/cases/c-1`, base), "surgeryos");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/surgery-readiness`, base), "surgery-readiness-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/foundation-integrity`, base), "foundationos");
 });
 
