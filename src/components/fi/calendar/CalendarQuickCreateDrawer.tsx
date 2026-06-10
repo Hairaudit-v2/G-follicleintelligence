@@ -715,7 +715,7 @@ export function CalendarQuickCreateDrawer({
     setLeadHits([]);
   }, []);
 
-  async function onSubmit(e: React.FormEvent) {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErr(null);
     const tpl = templateId ? calendarQuickTemplateById(templateId) : undefined;
@@ -752,6 +752,7 @@ export function CalendarQuickCreateDrawer({
     }
 
     const staffId = assignedStaffId.trim();
+    if (staffId) {
       const staff = staffDirectory.find((s) => s.id === staffId);
       if (staff && !canSelectStaffForClinicalPicker(staff)) {
         setFormErr(staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available.");
@@ -818,7 +819,7 @@ export function CalendarQuickCreateDrawer({
     } finally {
       setBusy(false);
     }
-  }
+  };
 
   if (!open || !prefill) return null;
 

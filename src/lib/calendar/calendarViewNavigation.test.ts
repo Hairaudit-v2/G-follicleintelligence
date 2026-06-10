@@ -1,11 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  buildCalendarHref,
-  mergeCalendarHrefQuery,
-  parseCalendarSearchParams,
-} from "@/src/lib/bookings/calendarQuery";
+import { buildCalendarHref, parseCalendarSearchParams } from "@/src/lib/bookings/calendarQuery";
 import { buildCalendarNavigationHref, updateCalendarSearchParams } from "@/src/lib/calendar/calendarViewNavigation";
 
 const TENANT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
