@@ -100,6 +100,10 @@ export function CaseDetailPageView({
         <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-600 hover:underline">
           Surgery readiness
         </Link>
+        <span className="text-gray-300">·</span>
+        <Link href={`/fi-admin/${tenantId}/procedure-day`} className="text-blue-600 hover:underline">
+          Procedure day board
+        </Link>
       </p>
 
       <div>

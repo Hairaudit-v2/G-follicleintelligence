@@ -185,6 +185,15 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
             Tomorrow board
           </Link>
           <Link
+            href={`${base}/procedure-day`}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex px-3 py-2 text-sm font-semibold text-slate-200",
+            )}
+          >
+            Procedure day
+          </Link>
+          <Link
             href={`${base}/cases`}
             className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
           >

@@ -93,6 +93,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
         label: "Readiness board",
         title: "SurgeryOS — 14-day surgery readiness across bookings and case signals.",
       },
+      {
+        href: `${base}/procedure-day`,
+        label: "Procedure day",
+        title: "SurgeryOS — today’s surgery schedule, team, and procedure progress.",
+      },
     ],
   });
 

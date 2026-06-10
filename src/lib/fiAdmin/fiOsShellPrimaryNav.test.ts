@@ -39,12 +39,18 @@ test("getFiOsShellActiveSidebarId: surgery readiness route stays under Cases / S
   assert.equal(getFiOsShellActiveSidebarId(`${base}/surgery-readiness`, base), "cases");
 });
 
-test("resolveFiOsPrimarySidebarItems: cases entry includes readiness board sub-link when enabled", () => {
+test("getFiOsShellActiveSidebarId: procedure day route stays under Cases / SurgeryOS", () => {
+  const b = "/fi-admin/t-1";
+  assert.equal(getFiOsShellActiveSidebarId(`${b}/procedure-day`, b), "cases");
+});
+
+test("resolveFiOsPrimarySidebarItems: cases entry includes readiness and procedure day sub-links when enabled", () => {
   const base = "/fi-admin/t-1";
   const items = resolveFiOsPrimarySidebarItems(base, true, true);
   const cases = items.find((i) => i.id === "cases");
   assert.ok(cases?.subItems?.length);
   assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/surgery-readiness")));
+  assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/procedure-day")));
 });
 
 test("getFiOsShellActiveSidebarId: consultation conversion route stays under Consultations", () => {

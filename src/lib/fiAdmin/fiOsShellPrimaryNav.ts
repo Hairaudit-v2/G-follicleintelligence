@@ -170,6 +170,7 @@ export function resolveFiOsPrimarySidebarItems(
         : [
             { id: "cases-worklist", label: "Cases", href: hrefFor(b, "cases") },
             { id: "surgery-readiness-board", label: "Readiness board", href: hrefFor(b, "surgery-readiness") },
+            { id: "procedure-day-board", label: "Procedure day", href: hrefFor(b, "procedure-day") },
           ],
     },
     {
@@ -239,6 +240,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
+    if (firstEarly === "procedure-day") return "cases";
   }
 
   const legacy = getClinicOsShellActiveNavId(pathname, base);
@@ -248,7 +250,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "operations-centre") return "operations-centre";
   if (legacy === "reception-board") return "reception-board";
   if (legacy === "tomorrow-board") return "tomorrow-board";
-  if (legacy === "surgeryos" || legacy === "surgery-readiness-board") return "cases";
+  if (legacy === "surgeryos" || legacy === "surgery-readiness-board" || legacy === "procedure-day-board") return "cases";
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";

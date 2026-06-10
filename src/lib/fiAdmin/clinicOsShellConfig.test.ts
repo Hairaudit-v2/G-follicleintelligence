@@ -38,6 +38,9 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   const readiness = items.find((i) => i.id === "surgery-readiness-board");
   assert.ok(readiness);
   assert.equal(readiness!.href, `${base}/surgery-readiness`);
+  const procDay = items.find((i) => i.id === "procedure-day-board");
+  assert.ok(procDay);
+  assert.equal(procDay!.href, `${base}/procedure-day`);
   assert.equal(byId.auditos?.href, `${base}/audit`);
   assert.equal(byId.analyticsos?.href, `${base}/analytics`);
   assert.equal(byId.foundationos?.href, `${base}/foundation-integrity`);
@@ -106,6 +109,8 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/cases/c-1`, base), "surgeryos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/surgery-readiness`, base), "surgery-readiness-board");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/procedure-day`, base), "procedure-day-board");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/procedure-day/extra`, base), "procedure-day-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/consultation-conversion`, base), "consultation-conversion-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/consultations/c-1`, base), "consultations");
   assert.equal(getClinicOsShellActiveNavId(`${base}/operations`, base), "operations-centre");

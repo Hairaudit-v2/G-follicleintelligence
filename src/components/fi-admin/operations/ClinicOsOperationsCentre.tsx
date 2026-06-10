@@ -113,6 +113,15 @@ export function ClinicOsOperationsCentre(props: {
             Surgery readiness
           </Link>
           <Link
+            href={`${base}/procedure-day`}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200",
+            )}
+          >
+            Procedure day
+          </Link>
+          <Link
             href={base}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,

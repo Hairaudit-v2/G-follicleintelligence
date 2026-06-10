@@ -193,6 +193,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         permissionHint: {},
         description: "14-day surgery readiness across bookings, cases, pathology, and consent signals.",
       },
+      {
+        id: "procedure-day-board",
+        label: "Procedure day",
+        path: "procedure-day",
+        permissionHint: {},
+        description: "Today’s surgery schedule, team, procedure progress, and operating-room checklist.",
+      },
     ],
   },
   {
@@ -375,6 +382,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "prescriptions") return "prescriptions";
   if (first === "cases") return "surgeryos";
   if (first === "surgery-readiness") return "surgery-readiness-board";
+  if (first === "procedure-day") return "procedure-day-board";
   if (first === "crm") return "leadflow";
   if (first === "analytics") return "analyticsos";
   if (first === "audit") return "auditos";

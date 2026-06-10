@@ -62,6 +62,12 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
           >
             Surgery readiness
           </Link>
+          <Link
+            href={`${base}/procedure-day`}
+            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200")}
+          >
+            Procedure day
+          </Link>
         </div>
       </header>
 
