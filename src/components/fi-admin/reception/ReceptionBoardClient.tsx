@@ -4,13 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { receptionBoardFlowAction } from "@/lib/actions/reception-board-flow-action";
 import { cn } from "@/lib/utils";
-import { cancelBookingAction, completeBookingAction, updateBookingAction } from "@/lib/actions/fi-booking-actions";
 import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { ReceptionBoardCard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import type { ReceptionBoardColumnId } from "@/src/lib/fiOs/receptionBoardModel";
-import { RECEPTION_BOARD_COLUMN_IDS, withReceptionFlowPhase } from "@/src/lib/fiOs/receptionBoardModel";
+import { RECEPTION_BOARD_COLUMN_IDS } from "@/src/lib/fiOs/receptionBoardModel";
 
 const COLUMN_LABELS: Record<ReceptionBoardColumnId, string> = {
   expected: "Expected",
@@ -22,7 +22,7 @@ const COLUMN_LABELS: Record<ReceptionBoardColumnId, string> = {
   cancelled: "Cancelled",
 };
 
-export type ReceptionMutationMode = "full" | "complete_only" | "none";
+export type ReceptionMutationMode = "full" | "pin_reception" | "none";
 
 export function ReceptionBoardClient(props: {
   tenantId: string;
@@ -71,8 +71,8 @@ export function ReceptionBoardClient(props: {
     }
   }
 
-  const canPatch = mutationMode === "full";
-  const canCompleteOnly = mutationMode === "complete_only" || mutationMode === "full";
+  const canFlo = mutationMode === "full" || mutationMode === "pin_reception";
+  const canCancel = mutationMode === "full";
 
   return (
     <div className="space-y-5">
@@ -101,9 +101,10 @@ export function ReceptionBoardClient(props: {
         </div>
       </div>
 
-      {mutationMode === "complete_only" ? (
-        <p className="rounded-lg border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2 text-sm text-amber-100/95">
-          PIN session: you can mark visits complete. Other status changes need a full team login.
+      {mutationMode === "pin_reception" ? (
+        <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2 text-sm text-emerald-100/95">
+          PIN session: you can run today&apos;s reception flow (arrived, consult/treatment phase, complete, no-show).{" "}
+          <span className="font-medium text-emerald-50">Cancel</span> needs a full team login.
         </p>
       ) : null}
       {mutationMode === "none" ? (
@@ -136,8 +137,8 @@ export function ReceptionBoardClient(props: {
                     base={base}
                     timeLabel={timeFmt.format(new Date(c.startAt))}
                     busy={busyId === c.id}
-                    canPatch={canPatch}
-                    canCompleteOnly={canCompleteOnly}
+                    canFlo={canFlo}
+                    canCancel={canCancel}
                     onAction={(fn) => run(c.id, fn)}
                   />
                 </li>
@@ -156,11 +157,11 @@ function ReceptionBookingCard(props: {
   base: string;
   timeLabel: string;
   busy: boolean;
-  canPatch: boolean;
-  canCompleteOnly: boolean;
+  canFlo: boolean;
+  canCancel: boolean;
   onAction: (fn: () => Promise<{ ok: boolean; error?: string }>) => void;
 }) {
-  const { card, tenantId, base, timeLabel, busy, canPatch, canCompleteOnly, onAction } = props;
+  const { card, tenantId, base, timeLabel, busy, canFlo, canCancel, onAction } = props;
   const apptHref = `${base}/calendar`;
 
   const terminal = card.receptionColumn === "complete" || card.receptionColumn === "cancelled" || card.receptionColumn === "no_show";
@@ -193,91 +194,46 @@ function ReceptionBookingCard(props: {
 
       {!terminal ? (
         <div className="mt-2 flex flex-wrap gap-1">
-          {card.receptionColumn === "expected" && canPatch ? (
+          {card.receptionColumn === "expected" && canFlo ? (
             <>
               <ActionChip
                 label="Mark arrived"
                 disabled={busy}
-                onPress={() =>
-                  onAction(() =>
-                    updateBookingAction(tenantId, card.id, {
-                      adminKey: "",
-                      bookingStatus: "arrived",
-                      metadata: withReceptionFlowPhase(card.metadata, null),
-                    })
-                  )
-                }
+                onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "mark_arrived" }))}
               />
               <ActionChip
                 label="Start consult"
                 disabled={busy}
-                onPress={() =>
-                  onAction(() =>
-                    updateBookingAction(tenantId, card.id, {
-                      adminKey: "",
-                      bookingStatus: "arrived",
-                      metadata: withReceptionFlowPhase(card.metadata, "consultation"),
-                    })
-                  )
-                }
+                onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_consultation" }))}
               />
               <ActionChip
                 label="Start treatment"
                 disabled={busy}
-                onPress={() =>
-                  onAction(() =>
-                    updateBookingAction(tenantId, card.id, {
-                      adminKey: "",
-                      bookingStatus: "arrived",
-                      metadata: withReceptionFlowPhase(card.metadata, "treatment"),
-                    })
-                  )
-                }
+                onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))}
               />
             </>
           ) : null}
 
-          {card.receptionColumn === "arrived" && canPatch ? (
+          {card.receptionColumn === "arrived" && canFlo ? (
             <>
               <ActionChip
                 label="Start consult"
                 disabled={busy}
-                onPress={() =>
-                  onAction(() =>
-                    updateBookingAction(tenantId, card.id, {
-                      adminKey: "",
-                      metadata: withReceptionFlowPhase(card.metadata, "consultation"),
-                    })
-                  )
-                }
+                onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_consultation" }))}
               />
               <ActionChip
                 label="Start treatment"
                 disabled={busy}
-                onPress={() =>
-                  onAction(() =>
-                    updateBookingAction(tenantId, card.id, {
-                      adminKey: "",
-                      metadata: withReceptionFlowPhase(card.metadata, "treatment"),
-                    })
-                  )
-                }
+                onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))}
               />
             </>
           ) : null}
 
-          {card.receptionColumn === "in_consultation" && canPatch ? (
+          {card.receptionColumn === "in_consultation" && canFlo ? (
             <ActionChip
               label="Start treatment"
               disabled={busy}
-              onPress={() =>
-                onAction(() =>
-                  updateBookingAction(tenantId, card.id, {
-                    adminKey: "",
-                    metadata: withReceptionFlowPhase(card.metadata, "treatment"),
-                  })
-                )
-              }
+              onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "start_treatment" }))}
             />
           ) : null}
 
@@ -285,11 +241,11 @@ function ReceptionBookingCard(props: {
             card.receptionColumn === "in_consultation" ||
             card.receptionColumn === "in_treatment" ||
             card.receptionColumn === "expected") &&
-          canCompleteOnly ? (
+          canFlo ? (
             <ActionChip
               label="Complete"
               disabled={busy}
-              onPress={() => onAction(() => completeBookingAction(tenantId, card.id, { adminKey: "" }))}
+              onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "complete" }))}
             />
           ) : null}
 
@@ -297,28 +253,39 @@ function ReceptionBookingCard(props: {
             card.receptionColumn === "arrived" ||
             card.receptionColumn === "in_consultation" ||
             card.receptionColumn === "in_treatment") &&
-          canPatch ? (
-            <>
-              <ActionChip
-                label="No show"
-                disabled={busy}
-                onPress={() =>
-                  onAction(() =>
-                    updateBookingAction(tenantId, card.id, {
-                      adminKey: "",
-                      bookingStatus: "no_show",
-                      metadata: withReceptionFlowPhase(card.metadata, null),
-                    })
-                  )
-                }
-              />
-              <ActionChip
-                label="Cancel"
-                disabled={busy}
-                tone="danger"
-                onPress={() => onAction(() => cancelBookingAction(tenantId, card.id, { adminKey: "" }))}
-              />
-            </>
+          canFlo ? (
+            <ActionChip
+              label="No show"
+              disabled={busy}
+              onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "mark_no_show" }))}
+            />
+          ) : null}
+
+          {(card.receptionColumn === "expected" ||
+            card.receptionColumn === "arrived" ||
+            card.receptionColumn === "in_consultation" ||
+            card.receptionColumn === "in_treatment") &&
+          canCancel ? (
+            <ActionChip
+              label="Cancel"
+              disabled={busy}
+              tone="danger"
+              onPress={() => onAction(() => receptionBoardFlowAction(tenantId, card.id, { action: "cancel" }))}
+            />
+          ) : null}
+
+          {(card.receptionColumn === "expected" ||
+            card.receptionColumn === "arrived" ||
+            card.receptionColumn === "in_consultation" ||
+            card.receptionColumn === "in_treatment") &&
+          !canCancel &&
+          canFlo ? (
+            <span
+              className="inline-flex items-center rounded-md border border-white/[0.06] px-2 py-1 text-[0.6rem] font-medium uppercase tracking-wide text-slate-500"
+              title="Cancellation requires a full team login (not available in PIN mode)."
+            >
+              Cancel (full login)
+            </span>
           ) : null}
         </div>
       ) : null}

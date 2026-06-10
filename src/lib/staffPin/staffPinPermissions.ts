@@ -11,6 +11,7 @@ export type StaffPinClinicAction =
   | "calendar.view"
   | "calendar.quick_book"
   | "patient.check_in"
+  | "reception.board_flow"
   | "appointment.notes"
   | "tasks.view_assigned"
   | "patient.appointment_context"
@@ -28,6 +29,7 @@ const PIN_ALLOWED_ACTIONS = new Set<StaffPinClinicAction>([
   "calendar.view",
   "calendar.quick_book",
   "patient.check_in",
+  "reception.board_flow",
   "appointment.notes",
   "tasks.view_assigned",
   "patient.appointment_context",

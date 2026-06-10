@@ -9,7 +9,8 @@ export type FiStaffPinAuditEventKind =
   | "staff_pin.set"
   | "staff_pin.reset"
   | "staff_pin.disabled"
-  | "staff_pin.logout";
+  | "staff_pin.logout"
+  | "staff_pin.reception_board_action";
 
 export async function insertFiStaffPinAuditEvent(opts: {
   tenantId: string;

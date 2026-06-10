@@ -37,7 +37,7 @@ export default async function FiAdminReceptionBoardPage({ params }: { params: Pr
 
   let mutationMode: ReceptionMutationMode = "none";
   if (session) {
-    mutationMode = session.authMode === "staff_pin" ? "complete_only" : "full";
+    mutationMode = session.authMode === "staff_pin" ? "pin_reception" : "full";
   }
 
   const base = `/fi-admin/${data.tenantId}`;

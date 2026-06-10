@@ -21,6 +21,7 @@ describe("staffPinPermissions", () => {
     assert.equal(canUseStaffPinClinicSession(session, "calendar.view"), true);
     assert.equal(canUseStaffPinClinicSession(session, "calendar.quick_book"), true);
     assert.equal(canUseStaffPinClinicSession(session, "patient.check_in"), true);
+    assert.equal(canUseStaffPinClinicSession(session, "reception.board_flow"), true);
   });
 
   it("blocks admin and settings actions", () => {
@@ -38,6 +39,7 @@ describe("staffPinPermissions", () => {
   it("flags restricted routes for PIN sessions", () => {
     const base = `/fi-admin/${session.tenantId}`;
     assert.equal(isStaffPinRestrictedRoute(`${base}/calendar`, base), false);
+    assert.equal(isStaffPinRestrictedRoute(`${base}/reception`, base), false);
     assert.equal(isStaffPinRestrictedRoute(`${base}/patients`, base), false);
     assert.equal(isStaffPinRestrictedRoute(`${base}/settings/admin-users`, base), true);
     assert.equal(isStaffPinRestrictedRoute(`${base}/prescriptions`, base), true);

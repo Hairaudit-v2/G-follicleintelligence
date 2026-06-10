@@ -18,9 +18,9 @@ export function aggregateActiveLeadVolumeByPipelineStage(
   pipelineStageIds: ReadonlySet<string>
 ): CrmPipelineLeadVolume {
   const activeByStageId: Record<string, number> = {};
-  for (const sid of pipelineStageIds) {
+  pipelineStageIds.forEach((sid) => {
     activeByStageId[sid] = 0;
-  }
+  });
   let activeUnassignedStage = 0;
   let activeOtherPipelineStage = 0;
 
