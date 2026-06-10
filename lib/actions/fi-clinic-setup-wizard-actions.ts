@@ -9,11 +9,7 @@ import {
   buildClinicSetupWizardPreview,
   loadClinicSetupWizardBootstrap,
 } from "@/src/lib/clinicSetup/clinicSetupWizard.server";
-import type {
-  ApplyClinicSetupResult,
-  ClinicSetupRoomCounts,
-  ClinicSetupStaffInput,
-} from "@/src/lib/clinicSetup/clinicSetupWizardCore";
+import type { ClinicSetupRoomCounts, ClinicSetupStaffInput } from "@/src/lib/clinicSetup/clinicSetupWizardCore";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;

@@ -13,7 +13,7 @@ import {
   findStaffOverlapConflictWithAssignments,
   staffRoleMatchesEligibility,
 } from "@/src/lib/rooms/roomAvailabilityCore";
-import { loadClinicRoomsForTenant, resolveServiceIdForBookingType } from "@/src/lib/rooms/fiClinicRooms.server";
+import { loadClinicRoomsForTenant } from "@/src/lib/rooms/fiClinicRooms.server";
 import type { FiClinicRoomRow } from "@/src/lib/rooms/roomTypes";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
