@@ -12,6 +12,7 @@ import type { CaseWorklistRow } from "@/src/lib/cases/casesIndexTypes";
 import { loadCasesIndexRowsForIds } from "@/src/lib/cases/caseLoaders";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
+import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { paymentRecordNeedsCollection, surgeryDepositBoardLabel, SURGERY_DEPOSIT_BOARD_COPY } from "@/src/lib/payments/paymentRecordModel";
@@ -38,7 +39,7 @@ import {
   loadStaffAndUserLabels,
   resolvePatientIdForCaseRow,
 } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
-import { hasHighRiskSeverity, isActiveSurgeryBookingStatus } from "@/src/lib/surgery/surgeryReadinessBoardModel";
+import { hasHighRiskSeverity, isActiveSurgeryBookingStatus, hasConsultationConsentSignal } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
 const BOARD_LIMIT = 240;
 
@@ -141,6 +142,8 @@ export type ProcedureDayScheduleCard = {
   graftTargetLabel: string | null;
   calendarAssigneeLabel: string | null;
   procedureSurgeonLabel: string | null;
+  procedureNurseLabel: string | null;
+  procedureTechnicianLabels: string[];
   teamMemberLabels: string[];
   roomLabel: string | null;
   procedureRoomText: string | null;
@@ -227,9 +230,13 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
   const roomIds = uniqueStrings(surgeryBookings.map((b) => b.room_id));
 
   const procUserIds = new Set<string>();
-  for (const w of worklistById.values()) {
+  for (const w of Array.from(worklistById.values())) {
     const p = w.procedureDay;
     if (p?.surgeon_user_id?.trim()) procUserIds.add(p.surgeon_user_id.trim());
+    if (p?.nurse_user_id?.trim()) procUserIds.add(p.nurse_user_id.trim());
+    for (const uid of p?.technician_user_ids ?? []) {
+      if (uid.trim()) procUserIds.add(uid.trim());
+    }
     for (const uid of p?.team_member_user_ids ?? []) {
       if (uid.trim()) procUserIds.add(uid.trim());
     }
@@ -273,7 +280,12 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
 
     const proc = work?.procedureDay ?? null;
     const surgeonUserId = proc?.surgeon_user_id?.trim() || null;
+    const nurseUserId = proc?.nurse_user_id?.trim() || null;
     const procedureSurgeonLabel = surgeonUserId ? fiUserLabels.get(surgeonUserId) ?? null : null;
+    const procedureNurseLabel = nurseUserId ? fiUserLabels.get(nurseUserId) ?? null : null;
+    const procedureTechnicianLabels = (proc?.technician_user_ids ?? [])
+      .map((id) => fiUserLabels.get(id.trim()))
+      .filter((x): x is string => Boolean(x?.trim()));
     const teamMemberLabels = (proc?.team_member_user_ids ?? [])
       .map((id) => fiUserLabels.get(id.trim()))
       .filter((x): x is string => Boolean(x?.trim()));
@@ -371,6 +383,8 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
       graftTargetLabel: formatGraftTarget(work),
       calendarAssigneeLabel: calendarAssignee,
       procedureSurgeonLabel,
+      procedureNurseLabel,
+      procedureTechnicianLabels,
       teamMemberLabels,
       roomLabel,
       procedureRoomText: proc?.procedure_room?.trim() || null,
@@ -394,7 +408,7 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
       pipelinePhase,
       hrefs: {
         appointment: `${base}/appointments/${encodeURIComponent(b.id)}`,
-        case: caseId ? `${base}/cases/${encodeURIComponent(caseId)}` : null,
+        case: caseId ? caseProcedureDayDetailHref(tid, caseId) : null,
         patient: patientHref,
         calendar: `${base}/calendar?date=${encodeURIComponent(surgeryLocalYmd)}`,
       },

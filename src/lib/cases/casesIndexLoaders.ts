@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import type { CaseFollowUpRow, CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
-import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
+import { FI_CASE_PROCEDURE_SELECT_COLUMNS, mapCaseProcedureRowFromRecord, type CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
 import type { CaseSurgeryPlanRow } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { plannedZoneRowSchema, type PlannedZoneRow } from "@/src/lib/cases/surgeryPlanningTypes";
 import type { FollowUpCheckpointValue } from "@/src/lib/cases/postOpTypes";
@@ -26,15 +26,6 @@ function parsePlannedZones(raw: unknown): PlannedZoneRow[] {
   for (const item of raw) {
     const p = plannedZoneRowSchema.safeParse(item);
     if (p.success) out.push(p.data);
-  }
-  return out;
-}
-
-function parseTeamIds(raw: unknown): string[] {
-  if (!Array.isArray(raw)) return [];
-  const out: string[] = [];
-  for (const x of raw) {
-    if (typeof x === "string" && x.trim()) out.push(x.trim());
   }
   return out;
 }
@@ -64,35 +55,6 @@ function mapSurgeryPlan(r: Record<string, unknown>): CaseSurgeryPlanRow {
     medication_prep_notes: r.medication_prep_notes != null ? String(r.medication_prep_notes) : null,
     planning_notes: r.planning_notes != null ? String(r.planning_notes) : null,
     surgical_plan_summary: r.surgical_plan_summary != null ? String(r.surgical_plan_summary) : null,
-    created_at: String(r.created_at ?? ""),
-    updated_at: String(r.updated_at ?? ""),
-  };
-}
-
-function mapProcedure(r: Record<string, unknown>): CaseProcedureRow {
-  return {
-    id: String(r.id),
-    tenant_id: String(r.tenant_id),
-    case_id: String(r.case_id),
-    procedure_date: r.procedure_date != null ? String(r.procedure_date) : null,
-    procedure_status: String(r.procedure_status ?? "scheduled"),
-    surgeon_user_id: r.surgeon_user_id != null ? String(r.surgeon_user_id) : null,
-    team_member_user_ids: parseTeamIds(r.team_member_user_ids),
-    procedure_location: r.procedure_location != null ? String(r.procedure_location) : null,
-    procedure_room: r.procedure_room != null ? String(r.procedure_room) : null,
-    start_time: r.start_time != null ? String(r.start_time) : null,
-    finish_time: r.finish_time != null ? String(r.finish_time) : null,
-    punch_size: r.punch_size != null ? String(r.punch_size) : null,
-    extraction_method: r.extraction_method != null ? String(r.extraction_method) : null,
-    implantation_method: r.implantation_method != null ? String(r.implantation_method) : null,
-    medication_notes: r.medication_notes != null ? String(r.medication_notes) : null,
-    intraoperative_notes: r.intraoperative_notes != null ? String(r.intraoperative_notes) : null,
-    grafts_extracted: r.grafts_extracted != null ? Number(r.grafts_extracted) : null,
-    grafts_implanted: r.grafts_implanted != null ? Number(r.grafts_implanted) : null,
-    hairs_implanted: r.hairs_implanted != null ? Number(r.hairs_implanted) : null,
-    graft_handling_notes: r.graft_handling_notes != null ? String(r.graft_handling_notes) : null,
-    complications_notes: r.complications_notes != null ? String(r.complications_notes) : null,
-    completion_summary: r.completion_summary != null ? String(r.completion_summary) : null,
     created_at: String(r.created_at ?? ""),
     updated_at: String(r.updated_at ?? ""),
   };
@@ -170,13 +132,7 @@ export async function loadCasesIndexExtensionBundle(
       )
       .eq("tenant_id", tid)
       .in("case_id", ids),
-    supabase
-      .from("fi_case_procedures")
-      .select(
-        "id, tenant_id, case_id, procedure_date, procedure_status, surgeon_user_id, team_member_user_ids, procedure_location, procedure_room, start_time, finish_time, punch_size, extraction_method, implantation_method, medication_notes, intraoperative_notes, grafts_extracted, grafts_implanted, hairs_implanted, graft_handling_notes, complications_notes, completion_summary, created_at, updated_at"
-      )
-      .eq("tenant_id", tid)
-      .in("case_id", ids),
+    supabase.from("fi_case_procedures").select(FI_CASE_PROCEDURE_SELECT_COLUMNS).eq("tenant_id", tid).in("case_id", ids),
     supabase
       .from("fi_case_post_op_tracking")
       .select(
@@ -212,7 +168,7 @@ export async function loadCasesIndexExtensionBundle(
   const proceduresByCaseId = new Map<string, CaseProcedureRow>();
   for (const row of procRows ?? []) {
     const r = row as Record<string, unknown>;
-    const p = mapProcedure(r);
+    const p = mapCaseProcedureRowFromRecord(r);
     proceduresByCaseId.set(p.case_id, p);
   }
 

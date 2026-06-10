@@ -21,6 +21,15 @@ export function caseDetailSectionHeadingId(sectionId: CaseDetailSectionId): stri
   return `${sectionId}-heading`;
 }
 
+/** Hash link for SurgeryOS procedure day section (scroll target on case detail). */
+export const CASE_PROCEDURE_DAY_DETAIL_HASH = `#${CASE_DETAIL_SECTION_IDS.procedureDay}`;
+
+export function caseProcedureDayDetailHref(tenantId: string, caseId: string): string {
+  const tid = tenantId.trim();
+  const cid = caseId.trim();
+  return `/fi-admin/${encodeURIComponent(tid)}/cases/${encodeURIComponent(cid)}${CASE_PROCEDURE_DAY_DETAIL_HASH}`;
+}
+
 /** Order matches main page layout top-to-bottom. */
 export const CASE_DETAIL_NAV_SECTIONS: { id: CaseDetailSectionId; label: string }[] = [
   { id: CASE_DETAIL_SECTION_IDS.summary, label: "Summary" },

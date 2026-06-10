@@ -9,17 +9,17 @@ import { StaffReadinessPickerWarning } from "@/src/components/fi/staff/StaffClin
 
 import { caseFormField } from "./caseFormFieldProps";
 
-const TEAM_MEMBER_SELECT = caseFormField("procedure-team-add-member");
+const TECH_ADD_SELECT = caseFormField("procedure-technician-add-member");
 
-export function CaseProcedureTeamPanel({
+export function CaseProcedureTechnicianPanel({
   tenantId,
-  teamIds,
+  technicianIds,
   userOptions,
   excludeUserIds,
   onChange,
 }: {
   tenantId: string;
-  teamIds: string[];
+  technicianIds: string[];
   userOptions: ProcedureTeamPickerOption[];
   excludeUserIds?: string[];
   onChange: (next: string[]) => void;
@@ -27,7 +27,7 @@ export function CaseProcedureTeamPanel({
   const exclude = new Set((excludeUserIds ?? []).filter(Boolean));
 
   const available = userOptions.filter(
-    (u) => !teamIds.includes(u.fi_user_id) && !exclude.has(u.fi_user_id)
+    (u) => !technicianIds.includes(u.fi_user_id) && !exclude.has(u.fi_user_id)
   );
 
   function labelFor(id: string): string {
@@ -40,7 +40,7 @@ export function CaseProcedureTeamPanel({
     return u.allowed_slots.includes("clinical") ? "clinical" : "support";
   }
 
-  const blockedSelected = teamIds
+  const blockedSelected = technicianIds
     .map((id) => {
       const u = userOptions.find((x) => x.fi_user_id === id);
       if (!u) return null;
@@ -51,27 +51,26 @@ export function CaseProcedureTeamPanel({
 
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-semibold text-gray-800">Additional team</h3>
+      <h3 className="text-xs font-semibold text-gray-800">Technicians / assistants</h3>
       <p className="text-xs text-gray-500">
-        Coordinators, trainees, or other staff not captured as surgeon, nurse, or technicians above (legacy mixed list
-        is still supported).
+        Structured technician roster for procedure day (separate from the circulating nurse and surgeon).
       </p>
       <div className="flex flex-wrap gap-2">
-        <label htmlFor={TEAM_MEMBER_SELECT.id} className="sr-only">
-          Add team member
+        <label htmlFor={TECH_ADD_SELECT.id} className="sr-only">
+          Add technician
         </label>
         <select
-          {...TEAM_MEMBER_SELECT}
+          {...TECH_ADD_SELECT}
           className="max-w-md rounded border border-gray-300 bg-white px-2 py-1 text-sm"
           defaultValue=""
           onChange={(e) => {
             const v = e.target.value;
             e.target.value = "";
             if (!v) return;
-            if (!teamIds.includes(v)) onChange([...teamIds, v]);
+            if (!technicianIds.includes(v)) onChange([...technicianIds, v]);
           }}
         >
-          <option value="">Add team member…</option>
+          <option value="">Add technician…</option>
           {available.map((u) => {
             const slot = u.allowed_slots.includes("support") ? "support" : "clinical";
             const selectable = canSelectStaffForProcedureSlot(u, slot);
@@ -89,17 +88,21 @@ export function CaseProcedureTeamPanel({
           blockReason={blockedSelected[0]!.clinical_readiness.block_reason}
         />
       ) : null}
-      {teamIds.length === 0 ? (
-        <p className="text-xs text-gray-400">No team members selected.</p>
+      {technicianIds.length === 0 ? (
+        <p className="text-xs text-gray-400">No technicians selected.</p>
       ) : (
         <ul className="flex flex-wrap gap-2">
-          {teamIds.map((id) => (
+          {technicianIds.map((id) => (
             <li
               key={id}
               className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-800"
             >
               <span>{labelFor(id)}</span>
-              <button type="button" className="text-rose-600 hover:underline" onClick={() => onChange(teamIds.filter((x) => x !== id))}>
+              <button
+                type="button"
+                className="text-rose-600 hover:underline"
+                onClick={() => onChange(technicianIds.filter((x) => x !== id))}
+              >
                 ×
               </button>
             </li>

@@ -11,6 +11,7 @@ import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPic
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { loadFollowUpsForCase, loadPostOpTrackingForCase } from "@/src/lib/cases/postOpLoaders";
 import { loadProcedureDayForCase } from "@/src/lib/cases/procedureDayLoaders";
+import { pickPrimaryLinkedSurgeryBookingYmd } from "@/src/lib/cases/caseProcedureDayLinkedBooking";
 import { loadProcedureTeamPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
@@ -107,6 +108,8 @@ export default async function CaseDetailRoutePage({
   const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
   const initialPaymentRecords = payMap.get(caseId.trim()) ?? [];
 
+  const linkedSurgery = pickPrimaryLinkedSurgeryBookingYmd(caseAppointmentBookings, calendarSettings.calendarTimezone);
+
   const pageView = (
     <CaseDetailPageView
       tenantId={tenantId}
@@ -114,6 +117,7 @@ export default async function CaseDetailRoutePage({
       surgeryPlan={surgeryPlan}
       procedureDay={procedureDay}
       teamUserOptions={teamUserOptions}
+      linkedSurgeryBookingYmd={linkedSurgery.ymd}
       postOpTracking={postOpTracking}
       followUps={followUps}
       timelineItems={timelineItems}

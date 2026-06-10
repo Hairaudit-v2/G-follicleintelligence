@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { parseProcedureMilestones } from "@/src/lib/cases/procedureDayMilestonesModel";
 
 export type CaseProcedureRow = {
   id: string;
@@ -11,7 +12,14 @@ export type CaseProcedureRow = {
   procedure_date: string | null;
   procedure_status: string;
   surgeon_user_id: string | null;
+  /** Circulating / recovery nurse (`fi_users`). */
+  nurse_user_id: string | null;
+  /** Surgical technicians / assistants (`fi_users` ids). */
+  technician_user_ids: string[];
+  /** Legacy mixed team list (still supported). Prefer nurse + technicians + surgeon for new records. */
   team_member_user_ids: string[];
+  /** Milestone key → completed-at ISO timestamp. */
+  procedure_milestones: Record<string, string>;
   procedure_location: string | null;
   procedure_room: string | null;
   start_time: string | null;
@@ -31,6 +39,10 @@ export type CaseProcedureRow = {
   updated_at: string;
 };
 
+/** Shared select list for `fi_case_procedures` (SurgeryOS procedure day). */
+export const FI_CASE_PROCEDURE_SELECT_COLUMNS =
+  "id, tenant_id, case_id, procedure_date, procedure_status, surgeon_user_id, nurse_user_id, technician_user_ids, team_member_user_ids, procedure_milestones, procedure_location, procedure_room, start_time, finish_time, punch_size, extraction_method, implantation_method, medication_notes, intraoperative_notes, grafts_extracted, grafts_implanted, hairs_implanted, graft_handling_notes, complications_notes, completion_summary, created_at, updated_at";
+
 export type FiUserPickerOption = {
   id: string;
   email: string | null;
@@ -46,28 +58,7 @@ function parseTeamIds(raw: unknown): string[] {
   return out;
 }
 
-export async function loadProcedureDayForCase(
-  tenantId: string,
-  caseId: string,
-  client?: SupabaseClient
-): Promise<CaseProcedureRow | null> {
-  const supabase = client ?? supabaseAdmin();
-  const tid = assertNonEmptyUuid(tenantId, "tenantId");
-  const cid = assertNonEmptyUuid(caseId, "caseId");
-
-  const { data: row, error } = await supabase
-    .from("fi_case_procedures")
-    .select(
-      "id, tenant_id, case_id, procedure_date, procedure_status, surgeon_user_id, team_member_user_ids, procedure_location, procedure_room, start_time, finish_time, punch_size, extraction_method, implantation_method, medication_notes, intraoperative_notes, grafts_extracted, grafts_implanted, hairs_implanted, graft_handling_notes, complications_notes, completion_summary, created_at, updated_at"
-    )
-    .eq("tenant_id", tid)
-    .eq("case_id", cid)
-    .maybeSingle();
-
-  if (error) throw new Error(error.message);
-  if (!row) return null;
-
-  const r = row as Record<string, unknown>;
+export function mapCaseProcedureRowFromRecord(r: Record<string, unknown>): CaseProcedureRow {
   return {
     id: String(r.id),
     tenant_id: String(r.tenant_id),
@@ -75,7 +66,10 @@ export async function loadProcedureDayForCase(
     procedure_date: r.procedure_date != null ? String(r.procedure_date) : null,
     procedure_status: String(r.procedure_status ?? "scheduled"),
     surgeon_user_id: r.surgeon_user_id != null ? String(r.surgeon_user_id) : null,
+    nurse_user_id: r.nurse_user_id != null ? String(r.nurse_user_id) : null,
+    technician_user_ids: parseTeamIds(r.technician_user_ids),
     team_member_user_ids: parseTeamIds(r.team_member_user_ids),
+    procedure_milestones: parseProcedureMilestones(r.procedure_milestones),
     procedure_location: r.procedure_location != null ? String(r.procedure_location) : null,
     procedure_room: r.procedure_room != null ? String(r.procedure_room) : null,
     start_time: r.start_time != null ? String(r.start_time) : null,
@@ -94,6 +88,28 @@ export async function loadProcedureDayForCase(
     created_at: String(r.created_at ?? ""),
     updated_at: String(r.updated_at ?? ""),
   };
+}
+
+export async function loadProcedureDayForCase(
+  tenantId: string,
+  caseId: string,
+  client?: SupabaseClient
+): Promise<CaseProcedureRow | null> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const cid = assertNonEmptyUuid(caseId, "caseId");
+
+  const { data: row, error } = await supabase
+    .from("fi_case_procedures")
+    .select(FI_CASE_PROCEDURE_SELECT_COLUMNS)
+    .eq("tenant_id", tid)
+    .eq("case_id", cid)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!row) return null;
+
+  return mapCaseProcedureRowFromRecord(row as Record<string, unknown>);
 }
 
 /** Tenant `fi_users` rows for surgeon / team pickers (Stage 5C). */

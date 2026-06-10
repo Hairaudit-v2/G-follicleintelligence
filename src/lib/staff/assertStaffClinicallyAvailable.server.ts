@@ -136,6 +136,8 @@ export async function assertProcedureDayTeamAssignments(
   tenantId: string,
   input: {
     surgeonUserId?: string | null;
+    nurseUserId?: string | null;
+    technicianUserIds?: string[] | null;
     teamMemberUserIds?: string[] | null;
   },
   client?: SupabaseClient
@@ -143,6 +145,29 @@ export async function assertProcedureDayTeamAssignments(
   const supabase = client ?? supabaseAdmin();
   if (input.surgeonUserId?.trim()) {
     await assertFiUserAllowedForProcedureSlot(tenantId, input.surgeonUserId, "clinical", supabase);
+  }
+  if (input.nurseUserId?.trim()) {
+    await assertFiUserAllowedForProcedureSlot(tenantId, input.nurseUserId, "support", supabase);
+  }
+  for (const uid of input.technicianUserIds ?? []) {
+    if (!uid?.trim()) continue;
+    const staff = await loadStaffMemberByFiUserId(tenantId, uid, supabase);
+    if (!staff) {
+      throw new StaffClinicalAvailabilityError(
+        "A technician has no linked staff profile. Link them in Staff settings before assignment."
+      );
+    }
+    const slot: ProcedureTeamSlotKind = isSupportStaffRole(staff.staff_role)
+      ? "support"
+      : isClinicalProviderStaffRole(staff.staff_role)
+        ? "clinical"
+        : "clinical";
+    if (!isSupportStaffRole(staff.staff_role) && !isClinicalProviderStaffRole(staff.staff_role)) {
+      throw new StaffClinicalAvailabilityError(
+        clinicalAssignmentErrorMessage("Role is not valid for technician assignment")
+      );
+    }
+    await assertStaffAllowedForProcedureSlot(tenantId, staff.id, slot, supabase);
   }
   for (const uid of input.teamMemberUserIds ?? []) {
     if (!uid?.trim()) continue;

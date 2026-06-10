@@ -4,16 +4,23 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { upsertCaseProcedureDayAction } from "@/lib/actions/fi-case-procedure-day-actions";
 import type { CaseProcedureRow } from "@/src/lib/cases/procedureDayLoaders";
+import {
+  PROCEDURE_MILESTONE_KEYS,
+  PROCEDURE_MILESTONE_LABEL,
+  milestoneCompletionCount,
+} from "@/src/lib/cases/procedureDayMilestonesModel";
 import { PROCEDURE_STATUS_VALUES, isProcedureStatus } from "@/src/lib/cases/procedureDayTypes";
 import { ProcedureTeamSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import type { ProcedureTeamPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import { CaseProcedureTeamPanel } from "./CaseProcedureTeamPanel";
+import { CaseProcedureTechnicianPanel } from "./CaseProcedureTechnicianPanel";
 import { caseFormField } from "./caseFormFieldProps";
 
 const PROCEDURE_DAY_FIELDS = {
   procedureDate: caseFormField("procedure-day-date"),
   procedureStatus: caseFormField("procedure-day-status"),
   surgeonId: caseFormField("procedure-day-surgeon"),
+  nurseId: caseFormField("procedure-day-nurse"),
   room: caseFormField("procedure-day-room"),
   location: caseFormField("procedure-day-location"),
   startLocal: caseFormField("procedure-day-start"),
@@ -70,6 +77,9 @@ export function CaseProcedureDayForm({
   const [procedureDate, setProcedureDate] = useState(initial?.procedure_date?.slice(0, 10) ?? "");
   const [procedureStatus, setProcedureStatus] = useState(initial?.procedure_status ?? "scheduled");
   const [surgeonId, setSurgeonId] = useState(initial?.surgeon_user_id ?? "");
+  const [nurseId, setNurseId] = useState(initial?.nurse_user_id ?? "");
+  const [technicianIds, setTechnicianIds] = useState<string[]>(initial?.technician_user_ids ?? []);
+  const [milestones, setMilestones] = useState<Record<string, string>>(() => ({ ...(initial?.procedure_milestones ?? {}) }));
   const [teamIds, setTeamIds] = useState<string[]>(initial?.team_member_user_ids ?? []);
   const [location, setLocation] = useState(initial?.procedure_location ?? "");
   const [room, setRoom] = useState(initial?.procedure_room ?? "");
@@ -99,6 +109,9 @@ export function CaseProcedureDayForm({
     setProcedureDate(initial?.procedure_date?.slice(0, 10) ?? "");
     setProcedureStatus(initial?.procedure_status ?? "scheduled");
     setSurgeonId(initial?.surgeon_user_id ?? "");
+    setNurseId(initial?.nurse_user_id ?? "");
+    setTechnicianIds(initial?.technician_user_ids ?? []);
+    setMilestones({ ...(initial?.procedure_milestones ?? {}) });
     setTeamIds(initial?.team_member_user_ids ?? []);
     setLocation(initial?.procedure_location ?? "");
     setRoom(initial?.procedure_room ?? "");
@@ -126,6 +139,9 @@ export function CaseProcedureDayForm({
       procedureDate !== (initial.procedure_date?.slice(0, 10) ?? "") ||
       procedureStatus !== initial.procedure_status ||
       surgeonId !== (initial.surgeon_user_id ?? "") ||
+      nurseId !== (initial.nurse_user_id ?? "") ||
+      JSON.stringify(technicianIds) !== JSON.stringify(initial.technician_user_ids) ||
+      JSON.stringify(milestones) !== JSON.stringify(initial.procedure_milestones ?? {}) ||
       JSON.stringify(teamIds) !== JSON.stringify(initial.team_member_user_ids) ||
       location !== (initial.procedure_location ?? "") ||
       room !== (initial.procedure_room ?? "") ||
@@ -148,6 +164,9 @@ export function CaseProcedureDayForm({
     procedureDate,
     procedureStatus,
     surgeonId,
+    nurseId,
+    technicianIds,
+    milestones,
     teamIds,
     location,
     room,
@@ -217,17 +236,29 @@ export function CaseProcedureDayForm({
             slot="clinical"
           />
         </label>
-        <label htmlFor={PROCEDURE_DAY_FIELDS.room.id} className="block text-xs font-medium text-gray-700">
-          Procedure room
-          <input
-            {...PROCEDURE_DAY_FIELDS.room}
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
-            placeholder="OR 2"
+        <label htmlFor={PROCEDURE_DAY_FIELDS.nurseId.id} className="block text-xs font-medium text-gray-700">
+          Circulating / recovery nurse
+          <ProcedureTeamSelect
+            id={PROCEDURE_DAY_FIELDS.nurseId.id}
+            tenantId={tenantId}
+            options={teamUserOptions}
+            value={nurseId}
+            onChange={setNurseId}
+            slot="support"
           />
         </label>
       </div>
+
+      <label htmlFor={PROCEDURE_DAY_FIELDS.room.id} className="block text-xs font-medium text-gray-700">
+        Procedure room
+        <input
+          {...PROCEDURE_DAY_FIELDS.room}
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+          className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          placeholder="OR 2"
+        />
+      </label>
 
       <label htmlFor={PROCEDURE_DAY_FIELDS.location.id} className="block text-xs font-medium text-gray-700">
         Procedure location / site
@@ -240,13 +271,87 @@ export function CaseProcedureDayForm({
         />
       </label>
 
+      <CaseProcedureTechnicianPanel
+        tenantId={tenantId}
+        technicianIds={technicianIds}
+        userOptions={teamUserOptions}
+        excludeUserIds={[surgeonId, nurseId]}
+        onChange={setTechnicianIds}
+      />
+
       <CaseProcedureTeamPanel
         tenantId={tenantId}
         teamIds={teamIds}
         userOptions={teamUserOptions}
-        excludeUserIds={[surgeonId]}
+        excludeUserIds={[surgeonId, nurseId, ...technicianIds]}
         onChange={setTeamIds}
       />
+
+      <div className="rounded border border-gray-200 bg-gray-50/80 p-3">
+        <h3 className="text-xs font-semibold text-gray-900">Procedure milestones</h3>
+        <p className="mt-1 text-xs text-gray-500">
+          Record when each stage happened (optional but recommended for handoffs and audits).
+        </p>
+        <ul className="mt-3 space-y-2">
+          {PROCEDURE_MILESTONE_KEYS.map((key) => {
+            const ts = milestones[key]?.trim();
+            return (
+              <li key={key} className="flex flex-wrap items-center gap-2 border-b border-gray-100 pb-2 text-xs last:border-0 last:pb-0">
+                <span className="min-w-0 flex-1 text-gray-800">{PROCEDURE_MILESTONE_LABEL[key]}</span>
+                <span className="text-gray-500">
+                  {ts ? (Number.isNaN(Date.parse(ts)) ? ts : new Date(ts).toLocaleString()) : "—"}
+                </span>
+                <button
+                  type="button"
+                  className="rounded border border-gray-300 bg-white px-2 py-0.5 text-[0.65rem] font-medium text-gray-800 hover:bg-gray-50"
+                  onClick={() => setMilestones((m) => ({ ...m, [key]: new Date().toISOString() }))}
+                >
+                  Now
+                </button>
+                <button
+                  type="button"
+                  className="rounded border border-transparent px-2 py-0.5 text-[0.65rem] text-rose-700 hover:underline"
+                  onClick={() =>
+                    setMilestones((m) => {
+                      const next = { ...m };
+                      delete next[key];
+                      return next;
+                    })
+                  }
+                >
+                  Clear
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-2 text-xs text-gray-600">
+          Milestones logged:{" "}
+          <span className="font-mono font-medium">
+            {milestoneCompletionCount(milestones)} / {PROCEDURE_MILESTONE_KEYS.length}
+          </span>
+        </p>
+      </div>
+
+      <div className="rounded border border-sky-100 bg-sky-50/50 p-3 text-xs text-gray-800">
+        <p className="font-semibold text-gray-900">Finishing the case</p>
+        <ol className="mt-2 list-decimal space-y-1 pl-4 text-gray-700">
+          <li className={ge != null && gi != null ? "" : "text-amber-900"}>Capture extracted and implanted graft counts.</li>
+          <li className={milestoneCompletionCount(milestones) >= 3 ? "" : "text-amber-900"}>
+            Log at least three procedure milestones (or explain gaps in intraoperative notes).
+          </li>
+          <li className={completionSummary.trim() ? "" : "text-amber-900"}>
+            Add a completion summary when you set status to completed.
+          </li>
+        </ol>
+        <button
+          type="button"
+          className="mt-2 rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-900 hover:bg-gray-50"
+          onClick={() => setProcedureStatus("completed")}
+        >
+          Set status to completed (save to persist)
+        </button>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label htmlFor={PROCEDURE_DAY_FIELDS.startLocal.id} className="block text-xs font-medium text-gray-700">
@@ -404,7 +509,10 @@ export function CaseProcedureDayForm({
               procedure_date: procedureDate.trim() ? procedureDate.trim().slice(0, 10) : null,
               procedure_status: procedureStatus as (typeof PROCEDURE_STATUS_VALUES)[number],
               surgeon_user_id: surgeonId.trim() ? surgeonId.trim() : null,
+              nurse_user_id: nurseId.trim() ? nurseId.trim() : null,
+              technician_user_ids: technicianIds,
               team_member_user_ids: teamIds,
+              procedure_milestones: milestones,
               procedure_location: location.trim() ? location.trim() : null,
               procedure_room: room.trim() ? room.trim() : null,
               start_time: datetimeLocalToIso(startLocal),

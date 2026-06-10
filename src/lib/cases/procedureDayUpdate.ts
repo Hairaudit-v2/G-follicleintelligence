@@ -44,12 +44,16 @@ export async function upsertProcedureDayForCase(params: UpsertProcedureDayParams
 
   const idsToCheck: string[] = [];
   if (p.surgeon_user_id) idsToCheck.push(p.surgeon_user_id);
+  if (p.nurse_user_id) idsToCheck.push(p.nurse_user_id);
+  if (p.technician_user_ids) idsToCheck.push(...p.technician_user_ids);
   if (p.team_member_user_ids) idsToCheck.push(...p.team_member_user_ids);
   await assertFiUserIdsBelongToTenant(supabase, tid, idsToCheck);
   await assertProcedureDayTeamAssignments(
     tid,
     {
       surgeonUserId: p.surgeon_user_id ?? null,
+      nurseUserId: p.nurse_user_id ?? null,
+      technicianUserIds: p.technician_user_ids ?? null,
       teamMemberUserIds: p.team_member_user_ids ?? null,
     },
     supabase
@@ -71,7 +75,10 @@ export async function upsertProcedureDayForCase(params: UpsertProcedureDayParams
   }
   if (p.procedure_status !== undefined) updatePayload.procedure_status = p.procedure_status;
   if (p.surgeon_user_id !== undefined) updatePayload.surgeon_user_id = p.surgeon_user_id;
+  if (p.nurse_user_id !== undefined) updatePayload.nurse_user_id = p.nurse_user_id;
+  if (p.technician_user_ids !== undefined) updatePayload.technician_user_ids = p.technician_user_ids;
   if (p.team_member_user_ids !== undefined) updatePayload.team_member_user_ids = p.team_member_user_ids;
+  if (p.procedure_milestones !== undefined) updatePayload.procedure_milestones = p.procedure_milestones;
   if (p.procedure_location !== undefined) {
     updatePayload.procedure_location = p.procedure_location?.trim() ? p.procedure_location.trim() : null;
   }
@@ -128,7 +135,10 @@ export async function upsertProcedureDayForCase(params: UpsertProcedureDayParams
     procedure_date: p.procedure_date !== undefined ? (p.procedure_date?.trim() ? p.procedure_date.trim().slice(0, 10) : null) : null,
     procedure_status: p.procedure_status ?? "scheduled",
     surgeon_user_id: p.surgeon_user_id !== undefined ? p.surgeon_user_id : null,
+    nurse_user_id: p.nurse_user_id !== undefined ? p.nurse_user_id : null,
+    technician_user_ids: p.technician_user_ids ?? [],
     team_member_user_ids: p.team_member_user_ids ?? [],
+    procedure_milestones: p.procedure_milestones ?? {},
     procedure_location: p.procedure_location !== undefined ? trimOrNull(p.procedure_location) : null,
     procedure_room: p.procedure_room !== undefined ? trimOrNull(p.procedure_room) : null,
     start_time: p.start_time !== undefined ? (p.start_time?.trim() ? p.start_time.trim() : null) : null,

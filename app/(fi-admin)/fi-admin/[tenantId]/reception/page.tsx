@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 import { ReceptionBoardClient, type ReceptionMutationMode } from "@/src/components/fi-admin/reception/ReceptionBoardClient";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
-import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { getClinicFloorSessionIfAllowed } from "@/src/lib/staffPin/clinicFloorAccess";
 
@@ -20,7 +20,7 @@ export default async function FiAdminReceptionBoardPage({ params }: { params: Pr
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  await assertFiTenantPortalAccess(tenantId);
+  await assertFiTenantPortalAccessUnlessStaffPinSession(tenantId);
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     return (

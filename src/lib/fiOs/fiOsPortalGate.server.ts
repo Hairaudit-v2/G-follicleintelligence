@@ -5,6 +5,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
 
+import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
+
 import { isFiOsCrossTenantDirectoryRole } from "./fiOsRoles";
 import { isFiPortalStaff, loadFiOsIdentity } from "./fiOsIdentity.server";
 
@@ -153,6 +155,17 @@ export async function assertFiTenantPortalAccess(tenantId: string): Promise<void
   if (!backendOk) {
     redirect("/follicle-intelligence/login?notice=no_tenant_access");
   }
+}
+
+/**
+ * Production gate for routes that may run on a clinic-floor **staff PIN** session without a
+ * Supabase operator user (e.g. reception kiosk). When a valid PIN cookie is present, skip the
+ * normal FI portal membership check; otherwise require {@link assertFiTenantPortalAccess}.
+ */
+export async function assertFiTenantPortalAccessUnlessStaffPinSession(tenantId: string): Promise<void> {
+  const pin = await getStaffPinClinicSessionIfValid(tenantId.trim());
+  if (pin) return;
+  await assertFiTenantPortalAccess(tenantId);
 }
 
 /**

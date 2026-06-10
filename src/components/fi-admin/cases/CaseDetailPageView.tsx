@@ -45,6 +45,7 @@ export function CaseDetailPageView({
   surgeryPlan,
   procedureDay,
   teamUserOptions,
+  linkedSurgeryBookingYmd,
   postOpTracking,
   followUps,
   timelineItems,
@@ -61,6 +62,8 @@ export function CaseDetailPageView({
   surgeryPlan: CaseSurgeryPlanRow | null;
   procedureDay: CaseProcedureRow | null;
   teamUserOptions: ProcedureTeamPickerOption[];
+  /** Earliest non-cancelled surgery booking day on the case (tenant calendar), for procedure-day alignment. */
+  linkedSurgeryBookingYmd: string | null;
   postOpTracking: CasePostOpTrackingRow | null;
   followUps: CaseFollowUpRow[];
   timelineItems: CaseTimelineItem[];
@@ -190,6 +193,7 @@ export function CaseDetailPageView({
             caseId={detail.id}
             procedure={procedureDay}
             teamUserOptions={teamUserOptions}
+            linkedSurgeryBookingYmd={linkedSurgeryBookingYmd}
           />
         </CaseDetailSection>
 

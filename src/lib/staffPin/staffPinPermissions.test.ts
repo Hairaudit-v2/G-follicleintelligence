@@ -45,5 +45,9 @@ describe("staffPinPermissions", () => {
     assert.equal(isStaffPinRestrictedRoute(`${base}/prescriptions`, base), true);
     assert.equal(isStaffPinRestrictedRoute(`${base}/staff`, base), true);
     assert.equal(isStaffPinRestrictedRoute(`${base}/surgery-readiness`, base), true);
+    assert.equal(isStaffPinRestrictedRoute(`${base}/procedure-day`, base), true);
+    assert.equal(isStaffPinRestrictedRoute(`${base}/operations`, base), true);
+    assert.equal(isStaffPinRestrictedRoute(`${base}/tomorrow`, base), true);
+    assert.equal(isStaffPinRestrictedRoute(`${base}/consultation-conversion`, base), true);
   });
 });

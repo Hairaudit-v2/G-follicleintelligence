@@ -9,7 +9,6 @@ import {
   buildSurgeryReadinessIssues,
   escalateSurgeryReadinessIssues,
   hasConsultationConsentSignal,
-  hasHighRiskSeverity,
   type ConsultationConsentInput,
   type SurgeryReadinessIssue,
 } from "@/src/lib/surgery/surgeryReadinessBoardModel";

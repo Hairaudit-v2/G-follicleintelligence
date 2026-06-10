@@ -75,6 +75,14 @@ function ScheduleCard({ c }: { c: ProcedureDayScheduleCard }) {
           <dd className="min-w-0 truncate text-slate-300">{c.procedureSurgeonLabel ?? "—"}</dd>
         </div>
         <div className="flex gap-1">
+          <dt className="shrink-0 text-slate-600">Nurse</dt>
+          <dd className="min-w-0 truncate text-slate-300">{c.procedureNurseLabel ?? "—"}</dd>
+        </div>
+        <div className="flex gap-1 sm:col-span-2">
+          <dt className="shrink-0 text-slate-600">Technicians</dt>
+          <dd className="min-w-0 text-slate-300">{c.procedureTechnicianLabels.length ? c.procedureTechnicianLabels.join(", ") : "—"}</dd>
+        </div>
+        <div className="flex gap-1">
           <dt className="shrink-0 text-slate-600">Calendar team</dt>
           <dd className="min-w-0 truncate text-slate-300">{c.calendarAssigneeLabel ?? "—"}</dd>
         </div>
@@ -87,7 +95,7 @@ function ScheduleCard({ c }: { c: ProcedureDayScheduleCard }) {
         </div>
         {c.teamMemberLabels.length ? (
           <div className="flex gap-1 sm:col-span-2">
-            <dt className="shrink-0 text-slate-600">Procedure team (users)</dt>
+            <dt className="shrink-0 text-slate-600">Additional team</dt>
             <dd className="min-w-0 text-slate-300">{c.teamMemberLabels.join(", ")}</dd>
           </div>
         ) : null}
