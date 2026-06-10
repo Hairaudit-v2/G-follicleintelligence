@@ -81,4 +81,9 @@ export type OperationalCalendarPageData = {
   setupRecommendations: string[];
   /** When set, the server page should redirect to canonical `staffId` (legacy `assignedUserId` resolved). */
   canonicalRedirectHref?: string | null;
+  /**
+   * Signed-in user's linked `fi_staff.working_hours._profile.primary_clinic_id` when valid for this tenant.
+   * Used by Quick Book to auto-resolve clinic when the calendar URL has no `clinicId` filter.
+   */
+  calendarOperatorPrimaryClinicId?: string | null;
 };

@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Keyboard, MapPin, PanelLeftOpen, Users } from "lucide-react";
 
 import {
-  buildCalendarHref,
   mergeCalendarHrefQuery,
   type CalendarRoute,
   type CalendarViewMode,
   type ParsedCalendarQuery,
 } from "@/src/lib/bookings/calendarQuery";
+import { buildCalendarNavigationHref } from "@/src/lib/calendar/calendarViewNavigation";
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
@@ -62,16 +62,17 @@ export function CalendarTopControls({
 }) {
   const router = useRouter();
   const hrefOpts = { route };
-  const prev = buildCalendarHref(tenantId, calendarNavigationHelpers.previousPeriod(query), hrefOpts);
-  const next = buildCalendarHref(tenantId, calendarNavigationHelpers.nextPeriod(query), hrefOpts);
-  const today = buildCalendarHref(
+  const prev = buildCalendarNavigationHref(tenantId, query, calendarNavigationHelpers.previousPeriod(query), hrefOpts);
+  const next = buildCalendarNavigationHref(tenantId, query, calendarNavigationHelpers.nextPeriod(query), hrefOpts);
+  const today = buildCalendarNavigationHref(
     tenantId,
-    mergeCalendarHrefQuery(query, calendarNavigationHelpers.goToToday()),
+    query,
+    calendarNavigationHelpers.goToToday(),
     hrefOpts
   );
 
   function navigate(patch: Parameters<typeof mergeCalendarHrefQuery>[1]) {
-    router.push(buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, patch), hrefOpts));
+    router.push(buildCalendarNavigationHref(tenantId, query, patch, hrefOpts));
   }
 
   const selectedClinic =
@@ -176,7 +177,7 @@ export function CalendarTopControls({
       <div className="flex flex-wrap items-center gap-2">
         <div className={cn(inset, "inline-flex")} role="group" aria-label="Calendar view">
           {viewOpts.map((opt) => {
-            const href = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: opt.id }), hrefOpts);
+            const href = buildCalendarNavigationHref(tenantId, query, { view: opt.id }, hrefOpts);
             const active = opt.active(query);
             return (
               <Link

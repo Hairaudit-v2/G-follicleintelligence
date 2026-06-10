@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import Link from "next/link";
 import { X } from "lucide-react";
 
 import { calendarQuickCreateBookingAction, loadServiceResourceRequirementsAction, suggestResourceAssignmentsAction } from "@/lib/actions/fi-calendar-quick-create-actions";
@@ -57,6 +58,7 @@ import {
   fiSurfaceVariantClassNames,
 } from "@/src/components/fi-design/fiDesignTokens";
 import { cn } from "@/lib/utils";
+import { resolveQuickBookClinicId } from "@/src/lib/calendar/quickBookResolveClinic";
 
 function useDebouncedValue<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -147,8 +149,7 @@ function clampStartToNearestOption(
   dayKey: string,
   desiredLocal: string,
   cfg: BusinessGridConfig,
-  durationMin: number,
-  tz: string
+  durationMin: number
 ): string {
   const opts = quarterHourStartOptions(cfg, durationMin);
   if (!opts.length) return desiredLocal;
@@ -178,6 +179,8 @@ export function CalendarQuickCreateDrawer({
   staffDirectory,
   gridConfig,
   resourceColumns,
+  calendarQueryClinicId,
+  calendarOperatorPrimaryClinicId = null,
   setupRecommendations = [],
   services = [],
   onCreated,
@@ -190,6 +193,10 @@ export function CalendarQuickCreateDrawer({
   prefill: CalendarQuickCreatePrefill | null;
   gridConfig: BusinessGridConfig;
   resourceColumns: OperationalCalendarResourceColumn[];
+  /** Active `clinicId` URL filter on the operational calendar (same tenant). */
+  calendarQueryClinicId?: string | null;
+  /** Server-resolved primary clinic for the signed-in operator's staff profile. */
+  calendarOperatorPrimaryClinicId?: string | null;
   clinics: CrmShellClinicOption[];
   /** Legacy fi_users — owner column labels only. */
   assignees: CrmShellUserPickerOption[];
@@ -231,6 +238,7 @@ export function CalendarQuickCreateDrawer({
   const [startLocal, setStartLocal] = useState("");
   const [endLocal, setEndLocal] = useState("");
   const [clinicId, setClinicId] = useState("");
+  const [clinicResolveBlocked, setClinicResolveBlocked] = useState<"no_clinics" | "ambiguous" | null>(null);
   const [roomId, setRoomId] = useState("");
   const [roomOptions, setRoomOptions] = useState<RoomPickerOption[]>([]);
   const [roomLoading, setRoomLoading] = useState(false);
@@ -267,8 +275,21 @@ export function CalendarQuickCreateDrawer({
   const resetFromPrefill = useCallback(() => {
     if (!prefill?.localStart?.trim()) return;
     const colDefaults = columnResourceDefaults(prefill.columnId, staffIdByUserId);
-    const clinicFromFilter = prefill.defaultClinicId?.trim() ?? "";
-    setClinicId(colDefaults.clinicId || clinicFromFilter || "");
+    const columnClinicId = colDefaults.clinicId?.trim() || null;
+    const resolution = resolveQuickBookClinicId({
+      columnClinicId,
+      prefillDefaultClinicId: prefill.defaultClinicId,
+      calendarQueryClinicId: calendarQueryClinicId ?? null,
+      operatorPrimaryClinicId: calendarOperatorPrimaryClinicId,
+      clinics,
+    });
+    if (resolution.ok) {
+      setClinicId(resolution.clinicId);
+      setClinicResolveBlocked(null);
+    } else {
+      setClinicId("");
+      setClinicResolveBlocked(resolution.reason);
+    }
     setRoomId(colDefaults.roomId || "");
     setAssignedStaffId(colDefaults.assignedStaffId);
     setLegacyOwnerUserId(colDefaults.legacyOwnerUserId);
@@ -281,7 +302,7 @@ export function CalendarQuickCreateDrawer({
     const dayKey = startRaw.slice(0, 10);
     const tplForDur = nextTpl ? calendarQuickTemplateById(nextTpl) : null;
     const durMin = tplForDur ? quickTemplateDurationMinutes(tplForDur, services) : PLACEHOLDER_DURATION_MIN;
-    const start = clampStartToNearestOption(dayKey, startRaw, gridConfig, durMin, tz);
+    const start = clampStartToNearestOption(dayKey, startRaw, gridConfig, durMin);
     setStartLocal(start);
     const startIso = fromDatetimeLocalValueInTimezone(start, tz);
     if (startIso && tplForDur) {
@@ -316,7 +337,16 @@ export function CalendarQuickCreateDrawer({
       selectedSlotUtcIso: startIso,
       appointmentTypeUnset: unsetType,
     });
-  }, [prefill, services, staffIdByUserId, tz, gridConfig]);
+  }, [
+    prefill,
+    services,
+    staffIdByUserId,
+    tz,
+    gridConfig,
+    clinics,
+    calendarQueryClinicId,
+    calendarOperatorPrimaryClinicId,
+  ]);
 
   useEffect(() => {
     if (!open) return;
@@ -560,7 +590,7 @@ export function CalendarQuickCreateDrawer({
       const durMin = quickTemplateDurationMinutes(t, services);
       const dk = startLocal.slice(0, 10);
       if (!dk) return;
-      const clamped = clampStartToNearestOption(dk, startLocal, gridConfig, durMin, tz);
+      const clamped = clampStartToNearestOption(dk, startLocal, gridConfig, durMin);
       setStartLocal(clamped);
       const iso2 = fromDatetimeLocalValueInTimezone(clamped, tz);
       if (!iso2) return;
@@ -591,7 +621,7 @@ export function CalendarQuickCreateDrawer({
       if (!startIso) return;
       const bumpIso = addUtcMinutesToIso(startIso, deltaMin);
       const bumpLocal = toDatetimeLocalValueInTimezone(bumpIso, tz);
-      const clamped = clampStartToNearestOption(dayKey, bumpLocal, gridConfig, durMin, tz);
+      const clamped = clampStartToNearestOption(dayKey, bumpLocal, gridConfig, durMin);
       onStartChange(clamped);
     },
     [gridConfig, onStartChange, services, startLocal, templateId, tz]
@@ -712,8 +742,16 @@ export function CalendarQuickCreateDrawer({
       return;
     }
 
+    if (!clinicId.trim()) {
+      setFormErr(
+        clinicResolveBlocked === "no_clinics"
+          ? "Add a clinic for this tenant before booking."
+          : "Choose a site under Advanced scheduling (Clinic override), or set a calendar clinic filter."
+      );
+      return;
+    }
+
     const staffId = assignedStaffId.trim();
-    if (staffId) {
       const staff = staffDirectory.find((s) => s.id === staffId);
       if (staff && !canSelectStaffForClinicalPicker(staff)) {
         setFormErr(staff.clinical_readiness.block_reason ?? "Selected provider is not clinically available.");
@@ -784,6 +822,8 @@ export function CalendarQuickCreateDrawer({
 
   if (!open || !prefill) return null;
 
+  const clinicSetupHref = `/fi-admin/${tenantId.trim()}/settings/clinic-setup`;
+  const showClinicOverride = clinics.length > 1;
   const os = fiPageHeaderVariantClassNames.osDark;
   const inputClass =
     "mt-1 w-full rounded-lg border border-white/[0.12] bg-slate-950/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-[#22C1FF]/45";
@@ -976,9 +1016,24 @@ export function CalendarQuickCreateDrawer({
               <p className={cn(os.eyebrow, "mb-1")}>Time</p>
               <p className="text-xs text-slate-500">Selected from calendar. Adjust if needed.</p>
               <p className="mt-3 text-base font-semibold leading-snug text-slate-50">{dateHeading}</p>
-              {clinicLabel ? (
-                <p className="mt-1 text-xs text-slate-500">
-                  {clinicLabel}
+              {clinicResolveBlocked ? (
+                <div className="mt-2 rounded-lg border border-amber-500/35 bg-amber-950/25 px-3 py-2 text-xs leading-snug text-amber-100/95">
+                  <p>
+                    Clinic is not configured for this calendar. Please complete Clinic Setup
+                    {clinicResolveBlocked === "ambiguous"
+                      ? ", or choose a site under Advanced scheduling (Clinic override)."
+                      : "."}
+                  </p>
+                  <Link
+                    href={clinicSetupHref}
+                    className="mt-1.5 inline-block font-semibold text-sky-300 underline hover:text-sky-200"
+                  >
+                    Settings → Clinic Setup
+                  </Link>
+                </div>
+              ) : clinicLabel ? (
+                <p className="mt-2 text-xs text-slate-400">
+                  Clinic: <span className="font-medium text-slate-200">{clinicLabel}</span>
                   <span className="text-slate-600"> · {tzLabel}</span>
                 </p>
               ) : (
@@ -1067,7 +1122,9 @@ export function CalendarQuickCreateDrawer({
                     ? "Checking rooms for this slot…"
                     : assignedRoomLabel
                       ? `This booking will save with room “${assignedRoomLabel}” when the slot is valid.`
-                      : "Choose an appointment type and clinic — a room is picked automatically when slots load."}
+                      : !clinicId.trim()
+                        ? "Set a clinic (see message above or Advanced scheduling) so a room can be assigned."
+                        : "Choose an appointment type and clinic — a room is picked automatically when slots load."}
                 </p>
               </div>
             </details>
@@ -1128,15 +1185,16 @@ export function CalendarQuickCreateDrawer({
                     onChange={(e) => setEndLocal(e.target.value)}
                   />
                 </label>
-                {clinics.length > 0 ? (
+                {showClinicOverride ? (
                   <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                    Clinic
+                    Clinic override
                     <select
                       className={inputClass}
                       value={clinicId}
                       onChange={(e) => {
                         setClinicId(e.target.value);
                         setRoomId("");
+                        setClinicResolveBlocked(null);
                       }}
                     >
                       <option value="">—</option>
@@ -1248,7 +1306,7 @@ export function CalendarQuickCreateDrawer({
             >
               Cancel
             </button>
-            <button type="submit" className={fiButtonVariantClassNames.osPrimary} disabled={busy}>
+            <button type="submit" className={fiButtonVariantClassNames.osPrimary} disabled={busy || !clinicId.trim()}>
               {busy ? "Saving…" : "Save"}
             </button>
           </div>

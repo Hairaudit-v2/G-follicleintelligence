@@ -24,12 +24,14 @@ export type {
   OperationalCalendarPageData,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
+import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import { parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import {
   buildLegacyUserResourceColumns,
   buildStaffResourceColumns,
@@ -340,6 +342,27 @@ async function resolveBookingMutationGate(tenantId: string): Promise<{
   };
 }
 
+async function loadCalendarOperatorPrimaryClinicId(
+  tenantId: string,
+  staffDirectory: ClinicalStaffPickerOption[]
+): Promise<string | null> {
+  const authId = await resolveAuthUserId(null);
+  if (!authId) return null;
+  const supabase = supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_users")
+    .select("id")
+    .eq("tenant_id", tenantId.trim())
+    .eq("auth_user_id", authId.trim())
+    .maybeSingle();
+  if (error || !data) return null;
+  const fiUserId = String((data as { id: string }).id).trim();
+  const staff = staffDirectory.find((s) => (s.fi_user_id?.trim() ?? "") === fiUserId);
+  if (!staff?.working_hours) return null;
+  const cid = parseStaffProfileExtras(staff.working_hours).primary_clinic_id;
+  return cid?.trim() || null;
+}
+
 /**
  * FI Admin operational calendar: uses {@link loadBookingsForTenantRange} for the same overlap
  * semantics as the tenant dashboard agenda, then applies URL filters + a hard row cap.
@@ -355,9 +378,12 @@ export async function loadOperationalCalendarPageData(
   const parsed = parseCalendarSearchParams(searchParams, new Date(), {
     calendarTimezone: calendarSettings.calendarTimezone,
   });
-  const viewRaw = Array.isArray(searchParams.view) ? searchParams.view[0] : searchParams.view;
-  let query =
-    typeof viewRaw === "string" && viewRaw.trim() ? parsed : { ...parsed, view: "day" as const };
+  /**
+   * Always trust {@link parseCalendarSearchParams} for `view`. Week is the default when `view`
+   * is omitted from the URL ({@link buildCalendarHref} does not emit `view=` for week); forcing
+   * `day` here broke Week links because they intentionally omit the param.
+   */
+  let query = parsed;
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
@@ -371,11 +397,7 @@ export async function loadOperationalCalendarPageData(
   const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
   query = normalized.query;
   const canonicalRedirectHref = normalized.shouldCanonicalizeToStaffId
-    ? buildCalendarHref(
-        tid,
-        mergeCalendarHrefQuery(parsed, { staffId: query.staffId, assignedUserId: null }),
-        { route }
-      )
+    ? buildCalendarHref(tid, mergeCalendarHrefQuery(query, {}), { route })
     : null;
 
   const resourceColumns =
@@ -509,6 +531,8 @@ export async function loadOperationalCalendarPageData(
     timezoneConfigured: calendarSettings.timezoneConfigured,
   });
 
+  const calendarOperatorPrimaryClinicId = await loadCalendarOperatorPrimaryClinicId(tid, resources.staffDirectory);
+
   return {
     tenantId: tid,
     query,
@@ -534,5 +558,6 @@ export async function loadOperationalCalendarPageData(
     services,
     setupRecommendations,
     canonicalRedirectHref,
+    calendarOperatorPrimaryClinicId,
   };
 }

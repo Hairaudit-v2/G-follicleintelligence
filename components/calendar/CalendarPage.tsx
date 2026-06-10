@@ -407,6 +407,8 @@ export function CalendarPage({
           prefill={quickCreatePrefill}
           gridConfig={data.gridConfig}
           resourceColumns={data.resourceColumns}
+          calendarQueryClinicId={data.query.clinicId?.trim() || undefined}
+          calendarOperatorPrimaryClinicId={data.calendarOperatorPrimaryClinicId ?? null}
           clinics={data.clinics}
           assignees={data.assignees}
           staffDirectory={data.staffDirectory}

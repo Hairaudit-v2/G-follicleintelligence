@@ -76,7 +76,6 @@ export function FiOsCalendarQuickFilters({
       tenantId,
       mergeCalendarHrefQuery(query, {
         resourceView: active && view !== "staff" ? null : view,
-        view: "day",
       }),
       hrefOpts
     );
