@@ -73,6 +73,7 @@ export function ReceptionBoardClient(props: {
 
   const canFlo = mutationMode === "full" || mutationMode === "pin_reception";
   const canCancel = mutationMode === "full";
+  const hasAnyCards = cards.length > 0;
 
   return (
     <div className="space-y-5">
@@ -93,10 +94,16 @@ export function ReceptionBoardClient(props: {
             Operations centre
           </Link>
           <Link
-            href={`${base}/calendar`}
+            href={`${base}/consultation-conversion`}
             className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center px-3 py-2 text-sm font-semibold text-slate-200")}
           >
-            Calendar
+            Conversion board
+          </Link>
+          <Link
+            href={`${base}/surgery-readiness`}
+            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex items-center px-3 py-2 text-sm font-semibold text-slate-200")}
+          >
+            Surgery readiness
           </Link>
         </div>
       </div>
@@ -110,6 +117,17 @@ export function ReceptionBoardClient(props: {
       {mutationMode === "none" ? (
         <p className="rounded-lg border border-slate-600/40 bg-slate-900/40 px-3 py-2 text-sm text-slate-400">
           Sign in with clinic access to update booking statuses from this board.
+        </p>
+      ) : null}
+
+      {!hasAnyCards ? (
+        <p className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-sm text-slate-400">
+          No bookings on the reception board for this operational day. Confirm the calendar has visits scheduled, or check
+          another day in{" "}
+          <Link className="font-medium text-cyan-400/90 underline-offset-2 hover:underline" href={`${base}/calendar`}>
+            Calendar
+          </Link>
+          .
         </p>
       ) : null}
 
@@ -129,20 +147,24 @@ export function ReceptionBoardClient(props: {
               </p>
             </header>
             <ul className="flex max-h-[70vh] min-h-[12rem] flex-col gap-2 overflow-y-auto p-2">
-              {(byColumn.get(colId) ?? []).map((c) => (
-                <li key={c.id}>
-                  <ReceptionBookingCard
-                    card={c}
-                    tenantId={tenantId}
-                    base={base}
-                    timeLabel={timeFmt.format(new Date(c.startAt))}
-                    busy={busyId === c.id}
-                    canFlo={canFlo}
-                    canCancel={canCancel}
-                    onAction={(fn) => run(c.id, fn)}
-                  />
-                </li>
-              ))}
+              {(byColumn.get(colId) ?? []).length === 0 ? (
+                <li className="py-6 text-center text-xs text-slate-600">No bookings in this column</li>
+              ) : (
+                (byColumn.get(colId) ?? []).map((c) => (
+                  <li key={c.id}>
+                    <ReceptionBookingCard
+                      card={c}
+                      tenantId={tenantId}
+                      base={base}
+                      timeLabel={timeFmt.format(new Date(c.startAt))}
+                      busy={busyId === c.id}
+                      canFlo={canFlo}
+                      canCancel={canCancel}
+                      onAction={(fn) => run(c.id, fn)}
+                    />
+                  </li>
+                ))
+              )}
             </ul>
           </section>
         ))}
@@ -162,7 +184,7 @@ function ReceptionBookingCard(props: {
   onAction: (fn: () => Promise<{ ok: boolean; error?: string }>) => void;
 }) {
   const { card, tenantId, base, timeLabel, busy, canFlo, canCancel, onAction } = props;
-  const apptHref = `${base}/calendar`;
+  const apptHref = `${base}/appointments/${encodeURIComponent(card.id)}`;
 
   const terminal = card.receptionColumn === "complete" || card.receptionColumn === "cancelled" || card.receptionColumn === "no_show";
 
@@ -176,7 +198,7 @@ function ReceptionBookingCard(props: {
       <div className="flex items-start justify-between gap-2">
         <p className="font-mono text-sm font-semibold text-cyan-200/95">{timeLabel}</p>
         <Link href={apptHref} className="shrink-0 text-[0.65rem] font-medium uppercase tracking-wide text-cyan-400/80 hover:underline">
-          Open
+          Appointment
         </Link>
       </div>
       <p className="mt-1 truncate text-sm font-semibold text-slate-50">{card.displayName}</p>
@@ -191,6 +213,25 @@ function ReceptionBookingCard(props: {
           {[card.clinicLabel, card.roomLabel].filter(Boolean).join(" · ")}
         </p>
       )}
+
+      <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-[0.65rem] font-semibold">
+        <Link className="text-cyan-400/90 hover:text-cyan-300 hover:underline" href={apptHref}>
+          Open appointment
+        </Link>
+        {card.patientId ? (
+          <Link
+            className="text-cyan-400/90 hover:text-cyan-300 hover:underline"
+            href={`${base}/patients/${encodeURIComponent(card.patientId)}`}
+          >
+            Patient
+          </Link>
+        ) : null}
+        {card.leadId ? (
+          <Link className="text-cyan-400/90 hover:text-cyan-300 hover:underline" href={`${base}/crm/leads/${encodeURIComponent(card.leadId)}`}>
+            Lead
+          </Link>
+        ) : null}
+      </div>
 
       {!terminal ? (
         <div className="mt-2 flex flex-wrap gap-1">

@@ -7,10 +7,12 @@ export function ConsultationOsCreatePage({
   tenantId,
   showCrmNav,
   clinicalStaffOptions = [],
+  operationalTodayYmd,
 }: {
   tenantId: string;
   showCrmNav: boolean;
   clinicalStaffOptions?: ClinicalStaffPickerOption[];
+  operationalTodayYmd: string;
 }) {
   return (
     <ConsultationOsWorkspace
@@ -18,6 +20,7 @@ export function ConsultationOsCreatePage({
       mode="create"
       showCrmNav={showCrmNav}
       clinicalStaffOptions={clinicalStaffOptions}
+      operationalTodayYmd={operationalTodayYmd}
     />
   );
 }

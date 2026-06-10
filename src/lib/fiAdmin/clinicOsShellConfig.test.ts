@@ -18,8 +18,8 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.dashboard?.href, base);
   assert.equal(byId.dashboard?.disabled, false);
   assert.equal(byId["operations-centre"]?.href, `${base}/operations`);
-  assert.equal(byId["operations-centre"]?.disabled, false);
   assert.equal(byId["reception-board"]?.href, `${base}/reception`);
+  assert.equal(byId["operations-centre"]?.disabled, false);
   assert.equal(byId["reception-board"]?.disabled, false);
   assert.equal(byId.bookings?.href, `${base}/bookings`);
   assert.equal(byId.calendar?.href, `${base}/calendar`);
@@ -27,6 +27,9 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.equal(byId.staff?.href, `${base}/staff`);
   assert.equal(byId.services?.href, `${base}/services`);
   assert.equal(byId.consultations?.href, `${base}/consultations`);
+  const conv = items.find((i) => i.id === "consultation-conversion-board");
+  assert.ok(conv);
+  assert.equal(conv!.href, `${base}/consultation-conversion`);
   assert.equal(byId.surgeryos?.href, `${base}/cases`);
   const readiness = items.find((i) => i.id === "surgery-readiness-board");
   assert.ok(readiness);
@@ -39,6 +42,10 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.ok(taxLoc);
   assert.equal(taxLoc!.disabled, false);
   assert.equal(taxLoc!.href, `${base}/settings/tax-localisation`);
+  const timely = items.find((i) => i.id === "timely-zapier");
+  assert.ok(timely);
+  assert.equal(timely!.disabled, false);
+  assert.equal(timely!.href, `${base}/settings/integrations/timely`);
 });
 
 test("resolveClinicOsShellNavItems: LeadFlow (CRM) enabled when showCrmNav", () => {
@@ -93,6 +100,10 @@ test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/analytics`, base), "analyticsos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/cases/c-1`, base), "surgeryos");
   assert.equal(getClinicOsShellActiveNavId(`${base}/surgery-readiness`, base), "surgery-readiness-board");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/consultation-conversion`, base), "consultation-conversion-board");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/consultations/c-1`, base), "consultations");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/operations`, base), "operations-centre");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/reception`, base), "reception-board");
   assert.equal(getClinicOsShellActiveNavId(`${base}/foundation-integrity`, base), "foundationos");
 });
 
@@ -163,6 +174,10 @@ test("getClinicOsShellActiveNavId: admin users under settings cluster", () => {
 
 test("getClinicOsShellActiveNavId: tax localisation under settings cluster", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/settings/tax-localisation`, base), "configuration");
+});
+
+test("getClinicOsShellActiveNavId: Timely Zapier under settings cluster", () => {
+  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/integrations/timely`, base), "configuration");
 });
 
 test("resolveClinicOsShellNavItems: Admin Users gated by showManageAdminUsers", () => {

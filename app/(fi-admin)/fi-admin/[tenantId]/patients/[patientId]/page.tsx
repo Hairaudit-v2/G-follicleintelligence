@@ -13,6 +13,10 @@ import { parsePatientPreviewSearchParam } from "@/src/lib/patients/patientPrevie
 import { loadPatientProfile } from "@/src/lib/patients/patientProfileLoader";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
+import { loadPaymentRecordsForPatientId } from "@/src/lib/payments/paymentRecordLoaders.server";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -69,10 +73,14 @@ export default async function PatientProfileRoutePage({
   const payload = await loadPatientDetailPayload(tenantId, patientId);
   if (!payload) notFound();
 
-  const [services, clinicalStaffOptions] = await Promise.all([
+  const [services, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap] = await Promise.all([
     loadFiServicesForTenant(tenantId.trim()),
     loadClinicalStaffPickerOptions(tenantId.trim()),
+    loadTenantOperationalCalendarSettings(tenantId.trim()),
+    loadPaymentRecordsForPatientId(tenantId.trim(), patientId.trim()),
+    getPaymentRecordMutationCapability(tenantId.trim()),
   ]);
+  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
 
   return (
     <AppointmentSlideOverProvider
@@ -93,6 +101,9 @@ export default async function PatientProfileRoutePage({
           initialPayload={payload}
           activeTab={activeTab}
           previewPatientId={previewPatientId}
+          operationalTodayYmd={operationalTodayYmd}
+          initialPaymentRecords={initialPaymentRecords}
+          canMutatePaymentRecords={payCap.canMutate}
           prescriptionsTab={
             activeTab === "prescriptions" ? (
               <Suspense

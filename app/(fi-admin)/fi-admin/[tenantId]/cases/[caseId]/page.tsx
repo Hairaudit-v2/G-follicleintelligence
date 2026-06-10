@@ -18,6 +18,9 @@ import { buildCaseTimeline } from "@/src/lib/cases/caseTimelineBuild";
 import { loadCaseTimelineExtraSources } from "@/src/lib/cases/caseTimelineLoaders";
 import { loadUniversalCaseRecord } from "@/src/lib/fi/foundation/caseRecord";
 import { sanitizeFromCasesSearchParam } from "@/src/lib/cases/caseDetailFromCasesParam";
+import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
+import { loadPaymentRecordsForCases } from "@/src/lib/payments/paymentRecordLoaders.server";
 
 export const metadata = {
   title: "Patient",
@@ -90,14 +93,19 @@ export default async function CaseDetailRoutePage({
   const foundationOk = foundationRecord && foundationRecord.ok ? foundationRecord : null;
 
   const linkedFiPatientId = detail.patient?.foundation_patient_id ?? null;
-  const [caseAppointmentBookings, services, calendarSettings, assignees, scope, bookingSession] = await Promise.all([
+  const [caseAppointmentBookings, services, calendarSettings, assignees, scope, bookingSession, payMap, payCap] =
+    await Promise.all([
     loadCaseAppointmentBookingsForShell(tenantId, caseId, linkedFiPatientId),
     loadFiServicesForTenant(tenantId.trim()),
     loadTenantOperationalCalendarSettings(tenantId.trim()),
     loadClinicalStaffPickerOptions(tenantId.trim()),
     loadCrmShellScopePickerOptions(tenantId.trim()),
     getBookingsOperatorSessionIfAllowed(tenantId.trim()),
+    loadPaymentRecordsForCases(tenantId.trim(), [caseId.trim()]),
+    getPaymentRecordMutationCapability(tenantId.trim()),
   ]);
+  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
+  const initialPaymentRecords = payMap.get(caseId.trim()) ?? [];
 
   const pageView = (
     <CaseDetailPageView
@@ -113,6 +121,9 @@ export default async function CaseDetailRoutePage({
       foundationRecord={foundationOk}
       casesListReturnQuery={casesListReturnQuery}
       caseAppointmentBookings={caseAppointmentBookings}
+      operationalTodayYmd={operationalTodayYmd}
+      initialPaymentRecords={initialPaymentRecords}
+      canMutatePaymentRecords={payCap.canMutate}
     />
   );
 

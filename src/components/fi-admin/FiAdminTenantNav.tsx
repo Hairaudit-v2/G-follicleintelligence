@@ -36,6 +36,16 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       home: true,
       title: "ClinicOS — tenant home, agenda context, and daily operations.",
     },
+    {
+      href: `${base}/operations`,
+      label: "Operations",
+      title: "ClinicOS — operations centre, agenda, and links to other boards.",
+    },
+    {
+      href: `${base}/reception`,
+      label: "Reception",
+      title: "ClinicOS — today’s reception board and booking flow.",
+    },
   ];
   if (showBookingsBoard) {
     clinicItems.push(
@@ -80,6 +90,26 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       },
     ],
   });
+
+  if (showBookingsBoard || showCrmNav) {
+    groups.push({
+      id: "consultationos",
+      label: "ConsultationOS",
+      description: "Consultation workspace and conversion funnel.",
+      items: [
+        {
+          href: `${base}/consultations`,
+          label: "Consultations",
+          title: "ConsultationOS — clinical consultation records and quotes.",
+        },
+        {
+          href: `${base}/consultation-conversion`,
+          label: "Conversion board",
+          title: "ConsultationOS — live view from booked consult through surgery booking.",
+        },
+      ],
+    });
+  }
 
   const patientItems: NavLink[] = [];
   if (showBookingsBoard) {
@@ -215,6 +245,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       href: `${base}/settings/tax-localisation`,
       label: "Tax & Localisation",
       title: "Settings — tax, currency, invoice, and regional business settings.",
+    },
+    {
+      href: `${base}/settings/integrations/timely`,
+      label: "Integrations · Timely",
+      title: "Settings — Zapier webhooks for Timely patients and appointments.",
     },
   );
   groups.push({

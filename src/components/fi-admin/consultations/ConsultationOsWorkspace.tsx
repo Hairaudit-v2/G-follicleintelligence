@@ -29,6 +29,8 @@ import {
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiSection } from "@/src/components/fi-design/FiSection";
+import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
+import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
@@ -117,6 +119,10 @@ export type ConsultationOsWorkspaceProps = {
   /** When false, lead linking UI is hidden (CRM shell not available). */
   showCrmNav?: boolean;
   clinicalStaffOptions?: ClinicalStaffPickerOption[];
+  /** Tenant-local YYYY-MM-DD for payment overdue badges. */
+  operationalTodayYmd: string;
+  initialPaymentRecords?: PaymentRecordRow[];
+  canMutatePaymentRecords?: boolean;
 };
 
 function renderMainSection(
@@ -162,6 +168,9 @@ export function ConsultationOsWorkspace({
   initialWorkspaceDisplay = null,
   showCrmNav = false,
   clinicalStaffOptions = [],
+  operationalTodayYmd,
+  initialPaymentRecords = [],
+  canMutatePaymentRecords = false,
 }: ConsultationOsWorkspaceProps) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -679,6 +688,24 @@ export function ConsultationOsWorkspace({
           </dl>
         </FiSection>
       </FiCard>
+
+      {mode === "edit" && consultationId?.trim() ? (
+        <FiCard>
+          <PaymentRecordPanel
+            tenantId={tenantId.trim()}
+            optionalFiAdminKey={adminKey.trim() || undefined}
+            todayYmd={operationalTodayYmd}
+            paymentContext="consultation"
+            consultationId={consultationId.trim()}
+            patientId={linkedPatientId}
+            leadId={linkedLeadId}
+            bookingId={initialRow?.booking_id?.trim() || null}
+            initialRows={initialPaymentRecords}
+            canMutate={canMutatePaymentRecords}
+            noManualPaymentRecordsCopy="No manual deposit record yet."
+          />
+        </FiCard>
+      ) : null}
 
       <FiSection
         title="Consultation summary"

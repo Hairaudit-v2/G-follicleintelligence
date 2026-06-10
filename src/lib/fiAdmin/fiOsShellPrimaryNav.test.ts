@@ -30,6 +30,7 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
   assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/admin-users`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/tax-localisation`, base), "settings");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");
 });
 
@@ -46,10 +47,38 @@ test("resolveFiOsPrimarySidebarItems: cases entry includes readiness board sub-l
   assert.ok(cases!.subItems!.some((s) => s.href.endsWith("/surgery-readiness")));
 });
 
-test("resolveFiOsPrimarySidebarItems: consultations follows bookings board flag", () => {
-  const on = resolveFiOsPrimarySidebarItems(base, true, true);
-  assert.ok(on.find((i) => i.id === "consultations" && !i.disabled));
-  const off = resolveFiOsPrimarySidebarItems(base, true, false);
+test("getFiOsShellActiveSidebarId: consultation conversion route stays under Consultations", () => {
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/consultation-conversion`, base), "consultations");
+});
+
+test("getFiOsShellActiveSidebarId: operations centre maps to Ops sidebar tab", () => {
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/operations`, base), "operations-centre");
+});
+
+test("getFiOsShellActiveSidebarId: reception board maps to Rec sidebar tab", () => {
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/reception`, base), "reception-board");
+});
+
+test("resolveFiOsPrimarySidebarItems: operations and reception entries exist", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true);
+  assert.ok(items.find((i) => i.id === "operations-centre" && !i.disabled));
+  assert.ok(items.find((i) => i.id === "reception-board" && !i.disabled));
+});
+
+test("resolveFiOsPrimarySidebarItems: consultations entry includes conversion board sub-link when enabled", () => {
+  const items = resolveFiOsPrimarySidebarItems(base, true, true);
+  const consult = items.find((i) => i.id === "consultations");
+  assert.ok(consult?.subItems?.length);
+  assert.ok(consult!.subItems!.some((s) => s.href.endsWith("/consultation-conversion")));
+});
+
+test("resolveFiOsPrimarySidebarItems: consultations enabled with CRM-only access", () => {
+  const crmOnly = resolveFiOsPrimarySidebarItems(base, true, false);
+  assert.ok(crmOnly.find((i) => i.id === "consultations" && !i.disabled));
+});
+
+test("resolveFiOsPrimarySidebarItems: consultations disabled without CRM or bookings access", () => {
+  const off = resolveFiOsPrimarySidebarItems(base, false, false);
   assert.ok(off.find((i) => i.id === "consultations" && i.disabled));
 });
 

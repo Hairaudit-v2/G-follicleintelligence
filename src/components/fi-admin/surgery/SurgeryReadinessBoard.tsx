@@ -69,7 +69,7 @@ function KpiTile(props: {
 }
 
 function SurgeryCard({ card }: { card: SurgeryReadinessBoardCard }) {
-  const displayIssues = card.issues.filter((i) => i.kind !== "payment_not_connected").slice(0, 8);
+  const displayIssues = card.issues.filter((i) => i.kind !== "no_payment_tracking").slice(0, 8);
   return (
     <article className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm text-slate-200 shadow-sm shadow-black/30">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -106,6 +106,10 @@ function SurgeryCard({ card }: { card: SurgeryReadinessBoardCard }) {
             <dd className="font-mono text-slate-300">{card.readinessPercent}%</dd>
           </div>
         ) : null}
+        <div className="flex gap-1">
+          <dt className="shrink-0 text-slate-600">Deposit</dt>
+          <dd className="min-w-0 text-slate-300">{card.surgeryDepositLabel}</dd>
+        </div>
       </dl>
       {displayIssues.length ? (
         <ul className="mt-2 space-y-1">
@@ -119,9 +123,6 @@ function SurgeryCard({ card }: { card: SurgeryReadinessBoardCard }) {
             </li>
           ))}
         </ul>
-      ) : null}
-      {card.issues.some((i) => i.kind === "payment_not_connected") ? (
-        <p className="mt-2 text-[0.65rem] text-slate-500">{SURGERY_READINESS_ISSUE_LABEL.payment_not_connected}</p>
       ) : null}
       <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.7rem] font-semibold">
         {card.hrefs.case ? (
@@ -190,6 +191,18 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
             Calendar
           </Link>
           <Link
+            href={`${base}/reception`}
+            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
+          >
+            Reception board
+          </Link>
+          <Link
+            href={`${base}/consultation-conversion`}
+            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
+          >
+            Conversion board
+          </Link>
+          <Link
             href={`${base}/operations`}
             className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
           >
@@ -229,19 +242,23 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
           <KpiTile label="Missing pathology" value={kpis.missingPathology} />
           <KpiTile label="Missing consent" value={kpis.missingConsent} />
           <KpiTile
-            label="Payment / deposit"
-            value="Payment tracking not connected"
-            sub="Informational only — not blocking until billing data is integrated."
+            label="Deposit tracking"
+            value={`${kpis.surgeryDepositsPending} pending`}
+            sub={`${kpis.surgeryPaymentRecordsTracked} surgery rows tracked on this board (manual payment tracking).`}
           />
         </div>
       </DashboardCard>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-6">
+      <div className="overflow-x-auto pb-2">
+        <div className="flex min-w-[900px] gap-3 xl:min-w-0 xl:grid xl:grid-cols-6 xl:gap-3">
         {COLUMN_META.map((col) => (
           <section
             key={col.id}
             aria-labelledby={`srcol-${col.id}`}
-            className={cn("flex min-h-[220px] min-w-0 flex-col rounded-xl border p-3", col.tone)}
+            className={cn(
+              "flex min-h-[220px] w-[min(100%,16rem)] shrink-0 flex-col rounded-xl border p-3 xl:w-auto xl:min-w-0",
+              col.tone,
+            )}
           >
             <h2 id={`srcol-${col.id}`} className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               {col.title}
@@ -249,13 +266,14 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
             </h2>
             <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
               {filteredColumns[col.id].length === 0 ? (
-                <p className="py-6 text-center text-xs text-slate-600">No surgeries</p>
+                <p className="py-6 text-center text-xs text-slate-600">Nothing in this column (try another filter).</p>
               ) : (
                 filteredColumns[col.id].map((c) => <SurgeryCard key={c.bookingId} card={c} />)
               )}
             </div>
           </section>
         ))}
+        </div>
       </div>
     </div>
   );

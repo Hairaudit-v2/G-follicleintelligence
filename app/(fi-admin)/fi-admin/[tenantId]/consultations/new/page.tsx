@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { ConsultationOsCreatePage } from "@/src/components/fi-admin/consultations/ConsultationOsCreatePage";
+import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
@@ -18,16 +20,19 @@ export default async function ConsultationOsNewRoutePage({ params }: { params: P
 
   await assertFiTenantPortalAccess(tenantId);
 
-  const [showCrmNav, clinicalStaffOptions] = await Promise.all([
+  const [showCrmNav, clinicalStaffOptions, calendarSettings] = await Promise.all([
     getCrmShellNavAllowed(tenantId.trim()),
     loadClinicalStaffPickerOptions(tenantId.trim()),
+    loadTenantOperationalCalendarSettings(tenantId.trim()),
   ]);
+  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
 
   return (
     <ConsultationOsCreatePage
       tenantId={tenantId.trim()}
       showCrmNav={showCrmNav}
       clinicalStaffOptions={clinicalStaffOptions}
+      operationalTodayYmd={operationalTodayYmd}
     />
   );
 }

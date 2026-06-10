@@ -9,7 +9,8 @@ import { resolveConsultationConsultantDisplayName } from "./consultationConsulta
 import { CONSULTATION_TYPE_DEFINITIONS } from "./consultationTypeConfig";
 import type { ConsultationRow, ConsultationStatus, ConsultationTypeId } from "./consultationTypes";
 
-function mapRow(raw: Record<string, unknown>): ConsultationRow {
+/** Maps a `fi_consultations` select row to {@link ConsultationRow} (service-role reads). */
+export function mapFiConsultationRow(raw: Record<string, unknown>): ConsultationRow {
   return {
     id: String(raw.id),
     tenant_id: String(raw.tenant_id),
@@ -70,7 +71,7 @@ export async function loadConsultationForTenant(
 
   if (error) throw new Error(error.message);
   if (!data || typeof data !== "object") return null;
-  return mapRow(data as Record<string, unknown>);
+  return mapFiConsultationRow(data as Record<string, unknown>);
 }
 
 export type ListConsultationsOptions = {
@@ -367,7 +368,7 @@ export async function loadConsultationsForPatient(
   if (error) throw new Error(error.message);
   if (!Array.isArray(data)) return [];
 
-  const rows = data.map((row) => mapRow(row as Record<string, unknown>));
+  const rows = data.map((row) => mapFiConsultationRow(row as Record<string, unknown>));
   const subjectById = await resolveConsultationSubjectLines(tid, rows);
   const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
   const consultantStaffNameById = await resolveConsultantStaffNameById(tid, rows);
@@ -398,7 +399,7 @@ export async function listConsultationsForTenant(
   const { data, error } = await q.range(offset, offset + limit - 1);
   if (error) throw new Error(error.message);
   if (!Array.isArray(data)) return [];
-  const rows = data.map((row) => mapRow(row as Record<string, unknown>));
+  const rows = data.map((row) => mapFiConsultationRow(row as Record<string, unknown>));
   const subjectById = await resolveConsultationSubjectLines(tid, rows);
   const { patientLabelById, leadTitleById } = await resolveConsultationLinkIndexMaps(tid, rows);
   const consultantStaffNameById = await resolveConsultantStaffNameById(tid, rows);

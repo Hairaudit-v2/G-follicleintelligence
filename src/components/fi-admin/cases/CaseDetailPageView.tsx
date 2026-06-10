@@ -28,6 +28,8 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
+import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
+import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 
 function caseSelfQuery(casesListReturnQuery?: string, opts?: { foundation?: "1" }): string {
   const p = new URLSearchParams();
@@ -50,6 +52,9 @@ export function CaseDetailPageView({
   foundationRecord,
   casesListReturnQuery,
   caseAppointmentBookings,
+  operationalTodayYmd,
+  initialPaymentRecords = [],
+  canMutatePaymentRecords = false,
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
@@ -65,6 +70,9 @@ export function CaseDetailPageView({
   casesListReturnQuery?: string;
   /** Full booking rows for case detail appointments + slide-over shell (merged with patient when linked). */
   caseAppointmentBookings: FiBookingRow[];
+  operationalTodayYmd: string;
+  initialPaymentRecords?: PaymentRecordRow[];
+  canMutatePaymentRecords?: boolean;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
   /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
@@ -149,6 +157,19 @@ export function CaseDetailPageView({
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.readiness}>
           <CaseReadinessSummaryCard report={readiness} />
+          <div className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
+            <PaymentRecordPanel
+              tenantId={tenantId}
+              todayYmd={operationalTodayYmd}
+              paymentContext="surgery"
+              caseId={detail.id}
+              patientId={twinFoundationPatientId}
+              leadId={prefillLeadId}
+              initialRows={initialPaymentRecords}
+              canMutate={canMutatePaymentRecords}
+              noManualPaymentRecordsCopy="No manual payment records linked to this case yet."
+            />
+          </div>
         </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.timeline}>

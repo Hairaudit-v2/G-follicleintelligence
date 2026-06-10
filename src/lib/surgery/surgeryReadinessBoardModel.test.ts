@@ -13,6 +13,14 @@ import {
   pickSurgeryReadinessPrimaryColumn,
 } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
+const surgeryDepositSatisfied = {
+  status: "paid" as const,
+  due_date: null as string | null,
+  amount_expected: 1,
+  amount_paid: 1,
+};
+const TODAY_YMD = "2026-06-10";
+
 test("computeSurgeryReadinessBoardWindow: 14 inclusive days in Australia/Sydney", () => {
   const now = new Date("2026-06-10T14:00:00.000Z");
   const w = computeSurgeryReadinessBoardWindow(now, "Australia/Sydney");
@@ -39,6 +47,8 @@ test("pickSurgeryReadinessPrimaryColumn: missing case_id → on_hold_not_linked"
     surgeryPlanningComplete: true,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: null,
+    todayYmd: TODAY_YMD,
   });
   assert.equal(pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "ready" }), "on_hold_not_linked");
 });
@@ -54,6 +64,8 @@ test("pickSurgeryReadinessPrimaryColumn: missing pathology before consent", () =
     surgeryPlanningComplete: true,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: surgeryDepositSatisfied,
+    todayYmd: TODAY_YMD,
   });
   const issues = escalateSurgeryReadinessIssues(raw, 10, "confirmed");
   assert.equal(pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "needs_attention" }), "missing_pathology");
@@ -70,6 +82,8 @@ test("pickSurgeryReadinessPrimaryColumn: missing consent when pathology satisfie
     surgeryPlanningComplete: true,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: surgeryDepositSatisfied,
+    todayYmd: TODAY_YMD,
   });
   const issues = escalateSurgeryReadinessIssues(raw, 10, "confirmed");
   assert.equal(pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: "ready" }), "missing_consent");
@@ -98,6 +112,8 @@ test("V1.1: abnormal pathology is always high_risk severity", () => {
     surgeryPlanningComplete: true,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: surgeryDepositSatisfied,
+    todayYmd: TODAY_YMD,
   });
   const abnormal = raw.find((i) => i.kind === "abnormal_pathology");
   assert.equal(abnormal?.severity, "high_risk");
@@ -117,6 +133,8 @@ test("V1.1: missing pathology within 7 days escalates to high_risk", () => {
     surgeryPlanningComplete: true,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: surgeryDepositSatisfied,
+    todayYmd: TODAY_YMD,
   });
   const at8 = escalateSurgeryReadinessIssues(raw, 8, "confirmed");
   assert.equal(at8.find((i) => i.kind === "missing_pathology")?.severity, "warning");
@@ -135,6 +153,8 @@ test("V1.1: missing consent proxy within 7 days escalates to high_risk", () => {
     surgeryPlanningComplete: true,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: surgeryDepositSatisfied,
+    todayYmd: TODAY_YMD,
   });
   assert.equal(escalateSurgeryReadinessIssues(raw, 8, "confirmed").find((i) => i.kind === "missing_consent_proxy")?.severity, "warning");
   assert.equal(escalateSurgeryReadinessIssues(raw, 7, "confirmed").find((i) => i.kind === "missing_consent_proxy")?.severity, "high_risk");
@@ -151,6 +171,8 @@ test("V1.1: unconfirmed surgery (scheduled) within 3 days escalates booking_unco
     surgeryPlanningComplete: true,
     bookingStatus: "scheduled",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: surgeryDepositSatisfied,
+    todayYmd: TODAY_YMD,
   });
   assert.equal(escalateSurgeryReadinessIssues(raw, 4, "scheduled").find((i) => i.kind === "booking_unconfirmed")?.severity, "warning");
   assert.equal(escalateSurgeryReadinessIssues(raw, 3, "scheduled").find((i) => i.kind === "booking_unconfirmed")?.severity, "high_risk");
@@ -167,6 +189,8 @@ test("V1.1: missing case link matches Not Linked manager filter", () => {
     surgeryPlanningComplete: false,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: null,
+    todayYmd: TODAY_YMD,
   });
   const primary = pickSurgeryReadinessPrimaryColumn({ issues, readinessBucket: null });
   assert.equal(primary, "on_hold_not_linked");
@@ -174,7 +198,7 @@ test("V1.1: missing case link matches Not Linked manager filter", () => {
   assert.equal(cardMatchesManagerFilter(issues, primary, "missing_pathology"), false);
 });
 
-test("V1.1: payment_not_connected stays info and does not force high_risk", () => {
+test("V1.1: no manual payment tracking row stays info and does not force high_risk", () => {
   const raw = buildSurgeryReadinessIssues({
     caseId: "c1",
     patientIdForPathology: "p1",
@@ -185,24 +209,101 @@ test("V1.1: payment_not_connected stays info and does not force high_risk", () =
     surgeryPlanningComplete: true,
     bookingStatus: "confirmed",
     surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: null,
+    todayYmd: TODAY_YMD,
   });
-  const pay = raw.find((i) => i.kind === "payment_not_connected");
+  const pay = raw.find((i) => i.kind === "no_payment_tracking");
   assert.equal(pay?.severity, "info");
   const escalated = escalateSurgeryReadinessIssues(raw, 0, "confirmed");
-  assert.equal(escalated.find((i) => i.kind === "payment_not_connected")?.severity, "info");
+  assert.equal(escalated.find((i) => i.kind === "no_payment_tracking")?.severity, "info");
   assert.equal(maxSurgeryReadinessIssueSeverity(escalated), "info");
   assert.equal(cardMatchesManagerFilter(escalated, "ready", "high_risk"), false);
 });
 
-test("aggregateSurgeryReadinessKpis: payment tracking is informational only flag", () => {
-  const kpis = aggregateSurgeryReadinessKpis({
-    ready: [{}],
-    needs_attention: [{}, {}],
-    high_risk: [],
-    missing_pathology: [{}],
-    missing_consent: [],
-    on_hold_not_linked: [],
+test("pending tracked surgery deposit adds surgery_deposit_pending (not no_payment_tracking)", () => {
+  const raw = buildSurgeryReadinessIssues({
+    caseId: "c1",
+    patientIdForPathology: "p1",
+    hasPathologyResult: true,
+    abnormalPathologyMarkerCount: 0,
+    hasConsentProxy: true,
+    hasSurgeryPlanRow: true,
+    surgeryPlanningComplete: true,
+    bookingStatus: "confirmed",
+    surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: {
+      status: "pending",
+      due_date: "2026-06-20",
+      amount_expected: 500,
+      amount_paid: 0,
+    },
+    todayYmd: TODAY_YMD,
   });
+  assert.ok(raw.some((i) => i.kind === "surgery_deposit_pending"));
+  assert.equal(raw.some((i) => i.kind === "no_payment_tracking"), false);
+});
+
+test("paid tracked surgery deposit clears deposit collection issues", () => {
+  const raw = buildSurgeryReadinessIssues({
+    caseId: "c1",
+    patientIdForPathology: "p1",
+    hasPathologyResult: true,
+    abnormalPathologyMarkerCount: 0,
+    hasConsentProxy: true,
+    hasSurgeryPlanRow: true,
+    surgeryPlanningComplete: true,
+    bookingStatus: "confirmed",
+    surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: {
+      status: "paid",
+      due_date: null,
+      amount_expected: 100,
+      amount_paid: 100,
+    },
+    todayYmd: TODAY_YMD,
+  });
+  assert.equal(raw.some((i) => i.kind === "surgery_deposit_pending"), false);
+  assert.equal(raw.some((i) => i.kind === "no_payment_tracking"), false);
+});
+
+test("surgery_deposit_pending escalates to high_risk within 7 days of surgery", () => {
+  const raw = buildSurgeryReadinessIssues({
+    caseId: "c1",
+    patientIdForPathology: "p1",
+    hasPathologyResult: true,
+    abnormalPathologyMarkerCount: 0,
+    hasConsentProxy: true,
+    hasSurgeryPlanRow: true,
+    surgeryPlanningComplete: true,
+    bookingStatus: "confirmed",
+    surgeryPlanPlanningStatus: null,
+    surgeryPaymentRecord: {
+      status: "pending",
+      due_date: "2026-06-20",
+      amount_expected: 500,
+      amount_paid: 0,
+    },
+    todayYmd: TODAY_YMD,
+  });
+  const at8 = escalateSurgeryReadinessIssues(raw, 8, "confirmed");
+  assert.equal(at8.find((i) => i.kind === "surgery_deposit_pending")?.severity, "warning");
+  const at6 = escalateSurgeryReadinessIssues(raw, 6, "confirmed");
+  assert.equal(at6.find((i) => i.kind === "surgery_deposit_pending")?.severity, "high_risk");
+});
+
+test("aggregateSurgeryReadinessKpis: includes manual deposit counters", () => {
+  const kpis = aggregateSurgeryReadinessKpis(
+    {
+      ready: [{}],
+      needs_attention: [{}, {}],
+      high_risk: [],
+      missing_pathology: [{}],
+      missing_consent: [],
+      on_hold_not_linked: [],
+    },
+    { tracked: 3, pending: 1 }
+  );
   assert.equal(kpis.upcomingNext14Days, 4);
-  assert.equal(kpis.paymentTrackingInfoOnly, true);
+  assert.equal(kpis.surgeryPaymentRecordsTracked, 3);
+  assert.equal(kpis.surgeryDepositsPending, 1);
 });

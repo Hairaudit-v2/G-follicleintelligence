@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation";
 
+import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { ConsultationOsEditPage } from "@/src/components/fi-admin/consultations/ConsultationOsEditPage";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadConsultationForTenant, loadConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
+import { loadPaymentRecordsForConsultationId } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 
 export const metadata = {
@@ -28,11 +32,16 @@ export default async function ConsultationOsEditRoutePage({
 
   const tid = tenantId.trim();
   const cid = consultationId.trim();
-  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions] = await Promise.all([
-    getCrmShellNavAllowed(tid),
-    loadConsultationWorkspaceDisplay(tid, row),
-    loadClinicalStaffPickerOptions(tid),
-  ]);
+  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap] =
+    await Promise.all([
+      getCrmShellNavAllowed(tid),
+      loadConsultationWorkspaceDisplay(tid, row),
+      loadClinicalStaffPickerOptions(tid),
+      loadTenantOperationalCalendarSettings(tid),
+      loadPaymentRecordsForConsultationId(tid, cid),
+      getPaymentRecordMutationCapability(tid),
+    ]);
+  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
 
   return (
     <ConsultationOsEditPage
@@ -42,6 +51,9 @@ export default async function ConsultationOsEditRoutePage({
       initialWorkspaceDisplay={initialWorkspaceDisplay}
       showCrmNav={showCrmNav}
       clinicalStaffOptions={clinicalStaffOptions}
+      operationalTodayYmd={operationalTodayYmd}
+      initialPaymentRecords={initialPaymentRecords}
+      canMutatePaymentRecords={payCap.canMutate}
     />
   );
 }

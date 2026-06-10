@@ -17,6 +17,7 @@ import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developm
 import { computeOperationalLocalDayUtcWindow } from "@/src/lib/fiOs/tenantOperationalLocalDay";
 import { aggregateActiveLeadVolumeByPipelineStage } from "@/src/lib/fiOs/tenantOperationalDashboardCrmLeadVolume";
 import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
+import { loadPaymentSummaryForOperations } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
   bookingAgendaBucket,
@@ -128,7 +129,15 @@ const launchControlSchema = z.object({
   revenueAvailable: z.boolean(),
 });
 
+const paymentCommercialKpisSchema = z.object({
+  depositsDueCount: z.number().int().nonnegative(),
+  depositsPaidTodayCount: z.number().int().nonnegative(),
+  overduePaymentsCount: z.number().int().nonnegative(),
+});
+
 export type TenantLaunchControl = z.infer<typeof launchControlSchema>;
+
+export type TenantPaymentCommercialKpis = z.infer<typeof paymentCommercialKpisSchema>;
 
 const clinicTodaySchema = z.object({
   /** Consultation bookings starting today (tenant IANA calendar day, active statuses). */
@@ -150,7 +159,7 @@ const actionCentreSchema = z.object({
   consultationsAwaitingCompletion: z.number().int().nonnegative(),
   /** Follow-up / review bookings due within 14 days (active statuses). */
   followUpsDue: z.number().int().nonnegative(),
-  /** Upcoming surgery bookings missing a linked case (next 30 days). */
+  /** Upcoming surgery bookings missing a linked case (next 14 days — same horizon as Surgery readiness board). */
   surgeryReadinessAlerts: z.number().int().nonnegative(),
 });
 
@@ -217,6 +226,9 @@ const receptionBoardCardSchema = z.object({
   bookingType: z.string(),
   bookingStatus: z.string(),
   timezone: z.string().nullable(),
+  /** Optional anchors for deep links (same tenant). */
+  leadId: z.string().uuid().nullable(),
+  patientId: z.string().uuid().nullable(),
   displayName: z.string(),
   statusLabel: z.string(),
   typeLabel: z.string(),
@@ -266,6 +278,8 @@ export const tenantOperationalDashboardSchema = z.object({
   crmPipelineStages: z.array(crmPipelineStageSnapshotSchema),
   /** Active (non-terminal) lead counts by default-pipeline stage id — from `fi_crm_leads`, not stale-lead hygiene. */
   crmPipelineLeadVolume: crmPipelineLeadVolumeSchema,
+  /** Manual payment tracking KPIs (deposits / overdue — not integrated billing). */
+  paymentCommercialKpis: paymentCommercialKpisSchema,
   /** Reception board cards for `operationalDay` (tenant-local); empty when loader skips enrichment. */
   receptionBoard: receptionBoardPayloadSchema,
 });
@@ -554,7 +568,6 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
   const horizonIso = addHours(now, 14 * 24).toISOString();
-  const surgeryHorizonIso = addHours(now, 30 * 24).toISOString();
   const nowIso = now.toISOString();
 
   const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes] = await Promise.all([
@@ -583,7 +596,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
       .eq("booking_type", "surgery")
       .in("booking_status", [...ACTIVE_AGENDA_BOOKING_STATUSES])
       .gte("start_at", nowIso)
-      .lt("start_at", surgeryHorizonIso)
+      .lt("start_at", horizonIso)
       .is("case_id", null),
   ]);
 
@@ -825,6 +838,8 @@ async function loadReceptionBoardCards(
         bookingType: b.booking_type,
         bookingStatus: b.booking_status,
         timezone: b.timezone,
+        leadId: b.lead_id?.trim() ? b.lead_id.trim() : null,
+        patientId: b.patient_id?.trim() ? b.patient_id.trim() : null,
         displayName,
         statusLabel: bookingStatusLabel(b.booking_status),
         typeLabel: bookingTypeLabel(b.booking_type),
@@ -920,6 +935,7 @@ export async function loadTenantOperationalDashboard(
     openTasksCount,
     medicationReorderReviewsPending,
     crmPipelineLeadVolume,
+    paymentCommercialKpis,
     receptionBoardCards,
   ] = await Promise.all([
     loadAgendaBookings(tid, now),
@@ -932,6 +948,7 @@ export async function loadTenantOperationalDashboard(
     loadOpenCrmTasksCount(tid, viewerFiUserId),
     loadMedicationReorderPendingReviewCount(tid),
     loadCrmPipelineLeadVolume(tid, pipelineStages),
+    loadPaymentSummaryForOperations(tid, operationalTodayYmd, operationalLocalDay.localStartIso, operationalLocalDay.localEndIso),
     includeReceptionBoard
       ? loadReceptionBoardCards(tid, operationalLocalDay.localStartIso, operationalLocalDay.localEndIso)
       : Promise.resolve([]),
@@ -968,6 +985,7 @@ export async function loadTenantOperationalDashboard(
     },
     crmPipelineStages,
     crmPipelineLeadVolume,
+    paymentCommercialKpis: paymentCommercialKpisSchema.parse(paymentCommercialKpis),
     receptionBoard: receptionBoardPayloadSchema.parse({ cards: receptionBoardCards }),
   });
 }

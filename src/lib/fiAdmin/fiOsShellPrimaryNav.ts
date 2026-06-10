@@ -16,7 +16,7 @@ export type FiOsPrimarySidebarItem = {
   disabled: boolean;
   /** Shown when disabled (permissions / coming soon). */
   hint?: string;
-  /** Nested SurgeryOS links (readiness board). */
+  /** Nested links (SurgeryOS readiness, ConsultationOS conversion). */
   subItems?: FiOsPrimarySidebarSubItem[];
 };
 
@@ -104,6 +104,20 @@ export function resolveFiOsPrimarySidebarItems(
           : undefined,
     },
     {
+      id: "operations-centre",
+      label: "Operations centre",
+      shortLabel: "Ops",
+      href: hrefFor(b, "operations"),
+      disabled: false,
+    },
+    {
+      id: "reception-board",
+      label: "Reception board",
+      shortLabel: "Rec",
+      href: hrefFor(b, "reception"),
+      disabled: false,
+    },
+    {
       id: "patients",
       label: "Patients",
       shortLabel: "Patients",
@@ -124,8 +138,18 @@ export function resolveFiOsPrimarySidebarItems(
       label: "Consultations",
       shortLabel: "Consult",
       href: hrefFor(b, "consultations"),
-      disabled: !showBookingsBoard,
-      hint: !showBookingsBoard ? "Requires bookings operator access for this tenant." : undefined,
+      disabled: !showBookingsBoard && !showCrmNav,
+      hint:
+        !showBookingsBoard && !showCrmNav
+          ? "Requires bookings operator or CRM shell access for this tenant."
+          : undefined,
+      subItems:
+        !showBookingsBoard && !showCrmNav
+          ? undefined
+          : [
+              { id: "consultations-index", label: "Consultations", href: hrefFor(b, "consultations") },
+              { id: "consultation-conversion-board", label: "Conversion board", href: hrefFor(b, "consultation-conversion") },
+            ],
     },
     {
       id: "cases",
@@ -205,16 +229,21 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     const restEarly = npRaw.slice(nb.length).replace(/^\//, "");
     const firstEarly = restEarly.split("/")[0] ?? "";
     if (firstEarly === "doctor") return "doctor-workspace";
+    if (firstEarly === "operations") return "operations-centre";
+    if (firstEarly === "reception") return "reception-board";
   }
 
   const legacy = getClinicOsShellActiveNavId(pathname, base);
   if (legacy === "foundationos") return "patient-twin";
   if (legacy === "staff" || legacy === "services" || legacy === "configuration") return "settings";
   if (legacy === "leadflow") return "crm";
+  if (legacy === "operations-centre") return "operations-centre";
+  if (legacy === "reception-board") return "reception-board";
   if (legacy === "surgeryos" || legacy === "surgery-readiness-board") return "cases";
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
   if (legacy === "calendar") return "calendar";
+  if (legacy === "consultation-conversion-board") return "consultations";
   if (legacy === "consultations") return "consultations";
   if (legacy === "dashboard") return "dashboard";
   if (legacy === "auditos") return "auditos";

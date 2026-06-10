@@ -131,6 +131,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         description: "Consultation workspace.",
       },
       {
+        id: "consultation-conversion-board",
+        label: "Conversion board",
+        path: "consultation-conversion",
+        permissionHint: {},
+        description: "Consultation funnel from booked consult through surgery.",
+      },
+      {
         id: "prescriptions",
         label: "Prescriptions",
         path: "prescriptions",
@@ -242,6 +249,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         permissionHint: {},
         description: "Configure tax, currency, invoice, and regional business settings for this clinic.",
       },
+      {
+        id: "timely-zapier",
+        label: "Integrations · Timely",
+        path: "settings/integrations/timely",
+        permissionHint: {},
+        description: "Zapier webhook URLs and manual setup for Timely patients and appointments.",
+      },
     ],
   },
 ];
@@ -349,6 +363,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "services") return "services";
   if (first === "doctor") return "doctor-workspace";
   if (first === "consultations") return "consultations";
+  if (first === "consultation-conversion") return "consultation-conversion-board";
   if (first === "prescriptions") return "prescriptions";
   if (first === "cases") return "surgeryos";
   if (first === "surgery-readiness") return "surgery-readiness-board";

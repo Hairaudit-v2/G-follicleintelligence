@@ -30,10 +30,18 @@ export default async function FiAdminReceptionBoardPage({ params }: { params: Pr
     );
   }
 
-  const [data, session] = await Promise.all([
-    loadTenantOperationalDashboard(tenantId.trim(), { includeReceptionBoard: true }),
-    getClinicFloorSessionIfAllowed(tenantId.trim()),
-  ]);
+  let data: Awaited<ReturnType<typeof loadTenantOperationalDashboard>>;
+  let session: Awaited<ReturnType<typeof getClinicFloorSessionIfAllowed>>;
+  try {
+    [data, session] = await Promise.all([
+      loadTenantOperationalDashboard(tenantId.trim(), { includeReceptionBoard: true }),
+      getClinicFloorSessionIfAllowed(tenantId.trim()),
+    ]);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "Tenant not found") notFound();
+    throw e;
+  }
 
   let mutationMode: ReceptionMutationMode = "none";
   if (session) {

@@ -23,6 +23,8 @@ import { PatientAppointmentsTab } from "./PatientAppointmentsTab";
 import { PatientDocumentsTab } from "./PatientDocumentsTab";
 import { PatientVoiceClinicalNotesCard } from "@/src/components/fi/clinical-notes/PatientVoiceClinicalNotesCard";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
+import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
+import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 
 export function PatientDetailPageView({
   tenantId,
@@ -30,6 +32,9 @@ export function PatientDetailPageView({
   initialPayload,
   activeTab,
   previewPatientId,
+  operationalTodayYmd,
+  initialPaymentRecords = [],
+  canMutatePaymentRecords = false,
   /** Server-rendered async tab; passed from the route so this client module never imports prescribing loaders. */
   prescriptionsTab,
 }: {
@@ -38,6 +43,9 @@ export function PatientDetailPageView({
   initialPayload: PatientDetailPayload;
   activeTab: PatientDetailTabId;
   previewPatientId?: string;
+  operationalTodayYmd: string;
+  initialPaymentRecords?: PaymentRecordRow[];
+  canMutatePaymentRecords?: boolean;
   prescriptionsTab?: ReactNode;
 }) {
   const { profile } = initialPayload;
@@ -99,6 +107,17 @@ export function PatientDetailPageView({
           <div className="grid gap-4 lg:grid-cols-2">
             <PatientPersonDetailsCard data={profile} />
             <PatientCasesCard tenantId={tenantId} data={profile} />
+          </div>
+          <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
+            <PaymentRecordPanel
+              tenantId={tenantId}
+              todayYmd={operationalTodayYmd}
+              paymentContext="other"
+              patientId={patientId}
+              initialRows={initialPaymentRecords}
+              canMutate={canMutatePaymentRecords}
+              noManualPaymentRecordsCopy="No manual payment records linked to this patient yet."
+            />
           </div>
         </div>
       ) : null}

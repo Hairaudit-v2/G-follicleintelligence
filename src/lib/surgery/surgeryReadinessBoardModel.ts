@@ -3,6 +3,8 @@
  */
 
 import { addDaysToCalendarDate, calendarDateStringFromInstant, zonedMidnightUtcMs } from "@/src/lib/calendar/calendarTimezone";
+import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
+import { paymentRecordNeedsCollection } from "@/src/lib/payments/paymentRecordModel";
 
 export const SURGERY_READINESS_ACTIVE_BOOKING_STATUSES = ["scheduled", "confirmed", "arrived"] as const;
 
@@ -20,7 +22,8 @@ export type SurgeryReadinessIssueKind =
   | "abnormal_pathology"
   | "missing_consent_proxy"
   | "missing_surgery_plan"
-  | "payment_not_connected"
+  | "no_payment_tracking"
+  | "surgery_deposit_pending"
   | "booking_unconfirmed"
   | "case_on_hold";
 
@@ -37,7 +40,8 @@ export const SURGERY_READINESS_ISSUE_LABEL: Record<SurgeryReadinessIssueKind, st
   abnormal_pathology: "Pathology markers flagged abnormal",
   missing_consent_proxy: "Consultation / quote acceptance (consent proxy)",
   missing_surgery_plan: "Surgery plan incomplete or missing",
-  payment_not_connected: "Payment tracking not connected",
+  no_payment_tracking: "No manual surgery payment record yet.",
+  surgery_deposit_pending: "Recorded deposit not satisfied (manual tracking)",
   booking_unconfirmed: "Booking not confirmed",
   case_on_hold: "Surgery plan on hold",
 };
@@ -137,14 +141,25 @@ export type BuildSurgeryReadinessIssuesInput = {
   surgeryPlanningComplete: boolean;
   bookingStatus: string;
   surgeryPlanPlanningStatus: string | null;
+  /** Manual surgery deposit row when present (`payment_context = surgery`). */
+  surgeryPaymentRecord: Pick<PaymentRecordRow, "status" | "due_date" | "amount_expected" | "amount_paid"> | null;
+  /** Tenant-local `YYYY-MM-DD` for overdue derivation on manual payment rows. */
+  todayYmd: string;
 };
 
 /**
  * Base severities before days-to-surgery escalation.
- * Payment is always **info** and never blocking.
+ * Deposit blocking signals apply only when a manual payment record exists.
  */
 export function buildSurgeryReadinessIssues(input: BuildSurgeryReadinessIssuesInput): SurgeryReadinessIssue[] {
-  const issues: SurgeryReadinessIssue[] = [{ kind: "payment_not_connected", severity: "info" }];
+  const issues: SurgeryReadinessIssue[] = [];
+  const todayY = input.todayYmd.trim();
+
+  if (!input.surgeryPaymentRecord) {
+    issues.push({ kind: "no_payment_tracking", severity: "info" });
+  } else if (paymentRecordNeedsCollection(input.surgeryPaymentRecord, todayY)) {
+    issues.push({ kind: "surgery_deposit_pending", severity: "warning" });
+  }
 
   if (!input.caseId?.trim()) {
     issues.push({ kind: "missing_case_link", severity: "warning" });
@@ -200,6 +215,9 @@ export function escalateSurgeryReadinessIssues(
     if (it.kind === "booking_unconfirmed" && bst === "scheduled" && daysUntil <= 3) {
       return { ...it, severity: "high_risk" };
     }
+    if (it.kind === "surgery_deposit_pending" && daysUntil <= 7) {
+      return { ...it, severity: "high_risk" };
+    }
     return it;
   });
 }
@@ -239,7 +257,8 @@ export function pickSurgeryReadinessPrimaryColumn(input: PickPrimaryColumnInput)
   const structural =
     hasIssueKind(issues, "missing_surgery_plan") ||
     hasIssueKind(issues, "case_on_hold") ||
-    hasIssueKind(issues, "booking_unconfirmed");
+    hasIssueKind(issues, "booking_unconfirmed") ||
+    hasIssueKind(issues, "surgery_deposit_pending");
 
   if (input.readinessBucket === "needs_attention" || input.readinessBucket === "in_progress" || structural) {
     return "needs_attention";
@@ -270,11 +289,16 @@ export type SurgeryReadinessKpis = {
   highRisk: number;
   missingPathology: number;
   missingConsent: number;
-  /** Billing not integrated — KPI copy only. */
-  paymentTrackingInfoOnly: true;
+  /** Manual `fi_payment_records` rows for surgery context on this board. */
+  surgeryPaymentRecordsTracked: number;
+  /** Cards with a deposit still expected per manual tracking. */
+  surgeryDepositsPending: number;
 };
 
-export function aggregateSurgeryReadinessKpis(columns: Record<SurgeryReadinessBoardColumnId, unknown[]>): SurgeryReadinessKpis {
+export function aggregateSurgeryReadinessKpis(
+  columns: Record<SurgeryReadinessBoardColumnId, unknown[]>,
+  depositCounts?: { tracked: number; pending: number }
+): SurgeryReadinessKpis {
   return {
     upcomingNext14Days: Object.values(columns).reduce((a, r) => a + r.length, 0),
     ready: columns.ready.length,
@@ -282,6 +306,7 @@ export function aggregateSurgeryReadinessKpis(columns: Record<SurgeryReadinessBo
     highRisk: columns.high_risk.length,
     missingPathology: columns.missing_pathology.length,
     missingConsent: columns.missing_consent.length,
-    paymentTrackingInfoOnly: true,
+    surgeryPaymentRecordsTracked: depositCounts?.tracked ?? 0,
+    surgeryDepositsPending: depositCounts?.pending ?? 0,
   };
 }

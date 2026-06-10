@@ -15,6 +15,9 @@ import { loadCasesIndexRowsForIds } from "@/src/lib/cases/caseLoaders";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
+import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
+import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
+import { paymentRecordNeedsCollection, surgeryDepositBoardLabel, SURGERY_DEPOSIT_BOARD_COPY } from "@/src/lib/payments/paymentRecordModel";
 import {
   aggregateSurgeryReadinessKpis,
   buildSurgeryReadinessIssues,
@@ -51,6 +54,8 @@ export type SurgeryReadinessBoardCard = {
   /** Escalated issues (V1.1). */
   issues: SurgeryReadinessIssue[];
   primaryColumn: SurgeryReadinessBoardColumnId;
+  /** Manual surgery deposit label for the card chrome. */
+  surgeryDepositLabel: string;
   hrefs: {
     case: string | null;
     patient: string | null;
@@ -294,10 +299,14 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
     if (pid) patientIdsForPathology.add(pid);
   }
 
-  const [pathologySets, consultationsByCase] = await Promise.all([
+  const surgeryBookingIds = surgeryBookings.map((b) => b.id);
+  const [pathologySets, consultationsByCase, surgeryPayments] = await Promise.all([
     loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology)),
     loadConsultationsByCaseId(supabase, tid, caseIds),
+    loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
   ]);
+  let depositTracked = 0;
+  let depositPending = 0;
 
   const columns: Record<SurgeryReadinessBoardColumnId, SurgeryReadinessBoardCard[]> = {
     ready: [],
@@ -339,6 +348,14 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
 
     const abnormalN = patientIdForPathology ? pathologySets.abnormalTotalByPatient.get(patientIdForPathology) ?? 0 : 0;
 
+    const payByBooking = surgeryPayments.byBookingId.get(b.id) ?? null;
+    const payByCase = caseId ? surgeryPayments.byCaseId.get(caseId) ?? null : null;
+    const surgeryPaymentRow: PaymentRecordRow | null = payByBooking ?? payByCase;
+    if (surgeryPaymentRow) {
+      depositTracked += 1;
+      if (paymentRecordNeedsCollection(surgeryPaymentRow, window.todayYmd)) depositPending += 1;
+    }
+
     const rawIssues = buildSurgeryReadinessIssues({
       caseId,
       patientIdForPathology,
@@ -349,6 +366,8 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
       surgeryPlanningComplete: work ? work.readinessSurgeryPlanningHealth === "complete" : false,
       bookingStatus: b.booking_status,
       surgeryPlanPlanningStatus: work?.surgeryPlan?.planning_status ?? null,
+      surgeryPaymentRecord: surgeryPaymentRow,
+      todayYmd: window.todayYmd,
     });
     const issues = escalateSurgeryReadinessIssues(rawIssues, daysUntil, b.booking_status);
 
@@ -367,6 +386,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
           ? `/fi-admin/${tid}/patients/${encodeURIComponent(b.patient_id.trim())}`
           : null;
 
+    const depKey = surgeryDepositBoardLabel(surgeryPaymentRow, window.todayYmd);
     const card: SurgeryReadinessBoardCard = {
       bookingId: b.id,
       caseId,
@@ -384,6 +404,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
       readinessBucket: work?.readinessBucket ?? null,
       issues,
       primaryColumn: primary,
+      surgeryDepositLabel: SURGERY_DEPOSIT_BOARD_COPY[depKey],
       hrefs: {
         case: caseId ? `/fi-admin/${tid}/cases/${encodeURIComponent(caseId)}` : null,
         patient: patientHref,
@@ -404,6 +425,6 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
   return {
     window,
     columns,
-    kpis: aggregateSurgeryReadinessKpis(columns),
+    kpis: aggregateSurgeryReadinessKpis(columns, { tracked: depositTracked, pending: depositPending }),
   };
 }
