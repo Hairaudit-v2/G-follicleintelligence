@@ -56,6 +56,7 @@ const bodySchema = z
     calendarTimezone: z.string().min(1).max(128),
     bookingType: procedureSchema,
     title: z.string().max(2000).optional().nullable(),
+    description: z.string().max(8000).optional().nullable(),
     clinicId: optionalUuid,
     roomId: optionalUuid,
     roomRequired: z.boolean().optional(),
@@ -346,6 +347,7 @@ export async function calendarQuickCreateBookingAction(
     }
 
     const title = parsed.title?.trim() || null;
+    const description = parsed.description?.trim() || null;
     const booking = await createBooking({
       tenantId: tid,
       leadId,
@@ -359,7 +361,7 @@ export async function calendarQuickCreateBookingAction(
       assignedUserId,
       bookingType: parsed.bookingType.trim(),
       title,
-      description: null,
+      description,
       startAt: parsed.startAt.trim(),
       endAt: parsed.endAt.trim(),
       timezone: tz,

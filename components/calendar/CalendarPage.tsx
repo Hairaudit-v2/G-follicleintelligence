@@ -138,13 +138,22 @@ export function CalendarPage({
   }, [dismissFiOsCalendarDrawers, fiOsAgendaOpen, fiOsInsightsOpen, isFiOsWorkspace]);
 
   const openQuickCreateFromSlot = useCallback(
-    (p: { dayKey: string; columnId?: string; localStart: string }, templateId?: CalendarQuickTemplateId) => {
+    (
+      p: {
+        dayKey: string;
+        columnId?: string;
+        localStart: string;
+        appointmentTypeUnset?: boolean;
+      },
+      templateId?: CalendarQuickTemplateId
+    ) => {
       setSlotContextMenu(null);
       setQuickCreatePrefill({
         localStart: p.localStart.trim(),
         ...(p.columnId ? { columnId: p.columnId } : {}),
         dayKey: p.dayKey,
-        templateId,
+        ...(p.appointmentTypeUnset ? { appointmentTypeUnset: true } : {}),
+        ...(templateId ? { templateId } : {}),
         defaultClinicId: data.query.clinicId?.trim() || undefined,
       });
       setQuickCreateOpen(true);
@@ -155,14 +164,12 @@ export function CalendarPage({
   const openQuickCreateFromMonthEmptyDay = useCallback(
     (dayKey: string) => {
       const localStart = monthEmptyDayQuickCreateLocalStart(dayKey, data.gridConfig);
-      openQuickCreateFromSlot(
-        {
-          dayKey,
-          localStart,
-          ...(quickCreateColumnIdFromFilters ? { columnId: quickCreateColumnIdFromFilters } : {}),
-        },
-        "consultation"
-      );
+      openQuickCreateFromSlot({
+        dayKey,
+        localStart,
+        appointmentTypeUnset: true,
+        ...(quickCreateColumnIdFromFilters ? { columnId: quickCreateColumnIdFromFilters } : {}),
+      });
     },
     [data.gridConfig, openQuickCreateFromSlot, quickCreateColumnIdFromFilters]
   );
@@ -398,6 +405,8 @@ export function CalendarPage({
           }}
           calendarTimezone={data.calendarTimezone}
           prefill={quickCreatePrefill}
+          gridConfig={data.gridConfig}
+          resourceColumns={data.resourceColumns}
           clinics={data.clinics}
           assignees={data.assignees}
           staffDirectory={data.staffDirectory}

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { X } from "lucide-react";
 
 import { calendarQuickCreateBookingAction, loadServiceResourceRequirementsAction, suggestResourceAssignmentsAction } from "@/lib/actions/fi-calendar-quick-create-actions";
+import { findNextAvailableBookingSlotsAction } from "@/lib/actions/fi-next-available-booking-slots-actions";
 import { loadRoomPickerOptionsAction } from "@/lib/actions/fi-rooms-actions";
 import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
 import { BookingConflictPreview } from "@/src/components/calendar/BookingConflictPreview";
@@ -15,6 +16,7 @@ import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import {
   addUtcMinutesToIso,
   displayCalendarTimezoneSubtitle,
+  formatCalendarLongWeekdayDate,
   formatClinicTime,
   fromDatetimeLocalValueInTimezone,
   logFiCalendarTimezoneDebug,
@@ -37,6 +39,9 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { RoomPickerOption } from "@/src/lib/rooms/roomTypes";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import type { OperationalCalendarResourceColumn } from "@/src/lib/calendar/operationalCalendarTypes";
+import { isCalendarVisibleClinicalStaff } from "@/src/lib/staff/calendarVisibleStaff";
 import {
   buildStaffUserLinkIndex,
   columnPrefillAssignment,
@@ -67,6 +72,11 @@ export type CalendarQuickCreatePrefill = {
   columnId?: string;
   dayKey?: string;
   templateId?: CalendarQuickTemplateId;
+  /**
+   * Month empty-day quick book: start time uses clinic open hour but appointment type is unset until
+   * reception picks one (duration then updates from the catalog).
+   */
+  appointmentTypeUnset?: boolean;
   /** When the slot column does not imply a clinic (e.g. staff column), seed from calendar URL filter. */
   defaultClinicId?: string;
 };
@@ -100,6 +110,63 @@ function columnResourceDefaults(
   };
 }
 
+const PLACEHOLDER_DURATION_MIN = 30;
+
+function hhmmToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map((x) => Number(x));
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return 0;
+  return h * 60 + m;
+}
+
+function formatClockHm(hhmm: string): string {
+  const [h, m] = hhmm.split(":").map((x) => Number(x));
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return hhmm;
+  return `${h}:${String(m).padStart(2, "0")}`;
+}
+
+/** 15-minute aligned starts within configured business hours; last start still fits `durationMin`. */
+function quarterHourStartOptions(cfg: BusinessGridConfig, durationMin: number): string[] {
+  const startMin = Math.max(0, Math.floor(cfg.dayStartHourUtc)) * 60;
+  const endBoundMin = Math.max(startMin + 15, Math.floor(cfg.dayEndHourUtc)) * 60;
+  const dur = Math.max(15, durationMin);
+  const lastStart = endBoundMin - dur;
+  const out: string[] = [];
+  for (let m = startMin; m <= lastStart; m += 15) {
+    const h = Math.floor(m / 60);
+    const mm = m % 60;
+    out.push(`${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`);
+  }
+  return out;
+}
+
+function mergeDayAndHm(dayKey: string, hm: string): string {
+  return `${dayKey.trim()}T${hm}:00`;
+}
+
+function clampStartToNearestOption(
+  dayKey: string,
+  desiredLocal: string,
+  cfg: BusinessGridConfig,
+  durationMin: number,
+  tz: string
+): string {
+  const opts = quarterHourStartOptions(cfg, durationMin);
+  if (!opts.length) return desiredLocal;
+  const wantHm = desiredLocal.slice(11, 16);
+  if (opts.includes(wantHm)) return desiredLocal;
+  const wantMin = hhmmToMinutes(wantHm);
+  let bestHm = opts[0]!;
+  let bestAbs = Infinity;
+  for (const o of opts) {
+    const d = Math.abs(hhmmToMinutes(o) - wantMin);
+    if (d < bestAbs) {
+      bestAbs = d;
+      bestHm = o;
+    }
+  }
+  return mergeDayAndHm(dayKey, bestHm);
+}
+
 export function CalendarQuickCreateDrawer({
   tenantId,
   open,
@@ -109,6 +176,8 @@ export function CalendarQuickCreateDrawer({
   clinics,
   assignees,
   staffDirectory,
+  gridConfig,
+  resourceColumns,
   setupRecommendations = [],
   services = [],
   onCreated,
@@ -119,6 +188,8 @@ export function CalendarQuickCreateDrawer({
   onClose: () => void;
   calendarTimezone: string;
   prefill: CalendarQuickCreatePrefill | null;
+  gridConfig: BusinessGridConfig;
+  resourceColumns: OperationalCalendarResourceColumn[];
   clinics: CrmShellClinicOption[];
   /** Legacy fi_users — owner column labels only. */
   assignees: CrmShellUserPickerOption[];
@@ -134,7 +205,29 @@ export function CalendarQuickCreateDrawer({
   const tzLabel = displayCalendarTimezoneSubtitle(tz);
   const { staffIdByUserId } = useMemo(() => buildStaffUserLinkIndex(staffDirectory), [staffDirectory]);
 
-  const [templateId, setTemplateId] = useState<CalendarQuickTemplateId>("consultation");
+  const visibleStaffColumnIds = useMemo(() => {
+    return new Set(
+      resourceColumns
+        .filter((c) => c.kind === "fi_staff" && c.staffId?.trim())
+        .map((c) => c.staffId!.trim())
+    );
+  }, [resourceColumns]);
+
+  const providerOptions = useMemo(() => {
+    const staffCols = resourceColumns.filter((c) => c.kind === "fi_staff" && c.staffId?.trim());
+    return staffDirectory.filter((s) => {
+      const vis = isCalendarVisibleClinicalStaff({
+        is_active: s.is_active !== false,
+        staff_role: s.staff_role,
+        calendar_visible: s.calendar_visible,
+      });
+      if (!vis) return false;
+      if (staffCols.length === 0) return true;
+      return visibleStaffColumnIds.has(s.id.trim());
+    });
+  }, [resourceColumns, staffDirectory, visibleStaffColumnIds]);
+
+  const [templateId, setTemplateId] = useState<CalendarQuickTemplateId | null>("consultation");
   const [startLocal, setStartLocal] = useState("");
   const [endLocal, setEndLocal] = useState("");
   const [clinicId, setClinicId] = useState("");
@@ -154,6 +247,8 @@ export function CalendarQuickCreateDrawer({
   const [leadHits, setLeadHits] = useState<ConsultationLinkSearchLeadHit[]>([]);
   const [selection, setSelection] = useState<AnchorSelection | null>(null);
   const [busy, setBusy] = useState(false);
+  const [nextAvailBusy, setNextAvailBusy] = useState(false);
+  const [notes, setNotes] = useState("");
   const [formErr, setFormErr] = useState<string | null>(null);
   const [conflictPreview, setConflictPreview] = useState<BookingConflictPreviewResult | null>(null);
   const [conflictLoading, setConflictLoading] = useState(false);
@@ -177,23 +272,32 @@ export function CalendarQuickCreateDrawer({
     setRoomId(colDefaults.roomId || "");
     setAssignedStaffId(colDefaults.assignedStaffId);
     setLegacyOwnerUserId(colDefaults.legacyOwnerUserId);
-    const tpl = prefill.templateId ? calendarQuickTemplateById(prefill.templateId) : null;
-    const nextTpl = tpl?.id ?? "consultation";
+    const unsetType = Boolean(prefill.appointmentTypeUnset);
+    const explicitTpl = prefill.templateId ? calendarQuickTemplateById(prefill.templateId) : null;
+    const nextTpl: CalendarQuickTemplateId | null = unsetType ? null : explicitTpl?.id ?? "consultation";
     setTemplateId(nextTpl);
-    const start = prefill.localStart.trim();
+    setNotes("");
+    const startRaw = prefill.localStart.trim();
+    const dayKey = startRaw.slice(0, 10);
+    const tplForDur = nextTpl ? calendarQuickTemplateById(nextTpl) : null;
+    const durMin = tplForDur ? quickTemplateDurationMinutes(tplForDur, services) : PLACEHOLDER_DURATION_MIN;
+    const start = clampStartToNearestOption(dayKey, startRaw, gridConfig, durMin, tz);
     setStartLocal(start);
     const startIso = fromDatetimeLocalValueInTimezone(start, tz);
-    const t = calendarQuickTemplateById(nextTpl);
-    let endIso: string | null = null;
-    if (startIso && t) {
+    if (startIso && tplForDur) {
       try {
-        endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(t, services));
+        const endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(tplForDur, services));
+        setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
       } catch {
-        endIso = null;
+        setEndLocal("");
       }
-    }
-    if (startIso && endIso) {
-      setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
+    } else if (startIso) {
+      try {
+        const endIso = addUtcMinutesToIso(startIso, durMin);
+        setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
+      } catch {
+        setEndLocal("");
+      }
     } else {
       setEndLocal("");
     }
@@ -210,9 +314,9 @@ export function CalendarQuickCreateDrawer({
       clinicTimezone: tz,
       selectedSlotDatetimeLocal: start,
       selectedSlotUtcIso: startIso,
-      endUtcIso: endIso,
+      appointmentTypeUnset: unsetType,
     });
-  }, [prefill, services, staffIdByUserId, tz]);
+  }, [prefill, services, staffIdByUserId, tz, gridConfig]);
 
   useEffect(() => {
     if (!open) return;
@@ -259,7 +363,10 @@ export function CalendarQuickCreateDrawer({
     };
   }, [open, tenantId, debouncedPatientQ]);
 
-  const tplForRooms = useMemo(() => calendarQuickTemplateById(templateId), [templateId]);
+  const tplForRooms = useMemo(
+    () => (templateId ? calendarQuickTemplateById(templateId) : undefined),
+    [templateId]
+  );
 
   const catalogService = useMemo(() => {
     if (!tplForRooms) return null;
@@ -435,58 +542,121 @@ export function CalendarQuickCreateDrawer({
     return {
       clinicId: clinicId.trim(),
       bookingType: tplForRooms.bookingType,
+      serviceId: catalogService?.id ?? null,
       staffId: assignedStaffId.trim() || null,
       roomId: roomId.trim() || null,
       preferredStartAt: startIso,
       durationMinutes: quickTemplateDurationMinutes(tplForRooms, services),
     };
-  }, [assignedStaffId, clinicId, roomId, services, startLocal, tplForRooms, tz]);
+  }, [assignedStaffId, catalogService?.id, clinicId, roomId, services, startLocal, tplForRooms, tz]);
 
   const onTemplateChange = useCallback(
     (id: CalendarQuickTemplateId) => {
       setRoomId("");
       setResourcePicks({});
       setTemplateId(id);
-      const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
       const t = calendarQuickTemplateById(id);
-      if (!startIso || !t) return;
-      const endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(t, services));
-      setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
+      if (!t) return;
+      const durMin = quickTemplateDurationMinutes(t, services);
+      const dk = startLocal.slice(0, 10);
+      if (!dk) return;
+      const clamped = clampStartToNearestOption(dk, startLocal, gridConfig, durMin, tz);
+      setStartLocal(clamped);
+      const iso2 = fromDatetimeLocalValueInTimezone(clamped, tz);
+      if (!iso2) return;
+      setEndLocal(toDatetimeLocalValueInTimezone(addUtcMinutesToIso(iso2, durMin), tz));
     },
-    [services, startLocal, tz]
+    [gridConfig, services, startLocal, tz]
   );
 
   const onStartChange = useCallback(
     (nextStart: string) => {
       setStartLocal(nextStart);
-      const tpl = calendarQuickTemplateById(templateId);
+      const tpl = templateId ? calendarQuickTemplateById(templateId) : null;
       const startIso = fromDatetimeLocalValueInTimezone(nextStart, tz);
-      if (!startIso || !tpl) return;
-      const endIso = addUtcMinutesToIso(startIso, quickTemplateDurationMinutes(tpl, services));
+      if (!startIso) return;
+      const mins = tpl ? quickTemplateDurationMinutes(tpl, services) : PLACEHOLDER_DURATION_MIN;
+      const endIso = addUtcMinutesToIso(startIso, mins);
       setEndLocal(toDatetimeLocalValueInTimezone(endIso, tz));
     },
     [services, templateId, tz]
   );
 
-  const selectedStaff = useMemo(
-    () => staffDirectory.find((s) => s.id === assignedStaffId.trim()) ?? null,
-    [assignedStaffId, staffDirectory]
+  const bumpStartByClockMinutes = useCallback(
+    (deltaMin: number) => {
+      const dayKey = startLocal.slice(0, 10);
+      const tpl = templateId ? calendarQuickTemplateById(templateId) : null;
+      const durMin = tpl ? quickTemplateDurationMinutes(tpl, services) : PLACEHOLDER_DURATION_MIN;
+      const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
+      if (!startIso) return;
+      const bumpIso = addUtcMinutesToIso(startIso, deltaMin);
+      const bumpLocal = toDatetimeLocalValueInTimezone(bumpIso, tz);
+      const clamped = clampStartToNearestOption(dayKey, bumpLocal, gridConfig, durMin, tz);
+      onStartChange(clamped);
+    },
+    [gridConfig, onStartChange, services, startLocal, templateId, tz]
   );
+
+  const applyNextAvailableSlot = useCallback(async () => {
+    const req = nextSlotsRequest;
+    if (!req || !tplForRooms) return;
+    setNextAvailBusy(true);
+    try {
+      const r = await findNextAvailableBookingSlotsAction(tenantId.trim(), {
+        ...req,
+        limit: 5,
+      });
+      if (r.ok && r.slots[0]) onApplySuggestedSlot(r.slots[0]);
+    } finally {
+      setNextAvailBusy(false);
+    }
+  }, [nextSlotsRequest, onApplySuggestedSlot, tenantId, tplForRooms]);
 
   const isFiOsFlow = workflowVariant === "fiOs";
 
-  const scheduleSummary = useMemo(() => {
-    if (!startLocal || !endLocal) return "Time, clinic & provider — tap to adjust";
-    const datePart = startLocal.slice(0, 10);
-    const tStart = startLocal.slice(11, 16);
-    const tEnd = endLocal.slice(11, 16);
-    const c = clinics.find((x) => x.id === clinicId)?.display_name?.trim();
-    const providerLabel = selectedStaff?.full_name?.trim() || selectedStaff?.email?.trim() || legacyOwnerLabel;
-    const parts: string[] = [datePart, `${tStart}–${tEnd}`];
-    if (c) parts.push(c);
-    if (providerLabel) parts.push(providerLabel);
-    return parts.join(" · ");
-  }, [clinicId, clinics, endLocal, legacyOwnerLabel, selectedStaff, startLocal]);
+  const hasRoomConflict = useMemo(
+    () => Boolean(conflictPreview?.messages?.some((m) => m.type === "room" && m.severity === "error")),
+    [conflictPreview]
+  );
+
+  const dayKey = startLocal.length >= 10 ? startLocal.slice(0, 10) : "";
+
+  const durationMinutesForUi = useMemo(() => {
+    if (!tplForRooms) return PLACEHOLDER_DURATION_MIN;
+    return quickTemplateDurationMinutes(tplForRooms, services);
+  }, [services, tplForRooms]);
+
+  const timeSelectOptions = useMemo(() => {
+    if (!dayKey) return [];
+    return quarterHourStartOptions(gridConfig, durationMinutesForUi);
+  }, [dayKey, durationMinutesForUi, gridConfig]);
+
+  const dateHeading = dayKey ? formatCalendarLongWeekdayDate(dayKey, tz) : "";
+
+  const clinicLabel = clinics.find((x) => x.id === clinicId)?.display_name?.trim() ?? null;
+
+  const typeScheduleLine = useMemo(() => {
+    if (!startLocal || !endLocal || !dayKey) return "Pick a time slot";
+    const tpl = tplForRooms;
+    const label = tpl?.label ?? "Appointment";
+    const dur = tpl ? quickTemplateDurationMinutes(tpl, services) : PLACEHOLDER_DURATION_MIN;
+    const tStart = formatClockHm(startLocal.slice(11, 16));
+    const tEnd = formatClockHm(endLocal.slice(11, 16));
+    return `${label} · ${dur} min · ${tStart}–${tEnd}`;
+  }, [dayKey, endLocal, services, startLocal, tplForRooms]);
+
+  const assignedRoomLabel = useMemo(() => {
+    const id = roomId.trim();
+    if (!id) return null;
+    return roomOptions.find((o) => o.room.id === id)?.room.display_name ?? null;
+  }, [roomId, roomOptions]);
+
+  useEffect(() => {
+    if (!open) return;
+    const sid = assignedStaffId.trim();
+    if (!sid) return;
+    if (!providerOptions.some((s) => s.id === sid)) setAssignedStaffId("");
+  }, [open, assignedStaffId, providerOptions]);
 
   const clearExistingSelection = useCallback(() => {
     setSelection(null);
@@ -518,7 +688,7 @@ export function CalendarQuickCreateDrawer({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormErr(null);
-    const tpl = calendarQuickTemplateById(templateId);
+    const tpl = templateId ? calendarQuickTemplateById(templateId) : undefined;
     if (!tpl) {
       setFormErr("Pick an appointment type.");
       return;
@@ -585,6 +755,7 @@ export function CalendarQuickCreateDrawer({
         assignedUserId,
         templateId: tpl.id,
         anchor,
+        description: notes.trim() || null,
         metadata: { template_label: tpl.label },
         resourceAssignments: builtResourceExtras.length > 0 ? builtResourceExtras : undefined,
       });
@@ -631,11 +802,11 @@ export function CalendarQuickCreateDrawer({
       >
         <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-4 py-4 sm:px-5">
           <div className={cn(os.root, "min-w-0")}>
-            <p className={os.eyebrow}>Scheduling</p>
             <h2 id={titleId} className={cn(os.title, "text-lg sm:text-xl")}>
               Quick book
             </h2>
-            <p className={os.description}>Times use {tzLabel}.</p>
+            <p className={cn(os.description, "mt-1")}>Date and room are handled automatically.</p>
+            <p className="mt-1 text-[11px] text-slate-500">Times use {tzLabel}.</p>
           </div>
           <button
             type="button"
@@ -661,7 +832,7 @@ export function CalendarQuickCreateDrawer({
             ) : null}
 
             <div>
-              <p className={cn(os.eyebrow, "mb-2")}>Patient details</p>
+              <p className={cn(os.eyebrow, "mb-2")}>Patient or lead</p>
               <div className="grid gap-2">
                 <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
                   Name <span className="text-rose-300">*</span>
@@ -776,6 +947,9 @@ export function CalendarQuickCreateDrawer({
 
             <div>
               <p className={cn(os.eyebrow, "mb-2")}>Appointment type</p>
+              {!templateId ? (
+                <p className="mb-2 text-xs text-slate-400">Pick a type — duration updates from the service catalog.</p>
+              ) : null}
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
                 {CALENDAR_QUICK_TEMPLATES.map((t) => (
                   <button
@@ -798,36 +972,160 @@ export function CalendarQuickCreateDrawer({
               </div>
             </div>
 
+            <div>
+              <p className={cn(os.eyebrow, "mb-1")}>Time</p>
+              <p className="text-xs text-slate-500">Selected from calendar. Adjust if needed.</p>
+              <p className="mt-3 text-base font-semibold leading-snug text-slate-50">{dateHeading}</p>
+              {clinicLabel ? (
+                <p className="mt-1 text-xs text-slate-500">
+                  {clinicLabel}
+                  <span className="text-slate-600"> · {tzLabel}</span>
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-slate-500">{tzLabel}</p>
+              )}
+              <p className="mt-2 text-sm font-medium text-sky-100/95 tabular-nums">{typeScheduleLine}</p>
+              <label className={cn("mt-3 block text-xs font-medium text-slate-300", os.meta)}>
+                Start time
+                <select
+                  className={cn(inputClass, "text-base font-semibold tabular-nums")}
+                  value={timeSelectOptions.includes(startLocal.slice(11, 16)) ? startLocal.slice(11, 16) : ""}
+                  onChange={(e) => {
+                    const hm = e.target.value;
+                    if (!hm || !dayKey) return;
+                    onStartChange(mergeDayAndHm(dayKey, hm));
+                  }}
+                >
+                  <option value="">Select…</option>
+                  {timeSelectOptions.map((hm) => (
+                    <option key={hm} value={hm}>
+                      {formatClockHm(hm)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  onClick={() => bumpStartByClockMinutes(-30)}
+                >
+                  −30 min
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  onClick={() => bumpStartByClockMinutes(-15)}
+                >
+                  −15 min
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  onClick={() => bumpStartByClockMinutes(15)}
+                >
+                  +15 min
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  onClick={() => bumpStartByClockMinutes(30)}
+                >
+                  +30 min
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full border border-cyan-500/35 bg-cyan-500/15 px-3 py-1.5 text-xs font-semibold text-cyan-50 transition hover:bg-cyan-500/25 disabled:opacity-50"
+                  disabled={nextAvailBusy || !nextSlotsRequest}
+                  onClick={() => void applyNextAvailableSlot()}
+                >
+                  {nextAvailBusy ? "Searching…" : "Next available"}
+                </button>
+              </div>
+            </div>
+
+            <details
+              className={cn(
+                "rounded-xl border border-white/[0.1] bg-slate-950/25",
+                hasRoomConflict && "border-rose-500/35 bg-rose-950/20"
+              )}
+              open={hasRoomConflict}
+            >
+              <summary className="cursor-pointer list-none px-3 py-2.5 text-xs font-medium text-slate-200 [&::-webkit-details-marker]:hidden">
+                {hasRoomConflict ? (
+                  <span className="text-rose-200">Room issue detected</span>
+                ) : (
+                  <span>Room will be assigned automatically.</span>
+                )}
+                {assignedRoomLabel && !hasRoomConflict ? (
+                  <span className="mt-1 block text-[11px] font-normal text-slate-500">Planned: {assignedRoomLabel}</span>
+                ) : null}
+              </summary>
+              <div className="space-y-2 border-t border-white/[0.08] px-3 pb-3 pt-2 text-xs leading-snug text-slate-400">
+                <p>
+                  {roomLoading
+                    ? "Checking rooms for this slot…"
+                    : assignedRoomLabel
+                      ? `This booking will save with room “${assignedRoomLabel}” when the slot is valid.`
+                      : "Choose an appointment type and clinic — a room is picked automatically when slots load."}
+                </p>
+              </div>
+            </details>
+
+            {providerOptions.length > 0 ? (
+              <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                Provider
+                <StaffClinicalSelect
+                  tenantId={tenantId}
+                  options={providerOptions}
+                  value={assignedStaffId}
+                  onChange={setAssignedStaffId}
+                  emptyLabel="Unassigned"
+                  className={inputClass}
+                />
+                {legacyOwnerLabel && !assignedStaffId.trim() ? (
+                  <p className="mt-1 text-[11px] text-slate-500">From calendar column: {legacyOwnerLabel}</p>
+                ) : null}
+              </label>
+            ) : null}
+
+            <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+              Notes <span className="font-normal text-slate-500">(optional)</span>
+              <textarea
+                className={cn(inputClass, "min-h-[72px] resize-y")}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                placeholder="Internal notes…"
+              />
+            </label>
+
             <details
               className={cn(
                 "rounded-xl border border-white/[0.1] bg-slate-950/25",
                 isFiOsFlow && "open:border-cyan-500/25"
               )}
-              open={!isFiOsFlow}
             >
               <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-slate-200 [&::-webkit-details-marker]:hidden">
-                <span className="text-slate-500">Time & place · </span>
-                {scheduleSummary}
+                Advanced scheduling (full booking)
               </summary>
               <div className="space-y-3 border-t border-white/[0.08] px-3 pb-3 pt-2">
                 <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                  Start
+                  Start (exact)
                   <input
                     type="datetime-local"
                     className={inputClass}
                     value={startLocal}
                     onChange={(e) => onStartChange(e.target.value)}
-                    required
                   />
                 </label>
                 <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                  End
+                  End (exact)
                   <input
                     type="datetime-local"
                     className={inputClass}
                     value={endLocal}
                     onChange={(e) => setEndLocal(e.target.value)}
-                    required
                   />
                 </label>
                 {clinics.length > 0 ? (
@@ -867,24 +1165,6 @@ export function CalendarQuickCreateDrawer({
                         </option>
                       ))}
                     </select>
-                  </label>
-                ) : null}
-                {staffDirectory.length > 0 ? (
-                  <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
-                    Clinical provider
-                    <StaffClinicalSelect
-                      tenantId={tenantId}
-                      options={staffDirectory}
-                      value={assignedStaffId}
-                      onChange={setAssignedStaffId}
-                      emptyLabel="Unassigned"
-                      className={inputClass}
-                    />
-                    {legacyOwnerLabel && !assignedStaffId.trim() ? (
-                      <p className="mt-1 text-[11px] text-slate-500">
-                        Calendar column owner: {legacyOwnerLabel} (assign a clinical provider above when possible)
-                      </p>
-                    ) : null}
                   </label>
                 ) : null}
                 {serviceResourceReqs.length > 0 && resourceSuggest ? (
@@ -951,7 +1231,7 @@ export function CalendarQuickCreateDrawer({
               tenantId={tenantId}
               calendarTimezone={tz}
               request={nextSlotsRequest}
-              show={Boolean(conflictPreviewBody) && conflictPreview?.status === "blocked"}
+              show={Boolean(nextSlotsRequest) && (conflictPreview?.status === "blocked" || hasRoomConflict)}
               onApplySlot={onApplySuggestedSlot}
               variant="dark"
             />

@@ -189,6 +189,21 @@ export function zonedMidnightUtcMs(ymd: string, timeZone: string): number | null
   return zonedDateTimeToUtc(y, mo, da, 0, 0, 0, tz);
 }
 
+/** e.g. "Tuesday, 18 June 2026" for clinic-local `YYYY-MM-DD` in `timeZone`. */
+export function formatCalendarLongWeekdayDate(dayKey: string, timeZone: string): string {
+  const tz = normalizeCalendarTimezone(timeZone);
+  const ymd = dayKey.trim();
+  const ms = zonedMidnightUtcMs(ymd, tz);
+  if (ms == null) return ymd;
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(ms));
+}
+
 /** UTC epoch ms for the next local calendar day after `ymd`. */
 export function zonedNextDayUtcMs(ymd: string, timeZone: string): number | null {
   return zonedMidnightUtcMs(addDaysToCalendarDate(ymd, 1, timeZone), timeZone);

@@ -5,6 +5,7 @@ import {
   buildClinicZonedDateTime,
   calendarDateStringFromInstant,
   clinicLocalSlotToUtcIso,
+  formatCalendarLongWeekdayDate,
   fromDatetimeLocalValueInTimezone,
   getCalendarTimeZone,
   isoFromLocalDayMinutes,
@@ -106,6 +107,10 @@ describe("calendarTimezone — Australia/Brisbane wall time → UTC", () => {
 
   it("clinicLocalSlotToUtcIso matches isoFromLocalDayMinutes for 10:00", () => {
     assert.equal(clinicLocalSlotToUtcIso("2026-06-10", 10 * 60, tz), isoFromLocalDayMinutes("2026-06-10", 10 * 60, tz));
+  });
+
+  it("formatCalendarLongWeekdayDate uses en-GB weekday ordering", () => {
+    assert.equal(formatCalendarLongWeekdayDate("2026-06-10", tz), "Wednesday, 10 June 2026");
   });
 });
 
