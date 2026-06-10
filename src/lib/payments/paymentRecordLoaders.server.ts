@@ -135,6 +135,38 @@ export async function loadPaymentRecordsForSurgeryBoard(
   return { byBookingId, byCaseId };
 }
 
+/**
+ * Latest payment row per `booking_id` (any `payment_context`), by `updated_at` descending.
+ * Used for cross-board badges where a manual record exists on the appointment.
+ */
+export async function loadLatestPaymentRecordsByBookingIds(
+  tenantId: string,
+  bookingIds: string[]
+): Promise<Map<string, PaymentRecordRow>> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
+  const bids = uniqueIds(bookingIds);
+  const out = new Map<string, PaymentRecordRow>();
+  if (!bids.length) return out;
+
+  const supabase = supabaseAdmin();
+  for (const part of chunk(bids, 80)) {
+    const { data, error } = await supabase
+      .from("fi_payment_records")
+      .select("*")
+      .eq("tenant_id", tid)
+      .in("booking_id", part)
+      .order("updated_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    for (const raw of data ?? []) {
+      const row = mapRow(raw as Record<string, unknown>);
+      const b = row.booking_id?.trim();
+      if (!b || out.has(b)) continue;
+      out.set(b, row);
+    }
+  }
+  return out;
+}
+
 export async function loadPaymentRecordsForCases(
   tenantId: string,
   caseIds: string[],

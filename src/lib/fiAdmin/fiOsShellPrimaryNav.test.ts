@@ -59,10 +59,15 @@ test("getFiOsShellActiveSidebarId: reception board maps to Rec sidebar tab", () 
   assert.equal(getFiOsShellActiveSidebarId(`${base}/reception`, base), "reception-board");
 });
 
+test("getFiOsShellActiveSidebarId: tomorrow board maps to Tmrw sidebar tab", () => {
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/tomorrow`, base), "tomorrow-board");
+});
+
 test("resolveFiOsPrimarySidebarItems: operations and reception entries exist", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true);
   assert.ok(items.find((i) => i.id === "operations-centre" && !i.disabled));
   assert.ok(items.find((i) => i.id === "reception-board" && !i.disabled));
+  assert.ok(items.find((i) => i.id === "tomorrow-board" && !i.disabled));
 });
 
 test("resolveFiOsPrimarySidebarItems: consultations entry includes conversion board sub-link when enabled", () => {

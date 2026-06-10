@@ -77,6 +77,15 @@ export function ClinicOsOperationsCentre(props: {
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Link
+            href={`${base}/tomorrow`}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95",
+            )}
+          >
+            Tomorrow board
+          </Link>
+          <Link
             href={`${base}/reception`}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,

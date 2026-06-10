@@ -46,6 +46,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       label: "Reception",
       title: "ClinicOS — today’s reception board and booking flow.",
     },
+    {
+      href: `${base}/tomorrow`,
+      label: "Tomorrow",
+      title: "ClinicOS — end-of-day readiness for tomorrow’s clinic day.",
+    },
   ];
   if (showBookingsBoard) {
     clinicItems.push(

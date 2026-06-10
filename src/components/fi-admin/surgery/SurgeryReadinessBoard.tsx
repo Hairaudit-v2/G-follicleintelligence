@@ -176,6 +176,15 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
+            href={`${base}/tomorrow`}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex px-3 py-2 text-sm font-semibold text-cyan-100/95",
+            )}
+          >
+            Tomorrow board
+          </Link>
+          <Link
             href={`${base}/cases`}
             className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
           >

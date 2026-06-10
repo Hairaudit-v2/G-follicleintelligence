@@ -86,11 +86,11 @@ function formatLocalTimeFromIso(iso: string, tz: string): string {
   }
 }
 
-function resolvePatientIdForCaseRow(row: CaseWorklistRow): string | null {
+export function resolvePatientIdForCaseRow(row: CaseWorklistRow): string | null {
   return row.foundation_patient_id?.trim() || row.legacy_patient_id?.trim() || null;
 }
 
-async function loadPatientLabelsForBookings(
+export async function loadPatientLabelsForBookings(
   supabase: SupabaseClient,
   tenantId: string,
   bookings: FiBookingRow[]
@@ -150,7 +150,7 @@ function uniqueStrings(ids: (string | null | undefined)[]): string[] {
   return Array.from(s);
 }
 
-async function loadStaffAndUserLabels(
+export async function loadStaffAndUserLabels(
   supabase: SupabaseClient,
   tenantId: string,
   bookings: FiBookingRow[]
@@ -179,7 +179,7 @@ async function loadStaffAndUserLabels(
   return { staffNames, userEmails };
 }
 
-async function loadPathologyPatientSets(
+export async function loadPathologyPatientSets(
   supabase: SupabaseClient,
   tenantId: string,
   patientIds: string[]
@@ -225,7 +225,7 @@ async function loadPathologyPatientSets(
   return { withResult, abnormalTotalByPatient };
 }
 
-async function loadConsultationsByCaseId(
+export async function loadConsultationsByCaseId(
   supabase: SupabaseClient,
   tenantId: string,
   caseIds: string[]

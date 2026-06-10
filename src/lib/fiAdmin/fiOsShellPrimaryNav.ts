@@ -118,6 +118,13 @@ export function resolveFiOsPrimarySidebarItems(
       disabled: false,
     },
     {
+      id: "tomorrow-board",
+      label: "Tomorrow board",
+      shortLabel: "Tmrw",
+      href: hrefFor(b, "tomorrow"),
+      disabled: false,
+    },
+    {
       id: "patients",
       label: "Patients",
       shortLabel: "Patients",
@@ -231,6 +238,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception") return "reception-board";
+    if (firstEarly === "tomorrow") return "tomorrow-board";
   }
 
   const legacy = getClinicOsShellActiveNavId(pathname, base);
@@ -239,6 +247,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "leadflow") return "crm";
   if (legacy === "operations-centre") return "operations-centre";
   if (legacy === "reception-board") return "reception-board";
+  if (legacy === "tomorrow-board") return "tomorrow-board";
   if (legacy === "surgeryos" || legacy === "surgery-readiness-board") return "cases";
   if (legacy === "prescriptions") return "prescriptions";
   if (legacy === "patientos") return "patients";
