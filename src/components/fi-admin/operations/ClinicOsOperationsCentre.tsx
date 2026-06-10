@@ -75,15 +75,26 @@ export function ClinicOsOperationsCentre(props: {
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">{data.tenantName}</h1>
           <p className="mt-1 text-sm text-slate-500">{dateLine}</p>
         </div>
-        <Link
-          href={base}
-          className={cn(
-            fiOsChromeClasses.toolbarControlSurface,
-            "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200",
-          )}
-        >
-          Back to dashboard
-        </Link>
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <Link
+            href={`${base}/reception`}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95",
+            )}
+          >
+            Open reception board
+          </Link>
+          <Link
+            href={base}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200",
+            )}
+          >
+            Back to dashboard
+          </Link>
+        </div>
       </header>
 
       <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-today-kpis-heading">

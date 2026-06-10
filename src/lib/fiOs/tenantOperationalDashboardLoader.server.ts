@@ -3,7 +3,6 @@ import "server-only";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { calendarDateStringFromInstant, zonedMidnightUtcMs, zonedNextDayUtcMs } from "@/src/lib/calendar/calendarTimezone";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadBookingsForTenantRange } from "@/src/lib/bookings/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -16,6 +15,7 @@ import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
 import { computeOperationalLocalDayUtcWindow } from "@/src/lib/fiOs/tenantOperationalLocalDay";
+import { aggregateActiveLeadVolumeByPipelineStage } from "@/src/lib/fiOs/tenantOperationalDashboardCrmLeadVolume";
 import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
@@ -23,6 +23,17 @@ import {
   computeOperationalAgendaUtcRange,
   type AgendaBucket,
 } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
+import { anchorLabelForBookingRow } from "@/src/lib/bookings/bookingDisplayContext";
+import { loadBookingDisplayContextMaps } from "@/src/lib/bookings/bookingDisplayContext.server";
+import {
+  bookingStartFallsOnOperationalWindow,
+  receptionBoardColumnForBooking,
+  RECEPTION_BOARD_COLUMN_IDS,
+} from "@/src/lib/fiOs/receptionBoardModel";
+import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
+import { bookingStatusLabel, bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 
 export { bookingAgendaBucket, computeOperationalAgendaUtcRange } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
 export type { AgendaBucket } from "@/src/lib/fiOs/tenantOperationalDashboardHelpers";
@@ -196,6 +207,35 @@ const dashboardReminderItemSchema = z.object({
 
 export type DashboardReminderItem = z.infer<typeof dashboardReminderItemSchema>;
 
+const receptionBoardColumnSchema = z.enum(RECEPTION_BOARD_COLUMN_IDS);
+
+const receptionBoardCardSchema = z.object({
+  id: z.string().uuid(),
+  startAt: z.string(),
+  endAt: z.string(),
+  title: z.string().nullable(),
+  bookingType: z.string(),
+  bookingStatus: z.string(),
+  timezone: z.string().nullable(),
+  displayName: z.string(),
+  statusLabel: z.string(),
+  typeLabel: z.string(),
+  providerLabel: z.string(),
+  clinicLabel: z.string().nullable(),
+  roomLabel: z.string().nullable(),
+  receptionColumn: receptionBoardColumnSchema,
+  /** Canonical metadata for client-side PATCH merges (includes optional reception phase). */
+  metadata: z.record(z.string(), z.unknown()),
+});
+
+export type ReceptionBoardCard = z.infer<typeof receptionBoardCardSchema>;
+
+const receptionBoardPayloadSchema = z.object({
+  cards: z.array(receptionBoardCardSchema),
+});
+
+export type ReceptionBoardPayload = z.infer<typeof receptionBoardPayloadSchema>;
+
 export const tenantOperationalDashboardSchema = z.object({
   tenantId: z.string().uuid(),
   tenantName: z.string(),
@@ -226,6 +266,8 @@ export const tenantOperationalDashboardSchema = z.object({
   crmPipelineStages: z.array(crmPipelineStageSnapshotSchema),
   /** Active (non-terminal) lead counts by default-pipeline stage id — from `fi_crm_leads`, not stale-lead hygiene. */
   crmPipelineLeadVolume: crmPipelineLeadVolumeSchema,
+  /** Reception board cards for `operationalDay` (tenant-local); empty when loader skips enrichment. */
+  receptionBoard: receptionBoardPayloadSchema,
 });
 
 export type TenantOperationalDashboard = z.infer<typeof tenantOperationalDashboardSchema>;
@@ -716,12 +758,101 @@ async function loadUpcomingReminders(tenantId: string, now: Date): Promise<Dashb
   return raw.map((r: unknown) => dashboardReminderItemSchema.parse(r));
 }
 
+async function loadReceptionBoardCards(
+  tenantId: string,
+  localStartIso: string,
+  localEndIso: string
+): Promise<ReceptionBoardCard[]> {
+  const tid = tenantId.trim();
+  const raw = await loadBookingsForTenantRange(tid, localStartIso, localEndIso);
+  const todayBookings = raw.filter((b) =>
+    bookingStartFallsOnOperationalWindow(b.start_at, localStartIso, localEndIso)
+  );
+  if (todayBookings.length === 0) return [];
+
+  const [maps, staffOpts, userOpts] = await Promise.all([
+    loadBookingDisplayContextMaps(tid, todayBookings),
+    loadClinicalStaffPickerOptions(tid),
+    loadCrmShellUserPickerOptions(tid),
+  ]);
+
+  const clinicIds = Array.from(
+    new Set(todayBookings.map((b) => b.clinic_id?.trim()).filter((x): x is string => Boolean(x)))
+  );
+  const roomIds = Array.from(
+    new Set(todayBookings.map((b) => b.room_id?.trim()).filter((x): x is string => Boolean(x)))
+  );
+
+  const supabase = supabaseAdmin();
+  const [clinicRes, roomRes] = await Promise.all([
+    clinicIds.length
+      ? supabase.from("fi_clinics").select("id, display_name").eq("tenant_id", tid).in("id", clinicIds)
+      : Promise.resolve({ data: [], error: null }),
+    roomIds.length
+      ? supabase.from("fi_clinic_rooms").select("id, display_name").eq("tenant_id", tid).in("id", roomIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (clinicRes.error) throw new Error(clinicRes.error.message);
+  if (roomRes.error) throw new Error(roomRes.error.message);
+
+  const clinicNameById = new Map<string, string>();
+  for (const row of clinicRes.data ?? []) {
+    const r = row as { id: string; display_name: string | null };
+    clinicNameById.set(String(r.id), String(r.display_name ?? "").trim() || String(r.id));
+  }
+  const roomNameById = new Map<string, string>();
+  for (const row of roomRes.data ?? []) {
+    const r = row as { id: string; display_name: string | null };
+    roomNameById.set(String(r.id), String(r.display_name ?? "").trim() || String(r.id));
+  }
+
+  const cards: ReceptionBoardCard[] = [];
+  for (const b of todayBookings) {
+    const meta =
+      b.metadata && typeof b.metadata === "object" && !Array.isArray(b.metadata)
+        ? (b.metadata as Record<string, unknown>)
+        : {};
+    const displayName = anchorLabelForBookingRow(b, maps);
+    const assign = bookingAssignmentDisplay(staffOpts, userOpts, b);
+    const clinicLabel = b.clinic_id?.trim() ? clinicNameById.get(b.clinic_id.trim()) ?? null : null;
+    const roomLabel = b.room_id?.trim() ? roomNameById.get(b.room_id.trim()) ?? null : null;
+    cards.push(
+      receptionBoardCardSchema.parse({
+        id: b.id,
+        startAt: b.start_at,
+        endAt: b.end_at,
+        title: b.title,
+        bookingType: b.booking_type,
+        bookingStatus: b.booking_status,
+        timezone: b.timezone,
+        displayName,
+        statusLabel: bookingStatusLabel(b.booking_status),
+        typeLabel: bookingTypeLabel(b.booking_type),
+        providerLabel: assign.providerLabel,
+        clinicLabel,
+        roomLabel,
+        receptionColumn: receptionBoardColumnForBooking({ booking_status: b.booking_status, metadata: meta }),
+        metadata: meta,
+      })
+    );
+  }
+
+  cards.sort((a, b) => a.startAt.localeCompare(b.startAt));
+  return cards;
+}
+
+export type LoadTenantOperationalDashboardOptions = {
+  staleLeadStageDays?: number;
+  /** When true, loads same-day reception cards (extra reads); default false for home/analytics callers. */
+  includeReceptionBoard?: boolean;
+};
+
 /**
  * Tenant-scoped operational snapshot for the FI Admin home dashboard (service role).
  */
 export async function loadTenantOperationalDashboard(
   tenantId: string,
-  options?: { staleLeadStageDays?: number }
+  options?: LoadTenantOperationalDashboardOptions
 ): Promise<TenantOperationalDashboard> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const staleDays = options?.staleLeadStageDays ?? DEFAULT_STALE_LEAD_STAGE_DAYS;
@@ -776,6 +907,8 @@ export async function loadTenantOperationalDashboard(
     })
   );
 
+  const includeReceptionBoard = Boolean(options?.includeReceptionBoard);
+
   const [
     agenda,
     staleLeads,
@@ -787,6 +920,7 @@ export async function loadTenantOperationalDashboard(
     openTasksCount,
     medicationReorderReviewsPending,
     crmPipelineLeadVolume,
+    receptionBoardCards,
   ] = await Promise.all([
     loadAgendaBookings(tid, now),
     loadStaleLeads(tid, staleDays, now, pipelineStages),
@@ -798,6 +932,9 @@ export async function loadTenantOperationalDashboard(
     loadOpenCrmTasksCount(tid, viewerFiUserId),
     loadMedicationReorderPendingReviewCount(tid),
     loadCrmPipelineLeadVolume(tid, pipelineStages),
+    includeReceptionBoard
+      ? loadReceptionBoardCards(tid, operationalLocalDay.localStartIso, operationalLocalDay.localEndIso)
+      : Promise.resolve([]),
   ]);
 
   return tenantOperationalDashboardSchema.parse({
@@ -831,5 +968,6 @@ export async function loadTenantOperationalDashboard(
     },
     crmPipelineStages,
     crmPipelineLeadVolume,
+    receptionBoard: receptionBoardPayloadSchema.parse({ cards: receptionBoardCards }),
   });
 }
