@@ -11,9 +11,11 @@ import { CRM_TASK_ACTIVE_STATUS_VALUES } from "@/src/lib/crm/crmTaskPolicy";
 import { leadTitleFromRow, personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { loadPipelineStages } from "@/src/lib/crm/pipeline";
+import type { FiCrmPipelineStageRow } from "@/src/lib/crm/types";
 import { DEFAULT_CRM_PIPELINE_KEY } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
+import { computeOperationalLocalDayUtcWindow } from "@/src/lib/fiOs/tenantOperationalLocalDay";
 import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
@@ -33,7 +35,7 @@ const MS_DAY = 86_400_000;
 const AGENDA_BOOKING_STATUSES = ["scheduled", "confirmed", "arrived"] as const;
 const agendaBookingStatusSet = new Set<string>(AGENDA_BOOKING_STATUSES);
 
-const terminalLeadStatuses = new Set(["archived", "lost", "converted"]);
+export const terminalLeadStatuses = new Set(["archived", "lost", "converted"]);
 
 function utcDayStart(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
@@ -90,6 +92,8 @@ export type TaskDueItem = z.infer<typeof taskDueItemSchema>;
 
 const quickStatsSchema = z.object({
   newLeadsThisWeek: z.number().int().nonnegative(),
+  /** `fi_crm_leads.created_at` within tenant operational local day `[operationalDay.localStartIso, operationalDay.localEndIso)`. */
+  newLeadsToday: z.number().int().nonnegative(),
   conversionRateLast30d: z.number().min(0).max(1).nullable(),
   conversionWonLast30d: z.number().int().nonnegative(),
   conversionClosedLast30d: z.number().int().nonnegative(),
@@ -141,6 +145,36 @@ const actionCentreSchema = z.object({
 
 export type TenantActionCentre = z.infer<typeof actionCentreSchema>;
 
+const crmPipelineStageSnapshotSchema = z.object({
+  id: z.string().uuid(),
+  label: z.string(),
+  sort_order: z.number(),
+  is_entry: z.boolean(),
+  is_won: z.boolean(),
+  is_lost: z.boolean(),
+});
+
+const crmPipelineLeadVolumeSchema = z.object({
+  activeByStageId: z.record(z.string(), z.number().int().nonnegative()),
+  activeUnassignedStage: z.number().int().nonnegative(),
+  activeOtherPipelineStage: z.number().int().nonnegative(),
+});
+
+export type CrmPipelineLeadVolumePayload = z.infer<typeof crmPipelineLeadVolumeSchema>;
+
+export type CrmPipelineStageSnapshot = z.infer<typeof crmPipelineStageSnapshotSchema>;
+
+const operationalDaySchema = z.object({
+  calendarTimezone: z.string(),
+  todayYmd: z.string(),
+  /** Inclusive UTC instant for tenant-local operational day start (same as booking “today” window). */
+  localStartIso: z.string(),
+  /** Exclusive UTC instant for tenant-local operational day end. */
+  localEndIso: z.string(),
+});
+
+export type TenantOperationalDay = z.infer<typeof operationalDaySchema>;
+
 const dashboardReminderItemSchema = z.object({
   jobId: z.string().uuid(),
   scheduled_at: z.string(),
@@ -186,6 +220,12 @@ export const tenantOperationalDashboardSchema = z.object({
   actionCentre: actionCentreSchema,
   /** DoctorOS 1D: medication reorders awaiting clinic review (requested + doctor_review_required). */
   medicationReorderReviewsPending: z.number().int().nonnegative(),
+  /** Tenant IANA calendar day for operational widgets (same source as booking day windows). */
+  operationalDay: operationalDaySchema,
+  /** Default CRM pipeline stages (single shared `loadPipelineStages` call per dashboard load). */
+  crmPipelineStages: z.array(crmPipelineStageSnapshotSchema),
+  /** Active (non-terminal) lead counts by default-pipeline stage id — from `fi_crm_leads`, not stale-lead hygiene. */
+  crmPipelineLeadVolume: crmPipelineLeadVolumeSchema,
 });
 
 export type TenantOperationalDashboard = z.infer<typeof tenantOperationalDashboardSchema>;
@@ -265,15 +305,12 @@ async function loadAgendaBookings(tenantId: string, now: Date): Promise<{
 async function loadStaleLeads(
   tenantId: string,
   thresholdDays: number,
-  now: Date
+  now: Date,
+  stages: FiCrmPipelineStageRow[]
 ): Promise<StaleLeadItem[]> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
 
-  const stages = await loadPipelineStages(
-    { tenantId: tid, organisationId: null, clinicId: null, pipelineKey: DEFAULT_CRM_PIPELINE_KEY },
-    supabase
-  );
   const stageLabel = new Map(stages.map((s) => [s.id, s.label]));
 
   const { data: leadRows, error: le } = await supabase
@@ -408,20 +445,16 @@ async function loadTasksDue(tenantId: string, fiUserId: string | null, now: Date
 
 const ACTIVE_AGENDA_BOOKING_STATUSES = ["scheduled", "confirmed", "arrived"] as const;
 
-async function resolveTenantLocalDayWindow(
+export async function resolveTenantLocalDayWindow(
   tenantId: string,
-  now: Date
+  now: Date,
+  calendarTimezone?: string | null
 ): Promise<{ localStartIso: string; localEndIso: string }> {
-  const dayStart = utcDayStart(now).toISOString();
-  const dayEnd = addHours(utcDayStart(now), 24).toISOString();
-  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tenantId.trim());
-  const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
-  const localDayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone);
-  const localDayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone);
-  return {
-    localStartIso: localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart,
-    localEndIso: localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd,
-  };
+  const tz =
+    calendarTimezone?.trim() ||
+    (await loadTenantOperationalCalendarSettings(tenantId.trim())).calendarTimezone;
+  const { localStartIso, localEndIso } = computeOperationalLocalDayUtcWindow(now, tz);
+  return { localStartIso, localEndIso };
 }
 
 async function countActiveBookingsInRange(
@@ -452,9 +485,12 @@ async function countActiveBookingsInRange(
 
 async function loadClinicTodayAndWeekCounts(
   tenantId: string,
-  now: Date
+  now: Date,
+  calendarTimezone: string,
+  operationalLocalDay?: { localStartIso: string; localEndIso: string }
 ): Promise<{ clinicToday: TenantClinicToday; surgeriesThisWeek: number }> {
-  const { localStartIso, localEndIso } = await resolveTenantLocalDayWindow(tenantId, now);
+  const { localStartIso, localEndIso } =
+    operationalLocalDay ?? (await resolveTenantLocalDayWindow(tenantId, now, calendarTimezone));
   const weekStartIso = mondayStartUtc(now).toISOString();
   const weekEndIso = addHours(mondayStartUtc(now), 7 * 24).toISOString();
 
@@ -543,7 +579,12 @@ async function loadOpenCrmTasksCount(tenantId: string, fiUserId: string | null):
   return count ?? 0;
 }
 
-async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickStats> {
+async function loadQuickStats(
+  tenantId: string,
+  now: Date,
+  stages: FiCrmPipelineStageRow[],
+  operationalLocalDay: { localStartIso: string; localEndIso: string }
+): Promise<TenantQuickStats> {
   const supabase = supabaseAdmin();
   const tid = tenantId.trim();
 
@@ -552,24 +593,15 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
   const dayStart = utcDayStart(now).toISOString();
   const dayEnd = addHours(utcDayStart(now), 24).toISOString();
 
-  const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
-  const todayYmd = calendarDateStringFromInstant(now, calendarTimezone);
-  const localDayStartMs = zonedMidnightUtcMs(todayYmd, calendarTimezone);
-  const localDayEndMs = zonedNextDayUtcMs(todayYmd, calendarTimezone);
-  const localStartIso =
-    localDayStartMs != null ? new Date(localDayStartMs).toISOString() : dayStart;
-  const localEndIso = localDayEndMs != null ? new Date(localDayEndMs).toISOString() : dayEnd;
+  const { localStartIso, localEndIso } = operationalLocalDay;
 
-  const stages = await loadPipelineStages(
-    { tenantId: tid, organisationId: null, clinicId: null, pipelineKey: DEFAULT_CRM_PIPELINE_KEY },
-    supabase
-  );
   const wonIds = new Set(stages.filter((s) => s.is_won).map((s) => s.id));
   const lostIds = new Set(stages.filter((s) => s.is_lost).map((s) => s.id));
   const terminalStageIds = Array.from(wonIds).concat(Array.from(lostIds));
 
   const [
     newLeadsRes,
+    newLeadsTodayRes,
     terminalHistRes,
     consultRes,
     noShowRes,
@@ -580,6 +612,12 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
       .gte("created_at", weekStart),
+    supabase
+      .from("fi_crm_leads")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .gte("created_at", localStartIso)
+      .lt("created_at", localEndIso),
     terminalStageIds.length
       ? supabase
           .from("fi_crm_lead_stage_history")
@@ -612,6 +650,7 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
   ]);
 
   if (newLeadsRes.error) throw new Error(newLeadsRes.error.message);
+  if (newLeadsTodayRes.error) throw new Error(newLeadsTodayRes.error.message);
   if (consultRes.error) throw new Error(consultRes.error.message);
   if (noShowRes.error) throw new Error(noShowRes.error.message);
   if (terminalHistRes.error) throw new Error(terminalHistRes.error.message);
@@ -642,6 +681,7 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
 
   return quickStatsSchema.parse({
     newLeadsThisWeek: newLeadsRes.count ?? 0,
+    newLeadsToday: newLeadsTodayRes.count ?? 0,
     conversionRateLast30d,
     conversionWonLast30d: won,
     conversionClosedLast30d: closed,
@@ -649,6 +689,20 @@ async function loadQuickStats(tenantId: string, now: Date): Promise<TenantQuickS
     todaysNoShows: noShowRes.count ?? 0,
     staffOnDutyToday,
   });
+}
+
+async function loadCrmPipelineLeadVolume(
+  tenantId: string,
+  pipelineStages: FiCrmPipelineStageRow[]
+): Promise<CrmPipelineLeadVolumePayload> {
+  const supabase = supabaseAdmin();
+  const tid = tenantId.trim();
+  const { data, error } = await supabase.from("fi_crm_leads").select("current_stage_id, status").eq("tenant_id", tid);
+  if (error) throw new Error(error.message);
+  const rows = (data ?? []) as { current_stage_id: string | null; status: string | null }[];
+  const stageIds = new Set(pipelineStages.map((s) => s.id));
+  const aggregated = aggregateActiveLeadVolumeByPipelineStage(rows, stageIds);
+  return crmPipelineLeadVolumeSchema.parse(aggregated);
 }
 
 const UPCOMING_REMINDER_ROW_CAP = 10;
@@ -697,6 +751,31 @@ export async function loadTenantOperationalDashboard(
   if (!tenantRes.data) throw new Error("Tenant not found");
   const tenantName = String((tenantRes.data as { name?: string }).name ?? "").trim() || tid;
 
+  const [calendarSettings, pipelineStages] = await Promise.all([
+    loadTenantOperationalCalendarSettings(tid),
+    loadPipelineStages(
+      { tenantId: tid, organisationId: null, clinicId: null, pipelineKey: DEFAULT_CRM_PIPELINE_KEY },
+      supabase
+    ),
+  ]);
+  const operationalCalendarTimezone = calendarSettings.calendarTimezone;
+  const operationalLocalDayFull = computeOperationalLocalDayUtcWindow(now, operationalCalendarTimezone);
+  const operationalLocalDay = {
+    localStartIso: operationalLocalDayFull.localStartIso,
+    localEndIso: operationalLocalDayFull.localEndIso,
+  };
+  const operationalTodayYmd = operationalLocalDayFull.todayYmd;
+  const crmPipelineStages = pipelineStages.map((s) =>
+    crmPipelineStageSnapshotSchema.parse({
+      id: s.id,
+      label: s.label,
+      sort_order: s.sort_order,
+      is_entry: s.is_entry,
+      is_won: s.is_won,
+      is_lost: s.is_lost,
+    })
+  );
+
   const [
     agenda,
     staleLeads,
@@ -707,16 +786,18 @@ export async function loadTenantOperationalDashboard(
     actionCentre,
     openTasksCount,
     medicationReorderReviewsPending,
+    crmPipelineLeadVolume,
   ] = await Promise.all([
     loadAgendaBookings(tid, now),
-    loadStaleLeads(tid, staleDays, now),
+    loadStaleLeads(tid, staleDays, now, pipelineStages),
     loadTasksDue(tid, viewerFiUserId, now),
-    loadQuickStats(tid, now),
+    loadQuickStats(tid, now, pipelineStages, operationalLocalDay),
     loadUpcomingReminders(tid, now),
-    loadClinicTodayAndWeekCounts(tid, now),
+    loadClinicTodayAndWeekCounts(tid, now, operationalCalendarTimezone, operationalLocalDay),
     loadActionCentreCounts(tid, now),
     loadOpenCrmTasksCount(tid, viewerFiUserId),
     loadMedicationReorderPendingReviewCount(tid),
+    loadCrmPipelineLeadVolume(tid, pipelineStages),
   ]);
 
   return tenantOperationalDashboardSchema.parse({
@@ -742,5 +823,13 @@ export async function loadTenantOperationalDashboard(
     clinicToday: clinicCounts.clinicToday,
     actionCentre,
     medicationReorderReviewsPending,
+    operationalDay: {
+      calendarTimezone: operationalCalendarTimezone,
+      todayYmd: operationalTodayYmd,
+      localStartIso: operationalLocalDay.localStartIso,
+      localEndIso: operationalLocalDay.localEndIso,
+    },
+    crmPipelineStages,
+    crmPipelineLeadVolume,
   });
 }

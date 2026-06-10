@@ -33,6 +33,7 @@ export type AnalyticsOsRiskRow = {
 /** Mirrors `TenantQuickStats` — counts / ratios only. */
 export type AnalyticsOsQuickStatsPublic = {
   newLeadsThisWeek: number;
+  newLeadsToday: number;
   conversionRateLast30d: number | null;
   conversionWonLast30d: number;
   conversionClosedLast30d: number;

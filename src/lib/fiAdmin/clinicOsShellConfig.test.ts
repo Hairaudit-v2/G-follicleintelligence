@@ -17,6 +17,8 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
 
   assert.equal(byId.dashboard?.href, base);
   assert.equal(byId.dashboard?.disabled, false);
+  assert.equal(byId["operations-centre"]?.href, `${base}/operations`);
+  assert.equal(byId["operations-centre"]?.disabled, false);
   assert.equal(byId.bookings?.href, `${base}/bookings`);
   assert.equal(byId.calendar?.href, `${base}/calendar`);
   assert.equal(byId.patientos?.href, `${base}/patients`);
@@ -67,6 +69,8 @@ test("resolveClinicOsShellNavItems: placeholders stay disabled", () => {
 test("getClinicOsShellActiveNavId: dashboard and deep CRM", () => {
   assert.equal(getClinicOsShellActiveNavId(base, base), "dashboard");
   assert.equal(getClinicOsShellActiveNavId(`${base}/`, base), "dashboard");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/operations`, base), "operations-centre");
+  assert.equal(getClinicOsShellActiveNavId(`${base}/operations/extra`, base), "operations-centre");
   assert.equal(getClinicOsShellActiveNavId(`${base}/crm`, base), "leadflow");
   assert.equal(getClinicOsShellActiveNavId(`${base}/crm/leads`, base), "leadflow");
   assert.equal(getClinicOsShellActiveNavId(`${base}/calendar`, base), "calendar");

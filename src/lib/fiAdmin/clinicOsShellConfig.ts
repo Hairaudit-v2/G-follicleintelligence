@@ -88,6 +88,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     items: [
       { id: "dashboard", label: "Dashboard", path: "", home: true, permissionHint: {}, description: "Tenant home and overview." },
       {
+        id: "operations-centre",
+        label: "Operations",
+        path: "operations",
+        permissionHint: {},
+        description: "ClinicOS operations centre — schedule, flow, and CRM snapshot.",
+      },
+      {
         id: "appointments",
         label: "Appointments",
         path: "appointments",
@@ -312,6 +319,8 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   const rest = np.slice(nb.length);
   const sub = rest.startsWith("/") ? rest.slice(1) : rest;
   const first = sub.split("/")[0] ?? "";
+
+  if (first === "operations") return "operations-centre";
 
   if (first === "bookings") return "bookings";
   if (first === "calendar") return "calendar";
