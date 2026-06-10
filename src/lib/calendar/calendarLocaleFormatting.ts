@@ -127,7 +127,8 @@ export function formatClinicLongDate(dateIsoOrLocal: string, locale: string): st
     year: "numeric",
   }).format(d);
   // en-AU / en-GB often emit "Wednesday 10 June …"; Quick Book spec prefers a comma after weekday.
-  s = s.replace(/^(\p{L}+)\s+(\d)/u, "$1, $2");
+  // Avoid `\p{L}` (needs ES2018+ for TS); `[^\d\s,]+` matches the weekday token for typical locale output.
+  s = s.replace(/^([^\d\s,]+)\s+(\d)/, "$1, $2");
   return s;
 }
 
