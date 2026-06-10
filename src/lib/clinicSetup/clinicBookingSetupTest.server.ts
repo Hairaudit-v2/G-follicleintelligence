@@ -90,6 +90,7 @@ type StaffRow = {
   id: string;
   full_name: string;
   staff_role: string;
+  is_active: boolean;
   calendar_visible: boolean | null;
 };
 
@@ -117,6 +118,7 @@ function loadVisibleClinicalStaffRows(
           id: String(r.id),
           full_name: String(r.full_name ?? "").trim() || "Staff",
           staff_role: String(r.staff_role ?? ""),
+          is_active: Boolean(r.is_active),
           calendar_visible: r.calendar_visible == null ? null : Boolean(r.calendar_visible),
         };
       })
@@ -124,7 +126,7 @@ function loadVisibleClinicalStaffRows(
       .filter((s) => !isSupportStaffRole(s.staff_role))
       .filter((s) =>
         isCalendarVisibleClinicalStaff({
-          is_active: true,
+          is_active: s.is_active,
           staff_role: s.staff_role,
           calendar_visible: s.calendar_visible,
         })
