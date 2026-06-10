@@ -12,19 +12,31 @@ import {
   loadServiceStaffEligibilityForService,
 } from "@/src/lib/rooms/fiClinicRooms.server";
 import { filterRoomEligibilityForClinic } from "@/src/lib/rooms/roomAvailability.server";
+import type { FiClinicRoomRow, FiServiceRoomEligibilityRow } from "@/src/lib/rooms/roomTypes";
 import { isStaffEligibleForServiceRules } from "@/src/lib/rooms/roomAvailabilityCore";
 import { isSupportStaffRole } from "@/src/lib/staff/clinicalStaffPicker";
 import { isStaffBookableForClinicalWorkflow } from "@/src/lib/staff/staffRolePolicy";
-import { isCalendarVisibleClinicalStaff } from "@/src/lib/staff/calendarVisibleStaff";
+import { isCalendarVisibleClinicalStaff, isNonCalendarSupportRole } from "@/src/lib/staff/calendarVisibleStaff";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import type {
+  ClinicBookingSetupHygieneRow,
   ClinicBookingSetupTestProfile,
   ClinicBookingSetupTestResult,
   ClinicBookingSetupTestRow,
+  ClinicBookingSetupTestRowStatus,
 } from "@/src/lib/clinicSetup/clinicBookingSetupTestTypes";
+import {
+  AUTOFIX_KEY_CLINICAL_CALENDAR_RESTORE,
+  AUTOFIX_KEY_PERTH_PHYSICAL_ALIASES,
+  AUTOFIX_KEY_SUPPORT_CALENDAR,
+  preferredRoomFixKey,
+  roomEligibilityFixKey,
+  staffEligibilityFixKey,
+} from "@/src/lib/clinicSetup/clinicBookingSetupAutoFix.server";
 
 export type {
+  ClinicBookingSetupHygieneRow,
   ClinicBookingSetupTestProfile,
   ClinicBookingSetupTestResult,
   ClinicBookingSetupTestRow,
@@ -32,6 +44,98 @@ export type {
 } from "@/src/lib/clinicSetup/clinicBookingSetupTestTypes";
 
 const BASE = (tenantId: string) => `/fi-admin/${tenantId.trim()}`;
+
+function worstBookingSetupStatus(
+  a: ClinicBookingSetupTestRowStatus,
+  b: ClinicBookingSetupTestRowStatus
+): ClinicBookingSetupTestRowStatus {
+  if (a === "fail" || b === "fail") return "fail";
+  if (a === "warning" || b === "warning") return "warning";
+  return "pass";
+}
+
+async function buildBookingSetupHygiene(args: {
+  client: SupabaseClient;
+  tenantId: string;
+  clinicId: string;
+  rooms: FiClinicRoomRow[];
+}): Promise<ClinicBookingSetupHygieneRow[]> {
+  const hygiene: ClinicBookingSetupHygieneRow[] = [];
+  const tid = args.tenantId;
+  const cid = args.clinicId;
+
+  const { data: staffRaw, error } = await args.client
+    .from("fi_staff")
+    .select("staff_role, calendar_visible")
+    .eq("tenant_id", tid)
+    .eq("is_active", true);
+  if (error) throw new Error(error.message);
+  const allStaff = (staffRaw ?? []).map((raw) => ({
+    staff_role: (raw as { staff_role?: string | null }).staff_role,
+    calendar_visible: (raw as { calendar_visible?: boolean | null }).calendar_visible,
+  }));
+
+  if (allStaff.some((s) => isSupportStaffRole(s.staff_role) && s.calendar_visible === true)) {
+    hygiene.push({
+      id: "support_roles_calendar",
+      label: "Support roles on the calendar",
+      status: "warning",
+      message:
+        "One or more reception / admin / coordinator accounts are explicitly visible on the FI calendar. Clinical workflows normally hide these roles.",
+      suggestedAction: "Hide support roles from the calendar or adjust visibility in Staff.",
+      href: `${BASE(tid)}/staff`,
+      fixKeys: [AUTOFIX_KEY_SUPPORT_CALENDAR],
+    });
+  }
+
+  if (
+    allStaff.some((s) => {
+      if (s.calendar_visible !== false) return false;
+      if (isNonCalendarSupportRole(s.staff_role)) return false;
+      return isCalendarVisibleClinicalStaff({
+        is_active: true,
+        staff_role: s.staff_role,
+        calendar_visible: null,
+      });
+    })
+  ) {
+    hygiene.push({
+      id: "clinical_calendar_hidden",
+      label: "Clinical staff hidden from calendar",
+      status: "warning",
+      message:
+        "At least one clinical provider has “Show on calendar” turned off. Eligible staff may not appear as assignees until visibility is restored.",
+      suggestedAction: "Clear the calendar visibility override for affected staff, or run “Fix automatically”.",
+      href: `${BASE(tid)}/staff`,
+      fixKeys: [AUTOFIX_KEY_CLINICAL_CALENDAR_RESTORE],
+    });
+  }
+
+  const clinicRooms = args.rooms.filter((r) => r.clinic_id === cid);
+  const byCode = new Map(clinicRooms.map((r) => [r.room_code.trim().toLowerCase(), r]));
+  const cons2 = byCode.get("cons_2");
+  const patient2 = byCode.get("patient_room_2");
+  const prp2 = byCode.get("prp_2");
+  const surg2 = byCode.get("surgery_2");
+  if (cons2 && patient2 && prp2 && surg2) {
+    const pkMismatch = patient2.physical_room_key.trim() !== cons2.physical_room_key.trim();
+    const prpSurgMismatch = prp2.physical_room_key.trim() !== surg2.physical_room_key.trim();
+    if (pkMismatch || prpSurgMismatch) {
+      hygiene.push({
+        id: "perth_second_room_aliases",
+        label: "Perth-style second-room physical keys",
+        status: "warning",
+        message:
+          "Evolved Perth second-room pairing expects patient_room_2 to share cons_2’s physical key, and prp_2 / surgery_2 to share one physical treatment suite key.",
+        suggestedAction: "Apply the standard alias pairing (skips rooms marked manual override).",
+        href: `${BASE(tid)}/settings/clinic-setup`,
+        fixKeys: [AUTOFIX_KEY_PERTH_PHYSICAL_ALIASES],
+      });
+    }
+  }
+
+  return hygiene;
+}
 
 function pickFirstByName(services: FiServiceRow[]): FiServiceRow | null {
   if (!services.length) return null;
@@ -147,7 +251,7 @@ function hasEligibleVisibleStaff(
 }
 
 function simplifyPreferredRoomLabel(
-  roomElig: ReturnType<typeof filterRoomEligibilityForClinic>,
+  roomElig: FiServiceRoomEligibilityRow[],
   roomById: Map<string, { display_name: string; is_active: boolean }>
 ): string {
   const pref = roomElig.find((e) => e.is_preferred);
@@ -163,7 +267,7 @@ function simplifyPreferredRoomLabel(
 /** Refine success message preferred room label without duplicated lookup logic. */
 function buildSuccessMessage(args: {
   serviceName: string;
-  roomElig: ReturnType<typeof filterRoomEligibilityForClinic>;
+  roomElig: FiServiceRoomEligibilityRow[];
   roomById: Map<string, { display_name: string; is_active: boolean }>;
   visibleStaff: StaffRow[];
   staffRules: Awaited<ReturnType<typeof loadServiceStaffEligibilityForService>>;
@@ -221,7 +325,7 @@ export async function runClinicBookingSetupTest(args: {
     }
 
     const roomEligRaw = await loadServiceRoomEligibilityForService(tid, service.id, client);
-    const roomElig = filterRoomEligibilityForClinic(roomEligRaw, cid).filter((e) => e.is_active);
+    const roomElig = filterRoomEligibilityForClinic(roomEligRaw, cid).filter((e) => e.is_active) as FiServiceRoomEligibilityRow[];
     const roomById = new Map(rooms.map((r) => [r.id, { display_name: r.display_name, is_active: r.is_active }]));
 
     if (roomElig.length === 0) {
@@ -232,6 +336,7 @@ export async function runClinicBookingSetupTest(args: {
         message: `“${service.name}” has no room links for this clinic — FI OS cannot assign a room.`,
         suggestedAction: "Run Clinic setup or map eligible rooms under Services.",
         href: `${BASE(tid)}/services`,
+        fixKeys: [roomEligibilityFixKey(profile)],
       });
       continue;
     }
@@ -261,6 +366,7 @@ export async function runClinicBookingSetupTest(args: {
         message: `“${service.name}” has staff rules, but no calendar-visible clinical assignee matches them (reception and admin are excluded by default).`,
         suggestedAction: "Adjust staff eligibility, turn on “Show on calendar” for a qualified provider, or use Clinic setup.",
         href: `${BASE(tid)}/staff`,
+        fixKeys: [staffEligibilityFixKey(profile), AUTOFIX_KEY_CLINICAL_CALENDAR_RESTORE],
       });
       continue;
     }
@@ -325,6 +431,14 @@ export async function runClinicBookingSetupTest(args: {
     const rowStatus: ClinicBookingSetupTestRowStatus =
       pieces.length > 0 || staffSlotTail ? "warning" : "pass";
 
+    const fixKeys: string[] = [];
+    for (const p of pieces) {
+      if (p.includes("No preferred room")) fixKeys.push(preferredRoomFixKey(profile));
+      if (p.includes("Preferred room is missing or inactive")) fixKeys.push(preferredRoomFixKey(profile));
+      if (p.includes("No staff eligibility rules")) fixKeys.push(staffEligibilityFixKey(profile));
+    }
+    const uniqueFixKeys = Array.from(new Set(fixKeys));
+
     tests.push({
       profile,
       label,
@@ -344,6 +458,7 @@ export async function runClinicBookingSetupTest(args: {
           ? "Review preferred room, staff hours, or calendar visibility if you want stricter defaults."
           : undefined,
       href: rowStatus === "warning" ? `${BASE(tid)}/settings/clinic-setup` : undefined,
+      fixKeys: uniqueFixKeys.length ? uniqueFixKeys : undefined,
     });
   }
 
@@ -351,5 +466,10 @@ export async function runClinicBookingSetupTest(args: {
   if (tests.some((t) => t.status === "fail")) overallStatus = "fail";
   else if (tests.some((t) => t.status === "warning")) overallStatus = "warning";
 
-  return { overallStatus, tests };
+  const hygiene = await buildBookingSetupHygiene({ client, tenantId: tid, clinicId: cid, rooms });
+  for (const h of hygiene) {
+    overallStatus = worstBookingSetupStatus(overallStatus, h.status);
+  }
+
+  return { overallStatus, tests, hygiene };
 }

@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { AlertTriangle, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, Wrench, XCircle } from "lucide-react";
 
+import { applyClinicBookingSetupAutoFixAction } from "@/lib/actions/fi-clinic-booking-setup-autofix-actions";
 import { runClinicBookingSetupTestAction } from "@/lib/actions/fi-clinic-booking-setup-test-actions";
+import type { ClinicBookingSetupAutoFixResult } from "@/src/lib/clinicSetup/clinicBookingSetupAutoFixTypes";
 import type {
+  ClinicBookingSetupHygieneRow,
   ClinicBookingSetupTestResult,
   ClinicBookingSetupTestRow,
   ClinicBookingSetupTestRowStatus,
@@ -36,6 +39,35 @@ function overallBadgeClass(status: ClinicBookingSetupTestRowStatus, isDark: bool
   return isDark ? "bg-rose-500/15 text-rose-100 ring-rose-500/35" : "bg-rose-50 text-rose-950 ring-rose-200";
 }
 
+function collectAutoFixKeys(result: ClinicBookingSetupTestResult): string[] {
+  const keys: string[] = [];
+  for (const t of result.tests) {
+    if (t.status === "pass") continue;
+    for (const k of t.fixKeys ?? []) keys.push(k);
+  }
+  for (const h of result.hygiene) {
+    if (h.status === "pass") continue;
+    for (const k of h.fixKeys ?? []) keys.push(k);
+  }
+  return Array.from(new Set(keys));
+}
+
+function formatAutofixSummary(outcome: ClinicBookingSetupAutoFixResult): string {
+  const parts: string[] = [];
+  if (outcome.applied.length) {
+    parts.push(
+      `Applied: ${outcome.applied.map((a) => a.message).join(" ")}`.trim()
+    );
+  }
+  if (outcome.skipped.length) {
+    parts.push(`Skipped: ${outcome.skipped.map((s) => `${s.key} (${s.reason})`).join("; ")}`);
+  }
+  if (outcome.errors.length) {
+    parts.push(`Errors: ${outcome.errors.map((e) => `${e.key}: ${e.message}`).join("; ")}`);
+  }
+  return parts.join(" · ") || "No changes.";
+}
+
 export function ClinicBookingSetupTestPanel({
   tenantId,
   clinicId,
@@ -52,21 +84,49 @@ export function ClinicBookingSetupTestPanel({
   const isDark = variant === "dark";
   const [result, setResult] = useState<ClinicBookingSetupTestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [autofixSummary, setAutofixSummary] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  const runTestOnly = async () => {
+    const r = await runClinicBookingSetupTestAction(tid, { clinicId: cid });
+    if (!r.ok) {
+      setError(r.error);
+      setResult(null);
+      return;
+    }
+    setResult(r.result);
+  };
 
   const run = () => {
     if (!cid) return;
     setError(null);
+    setAutofixSummary(null);
     startTransition(async () => {
-      const r = await runClinicBookingSetupTestAction(tid, { clinicId: cid });
-      if (!r.ok) {
-        setError(r.error);
-        setResult(null);
-        return;
-      }
-      setResult(r.result);
+      await runTestOnly();
     });
   };
+
+  const applyFixes = (fixKeys: string[], opts?: { confirmPerthAliases?: boolean }) => {
+    if (!cid || fixKeys.length === 0) return;
+    setError(null);
+    setAutofixSummary(null);
+    startTransition(async () => {
+      const r = await applyClinicBookingSetupAutoFixAction(tid, {
+        clinicId: cid,
+        fixKeys,
+        confirmPerthAliases: opts?.confirmPerthAliases,
+      });
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      setAutofixSummary(formatAutofixSummary(r.outcome));
+      await runTestOnly();
+    });
+  };
+
+  const allSafeKeys = result ? collectAutoFixKeys(result) : [];
+  const showFixAll = allSafeKeys.length >= 2;
 
   return (
     <div
@@ -85,18 +145,34 @@ export function ClinicBookingSetupTestPanel({
             Safe diagnostic — no bookings created
           </p>
         </div>
-        <button
-          type="button"
-          disabled={pending || !cid}
-          onClick={run}
-          className={cn(
-            "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50",
-            isDark ? "bg-cyan-600 text-white hover:bg-cyan-500" : "bg-sky-600 text-white hover:bg-sky-500"
-          )}
-        >
-          {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
-          Run booking setup test
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {showFixAll ? (
+            <button
+              type="button"
+              disabled={pending || !cid}
+              onClick={() => applyFixes(allSafeKeys)}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50",
+                isDark ? "bg-violet-600 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
+              )}
+            >
+              {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : <Wrench className="h-3.5 w-3.5" aria-hidden />}
+              Fix all safe issues
+            </button>
+          ) : null}
+          <button
+            type="button"
+            disabled={pending || !cid}
+            onClick={run}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50",
+              isDark ? "bg-cyan-600 text-white hover:bg-cyan-500" : "bg-sky-600 text-white hover:bg-sky-500"
+            )}
+          >
+            {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
+            Run booking setup test
+          </button>
+        </div>
       </div>
 
       <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-gray-600")}>
@@ -107,6 +183,9 @@ export function ClinicBookingSetupTestPanel({
 
       {error ? (
         <p className="mt-2 text-xs text-rose-300">{error}</p>
+      ) : null}
+      {autofixSummary ? (
+        <p className={cn("mt-2 text-xs leading-relaxed", isDark ? "text-slate-300" : "text-gray-700")}>{autofixSummary}</p>
       ) : null}
 
       {result ? (
@@ -145,6 +224,22 @@ export function ClinicBookingSetupTestPanel({
                     {t.suggestedAction ? (
                       <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-900/90")}>{t.suggestedAction}</p>
                     ) : null}
+                    {t.status !== "pass" && t.fixKeys?.length ? (
+                      <div className="mt-2">
+                        <button
+                          type="button"
+                          disabled={pending || !cid}
+                          onClick={() => applyFixes(t.fixKeys ?? [])}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50",
+                            isDark ? "bg-violet-600/90 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
+                          )}
+                        >
+                          {pending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : <Wrench className="h-3 w-3" aria-hidden />}
+                          Fix automatically
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
                 {t.href ? (
@@ -161,6 +256,72 @@ export function ClinicBookingSetupTestPanel({
               </li>
             ))}
           </ul>
+
+          {result.hygiene.length ? (
+            <div className="mt-3 space-y-2">
+              <p className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-slate-500" : "text-gray-500")}>
+                Clinic hygiene
+              </p>
+              <ul className="space-y-2">
+                {result.hygiene.map((h: ClinicBookingSetupHygieneRow) => (
+                  <li
+                    key={h.id}
+                    className={cn(
+                      "flex flex-col gap-1 rounded-md border px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between",
+                      isDark ? "border-white/[0.06] bg-slate-950/40" : "border-gray-100 bg-white"
+                    )}
+                  >
+                    <div className="flex min-w-0 gap-2">
+                      {(() => {
+                        const Icon = STATUS_ICON[h.status];
+                        return <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", STATUS_COLOR[h.status])} aria-hidden />;
+                      })()}
+                      <div className="min-w-0">
+                        <p className={cn("text-sm font-medium", isDark ? "text-slate-100" : "text-gray-900")}>{h.label}</p>
+                        <p className={cn("mt-0.5 text-xs leading-relaxed", isDark ? "text-slate-400" : "text-gray-600")}>
+                          {h.message}
+                        </p>
+                        {h.suggestedAction ? (
+                          <p className={cn("mt-1 text-xs", isDark ? "text-amber-100/90" : "text-amber-900/90")}>{h.suggestedAction}</p>
+                        ) : null}
+                        {h.status !== "pass" && h.fixKeys?.length ? (
+                          <div className="mt-2">
+                            <button
+                              type="button"
+                              disabled={pending || !cid}
+                              onClick={() => applyFixes(h.fixKeys ?? [])}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50",
+                                isDark ? "bg-violet-600/90 text-white hover:bg-violet-500" : "bg-violet-600 text-white hover:bg-violet-500"
+                              )}
+                            >
+                              {pending ? (
+                                <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                              ) : (
+                                <Wrench className="h-3 w-3" aria-hidden />
+                              )}
+                              Fix automatically
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                    {h.href ? (
+                      <Link
+                        href={h.href}
+                        className={cn(
+                          "shrink-0 text-xs font-medium hover:underline sm:pt-0.5",
+                          isDark ? "text-cyan-400" : "text-sky-700"
+                        )}
+                      >
+                        Open
+                      </Link>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
