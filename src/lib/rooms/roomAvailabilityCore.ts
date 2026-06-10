@@ -55,7 +55,7 @@ export function roomIdsSharingPhysicalSpace(roomId: string, ctx: RoomOverlapCont
   return ctx.roomIdsByPhysicalKey.get(key) ?? [room.id];
 }
 
-function isActiveBookingRow(row: { booking_status: string; cancelled_at?: string | null }): boolean {
+export function isActiveBookingRow(row: { booking_status: string; cancelled_at?: string | null }): boolean {
   if (row.cancelled_at?.trim()) return false;
   if (isBookingCancelled({ booking_status: row.booking_status, cancelled_at: row.cancelled_at ?? null })) return false;
   if (row.booking_status === "completed") return false;
@@ -70,6 +70,25 @@ export function findRoomOverlapConflict(args: {
   ctx: RoomOverlapContext;
   excludeBookingId?: string | null;
 }): RoomOverlapBookingLike | null {
+  return findRoomOverlapConflictWithAssignments({
+    ...args,
+    assignmentsByBookingId: new Map(),
+  });
+}
+
+/**
+ * Like {@link findRoomOverlapConflict}, but also blocks when any extra `room` assignment on another booking
+ * occupies the same physical space as the candidate room.
+ */
+export function findRoomOverlapConflictWithAssignments(args: {
+  candidateRoomId: string;
+  candidateStartIso: string;
+  candidateEndIso: string;
+  existing: RoomOverlapBookingLike[];
+  ctx: RoomOverlapContext;
+  assignmentsByBookingId: ReadonlyMap<string, ReadonlyArray<{ resource_type: string; resource_id: string }>>;
+  excludeBookingId?: string | null;
+}): RoomOverlapBookingLike | null {
   const roomId = args.candidateRoomId.trim();
   if (!roomId) return null;
 
@@ -79,10 +98,15 @@ export function findRoomOverlapConflict(args: {
   for (const b of args.existing) {
     if (exclude && b.id === exclude) continue;
     if (!isActiveBookingRow(b)) continue;
-    const bookedRoomId = b.room_id?.trim();
-    if (!bookedRoomId || !blockedRoomIds.has(bookedRoomId)) continue;
-    if (bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at)) {
-      return b;
+    if (!bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at)) continue;
+
+    const bookedRoomIds: string[] = [];
+    if (b.room_id?.trim()) bookedRoomIds.push(b.room_id.trim());
+    for (const a of args.assignmentsByBookingId.get(b.id) ?? []) {
+      if (a.resource_type === "room" && a.resource_id.trim()) bookedRoomIds.push(a.resource_id.trim());
+    }
+    for (const bookedRid of bookedRoomIds) {
+      if (blockedRoomIds.has(bookedRid)) return b;
     }
   }
 
@@ -96,6 +120,24 @@ export function findStaffOverlapConflict(args: {
   existing: Array<Pick<FiBookingRow, "id" | "assigned_staff_id" | "start_at" | "end_at" | "booking_status" | "cancelled_at">>;
   excludeBookingId?: string | null;
 }): (typeof args.existing)[number] | null {
+  return findStaffOverlapConflictWithAssignments({
+    ...args,
+    assignmentsByBookingId: new Map(),
+  });
+}
+
+/**
+ * Like {@link findStaffOverlapConflict}, but treats `fi_booking_resource_assignments` staff rows as booked
+ * on the same booking (multi-resource SurgeryOS).
+ */
+export function findStaffOverlapConflictWithAssignments(args: {
+  candidateStaffId: string;
+  candidateStartIso: string;
+  candidateEndIso: string;
+  existing: Array<Pick<FiBookingRow, "id" | "assigned_staff_id" | "start_at" | "end_at" | "booking_status" | "cancelled_at">>;
+  assignmentsByBookingId: ReadonlyMap<string, ReadonlyArray<{ resource_type: string; resource_id: string }>>;
+  excludeBookingId?: string | null;
+}): (typeof args.existing)[number] | null {
   const staffId = args.candidateStaffId.trim();
   if (!staffId) return null;
   const exclude = args.excludeBookingId?.trim() || null;
@@ -103,10 +145,14 @@ export function findStaffOverlapConflict(args: {
   for (const b of args.existing) {
     if (exclude && b.id === exclude) continue;
     if (!isActiveBookingRow(b)) continue;
-    if (b.assigned_staff_id?.trim() !== staffId) continue;
-    if (bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at)) {
-      return b;
+    if (!bookingTimesOverlap(args.candidateStartIso, args.candidateEndIso, b.start_at, b.end_at)) continue;
+
+    const bookedStaff = new Set<string>();
+    if (b.assigned_staff_id?.trim()) bookedStaff.add(b.assigned_staff_id.trim());
+    for (const a of args.assignmentsByBookingId.get(b.id) ?? []) {
+      if (a.resource_type === "staff" && a.resource_id.trim()) bookedStaff.add(a.resource_id.trim());
     }
+    if (bookedStaff.has(staffId)) return b;
   }
 
   return null;

@@ -11,6 +11,11 @@ import { resolveOrCreatePerson } from "@/src/lib/fi/foundation/resolvePerson";
 import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
 import { BOOKING_TYPES, isAllowedBookingType } from "@/src/lib/bookings/bookingPolicy";
 import { createBooking } from "@/src/lib/bookings/server";
+import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import {
+  loadServiceResourceRequirements,
+  suggestResourceAssignments,
+} from "@/src/lib/calendar/bookingResourceRequirements.server";
 import { logFiCalendarTimezoneDebug } from "@/src/lib/calendar/calendarTimezone";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
@@ -59,6 +64,19 @@ const bodySchema = z
     templateId: z.string().max(80).optional().nullable(),
     anchor: anchorSchema,
     metadata: z.record(z.string(), z.unknown()).optional(),
+    resourceAssignments: z
+      .array(
+        z
+          .object({
+            resource_type: z.enum(["staff", "room"]),
+            resource_id: UUID,
+            role_label: z.string().max(200).optional().nullable(),
+            is_primary: z.boolean().optional(),
+          })
+          .strict()
+      )
+      .max(32)
+      .optional(),
   })
   .strict();
 
@@ -347,6 +365,7 @@ export async function calendarQuickCreateBookingAction(
       timezone: tz,
       location: null,
       metadata: { ...metaBase, ...templateMeta, intake: "calendar_quick_create" },
+      resourceAssignments: parsed.resourceAssignments,
       createdByUserId,
     });
 
@@ -361,6 +380,57 @@ export async function calendarQuickCreateBookingAction(
     if (process.env.NODE_ENV === "development") {
       console.error("[calendarQuickCreateBookingAction] error", { tenantId: tenantId.trim(), err: e });
     }
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function loadServiceResourceRequirementsAction(
+  tenantId: string,
+  serviceId: string
+): Promise<
+  | { ok: true; requirements: Awaited<ReturnType<typeof loadServiceResourceRequirements>> }
+  | { ok: false; error: string }
+> {
+  try {
+    const tid = tenantId.trim();
+    const sid = serviceId.trim();
+    if (!tid || !sid) return { ok: false, error: "Missing tenant or service." };
+    const requirements = await loadServiceResourceRequirements({ tenantId: tid, serviceId: sid });
+    return { ok: true, requirements };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function suggestResourceAssignmentsAction(
+  tenantId: string,
+  body: unknown
+): Promise<
+  | { ok: true; suggestions: Awaited<ReturnType<typeof suggestResourceAssignments>> }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = z
+      .object({
+        clinicId: UUID,
+        serviceId: UUID,
+      })
+      .strict()
+      .parse(body);
+    const tid = tenantId.trim();
+    const staffDirectory = await loadClinicalStaffPickerOptions(tid);
+    const suggestions = await suggestResourceAssignments({
+      tenantId: tid,
+      clinicId: parsed.clinicId,
+      serviceId: parsed.serviceId,
+      staffCandidates: staffDirectory.map((s) => ({
+        id: s.id,
+        staff_role: s.staff_role ?? "",
+        is_active: s.is_active ?? true,
+      })),
+    });
+    return { ok: true, suggestions };
+  } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
 }

@@ -50,6 +50,10 @@ import {
   patientContactForBookingRow,
 } from "@/src/lib/bookings/bookingDisplayContext";
 import { loadBookingDisplayContextMaps } from "@/src/lib/bookings/bookingDisplayContext.server";
+import {
+  buildBookingResourceSummaryLines,
+  loadBookingResourceAssignmentsForBookings,
+} from "@/src/lib/calendar/bookingResourceRequirements.server";
 
 type ClinicalLite = {
   norwood_scale: string | null;
@@ -394,13 +398,22 @@ export async function loadOperationalCalendarPageData(
     resources.staffDirectory
   );
 
-  const [displayMaps, clinicalMap] = await Promise.all([
+  const [displayMaps, clinicalMap, assignmentMap] = await Promise.all([
     loadBookingDisplayContextMaps(tid, structured),
     loadClinicalDetailsMap(
       tid,
       structured.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()))
     ),
+    loadBookingResourceAssignmentsForBookings({
+      tenantId: tid,
+      bookingIds: structured.map((b) => b.id),
+    }),
   ]);
+
+  const staffNameById: Record<string, string> = {};
+  for (const s of resources.staffDirectory) {
+    staffNameById[s.id] = s.full_name?.trim() || s.email?.trim() || s.id.slice(0, 8);
+  }
 
   const bookingDisplay: Record<string, OperationalCalendarBookingDisplay> = {};
   for (const row of structured) {
@@ -421,6 +434,12 @@ export async function loadOperationalCalendarPageData(
 
     const cat = serviceForBookingType(services, row.booking_type);
     const contact = patientContactForBookingRow(row, displayMaps);
+    const resourceLines = buildBookingResourceSummaryLines({
+      booking: row,
+      assignments: assignmentMap.get(row.id) ?? [],
+      roomLabelById: resources.roomDisplayById,
+      staffNameById,
+    });
     bookingDisplay[row.id] = {
       anchorLabel: anchorLabelForBookingRow(row, displayMaps),
       scalesSummary,
@@ -435,6 +454,8 @@ export async function loadOperationalCalendarPageData(
         (row.room_id?.trim() ? resources.roomDisplayById[row.room_id.trim()] : null) ??
         row.location?.trim() ??
         null,
+      resourceRoomLine: resourceLines.roomLine,
+      resourceTeamLine: resourceLines.teamLine,
     };
   }
 

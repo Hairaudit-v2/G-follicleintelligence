@@ -61,6 +61,12 @@ export function BookingCalendarCard({
       {display.scalesSummary ? (
         <div className="mt-0.5 line-clamp-2 text-[10px] font-medium leading-snug text-slate-800/95">{display.scalesSummary}</div>
       ) : null}
+      {display.resourceTeamLine ? (
+        <div className="mt-0.5 truncate text-[9px] font-medium leading-tight opacity-90">{display.resourceTeamLine}</div>
+      ) : null}
+      {display.resourceRoomLine ? (
+        <div className="mt-0.5 truncate text-[9px] leading-tight opacity-90">{display.resourceRoomLine}</div>
+      ) : null}
       {display.reminderHint ? (
         <div className="mt-0.5 line-clamp-2 text-[9px] font-medium leading-snug text-sky-800/95 dark:text-sky-200/90">
           {display.reminderHint}

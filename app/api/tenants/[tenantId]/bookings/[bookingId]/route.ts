@@ -27,6 +27,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ tenant
       patientId: parsed.patientId,
       caseId: parsed.caseId,
       clinicId: parsed.clinicId,
+      roomId: parsed.roomId,
+      roomRequired: parsed.roomRequired,
+      assignedStaffId: parsed.assignedStaffId,
       assignedUserId: parsed.assignedUserId,
       bookingType: parsed.bookingType ?? undefined,
       bookingStatus: parsed.bookingStatus ?? undefined,
@@ -37,6 +40,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ tenant
       timezone: parsed.timezone,
       location: parsed.location,
       metadata: parsed.metadata ?? undefined,
+      resourceAssignments: parsed.resourceAssignments ?? undefined,
     });
 
     return crmJsonOk({ booking });

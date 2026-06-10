@@ -25,7 +25,9 @@ export function FiOsClinicSettingsNav({
 }) {
   const pathname = usePathname() ?? "";
   const base = `/fi-admin/${tenantId.trim()}`;
-  const re = new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(configuration|staff|services|settings)(/|$)`);
+  const re = new RegExp(
+    `^${base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(configuration|staff|services|settings|rooms)(/|$)`
+  );
   if (!re.test(pathname)) return null;
 
   const linkCls = (href: string) =>
@@ -52,6 +54,12 @@ export function FiOsClinicSettingsNav({
             </Link>
             <Link href={`${base}/services`} className={linkCls(`${base}/services`)}>
               Services
+            </Link>
+            <Link href={`${base}/rooms`} className={linkCls(`${base}/rooms`)}>
+              Rooms
+            </Link>
+            <Link href={`${base}/settings/clinic-setup`} className={linkCls(`${base}/settings/clinic-setup`)}>
+              Clinic setup
             </Link>
           </>
         ) : null}

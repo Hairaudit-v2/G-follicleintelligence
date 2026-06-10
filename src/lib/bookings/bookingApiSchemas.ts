@@ -14,6 +14,16 @@ const metadataSchema = z.record(z.string(), z.unknown()).refine((v) => v != null
   message: "metadata must be a JSON object.",
 });
 
+const resourceAssignmentInputSchema = z
+  .object({
+    resource_type: z.enum(["staff", "room"]),
+    resource_id: UUID,
+    role_label: z.string().max(200).nullable().optional(),
+    is_primary: z.boolean().optional(),
+    metadata: metadataSchema.optional(),
+  })
+  .strict();
+
 export const bookingListQuerySchema = z
   .object({
     start: z.string().min(1, "start is required (ISO-8601)."),
@@ -41,6 +51,7 @@ export const bookingCreateBodySchema = z
     timezone: z.string().max(128).optional().nullable(),
     location: z.string().max(2000).optional().nullable(),
     metadata: metadataSchema.optional(),
+    resourceAssignments: z.array(resourceAssignmentInputSchema).max(32).optional(),
   })
   .strict()
   .superRefine((val, ctx) => {
@@ -79,6 +90,7 @@ export const bookingUpdateBodySchema = z
     timezone: z.string().max(128).optional().nullable(),
     location: z.string().max(2000).optional().nullable(),
     metadata: metadataSchema.optional(),
+    resourceAssignments: z.array(resourceAssignmentInputSchema).max(32).optional().nullable(),
   })
   .strict();
 

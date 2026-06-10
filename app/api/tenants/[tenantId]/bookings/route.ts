@@ -57,6 +57,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       patientId: parsed.patientId ?? null,
       caseId: parsed.caseId ?? null,
       clinicId: parsed.clinicId ?? null,
+      roomId: parsed.roomId ?? null,
+      roomRequired: parsed.roomRequired,
+      assignedStaffId: parsed.assignedStaffId ?? null,
       assignedUserId: parsed.assignedUserId ?? null,
       bookingType: parsed.bookingType,
       title: parsed.title ?? null,
@@ -66,6 +69,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       timezone: parsed.timezone ?? null,
       location: parsed.location ?? null,
       metadata: parsed.metadata ?? {},
+      resourceAssignments: parsed.resourceAssignments,
       createdByUserId,
     });
 

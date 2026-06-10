@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { updateBookingAction } from "@/lib/actions/fi-booking-actions";
+import { updateBookingAction, loadBookingResourceAssignmentsAction } from "@/lib/actions/fi-booking-actions";
+import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
+import { BookingConflictPreview } from "@/src/components/calendar/BookingConflictPreview";
+import { NextAvailableBookingSlots } from "@/src/components/calendar/NextAvailableBookingSlots";
+import type { BookingConflictPreviewResult } from "@/src/lib/calendar/bookingConflictPreview.server";
+import type { NextAvailableBookingSlot } from "@/src/lib/calendar/findNextAvailableBookingSlots.server";
 import { BOOKING_TYPES, isBookingCancelled } from "@/src/lib/bookings";
 import {
   defaultProcedureDurationMinutes,
@@ -14,13 +19,13 @@ import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import type { CrmShellClinicOption } from "@/src/lib/crm/types";
-import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import { canSelectStaffForClinicalPicker, type ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import {
   endLocalFromStartLocalAndProcedure,
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
 } from "@/src/components/fi/bookings/bookingFormUtils";
-import { formatIsoDateTimeInTimezone, normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
+import { formatIsoDateTimeInTimezone, normalizeCalendarTimezone, bookingDurationMinutesUtc } from "@/src/lib/calendar/calendarTimezone";
 
 const WRITABLE_STATUSES = ["scheduled", "confirmed", "arrived", "no_show"] as const;
 
@@ -61,6 +66,15 @@ export function BookingEditDrawer({
   const [location, setLocation] = useState("");
   const [assignedStaffId, setAssignedStaffId] = useState("");
   const [clinicId, setClinicId] = useState("");
+  const [draftRoomId, setDraftRoomId] = useState("");
+
+  const cancelled = booking ? isBookingCancelled(booking) : false;
+  const completed = booking?.booking_status === "completed";
+
+  const [resourceDraft, setResourceDraft] = useState<
+    Array<{ resource_type: "staff" | "room"; resource_id: string; role_label?: string | null }>
+  >([]);
+  const [resourceDraftHydrated, setResourceDraftHydrated] = useState(false);
 
   useEffect(() => {
     if (!booking) return;
@@ -74,8 +88,39 @@ export function BookingEditDrawer({
     setLocation(booking.location ?? "");
     setAssignedStaffId(booking.assigned_staff_id ?? "");
     setClinicId(booking.clinic_id ?? "");
+    setDraftRoomId(booking.room_id?.trim() ?? "");
     setFeedback(null);
+    setResourceDraft([]);
+    setResourceDraftHydrated(false);
   }, [booking, clinicCalendarTimezone]);
+
+  useEffect(() => {
+    if (!booking || cancelled || completed) {
+      setResourceDraft([]);
+      setResourceDraftHydrated(true);
+      return;
+    }
+    let cancelledEffect = false;
+    setResourceDraftHydrated(false);
+    void loadBookingResourceAssignmentsAction(tenantId, booking.id, adminKey).then((r) => {
+      if (cancelledEffect) return;
+      if (r.ok) {
+        setResourceDraft(
+          r.assignments.map((a) => ({
+            resource_type: a.resource_type,
+            resource_id: a.resource_id,
+            role_label: a.role_label,
+          }))
+        );
+      } else {
+        setResourceDraft([]);
+      }
+      setResourceDraftHydrated(true);
+    });
+    return () => {
+      cancelledEffect = true;
+    };
+  }, [adminKey, booking, cancelled, completed, tenantId]);
 
   function withAdmin<T extends Record<string, unknown>>(body: T): T & { adminKey?: string } {
     if (adminKey.trim()) return { ...body, adminKey: adminKey.trim() };
@@ -101,8 +146,100 @@ export function BookingEditDrawer({
     if (nextEnd) setEndLocal(nextEnd);
   }
 
-  const cancelled = booking ? isBookingCancelled(booking) : false;
-  const completed = booking?.booking_status === "completed";
+  const [conflictPreview, setConflictPreview] = useState<BookingConflictPreviewResult | null>(null);
+  const [conflictLoading, setConflictLoading] = useState(false);
+
+  const conflictPreviewBody = useMemo(() => {
+    if (!booking || cancelled || completed) return null;
+    const startIso = fromDatetimeLocalValue(startLocal, datetimeTz);
+    const endIso = fromDatetimeLocalValue(endLocal, datetimeTz);
+    if (!startIso || !endIso) return null;
+    return {
+      previewIntent: "edit" as const,
+      clinicId: clinicId.trim() || null,
+      bookingType: bookingType.trim() || null,
+      roomId: draftRoomId.trim() || booking.room_id,
+      roomRequired: booking.room_required,
+      staffId: assignedStaffId.trim() || null,
+      bookingId: booking.id,
+      startAt: startIso,
+      endAt: endIso,
+      ...(resourceDraft.length > 0 ? { extraResourceAssignments: resourceDraft } : {}),
+    };
+  }, [
+    assignedStaffId,
+    booking,
+    bookingType,
+    cancelled,
+    clinicId,
+    completed,
+    datetimeTz,
+    draftRoomId,
+    endLocal,
+    resourceDraft,
+    startLocal,
+  ]);
+
+  useEffect(() => {
+    if (!conflictPreviewBody) {
+      setConflictPreview(null);
+      setConflictLoading(false);
+      return;
+    }
+    let cancelledEffect = false;
+    setConflictLoading(true);
+    const t = window.setTimeout(() => {
+      void (async () => {
+        const r = await previewBookingConflictsAction(tenantId, conflictPreviewBody);
+        if (cancelledEffect) return;
+        setConflictPreview(r.ok ? r.preview : null);
+        setConflictLoading(false);
+      })();
+    }, 350);
+    return () => {
+      cancelledEffect = true;
+      window.clearTimeout(t);
+    };
+  }, [tenantId, conflictPreviewBody]);
+
+  const nextSlotsRequest = useMemo(() => {
+    if (!booking || cancelled || completed || !clinicId.trim()) return null;
+    const startIso = fromDatetimeLocalValue(startLocal, datetimeTz);
+    if (!startIso) return null;
+    const endIso = fromDatetimeLocalValue(endLocal, datetimeTz);
+    const dur =
+      (endIso ? bookingDurationMinutesUtc(startIso, endIso) : null) ??
+      defaultProcedureDurationMinutes(bookingType, services);
+    if (!dur || dur < 1) return null;
+    return {
+      clinicId: clinicId.trim(),
+      bookingType: bookingType.trim() || null,
+      staffId: assignedStaffId.trim() || null,
+      roomId: (draftRoomId.trim() || booking.room_id?.trim()) || null,
+      bookingId: booking.id,
+      preferredStartAt: startIso,
+      durationMinutes: dur,
+    };
+  }, [
+    assignedStaffId,
+    booking,
+    bookingType,
+    cancelled,
+    clinicId,
+    completed,
+    datetimeTz,
+    draftRoomId,
+    endLocal,
+    services,
+    startLocal,
+  ]);
+
+  const onApplySuggestedSlot = (slot: NextAvailableBookingSlot) => {
+    setStartLocal(toDatetimeLocalValue(slot.startAt, datetimeTz));
+    setEndLocal(toDatetimeLocalValue(slot.endAt, datetimeTz));
+    setDraftRoomId(slot.roomId);
+    if (slot.staffId) setAssignedStaffId(slot.staffId);
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -140,8 +277,11 @@ export function BookingEditDrawer({
           timezone: timezone.trim() || null,
           location: location.trim() || null,
           clinicId: clinicId.trim() || null,
+          roomId: draftRoomId.trim() || null,
+          roomRequired: booking.room_required,
           assignedStaffId: assignedStaffId.trim() || null,
           metadata: booking.metadata ?? {},
+          ...(resourceDraftHydrated ? { resourceAssignments: resourceDraft } : {}),
         })
       );
       if (!r.ok) setFeedback(r.error);
@@ -309,6 +449,77 @@ export function BookingEditDrawer({
                   className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
                 />
               </label>
+              <div className="rounded border border-gray-200 bg-gray-50 p-2 text-xs">
+                <p className="font-semibold text-gray-900">Supporting staff & rooms</p>
+                <p className="mt-1 text-gray-600">
+                  Extra team members and rooms (multi-resource). Primary provider and primary room stay in the fields
+                  above.
+                </p>
+                {resourceDraft.length > 0 ? (
+                  <ul className="mt-2 space-y-1">
+                    {resourceDraft.map((x, idx) => (
+                      <li
+                        key={`${x.resource_type}-${x.resource_id}-${idx}`}
+                        className="flex items-center justify-between gap-2 border-t border-gray-200 pt-1 first:border-0 first:pt-0"
+                      >
+                        <span>
+                          {x.resource_type === "staff" ? "Staff" : "Room"}:{" "}
+                          {x.resource_type === "staff"
+                            ? clinicalStaffOptions.find((s) => s.id === x.resource_id)?.full_name?.trim() ||
+                              x.resource_id.slice(0, 8)
+                            : x.resource_id.slice(0, 8)}
+                        </span>
+                        <button
+                          type="button"
+                          className="text-rose-600 hover:underline"
+                          onClick={() => setResourceDraft((d) => d.filter((_, i) => i !== idx))}
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-gray-500">No extra resources assigned.</p>
+                )}
+                <div className="mt-2">
+                  <p className="text-[11px] font-medium text-gray-700">Add supporting staff</p>
+                  <select
+                    className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                    defaultValue=""
+                    onChange={(e) => {
+                      const id = e.target.value.trim();
+                      e.currentTarget.value = "";
+                      if (!id) return;
+                      if (id === assignedStaffId.trim()) return;
+                      if (resourceDraft.some((r) => r.resource_type === "staff" && r.resource_id === id)) return;
+                      setResourceDraft((d) => [...d, { resource_type: "staff", resource_id: id, role_label: null }]);
+                    }}
+                  >
+                    <option value="">Select staff to add…</option>
+                    {clinicalStaffOptions
+                      .filter((s) => canSelectStaffForClinicalPicker(s))
+                      .map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.full_name?.trim() || s.email?.trim() || s.id.slice(0, 8)}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+              <BookingConflictPreview
+                preview={conflictPreview}
+                loading={conflictLoading && !conflictPreview}
+                variant="light"
+              />
+              <NextAvailableBookingSlots
+                tenantId={tenantId}
+                calendarTimezone={displayTz}
+                request={nextSlotsRequest}
+                show={Boolean(conflictPreviewBody) && conflictPreview?.status === "blocked"}
+                onApplySlot={onApplySuggestedSlot}
+                variant="light"
+              />
               <button
                 type="submit"
                 disabled={busy}

@@ -9,12 +9,13 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 
 import {
   buildRoomOverlapContext,
-  findRoomOverlapConflict,
-  findStaffOverlapConflict,
+  findRoomOverlapConflictWithAssignments,
+  findStaffOverlapConflictWithAssignments,
   isStaffEligibleForServiceRules,
   resolveDefaultRoomFromOptions,
   roomPickerDisabledReason,
 } from "./roomAvailabilityCore";
+import { loadBookingResourceAssignmentsOverlapByBooking } from "@/src/lib/bookings/bookingResourceAssignmentsOverlap.server";
 import {
   loadClinicRoomForTenant,
   loadClinicRoomsForTenant,
@@ -40,7 +41,7 @@ export class ServiceStaffEligibilityError extends Error {
   }
 }
 
-async function loadOverlappingBookingsForRange(
+export async function loadOverlappingBookingsForRange(
   tenantId: string,
   startAt: string,
   endAt: string,
@@ -61,7 +62,7 @@ async function loadOverlappingBookingsForRange(
   );
 }
 
-function filterRoomEligibilityForClinic<T extends { clinic_id: string | null; is_active: boolean }>(
+export function filterRoomEligibilityForClinic<T extends { clinic_id: string | null; is_active: boolean }>(
   rows: T[],
   clinicId: string
 ): T[] {
@@ -94,6 +95,12 @@ export async function loadClinicRoomsForPicker(args: {
     loadOverlappingBookingsForRange(tid, args.startAt, args.endAt, client),
   ]);
 
+  const assignmentByBooking = await loadBookingResourceAssignmentsOverlapByBooking(
+    tid,
+    existing.map((b) => b.id),
+    client
+  );
+
   const ctx = buildRoomOverlapContext(rooms);
   const eligibleRoomIds =
     serviceId && eligibility.length > 0
@@ -107,12 +114,13 @@ export async function loadClinicRoomsForPicker(args: {
 
   return rooms.map((room) => {
     const eligible = eligibleRoomIds == null || eligibleRoomIds.has(room.id);
-    const conflict = findRoomOverlapConflict({
+    const conflict = findRoomOverlapConflictWithAssignments({
       candidateRoomId: room.id,
       candidateStartIso: args.startAt,
       candidateEndIso: args.endAt,
       existing,
       ctx,
+      assignmentsByBookingId: assignmentByBooking,
       excludeBookingId: args.bookingId,
     });
     const available = !conflict;
@@ -162,13 +170,19 @@ export async function assertRoomAvailableForBooking(args: {
     loadClinicRoomsForTenant(tid, { clinicId }, client),
     loadOverlappingBookingsForRange(tid, args.startAt, args.endAt, client),
   ]);
+  const assignmentByBooking = await loadBookingResourceAssignmentsOverlapByBooking(
+    tid,
+    existing.map((b) => b.id),
+    client
+  );
   const ctx = buildRoomOverlapContext(rooms);
-  const conflict = findRoomOverlapConflict({
+  const conflict = findRoomOverlapConflictWithAssignments({
     candidateRoomId: roomId,
     candidateStartIso: args.startAt,
     candidateEndIso: args.endAt,
     existing,
     ctx,
+    assignmentsByBookingId: assignmentByBooking,
     excludeBookingId: args.bookingId,
   });
   if (conflict) {
@@ -261,11 +275,17 @@ export async function assertBookingResourceAvailability(args: {
     });
 
     const existing = await loadOverlappingBookingsForRange(tid, args.startAt, args.endAt, client);
-    const staffConflict = findStaffOverlapConflict({
+    const assignmentByBooking = await loadBookingResourceAssignmentsOverlapByBooking(
+      tid,
+      existing.map((b) => b.id),
+      client
+    );
+    const staffConflict = findStaffOverlapConflictWithAssignments({
       candidateStaffId: staffId,
       candidateStartIso: args.startAt,
       candidateEndIso: args.endAt,
       existing,
+      assignmentsByBookingId: assignmentByBooking,
       excludeBookingId: args.bookingId,
     });
     if (staffConflict) {

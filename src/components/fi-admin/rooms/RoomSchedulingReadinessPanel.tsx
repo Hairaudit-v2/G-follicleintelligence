@@ -7,6 +7,7 @@ import type {
   RoomSchedulingReadinessCheck,
   RoomSchedulingReadinessResult,
 } from "@/src/lib/rooms/roomSchedulingReadinessCore";
+import { ClinicBookingSetupTestPanel } from "@/src/components/fi-admin/settings/ClinicBookingSetupTestPanel";
 
 const OVERALL_META: Record<
   OverallReadinessStatus,
@@ -49,11 +50,14 @@ export function RoomSchedulingReadinessPanel({
   readiness,
   variant = "dark",
   className,
+  showBookingSetupTest = true,
 }: {
   tenantId: string;
   readiness: RoomSchedulingReadinessResult;
   variant?: "dark" | "light";
   className?: string;
+  /** When false, hides the read-only “booking setup test” block. */
+  showBookingSetupTest?: boolean;
 }) {
   const meta = OVERALL_META[readiness.overallStatus];
   const OverallIcon = meta.Icon;
@@ -98,6 +102,12 @@ export function RoomSchedulingReadinessPanel({
           <ReadinessRow key={check.key} check={check} isDark={isDark} />
         ))}
       </ul>
+
+      {showBookingSetupTest && readiness.clinicId ? (
+        <div className="mt-4">
+          <ClinicBookingSetupTestPanel tenantId={tenantId} clinicId={readiness.clinicId} variant={variant} />
+        </div>
+      ) : null}
 
       <PerthDefaultSetupInfoBox isDark={isDark} tenantId={tenantId} />
     </section>

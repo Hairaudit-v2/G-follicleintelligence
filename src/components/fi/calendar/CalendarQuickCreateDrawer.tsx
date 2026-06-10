@@ -3,8 +3,14 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { X } from "lucide-react";
 
-import { calendarQuickCreateBookingAction } from "@/lib/actions/fi-calendar-quick-create-actions";
+import { calendarQuickCreateBookingAction, loadServiceResourceRequirementsAction, suggestResourceAssignmentsAction } from "@/lib/actions/fi-calendar-quick-create-actions";
 import { loadRoomPickerOptionsAction } from "@/lib/actions/fi-rooms-actions";
+import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
+import { BookingConflictPreview } from "@/src/components/calendar/BookingConflictPreview";
+import { NextAvailableBookingSlots } from "@/src/components/calendar/NextAvailableBookingSlots";
+import type { BookingConflictPreviewResult } from "@/src/lib/calendar/bookingConflictPreview.server";
+import type { NextAvailableBookingSlot } from "@/src/lib/calendar/findNextAvailableBookingSlots.server";
+import { BOOKING_CONFLICT_PREVIEW_CALM_INCOMPLETE_MESSAGE } from "@/src/lib/calendar/bookingConflictPreviewConstants";
 import { useCalendarToastOptional } from "@/components/calendar/CalendarToast";
 import {
   addUtcMinutesToIso,
@@ -22,7 +28,11 @@ import {
 } from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
-import { quickTemplateDurationMinutes } from "@/src/lib/bookings/servicesCatalog";
+import { quickTemplateDurationMinutes, serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
+import type {
+  FiServiceResourceRequirementRow,
+  SuggestResourceAssignmentsResult,
+} from "@/src/lib/calendar/bookingResourceRequirements.server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import type { RoomPickerOption } from "@/src/lib/rooms/roomTypes";
@@ -145,6 +155,12 @@ export function CalendarQuickCreateDrawer({
   const [selection, setSelection] = useState<AnchorSelection | null>(null);
   const [busy, setBusy] = useState(false);
   const [formErr, setFormErr] = useState<string | null>(null);
+  const [conflictPreview, setConflictPreview] = useState<BookingConflictPreviewResult | null>(null);
+  const [conflictLoading, setConflictLoading] = useState(false);
+
+  const [serviceResourceReqs, setServiceResourceReqs] = useState<FiServiceResourceRequirementRow[]>([]);
+  const [resourceSuggest, setResourceSuggest] = useState<SuggestResourceAssignmentsResult | null>(null);
+  const [resourcePicks, setResourcePicks] = useState<Record<string, string>>({});
 
   const legacyOwnerLabel = useMemo(() => {
     const uid = legacyOwnerUserId.trim();
@@ -189,6 +205,7 @@ export function CalendarQuickCreateDrawer({
     setLeadHits([]);
     setSelection(null);
     setFormErr(null);
+    setResourcePicks({});
     logFiCalendarTimezoneDebug("quick-create-drawer-prefill", {
       clinicTimezone: tz,
       selectedSlotDatetimeLocal: start,
@@ -244,6 +261,46 @@ export function CalendarQuickCreateDrawer({
 
   const tplForRooms = useMemo(() => calendarQuickTemplateById(templateId), [templateId]);
 
+  const catalogService = useMemo(() => {
+    if (!tplForRooms) return null;
+    return serviceForBookingType(services, tplForRooms.bookingType);
+  }, [services, tplForRooms]);
+
+  useEffect(() => {
+    if (!open || !catalogService?.id) {
+      setServiceResourceReqs([]);
+      setResourceSuggest(null);
+      setResourcePicks({});
+      return;
+    }
+    let cancelled = false;
+    void loadServiceResourceRequirementsAction(tenantId.trim(), catalogService.id).then((r) => {
+      if (cancelled) return;
+      setServiceResourceReqs(r.ok ? r.requirements : []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, tenantId, catalogService?.id]);
+
+  useEffect(() => {
+    if (!open || !catalogService?.id || !clinicId.trim() || serviceResourceReqs.length === 0) {
+      if (!serviceResourceReqs.length) setResourceSuggest(null);
+      return;
+    }
+    let cancelled = false;
+    void suggestResourceAssignmentsAction(tenantId.trim(), {
+      clinicId: clinicId.trim(),
+      serviceId: catalogService.id,
+    }).then((r) => {
+      if (cancelled) return;
+      setResourceSuggest(r.ok ? r.suggestions : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, tenantId, clinicId, catalogService?.id, serviceResourceReqs.length]);
+
   useEffect(() => {
     if (!open) return;
     const cid = clinicId.trim();
@@ -285,9 +342,110 @@ export function CalendarQuickCreateDrawer({
     };
   }, [open, tenantId, clinicId, startLocal, endLocal, tz, tplForRooms, templateId, roomId]);
 
+  const calmIncompleteConflictPreview = useMemo(
+    (): BookingConflictPreviewResult => ({
+      status: "warning",
+      messages: [
+        {
+          type: "service",
+          severity: "info",
+          message: BOOKING_CONFLICT_PREVIEW_CALM_INCOMPLETE_MESSAGE,
+        },
+      ],
+    }),
+    []
+  );
+
+  const builtResourceExtras = useMemo(() => {
+    if (!resourceSuggest || serviceResourceReqs.length === 0) return [];
+    const primStaff = assignedStaffId.trim();
+    const primRoom = roomId.trim();
+    const out: { resource_type: "staff" | "room"; resource_id: string; role_label?: string | null }[] = [];
+    for (const req of serviceResourceReqs) {
+      const pick = resourcePicks[req.id]?.trim();
+      if (!pick) continue;
+      if (req.resource_type === "staff_role" || req.resource_type === "staff_member") {
+        if (pick === primStaff) continue;
+        out.push({ resource_type: "staff", resource_id: pick, role_label: req.requirement_label });
+      } else if (req.resource_type === "room_type" || req.resource_type === "room_id") {
+        if (pick === primRoom) continue;
+        out.push({ resource_type: "room", resource_id: pick, role_label: req.requirement_label });
+      }
+    }
+    return out;
+  }, [resourceSuggest, serviceResourceReqs, resourcePicks, assignedStaffId, roomId]);
+
+  const conflictPreviewBody = useMemo(() => {
+    if (!tplForRooms) return null;
+    const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
+    const endIso = fromDatetimeLocalValueInTimezone(endLocal, tz);
+    if (!startIso || !endIso) return null;
+    return {
+      previewIntent: "quick_create" as const,
+      clinicId: clinicId.trim() || null,
+      bookingType: tplForRooms.bookingType,
+      roomId: roomId.trim() || null,
+      staffId: assignedStaffId.trim() || null,
+      startAt: startIso,
+      endAt: endIso,
+      ...(builtResourceExtras.length > 0 ? { extraResourceAssignments: builtResourceExtras } : {}),
+    };
+  }, [assignedStaffId, builtResourceExtras, clinicId, endLocal, roomId, startLocal, tplForRooms, tz]);
+  const debouncedConflictKey = useDebouncedValue(
+    conflictPreviewBody ? JSON.stringify(conflictPreviewBody) : "",
+    350
+  );
+
+  useEffect(() => {
+    if (!open || !debouncedConflictKey) {
+      setConflictPreview(null);
+      setConflictLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setConflictLoading(true);
+    void (async () => {
+      const r = await previewBookingConflictsAction(
+        tenantId.trim(),
+        JSON.parse(debouncedConflictKey) as Record<string, unknown>
+      );
+      if (cancelled) return;
+      setConflictPreview(r.ok ? r.preview : null);
+      setConflictLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, tenantId, debouncedConflictKey]);
+
+  const onApplySuggestedSlot = useCallback(
+    (slot: NextAvailableBookingSlot) => {
+      setStartLocal(toDatetimeLocalValueInTimezone(slot.startAt, tz));
+      setEndLocal(toDatetimeLocalValueInTimezone(slot.endAt, tz));
+      setRoomId(slot.roomId);
+      if (slot.staffId) setAssignedStaffId(slot.staffId);
+    },
+    [tz]
+  );
+
+  const nextSlotsRequest = useMemo(() => {
+    if (!tplForRooms || !clinicId.trim()) return null;
+    const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
+    if (!startIso) return null;
+    return {
+      clinicId: clinicId.trim(),
+      bookingType: tplForRooms.bookingType,
+      staffId: assignedStaffId.trim() || null,
+      roomId: roomId.trim() || null,
+      preferredStartAt: startIso,
+      durationMinutes: quickTemplateDurationMinutes(tplForRooms, services),
+    };
+  }, [assignedStaffId, clinicId, roomId, services, startLocal, tplForRooms, tz]);
+
   const onTemplateChange = useCallback(
     (id: CalendarQuickTemplateId) => {
       setRoomId("");
+      setResourcePicks({});
       setTemplateId(id);
       const startIso = fromDatetimeLocalValueInTimezone(startLocal, tz);
       const t = calendarQuickTemplateById(id);
@@ -428,6 +586,7 @@ export function CalendarQuickCreateDrawer({
         templateId: tpl.id,
         anchor,
         metadata: { template_label: tpl.label },
+        resourceAssignments: builtResourceExtras.length > 0 ? builtResourceExtras : undefined,
       });
       if (!r.ok) {
         setFormErr(r.error);
@@ -728,8 +887,74 @@ export function CalendarQuickCreateDrawer({
                     ) : null}
                   </label>
                 ) : null}
+                {serviceResourceReqs.length > 0 && resourceSuggest ? (
+                  <div className="space-y-2 rounded-lg border border-amber-500/25 bg-amber-950/25 px-2 py-2">
+                    <p className="text-xs font-semibold text-amber-100/95">Required resources</p>
+                    {serviceResourceReqs.map((req) => {
+                      const val = resourcePicks[req.id] ?? "";
+                      if (req.resource_type === "staff_role" || req.resource_type === "staff_member") {
+                        const ids = resourceSuggest.staffOptionsByRequirementId[req.id] ?? [];
+                        return (
+                          <label key={req.id} className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                            {req.requirement_label}
+                            {!req.is_required ? <span className="text-slate-500"> (optional)</span> : null}
+                            <select
+                              className={inputClass}
+                              value={val}
+                              onChange={(e) => setResourcePicks((p) => ({ ...p, [req.id]: e.target.value }))}
+                            >
+                              <option value="">—</option>
+                              {ids.map((sid) => {
+                                const st = staffDirectory.find((s) => s.id === sid);
+                                return (
+                                  <option key={sid} value={sid}>
+                                    {st?.full_name?.trim() || sid.slice(0, 8)}
+                                  </option>
+                                );
+                              })}
+                            </select>
+                          </label>
+                        );
+                      }
+                      const rooms = resourceSuggest.roomOptionsByRequirementId[req.id] ?? [];
+                      return (
+                        <label key={req.id} className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                          {req.requirement_label}
+                          {!req.is_required ? <span className="text-slate-500"> (optional)</span> : null}
+                          <select
+                            className={inputClass}
+                            value={val}
+                            onChange={(e) => setResourcePicks((p) => ({ ...p, [req.id]: e.target.value }))}
+                          >
+                            <option value="">—</option>
+                            {rooms.map((r) => (
+                              <option key={r.id} value={r.id}>
+                                {r.display_name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </div>
             </details>
+
+            <BookingConflictPreview
+              preview={conflictPreviewBody ? conflictPreview : calmIncompleteConflictPreview}
+              loading={Boolean(conflictPreviewBody) && conflictLoading && !conflictPreview}
+              variant="dark"
+            />
+
+            <NextAvailableBookingSlots
+              tenantId={tenantId}
+              calendarTimezone={tz}
+              request={nextSlotsRequest}
+              show={Boolean(conflictPreviewBody) && conflictPreview?.status === "blocked"}
+              onApplySlot={onApplySuggestedSlot}
+              variant="dark"
+            />
 
             {formErr ? <p className="text-sm text-rose-300">{formErr}</p> : null}
           </div>

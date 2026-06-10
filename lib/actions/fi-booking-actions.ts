@@ -18,6 +18,10 @@ import type { AppointmentSlideOverPayload } from "@/src/lib/bookings/appointment
 import { assertAppointmentProcedureStaffAssignments } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { cancelBooking, completeBooking, createBooking, updateBooking } from "@/src/lib/bookings/server";
+import {
+  loadBookingResourceAssignments,
+  type FiBookingResourceAssignmentRow,
+} from "@/src/lib/calendar/bookingResourceRequirements.server";
 import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmLeadById, appendCrmActivityEvent } from "@/src/lib/crm/server";
 import { z, ZodError } from "zod";
@@ -62,6 +66,7 @@ export async function createBookingAction(
       timezone: parsed.timezone ?? null,
       location: parsed.location ?? null,
       metadata: parsed.metadata ?? {},
+      resourceAssignments: parsed.resourceAssignments,
       createdByUserId,
     });
     return { ok: true, booking };
@@ -99,6 +104,7 @@ export async function updateBookingAction(
       timezone: parsed.timezone,
       location: parsed.location,
       metadata: parsed.metadata ?? undefined,
+      resourceAssignments: parsed.resourceAssignments ?? undefined,
     });
     return { ok: true, booking };
   } catch (e) {
@@ -293,6 +299,26 @@ export async function sendAppointmentInstructionsAction(
       metadata,
     });
     return { ok: true, booking };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function loadBookingResourceAssignmentsAction(
+  tenantId: string,
+  bookingId: string,
+  adminKey?: string
+): Promise<
+  | { ok: true; assignments: FiBookingResourceAssignmentRow[] }
+  | { ok: false; error: string }
+> {
+  try {
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
+    const assignments = await loadBookingResourceAssignments({
+      tenantId: tenantId.trim(),
+      bookingId: bookingId.trim(),
+    });
+    return { ok: true, assignments };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

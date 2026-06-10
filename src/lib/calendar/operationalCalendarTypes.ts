@@ -23,6 +23,10 @@ export type OperationalCalendarBookingDisplay = {
   patientPhone?: string | null;
   /** Assigned room display name when `room_id` is set. */
   roomLabel?: string | null;
+  /** Compact multi-room line from `fi_booking_resource_assignments` (includes primary label). */
+  resourceRoomLine?: string | null;
+  /** Compact team line (primary + assignment staff). */
+  resourceTeamLine?: string | null;
 };
 
 export type OperationalCalendarResourceColumn = {
