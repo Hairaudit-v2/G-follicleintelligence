@@ -18,6 +18,8 @@ function mapRequest(row: Record<string, unknown>): PathologyRequestRow {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
     patient_id: String(row.patient_id),
+    consultation_id: row.consultation_id == null ? null : String(row.consultation_id),
+    form_instance_id: row.form_instance_id == null ? null : String(row.form_instance_id),
     request_date: String(row.request_date),
     doctor_user_id: row.doctor_user_id != null ? String(row.doctor_user_id) : null,
     template_used: String(row.template_used) as PathologyRequestRow["template_used"],

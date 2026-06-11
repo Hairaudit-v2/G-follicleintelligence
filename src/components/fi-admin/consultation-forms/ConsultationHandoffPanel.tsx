@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
   createConsultationFollowUpTaskFromSummaryAction,
@@ -23,6 +23,18 @@ import type {
 } from "@/src/lib/consultationForms/handoff/consultationHandoffTypes";
 
 type HandoffKey = "followUp" | "quote" | "pathology" | "surgery";
+
+type HandoffCardModel = {
+  key: HandoffKey;
+  title: string;
+  why: string;
+  requirements: ReactNode;
+  blocked: boolean;
+  blockedDetail: string | null;
+  cta: string;
+  onClick: () => void;
+  result: ConsultationHandoffMutationResult | null;
+};
 
 function surgeryBlockReason(summary: ConsultationCompletionSummary, caseId: string | null | undefined): string | null {
   const cid = caseId?.trim();
@@ -140,8 +152,7 @@ export function ConsultationHandoffPanel({
 
   const body = useMemo(() => ({ formInstanceId: fid }), [fid]);
 
-  const cards = useMemo(
-    () => [
+  const cards = useMemo((): HandoffCardModel[] => [
       {
         key: "followUp" as const,
         title: "Follow-up task",
@@ -161,8 +172,9 @@ export function ConsultationHandoffPanel({
             ? null
             : null,
         cta: "Create follow-up task",
-        onClick: () =>
-          void run("followUp", () => createConsultationFollowUpTaskFromSummaryAction(tid, cid, body)),
+        onClick: (): void => {
+          void run("followUp", () => createConsultationFollowUpTaskFromSummaryAction(tid, cid, body));
+        },
         result: followUpRes,
       },
       {
@@ -179,7 +191,9 @@ export function ConsultationHandoffPanel({
           ? "Link a CRM lead or a case on the consultation before creating a quote draft."
           : null,
         cta: "Create quote draft",
-        onClick: () => void run("quote", () => createConsultationQuoteDraftFromSummaryAction(tid, cid, body)),
+        onClick: (): void => {
+          void run("quote", () => createConsultationQuoteDraftFromSummaryAction(tid, cid, body));
+        },
         result: quoteRes,
       },
       {
@@ -201,8 +215,9 @@ export function ConsultationHandoffPanel({
             ? null
             : null,
         cta: "Prepare pathology request",
-        onClick: () =>
-          void run("pathology", () => createConsultationPathologyRecommendationFromSummaryAction(tid, cid, body)),
+        onClick: (): void => {
+          void run("pathology", () => createConsultationPathologyRecommendationFromSummaryAction(tid, cid, body));
+        },
         result: pathologyRes,
       },
       {
@@ -218,8 +233,9 @@ export function ConsultationHandoffPanel({
         blocked: !surgeryEligible,
         blockedDetail: surgeryReason,
         cta: "Send to SurgeryOS planning",
-        onClick: () =>
-          void run("surgery", () => createSurgeryPlanningDraftFromConsultationSummaryAction(tid, cid, body)),
+        onClick: (): void => {
+          void run("surgery", () => createSurgeryPlanningDraftFromConsultationSummaryAction(tid, cid, body));
+        },
         result: surgeryRes,
       },
     ],
