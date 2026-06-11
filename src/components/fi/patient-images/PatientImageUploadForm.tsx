@@ -91,6 +91,9 @@ export function PatientImageUploadForm({
             ))}
           </select>
         </label>
+        <label className="block text-xs text-gray-700">
+          Image category
+          <select name="image_category" defaultValue="scalp" className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm">
             {PATIENT_IMAGE_CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}
