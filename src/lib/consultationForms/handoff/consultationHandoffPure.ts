@@ -71,6 +71,24 @@ export function pathologyHandoffRecommended(summary: ConsultationCompletionSumma
   return summary.pathologyRecommended;
 }
 
+/**
+ * Auto-orchestration quote policy: skip creating draft quotes unless the summary shows clear
+ * pricing / treatment intent, or the caller explicitly enables `quote_draft` in `enabledHandoffs`.
+ */
+export function quoteDraftAutomationIntentEligible(summary: ConsultationCompletionSummary): boolean {
+  if (
+    summary.outcomeType === "proceed_surgery" ||
+    summary.outcomeType === "proceed_prp" ||
+    summary.outcomeType === "proceed_exosomes"
+  ) {
+    return true;
+  }
+  if (summary.quoteNotes.trim().length > 0) return true;
+  if (summary.recommendedProcedure.trim().length > 0) return true;
+  if (summary.recommendedTreatments.length > 0) return true;
+  return false;
+}
+
 export function surgeryPlanningHandoffEligible(summary: ConsultationCompletionSummary, caseId: string | null): boolean {
   if (!caseId?.trim()) return false;
   if (summary.outcomeType !== "proceed_surgery") return false;

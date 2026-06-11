@@ -8,6 +8,7 @@ import {
   followUpTaskTitleForOutcome,
   handoffIdempotencyMetadata,
   pathologyTemplateForOutcome,
+  quoteDraftAutomationIntentEligible,
   quoteDraftTitle,
   surgeryPlanningHandoffEligible,
 } from "./consultationHandoffPure";
@@ -100,6 +101,16 @@ describe("consultationHandoffPure", () => {
       surgeryPlanningHandoffEligible(baseSummary({ outcomeType: "proceed_surgery", recommendedProcedure: "", recommendedZones: ["crown"] }), "case-1"),
       true
     );
+  });
+
+  it("quoteDraftAutomationIntentEligible detects quote/treatment intent signals", () => {
+    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "medical_management" })), false);
+    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "proceed_surgery" })), true);
+    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ outcomeType: "proceed_prp" })), true);
+    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ quoteNotes: "  " })), false);
+    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ quoteNotes: "Pricing TBD" })), true);
+    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ recommendedProcedure: "FUE" })), true);
+    assert.equal(quoteDraftAutomationIntentEligible(baseSummary({ recommendedTreatments: ["finasteride"] })), true);
   });
 
   it("handoffIdempotencyMetadata builder is stable for JSON containment queries", () => {

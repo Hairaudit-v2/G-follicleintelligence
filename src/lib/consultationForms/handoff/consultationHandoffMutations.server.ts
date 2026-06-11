@@ -35,7 +35,7 @@ function parseCompletionSummary(raw: unknown): ConsultationCompletionSummary | n
   return o as unknown as ConsultationCompletionSummary;
 }
 
-async function requireLockedHandoffContext(
+export async function requireLockedHandoffContext(
   tenantId: string,
   consultationId: string,
   formInstanceId: string
