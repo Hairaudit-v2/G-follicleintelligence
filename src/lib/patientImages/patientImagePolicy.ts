@@ -1,3 +1,5 @@
+import type { ImagingAnatomicalRegion, ImagingLibraryAxis } from "@/src/lib/imagingOs/imagingOsConstants";
+import { IMAGING_ANATOMICAL_REGIONS, IMAGING_LIBRARY_AXES } from "@/src/lib/imagingOs/imagingOsConstants";
 import type { PatientImageCategory, PatientImageStatus } from "./patientImageTypes";
 
 export const PATIENT_IMAGES_BUCKET_DEFAULT = "patient-images";
@@ -16,6 +18,26 @@ export const PATIENT_IMAGE_CATEGORIES: readonly PatientImageCategory[] = [
 ] as const;
 
 export const PATIENT_IMAGE_STATUSES: readonly PatientImageStatus[] = ["active", "archived"] as const;
+
+export function isImagingLibraryAxis(value: unknown): value is ImagingLibraryAxis {
+  return typeof value === "string" && (IMAGING_LIBRARY_AXES as readonly string[]).includes(value);
+}
+
+export function normalizeImagingLibraryAxis(raw: unknown): ImagingLibraryAxis {
+  if (isImagingLibraryAxis(raw)) return raw;
+  return "general_clinical";
+}
+
+export function isImagingAnatomicalRegion(value: unknown): value is ImagingAnatomicalRegion {
+  return typeof value === "string" && (IMAGING_ANATOMICAL_REGIONS as readonly string[]).includes(value);
+}
+
+export function normalizeImagingAnatomicalRegion(raw: unknown): ImagingAnatomicalRegion | null {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+  return isImagingAnatomicalRegion(s) ? s : null;
+}
 
 const CATEGORY_SET = new Set<string>(PATIENT_IMAGE_CATEGORIES);
 const STATUS_SET = new Set<string>(PATIENT_IMAGE_STATUSES);

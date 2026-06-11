@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
+import { IMAGING_ANATOMICAL_REGIONS, IMAGING_LIBRARY_AXES } from "@/src/lib/imagingOs/imagingOsConstants";
 import { PATIENT_IMAGE_CATEGORIES } from "@/src/lib/patientImages/patientImagePolicy";
 import type { PatientProfileBookingCard, PatientProfileCaseCard, PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 
@@ -60,11 +61,36 @@ export function PatientImageUploadForm({
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="block text-xs text-gray-700">
           File (max 20 MB, JPEG/PNG/WebP/HEIC)
-          <input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" required className="mt-1 block w-full text-sm" />
+          <input
+            name="file"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+            capture="environment"
+            required
+            className="mt-1 block w-full text-sm"
+          />
         </label>
         <label className="block text-xs text-gray-700">
-          Category
-          <select name="image_category" defaultValue="other" className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm">
+          Imaging library axis
+          <select name="imaging_library_axis" defaultValue="general_clinical" className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm">
+            {IMAGING_LIBRARY_AXES.map((a) => (
+              <option key={a} value={a}>
+                {a.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-xs text-gray-700">
+          Anatomical region (optional)
+          <select name="anatomical_region" defaultValue="" className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm">
+            <option value="">—</option>
+            {IMAGING_ANATOMICAL_REGIONS.map((r) => (
+              <option key={r} value={r}>
+                {r.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+        </label>
             {PATIENT_IMAGE_CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}

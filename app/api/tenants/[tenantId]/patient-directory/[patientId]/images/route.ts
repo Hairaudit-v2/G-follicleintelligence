@@ -32,6 +32,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     const caseId = form.get("case_id");
     const bookingId = form.get("booking_id");
     const leadId = form.get("lead_id");
+    const consultationId = form.get("consultation_id");
+    const imagingLibraryAxis = form.get("imaging_library_axis");
+    const clinicId = form.get("clinic_id");
+    const capturedByStaffId = form.get("captured_by_staff_id");
+    const deviceType = form.get("device_type");
+    const anatomicalRegion = form.get("anatomical_region");
+    const visitType = form.get("visit_type");
+    const followUpInterval = form.get("follow_up_interval");
+    const imagingProtocolTemplateSlug = form.get("imaging_protocol_template_slug");
+    const imagingProtocolSlotSlug = form.get("imaging_protocol_slot_slug");
     const metadataRaw = form.get("metadata");
 
     let metadata: unknown = {};
@@ -55,6 +65,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       caseId: caseId == null ? null : String(caseId),
       bookingId: bookingId == null ? null : String(bookingId),
       leadId: leadId == null ? null : String(leadId),
+      consultationId: consultationId == null ? null : String(consultationId),
+      imagingLibraryAxis,
+      clinicId: clinicId == null ? null : String(clinicId),
+      capturedByStaffId: capturedByStaffId == null ? null : String(capturedByStaffId),
+      deviceType: deviceType == null ? null : String(deviceType),
+      anatomicalRegion,
+      visitType: visitType == null ? null : String(visitType),
+      followUpInterval: followUpInterval == null ? null : String(followUpInterval),
+      imagingProtocolTemplateSlug: imagingProtocolTemplateSlug == null ? null : String(imagingProtocolTemplateSlug),
+      imagingProtocolSlotSlug: imagingProtocolSlotSlug == null ? null : String(imagingProtocolSlotSlug),
       actingUserId,
     });
 

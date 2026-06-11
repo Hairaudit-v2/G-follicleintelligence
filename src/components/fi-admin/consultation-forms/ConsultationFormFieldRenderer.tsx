@@ -1,0 +1,349 @@
+"use client";
+
+import { BodyAreaMapAnnotationsSummary, BodyAreaMapField } from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
+import { ClinicalNoteField, ClinicalNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/ClinicalNoteField";
+import { VoiceNoteField, VoiceNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/VoiceNoteField";
+import { FiCard } from "@/src/components/fi-design/FiCard";
+import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
+import { optionsForField } from "@/src/lib/consultationForms/consultationFormOptionSets";
+import type { ConsultationFormField, ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
+
+function readStringArray(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((x) => String(x)).filter(Boolean);
+}
+
+function PlaceholderCard({ title, body }: { title: string; body: string }) {
+  return (
+    <FiCard className="border border-dashed border-slate-300 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-900/40">
+      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{title}</p>
+      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{body}</p>
+    </FiCard>
+  );
+}
+
+export function ConsultationFormFieldRenderer({
+  field,
+  values,
+  value,
+  onChange,
+  disabled,
+  persistence = null,
+}: {
+  field: ConsultationFormField;
+  values: Record<string, unknown>;
+  value: unknown;
+  onChange: (next: unknown) => void;
+  disabled: boolean;
+  persistence?: ConsultationFormPersistenceContext | null;
+}) {
+  if (!evaluateConsultationFormCondition(field.showWhen, values)) {
+    return null;
+  }
+
+  const opts = optionsForField(field);
+  const commonLabel = (
+    <label className="block text-sm font-medium text-slate-800 dark:text-slate-100">
+      {field.label}
+      {field.required ? <span className="text-red-600"> *</span> : null}
+    </label>
+  );
+
+  const description =
+    field.description?.trim() ? (
+      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{field.description}</p>
+    ) : null;
+
+  switch (field.type) {
+    case "text":
+      return (
+        <div className="space-y-1">
+          {commonLabel}
+          {description}
+          <input
+            type="text"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            value={typeof value === "string" ? value : value == null ? "" : String(value)}
+            placeholder={field.placeholder}
+            disabled={disabled}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      );
+    case "textarea":
+      return (
+        <div className="space-y-1">
+          {commonLabel}
+          {description}
+          <textarea
+            className="min-h-[88px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            value={typeof value === "string" ? value : value == null ? "" : String(value)}
+            placeholder={field.placeholder}
+            disabled={disabled}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      );
+    case "number":
+      return (
+        <div className="space-y-1">
+          {commonLabel}
+          {description}
+          <input
+            type="number"
+            className="w-full max-w-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            value={
+              typeof value === "number" && !Number.isNaN(value)
+                ? String(value)
+                : typeof value === "string" && value.trim() !== ""
+                  ? value
+                  : ""
+            }
+            min={field.min}
+            max={field.max}
+            step={field.step ?? "any"}
+            disabled={disabled}
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (raw === "") {
+                onChange(null);
+                return;
+              }
+              const n = Number.parseFloat(raw);
+              onChange(Number.isNaN(n) ? null : n);
+            }}
+          />
+        </div>
+      );
+    case "date":
+      return (
+        <div className="space-y-1">
+          {commonLabel}
+          {description}
+          <input
+            type="date"
+            className="w-full max-w-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            value={typeof value === "string" ? value : ""}
+            disabled={disabled}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      );
+    case "boolean":
+      return (
+        <div className="flex items-start gap-2">
+          <input
+            id={`cf-${field.id}`}
+            type="checkbox"
+            className="mt-1 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 disabled:opacity-60"
+            checked={Boolean(value)}
+            disabled={disabled}
+            onChange={(e) => onChange(e.target.checked)}
+          />
+          <div>
+            <label htmlFor={`cf-${field.id}`} className="text-sm font-medium text-slate-800 dark:text-slate-100">
+              {field.label}
+              {field.required ? <span className="text-red-600"> *</span> : null}
+            </label>
+            {description}
+          </div>
+        </div>
+      );
+    case "select":
+      return (
+        <div className="space-y-1">
+          {commonLabel}
+          {description}
+          <select
+            className="w-full max-w-lg rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            value={typeof value === "string" ? value : ""}
+            disabled={disabled}
+            onChange={(e) => onChange(e.target.value)}
+          >
+            <option value="">— Select —</option>
+            {opts.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    case "multi_select":
+    case "checkbox_group": {
+      const selected = new Set(readStringArray(value));
+      return (
+        <fieldset className="space-y-2" disabled={disabled}>
+          <legend className="text-sm font-medium text-slate-800 dark:text-slate-100">
+            {field.label}
+            {field.required ? <span className="text-red-600"> *</span> : null}
+          </legend>
+          {description}
+          <div className="grid gap-2 sm:grid-cols-2">
+            {opts.map((o) => {
+              const checked = selected.has(o.value);
+              return (
+                <label key={o.value} className="flex items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                    checked={checked}
+                    disabled={disabled}
+                    onChange={() => {
+                      const next = new Set(selected);
+                      if (checked) next.delete(o.value);
+                      else next.add(o.value);
+                      onChange(Array.from(next));
+                    }}
+                  />
+                  {o.label}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      );
+    }
+    case "radio":
+      return (
+        <fieldset className="space-y-2" disabled={disabled}>
+          <legend className="text-sm font-medium text-slate-800 dark:text-slate-100">
+            {field.label}
+            {field.required ? <span className="text-red-600"> *</span> : null}
+          </legend>
+          {description}
+          <div className="flex flex-col gap-2">
+            {opts.map((o) => (
+              <label key={o.value} className="flex items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+                <input
+                  type="radio"
+                  name={`cf-radio-${field.id}`}
+                  className="h-4 w-4 border-slate-300 text-sky-600 focus:ring-sky-500"
+                  value={o.value}
+                  checked={value === o.value}
+                  disabled={disabled}
+                  onChange={() => onChange(o.value)}
+                />
+                {o.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      );
+    case "body_area_map":
+      if (disabled) {
+        return (
+          <div className="space-y-2">
+            {commonLabel}
+            {description}
+            <BodyAreaMapAnnotationsSummary
+              fieldLabel=""
+              value={value}
+              allowedViews={field.bodyAreaMapViews}
+            />
+          </div>
+        );
+      }
+      return (
+        <BodyAreaMapField
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          disabled={disabled}
+          allowedViews={field.bodyAreaMapViews}
+          onChange={(next) => onChange(next)}
+        />
+      );
+    case "voice_note":
+      if (disabled) {
+        return (
+          <div className="space-y-2">
+            {description}
+            <VoiceNoteReadOnlySummary label={field.label} value={value} />
+          </div>
+        );
+      }
+      return (
+        <VoiceNoteField
+          fieldId={field.id}
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          disabled={disabled}
+          persistence={persistence}
+          onChange={(next) => onChange(next)}
+        />
+      );
+    case "image_upload":
+      return (
+        <div className="space-y-2">
+          {commonLabel}
+          {description}
+          <PlaceholderCard
+            title="Image upload (Stage 2+)"
+            body="Uploads will create fi_patient_images rows linked to this consultation / form instance."
+          />
+        </div>
+      );
+    case "clinical_note":
+      if (disabled) {
+        return (
+          <div className="space-y-2">
+            {description}
+            <ClinicalNoteReadOnlySummary label={field.label} value={value} />
+          </div>
+        );
+      }
+      return (
+        <ClinicalNoteField
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          disabled={disabled}
+          onChange={(next) => onChange(next)}
+        />
+      );
+    case "diagnosis_picker":
+      return (
+        <div className="space-y-2">
+          {commonLabel}
+          {description}
+          <PlaceholderCard
+            title="Diagnosis picker (Stage 2+)"
+            body="Searchable diagnosis codes / impressions will be wired here."
+          />
+        </div>
+      );
+    case "treatment_recommendation":
+      return (
+        <div className="space-y-2">
+          {commonLabel}
+          {description}
+          <PlaceholderCard
+            title="Treatment recommendation (Stage 2+)"
+            body="Procedure bundles and medical therapy suggestions will render here."
+          />
+        </div>
+      );
+    case "quote_builder":
+      return (
+        <div className="space-y-2">
+          {commonLabel}
+          {description}
+          <PlaceholderCard
+            title="Quote builder (Stage 2+)"
+            body="Line items, templates, and fi_crm_quotes linkage will replace this placeholder."
+          />
+        </div>
+      );
+    default:
+      return (
+        <p className="text-xs text-amber-800">
+          Unsupported field type: <code>{field.type}</code>
+        </p>
+      );
+  }
+}

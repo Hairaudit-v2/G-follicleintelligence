@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   assertPatientImageMetadataObject,
+  isImagingLibraryAxis,
   isPatientImageCategory,
   PATIENT_IMAGE_ARCHIVE_REASON_MAX,
   PATIENT_IMAGE_CAPTION_MAX,
@@ -47,17 +48,34 @@ export const patientImagePatchBodySchema = z
     caption: boundedOptString(PATIENT_IMAGE_CAPTION_MAX, "caption").nullable().optional(),
     taken_at: z.union([z.string(), z.null()]).optional(),
     metadata: jsonObjectSchema,
+    imaging_library_axis: z.string().optional(),
+    clinic_id: z.union([z.string().uuid(), z.null()]).optional(),
+    captured_by_staff_id: z.union([z.string().uuid(), z.null()]).optional(),
+    device_type: boundedOptString(160, "device_type").nullable().optional(),
+    anatomical_region: z.union([z.string(), z.null()]).optional(),
+    visit_type: boundedOptString(160, "visit_type").nullable().optional(),
+    follow_up_interval: boundedOptString(64, "follow_up_interval").nullable().optional(),
+    imaging_protocol_template_slug: boundedOptString(128, "imaging_protocol_template_slug").nullable().optional(),
+    imaging_protocol_slot_slug: boundedOptString(128, "imaging_protocol_slot_slug").nullable().optional(),
+    consultation_id: z.union([z.string().uuid(), z.null()]).optional(),
   })
   .strict()
   .superRefine((b, ctx) => {
     if (b.image_category !== undefined && !isPatientImageCategory(b.image_category)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid image_category.", path: ["image_category"] });
     }
+    if (b.imaging_library_axis !== undefined && !isImagingLibraryAxis(b.imaging_library_axis)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid imaging_library_axis.",
+        path: ["imaging_library_axis"],
+      });
+    }
     const keys = Object.keys(b).filter((k) => k !== "adminKey");
     if (keys.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Provide at least one of image_category, caption, taken_at, or metadata.",
+        message: "Provide at least one field to update.",
       });
     }
   });

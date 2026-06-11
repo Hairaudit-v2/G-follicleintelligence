@@ -1,0 +1,455 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+
+import { cn } from "@/lib/utils";
+import { FiCard } from "@/src/components/fi-design/FiCard";
+import {
+  BODY_AREA_MAP_LABEL_OPTIONS,
+  BODY_AREA_MAP_SEVERITY_OPTIONS,
+  BODY_AREA_MAP_TAG_OPTIONS,
+  BODY_AREA_MAP_VIEWS,
+  BODY_AREA_MAP_VIEW_LABELS,
+  type BodyAreaMapAnnotation,
+  type BodyAreaMapSeverity,
+  type BodyAreaMapValue,
+  type BodyAreaMapViewId,
+  labelDisplayForBodyAreaMap,
+  normalizeBodyAreaMapValue,
+  viewDisplayForBodyAreaMap,
+} from "@/src/lib/consultationForms/bodyAreaMapModel";
+
+function WireframeSvg({ view }: { view: BodyAreaMapViewId }) {
+  const common = "fill-none stroke-current stroke-[1.25] text-slate-500 dark:text-slate-400";
+  switch (view) {
+    case "frontal_hairline":
+      return (
+        <g className={common}>
+          <ellipse cx="50" cy="58" rx="28" ry="34" />
+          <path d="M 22 52 Q 50 28 78 52" />
+          <path d="M 30 48 Q 50 38 70 48" strokeDasharray="2 2" opacity="0.7" />
+        </g>
+      );
+    case "top_scalp":
+      return (
+        <g className={common}>
+          <ellipse cx="50" cy="50" rx="36" ry="28" />
+          <ellipse cx="50" cy="50" rx="22" ry="16" opacity="0.6" />
+          <path d="M 50 22 L 50 78" strokeDasharray="3 3" opacity="0.5" />
+          <path d="M 14 50 L 86 50" strokeDasharray="3 3" opacity="0.5" />
+        </g>
+      );
+    case "crown":
+      return (
+        <g className={common}>
+          <circle cx="50" cy="50" r="32" />
+          <path d="M 50 18 Q 78 50 50 82 Q 22 50 50 18" opacity="0.7" />
+          <circle cx="50" cy="50" r="6" strokeDasharray="2 2" />
+        </g>
+      );
+    case "donor_back":
+      return (
+        <g className={common}>
+          <path d="M 50 18 Q 78 40 76 70 Q 50 88 24 70 Q 22 40 50 18" />
+          <path d="M 38 32 Q 50 26 62 32" />
+          <path d="M 34 55 L 66 55" strokeDasharray="2 2" opacity="0.6" />
+        </g>
+      );
+    case "beard_face":
+      return (
+        <g className={common}>
+          <ellipse cx="50" cy="48" rx="26" ry="32" />
+          <path d="M 28 52 Q 50 78 72 52" />
+          <path d="M 36 58 Q 50 72 64 58" opacity="0.7" />
+        </g>
+      );
+    case "eyebrows":
+      return (
+        <g className={common}>
+          <ellipse cx="50" cy="52" rx="30" ry="26" />
+          <path d="M 22 44 Q 34 36 46 44" />
+          <path d="M 54 44 Q 66 36 78 44" />
+          <path d="M 24 48 L 46 48" strokeWidth="1.8" />
+          <path d="M 54 48 L 76 48" strokeWidth="1.8" />
+        </g>
+      );
+    default:
+      return null;
+  }
+}
+
+function useAllowedViews(allowed?: readonly BodyAreaMapViewId[]): BodyAreaMapViewId[] {
+  return useMemo(() => {
+    if (!allowed?.length) return [...BODY_AREA_MAP_VIEWS];
+    const set = new Set(BODY_AREA_MAP_VIEWS);
+    return allowed.filter((v): v is BodyAreaMapViewId => set.has(v));
+  }, [allowed]);
+}
+
+export function BodyAreaMapField({
+  label,
+  description,
+  required,
+  value,
+  onChange,
+  disabled,
+  allowedViews: allowedViewsProp,
+}: {
+  label: string;
+  description?: string | null;
+  required?: boolean;
+  value: unknown;
+  onChange: (next: BodyAreaMapValue) => void;
+  disabled: boolean;
+  allowedViews?: readonly BodyAreaMapViewId[];
+}) {
+  const allowedViews = useAllowedViews(allowedViewsProp);
+  const normalized = useMemo(
+    () => normalizeBodyAreaMapValue(value, allowedViews),
+    [value, allowedViews]
+  );
+
+  const [activeView, setActiveView] = useState<BodyAreaMapViewId>(() => {
+    const n = normalizeBodyAreaMapValue(value, allowedViews);
+    const v = n.view;
+    return allowedViews.includes(v) ? v : allowedViews[0] ?? "frontal_hairline";
+  });
+
+  useEffect(() => {
+    if (allowedViews.includes(normalized.view)) setActiveView(normalized.view);
+  }, [normalized.view, allowedViews]);
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
+  const countsByView = useMemo(() => {
+    const m = new Map<BodyAreaMapViewId, number>();
+    for (const v of allowedViews) m.set(v, 0);
+    for (const a of normalized.annotations) {
+      m.set(a.view, (m.get(a.view) ?? 0) + 1);
+    }
+    return m;
+  }, [normalized.annotations, allowedViews]);
+
+  const markersForActive = useMemo(
+    () => normalized.annotations.filter((a) => a.view === activeView),
+    [normalized.annotations, activeView]
+  );
+
+  const selected = useMemo(
+    () => normalized.annotations.find((a) => a.id === selectedId) ?? null,
+    [normalized.annotations, selectedId]
+  );
+
+  const commit = useCallback(
+    (next: BodyAreaMapValue) => {
+      onChange(next);
+    },
+    [onChange]
+  );
+
+  const setView = useCallback(
+    (v: BodyAreaMapViewId) => {
+      setActiveView(v);
+      setSelectedId(null);
+      commit({ ...normalized, view: v });
+    },
+    [commit, normalized]
+  );
+
+  const addMarker = useCallback(
+    (xPct: number, yPct: number) => {
+      if (disabled) return;
+      const id = (() => {
+        try {
+          const c = globalThis.crypto;
+          if (c?.randomUUID) return c.randomUUID();
+        } catch {
+          /* ignore */
+        }
+        return `ann_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      })();
+      const nextAnn: BodyAreaMapAnnotation = {
+        id,
+        view: activeView,
+        x: xPct,
+        y: yPct,
+        label: BODY_AREA_MAP_LABEL_OPTIONS[0]?.value ?? "hairline_recession",
+        severity: "not_assessed",
+        tags: [],
+        notes: "",
+        createdAt: new Date().toISOString(),
+      };
+      commit({
+        view: activeView,
+        annotations: [...normalized.annotations, nextAnn],
+      });
+      setSelectedId(id);
+    },
+    [activeView, commit, disabled, normalized.annotations]
+  );
+
+  const onSvgPointerDown = useCallback(
+    (e: PointerEvent<SVGSVGElement>) => {
+      if (disabled) return;
+      const el = svgRef.current;
+      if (!el) return;
+      const t = e.target as Element | null;
+      if (t?.closest?.("[data-annotation-marker]")) return;
+
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+      const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+      addMarker(Math.min(100, Math.max(0, xPct)), Math.min(100, Math.max(0, yPct)));
+    },
+    [addMarker, disabled]
+  );
+
+  const updateSelected = useCallback(
+    (patch: Partial<BodyAreaMapAnnotation>) => {
+      if (!selectedId) return;
+      commit({
+        ...normalized,
+        annotations: normalized.annotations.map((a) => (a.id === selectedId ? { ...a, ...patch } : a)),
+      });
+    },
+    [commit, normalized, selectedId]
+  );
+
+  const deleteSelected = useCallback(() => {
+    if (!selectedId) return;
+    const next = normalized.annotations.filter((a) => a.id !== selectedId);
+    commit({ ...normalized, annotations: next });
+    setSelectedId(null);
+  }, [commit, normalized, selectedId]);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
+          {label}
+          {required ? <span className="text-red-600"> *</span> : null}
+        </div>
+        {description?.trim() ? (
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>
+        ) : null}
+      </div>
+
+      <div
+        role="tablist"
+        aria-label="Wireframe view"
+        className="flex flex-wrap gap-2"
+      >
+        {allowedViews.map((v) => {
+          const count = countsByView.get(v) ?? 0;
+          const active = v === activeView;
+          return (
+            <button
+              key={v}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setView(v)}
+              className={cn(
+                "min-h-[44px] min-w-[44px] touch-manipulation rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
+                active
+                  ? "border-sky-500 bg-sky-50 text-sky-950 dark:border-sky-400 dark:bg-sky-950/50 dark:text-sky-50"
+                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-500"
+              )}
+            >
+              <span className="block leading-tight">{BODY_AREA_MAP_VIEW_LABELS[v]}</span>
+              <span className="mt-0.5 block text-xs font-normal text-slate-500 dark:text-slate-400">
+                {count} marker{count === 1 ? "" : "s"}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <FiCard className="overflow-hidden border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+        <svg
+          ref={svgRef}
+          viewBox="0 0 100 100"
+          className={cn(
+            "aspect-square w-full max-w-md select-none rounded-lg bg-white dark:bg-slate-950",
+            disabled ? "cursor-not-allowed opacity-70" : "cursor-crosshair"
+          )}
+          onPointerDown={onSvgPointerDown}
+          role="img"
+          aria-label={`Wireframe: ${viewDisplayForBodyAreaMap(activeView)}. Tap to add a marker.`}
+        >
+          <rect width="100" height="100" className="fill-white dark:fill-slate-950" />
+          <WireframeSvg view={activeView} />
+          {markersForActive.map((a) => {
+            const sel = a.id === selectedId;
+            return (
+              <g
+                key={a.id}
+                data-annotation-marker
+                transform={`translate(${a.x},${a.y})`}
+                className="cursor-pointer"
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(a.id);
+                }}
+              >
+                <circle r="8" className="fill-transparent" />
+                <circle
+                  r={sel ? 4.2 : 3.2}
+                  className={cn(
+                    sel ? "fill-sky-600 stroke-white stroke-1" : "fill-amber-500 stroke-white stroke-1",
+                    "drop-shadow-sm"
+                  )}
+                />
+              </g>
+            );
+          })}
+        </svg>
+        {!disabled ? (
+          <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+            Tap the diagram to add a marker. Tap a marker to edit.
+          </p>
+        ) : null}
+      </FiCard>
+
+      {selected && !disabled ? (
+        <FiCard className="space-y-3 border border-slate-200 p-4 dark:border-slate-600">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-50">Edit marker</h4>
+            <button
+              type="button"
+              onClick={() => setSelectedId(null)}
+              className="min-h-[44px] rounded-lg px-3 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              Close
+            </button>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Label</label>
+            <select
+              className="min-h-[44px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              value={selected.label}
+              onChange={(e) => updateSelected({ label: e.target.value })}
+            >
+              {BODY_AREA_MAP_LABEL_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Severity</label>
+            <select
+              className="min-h-[44px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              value={selected.severity}
+              onChange={(e) => updateSelected({ severity: e.target.value as BodyAreaMapSeverity })}
+            >
+              {BODY_AREA_MAP_SEVERITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <fieldset className="space-y-2">
+            <legend className="text-xs font-medium text-slate-600 dark:text-slate-400">Tags</legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {BODY_AREA_MAP_TAG_OPTIONS.map((o) => {
+                const on = selected.tags.includes(o.value);
+                return (
+                  <label
+                    key={o.value}
+                    className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-100 px-2 py-1 text-sm dark:border-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-slate-300 text-sky-600"
+                      checked={on}
+                      onChange={() => {
+                        const next = new Set(selected.tags);
+                        if (on) next.delete(o.value);
+                        else next.add(o.value);
+                        updateSelected({ tags: Array.from(next) });
+                      }}
+                    />
+                    {o.label}
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Notes</label>
+            <textarea
+              className="min-h-[88px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              value={selected.notes}
+              onChange={(e) => updateSelected({ notes: e.target.value })}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={deleteSelected}
+            className="min-h-[44px] w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-100"
+          >
+            Delete marker
+          </button>
+        </FiCard>
+      ) : null}
+    </div>
+  );
+}
+
+/** Read-only summary of markers for submitted / locked forms. */
+export function BodyAreaMapAnnotationsSummary({
+  fieldLabel,
+  value,
+  allowedViews,
+}: {
+  fieldLabel: string;
+  value: unknown;
+  allowedViews?: readonly BodyAreaMapViewId[];
+}) {
+  const allowed = useAllowedViews(allowedViews);
+  const { annotations } = normalizeBodyAreaMapValue(value, allowed);
+  if (annotations.length === 0) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
+        {fieldLabel.trim() ? (
+          <>
+            <span className="font-medium text-slate-800 dark:text-slate-200">{fieldLabel}:</span>{" "}
+          </>
+        ) : null}
+        No markers recorded.
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/50">
+      {fieldLabel.trim() ? <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">{fieldLabel}</p> : null}
+      <ul className="space-y-2">
+        {annotations.map((a) => (
+          <li
+            key={a.id}
+            className="rounded-md border border-slate-200/80 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+          >
+            <div className="font-medium text-slate-800 dark:text-slate-100">
+              {viewDisplayForBodyAreaMap(a.view)} · {labelDisplayForBodyAreaMap(a.label)}
+            </div>
+            <div className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+              Severity: <span className="font-medium capitalize">{a.severity.replace(/_/g, " ")}</span>
+            </div>
+            {a.notes.trim() ? (
+              <div className="mt-1 text-xs text-slate-700 dark:text-slate-300">Notes: {a.notes.trim()}</div>
+            ) : null}
+            {a.tags.length > 0 ? (
+              <div className="mt-1 text-xs text-slate-500">Tags: {a.tags.join(", ")}</div>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

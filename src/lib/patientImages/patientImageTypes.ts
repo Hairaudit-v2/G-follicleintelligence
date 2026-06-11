@@ -1,5 +1,7 @@
 /** Row shape for `fi_patient_images` (application layer). */
 
+import type { ImagingAnatomicalRegion, ImagingLibraryAxis } from "@/src/lib/imagingOs/imagingOsConstants";
+
 export type PatientImageCategory =
   | "consult"
   | "scalp"
@@ -22,8 +24,19 @@ export type PatientImageRow = {
   case_id: string | null;
   booking_id: string | null;
   lead_id: string | null;
+  consultation_id: string | null;
+  form_instance_id: string | null;
   image_category: PatientImageCategory;
   image_status: PatientImageStatus;
+  imaging_library_axis: ImagingLibraryAxis;
+  clinic_id: string | null;
+  captured_by_staff_id: string | null;
+  device_type: string | null;
+  anatomical_region: ImagingAnatomicalRegion | null;
+  visit_type: string | null;
+  follow_up_interval: string | null;
+  imaging_protocol_template_slug: string | null;
+  imaging_protocol_slot_slug: string | null;
   storage_bucket: string;
   storage_path: string;
   original_filename: string | null;

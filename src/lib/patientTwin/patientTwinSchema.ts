@@ -107,6 +107,13 @@ export const patientTwinMediaSectionSchema = z.object({
   ),
 });
 
+export const patientTwinImagingSectionSchema = z.object({
+  active_image_total: z.number().int().nonnegative(),
+  by_library_axis: z.record(z.string(), z.number().int().nonnegative()),
+  latest_captured_at: z.string().nullable(),
+  imaging_workspace_href: z.string(),
+});
+
 export const patientTwinPathologyRequestRowSchema = z.object({
   id: z.string().uuid(),
   request_date: z.string(),
@@ -243,6 +250,7 @@ export const patientTwinV1Schema = z.object({
   cases: z.array(patientTwinCaseRowSchema),
   audits: patientTwinAuditRollupSectionSchema,
   media: patientTwinMediaSectionSchema,
+  imaging: patientTwinImagingSectionSchema,
   pathology: patientTwinPathologySectionSchema,
   timeline: patientTwinTimelineSectionSchema,
   clinical: patientTwinClinicalSectionSchema,

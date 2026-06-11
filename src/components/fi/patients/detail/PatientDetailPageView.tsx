@@ -85,6 +85,18 @@ export function PatientDetailPageView({
           Upload blood results
         </Link>
         <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}/imaging`}
+          className="rounded border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-900 hover:bg-indigo-100"
+        >
+          ImagingOS
+        </Link>
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}/twin`}
+          className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-50"
+        >
+          Patient Twin
+        </Link>
+        <Link
           href={`/fi-admin/${tenantId}/surgery-readiness`}
           className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-50"
         >

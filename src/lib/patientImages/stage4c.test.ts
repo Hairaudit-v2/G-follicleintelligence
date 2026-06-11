@@ -68,13 +68,27 @@ describe("Stage 4C — patient images foundation (pure)", () => {
   });
 
   it("changed_keys generation", () => {
+    const base: Omit<PatientImageEditableSnapshot, "image_category" | "caption" | "taken_at" | "metadata"> = {
+      imaging_library_axis: "general_clinical",
+      clinic_id: null,
+      captured_by_staff_id: null,
+      device_type: null,
+      anatomical_region: null,
+      visit_type: null,
+      follow_up_interval: null,
+      imaging_protocol_template_slug: null,
+      imaging_protocol_slot_slug: null,
+      consultation_id: null,
+    };
     const before: PatientImageEditableSnapshot = {
+      ...base,
       image_category: "other",
       caption: null,
       taken_at: null,
       metadata: { a: 1 },
     };
     const after: PatientImageEditableSnapshot = {
+      ...base,
       image_category: "consult",
       caption: "Hi",
       taken_at: "2026-01-01T00:00:00.000Z",

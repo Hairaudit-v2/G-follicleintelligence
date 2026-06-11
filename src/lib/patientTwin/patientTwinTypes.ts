@@ -118,6 +118,13 @@ export type PatientTwinMediaSection = {
   >;
 };
 
+export type PatientTwinImagingSection = {
+  active_image_total: number;
+  by_library_axis: Record<string, number>;
+  latest_captured_at: string | null;
+  imaging_workspace_href: string;
+};
+
 /** Foundation timeline only (`fi_timeline_events`); CRM activity lives under `crm`. */
 export type PatientTwinTimelineItem = {
   source_type: "fi_timeline_events";
@@ -249,6 +256,7 @@ export type PatientTwinV1 = {
   cases: PatientTwinCaseRow[];
   audits: PatientTwinAuditRollupSection;
   media: PatientTwinMediaSection;
+  imaging: PatientTwinImagingSection;
   pathology: PatientTwinPathologySection;
   timeline: PatientTwinTimelineSection;
   clinical: PatientTwinClinicalSection;

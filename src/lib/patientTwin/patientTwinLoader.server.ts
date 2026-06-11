@@ -16,12 +16,14 @@ import {
 } from "@/src/lib/fi/foundation/patientRecord";
 import { calculatePatientTwinCompleteness, type PatientTwinV1ForCompleteness } from "./patientTwinCompleteness";
 import { patientTwinV1Schema } from "./patientTwinSchema";
+import { normalizeImagingLibraryAxis } from "@/src/lib/patientImages/patientImagePolicy";
 import {
   PATIENT_TWIN_LOADER_VERSION,
   PATIENT_TWIN_VERSION,
   type PatientTwinV1,
   type PatientTwinCaseMilestone,
   type PatientTwinCaseRow,
+  type PatientTwinImagingSection,
   type PatientTwinMediaLatestItem,
   type PatientTwinMediaSection,
   type PatientTwinTimelineItem,
@@ -62,6 +64,7 @@ const SOURCE_TABLES_USED = [
   "fi_pathology_results",
   "fi_pathology_result_items",
   "fi_pathology_ai_interpretations",
+  "fi_patient_images",
 ] as const;
 
 const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
@@ -540,6 +543,45 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
 
   const media = buildMediaSection(base.media_unified);
 
+  const imagingWorkspaceHref = `/fi-admin/${encodeURIComponent(tid)}/patients/${encodeURIComponent(primaryFoundation)}/imaging`;
+  let imaging: PatientTwinImagingSection = {
+    active_image_total: 0,
+    by_library_axis: {},
+    latest_captured_at: null,
+    imaging_workspace_href: imagingWorkspaceHref,
+  };
+
+  const { data: imgTwinRows, error: imgTwinErr } = await supabase
+    .from("fi_patient_images")
+    .select("imaging_library_axis, taken_at, created_at")
+    .eq("tenant_id", tid)
+    .eq("patient_id", primaryFoundation)
+    .eq("image_status", "active");
+  if (imgTwinErr) {
+    const m = imgTwinErr.message ?? "";
+    if (!m.includes("does not exist") && !m.includes("schema cache")) {
+      pushWarning(warnings, "generic", `Imaging twin section skipped: ${m}`);
+    }
+  } else if (imgTwinRows) {
+    const by_library_axis: Record<string, number> = {};
+    let latest_captured_at: string | null = null;
+    for (const raw of imgTwinRows) {
+      const r = raw as Record<string, unknown>;
+      const axis = normalizeImagingLibraryAxis(r.imaging_library_axis);
+      by_library_axis[axis] = (by_library_axis[axis] ?? 0) + 1;
+      const ts = (r.taken_at != null ? String(r.taken_at) : String(r.created_at ?? "")).trim();
+      if (ts && (!latest_captured_at || ts > latest_captured_at)) {
+        latest_captured_at = ts;
+      }
+    }
+    imaging = {
+      active_image_total: imgTwinRows.length,
+      by_library_axis,
+      latest_captured_at,
+      imaging_workspace_href: imagingWorkspaceHref,
+    };
+  }
+
   const timelineItems = buildFoundationTimeline(base);
 
   const pathologyCap = 12;
@@ -743,6 +785,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     cases: casesOut,
     audits,
     media,
+    imaging,
     pathology,
     timeline: {
       order: "newest_first",

@@ -6,7 +6,7 @@ import { PatientTwinClinicalCard } from "./PatientTwinClinicalCard";
 import { PatientTwinPathologyCard } from "./PatientTwinPathologyCard";
 import { PatientTwinCrmCard } from "./PatientTwinCrmCard";
 import { PatientTwinHeader } from "./PatientTwinHeader";
-import { PatientTwinIdentityCard } from "./PatientTwinIdentityCard";
+import { PatientTwinImagingCard } from "./PatientTwinImagingCard";
 import { PatientTwinMediaCard } from "./PatientTwinMediaCard";
 import { PatientTwinTimelineCard } from "./PatientTwinTimelineCard";
 import { PatientTwinWarningsCard } from "./PatientTwinWarningsCard";
@@ -33,6 +33,8 @@ export function PatientTwinDashboard({ tenantId, patientId, twin }: PatientTwinD
       <PatientTwinCasesCard tenantId={tenantId} twin={twin} />
 
       <PatientTwinPathologyCard tenantId={tenantId} patientId={patientId} twin={twin} />
+
+      <PatientTwinImagingCard twin={twin} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
         <PatientTwinAuditCard tenantId={tenantId} twin={twin} />

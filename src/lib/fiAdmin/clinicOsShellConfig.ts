@@ -181,6 +181,20 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     ],
   },
   {
+    id: "imagingos",
+    label: "ImagingOS",
+    description: "Clinical imaging library, protocols, scalp maps, and compare — per patient from PatientOS.",
+    items: [
+      {
+        id: "imagingos-guide",
+        label: "Patient imaging",
+        path: "patients",
+        permissionHint: { requiresBookingsBoardNav: true },
+        description: "Open a patient, then use ImagingOS on their profile (or Patient Twin).",
+      },
+    ],
+  },
+  {
     id: "surgeryos",
     label: "SurgeryOS",
     description: "Planning, procedure day, post-op, and follow-up.",
@@ -371,7 +385,11 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "bookings") return "bookings";
   if (first === "calendar") return "calendar";
   if (first === "appointments") return "appointments";
-  if (first === "patients") return "patientos";
+  if (first === "patients") {
+    const parts = sub.split("/").filter(Boolean);
+    if (parts.length >= 3 && parts[2] === "imaging") return "imagingos-guide";
+    return "patientos";
+  }
   /** Tenant directory — closest match to PatientOS (no dedicated shell tab). */
   if (first === "directory") return "patientos";
   if (first === "staff") return "staff";

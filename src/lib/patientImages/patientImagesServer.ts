@@ -16,6 +16,8 @@ import {
   assertCaptionLength,
   assertPatientImageEditableStatus,
   assertPatientImageMetadataObject,
+  normalizeImagingAnatomicalRegion,
+  normalizeImagingLibraryAxis,
   normalizePatientImageCategory,
   PATIENT_IMAGES_BUCKET_DEFAULT,
 } from "./patientImagePolicy";
@@ -42,8 +44,21 @@ function mapRow(data: Record<string, unknown>): PatientImageRow {
     case_id: data.case_id != null ? String(data.case_id) : null,
     booking_id: data.booking_id != null ? String(data.booking_id) : null,
     lead_id: data.lead_id != null ? String(data.lead_id) : null,
+    consultation_id: data.consultation_id != null ? String(data.consultation_id) : null,
+    form_instance_id: data.form_instance_id != null ? String(data.form_instance_id) : null,
     image_category: normalizePatientImageCategory(data.image_category),
     image_status: (data.image_status === "archived" ? "archived" : "active") as PatientImageStatus,
+    imaging_library_axis: normalizeImagingLibraryAxis(data.imaging_library_axis),
+    clinic_id: data.clinic_id != null ? String(data.clinic_id) : null,
+    captured_by_staff_id: data.captured_by_staff_id != null ? String(data.captured_by_staff_id) : null,
+    device_type: data.device_type != null ? String(data.device_type) : null,
+    anatomical_region: normalizeImagingAnatomicalRegion(data.anatomical_region),
+    visit_type: data.visit_type != null ? String(data.visit_type) : null,
+    follow_up_interval: data.follow_up_interval != null ? String(data.follow_up_interval) : null,
+    imaging_protocol_template_slug:
+      data.imaging_protocol_template_slug != null ? String(data.imaging_protocol_template_slug) : null,
+    imaging_protocol_slot_slug:
+      data.imaging_protocol_slot_slug != null ? String(data.imaging_protocol_slot_slug) : null,
     storage_bucket: String(data.storage_bucket ?? PATIENT_IMAGES_BUCKET_DEFAULT),
     storage_path: String(data.storage_path),
     original_filename: data.original_filename != null ? String(data.original_filename) : null,
@@ -149,6 +164,57 @@ async function assertOptionalLeadForPatient(
   if (!data || String((data as { patient_id: string | null }).patient_id ?? "") !== patientId) {
     throw new Error("Lead not found for this patient.");
   }
+}
+
+async function assertOptionalConsultationForPatient(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string,
+  consultationId: string | null
+): Promise<void> {
+  if (!consultationId) return;
+  const { data, error } = await supabase
+    .from("fi_consultations")
+    .select("id, tenant_id, patient_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", consultationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data || String((data as { patient_id: string | null }).patient_id ?? "") !== patientId) {
+    throw new Error("Consultation not found for this patient.");
+  }
+}
+
+async function assertOptionalClinicForTenant(supabase: SupabaseClient, tenantId: string, clinicId: string | null): Promise<void> {
+  if (!clinicId) return;
+  const { data, error } = await supabase
+    .from("fi_clinics")
+    .select("id, tenant_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", clinicId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Clinic not found for tenant.");
+}
+
+async function assertOptionalStaffForTenant(supabase: SupabaseClient, tenantId: string, staffId: string | null): Promise<void> {
+  if (!staffId) return;
+  const { data, error } = await supabase
+    .from("fi_staff")
+    .select("id, tenant_id")
+    .eq("tenant_id", tenantId)
+    .eq("id", staffId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Staff member not found for tenant.");
+}
+
+function normalizeBoundedOptText(raw: string | null | undefined, max: number, label: string): string | null {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+  if (s.length > max) throw new Error(`${label} must be at most ${max} characters.`);
+  return s;
 }
 
 function normalizeTakenAt(raw: string | null | undefined): string | null {
@@ -326,6 +392,16 @@ export type CreatePatientImageUploadInput = {
   caseId?: string | null;
   bookingId?: string | null;
   leadId?: string | null;
+  consultationId?: string | null;
+  imagingLibraryAxis?: unknown;
+  clinicId?: string | null;
+  capturedByStaffId?: string | null;
+  deviceType?: string | null;
+  anatomicalRegion?: unknown;
+  visitType?: string | null;
+  followUpInterval?: string | null;
+  imagingProtocolTemplateSlug?: string | null;
+  imagingProtocolSlotSlug?: string | null;
   actingUserId?: string | null;
 };
 
@@ -347,12 +423,25 @@ export async function createPatientImageRecord(
   const caseId = parseUuidOpt(input.caseId);
   const bookingId = parseUuidOpt(input.bookingId);
   const leadId = parseUuidOpt(input.leadId);
+  const consultationId = parseUuidOpt(input.consultationId);
+  const clinicId = parseUuidOpt(input.clinicId);
+  const capturedByStaffId = parseUuidOpt(input.capturedByStaffId);
 
   await assertOptionalCaseForPatient(supabase, tid, pid, caseId);
   await assertOptionalBookingForPatient(supabase, tid, pid, bookingId);
   await assertOptionalLeadForPatient(supabase, tid, pid, leadId);
+  await assertOptionalConsultationForPatient(supabase, tid, pid, consultationId);
+  await assertOptionalClinicForTenant(supabase, tid, clinicId);
+  await assertOptionalStaffForTenant(supabase, tid, capturedByStaffId);
 
   const imageCategory = normalizePatientImageCategory(input.imageCategory);
+  const imagingLibraryAxis = normalizeImagingLibraryAxis(input.imagingLibraryAxis);
+  const anatomicalRegion = normalizeImagingAnatomicalRegion(input.anatomicalRegion);
+  const deviceType = normalizeBoundedOptText(input.deviceType ?? null, 160, "device_type");
+  const visitType = normalizeBoundedOptText(input.visitType ?? null, 160, "visit_type");
+  const followUpInterval = normalizeBoundedOptText(input.followUpInterval ?? null, 64, "follow_up_interval");
+  const imagingProtocolTemplateSlug = normalizeBoundedOptText(input.imagingProtocolTemplateSlug ?? null, 128, "protocol template");
+  const imagingProtocolSlotSlug = normalizeBoundedOptText(input.imagingProtocolSlotSlug ?? null, 128, "protocol slot");
   const caption = assertCaptionLength(input.caption ?? null);
   const takenAt = normalizeTakenAt(input.takenAt ?? null);
   const metadata = assertPatientImageMetadataObject("metadata", input.metadata ?? {});
@@ -384,8 +473,18 @@ export async function createPatientImageRecord(
     case_id: caseId,
     booking_id: bookingId,
     lead_id: leadId,
+    consultation_id: consultationId,
     image_category: imageCategory,
     image_status: "active" as const,
+    imaging_library_axis: imagingLibraryAxis,
+    clinic_id: clinicId,
+    captured_by_staff_id: capturedByStaffId,
+    device_type: deviceType,
+    anatomical_region: anatomicalRegion,
+    visit_type: visitType,
+    follow_up_interval: followUpInterval,
+    imaging_protocol_template_slug: imagingProtocolTemplateSlug,
+    imaging_protocol_slot_slug: imagingProtocolSlotSlug,
     storage_bucket: bucket,
     storage_path: storagePath,
     original_filename: input.file.name || null,
@@ -420,6 +519,16 @@ function editableSnapshotFromRow(row: PatientImageRow): PatientImageEditableSnap
     caption: row.caption,
     taken_at: row.taken_at,
     metadata: row.metadata,
+    imaging_library_axis: row.imaging_library_axis,
+    clinic_id: row.clinic_id,
+    captured_by_staff_id: row.captured_by_staff_id,
+    device_type: row.device_type,
+    anatomical_region: row.anatomical_region,
+    visit_type: row.visit_type,
+    follow_up_interval: row.follow_up_interval,
+    imaging_protocol_template_slug: row.imaging_protocol_template_slug,
+    imaging_protocol_slot_slug: row.imaging_protocol_slot_slug,
+    consultation_id: row.consultation_id,
   };
 }
 
@@ -451,7 +560,38 @@ export async function updatePatientImageDetails(
       params.patch.metadata !== undefined
         ? assertPatientImageMetadataObject("metadata", params.patch.metadata)
         : before.metadata,
+    imaging_library_axis:
+      params.patch.imaging_library_axis !== undefined
+        ? normalizeImagingLibraryAxis(params.patch.imaging_library_axis)
+        : before.imaging_library_axis,
+    clinic_id: params.patch.clinic_id !== undefined ? parseUuidOpt(params.patch.clinic_id) : before.clinic_id,
+    captured_by_staff_id:
+      params.patch.captured_by_staff_id !== undefined ? parseUuidOpt(params.patch.captured_by_staff_id) : before.captured_by_staff_id,
+    device_type: params.patch.device_type !== undefined ? normalizeBoundedOptText(params.patch.device_type, 160, "device_type") : before.device_type,
+    anatomical_region:
+      params.patch.anatomical_region !== undefined
+        ? normalizeImagingAnatomicalRegion(params.patch.anatomical_region)
+        : before.anatomical_region,
+    visit_type: params.patch.visit_type !== undefined ? normalizeBoundedOptText(params.patch.visit_type, 160, "visit_type") : before.visit_type,
+    follow_up_interval:
+      params.patch.follow_up_interval !== undefined
+        ? normalizeBoundedOptText(params.patch.follow_up_interval, 64, "follow_up_interval")
+        : before.follow_up_interval,
+    imaging_protocol_template_slug:
+      params.patch.imaging_protocol_template_slug !== undefined
+        ? normalizeBoundedOptText(params.patch.imaging_protocol_template_slug, 128, "protocol template")
+        : before.imaging_protocol_template_slug,
+    imaging_protocol_slot_slug:
+      params.patch.imaging_protocol_slot_slug !== undefined
+        ? normalizeBoundedOptText(params.patch.imaging_protocol_slot_slug, 128, "protocol slot")
+        : before.imaging_protocol_slot_slug,
+    consultation_id:
+      params.patch.consultation_id !== undefined ? parseUuidOpt(params.patch.consultation_id) : before.consultation_id,
   };
+
+  await assertOptionalConsultationForPatient(supabase, tid, pid, after.consultation_id);
+  await assertOptionalClinicForTenant(supabase, tid, after.clinic_id);
+  await assertOptionalStaffForTenant(supabase, tid, after.captured_by_staff_id);
 
   const changed_keys = patientImageDetailChangedKeys(before, after);
   if (changed_keys.length === 0) {
@@ -463,6 +603,16 @@ export async function updatePatientImageDetails(
     caption: after.caption,
     taken_at: after.taken_at,
     metadata: after.metadata,
+    imaging_library_axis: after.imaging_library_axis,
+    clinic_id: after.clinic_id,
+    captured_by_staff_id: after.captured_by_staff_id,
+    device_type: after.device_type,
+    anatomical_region: after.anatomical_region,
+    visit_type: after.visit_type,
+    follow_up_interval: after.follow_up_interval,
+    imaging_protocol_template_slug: after.imaging_protocol_template_slug,
+    imaging_protocol_slot_slug: after.imaging_protocol_slot_slug,
+    consultation_id: after.consultation_id,
     updated_at: new Date().toISOString(),
   };
 

@@ -10,6 +10,7 @@ export {
   type PatientTwinCrmSection,
   type PatientTwinIdentityResolutionSection,
   type PatientTwinIntelligenceSection,
+  type PatientTwinImagingSection,
   type PatientTwinMediaLatestItem,
   type PatientTwinMediaSection,
   type PatientTwinPersonSection,
