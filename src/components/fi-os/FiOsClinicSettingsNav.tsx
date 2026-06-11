@@ -82,6 +82,11 @@ export function FiOsClinicSettingsNav({
             Admin Users
           </Link>
         ) : null}
+        {showConfigurationHubNav ? (
+          <Link href={`${base}/settings/imports/hubspot`} className={linkCls(`${base}/settings/imports/hubspot`)}>
+            HubSpot import
+          </Link>
+        ) : null}
       </div>
     </div>
   );
