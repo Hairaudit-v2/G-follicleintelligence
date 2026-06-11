@@ -184,7 +184,14 @@ export function CaseDetailPageView({
         </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.surgeryPlanning}>
-          <CaseSurgeryPlanningCard tenantId={tenantId} caseId={detail.id} plan={surgeryPlan} />
+          <CaseSurgeryPlanningCard
+            tenantId={tenantId}
+            caseId={detail.id}
+            plan={surgeryPlan}
+            foundationPatientId={twinFoundationPatientId}
+            procedureDay={procedureDay}
+            linkedSurgeryBookingYmd={linkedSurgeryBookingYmd}
+          />
         </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.procedureDay}>
