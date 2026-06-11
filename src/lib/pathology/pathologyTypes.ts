@@ -11,6 +11,8 @@ export type PathologyRequestRow = {
   id: string;
   tenant_id: string;
   patient_id: string;
+  consultation_id: string | null;
+  form_instance_id: string | null;
   request_date: string;
   doctor_user_id: string | null;
   template_used: PathologyTemplateId;

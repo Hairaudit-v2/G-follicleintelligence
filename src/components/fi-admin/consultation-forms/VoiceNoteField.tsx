@@ -12,11 +12,30 @@ import {
   type VoiceNoteFieldValue,
 } from "@/src/lib/consultationForms/consultationFormNoteModel";
 
-function getSpeechRecognitionCtor(): (new () => SpeechRecognition) | null {
+/** Subset of Web Speech API used here (DOM lib typings vary by TypeScript version). */
+type BrowserSpeechRecognitionResult = { transcript: string };
+type BrowserSpeechRecognitionResultList = ArrayLike<{ 0: BrowserSpeechRecognitionResult }>;
+type BrowserSpeechRecognitionEvent = {
+  resultIndex: number;
+  results: BrowserSpeechRecognitionResultList;
+};
+
+type BrowserSpeechRecognition = EventTarget & {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onerror: ((ev: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  onresult: ((ev: BrowserSpeechRecognitionEvent) => void) | null;
+};
+
+function getSpeechRecognitionCtor(): (new () => BrowserSpeechRecognition) | null {
   if (typeof window === "undefined") return null;
   const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRecognition;
-    webkitSpeechRecognition?: new () => SpeechRecognition;
+    SpeechRecognition?: new () => BrowserSpeechRecognition;
+    webkitSpeechRecognition?: new () => BrowserSpeechRecognition;
   };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
@@ -46,7 +65,7 @@ export function VoiceNoteField({
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const recRef = useRef<SpeechRecognition | null>(null);
+  const recRef = useRef<BrowserSpeechRecognition | null>(null);
   const valueRef = useRef(value);
   useEffect(() => {
     valueRef.current = value;
@@ -100,7 +119,7 @@ export function VoiceNoteField({
       setListening(false);
       recRef.current = null;
     };
-    rec.onresult = (event: SpeechRecognitionEvent) => {
+    rec.onresult = (event: BrowserSpeechRecognitionEvent) => {
       let chunk = "";
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         chunk += event.results[i]?.[0]?.transcript ?? "";

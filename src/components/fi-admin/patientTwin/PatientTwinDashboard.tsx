@@ -6,6 +6,7 @@ import { PatientTwinClinicalCard } from "./PatientTwinClinicalCard";
 import { PatientTwinPathologyCard } from "./PatientTwinPathologyCard";
 import { PatientTwinCrmCard } from "./PatientTwinCrmCard";
 import { PatientTwinHeader } from "./PatientTwinHeader";
+import { PatientTwinIdentityCard } from "./PatientTwinIdentityCard";
 import { PatientTwinImagingCard } from "./PatientTwinImagingCard";
 import { PatientTwinMediaCard } from "./PatientTwinMediaCard";
 import { PatientTwinTimelineCard } from "./PatientTwinTimelineCard";

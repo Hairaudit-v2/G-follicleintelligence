@@ -22,6 +22,7 @@ function taskRow(p: Partial<FiCrmTaskRow> & Pick<FiCrmTaskRow, "id" | "title">):
     lead_id: LID,
     patient_id: null,
     case_id: null,
+    consultation_id: null,
     description: null,
     task_type: "follow_up",
     status: "open",

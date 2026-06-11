@@ -11,6 +11,7 @@ import {
 } from "@/lib/actions/fi-consultation-form-actions";
 import { BodyAreaMapAnnotationsSummary } from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
 import { ConsultationCompletionSummaryCard } from "@/src/components/fi-admin/consultation-forms/ConsultationCompletionSummaryCard";
+import { ConsultationHandoffPanel } from "@/src/components/fi-admin/consultation-forms/ConsultationHandoffPanel";
 import { ConsultationFormFieldRenderer } from "@/src/components/fi-admin/consultation-forms/ConsultationFormFieldRenderer";
 import { ConsultationFormSectionNav } from "@/src/components/fi-admin/consultation-forms/ConsultationFormSectionNav";
 import { FiCard } from "@/src/components/fi-design/FiCard";
@@ -21,6 +22,7 @@ import type {
 } from "@/src/lib/consultationForms/consultationFormTypes";
 import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/consultationCompletionTypes";
 import { buildHairTransplantCompletionSummary } from "@/src/lib/consultationForms/completion/hairTransplantCompletionRules";
+import type { ConsultationHandoffInitialIds } from "@/src/lib/consultationForms/handoff/consultationHandoffTypes";
 
 const AUTOSAVE_MS = 900;
 
@@ -39,6 +41,8 @@ export function ConsultationFormRunner({
   consultationId,
   patientId,
   caseId,
+  leadId,
+  handoffInitial,
   initialInstance,
 }: {
   tenantId: string;
@@ -46,6 +50,8 @@ export function ConsultationFormRunner({
   /** Foundation patient id when linked on the consultation (required to save voice notes to fi_clinical_notes). */
   patientId?: string | null;
   caseId?: string | null;
+  leadId?: string | null;
+  handoffInitial?: ConsultationHandoffInitialIds;
   initialInstance: ConsultationFormInstanceWithTemplate;
 }) {
   const router = useRouter();
@@ -54,7 +60,7 @@ export function ConsultationFormRunner({
   const base = `/fi-admin/${tid}/consultations/${cid}`;
 
   const schema = initialInstance.template_version.schema;
-  const sections = schema.sections ?? [];
+  const sections = useMemo(() => schema.sections ?? [], [schema]);
 
   const persistence: ConsultationFormPersistenceContext | null = useMemo(
     () => ({
@@ -67,7 +73,18 @@ export function ConsultationFormRunner({
     [tid, cid, initialInstance.id, patientId, caseId]
   );
 
-  const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id ?? "");
+  const [activeSectionId, setActiveSectionId] = useState(() => sections[0]?.id ?? "");
+
+  const activeSection = useMemo(
+    () => sections.find((s) => s.id === activeSectionId) ?? sections[0] ?? null,
+    [sections, activeSectionId]
+  );
+
+  useEffect(() => {
+    if (!sections.length) return;
+    setActiveSectionId((prev) => (sections.some((s) => s.id === prev) ? prev : sections[0]!.id));
+  }, [sections]);
+
   const [values, setValues] = useState<Record<string, unknown>>(() => cloneValues(initialInstance.values));
   const [status, setStatus] = useState(initialInstance.status);
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -84,7 +101,13 @@ export function ConsultationFormRunner({
     setValues(cloneValues(initialInstance.values));
     setStatus(initialInstance.status);
     lastSavedJson.current = JSON.stringify(initialInstance.values);
-  }, [initialInstance.id, initialInstance.updated_at, initialInstance.status, initialInstance.completed_at]);
+  }, [
+    initialInstance.id,
+    initialInstance.updated_at,
+    initialInstance.status,
+    initialInstance.completed_at,
+    initialInstance.values,
+  ]);
 
   const canEdit = status === "draft";
 
@@ -147,6 +170,18 @@ export function ConsultationFormRunner({
   );
 
   const formIsCompleted = initialInstance.status === "locked" && Boolean(initialInstance.completed_at);
+
+  const handoffState = handoffInitial ?? {
+    followUpTaskId: null,
+    quoteId: null,
+    pathologyRequestId: null,
+    surgeryPlanId: null,
+  };
+
+  const canShowHandoffs = useMemo(
+    () => formIsCompleted && Boolean(persistedCompletion) && persistedCompletion!.source === "rules_v1",
+    [formIsCompleted, persistedCompletion]
+  );
 
   const previewCompletionSummary = useMemo(
     () =>
@@ -290,11 +325,19 @@ export function ConsultationFormRunner({
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
             Consultation completion
           </h2>
-          <ConsultationCompletionSummaryCard
-            summary={displayCompletionSummary}
-            isPreview={showCompleteConsultationCta}
-            showHandoffPlaceholders={formIsCompleted}
-          />
+          <ConsultationCompletionSummaryCard summary={displayCompletionSummary} isPreview={showCompleteConsultationCta} />
+          {canShowHandoffs && persistedCompletion ? (
+            <ConsultationHandoffPanel
+              tenantId={tid}
+              consultationId={cid}
+              formInstanceId={initialInstance.id}
+              summary={persistedCompletion}
+              leadId={leadId}
+              patientId={patientId}
+              caseId={caseId}
+              handoffInitial={handoffState}
+            />
+          ) : null}
           {showCompleteConsultationCta ? (
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -307,8 +350,8 @@ export function ConsultationFormRunner({
               </button>
               <p className="max-w-xl text-xs text-slate-500 dark:text-slate-400">
                 Finalizes the guided consultation: locks this form, stores the summary on the consultation record, and
-                records a timeline event when a case is linked. Does not create quotes, tasks, or pathology requests
-                automatically.
+                records a timeline event when a case is linked. Optional CRM, pathology, and SurgeryOS hand-offs appear
+                below after completion; they are never created automatically.
               </p>
             </div>
           ) : null}
@@ -319,7 +362,7 @@ export function ConsultationFormRunner({
         <aside className="lg:sticky lg:top-4 lg:self-start">
           <ConsultationFormSectionNav
             sections={sections.map((s) => ({ id: s.id, title: s.title }))}
-            activeSectionId={activeSection?.id ?? ""}
+            activeSectionId={activeSectionId}
             onSelect={setActiveSectionId}
           />
         </aside>

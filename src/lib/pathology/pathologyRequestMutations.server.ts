@@ -15,6 +15,8 @@ function mapRequest(row: Record<string, unknown>): PathologyRequestRow {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
     patient_id: String(row.patient_id),
+    consultation_id: row.consultation_id == null ? null : String(row.consultation_id),
+    form_instance_id: row.form_instance_id == null ? null : String(row.form_instance_id),
     request_date: String(row.request_date),
     doctor_user_id: row.doctor_user_id != null ? String(row.doctor_user_id) : null,
     template_used: String(row.template_used) as PathologyTemplateId,
@@ -53,6 +55,9 @@ export type CreatePathologyRequestInput = {
   doctorUserId: string | null;
   clinicalNotes?: string | null;
   tests: { code: string | null; label: string }[];
+  consultationId?: string | null;
+  formInstanceId?: string | null;
+  requestMetadata?: Record<string, unknown> | null;
 };
 
 export type CreatePathologyRequestResult = {
@@ -90,7 +95,13 @@ export async function createPathologyRequest(
       template_used: input.templateUsed,
       status: "saved",
       clinical_notes: input.clinicalNotes?.trim() ? input.clinicalNotes.trim() : null,
-      metadata: {},
+      consultation_id: input.consultationId?.trim() || null,
+      form_instance_id: input.formInstanceId?.trim() || null,
+      metadata: {
+        ...(input.requestMetadata && typeof input.requestMetadata === "object" && !Array.isArray(input.requestMetadata)
+          ? input.requestMetadata
+          : {}),
+      },
     })
     .select("*")
     .single();

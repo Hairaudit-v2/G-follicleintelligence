@@ -26,6 +26,7 @@ export type CreateCrmTaskParams = {
   dueAt?: string | null;
   patientId?: string | null;
   caseId?: string | null;
+  consultationId?: string | null;
   assigneeUserId?: string | null;
   metadata?: Record<string, unknown> | null;
 };
@@ -37,6 +38,7 @@ function mapTaskRow(row: Record<string, unknown>): FiCrmTaskRow {
     lead_id: String(row.lead_id),
     patient_id: row.patient_id != null ? String(row.patient_id) : null,
     case_id: row.case_id != null ? String(row.case_id) : null,
+    consultation_id: row.consultation_id != null ? String(row.consultation_id) : null,
     title: String(row.title),
     description: row.description != null ? String(row.description) : null,
     task_type: String(row.task_type),
@@ -152,6 +154,7 @@ export async function createCrmTask(params: CreateCrmTaskParams, client?: Supaba
       lead_id: leadId,
       patient_id: patientId,
       case_id: caseId,
+      consultation_id: params.consultationId?.trim() || null,
       title,
       description: params.description?.trim() || null,
       task_type: taskType,

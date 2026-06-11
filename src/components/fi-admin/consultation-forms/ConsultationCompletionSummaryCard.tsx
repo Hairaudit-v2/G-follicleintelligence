@@ -19,13 +19,10 @@ function ListOrDash({ items }: { items: string[] }) {
 export function ConsultationCompletionSummaryCard({
   summary,
   isPreview,
-  showHandoffPlaceholders,
 }: {
   summary: ConsultationCompletionSummary;
   /** When true, banner indicates values are not yet persisted as completion. */
   isPreview?: boolean;
-  /** Show disabled “next step” buttons (Stage 4 placeholders). */
-  showHandoffPlaceholders?: boolean;
 }) {
   return (
     <div className="space-y-4">
@@ -139,32 +136,6 @@ export function ConsultationCompletionSummaryCard({
           </div>
         </dl>
       </FiCard>
-
-      {showHandoffPlaceholders ? (
-        <FiCard className="space-y-3 p-4">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-50">Next steps</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Hand-offs are placeholders until wired to CRM / SurgeryOS.</p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              "Create quote",
-              "Create follow-up task",
-              "Create pathology request",
-              "Send to SurgeryOS planning",
-            ].map((label) => (
-              <button
-                key={label}
-                type="button"
-                disabled
-                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500"
-                title="Coming next"
-              >
-                {label}
-                <span className="ml-1 text-[10px] font-normal text-slate-400">(Coming next)</span>
-              </button>
-            ))}
-          </div>
-        </FiCard>
-      ) : null}
     </div>
   );
 }

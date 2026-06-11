@@ -10,6 +10,13 @@ import {
   submitConsultationFormInstance,
   upsertClinicalNoteForFormField,
 } from "@/src/lib/consultationForms/consultationFormMutations.server";
+import {
+  createConsultationFollowUpTaskFromSummary,
+  createConsultationPathologyRecommendationFromSummary,
+  createConsultationQuoteDraftFromSummary,
+  createSurgeryPlanningDraftFromConsultationSummary,
+} from "@/src/lib/consultationForms/handoff/consultationHandoffMutations.server";
+import type { ConsultationHandoffMutationResult } from "@/src/lib/consultationForms/handoff/consultationHandoffTypes";
 
 function errMsg(e: unknown): string {
   if (e instanceof CrmAccessError) return e.message;
@@ -172,6 +179,129 @@ export async function completeConsultationFormInstanceAction(
     revalidatePath(`/fi-admin/${tid}/consultations/${cid}/forms`);
     revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
     return { ok: true, summary };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+async function handoffFormInstanceId(body: unknown): Promise<string> {
+  const b = readRecord(body);
+  const formInstanceId = String(b.formInstanceId ?? "").trim();
+  if (!formInstanceId) throw new Error("formInstanceId is required.");
+  return formInstanceId;
+}
+
+export async function createConsultationFollowUpTaskFromSummaryAction(
+  tenantId: string,
+  consultationId: string,
+  body: unknown
+): Promise<{ ok: true; result: ConsultationHandoffMutationResult } | { ok: false; error: string }> {
+  try {
+    const adminKey =
+      body && typeof body === "object" && body !== null && "adminKey" in body
+        ? String((body as { adminKey?: string }).adminKey ?? "")
+        : undefined;
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
+    const fid = await handoffFormInstanceId(body);
+    const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await createConsultationFollowUpTaskFromSummary({
+      tenantId: tenantId.trim(),
+      consultationId: consultationId.trim(),
+      formInstanceId: fid,
+      actorUserId: fiUserId,
+    });
+    const tid = tenantId.trim();
+    const cid = consultationId.trim();
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}/forms`);
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
+    return { ok: true, result };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function createConsultationQuoteDraftFromSummaryAction(
+  tenantId: string,
+  consultationId: string,
+  body: unknown
+): Promise<{ ok: true; result: ConsultationHandoffMutationResult } | { ok: false; error: string }> {
+  try {
+    const adminKey =
+      body && typeof body === "object" && body !== null && "adminKey" in body
+        ? String((body as { adminKey?: string }).adminKey ?? "")
+        : undefined;
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
+    const fid = await handoffFormInstanceId(body);
+    const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await createConsultationQuoteDraftFromSummary({
+      tenantId: tenantId.trim(),
+      consultationId: consultationId.trim(),
+      formInstanceId: fid,
+      actorUserId: fiUserId,
+    });
+    const tid = tenantId.trim();
+    const cid = consultationId.trim();
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}/forms`);
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
+    return { ok: true, result };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function createConsultationPathologyRecommendationFromSummaryAction(
+  tenantId: string,
+  consultationId: string,
+  body: unknown
+): Promise<{ ok: true; result: ConsultationHandoffMutationResult } | { ok: false; error: string }> {
+  try {
+    const adminKey =
+      body && typeof body === "object" && body !== null && "adminKey" in body
+        ? String((body as { adminKey?: string }).adminKey ?? "")
+        : undefined;
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
+    const fid = await handoffFormInstanceId(body);
+    const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await createConsultationPathologyRecommendationFromSummary({
+      tenantId: tenantId.trim(),
+      consultationId: consultationId.trim(),
+      formInstanceId: fid,
+      actorUserId: fiUserId,
+    });
+    const tid = tenantId.trim();
+    const cid = consultationId.trim();
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}/forms`);
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
+    return { ok: true, result };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function createSurgeryPlanningDraftFromConsultationSummaryAction(
+  tenantId: string,
+  consultationId: string,
+  body: unknown
+): Promise<{ ok: true; result: ConsultationHandoffMutationResult } | { ok: false; error: string }> {
+  try {
+    const adminKey =
+      body && typeof body === "object" && body !== null && "adminKey" in body
+        ? String((body as { adminKey?: string }).adminKey ?? "")
+        : undefined;
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey, request: undefined });
+    const fid = await handoffFormInstanceId(body);
+    const fiUserId = await tryResolveFiUserIdForTenant(tenantId.trim(), undefined);
+    const result = await createSurgeryPlanningDraftFromConsultationSummary({
+      tenantId: tenantId.trim(),
+      consultationId: consultationId.trim(),
+      formInstanceId: fid,
+      actorUserId: fiUserId,
+    });
+    const tid = tenantId.trim();
+    const cid = consultationId.trim();
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}/forms`);
+    revalidatePath(`/fi-admin/${tid}/consultations/${cid}`);
+    return { ok: true, result };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

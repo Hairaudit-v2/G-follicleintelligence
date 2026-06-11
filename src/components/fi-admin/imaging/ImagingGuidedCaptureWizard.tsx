@@ -17,7 +17,11 @@ import {
   missingRequiredSlotSlugs,
   nextRecommendedSlotSlug,
   slotIsSatisfied,
+  type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
+
+const EMPTY_PROGRESS: Record<string, unknown> = {};
+const EMPTY_SLOTS: ProtocolSlotDef[] = [];
 
 const GUIDED_TEMPLATE_SLUGS = [
   "hair_loss_consultation",
@@ -104,8 +108,12 @@ export function ImagingGuidedCaptureWizard({
     [initial.protocolTemplates, currentSession?.template_slug]
   );
 
-  const slots = template?.slots ?? [];
-  const progress = currentSession?.progress ?? {};
+  const slots = useMemo(() => template?.slots ?? EMPTY_SLOTS, [template]);
+  const progress = useMemo(() => {
+    const p = currentSession?.progress;
+    if (p && typeof p === "object" && !Array.isArray(p)) return p as Record<string, unknown>;
+    return EMPTY_PROGRESS;
+  }, [currentSession]);
 
   const computedNext = useMemo(() => {
     if (!slots.length) return null;
@@ -267,7 +275,7 @@ export function ImagingGuidedCaptureWizard({
       if (row) out.push(row);
     }
     return out;
-  }, [initial.protocolTemplates]);
+  }, [initial]);
 
   return (
     <section className="space-y-6 rounded-xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white p-4 sm:p-6">

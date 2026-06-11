@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { ConsultationFormRunner } from "@/src/components/fi-admin/consultation-forms/ConsultationFormRunner";
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
+import { loadConsultationHandoffState } from "@/src/lib/consultationForms/handoff/consultationHandoffMutations.server";
 import { ensureInRoomHairTransplantConsultationFormInstance } from "@/src/lib/consultationForms/consultationFormMutations.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
@@ -30,6 +31,8 @@ export default async function ConsultationGuidedFormPage({
 
   const instance = await ensureInRoomHairTransplantConsultationFormInstance(tid, cid);
 
+  const handoffInitial = await loadConsultationHandoffState(tid, cid, instance.id);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <ConsultationFormRunner
@@ -37,6 +40,8 @@ export default async function ConsultationGuidedFormPage({
         consultationId={cid}
         patientId={row.patient_id}
         caseId={row.case_id}
+        leadId={row.lead_id}
+        handoffInitial={handoffInitial}
         initialInstance={instance}
       />
     </div>

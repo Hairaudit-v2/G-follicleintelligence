@@ -117,6 +117,7 @@ export type FiCrmTaskRow = {
   lead_id: string;
   patient_id: string | null;
   case_id: string | null;
+  consultation_id: string | null;
   title: string;
   description: string | null;
   task_type: string;
