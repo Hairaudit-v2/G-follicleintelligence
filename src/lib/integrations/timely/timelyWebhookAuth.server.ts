@@ -30,6 +30,8 @@ function extractBearerToken(request: Request): string | null {
 
 /**
  * Zapier Timely webhooks: require `Authorization: Bearer <FI_TIMELY_WEBHOOK_SECRET>`.
+ * Used by patient/appointment sync routes and the temporary discovery endpoint
+ * `POST /api/tenants/[tenantId]/integrations/timely/discovery`.
  * In production, rejects all requests when the secret env var is missing or empty (fail closed).
  */
 export function assertTimelyWebhookAuthorized(request: Request): void {

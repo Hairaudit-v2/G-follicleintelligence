@@ -79,7 +79,7 @@ For **incremental** releases that already have the June 2026 FI foundation, the 
 |----------|---------|
 | `NEXT_PUBLIC_SITE_URL` | Password reset / invite fallback when `Host` / `X-Forwarded-*` are missing in server actions. |
 | `FI_ADMIN_API_KEY` | Operator-key path for selected admin mutations (including some **payment record** writes when keyed — see `assertPaymentRecordWriteAllowed` / CRM gates). |
-| `FI_TIMELY_WEBHOOK_SECRET` | **Required in production** for Timely Zapier webhooks to `POST /api/tenants/[tenantId]/integrations/timely/...` when those routes are used. |
+| `FI_TIMELY_WEBHOOK_SECRET` | **Required in production** for Timely Zapier webhooks to `POST /api/tenants/[tenantId]/integrations/timely/patient|appointment|discovery` when those routes are used. |
 | `FI_REMINDER_CRON_SECRET` | Cron: `POST/GET /api/cron/fi-reminder-jobs` (min 16 chars when enabled). |
 | `RESEND_*` / `TWILIO_*` | Reminder and related email/SMS delivery (see `.env.example`). |
 | `OPENAI_API_KEY` | DoctorOS voice notes / pathology AI where enabled. |

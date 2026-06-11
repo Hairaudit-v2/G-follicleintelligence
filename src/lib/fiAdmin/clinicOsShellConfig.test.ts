@@ -53,6 +53,10 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.ok(timely);
   assert.equal(timely!.disabled, false);
   assert.equal(timely!.href, `${base}/settings/integrations/timely`);
+  const timelyDiscovery = items.find((i) => i.id === "timely-zapier-discovery");
+  assert.ok(timelyDiscovery);
+  assert.equal(timelyDiscovery!.disabled, false);
+  assert.equal(timelyDiscovery!.href, `${base}/settings/integrations/timely/discovery`);
 });
 
 test("resolveClinicOsShellNavItems: LeadFlow (CRM) enabled when showCrmNav", () => {
@@ -190,6 +194,10 @@ test("getClinicOsShellActiveNavId: tax localisation under settings cluster", () 
 
 test("getClinicOsShellActiveNavId: Timely Zapier under settings cluster", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/settings/integrations/timely`, base), "configuration");
+});
+
+test("getClinicOsShellActiveNavId: Timely discovery under settings cluster", () => {
+  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/integrations/timely/discovery`, base), "configuration");
 });
 
 test("resolveClinicOsShellNavItems: Admin Users gated by showManageAdminUsers", () => {

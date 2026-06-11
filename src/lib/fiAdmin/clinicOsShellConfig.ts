@@ -284,6 +284,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         permissionHint: {},
         description: "Zapier webhook URLs and manual setup for Timely patients and appointments.",
       },
+      {
+        id: "timely-zapier-discovery",
+        label: "Integrations · Timely Discovery",
+        path: "settings/integrations/timely/discovery",
+        permissionHint: {},
+        description: "Temporary raw payload capture from Timely Zapier triggers (read-only inbox).",
+      },
     ],
   },
 ];

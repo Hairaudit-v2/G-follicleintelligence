@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { assertTimelyWebhookAuthorized, TimelyWebhookAuthError } from "./timelyWebhookAuth.server";
+import { extractTimelyDiscoveryEventType, stableStringifyForWebhookHash } from "./timelyWebhookEvents.server";
 import { timelyAppointmentWebhookSchema, timelyPatientWebhookSchema } from "./timelyWebhookSchemas";
 import { processTimelyAppointmentWebhook, resolveTimelyStaffIdByName } from "./timelyAppointmentWebhook.server";
 import { processTimelyPatientWebhook } from "./timelyPatientWebhook.server";
@@ -56,6 +57,20 @@ describe("Timely webhook auth", () => {
       () => assertTimelyWebhookAuthorized(reqWithAuth(SECRET)),
       (e: unknown) => e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 503
     );
+  });
+});
+
+describe("Timely discovery webhook helpers", () => {
+  it("stableStringify sorts object keys for canonical hash input", () => {
+    assert.equal(stableStringifyForWebhookHash({ b: 2, a: 1 }), `{"a":1,"b":2}`);
+  });
+
+  it("extractTimelyDiscoveryEventType prefers event_type, event, type", () => {
+    assert.equal(extractTimelyDiscoveryEventType({ event_type: "x" }), "x");
+    assert.equal(extractTimelyDiscoveryEventType({ event: "e" }), "e");
+    assert.equal(extractTimelyDiscoveryEventType({ type: "t" }), "t");
+    assert.equal(extractTimelyDiscoveryEventType({}), "zapier_discovery");
+    assert.equal(extractTimelyDiscoveryEventType([]), "zapier_discovery");
   });
 });
 

@@ -261,6 +261,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       label: "Integrations · Timely",
       title: "Settings — Zapier webhooks for Timely patients and appointments.",
     },
+    {
+      href: `${base}/settings/integrations/timely/discovery`,
+      label: "Integrations · Timely Discovery",
+      title: "Settings — capture raw Timely Zapier payloads for inspection (temporary).",
+    },
   );
   groups.push({
     id: "settings",
