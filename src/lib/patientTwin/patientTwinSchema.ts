@@ -175,6 +175,41 @@ export const patientTwinTimelineSectionSchema = z.object({
   item_cap: z.number().int().positive(),
 });
 
+export const patientTwinMedicationActiveItemSchema = z.object({
+  plan_item_id: z.string().uuid(),
+  plan_id: z.string().uuid(),
+  plan_title: z.string(),
+  plan_type: z.string(),
+  canonical_code: z.string(),
+  display_name: z.string(),
+  role: z.string(),
+  dosing_summary: z.string().nullable(),
+  pathology_gate: z.string().nullable(),
+  sessions_planned: z.number().int().nullable(),
+  sessions_completed: z.number().int(),
+  prescription_id: z.string().uuid().nullable(),
+  prescription_item_id: z.string().uuid().nullable(),
+  source_tables: z.tuple([z.literal("fi_patient_therapy_plan_items"), z.literal("fi_medication_os_canonical")]),
+});
+
+export const patientTwinTherapyEventPreviewSchema = z.object({
+  id: z.string().uuid(),
+  event_type: z.string(),
+  occurred_at: z.string(),
+  title: z.string(),
+  canonical_code: z.string().nullable(),
+  plan_id: z.string().uuid().nullable(),
+  source_table: z.literal("fi_patient_therapy_events"),
+});
+
+export const patientTwinMedicationsSectionSchema = z.object({
+  active_plan_count: z.number().int().min(0),
+  active_items: z.array(patientTwinMedicationActiveItemSchema).max(80),
+  therapy_events_preview: z.array(patientTwinTherapyEventPreviewSchema).max(100),
+  active_item_cap: z.number().int().positive(),
+  therapy_events_preview_cap: z.number().int().positive(),
+});
+
 export const patientTwinClinicalSectionSchema = z.object({
   structured_profile: z
     .object({
@@ -185,7 +220,7 @@ export const patientTwinClinicalSectionSchema = z.object({
       treatment_interest: z.string().nullable(),
     })
     .nullable(),
-  medications: z.null(),
+  medications: patientTwinMedicationsSectionSchema,
   treatments: z.array(z.never()),
   blood_markers: z.array(z.never()),
 });

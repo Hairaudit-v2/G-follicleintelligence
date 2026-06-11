@@ -3,6 +3,7 @@ import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 import { PatientTwinAuditCard } from "./PatientTwinAuditCard";
 import { PatientTwinCasesCard } from "./PatientTwinCasesCard";
 import { PatientTwinClinicalCard } from "./PatientTwinClinicalCard";
+import { PatientTwinMedicationsCard } from "./PatientTwinMedicationsCard";
 import { PatientTwinPathologyCard } from "./PatientTwinPathologyCard";
 import { PatientTwinCrmCard } from "./PatientTwinCrmCard";
 import { PatientTwinHeader } from "./PatientTwinHeader";
@@ -44,6 +45,7 @@ export function PatientTwinDashboard({ tenantId, patientId, twin }: PatientTwinD
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
         <PatientTwinClinicalCard twin={twin} />
+        <PatientTwinMedicationsCard twin={twin} />
         <PatientTwinTimelineCard tenantId={tenantId} twin={twin} />
       </div>
 

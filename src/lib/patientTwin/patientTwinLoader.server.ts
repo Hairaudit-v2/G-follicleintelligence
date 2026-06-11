@@ -16,7 +16,16 @@ import {
 } from "@/src/lib/fi/foundation/patientRecord";
 import { calculatePatientTwinCompleteness, type PatientTwinV1ForCompleteness } from "./patientTwinCompleteness";
 import { patientTwinV1Schema } from "./patientTwinSchema";
+import {
+  loadActiveTherapyPlanSummary,
+  loadPatientTherapyEventsForPatient,
+} from "@/src/lib/medicationOs/medicationOsLoaders.server";
 import { normalizeImagingLibraryAxis } from "@/src/lib/patientImages/patientImagePolicy";
+import {
+  buildPatientTwinMedicationsSection,
+  emptyPatientTwinMedicationsSection,
+  PATIENT_TWIN_MEDICATION_OS_EVENTS_READ_CAP,
+} from "./patientTwinMedicationOs";
 import {
   PATIENT_TWIN_LOADER_VERSION,
   PATIENT_TWIN_VERSION,
@@ -65,6 +74,10 @@ const SOURCE_TABLES_USED = [
   "fi_pathology_result_items",
   "fi_pathology_ai_interpretations",
   "fi_patient_images",
+  "fi_medication_os_canonical",
+  "fi_patient_therapy_plans",
+  "fi_patient_therapy_plan_items",
+  "fi_patient_therapy_events",
 ] as const;
 
 const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
@@ -767,6 +780,20 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     };
   }
 
+  let medications = emptyPatientTwinMedicationsSection();
+  try {
+    const [therapySummary, therapyEvents] = await Promise.all([
+      loadActiveTherapyPlanSummary(supabase, tid, primaryFoundation),
+      loadPatientTherapyEventsForPatient(supabase, tid, primaryFoundation, {
+        limit: PATIENT_TWIN_MEDICATION_OS_EVENTS_READ_CAP,
+      }),
+    ]);
+    medications = buildPatientTwinMedicationsSection(therapySummary, therapyEvents);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    pushWarning(warnings, "generic", `MedicationOS Patient Twin section skipped: ${msg}`);
+  }
+
   const generatedAt = new Date().toISOString();
   const twinBefore: PatientTwinV1ForCompleteness = {
     version: PATIENT_TWIN_VERSION,
@@ -794,7 +821,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     },
     clinical: {
       structured_profile,
-      medications: null,
+      medications,
       treatments: [],
       blood_markers: [],
     },

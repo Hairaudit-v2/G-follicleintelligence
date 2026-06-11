@@ -101,8 +101,8 @@ describe("medicationOsMappers", () => {
       day_offset_start: null,
       day_offset_end: null,
       pathology_gate: null,
-      prescription_id: null,
-      prescription_item_id: null,
+      prescription_id: "99999999-9999-4999-8999-999999999999",
+      prescription_item_id: "88888888-8888-4888-8888-888888888888",
       sort_order: 0,
       metadata: {},
       created_at: "2026-01-01",
@@ -117,6 +117,8 @@ describe("medicationOsMappers", () => {
     assert.equal(summary.active_plan_count, 1);
     assert.equal(summary.plans[0]?.items[0]?.display_name, "Finasteride (display)");
     assert.equal(summary.plans[0]?.items[0]?.dosing_summary, "1 mg daily");
+    assert.equal(summary.plans[0]?.items[0]?.prescription_id, "99999999-9999-4999-8999-999999999999");
+    assert.equal(summary.plans[0]?.items[0]?.prescription_item_id, "88888888-8888-4888-8888-888888888888");
   });
 
   it("buildActiveTherapyPlanSummary falls back to canonical_code when no display map", () => {

@@ -338,6 +338,7 @@ export async function generatePathologyAiInterpretation(
       hair_loss_relevance_score: hairLossRelevanceScore,
       reviewed_by_user_id: null,
       reviewed_at: null,
+      // Generator identity belongs in `metadata`; `reviewed_by_user_id` is reserved for clinician review.
       metadata: { generated_by_user_id: actingUserId },
     })
     .select("*")

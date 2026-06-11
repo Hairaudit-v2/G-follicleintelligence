@@ -142,6 +142,43 @@ export type PatientTwinTimelineSection = {
   item_cap: number;
 };
 
+/** MedicationOS read slice for Twin (bounded; no prescribing mutations). */
+export type PatientTwinMedicationActiveItem = {
+  plan_item_id: string;
+  plan_id: string;
+  plan_title: string;
+  plan_type: string;
+  canonical_code: string;
+  display_name: string;
+  role: string;
+  dosing_summary: string | null;
+  pathology_gate: string | null;
+  sessions_planned: number | null;
+  sessions_completed: number;
+  prescription_id: string | null;
+  prescription_item_id: string | null;
+  /** Tables contributing to this row (for provenance badges in UI). */
+  source_tables: readonly ["fi_patient_therapy_plan_items", "fi_medication_os_canonical"];
+};
+
+export type PatientTwinTherapyEventPreview = {
+  id: string;
+  event_type: string;
+  occurred_at: string;
+  title: string;
+  canonical_code: string | null;
+  plan_id: string | null;
+  source_table: "fi_patient_therapy_events";
+};
+
+export type PatientTwinMedicationsSection = {
+  active_plan_count: number;
+  active_items: PatientTwinMedicationActiveItem[];
+  therapy_events_preview: PatientTwinTherapyEventPreview[];
+  active_item_cap: number;
+  therapy_events_preview_cap: number;
+};
+
 /** Bounded structured fields only — no free-text clinical narrative. */
 export type PatientTwinClinicalSection = {
   structured_profile: {
@@ -151,8 +188,8 @@ export type PatientTwinClinicalSection = {
     primary_concern: string | null;
     treatment_interest: string | null;
   } | null;
-  /** Reserved until a structured medication list exists; narrative fields are intentionally omitted. */
-  medications: null;
+  /** MedicationOS therapy plans / items / recent events (read-only; empty when tables are empty or load fails). */
+  medications: PatientTwinMedicationsSection;
   treatments: never[];
   blood_markers: never[];
 };

@@ -191,6 +191,8 @@ export function buildActiveTherapyPlanSummary(params: {
       pathology_gate: it.pathology_gate,
       sessions_planned: it.sessions_planned,
       sessions_completed: it.sessions_completed,
+      prescription_id: it.prescription_id,
+      prescription_item_id: it.prescription_item_id,
     }));
     return {
       planId: plan.id,

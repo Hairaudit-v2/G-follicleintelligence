@@ -219,3 +219,31 @@ export async function loadActiveTherapyPlanSummary(
     displayNameByCanonicalCode,
   });
 }
+
+/**
+ * Single therapy plan by id (tenant-scoped) with items when `includeItems` is true (default).
+ */
+export async function loadTherapyPlanById(
+  supabase: SupabaseClient,
+  tenantId: string,
+  planId: string,
+  options?: { includeItems?: boolean }
+): Promise<MedicationOsTherapyPlanBundle | null> {
+  const tid = tenantId.trim();
+  const pid = planId.trim();
+  const includeItems = options?.includeItems !== false;
+  const { data, error } = await supabase
+    .from("fi_patient_therapy_plans")
+    .select(PATIENT_THERAPY_PLAN_SELECT)
+    .eq("tenant_id", tid)
+    .eq("id", pid)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+  const plan = toPatientTherapyPlanRow(data as Record<string, unknown>);
+  if (!includeItems) {
+    return { plan, items: [] };
+  }
+  const itemsByPlan = await loadPlanItemsByPlanIds(supabase, tid, [plan.id]);
+  return { plan, items: itemsByPlan.get(plan.id) ?? [] };
+}

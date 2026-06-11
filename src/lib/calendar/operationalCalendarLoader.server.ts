@@ -398,16 +398,13 @@ export async function loadOperationalCalendarPageData(
     loadTenantStaffAndClinics(tid, { resourceView: query.resourceView, clinicId: query.clinicId }),
     resolveBookingMutationGate(tid),
     loadFiServicesForTenant(tid),
-    supabaseAdmin().from("fi_tenants").select("metadata").eq("id", tid).maybeSingle(),
+    supabaseAdmin().from("fi_tenants").select("config_json").eq("id", tid).maybeSingle(),
   ]);
 
-  const tenantMetaRow = tenantRow.data as { metadata?: unknown } | null;
+  const tenantMetaRow = tenantRow.data as { config_json?: unknown } | null;
+  const cfg = tenantMetaRow?.config_json;
   const tenantMetadata =
-    tenantMetaRow?.metadata != null &&
-    typeof tenantMetaRow.metadata === "object" &&
-    !Array.isArray(tenantMetaRow.metadata)
-      ? (tenantMetaRow.metadata as Record<string, unknown>)
-      : null;
+    cfg != null && typeof cfg === "object" && !Array.isArray(cfg) ? (cfg as Record<string, unknown>) : null;
 
   const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
   query = normalized.query;

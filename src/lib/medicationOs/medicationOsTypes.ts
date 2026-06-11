@@ -142,6 +142,8 @@ export type ActiveTherapyItemSummary = {
   pathology_gate: string | null;
   sessions_planned: number | null;
   sessions_completed: number;
+  prescription_id: string | null;
+  prescription_item_id: string | null;
 };
 
 export type ActiveTherapyPlanSummary = {
@@ -163,6 +165,20 @@ export type PatientTherapyEventPreview = {
   title: string;
   canonical_code: string | null;
   plan_id: string | null;
+};
+
+/** Input line for draft plan create/update (canonical_code validated against tenant vocabulary). */
+export type DraftTherapyPlanItemInput = {
+  canonical_code: string;
+  role: PlanItemRole;
+  dosing_summary?: string | null;
+  sessions_planned?: number | null;
+  sessions_completed?: number;
+  day_offset_start?: number | null;
+  day_offset_end?: number | null;
+  pathology_gate?: string | null;
+  sort_order?: number;
+  metadata?: Record<string, unknown>;
 };
 
 export type LoadTherapyPlansOptions = {

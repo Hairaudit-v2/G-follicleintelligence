@@ -161,6 +161,8 @@ export async function createImagingProtocolSessionAction(
     const tid = tenantId.trim();
     const pid = patientId.trim();
     const now = new Date().toISOString();
+    // `fi_imaging_protocol_sessions` has no top-level `status` column; session state lives in `progress` jsonb
+    // (including per-step status under PROGRESS_META_KEY).
     const { data: ins, error } = await supabase
       .from("fi_imaging_protocol_sessions")
       .insert({

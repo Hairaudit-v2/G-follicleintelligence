@@ -162,11 +162,11 @@ export async function loadStaffAndUserLabels(
   const staffNames = new Map<string, string>();
   const userEmails = new Map<string, string>();
   if (staffIds.length) {
-    const { data, error } = await supabase.from("fi_staff").select("id, display_name").eq("tenant_id", tid).in("id", staffIds);
+    const { data, error } = await supabase.from("fi_staff").select("id, full_name, email").eq("tenant_id", tid).in("id", staffIds);
     if (error) throw new Error(error.message);
     for (const raw of data ?? []) {
-      const r = raw as { id: string; display_name: string | null };
-      staffNames.set(String(r.id), String(r.display_name ?? "").trim() || "Staff");
+      const r = raw as { id: string; full_name: string | null; email: string | null };
+      staffNames.set(String(r.id), String(r.full_name ?? "").trim() || String(r.email ?? "").trim() || "Staff");
     }
   }
   if (userIds.length) {

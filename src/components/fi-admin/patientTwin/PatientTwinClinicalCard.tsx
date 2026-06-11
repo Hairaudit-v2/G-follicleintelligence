@@ -16,7 +16,7 @@ export function PatientTwinClinicalCard({ twin }: { twin: PatientTwinV1 }) {
       surfaceVariant="darkGlass"
       headingId="patient-twin-clinical-heading"
       title="Clinical (bounded)"
-      description="Structured scales and interest fields only — no narrative, medications, or imaging URLs."
+      description="Structured scales and interest fields only — no narrative or imaging URLs. MedicationOS therapy appears on the MedicationOS card."
     >
       {twin.person.date_of_birth ? (
         <p className="mb-3 text-sm text-[#CBD5E1]">
@@ -45,8 +45,7 @@ export function PatientTwinClinicalCard({ twin }: { twin: PatientTwinV1 }) {
       )}
 
       <p className="mt-4 text-xs leading-relaxed text-[#64748B]">
-        Medications, free-text history, and blood markers are intentionally omitted from Twin V1 until structured
-        sources exist.
+        Free-text history and blood markers stay off Twin V1; MedicationOS therapy read model is on the adjacent card.
       </p>
     </FiSection>
   );
