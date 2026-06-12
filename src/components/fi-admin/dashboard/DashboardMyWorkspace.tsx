@@ -2,9 +2,11 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
+import { FI_WORKSPACE_PROFILES } from "@/src/config/fiWorkspaceProfiles";
+import { FI_DASHBOARD_WIDGET_LABELS } from "@/src/config/fiDashboardRegistry";
 import type { DashboardReminderItem, TaskDueItem } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import { FI_DASHBOARD_WIDGET_LABELS } from "@/src/config/fiDashboardRegistry";
 
 /**
  * TODO(Stage 2 loader): Add explicit “my consultations / my bookings / my cases” lists with
@@ -23,9 +25,14 @@ export function DashboardMyWorkspace(props: {
   viewerFiUserId: string | null;
   tasksDue: readonly TaskDueItem[];
   upcomingReminders: readonly DashboardReminderItem[];
+  workspaceProfile?: FiWorkspaceProfileKey;
 }) {
-  const { base, viewerFiUserId, tasksDue, upcomingReminders } = props;
+  const { base, viewerFiUserId, tasksDue, upcomingReminders, workspaceProfile } = props;
   const meta = FI_DASHBOARD_WIDGET_LABELS.my_workspace;
+  const profileHints =
+    workspaceProfile && workspaceProfile !== "default"
+      ? (FI_WORKSPACE_PROFILES[workspaceProfile]?.priorityTaskTypes ?? [])
+      : [];
 
   const myTasks = viewerFiUserId
     ? tasksDue.filter((t) => t.assigneeUserId != null && t.assigneeUserId === viewerFiUserId)
@@ -53,6 +60,16 @@ export function DashboardMyWorkspace(props: {
           <p className="mt-1 text-xs text-slate-500">
             When CRM tasks or reminders are tied to you as assignee or owner, they will appear in this space.
           </p>
+          {profileHints.length ? (
+            <div className="mt-4 text-left">
+              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Typical focus</p>
+              <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-slate-400">
+                {profileHints.slice(0, 4).map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="mt-4 grid gap-4 lg:grid-cols-2">

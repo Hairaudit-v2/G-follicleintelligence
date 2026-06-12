@@ -1,4 +1,5 @@
 import type { FiDashboardWidgetKey } from "@/src/config/fiDashboardRegistry";
+import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { FiOsControlCentreHome } from "@/src/components/fi-os/FiOsControlCentreHome";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import type { ResolvedDashboardQuickAction } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
@@ -11,8 +12,17 @@ export function FiTenantOperationalHome(props: {
   featureAccess?: ReadonlyMap<FiFeatureKey, boolean> | null;
   homeWidgetOrder?: readonly FiDashboardWidgetKey[];
   quickActionItems?: readonly ResolvedDashboardQuickAction[];
+  workspaceProfile?: FiWorkspaceProfileKey;
 }) {
-  const { data, showCrmNav, showBookingsBoard = showCrmNav, featureAccess, homeWidgetOrder, quickActionItems } = props;
+  const {
+    data,
+    showCrmNav,
+    showBookingsBoard = showCrmNav,
+    featureAccess,
+    homeWidgetOrder,
+    quickActionItems,
+    workspaceProfile,
+  } = props;
   return (
     <FiOsControlCentreHome
       data={data}
@@ -21,6 +31,7 @@ export function FiTenantOperationalHome(props: {
       featureAccess={featureAccess ?? null}
       homeWidgetOrder={homeWidgetOrder}
       quickActionItems={quickActionItems}
+      workspaceProfile={workspaceProfile}
     />
   );
 }

@@ -24,6 +24,7 @@ function staff(p: Partial<FiStaffRow> & Pick<FiStaffRow, "id" | "full_name">): F
     mobile: null,
     default_timezone: null,
     working_hours: {},
+    staff_metadata: {},
     is_active: true,
     calendar_color: null,
     created_at: "",

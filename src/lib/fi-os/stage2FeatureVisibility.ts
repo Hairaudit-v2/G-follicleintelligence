@@ -31,6 +31,26 @@ export function fiDashboardWidgetVisibleByFeatureAccess(
       return on(access, "my_workspace");
     case "attention_centre":
       return on(access, "attention_centre");
+    case "analytics_summary":
+      return onAny(access, ["analytics", "dashboard"]);
+    case "audit_summary":
+      return on(access, "audit");
+    case "imaging_summary":
+      return onAny(access, ["imaging", "patient_twin"]);
+    case "pathology_summary":
+      return on(access, "pathology");
+    case "crm_pipeline":
+      return on(access, "crm");
+    case "consultation_queue":
+      return on(access, "consultations");
+    case "procedure_day_queue":
+      return onAny(access, ["procedure_day", "cases"]);
+    case "follow_up_queue":
+      return onAny(access, ["my_workspace", "crm", "attention_centre"]);
+    case "imaging_uploads":
+      return onAny(access, ["imaging", "patient_twin"]);
+    case "booking_queue":
+      return onAny(access, ["calendar", "dashboard"]);
     default:
       return true;
   }

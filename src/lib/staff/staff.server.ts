@@ -15,6 +15,8 @@ export type FiStaffRow = {
   mobile: string | null;
   default_timezone: string | null;
   working_hours: Record<string, unknown>;
+  /** FI OS Stage 3+ JSON bag (`workspace_profile`, future keys). */
+  staff_metadata: Record<string, unknown>;
   is_active: boolean;
   calendar_color: string | null;
   created_at: string;
@@ -25,6 +27,9 @@ function mapStaffRow(row: Record<string, unknown>): FiStaffRow {
   const wh = row.working_hours;
   const working_hours =
     wh && typeof wh === "object" && !Array.isArray(wh) ? (wh as Record<string, unknown>) : {};
+  const sm = row.staff_metadata;
+  const staff_metadata =
+    sm && typeof sm === "object" && !Array.isArray(sm) ? (sm as Record<string, unknown>) : {};
   return {
     id: String(row.id),
     tenant_id: String(row.tenant_id),
@@ -35,6 +40,7 @@ function mapStaffRow(row: Record<string, unknown>): FiStaffRow {
     mobile: row.mobile != null ? String(row.mobile) : null,
     default_timezone: row.default_timezone != null ? String(row.default_timezone) : null,
     working_hours,
+    staff_metadata,
     is_active: Boolean(row.is_active),
     calendar_color: row.calendar_color != null ? String(row.calendar_color) : null,
     created_at: String(row.created_at),
@@ -165,6 +171,7 @@ export type FiStaffUpsertInput = {
   mobile?: string | null;
   default_timezone?: string | null;
   working_hours?: Record<string, unknown>;
+  staff_metadata?: Record<string, unknown>;
   is_active?: boolean;
   calendar_color?: string | null;
   fi_user_id?: string | null;
@@ -201,6 +208,10 @@ export async function insertFiStaff(
     input.working_hours && typeof input.working_hours === "object" && !Array.isArray(input.working_hours)
       ? input.working_hours
       : {};
+  const sm =
+    input.staff_metadata && typeof input.staff_metadata === "object" && !Array.isArray(input.staff_metadata)
+      ? input.staff_metadata
+      : {};
   const payload = {
     tenant_id: tid,
     full_name: input.full_name.trim(),
@@ -209,6 +220,7 @@ export async function insertFiStaff(
     mobile: input.mobile?.trim() || null,
     default_timezone: input.default_timezone?.trim() || null,
     working_hours: wh,
+    staff_metadata: sm,
     is_active: input.is_active !== false,
     calendar_color: input.calendar_color?.trim() || null,
     fi_user_id: fiUserId,
@@ -249,6 +261,11 @@ export async function updateFiStaff(
     const fiUserId = patch.fi_user_id?.trim() || null;
     if (fiUserId) await assertFiUserBelongsToTenant(supabase, tid, fiUserId);
     row.fi_user_id = fiUserId;
+  }
+  if (patch.staff_metadata !== undefined) {
+    const sm = patch.staff_metadata;
+    row.staff_metadata =
+      sm && typeof sm === "object" && !Array.isArray(sm) ? (sm as Record<string, unknown>) : {};
   }
 
   const { data, error } = await supabase.from("fi_staff").update(row).eq("tenant_id", tid).eq("id", sid).select("*").single();

@@ -5,12 +5,15 @@ import { cn } from "@/lib/utils";
 import type { FiDashboardWidgetKey } from "@/src/config/fiDashboardRegistry";
 import { FI_DASHBOARD_HOME_WIDGET_ORDER } from "@/src/config/fiDashboardRegistry";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
+import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
+import { getWorkspaceProfileLabel } from "@/src/config/fiWorkspaceProfiles";
 import { DashboardActionCentre } from "@/src/components/fi-admin/dashboard/DashboardActionCentre";
 import { DashboardClinicMetrics } from "@/src/components/fi-admin/dashboard/DashboardClinicMetrics";
 import { DashboardMyWorkspace } from "@/src/components/fi-admin/dashboard/DashboardMyWorkspace";
 import { DashboardOperationalWorkspace } from "@/src/components/fi-admin/dashboard/DashboardOperationalWorkspace";
 import { DashboardQuickActionsBar } from "@/src/components/fi-admin/dashboard/DashboardQuickActionsBar";
 import { DashboardSurgeryPipeline } from "@/src/components/fi-admin/dashboard/DashboardSurgeryPipeline";
+import { DashboardWidgetPlaceholder } from "@/src/components/fi-admin/dashboard/DashboardWidgetPlaceholder";
 import { TenantHomeQuickCallIn } from "@/src/components/fi-admin/TenantHomeQuickCallIn";
 import type { ResolvedDashboardQuickAction } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
 import { resolveDashboardQuickActions } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
@@ -20,6 +23,34 @@ import {
 } from "@/src/lib/fi-os/stage2FeatureVisibility";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+
+function resolveDashboardPlaceholderHref(tenantBase: string, key: FiDashboardWidgetKey): string | null {
+  const b = tenantBase.replace(/\/+$/, "");
+  switch (key) {
+    case "analytics_summary":
+      return `${b}/analytics`;
+    case "audit_summary":
+      return `${b}/audit`;
+    case "imaging_summary":
+      return `${b}/foundation-integrity`;
+    case "pathology_summary":
+      return `${b}/cases`;
+    case "crm_pipeline":
+      return `${b}/crm`;
+    case "consultation_queue":
+      return `${b}/consultations`;
+    case "procedure_day_queue":
+      return `${b}/procedure-day`;
+    case "follow_up_queue":
+      return `${b}/crm`;
+    case "imaging_uploads":
+      return `${b}/foundation-integrity#fi-os-foundation-media`;
+    case "booking_queue":
+      return `${b}/calendar`;
+    default:
+      return null;
+  }
+}
 
 /**
  * FI OS tenant home — clinic operating centre.
@@ -34,8 +65,18 @@ export function FiOsControlCentreHome(props: {
   featureAccess?: ReadonlyMap<FiFeatureKey, boolean> | null;
   homeWidgetOrder?: readonly FiDashboardWidgetKey[];
   quickActionItems?: readonly ResolvedDashboardQuickAction[];
+  /** Stage 3: resolved persona for copy and optional badge (defaults omitted). */
+  workspaceProfile?: FiWorkspaceProfileKey;
 }) {
-  const { data, showCrmNav, showBookingsBoard, featureAccess = null, homeWidgetOrder, quickActionItems } = props;
+  const {
+    data,
+    showCrmNav,
+    showBookingsBoard,
+    featureAccess = null,
+    homeWidgetOrder,
+    quickActionItems,
+    workspaceProfile,
+  } = props;
   const base = `/fi-admin/${data.tenantId}`;
   const baseResolved = resolveDashboardQuickActions(base, { showCrmNav, showBookingsBoard });
   const resolvedQuick =
@@ -89,14 +130,32 @@ export function FiOsControlCentreHome(props: {
             viewerFiUserId={data.viewerFiUserId}
             tasksDue={data.tasksDue}
             upcomingReminders={data.upcomingReminders}
+            workspaceProfile={workspaceProfile}
           />
         );
       case "attention_centre":
         return <DashboardActionCentre base={base} actionCentre={data.actionCentre} showCrmNav={showCrmNav} />;
-      default:
-        return null;
+      case "analytics_summary":
+      case "audit_summary":
+      case "imaging_summary":
+      case "pathology_summary":
+      case "crm_pipeline":
+      case "consultation_queue":
+      case "procedure_day_queue":
+      case "follow_up_queue":
+      case "imaging_uploads":
+      case "booking_queue":
+        return (
+          <DashboardWidgetPlaceholder widgetKey={key} relatedHref={resolveDashboardPlaceholderHref(base, key)} />
+        );
+      default: {
+        const _exhaustive: never = key;
+        return _exhaustive;
+      }
     }
   };
+
+  const showWorkspaceBadge = Boolean(workspaceProfile && workspaceProfile !== "default");
 
   return (
     <div className="space-y-6 pb-8 sm:space-y-7">
@@ -105,6 +164,11 @@ export function FiOsControlCentreHome(props: {
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">Clinic operating centre</p>
           <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">{data.tenantName}</h1>
           <p className="mt-1 text-sm text-slate-500">{dateLine}</p>
+          {showWorkspaceBadge ? (
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Workspace: <span className="text-cyan-400/90">{getWorkspaceProfileLabel(workspaceProfile!)}</span>
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {data.canQuickCallIn ? <TenantHomeQuickCallIn tenantId={data.tenantId} /> : null}

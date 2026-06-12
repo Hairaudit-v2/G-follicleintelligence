@@ -22,6 +22,7 @@ import {
 import { mergeStaffWorkingHoursDocument, parseStaffProfileExtras } from "@/src/lib/staff/staffProfileExtras";
 import { CLINICAL_STAFF_ROLE_OPTIONS, NEEDS_REVIEW_STAFF_ROLE } from "@/src/lib/staff/staffRolePolicy";
 import type { FiStaffRow } from "@/src/lib/staff/staff.server";
+import { parseExplicitWorkspaceProfile } from "@/src/lib/fi-os/workspaceProfileDerivation";
 import {
   formatStaffWeeklyHoursSummary,
   parseStaffWeeklyHours,
@@ -553,6 +554,9 @@ export function StaffDirectoryClient({
                   tenantId={tenantId}
                   staffId={editingRow.id}
                   dbOverrides={data.staffFeatureAccessByStaffId[editingRow.id] ?? {}}
+                  initialExplicitWorkspaceProfile={parseExplicitWorkspaceProfile(
+                    editingRow.staff_metadata.workspace_profile
+                  )}
                 />
               ) : null}
             </>
