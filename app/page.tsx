@@ -8,6 +8,7 @@ import { FiHomeEcosystemSection } from "@/components/home/FiHomeEcosystemSection
 import { FiHomeGlobalIntelligenceSection } from "@/components/home/FiHomeGlobalIntelligenceSection";
 import { FiHomePatientTwinSection } from "@/components/home/FiHomePatientTwinSection";
 import { Section } from "@/components/layout/section";
+import { PlatformArchitectureMap } from "@/components/platform/PlatformArchitectureMap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -832,6 +833,9 @@ export default function HomePage() {
             title="Built as category infrastructure—not a single-product feature."
             description="Follicle Intelligence strengthens as more evidence types and standards programs connect: deeper cohorts, sharper benchmarks, and harder-to-replace workflow integration. Hair restoration is the live wedge; the architecture is modular for procedural and cosmetic verticals that share audit-shaped problems."
           />
+        </FadeIn>
+        <FadeIn delay={0.04} className="mt-10">
+          <PlatformArchitectureMap />
         </FadeIn>
         <div className="mt-10 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <FadeIn>
