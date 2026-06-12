@@ -35,7 +35,14 @@ export async function supabaseAdminFetchWithRetry(input: RequestInfo | URL, init
     }
   }
   const detail = describeUnderlyingFetchError(last);
-  throw new Error(`Supabase fetch failed after 6 attempts (${detail}). Check NEXT_PUBLIC_SUPABASE_URL, network/VPN/firewall, and that the Supabase project is not paused.`, {
-    cause: last,
-  });
+  const overflowHint =
+    /HEADERS_OVERFLOW|UND_ERR_HEADERS_OVERFLOW/i.test(detail) || /Headers Overflow/i.test(detail)
+      ? " Try: NODE_OPTIONS=--max-http-header-size=262144 (Windows / undici)."
+      : "";
+  throw new Error(
+    `Supabase fetch failed after 6 attempts (${detail}). Check NEXT_PUBLIC_SUPABASE_URL, network/VPN/firewall, and that the Supabase project is not paused.${overflowHint}`,
+    {
+      cause: last,
+    }
+  );
 }

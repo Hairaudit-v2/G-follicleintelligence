@@ -73,6 +73,15 @@ describe("validateFiServerEnv", () => {
     if (!r.ok) assert.ok(r.errors.includes("CRON_SECRET"));
   });
 
+  it("FI_HR_SYNC_CRON_SECRET too short fails", () => {
+    const r = validateFiServerEnv({
+      ...validProdBase(),
+      FI_HR_SYNC_CRON_SECRET: "123456789012345",
+    });
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.ok(r.errors.includes("FI_HR_SYNC_CRON_SECRET"));
+  });
+
   it("non-production minimal env passes with empty Supabase URL", () => {
     const r = validateFiServerEnv({ NODE_ENV: "development" });
     assert.equal(r.ok, true);

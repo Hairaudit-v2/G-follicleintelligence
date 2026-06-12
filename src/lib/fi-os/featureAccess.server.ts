@@ -15,6 +15,10 @@ import {
   isFiFeatureKey,
   type FiFeatureKey,
 } from "@/src/config/fiFeatureAccessRegistry";
+import { loadFeatureTemplateDefaultsForStaff } from "@/src/lib/fi-os/organisationalProfile.server";
+import { mergeFeatureAccessWithOrganisationalLayers } from "@/src/lib/fi-os/organisationalProfile.merge";
+import { resolveTenantOperatingModeFeatureDefaults } from "@/src/lib/fi-os/organisationalProfile.tenantMode.server";
+import { loadStaffFeatureAccessOverrides } from "@/src/lib/fi-os/staffFeatureAccessOverrides.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole, isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
@@ -51,33 +55,7 @@ export async function tryResolveViewerStaffIdForTenant(tenantId: string, fiUserI
   return String((data as { id: string }).id);
 }
 
-/**
- * Loads explicit per-feature toggles from `fi_staff_feature_access` for one staff member.
- * Unknown `feature_key` values from the database are ignored.
- */
-export async function loadStaffFeatureAccessOverrides(
-  tenantId: string,
-  staffId: string | null
-): Promise<Partial<Record<FiFeatureKey, boolean>>> {
-  const tid = tenantId.trim();
-  const sid = staffId?.trim() ?? "";
-  if (!tid || !sid) return {};
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_staff_feature_access")
-    .select("feature_key, enabled")
-    .eq("tenant_id", tid)
-    .eq("staff_id", sid);
-  if (error || !data) return {};
-  const out: Partial<Record<FiFeatureKey, boolean>> = {};
-  for (const raw of data) {
-    const row = raw as { feature_key: string; enabled: boolean };
-    const k = String(row.feature_key ?? "");
-    if (!isFiFeatureKey(k)) continue;
-    out[k] = Boolean(row.enabled);
-  }
-  return out;
-}
+export { loadStaffFeatureAccessOverrides } from "@/src/lib/fi-os/staffFeatureAccessOverrides.server";
 
 export function mergeEffectiveFeatureAccessMap(overrides: Partial<Record<FiFeatureKey, boolean>>): Map<FiFeatureKey, boolean> {
   return applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), overrides);
@@ -107,7 +85,19 @@ async function loadFiOsFeatureAccessMapOrNullForViewerImpl(tenantId: string): Pr
     const fiUser = await loadFiUserRow(tid, authId);
     const staffId = fiUser ? await tryResolveViewerStaffIdForTenant(tid, fiUser.id) : null;
     const overrides = staffId ? await loadStaffFeatureAccessOverrides(tid, staffId) : {};
-    return mergeEffectiveFeatureAccessMap(overrides);
+    try {
+      const [tenantModeDefaults, templateDefaults] = await Promise.all([
+        resolveTenantOperatingModeFeatureDefaults(tid),
+        staffId ? loadFeatureTemplateDefaultsForStaff(tid, staffId) : Promise.resolve({} as Partial<Record<FiFeatureKey, boolean>>),
+      ]);
+      return mergeFeatureAccessWithOrganisationalLayers({
+        tenantModeDefaults,
+        templateDefaults,
+        staffOverrides: overrides,
+      });
+    } catch {
+      return mergeEffectiveFeatureAccessMap(overrides);
+    }
   } catch {
     return null;
   }

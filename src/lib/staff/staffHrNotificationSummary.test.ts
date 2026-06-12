@@ -19,6 +19,7 @@ function staff(p: Partial<FiStaffRow> & Pick<FiStaffRow, "id" | "full_name">): F
     tenant_id: "t1",
     fi_user_id: null,
     staff_role: "needs_review",
+    position_type_id: null,
     email: null,
     mobile: null,
     default_timezone: null,

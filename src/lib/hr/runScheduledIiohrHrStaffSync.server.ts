@@ -10,7 +10,7 @@ import {
 } from "@/src/lib/hr/runScheduledIiohrHrStaffSyncCore";
 
 /**
- * Scheduled Evolved Perth HR → FI staff sync (commit). Used by `/api/cron/iiohr-hr-perth-staff-sync`.
+ * Scheduled Evolved Perth HR → FI staff sync (commit). Used by `GET` or `POST /api/cron/iiohr-hr-perth-staff-sync`.
  */
 export async function runScheduledIiohrHrStaffSync(): Promise<ScheduledIiohrHrStaffSyncCoreResult> {
   const tenantId = process.env.EVOLVED_PERTH_TENANT_ID?.trim() ?? "";

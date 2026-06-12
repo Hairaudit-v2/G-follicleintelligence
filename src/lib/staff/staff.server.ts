@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
+import { assertFiStaffPositionTypeAssignableToTenant } from "@/src/lib/fi-os/staffPositionTypeValidation.server";
 
 export type FiStaffRow = {
   id: string;
@@ -11,6 +12,8 @@ export type FiStaffRow = {
   fi_user_id: string | null;
   full_name: string;
   staff_role: string;
+  /** FI OS Stage 3.5: optional structured position; `staff_role` remains legacy fallback. */
+  position_type_id: string | null;
   email: string | null;
   mobile: string | null;
   default_timezone: string | null;
@@ -36,6 +39,7 @@ function mapStaffRow(row: Record<string, unknown>): FiStaffRow {
     fi_user_id: row.fi_user_id != null ? String(row.fi_user_id) : null,
     full_name: String(row.full_name ?? "").trim() || "Staff",
     staff_role: String(row.staff_role ?? "consultant").trim() || "consultant",
+    position_type_id: row.position_type_id != null ? String(row.position_type_id) : null,
     email: row.email != null ? String(row.email) : null,
     mobile: row.mobile != null ? String(row.mobile) : null,
     default_timezone: row.default_timezone != null ? String(row.default_timezone) : null,
@@ -167,6 +171,7 @@ export async function resolveBookingStaffAssignment(
 export type FiStaffUpsertInput = {
   full_name: string;
   staff_role?: string;
+  position_type_id?: string | null;
   email?: string | null;
   mobile?: string | null;
   default_timezone?: string | null;
@@ -204,6 +209,9 @@ export async function insertFiStaff(
   const fiUserId = input.fi_user_id?.trim() || null;
   if (fiUserId) await assertFiUserBelongsToTenant(supabase, tid, fiUserId);
 
+  const posId = input.position_type_id?.trim() || null;
+  if (posId) await assertFiStaffPositionTypeAssignableToTenant(tid, posId);
+
   const wh =
     input.working_hours && typeof input.working_hours === "object" && !Array.isArray(input.working_hours)
       ? input.working_hours
@@ -216,6 +224,7 @@ export async function insertFiStaff(
     tenant_id: tid,
     full_name: input.full_name.trim(),
     staff_role: (input.staff_role ?? "consultant").trim() || "consultant",
+    position_type_id: input.position_type_id?.trim() || null,
     email: input.email?.trim() || null,
     mobile: input.mobile?.trim() || null,
     default_timezone: input.default_timezone?.trim() || null,
@@ -245,6 +254,13 @@ export async function updateFiStaff(
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (patch.full_name !== undefined) row.full_name = String(patch.full_name ?? "").trim() || "Staff";
   if (patch.staff_role !== undefined) row.staff_role = String(patch.staff_role ?? "consultant").trim() || "consultant";
+  if (patch.position_type_id !== undefined) {
+    const pt = patch.position_type_id?.trim() || null;
+    if (pt) {
+      await assertFiStaffPositionTypeAssignableToTenant(tid, pt);
+    }
+    row.position_type_id = pt;
+  }
   if (patch.email !== undefined) row.email = patch.email?.trim() || null;
   if (patch.mobile !== undefined) row.mobile = patch.mobile?.trim() || null;
   if (patch.default_timezone !== undefined) row.default_timezone = patch.default_timezone?.trim() || null;

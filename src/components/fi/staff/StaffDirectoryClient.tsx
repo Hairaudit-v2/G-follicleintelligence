@@ -554,6 +554,16 @@ export function StaffDirectoryClient({
                   tenantId={tenantId}
                   staffId={editingRow.id}
                   dbOverrides={data.staffFeatureAccessByStaffId[editingRow.id] ?? {}}
+                  featureTemplateDefaults={data.staffFeatureTemplateDefaultsByStaffId[editingRow.id] ?? {}}
+                  staffPositionTypeId={editingRow.position_type_id}
+                  positionTypes={data.staffPositionTypes.map((p) => ({
+                    id: p.id,
+                    tenant_id: p.tenant_id,
+                    code: p.code,
+                    title: p.title,
+                    default_workspace_profile: p.default_workspace_profile,
+                    default_feature_template_key: p.default_feature_template_key,
+                  }))}
                   initialExplicitWorkspaceProfile={parseExplicitWorkspaceProfile(
                     editingRow.staff_metadata.workspace_profile
                   )}

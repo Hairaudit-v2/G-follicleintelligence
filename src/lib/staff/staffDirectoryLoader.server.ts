@@ -6,6 +6,8 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmStaffManageRole } from "@/src/lib/crm/crmGatePolicy";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveCanManageStaffFeatureAccessSettings } from "@/src/lib/fi-os/featureAccess.server";
+import { loadFeatureTemplateDefaultsForStaff, loadFiStaffPositionTypesForTenant } from "@/src/lib/fi-os/organisationalProfile.server";
+import type { FiStaffPositionTypeRow } from "@/src/lib/fi-os/organisationalProfile.schema";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
@@ -28,6 +30,10 @@ export type StaffDirectoryPageResult = {
   canManageStaffFeatureVisibility: boolean;
   /** Sparse DB overrides keyed by staff id (only when `canManageStaffFeatureVisibility`). */
   staffFeatureAccessByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>>;
+  /** Stage 3.5: template-derived defaults before per-staff overrides (same gate as feature visibility). */
+  staffFeatureTemplateDefaultsByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>>;
+  /** Global + tenant-specific position types for admin dropdown. */
+  staffPositionTypes: FiStaffPositionTypeRow[];
   /** Staff profile id linked to the signed-in tenant user (`fi_staff.fi_user_id` = `fi_users.id`), if any. */
   viewerStaffId: string | null;
   fiUsersForLink: { id: string; email: string | null }[];
@@ -147,6 +153,9 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
   const canManageStaffFeatureVisibility = await resolveCanManageStaffFeatureAccessSettings(tid);
 
   const staffFeatureAccessByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
+  const staffFeatureTemplateDefaultsByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
+  let staffPositionTypes: FiStaffPositionTypeRow[] = [];
+
   if (canManageStaffFeatureVisibility && staffIds.length) {
     const { data: faRows, error: faErr } = await supabase
       .from("fi_staff_feature_access")
@@ -163,6 +172,22 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
         staffFeatureAccessByStaffId[sid][fk] = Boolean(r.enabled);
       }
     }
+
+    try {
+      staffPositionTypes = await loadFiStaffPositionTypesForTenant(tid);
+    } catch {
+      staffPositionTypes = [];
+    }
+
+    await Promise.all(
+      staffIds.map(async (sid) => {
+        try {
+          staffFeatureTemplateDefaultsByStaffId[sid] = await loadFeatureTemplateDefaultsForStaff(tid, sid);
+        } catch {
+          staffFeatureTemplateDefaultsByStaffId[sid] = {};
+        }
+      })
+    );
   }
 
   const [payrollByStaffId, hrNotificationByStaffId] = await Promise.all([
@@ -175,6 +200,8 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     canManageStaff,
     canManageStaffFeatureVisibility,
     staffFeatureAccessByStaffId,
+    staffFeatureTemplateDefaultsByStaffId,
+    staffPositionTypes,
     viewerStaffId,
     fiUsersForLink,
     pinMetadataByStaffId,

@@ -7,6 +7,7 @@ import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { isFiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { assertStaffFeatureAccessMutationAllowed } from "@/src/lib/fi-os/featureAccess.server";
+import { loadLinkedStaffOrganisationalSignalsForFiUser } from "@/src/lib/fi-os/organisationalProfile.server";
 import { resolveWorkspaceProfileKeyFromSignals } from "@/src/lib/fi-os/workspaceProfileDerivation";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
@@ -28,30 +29,6 @@ async function loadFiUserRow(
   return { id: String((data as { id: string }).id), role: String((data as { role: string | null }).role ?? "member") };
 }
 
-async function loadLinkedStaffSignalsForFiUser(
-  tenantId: string,
-  fiUserId: string
-): Promise<{ staff_role: string; explicitWorkspaceProfile: unknown } | null> {
-  const tid = tenantId.trim();
-  const uid = fiUserId.trim();
-  if (!tid || !uid) return null;
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("fi_staff")
-    .select("staff_role, staff_metadata")
-    .eq("tenant_id", tid)
-    .eq("fi_user_id", uid)
-    .maybeSingle();
-  if (error || !data) return null;
-  const row = data as { staff_role: string | null; staff_metadata: unknown };
-  const md = row.staff_metadata;
-  const metaObj = md && typeof md === "object" && !Array.isArray(md) ? (md as Record<string, unknown>) : {};
-  return {
-    staff_role: String(row.staff_role ?? "").trim() || "consultant",
-    explicitWorkspaceProfile: metaObj.workspace_profile,
-  };
-}
-
 async function loadWorkspaceProfileKeyForViewerImpl(tenantId: string): Promise<FiWorkspaceProfileKey> {
   const tid = tenantId.trim();
   if (!tid) return "default";
@@ -60,12 +37,14 @@ async function loadWorkspaceProfileKeyForViewerImpl(tenantId: string): Promise<F
     if (!authId) return "default";
 
     const fiUser = await loadFiUserRow(tid, authId);
-    const staff = fiUser ? await loadLinkedStaffSignalsForFiUser(tid, fiUser.id) : null;
+    const staff = fiUser ? await loadLinkedStaffOrganisationalSignalsForFiUser(tid, fiUser.id) : null;
     const tenantAdmin = await loadActiveTenantAdminProfileForSession(tid, authId);
     const os = await loadFiOsIdentity(authId);
 
     return resolveWorkspaceProfileKeyFromSignals({
       explicitWorkspaceProfile: staff?.explicitWorkspaceProfile,
+      positionTypeDefaultWorkspaceProfile: staff?.positionTypeDefaultWorkspaceProfile ?? null,
+      featureTemplateWorkspaceProfile: staff?.featureTemplateWorkspaceProfile ?? null,
       staffRole: staff?.staff_role ?? null,
       tenantAdminRole: tenantAdmin?.adminRole ?? null,
       fiOsRole: os?.osRole ?? null,

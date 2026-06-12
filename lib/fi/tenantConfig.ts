@@ -30,6 +30,11 @@ export type TenantConfig = {
   branding?: TenantBranding | null;
   feature_flags?: TenantFeatureFlags | null;
   scorecard_weights?: TenantScorecardWeights | null;
+  /**
+   * Optional FI OS Stage 3.5 tenant operating mode key (`fi_tenant_operating_modes.mode_key`).
+   * When unset, tenant operating mode defaults are not applied (Stage 2/3 parity).
+   */
+  fi_os_operating_mode_key?: string | null;
 };
 
 const DEFAULT_BRANDING: TenantBranding = {

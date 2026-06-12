@@ -8,6 +8,10 @@ import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
 export type WorkspaceProfileDerivationInput = {
   /** Raw `staff_metadata.workspace_profile` value from JSON (if any). */
   explicitWorkspaceProfile?: unknown;
+  /** `fi_staff_position_types.default_workspace_profile` when staff.position_type_id is set (Stage 3.5). */
+  positionTypeDefaultWorkspaceProfile?: string | null;
+  /** `fi_staff_feature_templates.workspace_profile` from the position type’s default template (Stage 3.5). */
+  featureTemplateWorkspaceProfile?: string | null;
   /** `fi_staff.staff_role` (free text in DB). */
   staffRole?: string | null;
   /** Active tenant backend admin role when linked to the viewer for this tenant. */
@@ -32,6 +36,7 @@ export function parseExplicitWorkspaceProfile(raw: unknown): FiWorkspaceProfileK
 
 /**
  * Maps schedulable `fi_staff.staff_role` text to a workspace persona (best-effort).
+ * **Fallback (Stage 3.5):** superseded by `position_type` / feature-template defaults when present.
  * TODO(Stage 4): replace with normalized staff_type / HR job code when available in schema.
  */
 export function deriveWorkspaceProfileFromStaffRole(staffRole: string | null | undefined): FiWorkspaceProfileKey | null {
@@ -70,11 +75,17 @@ export function deriveWorkspaceProfileFromFiOsRole(osRole: string | null | undef
 
 /**
  * Deterministic workspace profile resolution for the signed-in viewer.
- * Order: explicit metadata → staff role text → tenant admin → OS role → default.
+ * Order: explicit metadata → position type default → feature template default → staff role heuristic (fallback) → tenant admin → OS role → default.
  */
 export function resolveWorkspaceProfileKeyFromSignals(input: WorkspaceProfileDerivationInput): FiWorkspaceProfileKey {
   const explicit = parseExplicitWorkspaceProfile(input.explicitWorkspaceProfile);
   if (explicit) return explicit;
+
+  const fromPositionType = parseExplicitWorkspaceProfile(input.positionTypeDefaultWorkspaceProfile);
+  if (fromPositionType) return fromPositionType;
+
+  const fromTemplate = parseExplicitWorkspaceProfile(input.featureTemplateWorkspaceProfile);
+  if (fromTemplate) return fromTemplate;
 
   const fromStaff = deriveWorkspaceProfileFromStaffRole(input.staffRole);
   if (fromStaff) return fromStaff;

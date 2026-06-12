@@ -46,10 +46,40 @@ test("default fallback", () => {
   assert.equal(
     resolveWorkspaceProfileKeyFromSignals({
       explicitWorkspaceProfile: null,
+      positionTypeDefaultWorkspaceProfile: null,
+      featureTemplateWorkspaceProfile: null,
       staffRole: "technician",
       tenantAdminRole: null,
       fiOsRole: null,
     }),
     "default"
+  );
+});
+
+test("position type default wins over legacy staff_role substring heuristics", () => {
+  assert.equal(
+    resolveWorkspaceProfileKeyFromSignals({
+      explicitWorkspaceProfile: null,
+      positionTypeDefaultWorkspaceProfile: "nurse",
+      featureTemplateWorkspaceProfile: null,
+      staffRole: "Lead Surgeon",
+      tenantAdminRole: null,
+      fiOsRole: null,
+    }),
+    "nurse"
+  );
+});
+
+test("feature template workspace used when position type profile absent", () => {
+  assert.equal(
+    resolveWorkspaceProfileKeyFromSignals({
+      explicitWorkspaceProfile: null,
+      positionTypeDefaultWorkspaceProfile: null,
+      featureTemplateWorkspaceProfile: "consultant",
+      staffRole: "technician",
+      tenantAdminRole: null,
+      fiOsRole: null,
+    }),
+    "consultant"
   );
 });
