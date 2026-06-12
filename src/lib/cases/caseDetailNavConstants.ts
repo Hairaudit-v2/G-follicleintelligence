@@ -2,6 +2,7 @@
 export const CASE_DETAIL_SECTION_IDS = {
   summary: "case-summary",
   readiness: "case-readiness",
+  caseIntelligence: "case-intelligence",
   timeline: "case-timeline",
   surgeryPlanning: "case-surgery-planning",
   procedureDay: "case-procedure-day",
@@ -50,6 +51,7 @@ export function procedureDayLinkForClipboard(relativeHref: string, origin?: stri
 export const CASE_DETAIL_NAV_SECTIONS: { id: CaseDetailSectionId; label: string }[] = [
   { id: CASE_DETAIL_SECTION_IDS.summary, label: "Summary" },
   { id: CASE_DETAIL_SECTION_IDS.readiness, label: "Readiness" },
+  { id: CASE_DETAIL_SECTION_IDS.caseIntelligence, label: "Case intelligence" },
   { id: CASE_DETAIL_SECTION_IDS.timeline, label: "Timeline" },
   { id: CASE_DETAIL_SECTION_IDS.surgeryPlanning, label: "Surgery planning" },
   { id: CASE_DETAIL_SECTION_IDS.procedureDay, label: "Procedure day" },

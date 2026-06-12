@@ -5,6 +5,26 @@ import { FI_DASHBOARD_HOME_WIDGET_ORDER, FI_DASHBOARD_WIDGET_KEYS } from "@/src/
 import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
 import { composeWorkspaceDashboardWidgets } from "@/src/lib/fi-os/workspaceDashboardComposer";
 
+test("composer: surgeon profile includes clinical intelligence widget", () => {
+  const got = composeWorkspaceDashboardWidgets({
+    workspaceProfile: "surgeon",
+    featureAccess: null,
+    registryBaselineOrder: FI_DASHBOARD_HOME_WIDGET_ORDER,
+    availableWidgets: FI_DASHBOARD_WIDGET_KEYS,
+  });
+  assert.ok(got.includes("clinical_intelligence_summary"));
+});
+
+test("composer: consultant profile does not include clinical intelligence by default", () => {
+  const got = composeWorkspaceDashboardWidgets({
+    workspaceProfile: "consultant",
+    featureAccess: null,
+    registryBaselineOrder: FI_DASHBOARD_HOME_WIDGET_ORDER,
+    availableWidgets: FI_DASHBOARD_WIDGET_KEYS,
+  });
+  assert.ok(!got.includes("clinical_intelligence_summary"));
+});
+
 test("composer: default profile matches Stage 2 baseline order (filtered)", () => {
   const access = null;
   const got = composeWorkspaceDashboardWidgets({

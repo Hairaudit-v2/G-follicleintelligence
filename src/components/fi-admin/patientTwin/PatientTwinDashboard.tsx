@@ -1,7 +1,9 @@
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
+import type { PatientClinicalIntelligenceView } from "@/src/lib/fi-os/clinicalIntelligenceSignals";
 
 import { PatientTwinAuditCard } from "./PatientTwinAuditCard";
 import { PatientTwinCasesCard } from "./PatientTwinCasesCard";
+import { PatientTwinClinicalIntelligenceCard } from "./PatientTwinClinicalIntelligenceCard";
 import { PatientTwinClinicalCard } from "./PatientTwinClinicalCard";
 import { PatientTwinMedicationsCard } from "./PatientTwinMedicationsCard";
 import { PatientTwinPathologyCard } from "./PatientTwinPathologyCard";
@@ -17,12 +19,13 @@ export type PatientTwinDashboardProps = {
   tenantId: string;
   patientId: string;
   twin: PatientTwinV1;
+  clinicalIntel: PatientClinicalIntelligenceView;
 };
 
 /**
  * Executive read-only layout for PatientTwin V1 — no client fetches, no writes.
  */
-export function PatientTwinDashboard({ tenantId, patientId, twin }: PatientTwinDashboardProps) {
+export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel }: PatientTwinDashboardProps) {
   return (
     <div className="scroll-mt-4 space-y-5">
       <PatientTwinHeader tenantId={tenantId} patientId={patientId} twin={twin} />
@@ -33,6 +36,8 @@ export function PatientTwinDashboard({ tenantId, patientId, twin }: PatientTwinD
       </div>
 
       <PatientTwinCasesCard tenantId={tenantId} twin={twin} />
+
+      <PatientTwinClinicalIntelligenceCard tenantId={tenantId} patientId={patientId} view={clinicalIntel} />
 
       <PatientTwinPathologyCard tenantId={tenantId} patientId={patientId} twin={twin} />
 

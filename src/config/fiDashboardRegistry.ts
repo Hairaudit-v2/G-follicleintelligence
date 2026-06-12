@@ -26,6 +26,8 @@ export const FI_DASHBOARD_WIDGET_KEYS = [
   "booking_queue",
   /** Stage 3.75 — manager support signals (director / clinic manager profiles; placeholder until richer loaders). */
   "staff_intelligence_summary",
+  /** Stage 5 — neutral clinical journey signals (no AI; no treatment advice). */
+  "clinical_intelligence_summary",
 ] as const;
 
 export type FiDashboardWidgetKey = (typeof FI_DASHBOARD_WIDGET_KEYS)[number];
@@ -98,6 +100,10 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
   staff_intelligence_summary: {
     title: "Staff intelligence",
     description: "Operational support signals for clinic leadership (no automated permission changes).",
+  },
+  clinical_intelligence_summary: {
+    title: "Clinical Intelligence",
+    description: "Neutral patient journey and outcome support signals for clinical leadership (no automated medical advice).",
   },
 } as const satisfies Record<FiDashboardWidgetKey, { title: string; description?: string }>;
 

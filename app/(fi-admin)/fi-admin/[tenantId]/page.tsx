@@ -7,7 +7,11 @@ import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 import { FI_DASHBOARD_HOME_WIDGET_ORDER, FI_DASHBOARD_WIDGET_KEYS } from "@/src/config/fiDashboardRegistry";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
-import { filterResolvedQuickActionsByFeatureAccess } from "@/src/lib/fi-os/stage2FeatureVisibility";
+import {
+  fiDashboardWidgetVisibleByFeatureAccess,
+  filterResolvedQuickActionsByFeatureAccess,
+} from "@/src/lib/fi-os/stage2FeatureVisibility";
+import { loadTenantClinicalIntelligenceSummary } from "@/src/lib/fi-os/clinicalIntelligence.server";
 import { composeWorkspaceDashboardWidgets } from "@/src/lib/fi-os/workspaceDashboardComposer";
 import { composeWorkspaceQuickActionsOrder } from "@/src/lib/fi-os/workspaceQuickActionsComposer";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
@@ -66,6 +70,14 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
     throw e;
   }
 
+  const shouldLoadClinical =
+    homeWidgetOrder.includes("clinical_intelligence_summary") &&
+    fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", featureAccess);
+
+  const clinicalIntelligenceSummary = shouldLoadClinical
+    ? await loadTenantClinicalIntelligenceSummary(tenantId.trim(), data.actionCentre)
+    : null;
+
   return (
     <CalendarToastProvider>
       <FiTenantOperationalHome
@@ -76,6 +88,7 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
         homeWidgetOrder={homeWidgetOrder}
         quickActionItems={quickActionItems}
         workspaceProfile={workspaceProfile}
+        clinicalIntelligenceSummary={clinicalIntelligenceSummary}
       />
     </CalendarToastProvider>
   );

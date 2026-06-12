@@ -3,6 +3,7 @@ import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
 import { FiOsControlCentreHome } from "@/src/components/fi-os/FiOsControlCentreHome";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import type { ResolvedDashboardQuickAction } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
+import type { TenantClinicalIntelligenceSummary } from "@/src/lib/fi-os/clinicalIntelligence.server";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 export function FiTenantOperationalHome(props: {
@@ -13,6 +14,7 @@ export function FiTenantOperationalHome(props: {
   homeWidgetOrder?: readonly FiDashboardWidgetKey[];
   quickActionItems?: readonly ResolvedDashboardQuickAction[];
   workspaceProfile?: FiWorkspaceProfileKey;
+  clinicalIntelligenceSummary?: TenantClinicalIntelligenceSummary | null;
 }) {
   const {
     data,
@@ -22,6 +24,7 @@ export function FiTenantOperationalHome(props: {
     homeWidgetOrder,
     quickActionItems,
     workspaceProfile,
+    clinicalIntelligenceSummary = null,
   } = props;
   return (
     <FiOsControlCentreHome
@@ -32,6 +35,7 @@ export function FiTenantOperationalHome(props: {
       homeWidgetOrder={homeWidgetOrder}
       quickActionItems={quickActionItems}
       workspaceProfile={workspaceProfile}
+      clinicalIntelligenceSummary={clinicalIntelligenceSummary}
     />
   );
 }

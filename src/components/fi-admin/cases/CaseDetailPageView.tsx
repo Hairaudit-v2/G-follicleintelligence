@@ -4,6 +4,7 @@ import { caseSummaryDocumentPageHref } from "@/src/lib/cases/caseDetailFromCases
 import { CASE_DETAIL_SECTION_IDS } from "@/src/lib/cases/caseDetailNavConstants";
 import { UniversalCaseRecord } from "@/src/components/fi/UniversalCaseRecord";
 import type { UniversalCaseRecordResult } from "@/src/lib/fi/foundation/caseRecord";
+import { CaseClinicalIntelligencePanel } from "@/src/components/fi-admin/cases/CaseClinicalIntelligencePanel";
 import { CaseAppointmentsCard } from "./CaseAppointmentsCard";
 import { CaseDetailBackLink } from "./CaseDetailBackLink";
 import { CaseDetailSection } from "./CaseDetailSection";
@@ -177,6 +178,15 @@ export function CaseDetailPageView({
               noManualPaymentRecordsCopy="No manual payment records linked to this case yet."
             />
           </div>
+        </CaseDetailSection>
+
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.caseIntelligence}>
+          <CaseClinicalIntelligencePanel
+            tenantId={tenantId}
+            caseId={detail.id}
+            patientFoundationId={twinFoundationPatientId}
+            readiness={readiness}
+          />
         </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.timeline}>

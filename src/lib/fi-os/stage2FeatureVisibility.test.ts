@@ -12,6 +12,24 @@ import {
 
 const base = "/fi-admin/t-1";
 
+test("dashboard widgets: clinical_intelligence_summary needs dashboard plus clinical slice", () => {
+  const off = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    dashboard: true,
+    patients: false,
+    cases: false,
+    pathology: false,
+    imaging: false,
+    audit: false,
+  });
+  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", off), false);
+
+  const on = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    dashboard: true,
+    pathology: true,
+  });
+  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", on), true);
+});
+
 test("dashboard widgets: null access keeps full order", () => {
   const filtered = FI_DASHBOARD_HOME_WIDGET_ORDER.filter((w) => fiDashboardWidgetVisibleByFeatureAccess(w, null));
   assert.deepEqual(filtered, [...FI_DASHBOARD_HOME_WIDGET_ORDER]);
