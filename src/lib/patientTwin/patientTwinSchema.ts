@@ -5,6 +5,7 @@ import {
   type HliPhotoProtocolSlot,
 } from "@/src/lib/hair-intelligence/photoProtocols/types";
 import { PATIENT_TWIN_VERSION } from "./patientTwinTypes";
+import { patientTwinHairProgressionSectionSchema } from "./patientTwinHairProgressionSchema";
 
 const hliPhotoProtocolClinicalContextSchema: z.ZodType<HliPhotoProtocolClinicalContext> = z.custom<HliPhotoProtocolClinicalContext>(
   (val): val is HliPhotoProtocolClinicalContext =>
@@ -319,10 +320,38 @@ export const patientTwinClinicalSectionSchema = z.object({
   blood_markers: z.array(z.never()),
 });
 
+export const patientTwinHairLossClassificationRowSchema = z.object({
+  id: z.string().uuid(),
+  source_record_id: z.string().nullable(),
+  classification_system: z.string(),
+  pattern_type: z.string(),
+  classification_grade: z.string(),
+  confidence_score: z.number(),
+  frontal_loss_score: z.number().nullable(),
+  temporal_recession_score: z.number().nullable(),
+  mid_scalp_score: z.number().nullable(),
+  crown_loss_score: z.number().nullable(),
+  diffuse_thinning_score: z.number().nullable(),
+  retrograde_pattern_detected: z.boolean(),
+  suspected_scarring_pattern: z.boolean(),
+  sex_classification: z.string().nullable(),
+  review_status: z.string(),
+  ai_notes: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const patientTwinHairLossSectionSchema = z.object({
+  latest: patientTwinHairLossClassificationRowSchema.nullable(),
+  recent: z.array(patientTwinHairLossClassificationRowSchema),
+  recent_cap: z.number().int().positive(),
+});
+
 export const patientTwinIntelligenceSectionSchema = z.object({
   risk_score: z.null(),
   predicted_outcome: z.null(),
   model_outputs: z.array(z.never()),
+  hair_loss: patientTwinHairLossSectionSchema,
+  hair_progression: patientTwinHairProgressionSectionSchema,
 });
 
 export const patientTwinProvenanceSectionSchema = z.object({

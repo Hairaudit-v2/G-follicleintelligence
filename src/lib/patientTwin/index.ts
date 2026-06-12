@@ -8,6 +8,7 @@ export {
   type PatientTwinCaseRow,
   type PatientTwinClinicalSection,
   type PatientTwinCrmSection,
+  type PatientTwinHairProgressionSection,
   type PatientTwinIdentityResolutionSection,
   type PatientTwinIntelligenceSection,
   type PatientTwinImagingGalleryItem,

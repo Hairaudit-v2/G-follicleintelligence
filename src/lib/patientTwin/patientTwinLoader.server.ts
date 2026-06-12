@@ -25,6 +25,11 @@ import {
 import { normalizeImagingLibraryAxis } from "@/src/lib/patientImages/patientImagePolicy";
 import { loadPatientTwinPhotoProtocolSection } from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolLoader.server";
 import { loadPatientTwinImagingGallerySection } from "@/src/lib/patientTwin/patientTwinImagingGallery.server";
+import { loadPatientTwinHairLossSection } from "@/src/lib/patientTwin/patientTwinHairLossClassification.server";
+import {
+  emptyPatientTwinHairProgressionIntelligence,
+  loadPatientTwinHairProgressionSection,
+} from "@/src/lib/patientTwin/patientTwinHairProgression.server";
 import {
   buildPatientTwinMedicationsSection,
   emptyPatientTwinMedicationsSection,
@@ -87,6 +92,8 @@ const SOURCE_TABLES_USED = [
   "fi_patient_therapy_plans",
   "fi_patient_therapy_plan_items",
   "fi_patient_therapy_events",
+  "hair_intelligence_hair_loss_classifications",
+  "hair_intelligence_progression_network_buckets",
 ] as const;
 
 const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
@@ -677,6 +684,33 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     }
   }
 
+  let hair_loss: PatientTwinV1["intelligence"]["hair_loss"] = {
+    latest: null,
+    recent: [],
+    recent_cap: 5,
+  };
+  try {
+    hair_loss = await loadPatientTwinHairLossSection(tid, primaryFoundation, supabase);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
+      pushWarning(warnings, "generic", `Hair loss classification section skipped: ${msg}`);
+    }
+  }
+
+  let hair_progression: PatientTwinV1["intelligence"]["hair_progression"] = emptyPatientTwinHairProgressionIntelligence();
+  try {
+    hair_progression = await loadPatientTwinHairProgressionSection(tid, primaryFoundation, {
+      patientDateOfBirthIso: date_of_birth,
+      patientSexClassification: null,
+    }, supabase);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
+      pushWarning(warnings, "generic", `Hair progression intelligence skipped: ${msg}`);
+    }
+  }
+
   const timelineItems = buildFoundationTimeline(base);
 
   const pathologyCap = 12;
@@ -920,6 +954,8 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       risk_score: null,
       predicted_outcome: null,
       model_outputs: [],
+      hair_loss,
+      hair_progression,
     },
     provenance: {
       generated_at: generatedAt,

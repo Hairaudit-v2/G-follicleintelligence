@@ -8,6 +8,7 @@
  */
 
 import type { HliPhotoProtocolClinicalContext, HliPhotoProtocolComplianceSummary } from "@/src/lib/hair-intelligence/photoProtocols/types";
+import type { HairProgressionIntelligence } from "@/src/lib/hair-intelligence/hairProgressionIntelligence";
 
 export const PATIENT_TWIN_VERSION = "patient-twin.v1" as const;
 
@@ -259,10 +260,42 @@ export type PatientTwinClinicalSection = {
   blood_markers: never[];
 };
 
+export type PatientTwinHairLossClassificationRow = {
+  id: string;
+  source_record_id: string | null;
+  classification_system: string;
+  pattern_type: string;
+  classification_grade: string;
+  confidence_score: number;
+  frontal_loss_score: number | null;
+  temporal_recession_score: number | null;
+  mid_scalp_score: number | null;
+  crown_loss_score: number | null;
+  diffuse_thinning_score: number | null;
+  retrograde_pattern_detected: boolean;
+  suspected_scarring_pattern: boolean;
+  sex_classification: string | null;
+  review_status: string;
+  ai_notes: string | null;
+  created_at: string;
+};
+
+export type PatientTwinHairLossSection = {
+  latest: PatientTwinHairLossClassificationRow | null;
+  recent: PatientTwinHairLossClassificationRow[];
+  recent_cap: number;
+};
+
+export type PatientTwinHairProgressionSection = HairProgressionIntelligence;
+
 export type PatientTwinIntelligenceSection = {
   risk_score: null;
   predicted_outcome: null;
   model_outputs: never[];
+  /** HIE Stage 9A — shared hair loss pattern classifications for this patient. */
+  hair_loss: PatientTwinHairLossSection;
+  /** HIE Stage 9B — longitudinal velocity, stability, therapy contrast, forecast, cohort context. */
+  hair_progression: PatientTwinHairProgressionSection;
 };
 
 export type PatientTwinCompletenessMissingArea =
