@@ -3,7 +3,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CrmAccessError, resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
-import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
 import { evaluateFiServicesCatalogManageAllowed } from "@/src/lib/services/fiServicesManagePolicy";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 

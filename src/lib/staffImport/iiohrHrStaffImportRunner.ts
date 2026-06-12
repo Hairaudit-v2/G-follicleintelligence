@@ -8,7 +8,8 @@ import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { isCrmStaffManageRole, isFiAdminApiKeyMatch } from "@/src/lib/crm/crmGatePolicy";
+import { isCrmStaffManageRole } from "@/src/lib/crm/crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
 import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
 import {
   normalizeFiStaffSourceMetadata,

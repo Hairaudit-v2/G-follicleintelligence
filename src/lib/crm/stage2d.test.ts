@@ -6,7 +6,8 @@ import {
   crmMoveLeadStageBodySchema,
 } from "./crmApiSchemas";
 import { assertMessagePayloadHasNoForbiddenBodyKeys } from "./messageBodyKeysPolicy";
-import { isCrmMutationRole, isCrmShellNavRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+import { isCrmMutationRole, isCrmShellNavRole } from "./crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 import { validateCrmMessagePreviewInput } from "./validation";
 
 describe("Stage 2D CRM gates (pure)", () => {

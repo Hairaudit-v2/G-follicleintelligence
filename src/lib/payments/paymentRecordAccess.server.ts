@@ -6,7 +6,7 @@ import {
   loadProxyFiUserRowForPlatformAdminTenant,
   resolveAuthUserId,
 } from "@/src/lib/crm/crmGate";
-import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
 import { isPaymentMutationRole } from "@/src/lib/payments/paymentRecordModel";
 import { rejectStaffPinSessionForRestrictedMutation } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 

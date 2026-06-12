@@ -37,7 +37,11 @@ function bookingDetailHref(tenantId: string, row: DashboardBookingItem): string 
 }
 
 function isInOperationalDay(iso: string, localStartIso: string, localEndIso: string): boolean {
-  return iso >= localStartIso && iso < localEndIso;
+  const t = Date.parse(iso);
+  const a = Date.parse(localStartIso);
+  const b = Date.parse(localEndIso);
+  if (![t, a, b].every(Number.isFinite)) return iso >= localStartIso && iso < localEndIso;
+  return t >= a && t < b;
 }
 
 function todayAppointmentsForOperationalDay(
@@ -61,19 +65,23 @@ type StaffShiftRow = {
 };
 
 function staffRowsFromReceptionCards(cards: readonly ReceptionBoardCard[]): StaffShiftRow[] {
-  const byProvider = new Map<string, { earliest: string; tz: string | null }>();
+  /** Case-insensitive key so the same clinician is not listed twice when labels differ only by casing. */
+  const byCanonical = new Map<string, { displayLabel: string; earliest: string; tz: string | null }>();
   for (const c of cards) {
     const label = c.providerLabel.trim();
     if (!label || label.toLowerCase() === "unassigned") continue;
-    const prev = byProvider.get(label);
-    if (!prev || c.startAt < prev.earliest) {
-      byProvider.set(label, { earliest: c.startAt, tz: c.timezone });
+    const canon = label.toLowerCase();
+    const prev = byCanonical.get(canon);
+    if (!prev) {
+      byCanonical.set(canon, { displayLabel: label, earliest: c.startAt, tz: c.timezone });
+    } else if (c.startAt < prev.earliest) {
+      byCanonical.set(canon, { ...prev, earliest: c.startAt, tz: c.timezone });
     }
   }
-  return [...byProvider.entries()]
-    .map(([providerLabel, { earliest, tz }]) => ({
-      key: providerLabel,
-      providerLabel,
+  return [...byCanonical.entries()]
+    .map(([canon, { displayLabel, earliest, tz }]) => ({
+      key: canon,
+      providerLabel: displayLabel,
       roleLabel: "Provider",
       earliestStartIso: earliest,
       timezone: tz,
@@ -103,7 +111,7 @@ export function DashboardOperationalWorkspace(props: {
         title={meta.title}
         description={meta.description}
       />
-      <div className="mt-4 grid min-h-[13rem] grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
+      <div className="mt-4 grid min-h-[10rem] grid-cols-1 gap-3 md:min-h-[11rem] md:grid-cols-2 md:gap-4">
         <div className={panelShell}>
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Today’s appointments</p>
           {appts.length === 0 ? (

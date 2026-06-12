@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isFiAdminApiKeyMatch } from "./crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 import { extractFiAdminKeyFromRequestParts, isAdminKeyQueryAllowed } from "./fiAdminKeyTransport";
 
 function headers(init: Record<string, string>): Headers {

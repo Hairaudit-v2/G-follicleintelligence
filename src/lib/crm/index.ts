@@ -61,8 +61,8 @@ export {
   canMutateClinicFromOperatorContext,
   isCrmMutationRole,
   isCrmShellNavRole,
-  isFiAdminApiKeyMatch,
 } from "./crmGatePolicy";
+export { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 export {
   CRM_LEAD_DETAIL_PRIORITY_VALUES,
   CRM_LEAD_DETAIL_STATUS_VALUES,

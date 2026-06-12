@@ -26,7 +26,7 @@ export function DashboardQuickActionsBar(props: { items: readonly ResolvedDashbo
       <h2 id="dash-quick-actions-bar-heading" className="sr-only">
         Quick actions
       </h2>
-      <div className="-mx-1 flex min-h-[2.5rem] flex-wrap items-center gap-2 px-1 sm:gap-2.5">
+      <div className="-mx-1 flex min-h-[2.5rem] max-w-full flex-nowrap items-center gap-2 overflow-x-auto overflow-y-hidden px-1 pb-0.5 [-webkit-overflow-scrolling:touch] sm:flex-wrap sm:overflow-x-visible sm:overflow-y-visible sm:pb-0 sm:gap-2.5">
         {items.map((item) => {
           const label = item.label.trim();
 

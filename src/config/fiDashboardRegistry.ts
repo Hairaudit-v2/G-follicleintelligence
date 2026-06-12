@@ -16,10 +16,7 @@ export const FI_DASHBOARD_WIDGET_KEYS = [
 
 export type FiDashboardWidgetKey = (typeof FI_DASHBOARD_WIDGET_KEYS)[number];
 
-export const FI_DASHBOARD_WIDGET_LABELS: Record<
-  FiDashboardWidgetKey,
-  { title: string; description?: string }
-> = {
+export const FI_DASHBOARD_WIDGET_LABELS = {
   quick_actions: {
     title: "Quick actions",
     description: "Compact shortcuts to common workflows.",
@@ -44,7 +41,7 @@ export const FI_DASHBOARD_WIDGET_LABELS: Record<
     title: "Attention centre",
     description: "Items that need a response before the clinic day moves on.",
   },
-};
+} as const satisfies Record<FiDashboardWidgetKey, { title: string; description?: string }>;
 
 /** Default home stack order — keep `FiOsControlCentreHome` in sync when changing. */
 export const FI_DASHBOARD_HOME_WIDGET_ORDER: readonly FiDashboardWidgetKey[] = [

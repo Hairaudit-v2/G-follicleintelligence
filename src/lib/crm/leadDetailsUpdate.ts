@@ -12,7 +12,7 @@ import {
 import { loadCrmLeadById } from "./leads";
 import { mapFiCrmLeadRow } from "./leadRow";
 import type { FiCrmLeadRow } from "./types";
-import { isFiAdminApiKeyMatch } from "./crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 
 export type UpdateCrmLeadDetailsInput = {
   tenantId: string;

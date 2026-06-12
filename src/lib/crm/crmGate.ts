@@ -14,7 +14,8 @@ import {
   resolveStaffPinFloorMutation,
 } from "@/src/lib/staffPin/staffPinMutationGuard.server";
 
-import { isCrmStaffManageRole, isFiAdminApiKeyMatch } from "./crmGatePolicy";
+import { isCrmStaffManageRole } from "./crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 
 export type { StaffPinClinicAction };
 

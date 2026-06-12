@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmFiAdminApiKeyMatch";
 
 /** UUID v4-style validation (aligned with FI configuration actions). */
 export const FI_ADMIN_UUID_RE =

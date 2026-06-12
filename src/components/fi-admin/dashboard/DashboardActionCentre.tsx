@@ -37,19 +37,19 @@ export function attentionSeverityForRow(row: AttentionRowKey, count: number): At
 
 const severityRowClasses: Record<AttentionSeverity, { row: string; icon: string; badge: string }> = {
   critical: {
-    row: "border-red-500/30 bg-red-500/[0.07] hover:border-red-400/45 hover:bg-red-500/10",
-    icon: "border-red-500/35 bg-red-500/15 text-red-200",
-    badge: "bg-red-500/20 text-red-50",
+    row: "border-red-400/35 bg-red-950/35 hover:border-red-300/50 hover:bg-red-950/45",
+    icon: "border-red-400/40 bg-red-950/50 text-red-100",
+    badge: "bg-red-950/55 text-red-50 ring-1 ring-red-400/25",
   },
   warning: {
-    row: "border-orange-500/28 bg-orange-500/[0.06] hover:border-orange-400/40 hover:bg-orange-500/10",
-    icon: "border-orange-500/35 bg-orange-500/12 text-orange-200",
-    badge: "bg-orange-500/18 text-orange-50",
+    row: "border-orange-400/35 bg-orange-950/25 hover:border-orange-300/45 hover:bg-orange-950/35",
+    icon: "border-orange-400/40 bg-orange-950/40 text-orange-100",
+    badge: "bg-orange-950/45 text-orange-50 ring-1 ring-orange-400/25",
   },
   normal: {
-    row: "border-blue-500/15 bg-blue-500/[0.04] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
-    icon: "border-blue-400/25 bg-blue-500/10 text-cyan-300",
-    badge: "bg-blue-500/15 text-cyan-50",
+    row: "border-sky-500/20 bg-sky-950/20 hover:border-cyan-400/35 hover:bg-cyan-950/25",
+    icon: "border-sky-400/30 bg-sky-950/35 text-sky-200",
+    badge: "bg-sky-950/40 text-cyan-50 ring-1 ring-sky-400/20",
   },
 };
 
@@ -77,7 +77,7 @@ function ActionRow({
       className={cn(
         "flex items-center gap-3 rounded-xl border px-3 py-3 transition sm:px-4",
         hasItems ? tone.row : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]",
-        !hasItems && severity === "normal" && "border-blue-500/10 bg-blue-500/[0.02]",
+        !hasItems && severity === "normal" && "border-sky-500/10 bg-sky-950/15",
       )}
     >
       <span
@@ -124,7 +124,7 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
       />
       {total === 0 ? (
         <DashboardEmptyState
-          className="mt-4"
+          className="mt-4 max-w-xl py-5 sm:px-6 sm:py-6"
           title="You're caught up"
           description="No leads, consultations, follow-ups, or surgery prep items need attention right now."
           actionLabel="View calendar"

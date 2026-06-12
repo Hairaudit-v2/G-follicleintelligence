@@ -24,7 +24,7 @@ import {
   type ExistingFiServiceSnapshot,
 } from "../src/lib/timelyImport/approvedFiServicesImportPlan";
 import type { FiServiceApprovedPayload } from "../src/lib/timelyImport/buildApprovedFiSeed";
-import { isFiAdminApiKeyMatch } from "../src/lib/crm/crmGatePolicy";
+import { isFiAdminApiKeyMatch } from "../src/lib/crm/crmFiAdminApiKeyMatch";
 
 function argValue(prefix: string): string | undefined {
   const a = process.argv.find((x) => x.startsWith(prefix));
