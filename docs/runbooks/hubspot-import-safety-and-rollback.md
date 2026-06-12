@@ -36,6 +36,8 @@ If the variable is missing or not exactly `1`, the script prints a JSON error in
 
 It exits with code **1** and performs **no** database writes.
 
+**Note:** The script still calls Supabase earlier in the flow (tenant resolution + DB-backed dry-run extension) before it can print the “missing confirm” error. If you see `TypeError: fetch failed`, fix connectivity to `NEXT_PUBLIC_SUPABASE_URL` first; `lib/supabaseAdmin` uses IPv4-first DNS and a retrying `fetch` to reduce flaky Windows failures.
+
 Example (last 500):
 
 ```bash
