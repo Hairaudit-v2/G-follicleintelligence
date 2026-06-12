@@ -31,6 +31,59 @@ test("parseHubspotContactsCsv maps headers", () => {
   assert.equal(r.rows[0].stageOfJourney, "Consult scheduled");
 });
 
+test("validateHubspotContactsRows flags duplicate phone as warning only", () => {
+  const rows: HubspotContactParsedRow[] = [
+    {
+      rowIndex: 1,
+      recordId: "1",
+      firstName: "A",
+      lastName: "B",
+      email: "a@test.com",
+      phoneNumber: "4155550100",
+      contactOwner: null,
+      leadStatus: null,
+      createDate: null,
+      lastModifiedDate: null,
+      contactType: null,
+      lifecycleStage: null,
+      leadSource: null,
+      stageOfJourney: null,
+      nextAppointmentDate: null,
+      associatedDeal: null,
+      associatedCompany: null,
+      associatedDealIds: null,
+    },
+    {
+      rowIndex: 2,
+      recordId: "2",
+      firstName: "C",
+      lastName: "D",
+      email: "b@test.com",
+      phoneNumber: "(415) 555-0100",
+      contactOwner: null,
+      leadStatus: null,
+      createDate: null,
+      lastModifiedDate: null,
+      contactType: null,
+      lifecycleStage: null,
+      leadSource: null,
+      stageOfJourney: null,
+      nextAppointmentDate: null,
+      associatedDeal: null,
+      associatedCompany: null,
+      associatedDealIds: null,
+    },
+  ];
+  const rep = validateHubspotContactsRows(rows);
+  assert.equal(rep.passed, true);
+  assert.equal(rep.blockingCount, 0);
+  assert.equal(rep.warningCount, 2);
+  assert.deepEqual(rep.duplicatePhonesInFile, ["4155550100"]);
+  const dupIssues = rep.rowResults.flatMap((r) => r.issues.filter((i) => i.code === "duplicate_phone"));
+  assert.equal(dupIssues.length, 2);
+  assert.ok(dupIssues.every((i) => i.blocking === false));
+});
+
 test("validateHubspotContactsRows flags duplicate record id as blocking", () => {
   const rows: HubspotContactParsedRow[] = [
     {

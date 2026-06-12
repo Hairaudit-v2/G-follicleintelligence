@@ -124,7 +124,7 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
       issues.push({
         code: "duplicate_phone",
         message: "Duplicate normalised phone number in file.",
-        blocking: true,
+        blocking: false,
       });
     }
 
