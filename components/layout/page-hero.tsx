@@ -1,14 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { ReactNode } from "react";
 
 interface PageHeroProps {
   eyebrow?: string;
   title: string;
   subtitle?: string;
+  /** Optional supporting copy below the subtitle (e.g. enterprise context). */
+  body?: ReactNode;
 }
 
-export function PageHero({ eyebrow, title, subtitle }: PageHeroProps) {
+export function PageHero({ eyebrow, title, subtitle, body }: PageHeroProps) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -28,6 +31,11 @@ export function PageHero({ eyebrow, title, subtitle }: PageHeroProps) {
         {subtitle && (
           <p className="mt-6 max-w-3xl text-lg leading-relaxed text-muted-foreground">{subtitle}</p>
         )}
+        {body ? (
+          <div className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground md:text-lg md:leading-relaxed">
+            {body}
+          </div>
+        ) : null}
       </div>
     </motion.section>
   );
