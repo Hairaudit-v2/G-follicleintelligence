@@ -19,6 +19,7 @@ import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermission
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
+import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import {
   canAccessTenantReminderSettings,
   canManageTenantAdminUsersRoute,
@@ -96,8 +97,9 @@ export default async function TenantAdminLayout({
     showAuditOsNav,
     showConfigurationHubNav,
     featureAccessMap,
+    workspaceProfileKey,
   ] = pinFloorMode
-    ? [false, true, pinSession!.staffName, false, null, false, false, false, false, null]
+    ? [false, true, pinSession!.staffName, false, null, false, false, false, false, null, "default" as const]
     : await Promise.all([
         getCrmShellNavAllowed(tenantId),
         getBookingsBoardNavAllowed(tenantId),
@@ -111,6 +113,7 @@ export default async function TenantAdminLayout({
         canViewSecurityAuditNav(tenantId),
         canViewTenantConfigurationHub(tenantId),
         loadFiOsFeatureAccessMapOrNullForViewer(tenantId),
+        loadWorkspaceProfileKeyForViewer(tenantId),
       ]);
   const tenantBackendAdminRole = pinFloorMode ? null : adminProf?.adminRole ?? null;
   const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
@@ -155,6 +158,7 @@ export default async function TenantAdminLayout({
         showRemindersSettingsNav={showRemindersSettingsNav}
         showAuditOsNav={showAuditOsNav}
         showConfigurationHubNav={showConfigurationHubNav}
+        workspaceProfileKey={workspaceProfileKey}
         featureAccess={featureAccessRecord}
         effective={effective}
         userEmail={userEmail}

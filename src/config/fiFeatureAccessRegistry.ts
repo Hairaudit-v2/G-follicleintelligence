@@ -119,7 +119,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   crm: {
     key: "crm",
-    label: "CRM / LeadFlow",
+    label: "Leads",
     description: "Leads, pipeline, and CRM shell workflows.",
     category: "patient_journey",
     navPath: "crm",
@@ -140,7 +140,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   cases: {
     key: "cases",
-    label: "Cases / SurgeryOS",
+    label: "Cases",
     description: "Case worklists, SurgeryOS readiness, and case lifecycle.",
     category: "clinical",
     navPath: "cases",
@@ -208,7 +208,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   audit: {
     key: "audit",
-    label: "AuditOS",
+    label: "Audit intelligence",
     description: "Security and operational audit surfaces.",
     category: "intelligence",
     navPath: "audit",
@@ -222,7 +222,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   analytics: {
     key: "analytics",
-    label: "AnalyticsOS",
+    label: "Analytics",
     description: "Tenant analytics and reporting entry points.",
     category: "intelligence",
     navPath: "analytics",
@@ -236,7 +236,7 @@ export const FI_FEATURE_REGISTRY: Record<FiFeatureKey, FiFeatureRegistryEntry> =
   },
   academy: {
     key: "academy",
-    label: "AcademyOS",
+    label: "Academy",
     description: "Training and academy experiences (staged rollout).",
     category: "intelligence",
   },

@@ -23,8 +23,8 @@ test("composer: surgeon profile reorders known widgets", () => {
     registryBaselineOrder: FI_DASHBOARD_HOME_WIDGET_ORDER,
     availableWidgets: FI_DASHBOARD_WIDGET_KEYS,
   });
-  assert.equal(got[0], "operational_workspace");
-  assert.ok(got.includes("surgery_pipeline"));
+  assert.equal(got[0], "surgery_pipeline");
+  assert.ok(got.includes("operational_workspace"));
 });
 
 test("composer: feature access removes analytics for director stack", () => {

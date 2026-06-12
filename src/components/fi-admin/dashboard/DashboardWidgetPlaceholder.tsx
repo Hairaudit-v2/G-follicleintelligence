@@ -22,13 +22,13 @@ export function DashboardWidgetPlaceholder(props: Props) {
     <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby={`dash-ph-${widgetKey}-heading`}>
       <SectionHeader
         id={`dash-ph-${widgetKey}-heading`}
-        kicker="Preview"
+        kicker="Coming into focus"
         title={meta.title}
         description={meta.description}
       />
       <p className="mt-3 text-xs text-slate-500">
-        This module is profile-suggested in Stage 3. Rich data and routing will tighten in Stage 4 — today it is a safe,
-        read-only placeholder.
+        Data will appear as this workflow becomes active in your clinic. The module stays read-only until live signals are
+        wired — nothing here changes permissions or routing.
       </p>
       {href ? (
         <p className="mt-3">

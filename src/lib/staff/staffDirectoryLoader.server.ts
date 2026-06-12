@@ -8,6 +8,10 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { resolveCanManageStaffFeatureAccessSettings } from "@/src/lib/fi-os/featureAccess.server";
 import { loadFeatureTemplateDefaultsForStaff, loadFiStaffPositionTypesForTenant } from "@/src/lib/fi-os/organisationalProfile.server";
 import type { FiStaffPositionTypeRow } from "@/src/lib/fi-os/organisationalProfile.schema";
+import {
+  loadStaffIntelligenceViewsForTenantStaff,
+  type StaffIntelligenceViewModel,
+} from "@/src/lib/fi-os/staffIntelligence.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
@@ -34,6 +38,9 @@ export type StaffDirectoryPageResult = {
   staffFeatureTemplateDefaultsByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>>;
   /** Global + tenant-specific position types for admin dropdown. */
   staffPositionTypes: FiStaffPositionTypeRow[];
+  /** Stage 3.75: manager intelligence snapshots per staff (same gate as feature visibility). */
+  canViewStaffOrganisationalIntelligence: boolean;
+  staffOrganisationalIntelligenceByStaffId: Record<string, StaffIntelligenceViewModel>;
   /** Staff profile id linked to the signed-in tenant user (`fi_staff.fi_user_id` = `fi_users.id`), if any. */
   viewerStaffId: string | null;
   fiUsersForLink: { id: string; email: string | null }[];
@@ -155,6 +162,7 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
   const staffFeatureAccessByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
   const staffFeatureTemplateDefaultsByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
   let staffPositionTypes: FiStaffPositionTypeRow[] = [];
+  let staffOrganisationalIntelligenceByStaffId: Record<string, StaffIntelligenceViewModel> = {};
 
   if (canManageStaffFeatureVisibility && staffIds.length) {
     const { data: faRows, error: faErr } = await supabase
@@ -188,6 +196,12 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
         }
       })
     );
+
+    try {
+      staffOrganisationalIntelligenceByStaffId = await loadStaffIntelligenceViewsForTenantStaff(tid, staffRes, staffPositionTypes);
+    } catch {
+      staffOrganisationalIntelligenceByStaffId = {};
+    }
   }
 
   const [payrollByStaffId, hrNotificationByStaffId] = await Promise.all([
@@ -202,6 +216,8 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     staffFeatureAccessByStaffId,
     staffFeatureTemplateDefaultsByStaffId,
     staffPositionTypes,
+    canViewStaffOrganisationalIntelligence: canManageStaffFeatureVisibility,
+    staffOrganisationalIntelligenceByStaffId,
     viewerStaffId,
     fiUsersForLink,
     pinMetadataByStaffId,

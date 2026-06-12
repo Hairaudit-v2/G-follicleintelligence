@@ -23,6 +23,8 @@ export type FiOsPrimarySidebarItem = {
   subItems?: FiOsPrimarySidebarSubItem[];
   /** Stage 2: optional UI visibility key (does not replace route guards). */
   featureKey?: FiFeatureKey;
+  /** When set, row stays visible if any listed feature is enabled (Stage 2 UI only). */
+  anyOfFeatures?: readonly FiFeatureKey[];
 };
 
 function normalizeBase(base: string): string {
@@ -146,11 +148,20 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "crm",
       featureKey: "crm",
-      label: "CRM / LeadFlow",
-      shortLabel: "CRM",
+      label: "Leads",
+      shortLabel: "Leads",
       href: hrefFor(b, "crm"),
       disabled: !showCrmNav,
       hint: !showCrmNav ? "Requires CRM shell role for this tenant." : undefined,
+    },
+    {
+      id: "follow-up-queue",
+      featureKey: "crm",
+      label: "Follow ups",
+      shortLabel: "Tasks",
+      href: hrefFor(b, "crm"),
+      disabled: !showCrmNav,
+      hint: !showCrmNav ? "Requires CRM shell role for this tenant." : "Lead pipeline and follow-up tasks live in the same workspace.",
     },
     {
       id: "consultations",
@@ -168,12 +179,6 @@ export function resolveFiOsPrimarySidebarItems(
           ? undefined
           : [
               {
-                id: "consultations-index",
-                featureKey: "consultations",
-                label: "Consultations",
-                href: hrefFor(b, "consultations"),
-              },
-              {
                 id: "consultation-conversion-board",
                 featureKey: "consultations",
                 label: "Conversion board",
@@ -184,15 +189,15 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "cases",
       featureKey: "cases",
-      label: "Cases / SurgeryOS",
+      label: "Cases",
       shortLabel: "Cases",
       href: hrefFor(b, "cases"),
       disabled: blocks.cases,
-      hint: blocks.cases ? "SurgeryOS is not enabled for this admin role." : undefined,
+      hint: blocks.cases ? "Surgery case workspace is not enabled for this admin role." : undefined,
       subItems: blocks.cases
         ? undefined
         : [
-            { id: "cases-worklist", featureKey: "cases", label: "Cases", href: hrefFor(b, "cases") },
+            { id: "cases-worklist", featureKey: "cases", label: "Case worklist", href: hrefFor(b, "cases") },
             {
               id: "surgery-readiness-board",
               featureKey: "cases",
@@ -217,27 +222,39 @@ export function resolveFiOsPrimarySidebarItems(
       hint: blocks.rx ? "Prescribing is not enabled for this admin role." : undefined,
     },
     {
+      id: "pathology-nav",
+      featureKey: "pathology",
+      label: "Pathology",
+      shortLabel: "Labs",
+      href: hrefFor(b, "patients"),
+      disabled: blocks.patients,
+      hint: blocks.patients
+        ? "Requires bookings operator access for this tenant."
+        : "Pathology requests and results are opened from patient records.",
+    },
+    {
       id: "patient-twin",
       featureKey: "patient_twin",
       label: "Patient Twin",
       shortLabel: "Twin",
       href: hrefFor(b, "foundation-integrity"),
       disabled: blocks.patientTwin,
-      hint: blocks.patientTwin ? "FoundationOS deep links are not enabled for this admin role." : undefined,
+      hint: blocks.patientTwin ? "Foundation integrity workspace is not enabled for this admin role." : undefined,
+      anyOfFeatures: ["patient_twin", "imaging"],
     },
     {
       id: "auditos",
       featureKey: "audit",
-      label: "AuditOS",
+      label: "Audit intelligence",
       shortLabel: "Audit",
       href: hrefFor(b, "audit"),
       disabled: auditDisabled,
-      hint: auditDisabled ? "AuditOS requires security review access or a clinical tenant role." : undefined,
+      hint: auditDisabled ? "Audit intelligence requires security review access or a clinical tenant role." : undefined,
     },
     {
       id: "academyos",
       featureKey: "academy",
-      label: "AcademyOS",
+      label: "Academy",
       shortLabel: "Academy",
       href: "#",
       disabled: true,
@@ -246,11 +263,20 @@ export function resolveFiOsPrimarySidebarItems(
     {
       id: "analytics",
       featureKey: "analytics",
-      label: "AnalyticsOS",
+      label: "Analytics",
       shortLabel: "Analytics",
       href: hrefFor(b, "analytics"),
       disabled: blocks.analytics,
       hint: blocks.analytics ? "Analytics is hidden for this admin role." : undefined,
+    },
+    {
+      id: "staff",
+      featureKey: "staff",
+      label: "Staff",
+      shortLabel: "Staff",
+      href: hrefFor(b, "staff"),
+      disabled: false,
+      hint: "People, roles, and workspace defaults for this clinic.",
     },
     {
       id: "settings",
@@ -272,6 +298,17 @@ function fiFeatureVisibleForNav(access: ReadonlyMap<FiFeatureKey, boolean> | nul
   return access.get(key) !== false;
 }
 
+function primarySidebarItemVisibleByFeatures(item: FiOsPrimarySidebarItem, access: ReadonlyMap<FiFeatureKey, boolean>): boolean {
+  const keys =
+    item.anyOfFeatures && item.anyOfFeatures.length > 0
+      ? [...item.anyOfFeatures]
+      : item.featureKey
+        ? [item.featureKey]
+        : [];
+  if (!keys.length) return true;
+  return keys.some((k) => fiFeatureVisibleForNav(access, k));
+}
+
 /**
  * Stage 2 UI visibility: removes primary-nav rows whose feature flag is off.
  * Does not alter `disabled` / RBAC-driven hints — callers should still resolve items with RBAC first.
@@ -283,7 +320,7 @@ export function filterFiOsPrimarySidebarItemsByFeatureAccess(
   if (!access) return items;
   const out: FiOsPrimarySidebarItem[] = [];
   for (const item of items) {
-    if (!fiFeatureVisibleForNav(access, item.featureKey)) continue;
+    if (!primarySidebarItemVisibleByFeatures(item, access)) continue;
     const rawSubs = item.subItems;
     if (rawSubs?.length) {
       const subs = rawSubs.filter((s) => fiFeatureVisibleForNav(access, s.featureKey));
@@ -309,11 +346,12 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
     if (firstEarly === "procedure-day") return "cases";
+    if (firstEarly === "staff") return "staff";
   }
 
   const legacy = getClinicOsShellActiveNavId(pathname, base);
   if (legacy === "foundationos") return "patient-twin";
-  if (legacy === "staff" || legacy === "services" || legacy === "configuration") return "settings";
+  if (legacy === "services" || legacy === "configuration") return "settings";
   if (legacy === "leadflow") return "crm";
   if (legacy === "operations-centre") return "operations-centre";
   if (legacy === "reception-board") return "reception-board";
@@ -332,6 +370,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (npRaw.startsWith(nb)) {
     const rest = npRaw.slice(nb.length).replace(/^\//, "");
     const first = rest.split("/")[0] ?? "";
+    if (first === "staff") return "staff";
     if (first === "system-status") return "calendar";
     if (first === "settings") return "settings";
   }

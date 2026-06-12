@@ -7,6 +7,9 @@ import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
+import { buildFiOsSidebarWorkflowSections } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
+import { buildFiOsWorkspaceFocusLine } from "@/src/lib/fi-os/fiOsWorkspaceFocusCopy";
 import {
   filterFiOsPrimarySidebarItemsByFeatureAccess,
   getFiOsShellActiveSidebarId,
@@ -42,6 +45,7 @@ export function FiOsAppShell({
   showRemindersSettingsNav = true,
   showAuditOsNav = true,
   showConfigurationHubNav = true,
+  workspaceProfileKey = "default",
   featureAccess = null,
   effective,
   userEmail,
@@ -69,6 +73,8 @@ export function FiOsAppShell({
   showAuditOsNav?: boolean;
   /** `/configuration` hub link in primary sidebar. */
   showConfigurationHubNav?: boolean;
+  /** Stage UI activation — workspace persona for nav emphasis (does not bypass Stage 2). */
+  workspaceProfileKey?: FiWorkspaceProfileKey;
   /** Stage 2: serialized feature map; null skips clinic-settings strip filtering. */
   featureAccess?: Partial<Record<FiFeatureKey, boolean>> | null;
   effective: EffectiveBranding;
@@ -122,6 +128,16 @@ export function FiOsAppShell({
     showConfigurationHubNav,
     featureAccessMap,
   ]);
+
+  const sidebarSections = useMemo(
+    () => buildFiOsSidebarWorkflowSections(sidebarItems, workspaceProfileKey),
+    [sidebarItems, workspaceProfileKey]
+  );
+
+  const workspaceFocusLine = useMemo(
+    () => buildFiOsWorkspaceFocusLine({ workspaceProfile: workspaceProfileKey, featureAccess: featureAccessMap }),
+    [workspaceProfileKey, featureAccessMap]
+  );
   const activeSidebarId = getFiOsShellActiveSidebarId(pathname, base);
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
@@ -187,7 +203,7 @@ export function FiOsAppShell({
           variant="rail"
           brandName={brandName}
           effective={effective}
-          navItems={sidebarItems}
+          navSections={sidebarSections}
           activeNavId={activeSidebarId}
           pathname={pathname}
         />
@@ -197,6 +213,8 @@ export function FiOsAppShell({
             tenantId={tenantId}
             clinicLabel={clinicLabel}
             accentHex={accent}
+            workspaceProfileKey={workspaceProfileKey}
+            workspaceFocusLine={workspaceFocusLine}
             userEmail={userEmail}
             searchOpen={searchOpen}
             onSearchOpenChange={setSearchOpen}
@@ -241,7 +259,7 @@ export function FiOsAppShell({
             variant="drawer"
             brandName={brandName}
             effective={effective}
-            navItems={sidebarItems}
+            navSections={sidebarSections}
             activeNavId={activeSidebarId}
             pathname={pathname}
             onNavigate={closeMobile}

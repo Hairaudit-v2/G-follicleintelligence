@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { BrandLogoImage } from "@/src/components/brand/BrandLogoImage";
 import { resolveTenantLogoSource } from "@/src/lib/brand/resolveTenantLogo";
-import type { FiOsPrimarySidebarItem } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import type { FiOsSidebarWorkflowSection } from "@/src/lib/fi-os/fiOsSidebarWorkflow";
 
 import { FiOsModuleNav } from "@/src/components/fi-os/FiOsModuleNav";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -15,7 +15,7 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 export function FiOsSidebar({
   brandName,
   effective,
-  navItems,
+  navSections,
   activeNavId,
   pathname,
   variant,
@@ -26,7 +26,7 @@ export function FiOsSidebar({
 }: {
   brandName: string;
   effective: EffectiveBranding;
-  navItems: FiOsPrimarySidebarItem[];
+  navSections: FiOsSidebarWorkflowSection[];
   activeNavId: string | null;
   pathname?: string;
   variant: "rail" | "drawer";
@@ -86,7 +86,7 @@ export function FiOsSidebar({
     return (
       <div className={fiOsChromeClasses.sidebarDrawer}>
         {brandBlock}
-        <FiOsModuleNav items={navItems} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
+        <FiOsModuleNav sections={navSections} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
       </div>
     );
   }
@@ -104,7 +104,7 @@ export function FiOsSidebar({
       <div className="relative flex min-h-0 flex-1 flex-col px-2.5">
         {brandBlock}
         {logoStrip}
-        <FiOsModuleNav items={navItems} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
+        <FiOsModuleNav sections={navSections} activeId={activeNavId} pathname={pathname} onNavigate={onNavigate} dense={dense} />
       </div>
     </aside>
   );

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getFiOsShellActiveSidebarId, resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  filterFiOsPrimarySidebarItemsByFeatureAccess,
+  getFiOsShellActiveSidebarId,
+  resolveFiOsPrimarySidebarItems,
+} from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 
 const base = "/fi-admin/t-1";
 
@@ -27,7 +32,7 @@ test("resolveFiOsPrimarySidebarItems: CRM and patients follow flags", () => {
 
 test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () => {
   assert.equal(getFiOsShellActiveSidebarId(`${base}/foundation-integrity`, base), "patient-twin");
-  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "settings");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/admin-users`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/tax-localisation`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely`, base), "settings");
@@ -80,7 +85,7 @@ test("resolveFiOsPrimarySidebarItems: operations and reception entries exist", (
 test("resolveFiOsPrimarySidebarItems: consultations entry includes conversion board sub-link when enabled", () => {
   const items = resolveFiOsPrimarySidebarItems(base, true, true);
   const consult = items.find((i) => i.id === "consultations");
-  assert.ok(consult?.subItems?.length);
+  assert.ok(consult?.subItems?.length === 1);
   assert.ok(consult!.subItems!.some((s) => s.href.endsWith("/consultation-conversion")));
 });
 
@@ -100,8 +105,19 @@ test("resolveFiOsPrimarySidebarItems: dashboard_viewer AuditOS disabled when she
   assert.equal(audit?.disabled, true);
 });
 
-test("resolveFiOsPrimarySidebarItems: data_safety_admin AuditOS enabled when shell allows security nav", () => {
-  const items = resolveFiOsPrimarySidebarItems(base, true, true, "data_safety_admin", true);
-  const audit = items.find((i) => i.id === "auditos");
-  assert.equal(audit?.disabled, false);
+test("filterFiOsPrimarySidebarItemsByFeatureAccess: patient twin row respects imaging OR patient_twin", () => {
+  const raw = resolveFiOsPrimarySidebarItems(base, true, true);
+  const imagingOnly = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    patient_twin: false,
+    imaging: true,
+  });
+  const filtered = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, imagingOnly);
+  assert.ok(filtered.some((i) => i.id === "patient-twin"));
+
+  const offBoth = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    patient_twin: false,
+    imaging: false,
+  });
+  const filtered2 = filterFiOsPrimarySidebarItemsByFeatureAccess(raw, offBoth);
+  assert.ok(!filtered2.some((i) => i.id === "patient-twin"));
 });

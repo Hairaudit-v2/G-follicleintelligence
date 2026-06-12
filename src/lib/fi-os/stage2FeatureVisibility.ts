@@ -51,6 +51,8 @@ export function fiDashboardWidgetVisibleByFeatureAccess(
       return onAny(access, ["imaging", "patient_twin"]);
     case "booking_queue":
       return onAny(access, ["calendar", "dashboard"]);
+    case "staff_intelligence_summary":
+      return on(access, "dashboard") && on(access, "staff");
     default:
       return true;
   }

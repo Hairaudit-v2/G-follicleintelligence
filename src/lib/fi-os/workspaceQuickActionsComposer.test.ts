@@ -22,6 +22,12 @@ test("quick action composer: surgeon prioritises case and upload", () => {
   assert.equal(ordered[1]?.key, "upload_images");
 });
 
+test("quick action composer: director prioritises lead before booking", () => {
+  const resolved = resolveDashboardQuickActions(base, { showCrmNav: true, showBookingsBoard: true });
+  const ordered = composeWorkspaceQuickActionsOrder({ workspaceProfile: "director", resolvedItems: resolved });
+  assert.deepEqual(ordered.slice(0, 4).map((i) => i.key), ["lead", "booking", "case", "upload_images"]);
+});
+
 test("quick action composer: reception order", () => {
   const resolved = resolveDashboardQuickActions(base, { showCrmNav: true, showBookingsBoard: true });
   const ordered = composeWorkspaceQuickActionsOrder({ workspaceProfile: "reception", resolvedItems: resolved });

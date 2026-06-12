@@ -13,6 +13,7 @@ import { DashboardMyWorkspace } from "@/src/components/fi-admin/dashboard/Dashbo
 import { DashboardOperationalWorkspace } from "@/src/components/fi-admin/dashboard/DashboardOperationalWorkspace";
 import { DashboardQuickActionsBar } from "@/src/components/fi-admin/dashboard/DashboardQuickActionsBar";
 import { DashboardSurgeryPipeline } from "@/src/components/fi-admin/dashboard/DashboardSurgeryPipeline";
+import { DashboardStaffIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardStaffIntelligenceSummary";
 import { DashboardWidgetPlaceholder } from "@/src/components/fi-admin/dashboard/DashboardWidgetPlaceholder";
 import { TenantHomeQuickCallIn } from "@/src/components/fi-admin/TenantHomeQuickCallIn";
 import type { ResolvedDashboardQuickAction } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
@@ -47,6 +48,8 @@ function resolveDashboardPlaceholderHref(tenantBase: string, key: FiDashboardWid
       return `${b}/foundation-integrity#fi-os-foundation-media`;
     case "booking_queue":
       return `${b}/calendar`;
+    case "staff_intelligence_summary":
+      return `${b}/staff`;
     default:
       return null;
   }
@@ -135,6 +138,8 @@ export function FiOsControlCentreHome(props: {
         );
       case "attention_centre":
         return <DashboardActionCentre base={base} actionCentre={data.actionCentre} showCrmNav={showCrmNav} />;
+      case "staff_intelligence_summary":
+        return <DashboardStaffIntelligenceSummary tenantBase={base} />;
       case "analytics_summary":
       case "audit_summary":
       case "imaging_summary":

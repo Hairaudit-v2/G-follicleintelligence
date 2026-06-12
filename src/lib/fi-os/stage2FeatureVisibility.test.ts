@@ -33,6 +33,26 @@ test("dashboard widgets: clinic_metrics visible when analytics on", () => {
   assert.equal(fiDashboardWidgetVisibleByFeatureAccess("clinic_metrics", m), true);
 });
 
+test("dashboard widgets: staff_intelligence_summary requires dashboard and staff", () => {
+  const off = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    dashboard: false,
+    staff: true,
+  });
+  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("staff_intelligence_summary", off), false);
+
+  const offStaff = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    dashboard: true,
+    staff: false,
+  });
+  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("staff_intelligence_summary", offStaff), false);
+
+  const on = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    dashboard: true,
+    staff: true,
+  });
+  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("staff_intelligence_summary", on), true);
+});
+
 test("quick actions: filters enabled booking when calendar feature off", () => {
   const items = resolveDashboardQuickActions(base, { showCrmNav: true, showBookingsBoard: true });
   const booking = items.find((i) => i.key === "booking");

@@ -18,11 +18,15 @@ import {
 import { cn } from "@/lib/utils";
 import { FiOsTenantSwitcher } from "@/src/components/fi-admin/shell/FiOsTenantSwitcher";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
+import { getWorkspaceProfileLabel } from "@/src/config/fiWorkspaceProfiles";
 
 export function FiOsTopBar({
   tenantId,
   clinicLabel,
   accentHex,
+  workspaceProfileKey = null,
+  workspaceFocusLine = null,
   userEmail,
   searchOpen,
   onSearchOpenChange,
@@ -38,6 +42,10 @@ export function FiOsTopBar({
   tenantId: string;
   clinicLabel: string;
   accentHex: string;
+  /** When not default, shows a subtle workspace persona hint (Stage UI activation). */
+  workspaceProfileKey?: FiWorkspaceProfileKey | null;
+  /** Positive Stage 2 framing line when feature access is narrowed (non-admin viewers). */
+  workspaceFocusLine?: string | null;
   userEmail: string | null;
   searchOpen: boolean;
   onSearchOpenChange: (open: boolean) => void;
@@ -114,6 +122,11 @@ export function FiOsTopBar({
 
         <div className="min-w-0 shrink-0">
           <FiOsTenantSwitcher tenantId={tenantId} currentLabel={clinicLabel} accentHex={accentHex} />
+          {workspaceProfileKey && workspaceProfileKey !== "default" ? (
+            <p className="mt-1 hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-400/75 sm:block">
+              {getWorkspaceProfileLabel(workspaceProfileKey)} workspace
+            </p>
+          ) : null}
         </div>
 
         <div className="flex w-full min-w-0 flex-1 basis-full sm:basis-auto">
@@ -214,6 +227,9 @@ export function FiOsTopBar({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {workspaceFocusLine ? (
+        <p className="mt-1.5 w-full border-t border-white/[0.06] px-1 pt-2 text-[11px] leading-snug text-slate-500">{workspaceFocusLine}</p>
+      ) : null}
     </div>
     </div>
   );

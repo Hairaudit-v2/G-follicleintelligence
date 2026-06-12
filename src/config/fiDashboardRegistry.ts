@@ -24,6 +24,8 @@ export const FI_DASHBOARD_WIDGET_KEYS = [
   "follow_up_queue",
   "imaging_uploads",
   "booking_queue",
+  /** Stage 3.75 — manager support signals (director / clinic manager profiles; placeholder until richer loaders). */
+  "staff_intelligence_summary",
 ] as const;
 
 export type FiDashboardWidgetKey = (typeof FI_DASHBOARD_WIDGET_KEYS)[number];
@@ -92,6 +94,10 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
   booking_queue: {
     title: "Booking queue",
     description: "Scheduling and arrivals-oriented snapshot (calendar remains canonical).",
+  },
+  staff_intelligence_summary: {
+    title: "Staff intelligence",
+    description: "Operational support signals for clinic leadership (no automated permission changes).",
   },
 } as const satisfies Record<FiDashboardWidgetKey, { title: string; description?: string }>;
 

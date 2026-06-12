@@ -19,6 +19,7 @@ import {
 import { FI_WORKSPACE_PROFILE_ADMIN_DROPDOWN_KEYS } from "@/src/config/fiWorkspaceProfiles";
 import { FI_WORKSPACE_PROFILES } from "@/src/config/fiWorkspaceProfiles";
 import type { FiWorkspaceProfileKey } from "@/src/config/fiWorkspaceProfiles";
+import { buildStaffFiOsExperiencePreview } from "@/src/lib/fi-os/fiOsWorkspaceExperiencePreview";
 import { parseExplicitWorkspaceProfile } from "@/src/lib/fi-os/workspaceProfileDerivation";
 
 export type StaffPositionTypeOption = {
@@ -113,6 +114,20 @@ export function StaffFeatureAccessPanel(props: {
     }
     return m;
   }, []);
+
+  const previewWorkspaceProfile = useMemo((): FiWorkspaceProfileKey => {
+    if (workspaceSelection !== "default") return workspaceSelection;
+    return inheritedWorkspaceFromPosition ?? "default";
+  }, [workspaceSelection, inheritedWorkspaceFromPosition]);
+
+  const experiencePreviewLines = useMemo(
+    () =>
+      buildStaffFiOsExperiencePreview({
+        workspaceProfile: previewWorkspaceProfile,
+        effectiveFeatures: values,
+      }),
+    [previewWorkspaceProfile, values]
+  );
 
   const onToggle = useCallback((key: FiFeatureKey, next: boolean) => {
     setValues((v) => ({ ...v, [key]: next }));
@@ -275,6 +290,19 @@ export function StaffFeatureAccessPanel(props: {
           {workspaceMessage.text}
         </p>
       ) : null}
+
+      <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50/90 p-3">
+        <h3 className="text-sm font-semibold text-gray-900">Preview experience</h3>
+        <p className="mt-1 text-xs text-gray-600">
+          How the FI OS shell will feel with the toggles above — layout order is suggestive; Stage 2 and route guards still
+          apply.
+        </p>
+        <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-gray-800">
+          {experiencePreviewLines.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </div>
 
       <h3 className="mt-8 text-sm font-semibold text-gray-900">Feature access (FI OS)</h3>
       <p className="mt-1 text-xs text-gray-600">
