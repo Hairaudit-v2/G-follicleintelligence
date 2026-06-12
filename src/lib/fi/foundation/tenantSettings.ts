@@ -94,6 +94,8 @@ export type TenantConfigurationOverview = {
   tenant_settings: FiTenantSettingsRow | null;
   organisations: OrganisationWithSettings[];
   clinics: ClinicWithSettings[];
+  /** From `fi_tenants.config_json.fi_os_operating_mode_key` when set. */
+  fi_os_operating_mode_key: string | null;
 };
 
 function asRecordMeta(v: unknown): Record<string, unknown> {
@@ -287,6 +289,15 @@ export async function loadTenantConfigurationOverview(
 
   const tenant_settings = await loadTenantBranding(tid, client);
 
+  let fi_os_operating_mode_key: string | null = null;
+  const { data: tcfgRow, error: cfgErr } = await supabase.from("fi_tenants").select("config_json").eq("id", tid).maybeSingle();
+  if (cfgErr) throw new Error(cfgErr.message);
+  const cj = (tcfgRow as { config_json?: unknown } | null)?.config_json;
+  if (cj && typeof cj === "object" && !Array.isArray(cj)) {
+    const k = (cj as Record<string, unknown>).fi_os_operating_mode_key;
+    if (typeof k === "string" && k.trim()) fi_os_operating_mode_key = k.trim();
+  }
+
   // Drive lists from fi_organisations / fi_clinics and embed optional settings so rows without settings still appear.
   const orgSelect = `
     id,
@@ -375,6 +386,7 @@ export async function loadTenantConfigurationOverview(
     tenant_settings,
     organisations,
     clinics: clinicsOut,
+    fi_os_operating_mode_key,
   };
 }
 

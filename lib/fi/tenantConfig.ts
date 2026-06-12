@@ -37,6 +37,22 @@ export type TenantConfig = {
   fi_os_operating_mode_key?: string | null;
 };
 
+export function mergeTenantConfigJsonWithOperatingModeKey(
+  rawConfigJson: unknown,
+  modeKey: string | null | undefined
+): Record<string, unknown> {
+  const base =
+    rawConfigJson != null && typeof rawConfigJson === "object" && !Array.isArray(rawConfigJson)
+      ? { ...(rawConfigJson as Record<string, unknown>) }
+      : {};
+  const mk = modeKey == null ? "" : String(modeKey).trim();
+  if (!mk) {
+    delete base.fi_os_operating_mode_key;
+  } else {
+    base.fi_os_operating_mode_key = mk;
+  }
+  return base;
+}
 const DEFAULT_BRANDING: TenantBranding = {
   primary_color: "#C6A75E",
   secondary_color: "#0F1B2D",
@@ -57,6 +73,7 @@ export function resolveTenantConfig(raw: TenantConfig | null): TenantConfig {
     branding: { ...DEFAULT_BRANDING, ...raw.branding },
     feature_flags: { ...DEFAULT_FEATURE_FLAGS, ...raw.feature_flags },
     scorecard_weights: raw.scorecard_weights ?? undefined,
+    fi_os_operating_mode_key: raw.fi_os_operating_mode_key ?? undefined,
   };
 }
 

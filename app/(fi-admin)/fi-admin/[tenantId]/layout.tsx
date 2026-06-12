@@ -19,6 +19,7 @@ import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermission
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
+import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGuard.server";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import {
   canAccessTenantReminderSettings,
@@ -73,6 +74,13 @@ export default async function TenantAdminLayout({
   } else {
     await assertFiTenantPortalAccess(tenantId);
   }
+
+  await enforceFiFeatureRouteOrRedirect({
+    tenantId,
+    pathname,
+    tenantBase: base,
+    pinFloorMode: Boolean(pinSession),
+  });
 
   const sessionAuthId = await resolveAuthUserId(null);
   let impersonationDisplayName: string | null = null;

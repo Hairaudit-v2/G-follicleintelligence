@@ -20,7 +20,11 @@ import { mergeFeatureAccessWithOrganisationalLayers } from "@/src/lib/fi-os/orga
 import { resolveTenantOperatingModeFeatureDefaults } from "@/src/lib/fi-os/organisationalProfile.tenantMode.server";
 import { loadStaffFeatureAccessOverrides } from "@/src/lib/fi-os/staffFeatureAccessOverrides.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
-import { isFiOsElevatedOsOperatorRole, isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
+import {
+  isFiOsCrossTenantDirectoryRole,
+  isFiOsElevatedOsOperatorRole,
+  isFiOsPlatformAdminRole,
+} from "@/src/lib/fiOs/fiOsRoles";
 import { loadActiveTenantAdminProfileForSession } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 import { isCrmStaffManageRole } from "@/src/lib/crm/crmGatePolicy";
 
@@ -63,7 +67,8 @@ export function mergeEffectiveFeatureAccessMap(overrides: Partial<Record<FiFeatu
 
 /**
  * Returns `null` when Stage-2 filtering should be skipped (full legacy UI).
- * Platform operators always receive `null` so every module stays discoverable.
+ * Platform operators, cross-tenant OS directory roles, and platform-admin full bypass always receive `null`
+ * so every module stays discoverable.
  */
 async function loadFiOsFeatureAccessMapOrNullForViewerImpl(tenantId: string): Promise<FiOsFeatureAccessMap | null> {
   const tid = tenantId.trim();
@@ -79,6 +84,10 @@ async function loadFiOsFeatureAccessMapOrNullForViewerImpl(tenantId: string): Pr
     }
 
     if (await isFiOsPlatformAdminFullSessionBypass(authId)) {
+      return null;
+    }
+
+    if (os && isFiOsCrossTenantDirectoryRole(os.osRole)) {
       return null;
     }
 

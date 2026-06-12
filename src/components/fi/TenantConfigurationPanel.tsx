@@ -8,6 +8,7 @@ import {
   upsertOrganisationSettingsAction,
   upsertTenantSettingsAction,
 } from "@/lib/actions/fi-configuration-actions";
+import { FiTenantOperatingModePanel } from "@/src/components/fi-os/FiTenantOperatingModePanel";
 import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import type { EffectiveBranding, TenantConfigurationOverview } from "@/src/lib/fi/foundation/tenantSettings";
 
@@ -181,6 +182,12 @@ export function TenantConfigurationPanel({
           <span className="block text-xs text-[#64748B]">Required only when you click a Save button. Never share in chat or tickets.</span>
         </label>
       </DashboardCard>
+
+      <FiTenantOperatingModePanel
+        tenantId={tenantId}
+        currentModeKey={overview.fi_os_operating_mode_key ?? null}
+        adminKey={adminKey}
+      />
 
       <Section title="Tenant branding">
         <div className="mb-4 grid gap-4 md:grid-cols-2">
