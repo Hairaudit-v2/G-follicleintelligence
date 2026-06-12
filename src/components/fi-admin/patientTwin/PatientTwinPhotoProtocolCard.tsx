@@ -40,7 +40,7 @@ export function PatientTwinPhotoProtocolCard({
 
   if (!pp) {
     return (
-      <section className="rounded-lg border border-white/[0.08] bg-[#0b1220]/80 p-4 text-sm text-slate-400">
+      <section id="smart-photo-protocol" className="rounded-lg border border-white/[0.08] bg-[#0b1220]/80 p-4 text-sm text-slate-400">
         <h2 className="text-sm font-semibold text-white">Smart Photography Protocol</h2>
         <p className="mt-2">Protocol templates are not available yet (database migration or seed missing).</p>
       </section>
@@ -51,7 +51,7 @@ export function PatientTwinPhotoProtocolCard({
   const pct = pp.compliance.required_count ? Math.round((100 * done) / pp.compliance.required_count) : 0;
 
   return (
-    <section className="rounded-lg border border-white/[0.08] bg-[#0b1220]/80 p-4">
+    <section id="smart-photo-protocol" className="rounded-lg border border-white/[0.08] bg-[#0b1220]/80 p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-cyan-400/90">Smart Photography Protocol</h2>

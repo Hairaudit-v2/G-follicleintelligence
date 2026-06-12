@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiKpiTile } from "@/src/components/fi-design/FiKpiTile";
 import type { PhotoProtocolAlert } from "@/src/lib/hair-intelligence/photoProtocols/protocolAlerts";
+import { fiOsPatientTwinPhotoProtocolHref } from "@/src/lib/hair-intelligence/photoProtocols/protocolDeepLinks";
 import type { PhotoProtocolAnalyticsSummary } from "@/src/lib/hair-intelligence/photoProtocols/protocolAnalytics";
 
 function pct(n: number): string {
@@ -110,10 +111,10 @@ export function PhotoProtocolAnalyticsCard({
                 <p className="mt-1 text-xs text-slate-500">{a.recommended_action}</p>
                 {a.patient_id ? (
                   <Link
-                    href={`/fi-admin/${encodeURIComponent(tid)}/patients/${encodeURIComponent(a.patient_id)}/twin`}
+                    href={fiOsPatientTwinPhotoProtocolHref(tid, a.patient_id)}
                     className="mt-1 inline-block text-xs font-medium text-sky-700 hover:underline"
                   >
-                    Open Patient Twin
+                    Open Patient Twin (protocol)
                   </Link>
                 ) : null}
               </li>

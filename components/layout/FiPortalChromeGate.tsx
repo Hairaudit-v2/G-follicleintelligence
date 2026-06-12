@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { HairEcosystemNav } from "@/components/layout/hair-ecosystem-nav";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -35,7 +34,6 @@ export function FiPortalChromeGate({ children }: { children: ReactNode }) {
   }
   return (
     <>
-      <HairEcosystemNav currentSite="follicleintelligence" />
       <Header />
       <main>{children}</main>
       <Footer />

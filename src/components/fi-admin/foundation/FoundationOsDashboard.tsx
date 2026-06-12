@@ -11,6 +11,7 @@ import { FiKpiTile } from "@/src/components/fi-design/FiKpiTile";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
 
+import { PhotoProtocolAlertEventsTable } from "./PhotoProtocolAlertEventsTable";
 import { PhotoProtocolAnalyticsCard } from "./PhotoProtocolAnalyticsCard";
 import { PhotoProtocolIncompleteSessionsTable } from "./PhotoProtocolIncompleteSessionsTable";
 import { FoundationOsBackfillCard } from "./FoundationOsBackfillCard";
@@ -66,6 +67,7 @@ export function FoundationOsDashboard({
     alerts: import("@/src/lib/hair-intelligence/photoProtocols/protocolAlerts").PhotoProtocolAlert[];
     incomplete_sessions: import("@/src/lib/hair-intelligence/photoProtocols/photoProtocolAnalyticsLoader.server").PhotoProtocolIncompleteSessionRow[];
     scan_note: string | null;
+    alert_events: import("@/src/lib/hair-intelligence/photoProtocols/types").HliPhotoProtocolAlertEvent[];
   } | null;
 }) {
   const tid = tenantId.trim();
@@ -176,7 +178,8 @@ export function FoundationOsDashboard({
             alerts={photoProtocol.alerts}
             scanNote={photoProtocol.scan_note}
           />
-          <PhotoProtocolIncompleteSessionsTable rows={photoProtocol.incomplete_sessions} />
+          <PhotoProtocolAlertEventsTable tenantId={tid} events={photoProtocol.alert_events} />
+          <PhotoProtocolIncompleteSessionsTable tenantId={tid} rows={photoProtocol.incomplete_sessions} />
         </div>
       ) : null}
 

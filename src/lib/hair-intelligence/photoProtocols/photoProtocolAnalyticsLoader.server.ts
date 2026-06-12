@@ -284,7 +284,7 @@ type Dataset = {
   patientDisplayByPatientId: Map<string, string>;
 };
 
-async function loadPhotoProtocolDatasetForTenant(
+export async function loadPhotoProtocolDatasetForTenant(
   tenantId: string,
   filters: PhotoProtocolAnalyticsFilters,
   statusOverride: HliPhotoProtocolSession["status"][] | null,

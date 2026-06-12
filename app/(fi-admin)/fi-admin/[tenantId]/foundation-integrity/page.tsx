@@ -7,6 +7,7 @@ import {
   loadIncompletePhotoProtocolSessionsForTenant,
   loadPhotoProtocolAnalyticsForTenant,
 } from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolAnalyticsLoader.server";
+import { loadPhotoProtocolAlertEventsForTenant } from "@/src/lib/hair-intelligence/photoProtocols/protocolAlertEvents.server";
 
 export const metadata = {
   title: "FoundationOS",
@@ -38,12 +39,20 @@ export default async function FoundationIntegrityPage({ params }: { params: Prom
     incomplete = [];
   }
 
+  let alertEvents: Awaited<ReturnType<typeof loadPhotoProtocolAlertEventsForTenant>>["events"] = [];
+  try {
+    alertEvents = (await loadPhotoProtocolAlertEventsForTenant(tid, { limit: 200 })).events;
+  } catch {
+    alertEvents = [];
+  }
+
   const photoProtocol = analytics
     ? {
         summary: analytics.summary,
         alerts: analytics.alerts,
         incomplete_sessions: incomplete.slice(0, 100),
         scan_note: analytics.scan_note,
+        alert_events: alertEvents,
       }
     : null;
 

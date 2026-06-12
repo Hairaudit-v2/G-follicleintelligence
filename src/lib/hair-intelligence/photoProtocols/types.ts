@@ -122,3 +122,45 @@ export type HliPhotoProtocolComplianceSummary = {
   suggested_matches: Record<string, HliPhotoProtocolSuggestedMatch[]>;
   warnings: string[];
 };
+
+export const HLI_PHOTO_PROTOCOL_ALERT_EVENT_STATUSES = ["open", "acknowledged", "resolved", "dismissed"] as const;
+export type HliPhotoProtocolAlertEventStatus = (typeof HLI_PHOTO_PROTOCOL_ALERT_EVENT_STATUSES)[number];
+
+export const HLI_PHOTO_PROTOCOL_ALERT_EVENT_SEVERITIES = ["low", "medium", "high"] as const;
+export type HliPhotoProtocolAlertEventSeverity = (typeof HLI_PHOTO_PROTOCOL_ALERT_EVENT_SEVERITIES)[number];
+
+export const HLI_PHOTO_PROTOCOL_ALERT_EVENT_TYPES = [
+  "missing_required_images",
+  "protocol_incomplete_over_24h",
+  "needs_retake",
+  "low_confidence_capture",
+  "hairaudit_not_ready",
+  "follow_up_missing_images",
+] as const;
+export type HliPhotoProtocolAlertEventType = (typeof HLI_PHOTO_PROTOCOL_ALERT_EVENT_TYPES)[number];
+
+export type HliPhotoProtocolAlertEvent = {
+  id: string;
+  source_system: HliPhotoProtocolSourceSystem;
+  source_record_id: string | null;
+  tenant_id: string | null;
+  clinic_id: string | null;
+  patient_id: string | null;
+  case_id: string | null;
+  protocol_session_id: string;
+  alert_type: HliPhotoProtocolAlertEventType;
+  severity: HliPhotoProtocolAlertEventSeverity;
+  status: HliPhotoProtocolAlertEventStatus;
+  message: string;
+  recommended_action: string | null;
+  payload: Record<string, unknown>;
+  idempotency_key: string;
+  first_detected_at: string;
+  last_detected_at: string;
+  acknowledged_at: string | null;
+  acknowledged_by_user_id: string | null;
+  resolved_at: string | null;
+  resolved_by_user_id: string | null;
+  created_at: string;
+  updated_at: string;
+};

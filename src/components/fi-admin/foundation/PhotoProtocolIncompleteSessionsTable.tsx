@@ -2,8 +2,10 @@ import Link from "next/link";
 
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import type { PhotoProtocolIncompleteSessionRow } from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolAnalyticsLoader.server";
+import { fiOsPatientTwinPhotoProtocolHref } from "@/src/lib/hair-intelligence/photoProtocols/protocolDeepLinks";
 
-export function PhotoProtocolIncompleteSessionsTable({ rows }: { rows: PhotoProtocolIncompleteSessionRow[] }) {
+export function PhotoProtocolIncompleteSessionsTable({ tenantId, rows }: { tenantId: string; rows: PhotoProtocolIncompleteSessionRow[] }) {
+  const tid = tenantId.trim();
   return (
     <FiCard>
       <h2 className="text-sm font-semibold text-slate-900">Incomplete protocol sessions</h2>
@@ -43,7 +45,10 @@ export function PhotoProtocolIncompleteSessionsTable({ rows }: { rows: PhotoProt
                   <td className="py-2 pr-4 text-slate-700">{r.status.replace(/_/g, " ")}</td>
                   <td className="py-2 pr-4 text-slate-600">{r.started_at ? new Date(r.started_at).toLocaleString() : "—"}</td>
                   <td className="py-2">
-                    <Link href={r.patient_twin_href} className="font-medium text-sky-700 hover:underline">
+                    <Link
+                      href={r.patient_id ? fiOsPatientTwinPhotoProtocolHref(tid, r.patient_id) : r.patient_twin_href}
+                      className="font-medium text-sky-700 hover:underline"
+                    >
                       Patient Twin
                     </Link>
                   </td>

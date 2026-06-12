@@ -11,12 +11,39 @@ export const PRIMARY_NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
-export const FOOTER_NAV = [
-  ...PRIMARY_NAV,
-  { href: "/modules", label: "Legacy Modules" },
-  { href: "/integration", label: "Integration" },
-  { href: "/security", label: "Security" },
-  { href: "/licensing", label: "Licensing" },
+export type FooterNavLink = { label: string; href: string };
+
+/** Public footer — Platform column */
+export const FOOTER_PLATFORM: FooterNavLink[] = [
+  { label: "Platform Overview", href: "/" },
+  { label: "Technology", href: "/technology" },
+  { label: "Patient Twin", href: "/patient-twin" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Security", href: "/technology" },
+  { label: "Enterprise", href: "/technology" },
+];
+
+/** Public footer — product modules */
+export const FOOTER_MODULES: FooterNavLink[] = [
+  { label: "SurgeryOS", href: "/platform/surgery-os" },
+  { label: "PatientOS", href: "/platform/patient-os" },
+  { label: "ImagingOS", href: "/platform/imaging-os" },
+  { label: "ClinicOS", href: "/platform/clinic-os" },
+  { label: "LeadFlow", href: "/platform/leadflow" },
+  { label: "AnalyticsOS", href: "/platform/analytics-os" },
+];
+
+/** Supporting intelligence layers (external) */
+export const FOOTER_INTELLIGENCE_LAYERS: FooterNavLink[] = [
+  { label: "HairAudit", href: "https://hairaudit.com" },
+  { label: "HLI", href: "https://hairlongevityinstitute.com" },
+  { label: "IIOHR", href: "https://iiohr.com" },
+];
+
+export const FOOTER_COMPANY: FooterNavLink[] = [
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Book Demo", href: "/contact?intent=demo" },
 ];
 
 export type EcosystemSiteId = "iiohr" | "hairaudit" | "follicleintelligence" | "hli";

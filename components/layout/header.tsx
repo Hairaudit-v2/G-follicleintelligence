@@ -18,9 +18,14 @@ import {
 import { PRIMARY_NAV } from "@/lib/site-navigation";
 import { cn } from "@/lib/utils";
 
+function navItemIsActive(pathname: string, href: string) {
+  if (href.startsWith("/#")) return false;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function Header() {
   const pathname = usePathname();
-  const headerNav = PRIMARY_NAV.filter((item) => item.label.toLowerCase() !== "iiohr");
+  const headerNav = PRIMARY_NAV;
 
   return (
     <motion.header
@@ -52,13 +57,11 @@ export function Header() {
         <nav className="hidden items-center gap-5 lg:flex">
           {headerNav.map((item) => (
             <Link
-              key={item.href}
+              key={`${item.label}:${item.href}`}
               href={item.href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-foreground",
-                pathname === item.href || pathname.startsWith(`${item.href}/`)
-                  ? "text-foreground"
-                  : "text-muted-foreground"
+                navItemIsActive(pathname, item.href) ? "text-foreground" : "text-muted-foreground"
               )}
             >
               {item.label}
@@ -68,7 +71,7 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <Button asChild size="sm" className="hidden md:inline-flex">
-            <Link href="/contact?intent=demo">Request Demo</Link>
+            <Link href="/contact?intent=demo">Book Demo</Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="lg:hidden">
@@ -78,12 +81,12 @@ export function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               {headerNav.map((item) => (
-                <DropdownMenuItem key={item.href} asChild>
+                <DropdownMenuItem key={`${item.label}:${item.href}`} asChild>
                   <Link href={item.href}>{item.label}</Link>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuItem asChild>
-                <Link href="/contact?intent=demo">Request Demo</Link>
+                <Link href="/contact?intent=demo">Book Demo</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
