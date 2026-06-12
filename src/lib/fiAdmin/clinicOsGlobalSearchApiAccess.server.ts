@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import { isInsecureFiApiBypassAllowed } from "@/src/lib/fiAdmin/insecureFiApiBypass";
 import { isFiOsCrossTenantDirectoryRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 
@@ -29,15 +30,14 @@ export type FiTenantPortalApiAccess = { ok: true } | { ok: false; status: number
 
 /**
  * Route-handler variant of `assertFiTenantPortalAccess` (no redirects).
- * **Non-production:** always allows (matches open local FI admin HTML routes).
- * API callers without a session can therefore hit this route in dev only — do not rely on it for
- * production-like API tests unless `NODE_ENV=production`.
+ * **Insecure bypass:** only when **`FI_ALLOW_INSECURE_API`** is `true` / `1` / `yes` and **`NODE_ENV` is not `production`**.
+ * Public preview/staging with `NODE_ENV=production` therefore always requires a session + tenant gate.
  */
 export async function checkFiTenantPortalApiAccess(request: Request, tenantId: string): Promise<FiTenantPortalApiAccess> {
   const tid = tenantId.trim();
   if (!tid) return { ok: false, status: 400, message: "Missing tenant." };
 
-  if (process.env.NODE_ENV !== "production") {
+  if (isInsecureFiApiBypassAllowed()) {
     return { ok: true };
   }
 

@@ -218,7 +218,7 @@ async function main(): Promise<void> {
       const sp = String((r as { source_person_id: string }).source_person_id);
       bySp.set(sp, (bySp.get(sp) ?? 0) + 1);
     }
-    for (const [source_person_id, cnt] of bySp.entries()) {
+    for (const [source_person_id, cnt] of Array.from(bySp.entries())) {
       if (cnt > 1) dupCheck.push({ source_person_id, cnt });
     }
   }

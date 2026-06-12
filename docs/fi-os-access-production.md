@@ -98,7 +98,7 @@ The tenant FI Admin layout (`app/(fi-admin)/fi-admin/[tenantId]/layout.tsx`) alw
 
 ### Global search API (`GET /api/tenants/[tenantId]/clinic-os/global-search`)
 
-- Requires **`checkFiTenantPortalApiAccess`** in production (session + tenant exists + portal membership or cross-tenant OS role — mirrors `assertFiTenantPortalAccess` intent). Supabase must be configured for the search loader.
+- Requires **`checkFiTenantPortalApiAccess`**: when **`NODE_ENV === 'production'`** (including Vercel preview), session + tenant exists + portal membership or cross-tenant OS role — mirrors `assertFiTenantPortalAccess` intent. When **`NODE_ENV` is not `production`**, the same check is skipped **only** if **`FI_ALLOW_INSECURE_API`** is `true` / `1` / `yes` (default off). Supabase must be configured for the search loader.
 - **500 responses:** In production, the JSON body uses a generic `error` (internal exception text is not forwarded to the client).
 
 ---

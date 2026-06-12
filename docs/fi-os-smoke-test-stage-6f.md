@@ -109,7 +109,7 @@ Use this section during the test run to capture **must-fix before launch** items
 
 **Known non-blockers / caveats**
 
-- **`next dev`:** API `checkFiTenantPortalApiAccess` for global search **does not** enforce session when `NODE_ENV !== 'production'` — do not treat dev API behaviour as production security.
+- **`next dev`:** API `checkFiTenantPortalApiAccess` skips session checks only when **`FI_ALLOW_INSECURE_API`** is `true` / `1` / `yes` **and** `NODE_ENV !== 'production'`. Default is **session required** like production-like builds — set the flag only for local convenience.
 - **Product placeholders:** e.g. “Book from existing patient” on `/bookings/new` may remain **Coming until** a future release.
 
 ---

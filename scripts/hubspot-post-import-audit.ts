@@ -118,7 +118,9 @@ async function main(): Promise<void> {
   if (le) throw new Error(le.message);
 
   const leadIds = (leads10 ?? []).map((r) => String((r as { id: string }).id));
-  const stageIds = [...new Set((leads10 ?? []).map((r) => (r as { current_stage_id: string | null }).current_stage_id).filter(Boolean))] as string[];
+  const stageIds = Array.from(
+    new Set((leads10 ?? []).map((r) => (r as { current_stage_id: string | null }).current_stage_id).filter(Boolean))
+  ) as string[];
 
   const stageLabelById = new Map<string, string>();
   const stageSlugById = new Map<string, string>();
@@ -237,7 +239,7 @@ async function main(): Promise<void> {
       continue;
     }
     const hitIds = new Set((hits ?? []).map((r) => String((r as { id: string }).id)));
-    const hitsInBatch = [...hitIds].filter((id) => batchPersonIdSet.has(id));
+    const hitsInBatch = Array.from(hitIds).filter((id) => batchPersonIdSet.has(id));
     searchAudit.push({
       term,
       total_hits_capped_50: hitIds.size,
@@ -267,7 +269,7 @@ async function main(): Promise<void> {
     list.push(pid);
     bySourcePid.set(sp, list);
   }
-  const duplicateHubspotSourcePersonIds = [...bySourcePid.entries()].filter(([, ids]) => ids.length > 1);
+  const duplicateHubspotSourcePersonIds = Array.from(bySourcePid.entries()).filter(([, ids]) => ids.length > 1);
 
   const expectedHubKeys = new Set([
     "record_id",
@@ -286,7 +288,7 @@ async function main(): Promise<void> {
     const ib = str(meta.import_batch_id);
     const h = hub(meta);
     const keys = Object.keys(h);
-    const hasCore = expectedHubKeys.size === [...expectedHubKeys].filter((k) => k in h).length;
+    const hasCore = expectedHubKeys.size === Array.from(expectedHubKeys).filter((k) => k in h).length;
     const extraKeys = keys.filter((k) => !expectedHubKeys.has(k));
     return {
       person_id: row.id,
@@ -336,7 +338,7 @@ async function main(): Promise<void> {
       })),
     },
     "6_metadata_structure": {
-      expected_minimum_hubspot_keys: [...expectedHubKeys],
+      expected_minimum_hubspot_keys: Array.from(expectedHubKeys),
       note: "Importer also stores additional hubspot keys (e.g. mapped_pipeline_slug); has_all_expected_hubspot_keys requires the seven user-listed fields plus record_id.",
       samples: metadataStructureSamples,
     },

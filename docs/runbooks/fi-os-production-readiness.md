@@ -23,7 +23,7 @@ The following are **not live** in this product as integrated, automated financia
 |---|---------|--------|
 | 1 | **Pending database migrations** | Production (and any preview DB used for FI OS) must apply **all** migrations the release branch expects, through at least **`20260718120002_fi_case_procedures_v11_team_milestones.sql`**. Missing columns on `fi_case_procedures` breaks procedure day V1.1 (team + milestones). |
 | 2 | **Supabase server configuration** | **`NEXT_PUBLIC_SUPABASE_URL`**, **`NEXT_PUBLIC_SUPABASE_ANON_KEY`**, and **`SUPABASE_SERVICE_ROLE_KEY`** must be set on the deployment; many loaders short-circuit when service role or URL is absent. |
-| 3 | **`NODE_ENV` on public hosts** | Production **HTML** route guards and **`/api/tenants`** staff checks key off **`process.env.NODE_ENV === 'production'`** only (not `VERCEL_ENV`). See [`docs/fi-os-access-production.md`](../fi-os-access-production.md). |
+| 3 | **`NODE_ENV` + tenant portal API gate** | Production **HTML** route guards key off **`NODE_ENV === 'production'`** (not `VERCEL_ENV`). **`checkFiTenantPortalApiAccess`** (global search, `/api/fi/report`, audit APIs, patient-twin) requires a **session** in production; optional insecure bypass uses **`FI_ALLOW_INSECURE_API`** only when `NODE_ENV !== 'production'`. See [`docs/fi-os-access-production.md`](../fi-os-access-production.md). |
 
 **Verify after deploy:** tenant **`default_timezone`** / operational calendar settings (e.g. **Australia/Perth** for Evolved) for “today” windows, agenda buckets, and deposit due-date copy.
 
@@ -87,7 +87,8 @@ For **incremental** releases that already have the June 2026 FI foundation, the 
 | `OPENAI_API_KEY` | DoctorOS voice notes / pathology AI where enabled. |
 | `CRON_SECRET`, `EVOLVED_PERTH_TENANT_ID`, `FI_BASE_URL`, `IIOHR_HR_SYNC_SECRET`, `IIOHR_HR_PERTH_STAFF_FEED_URL`, `IIOHR_HR_PERTH_STAFF_FEED_KEY` | IIOHR / Evolved Perth HR sync cron and staff feed (see [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md)). |
 
-**Local development only:** `FI_ENABLE_DEV_ADMIN_ACCESS` — **ignored when `NODE_ENV=production`**.
+**Local development only:** `FI_ENABLE_DEV_ADMIN_ACCESS` — **ignored when `NODE_ENV=production`**.  
+**Local / private non-prod only:** `FI_ALLOW_INSECURE_API` — when `true`/`1`/`yes`, skips session checks for **`checkFiTenantPortalApiAccess`**; **ignored when `NODE_ENV=production`** (previews stay session-gated).
 
 Full inventory: [`.env.example`](../../.env.example) and [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md).
 

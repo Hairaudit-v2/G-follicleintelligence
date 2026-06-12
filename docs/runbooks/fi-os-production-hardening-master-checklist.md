@@ -7,10 +7,10 @@
 
 ## Must fix before production
 
-- [ ] **Lock down legacy `/api/fi/*` machine routes** (`events`, `submit`, `uploads`, `cases`, `partners`, `run-model`) — add auth (integration HMAC, VPN, or merge under tenant session gates).
-- [ ] **Rotate and store secrets** — `SUPABASE_SERVICE_ROLE_KEY`, `FI_ADMIN_API_KEY`, `FI_REMINDER_CRON_SECRET`, `CRON_SECRET`, `FI_TIMELY_WEBHOOK_SECRET`, `IIOHR_HR_SYNC_SECRET` in secret manager; never in `NEXT_PUBLIC_*`.
+- [x] **Lock down legacy `/api/fi/*` machine routes** (`events`, `submit`, `uploads`, `cases`, `partners`, `run-model`) — gated by **`FI_LEGACY_FI_API_ENABLED`** (default off) + **`FI_LEGACY_FI_API_SECRET`** via `Authorization: Bearer` only (`src/lib/fiOs/legacyFiApiAuth.ts`). Remove flag after callers migrate to tenant-scoped APIs.
+- [ ] **Rotate and store secrets** — `SUPABASE_SERVICE_ROLE_KEY`, `FI_ADMIN_API_KEY`, `FI_REMINDER_CRON_SECRET`, `CRON_SECRET`, `FI_TIMELY_WEBHOOK_SECRET`, `IIOHR_HR_SYNC_SECRET`, `FI_LEGACY_FI_API_SECRET` (legacy `/api/fi/*` machine routes, if enabled) in secret manager; never in `NEXT_PUBLIC_*`.
 - [ ] **Remove query-string `adminKey`** usage for production clients (prefer header only); scrub access logs.
-- [ ] **Staging parity** — replace `checkFiTenantPortalApiAccess` implicit `NODE_ENV !== production` bypass with explicit **`FI_ALLOW_INSECURE_API`** (default false) so staging behind VPN is safe.
+- [x] **Staging parity** — `checkFiTenantPortalApiAccess` uses explicit **`FI_ALLOW_INSECURE_API`** (`src/lib/fiAdmin/insecureFiApiBypass.ts`); **ignored in production**. Public previews with `NODE_ENV=production` no longer auto-allow without session.
 - [ ] **Supabase PITR + backup drill** — enable managed backups; document RTO/RPO; test restore to isolated project.
 - [ ] **Vercel cron** — configure jobs + secrets for reminder and HR POST; confirm only one active reminder processor (Edge vs Next).
 - [ ] **Production gates verified** — smoke test `assertFiAdminShellAccess` / tenant portal with real `fi_users` + `fi_os_identities` rows.
