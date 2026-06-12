@@ -31,8 +31,16 @@ export type PatientTwinPersonSection = {
   display_name: string | null;
   email: string | null;
   phone: string | null;
-  /** Only when present as a structured string on `fi_persons.metadata` (same rule as patient profile UI). */
+  /** Structured DOB string when derivable from person / patient / HubSpot metadata. */
   date_of_birth: string | null;
+  address: string | null;
+  preferred_contact_method: "email" | "sms" | "both" | null;
+  reminder_consent: boolean | null;
+  lifecycle_stage: string | null;
+  lead_status: string | null;
+  stage_of_journey: string | null;
+  import_batch_id: string | null;
+  hubspot_record_id: string | null;
   /** Distinct source systems contributing identifiers or resolution rows for this twin. */
   source_labels: string[];
 };

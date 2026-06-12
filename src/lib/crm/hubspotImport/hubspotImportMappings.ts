@@ -5,6 +5,7 @@
 
 const JOURNEY_TO_SLUG: ReadonlyArray<{ re: RegExp; slug: string }> = [
   { re: /^(new|inquiry|lead)\b/i, slug: "new" },
+  { re: /welcome.*\b(new|lead)\b|\bnew\b.*lead/i, slug: "new" },
   { re: /contacted|attempt/i, slug: "contacted" },
   { re: /qualif/i, slug: "qualified" },
   { re: /consult.*sched|appointment.*sched|booked.*consult/i, slug: "consult_scheduled" },
@@ -12,6 +13,7 @@ const JOURNEY_TO_SLUG: ReadonlyArray<{ re: RegExp; slug: string }> = [
   { re: /plan|quote|proposal/i, slug: "treatment_planning" },
   { re: /quote.*sent|sent.*quote/i, slug: "quote_sent" },
   { re: /deposit|booked|surgery.*book/i, slug: "deposit_or_booked" },
+  { re: /surgery\s*done|post[\s-]*op|existing\s*patient|\bpatient\s*care\b/i, slug: "won_closed" },
   { re: /in treatment|procedure|surgery day/i, slug: "in_treatment" },
   { re: /won|closed won|customer|patient care/i, slug: "won_closed" },
   { re: /lost|disqual|closed lost/i, slug: "lost" },

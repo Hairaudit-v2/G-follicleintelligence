@@ -1,5 +1,5 @@
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
-import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
+import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 import { PatientStatusBadge } from "./PatientStatusBadge";
 
@@ -10,15 +10,28 @@ export function PatientProfileHeader({
   tenantId: string;
   data: PatientProfileFoundationData;
 }) {
-  const { name, email, phone } = displayFromPersonMetadata(data.person.metadata);
+  const idc = derivePatientIdentityContact({
+    personMetadata: data.person.metadata,
+    patientMetadata: data.patient.metadata,
+    preferredContactMethod: data.patient.preferred_contact_method,
+    reminderConsent: data.patient.reminder_consent,
+  });
+
   return (
     <header className="space-y-2 border-b border-gray-200 pb-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">{name}</h1>
+          <h1 className="text-lg font-semibold text-gray-900">{idc.fullName}</h1>
           <p className="text-sm text-gray-600">
-            {email ?? "—"} · {phone ?? "—"}
+            {idc.primaryEmail ?? "—"} · {idc.primaryPhone ?? "—"}
           </p>
+          {idc.dateOfBirth ? (
+            <p className="text-sm text-gray-600">
+              <span className="text-gray-500">DOB </span>
+              <time dateTime={idc.dateOfBirth}>{idc.dateOfBirth}</time>
+              {idc.ageYears != null ? ` · ${idc.ageYears} years` : null}
+            </p>
+          ) : null}
         </div>
         <div className="flex max-w-full flex-shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
           <PatientTwinNavLink tenantId={tenantId} patientId={data.foundationPatientId} />

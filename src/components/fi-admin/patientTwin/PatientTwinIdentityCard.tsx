@@ -3,6 +3,16 @@ import { fiBadgeIntentClassNames } from "@/src/components/fi-design/fiDesignToke
 import { cn } from "@/lib/utils";
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
+function row(label: string, value: string | null | undefined) {
+  const v = value?.trim();
+  return (
+    <div className="flex flex-wrap justify-between gap-2 border-b border-white/[0.06] py-1.5 last:border-b-0">
+      <dt className="text-[#94A3B8]">{label}</dt>
+      <dd className="max-w-[min(100%,20rem)] text-right text-[#E2E8F0]">{v && v.length > 0 ? v : "—"}</dd>
+    </div>
+  );
+}
+
 export function PatientTwinIdentityCard({ twin }: { twin: PatientTwinV1 }) {
   const { identity_resolution: idn, person } = twin;
   const hasSources = idn.source_ids.length > 0;
@@ -13,7 +23,7 @@ export function PatientTwinIdentityCard({ twin }: { twin: PatientTwinV1 }) {
       surfaceVariant="darkGlass"
       headingId="patient-twin-identity-heading"
       title="Identity & resolution"
-      description="Foundation mapping, global bridge, and external source identifiers."
+      description="Foundation mapping, global bridge, external source identifiers, and resolved contact profile."
     >
       <dl className="space-y-3 text-sm text-[#E2E8F0]">
         <div className="flex flex-wrap justify-between gap-2 border-b border-white/[0.06] pb-2">
@@ -41,10 +51,31 @@ export function PatientTwinIdentityCard({ twin }: { twin: PatientTwinV1 }) {
         </div>
       </dl>
 
+      <div className="mt-4 border-t border-white/[0.06] pt-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Contact & profile</h3>
+        <dl className="mt-2 text-sm">
+          {row("Display name", person.display_name)}
+          {row("Email", person.email)}
+          {row("Phone", person.phone)}
+          {row("Date of birth", person.date_of_birth)}
+          {row("Address", person.address)}
+          {row("Preferred contact", person.preferred_contact_method)}
+          {row(
+            "Reminder consent",
+            person.reminder_consent === true ? "Yes" : person.reminder_consent === false ? "No" : null
+          )}
+          {row("HubSpot record ID", person.hubspot_record_id)}
+          {row("Lifecycle stage", person.lifecycle_stage)}
+          {row("Lead status", person.lead_status)}
+          {row("Stage of journey", person.stage_of_journey)}
+          {row("Import batch", person.import_batch_id)}
+        </dl>
+      </div>
+
       <div className="mt-4">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Source IDs</h3>
         {!hasSources ? (
-          <p className="mt-2 text-sm text-[#94A3B8]">No mapped source identifiers for this patient.</p>
+          <p className="mt-2 text-sm text-[#94A3B8]">No mapped patient-level source identifiers for this patient.</p>
         ) : (
           <ul className="mt-2 flex flex-wrap gap-2">
             {idn.source_ids.map((s) => (

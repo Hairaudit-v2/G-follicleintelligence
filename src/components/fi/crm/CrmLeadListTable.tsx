@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import type { CrmShellLeadListItem } from "@/src/lib/crm/types";
 import { leadTitleFromRow, personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
-import { useCrmLeadSlideOverOptional } from "./LeadSlideOver";
+import { useCrmLeadSlideOverOptional } from "./crmLeadSlideOverContext";
 
 function fmtTs(iso: string | null | undefined): string {
   if (!iso) return "—";

@@ -5,6 +5,8 @@ import { Suspense, type ReactNode } from "react";
 import type { PatientDetailTabId } from "@/src/lib/patients/patientDetailTabs";
 import type { PatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
 import { PatientProfileHeader } from "../PatientProfileHeader";
+import { PatientContactDetailsCard } from "../PatientContactDetailsCard";
+import { PatientImportedSourceSection } from "../PatientImportedSourceSection";
 import { PatientProfileSummaryCards } from "../PatientProfileSummaryCards";
 import { PatientClinicalDetailsCard } from "../PatientClinicalDetailsCard";
 import { PatientImagesCard } from "@/src/components/fi/patient-images/PatientImagesCard";
@@ -60,6 +62,9 @@ export function PatientDetailPageView({
           Foundation patient · <span className="font-mono text-xs">{patientId}</span>
         </p>
       </header>
+
+      <PatientContactDetailsCard data={profile} />
+      <PatientImportedSourceSection data={profile} />
 
       <Suspense fallback={null}>
         <PatientDetailPreviewUrlSync currentPatientId={patientId} previewPatientId={previewPatientId} />

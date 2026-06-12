@@ -21,16 +21,18 @@ const HUBSPOT_DEAL_SOURCE = "hubspot_deal";
 
 function buildHubspotPersonMetadata(params: {
   importBatchId: string;
+  recordId: string;
   row: HubspotContactParsedRow;
   validation: HubspotContactRowValidation;
 }): Record<string, unknown> {
-  const { importBatchId, row, validation } = params;
+  const { importBatchId, recordId, row, validation } = params;
   const emailNorm = normalizeEmail(row.email);
   const display = [row.firstName?.trim(), row.lastName?.trim()].filter(Boolean).join(" ").trim();
   const normDisplay = normalizeWhitespaceName(display);
   const base: Record<string, unknown> = {
     import_batch_id: importBatchId,
     hubspot: {
+      record_id: recordId,
       first_name: row.firstName?.trim() ?? null,
       last_name: row.lastName?.trim() ?? null,
       email: row.email?.trim() ?? null,
@@ -157,7 +159,7 @@ export async function commitHubspotImportStage1Rows(params: {
     let leadId: string | null = null;
 
     try {
-      const personMeta = buildHubspotPersonMetadata({ importBatchId, row, validation: v });
+      const personMeta = buildHubspotPersonMetadata({ importBatchId, recordId, row, validation: v });
       const { data: pIns, error: pErr } = await supabase
         .from("fi_persons")
         .insert({ tenant_id: tenantId, metadata: personMeta })
@@ -174,7 +176,7 @@ export async function commitHubspotImportStage1Rows(params: {
       });
       if (psErr) throw new Error(psErr.message);
 
-      if (v.classification === "patient") {
+      if (v.classification === "patient" || v.classification === "mixed_patient_lead") {
         const hub = (personMeta.hubspot as Record<string, unknown>) ?? {};
         const patientMeta = {
           import_batch_id: importBatchId,

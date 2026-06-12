@@ -22,6 +22,14 @@ export const patientTwinPersonSectionSchema = z.object({
   email: z.string().nullable(),
   phone: z.string().nullable(),
   date_of_birth: z.string().nullable(),
+  address: z.string().nullable(),
+  preferred_contact_method: z.enum(["email", "sms", "both"]).nullable(),
+  reminder_consent: z.boolean().nullable(),
+  lifecycle_stage: z.string().nullable(),
+  lead_status: z.string().nullable(),
+  stage_of_journey: z.string().nullable(),
+  import_batch_id: z.string().nullable(),
+  hubspot_record_id: z.string().nullable(),
   source_labels: z.array(z.string()),
 });
 

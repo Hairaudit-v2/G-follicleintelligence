@@ -80,7 +80,19 @@ export function PatientTwinHeader({ tenantId, patientId, twin }: PatientTwinHead
                 {twin.person.phone}
               </span>
             ) : null}
+            {twin.person.date_of_birth ? (
+              <span>
+                <span className="text-[#64748B]">DOB </span>
+                {twin.person.date_of_birth}
+              </span>
+            ) : null}
           </div>
+          {twin.person.address?.trim() ? (
+            <p className="text-sm text-[#94A3B8]">
+              <span className="text-[#64748B]">Address </span>
+              {twin.person.address}
+            </p>
+          ) : null}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#64748B]">
             <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono text-[#CBD5E1]">
               {twin.version}

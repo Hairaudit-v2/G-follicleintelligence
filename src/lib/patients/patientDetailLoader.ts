@@ -7,7 +7,7 @@ import { loadClinicalNotesForPatient, type PatientClinicalNoteSummary } from "@/
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { loadCrmShellScopePickerOptions, loadCrmShellStaffPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
+import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import {
   formatPatientLifetimeValueGbp,
   pickNextAppointment,
@@ -171,7 +171,12 @@ export async function loadPatientDetailPayload(
 
   return {
     profile,
-    displayName: personMetadataDisplayLabel(profile.person.metadata),
+    displayName: derivePatientIdentityContact({
+      personMetadata: profile.person.metadata,
+      patientMetadata: profile.patient.metadata,
+      preferredContactMethod: profile.patient.preferred_contact_method,
+      reminderConsent: profile.patient.reminder_consent,
+    }).fullName,
     personId,
     personLeadHistory,
     personCrmActivity,

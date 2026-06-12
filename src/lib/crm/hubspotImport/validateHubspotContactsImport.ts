@@ -2,7 +2,8 @@ import { normalizeEmail } from "@/src/lib/fi/foundation/normalize";
 import { mapLeadStatusToKey, mapStageOfJourneyToPipelineSlug } from "./hubspotImportMappings";
 import type { HubspotContactParsedRow } from "./hubspotContactCsvColumns";
 
-export type HubspotImportClassification = "patient" | "lead_only";
+/** Stage 1 HubSpot contact disposition for CRM import (not Timely `classifyRowDisposition`). */
+export type HubspotImportClassification = "patient" | "lead_only" | "mixed_patient_lead";
 
 export type HubspotContactRowIssue = {
   code: string;
@@ -47,14 +48,134 @@ function parseOptionalDate(raw: string | null): { ok: boolean; invalid: boolean 
   return { ok: true, invalid: false };
 }
 
-function inferClassification(row: HubspotContactParsedRow): HubspotImportClassification {
-  const ct = row.contactType?.toLowerCase() ?? "";
-  const ls = row.leadStatus?.toLowerCase() ?? "";
-  const lc = row.lifecycleStage?.toLowerCase() ?? "";
-  if (ct.includes("patient")) return "patient";
-  if (lc.includes("customer") || lc.includes("patient")) return "patient";
-  if (ls.includes("patient") || ls.includes("customer")) return "patient";
-  return "lead_only";
+function lc(s: string | null | undefined): string {
+  return (s ?? "").trim().toLowerCase();
+}
+
+/** HubSpot lifecycle values that still indicate sales/lead tracking alongside a patient journey. */
+function hubspotLifecycleIsLeadPipeline(lifecycleStage: string | null | undefined): boolean {
+  const t = lc(lifecycleStage);
+  if (!t) return false;
+  if (/\bcustomer\b/.test(t)) return false;
+  if (/\bevangelist\b/.test(t)) return false;
+  if (/\bpatient\b/.test(t) && !/\blead\b/.test(t)) return false;
+  return /\blead\b|subscriber|\b(sql|mql)\b|marketing qualified|sales qualified|opportunity\b/.test(t);
+}
+
+function hubspotMarketingLeadContactType(contactType: string | null | undefined): boolean {
+  return /\bmarketing\s*lead\b/i.test((contactType ?? "").trim());
+}
+
+/** Rule 1 — Stage of Journey phrases that indicate an active or historical patient relationship. */
+function journeyIndicatesPatient(stageOfJourney: string | null | undefined): boolean {
+  const j = lc(stageOfJourney);
+  if (!j) return false;
+  if (j.includes("surgery done")) return true;
+  if (j.includes("surgery booked")) return true;
+  if (/post[\s-]*op|postop|postoperative/.test(j)) return true;
+  if (/follow[\s/-]*up/.test(j)) return true;
+  if (j.includes("existing patient")) return true;
+  if (/\bpatient\b/.test(j)) return true;
+  return false;
+}
+
+function contactTypeIndicatesPatient(contactType: string | null | undefined): boolean {
+  const t = lc(contactType);
+  if (!t) return false;
+  return t.includes("existing patient") || t.includes("patient");
+}
+
+function lifecycleIndicatesPatient(lifecycleStage: string | null | undefined): boolean {
+  const t = lc(lifecycleStage);
+  if (!t) return false;
+  return /\bcustomer\b/.test(t) || /\bpatient\b/.test(t);
+}
+
+/**
+ * Rule 4 — Associated deal text sometimes includes HubSpot won labels; this export often only has deal names.
+ * Treat obvious closed-won / completion language as surgery completed when a deal row is present.
+ */
+function associatedDealIndicatesSurgeryCompleted(associatedDeal: string | null | undefined): boolean {
+  const d = (associatedDeal ?? "").trim();
+  if (!d) return false;
+  const x = d.toLowerCase();
+  return /closed[\s_-]*won|closedwon|deal\s*won|won\s*deal|surgery\s*(complete|done|completed)|procedure\s*(complete|done|completed)|post[\s_-]?(op|operative)/i.test(
+    x
+  );
+}
+
+/**
+ * Rule 5 — Consult completed plus commercial acceptance (quote / deposit / contract), using journey + lead status text
+ * and mapped pipeline slugs where helpful.
+ */
+function hasCompletedConsultAndQuoteAccepted(row: HubspotContactParsedRow): boolean {
+  const journeySlug = mapStageOfJourneyToPipelineSlug(row.stageOfJourney).slug;
+  const leadKey = mapLeadStatusToKey(row.leadStatus).key;
+  const j = lc(row.stageOfJourney);
+  const ls = lc(row.leadStatus);
+  const consultDone =
+    journeySlug === "consult_completed" || /consultation?\s*(done|complete)|post[\s-]?consult/.test(j + " " + ls);
+  if (!consultDone) return false;
+  if (leadKey === "customer") return true;
+  if (
+    journeySlug === "treatment_planning" ||
+    journeySlug === "quote_sent" ||
+    journeySlug === "deposit_or_booked"
+  ) {
+    return true;
+  }
+  if (/quote\s*accepted|accepted\s*quote|treatment\s*accepted|deposit\s*(paid|received|taken)/.test(j + " " + ls)) {
+    return true;
+  }
+  if (/signed\s*contract|contract\s*signed|booking\s*(fee\s*)?(paid|received)/.test(j + " " + ls)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Strong patient signals: post-sale / explicit patient identity / won deal / consult+quote — overrides lead lifecycle for `patient`.
+ */
+function hasStrongPatientSignal(row: HubspotContactParsedRow): boolean {
+  const j = lc(row.stageOfJourney);
+  if (j.includes("surgery done")) return true;
+  if (/post[\s-]*op|postop|postoperative/.test(j)) return true;
+  if (j.includes("existing patient")) return true;
+  if (/follow[\s/-]*up/.test(j)) return true;
+  if (/\bpatient\b/.test(j)) return true;
+  if (lifecycleIndicatesPatient(row.lifecycleStage)) return true;
+  if (contactTypeIndicatesPatient(row.contactType)) return true;
+  if (associatedDealIndicatesSurgeryCompleted(row.associatedDeal)) return true;
+  if (hasCompletedConsultAndQuoteAccepted(row)) return true;
+  const ls = lc(row.leadStatus);
+  if (ls.includes("patient") || /\bcustomer\b/.test(ls)) return true;
+  return false;
+}
+
+/** Any rule 1–5 patient signal (journey includes Surgery Booked, lifecycle, contact type, deal, consult+quote). */
+function hasHubspotPatientSignal(row: HubspotContactParsedRow): boolean {
+  if (journeyIndicatesPatient(row.stageOfJourney)) return true;
+  if (lifecycleIndicatesPatient(row.lifecycleStage)) return true;
+  if (contactTypeIndicatesPatient(row.contactType)) return true;
+  const deal = (row.associatedDeal ?? "").trim();
+  if (deal && associatedDealIndicatesSurgeryCompleted(row.associatedDeal)) return true;
+  if (hasCompletedConsultAndQuoteAccepted(row)) return true;
+  const ls = lc(row.leadStatus);
+  if (ls.includes("patient") || /\bcustomer\b/.test(ls)) return true;
+  return false;
+}
+
+/**
+ * Classifies a HubSpot contact CSV row for Stage 1 import.
+ * - `mixed_patient_lead`: patient journey or deal context while HubSpot lifecycle still looks like a lead/opportunity.
+ * - `patient`: definitive patient / customer context, or strong journey (e.g. Surgery Done) even if lifecycle lags.
+ */
+export function classifyHubspotContactRow(row: HubspotContactParsedRow): HubspotImportClassification {
+  if (!hasHubspotPatientSignal(row)) return "lead_only";
+  const leadFraming =
+    hubspotLifecycleIsLeadPipeline(row.lifecycleStage) || hubspotMarketingLeadContactType(row.contactType);
+  if (leadFraming && !hasStrongPatientSignal(row)) return "mixed_patient_lead";
+  return "patient";
 }
 
 function missingName(row: HubspotContactParsedRow): boolean {
@@ -180,7 +301,7 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
       });
     }
 
-    const classification = inferClassification(row);
+    const classification = classifyHubspotContactRow(row);
 
     rowResults.push({
       rowIndex: row.rowIndex,

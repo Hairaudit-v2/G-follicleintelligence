@@ -32,15 +32,23 @@ for (const rr of report.rowResults) {
 }
 
 const validRowResults = report.rowResults.filter((r) => !rowHasBlockingIssues(r));
-const pilot = validRowResults
-  .slice()
-  .sort((a, b) => a.rowIndex - b.rowIndex)
-  .slice(0, 100)
-  .map((rr) => ({
-    rowIndex: rr.rowIndex,
-    recordId: rr.recordId,
-    classification: rr.classification,
-  }));
+
+function classificationCounts(rows: typeof validRowResults) {
+  const out = { lead_only: 0, patient: 0, mixed_patient_lead: 0 };
+  for (const rr of rows) {
+    if (rr.classification === "lead_only") out.lead_only++;
+    else if (rr.classification === "patient") out.patient++;
+    else if (rr.classification === "mixed_patient_lead") out.mixed_patient_lead++;
+  }
+  return out;
+}
+
+const pilotRows = validRowResults.slice().sort((a, b) => a.rowIndex - b.rowIndex).slice(0, 100);
+const pilot = pilotRows.map((rr) => ({
+  rowIndex: rr.rowIndex,
+  recordId: rr.recordId,
+  classification: rr.classification,
+}));
 
 console.log(
   JSON.stringify(
@@ -55,6 +63,8 @@ console.log(
       duplicateEmailsInFile: report.duplicateEmailsInFile,
       duplicatePhonesInFile: report.duplicatePhonesInFile,
       validRowCount: validRowResults.length,
+      classificationCountsAllValidRows: classificationCounts(validRowResults),
+      classificationCountsPilotFirst100: classificationCounts(pilotRows),
       unmappedLeadStatuses: Array.from(unmappedLeadStatuses).sort(),
       unmappedJourneyStages: Array.from(unmappedJourneyStages).sort(),
       pilotFirst100: pilot,

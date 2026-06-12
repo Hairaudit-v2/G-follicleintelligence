@@ -159,6 +159,87 @@ test("validateHubspotContactsRows classification patient when contact type menti
   assert.equal(rep.rowResults[0]?.classification, "patient");
 });
 
+test("validateHubspotContactsRows classification mixed when surgery booked and lifecycle is lead", () => {
+  const rows: HubspotContactParsedRow[] = [
+    {
+      rowIndex: 1,
+      recordId: "100",
+      firstName: "A",
+      lastName: "B",
+      email: "ab@example.com",
+      phoneNumber: "+1 555 0101",
+      contactOwner: null,
+      leadStatus: null,
+      createDate: null,
+      lastModifiedDate: null,
+      contactType: null,
+      lifecycleStage: "Lead",
+      leadSource: null,
+      stageOfJourney: "Surgery Booked",
+      nextAppointmentDate: null,
+      associatedDeal: null,
+      associatedCompany: null,
+      associatedDealIds: null,
+    },
+  ];
+  const rep = validateHubspotContactsRows(rows);
+  assert.equal(rep.rowResults[0]?.classification, "mixed_patient_lead");
+});
+
+test("validateHubspotContactsRows classification patient when surgery done despite lead lifecycle", () => {
+  const rows: HubspotContactParsedRow[] = [
+    {
+      rowIndex: 1,
+      recordId: "101",
+      firstName: "C",
+      lastName: "D",
+      email: "cd@example.com",
+      phoneNumber: "+1 555 0102",
+      contactOwner: null,
+      leadStatus: null,
+      createDate: null,
+      lastModifiedDate: null,
+      contactType: null,
+      lifecycleStage: "Lead",
+      leadSource: null,
+      stageOfJourney: "Surgery Done",
+      nextAppointmentDate: null,
+      associatedDeal: null,
+      associatedCompany: null,
+      associatedDealIds: null,
+    },
+  ];
+  const rep = validateHubspotContactsRows(rows);
+  assert.equal(rep.rowResults[0]?.classification, "patient");
+});
+
+test("validateHubspotContactsRows classification lead_only for welcome journey and lead", () => {
+  const rows: HubspotContactParsedRow[] = [
+    {
+      rowIndex: 1,
+      recordId: "102",
+      firstName: "E",
+      lastName: "F",
+      email: "ef@example.com",
+      phoneNumber: "+1 555 0103",
+      contactOwner: null,
+      leadStatus: null,
+      createDate: null,
+      lastModifiedDate: null,
+      contactType: null,
+      lifecycleStage: "Lead",
+      leadSource: null,
+      stageOfJourney: "Welcome / New Lead",
+      nextAppointmentDate: null,
+      associatedDeal: null,
+      associatedCompany: null,
+      associatedDealIds: null,
+    },
+  ];
+  const rep = validateHubspotContactsRows(rows);
+  assert.equal(rep.rowResults[0]?.classification, "lead_only");
+});
+
 test("mapStageOfJourneyToPipelineSlug maps consult scheduled", () => {
   const m = mapStageOfJourneyToPipelineSlug("Consult scheduled");
   assert.equal(m.slug, "consult_scheduled");

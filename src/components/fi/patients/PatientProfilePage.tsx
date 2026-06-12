@@ -7,6 +7,8 @@ import { PatientCasesCard } from "./PatientCasesCard";
 import { PatientImagesCard } from "@/src/components/fi/patient-images/PatientImagesCard";
 import { PatientClinicalDetailsCard } from "./PatientClinicalDetailsCard";
 import { PatientLinkedLeadsCard } from "./PatientLinkedLeadsCard";
+import { PatientContactDetailsCard } from "./PatientContactDetailsCard";
+import { PatientImportedSourceSection } from "./PatientImportedSourceSection";
 import { PatientPersonDetailsCard } from "./PatientPersonDetailsCard";
 import { PatientProfileHeader } from "./PatientProfileHeader";
 import { PatientProfileSummaryCards } from "./PatientProfileSummaryCards";
@@ -26,6 +28,9 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
       </p>
 
       <PatientProfileHeader tenantId={tenantId} data={data} />
+
+      <PatientContactDetailsCard data={data} />
+      <PatientImportedSourceSection data={data} />
 
       <p className="rounded border border-blue-100 bg-blue-50/80 p-3 text-sm text-blue-950">
         Patient profiles are the foundation for future clinical records, images, treatment plans, HLI assessments,

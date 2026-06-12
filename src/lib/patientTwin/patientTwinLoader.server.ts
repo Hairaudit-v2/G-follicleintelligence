@@ -14,6 +14,7 @@ import {
   loadUniversalPatientRecord,
   type UniversalPatientRecordResult,
 } from "@/src/lib/fi/foundation/patientRecord";
+import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { calculatePatientTwinCompleteness, type PatientTwinV1ForCompleteness } from "./patientTwinCompleteness";
 import { patientTwinV1Schema } from "./patientTwinSchema";
 import {
@@ -313,16 +314,57 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     base.person && typeof base.person.metadata === "object" && !Array.isArray(base.person.metadata)
       ? (base.person.metadata as Record<string, unknown>)
       : {};
-  const dobRaw = personMeta.date_of_birth;
-  const date_of_birth = typeof dobRaw === "string" && dobRaw.trim() ? dobRaw.trim() : null;
+  const patientMeta =
+    base.patient && typeof base.patient.metadata === "object" && !Array.isArray(base.patient.metadata)
+      ? (base.patient.metadata as Record<string, unknown>)
+      : {};
+
+  const personIdForHub = base.person?.person_id ?? base.anchor.person_id ?? null;
+
+  const patPrefsRes = await supabase
+    .from("fi_patients")
+    .select("preferred_contact_method, reminder_consent")
+    .eq("tenant_id", tid)
+    .eq("id", primaryFoundation)
+    .maybeSingle();
+  if (patPrefsRes.error) {
+    pushWarning(warnings, "generic", `Patient preferences lookup skipped: ${patPrefsRes.error.message}`);
+  }
+
+  let hubspotSourcePersonId: string | null = null;
+  if (personIdForHub) {
+    const hubspotPersonSrcRes = await supabase
+      .from("fi_person_source_ids")
+      .select("source_person_id")
+      .eq("tenant_id", tid)
+      .eq("person_id", personIdForHub)
+      .eq("source_system", "hubspot")
+      .maybeSingle();
+    if (hubspotPersonSrcRes.error) {
+      pushWarning(warnings, "generic", `HubSpot person source id lookup skipped: ${hubspotPersonSrcRes.error.message}`);
+    } else if (hubspotPersonSrcRes.data) {
+      hubspotSourcePersonId = String((hubspotPersonSrcRes.data as { source_person_id: string }).source_person_id);
+    }
+  }
+
+  const prefs = patPrefsRes.data as { preferred_contact_method?: unknown; reminder_consent?: boolean | null } | null;
+
+  const idc = derivePatientIdentityContact({
+    personMetadata: personMeta,
+    patientMetadata: patientMeta,
+    preferredContactMethod: prefs?.preferred_contact_method != null ? String(prefs.preferred_contact_method) : null,
+    reminderConsent: prefs?.reminder_consent ?? null,
+    hubspotSourcePersonId,
+  });
 
   const display_name =
-    base.patient?.display_name ??
-    (typeof personMeta.display_name === "string" ? personMeta.display_name : null) ??
-    base.resolution_rows[0]?.display_name ??
+    (idc.fullName !== "—" ? idc.fullName : null) ??
+    (base.patient?.display_name?.trim() ? base.patient.display_name.trim() : null) ??
+    (base.resolution_rows[0]?.display_name?.trim() ? base.resolution_rows[0]!.display_name!.trim() : null) ??
     null;
-  const email = base.patient?.email ?? base.resolution_rows[0]?.email ?? null;
-  const phone = base.patient?.phone ?? base.resolution_rows[0]?.phone ?? null;
+  const email = idc.primaryEmail ?? base.resolution_rows[0]?.email ?? null;
+  const phone = idc.primaryPhone ?? base.resolution_rows[0]?.phone ?? null;
+  const date_of_birth = idc.dateOfBirth;
 
   const source_labels = uniqueStrings([
     ...base.resolution_rows.map((r) => r.source_system),
@@ -805,6 +847,14 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       email,
       phone,
       date_of_birth,
+      address: idc.address,
+      preferred_contact_method: idc.preferredContactMethod,
+      reminder_consent: idc.reminderConsent,
+      lifecycle_stage: idc.lifecycleStage,
+      lead_status: idc.leadStatus,
+      stage_of_journey: idc.stageOfJourney,
+      import_batch_id: idc.importBatchId,
+      hubspot_record_id: idc.hubspotRecordId,
       source_labels,
     },
     identity_resolution,

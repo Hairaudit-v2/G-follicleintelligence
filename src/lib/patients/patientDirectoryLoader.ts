@@ -2,7 +2,11 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
+import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
+import {
+  buildFiPersonsMetadataSearchOrFilter,
+  patientDirectorySearchIlikePattern,
+} from "@/src/lib/patients/patientDirectorySearch";
 import type { PatientDirectoryQuery } from "./patientDirectoryQuery";
 import { norwoodValuesInRange } from "./patientDirectoryQuery";
 import { formatClinicalScalesSummary } from "./hairLossScales";
@@ -53,21 +57,6 @@ export type PatientDirectoryPageResult = {
   leadSourceOptions: string[];
 };
 
-function personMetaContact(meta: Record<string, unknown>): { email: string | null; phone: string | null } {
-  const email =
-    typeof meta.email === "string"
-      ? meta.email.trim() || null
-      : typeof meta.email_normalized === "string"
-        ? meta.email_normalized.trim() || null
-        : null;
-  const phone = typeof meta.phone === "string" ? meta.phone.trim() || null : null;
-  return { email, phone };
-}
-
-function escapeIlikePattern(raw: string): string {
-  return raw.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
-}
-
 async function loadPersonIdsMatchingSearch(
   supabase: SupabaseClient,
   tenantId: string,
@@ -75,12 +64,13 @@ async function loadPersonIdsMatchingSearch(
 ): Promise<string[] | null> {
   const term = search.trim();
   if (!term) return null;
-  const p = `%${escapeIlikePattern(term)}%`;
+  const quotedPattern = patientDirectorySearchIlikePattern(term);
+  const orFilter = buildFiPersonsMetadataSearchOrFilter(quotedPattern);
   const { data, error } = await supabase
     .from("fi_persons")
     .select("id")
     .eq("tenant_id", tenantId)
-    .filter("metadata::text", "ilike", p)
+    .or(orFilter)
     .limit(500);
   if (error) throw new Error(error.message);
   return (data ?? []).map((r) => String((r as { id: string }).id));
@@ -529,10 +519,17 @@ export async function loadPatientDirectoryPage(
       person_id: string;
       created_at: string;
       patient_status?: string | null;
+      metadata?: unknown;
     };
     const meta = personMeta.get(String(r.person_id)) ?? {};
-    const { email, phone } = personMetaContact(meta);
-    const displayName = personMetadataDisplayLabel(meta);
+    const patMeta =
+      r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+        ? (r.metadata as Record<string, unknown>)
+        : {};
+    const idc = derivePatientIdentityContact({ personMetadata: meta, patientMetadata: patMeta });
+    const displayName = idc.fullName;
+    const email = idc.primaryEmail;
+    const phone = idc.primaryPhone;
     const pid = String(r.id);
     const clinical = clinicalByPatient.get(pid);
     const norwoodScale = clinical?.norwood_scale ?? null;

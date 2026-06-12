@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCrmLeadSlideOverOptional } from "./LeadSlideOver";
+import { useCrmLeadSlideOverOptional } from "./crmLeadSlideOverContext";
 
 type Props = {
   leadId: string;

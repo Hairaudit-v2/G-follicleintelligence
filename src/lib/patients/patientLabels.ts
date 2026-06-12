@@ -1,4 +1,5 @@
 import type { PatientStatusValue } from "./patientPolicy";
+import { derivePatientIdentityContact } from "./patientIdentityContact";
 
 const STATUS_LABELS: Record<PatientStatusValue, string> = {
   active: "Active",
@@ -15,23 +16,15 @@ export function patientStatusLabel(status: string | null | undefined): string {
   return status;
 }
 
-/** Person metadata → display fields for patient shell (pure). */
-export function displayFromPersonMetadata(meta: Record<string, unknown>): {
+/** Person (+ optional patient) metadata → display fields for patient shell (pure). */
+export function displayFromPersonMetadata(
+  personMeta: Record<string, unknown>,
+  patientMeta?: Record<string, unknown> | null
+): {
   name: string;
   email: string | null;
   phone: string | null;
 } {
-  const name =
-    (typeof meta.display_name === "string" && meta.display_name.trim()) ||
-    (typeof meta.normalised_display_name === "string" && meta.normalised_display_name.trim()) ||
-    (typeof meta.email_normalized === "string" && meta.email_normalized.trim()) ||
-    "—";
-  const email =
-    typeof meta.email === "string"
-      ? meta.email.trim() || null
-      : typeof meta.email_normalized === "string"
-        ? meta.email_normalized.trim() || null
-        : null;
-  const phone = typeof meta.phone === "string" ? meta.phone.trim() || null : null;
-  return { name, email, phone };
+  const v = derivePatientIdentityContact({ personMetadata: personMeta, patientMetadata: patientMeta ?? {} });
+  return { name: v.fullName, email: v.primaryEmail, phone: v.primaryPhone };
 }
