@@ -4,15 +4,17 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 
-import { CrmAccessError, parseAdminKeyFromUnknown } from "./crmGate";
+import { CrmAccessError } from "./crmGate";
+import { extractFiAdminKeyFromRequestParts } from "./fiAdminKeyTransport";
 
 export function extractAdminKeyFromRequest(req: Request, body?: unknown): string | undefined {
-  const headerVal = req.headers.get("x-fi-admin-key")?.trim();
-  if (headerVal) return headerVal;
   const url = new URL(req.url);
-  const q = url.searchParams.get("adminKey")?.trim();
-  if (q) return q;
-  return parseAdminKeyFromUnknown(body);
+  return extractFiAdminKeyFromRequestParts({
+    urlSearchParams: url.searchParams,
+    headers: req.headers,
+    body,
+    configuredApiKey: process.env.FI_ADMIN_API_KEY,
+  });
 }
 
 export function crmJsonOk(payload: Record<string, unknown>, status = 200): NextResponse {

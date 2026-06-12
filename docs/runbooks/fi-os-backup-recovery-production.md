@@ -3,6 +3,8 @@
 **Status:** Audit / proposal only — no infrastructure changes performed.  
 **Data plane:** Supabase Postgres + Supabase Storage + Supabase Auth (users for FI OS and patient portal).
 
+**Operational runbooks (2026-06-12+):** [Supabase backup / PITR setup](fi-os-supabase-backup-setup.md) · [Storage backup / restore drill](fi-os-storage-backup-restore-drill.md) · [Rollback playbook](fi-os-rollback-playbook.md) · [Production release checklist](fi-os-production-release-checklist.md) · [Master checklist](fi-os-production-hardening-master-checklist.md)
+
 ---
 
 ## Current schema posture (from migrations)
@@ -113,3 +115,7 @@
 
 - [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md)
 - [`docs/runbooks/fi-os-env-vars-production-audit.md`](fi-os-env-vars-production-audit.md)
+- [`docs/runbooks/fi-os-supabase-backup-setup.md`](fi-os-supabase-backup-setup.md)
+- [`docs/runbooks/fi-os-storage-backup-restore-drill.md`](fi-os-storage-backup-restore-drill.md)
+- [`docs/runbooks/fi-os-rollback-playbook.md`](fi-os-rollback-playbook.md)
+- [`docs/runbooks/fi-os-production-release-checklist.md`](fi-os-production-release-checklist.md)

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 
 import type { ScheduledIiohrHrStaffSyncCoreResult } from "@/src/lib/hr/runScheduledIiohrHrStaffSyncCore";
+import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
 
-export const MIN_CRON_SECRET_LENGTH = 16;
+export const MIN_CRON_SECRET_LENGTH = CRON_OR_WEBHOOK_SECRET_MIN_LENGTH;
 
 export function extractCronBearer(req: Request): string | null {
   const auth = req.headers.get("authorization");
@@ -12,22 +12,11 @@ export function extractCronBearer(req: Request): string | null {
   return m?.[1]?.trim() || null;
 }
 
-function secretsEqual(expected: string, provided: string): boolean {
-  const a = Buffer.from(expected, "utf8");
-  const b = Buffer.from(provided, "utf8");
-  if (a.length !== b.length) return false;
-  try {
-    return timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
-
 function isAuthorizedCron(req: Request, expected: string | undefined): boolean {
   if (!expected) return false;
   const got = extractCronBearer(req);
   if (!got) return false;
-  return secretsEqual(expected, got);
+  return timingSafeUtf8Equal(expected, got);
 }
 
 export type IiohrHrPerthStaffSyncCronPostOptions = {
@@ -74,13 +63,10 @@ export async function handleIiohrHrPerthStaffSyncCronPost(
 
   const expected = opts.getEnv("CRON_SECRET")?.trim();
   if (!expected) {
-    return NextResponse.json({ ok: false, error: "CRON_SECRET is not configured." }, { status: 503 });
+    return NextResponse.json({ ok: false, error: "Service unavailable." }, { status: 503 });
   }
   if (expected.length < MIN_CRON_SECRET_LENGTH) {
-    return NextResponse.json(
-      { ok: false, error: `CRON_SECRET must be at least ${MIN_CRON_SECRET_LENGTH} characters.` },
-      { status: 503 }
-    );
+    return NextResponse.json({ ok: false, error: "Service unavailable." }, { status: 503 });
   }
   if (!isAuthorizedCron(req, expected)) {
     return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });

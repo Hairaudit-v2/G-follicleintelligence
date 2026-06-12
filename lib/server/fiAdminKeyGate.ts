@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isFiAdminApiKeyMatch } from "@/src/lib/crm/crmGatePolicy";
 
 /** UUID v4-style validation (aligned with FI configuration actions). */
 export const FI_ADMIN_UUID_RE =
@@ -13,7 +14,7 @@ export function requireFiAdminKey(adminKey: string): { ok: true } | { ok: false;
   if (!expected) {
     return { ok: false, error: "FI_ADMIN_API_KEY is not configured on the server." };
   }
-  if (!adminKey || adminKey.trim() !== expected) {
+  if (!isFiAdminApiKeyMatch(adminKey, expected)) {
     return { ok: false, error: "Invalid or missing admin key." };
   }
   return { ok: true };

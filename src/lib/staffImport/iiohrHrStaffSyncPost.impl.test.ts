@@ -93,6 +93,20 @@ test("missing configured secret returns 503", async () => {
   assert.equal(r.httpStatus, 503);
 });
 
+test("configured secret shorter than minimum returns 503", async () => {
+  const { deps } = trackedDeps();
+  const r = await processIiohrHrStaffSyncPost(
+    {
+      tenantId: TENANT,
+      secretHeader: "short-header-here",
+      configuredSecret: "tooshort",
+      body: { mode: "preview", rows: oneRow() },
+    },
+    deps
+  );
+  assert.equal(r.httpStatus, 503);
+});
+
 test("commit without confirm returns 400", async () => {
   const { deps } = trackedDeps();
   const r = await processIiohrHrStaffSyncPost(

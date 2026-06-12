@@ -3,6 +3,7 @@
  */
 
 import { canUseDevelopmentClinicFeaturesFromFiUserRole } from "@/src/lib/fiOs/developmentClinicAccess";
+import { safeTimingEqualAdminKey } from "@/src/lib/crm/fiAdminKeyTransport";
 
 export const CRM_MUTATION_ROLES_LOWER = new Set(["fi_admin", "admin", "crm_operator", "owner"]);
 
@@ -34,9 +35,11 @@ export function isCrmShellNavRole(role: string | null | undefined): boolean {
   return CRM_SHELL_NAV_ROLES_LOWER.has(String(role ?? "").trim().toLowerCase());
 }
 
-/** Compare submitted admin key to configured `FI_ADMIN_API_KEY` (both trimmed). */
+/** Compare submitted admin key to configured `FI_ADMIN_API_KEY` (trimmed; timing-safe). */
 export function isFiAdminApiKeyMatch(adminKey: string | undefined | null, configuredKey: string | undefined | null): boolean {
   const expected = configuredKey?.trim();
   if (!expected) return false;
-  return !!adminKey?.trim() && adminKey.trim() === expected;
+  const candidate = adminKey?.trim();
+  if (!candidate) return false;
+  return safeTimingEqualAdminKey(candidate, expected);
 }

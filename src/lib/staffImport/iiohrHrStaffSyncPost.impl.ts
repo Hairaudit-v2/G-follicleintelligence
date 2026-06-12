@@ -1,7 +1,6 @@
-import { timingSafeEqual } from "node:crypto";
-
 import { z } from "zod";
 
+import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
 import type { IiohrHrStaffImportCounts, IiohrHrStaffImportRunResult } from "@/src/lib/staffImport/iiohrHrStaffImportRunner";
 import { parseIiohrHrStaffSyncRows } from "@/src/lib/staffImport/iiohrHrStaffSyncRowsParse";
 import type { IiohrHrStaffSyncPayload, IiohrHrStaffSyncSummary, SyncIiohrHrStaffForTenantInput } from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
@@ -42,14 +41,7 @@ export type StaffSyncPostServices = {
 
 function timingSafeSecretEqual(expected: string, received: string | null): boolean {
   if (received == null) return false;
-  const a = Buffer.from(expected, "utf8");
-  const b = Buffer.from(received, "utf8");
-  if (a.length !== b.length) return false;
-  try {
-    return timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
+  return timingSafeUtf8Equal(expected, received);
 }
 
 function rollupImportCounts(c: IiohrHrStaffImportCounts): {
@@ -94,6 +86,8 @@ export type ProcessIiohrHrStaffSyncPostInput = {
   secretHeader: string | null;
   configuredSecret: string | undefined;
   body: unknown;
+  /** When true, caller already verified `x-iiohr-sync-secret` (e.g. HTTP layer before reading JSON body). */
+  callerSecretVerified?: boolean;
   /**
    * When set (e.g. from internal `x-fi-staff-sync-source` header), stored on
    * `fi_staff_sync_runs.metadata.trigger` to distinguish scheduled FI cron from external producers.
@@ -109,11 +103,20 @@ export async function processIiohrHrStaffSyncPost(
   services: StaffSyncPostServices
 ): Promise<{ httpStatus: number; body: Record<string, unknown> }> {
   const secret = input.configuredSecret?.trim();
-  if (!secret) {
-    return { httpStatus: 503, body: { ok: false, error: "Staff sync is not configured." } };
-  }
-  if (!timingSafeSecretEqual(secret, input.secretHeader)) {
-    return { httpStatus: 401, body: { ok: false, error: "Unauthorized." } };
+  if (!input.callerSecretVerified) {
+    if (!secret) {
+      return { httpStatus: 503, body: { ok: false, error: "Service unavailable." } };
+    }
+    if (secret.length < CRON_OR_WEBHOOK_SECRET_MIN_LENGTH) {
+      return { httpStatus: 503, body: { ok: false, error: "Service unavailable." } };
+    }
+    if (!timingSafeSecretEqual(secret, input.secretHeader)) {
+      return { httpStatus: 401, body: { ok: false, error: "Unauthorized." } };
+    }
+  } else {
+    if (!secret || secret.length < CRON_OR_WEBHOOK_SECRET_MIN_LENGTH) {
+      return { httpStatus: 503, body: { ok: false, error: "Service unavailable." } };
+    }
   }
 
   const tidParse = tenantIdParamSchema.safeParse(input.tenantId?.trim());

@@ -8,7 +8,7 @@
 ## Architecture snapshot
 
 1. **Browser FI Admin (`app/(fi-admin)`)** — `assertFiAdminShellAccess`, `assertFiTenantPortalAccess`, `assertFiTenantPortalAccessUnlessStaffPinSession` in `src/lib/fiOs/fiOsPortalGate.server.ts`: in **`NODE_ENV === "production"`**, require Supabase session + FI portal staff or tenant membership (or valid staff PIN where explicitly allowed).
-2. **Tenant REST API (`app/api/tenants/...`)** — Predominantly **`assertCrmTenantReadAllowed` / `assertCrmTenantWriteAllowed` / `assertCrmTenantStaffManageAllowed`** from `src/lib/crm/crmGate.ts`, optionally **`FI_ADMIN_API_KEY`** via `x-fi-admin-key`, query `adminKey`, or JSON body.
+2. **Tenant REST API (`app/api/tenants/...`)** — Predominantly **`assertCrmTenantReadAllowed` / `assertCrmTenantWriteAllowed` / `assertCrmTenantStaffManageAllowed`** from `src/lib/crm/crmGate.ts`, optionally **`FI_ADMIN_API_KEY`** via **`x-fi-admin-key`**, **`Authorization: Bearer`** (when the bearer token equals the configured admin key), or JSON body **`adminKey`**. Query **`?adminKey=`** is **disabled in production** and in non-production unless **`FI_ALLOW_ADMIN_KEY_QUERY=true`**.
 3. **Legacy / global `/api/fi/*` routes** — Mixed: some use **`checkFiTenantPortalApiAccess`**; the former unauthenticated machine routes **`/api/fi/events`**, **`submit`**, **`uploads`**, **`cases`**, **`partners`**, **`run-model`** are now gated by **`FI_LEGACY_FI_API_ENABLED`** + **`FI_LEGACY_FI_API_SECRET`** (Bearer only). Other paths unchanged (see risk table).
 4. **Server actions (`lib/actions`, `src/lib/actions`)** — Rely on **Next server context**; most sensitive actions use **`assertCrmTenantWriteAllowed`** (with `request: undefined` — **session cookies only**, no Bearer in typical client calls unless wired). Foundation actions use **`requireFiAdminKey`** (`lib/server/fiAdminKeyGate.ts`).
 5. **Middleware** — `middleware.ts` only sets pathname header and CORS/CORP for static images; **no auth**, no tenant routing.
@@ -93,7 +93,7 @@
 |----|------|------------|---------|
 | A1 | `/api/fi/events`, `/api/fi/submit`, `/api/fi/uploads`, `/api/fi/cases`, `/api/fi/partners`, `/api/fi/run-model` | **High** (was Critical) | **Mitigated:** routes return **404** unless `FI_LEGACY_FI_API_ENABLED`; when on, require **`Authorization: Bearer`** vs `FI_LEGACY_FI_API_SECRET` (timing-safe). Misconfiguration (enabled, empty secret) → **503**. Still **shared-secret** risk — migrate callers to `/api/tenants/...` + CRM gates. |
 | A2 | `checkFiTenantPortalApiAccess` insecure bypass | **Medium** (was High) | **Mitigated:** bypass requires **`FI_ALLOW_INSECURE_API`**; **ignored when `NODE_ENV=production`**. Residual risk if a **public** host runs **`NODE_ENV=development`** with the flag set (misconfiguration). |
-| A3 | `FI_ADMIN_API_KEY` in query / header / body | **High** | Shared secret bypasses end-user auth; logging/proxies may leak `adminKey` query param |
+| A3 | `FI_ADMIN_API_KEY` transport | **Medium** (was High) | **Mitigated for query strings:** production never reads **`?adminKey=`**; non-prod requires **`FI_ALLOW_ADMIN_KEY_QUERY`**. Header, Bearer (admin key), and JSON body paths remain; rotate key; scrub logs. |
 | A4 | `crm_operator` wide write surface | **Medium** | Documented development-era breadth; least-privilege not yet enforced per subdomain (PatientOS vs pure CRM) |
 | A5 | Staff PIN | **Medium** | Floor kiosk model; depends on PIN strength and lockout (review `verifyStaffPinLogin`) |
 | A6 | Impersonation | **Medium** | Platform admins act as tenants; governance + Supabase `fi_os` role assignment |
@@ -132,5 +132,5 @@
 
 1. **Patch PR 1 (done):** shared **`FI_LEGACY_FI_API_SECRET`** + opt-in **`FI_LEGACY_FI_API_ENABLED`** for legacy `/api/fi/*` machine routes. **Next:** network allowlist or mTLS for integrators **or** fold callers under `assertCrmTenant*` + signed JWT and delete these routes.
 2. **Patch PR 2 (done):** explicit **`FI_ALLOW_INSECURE_API`** for `checkFiTenantPortalApiAccess` bypass; production ignores it.
-3. Remove **`adminKey` from query string** support where possible (headers only).
+3. **Patch PR 3 (done):** query-string **`adminKey`** gated; prefer headers / Bearer for scripts.
 4. Document **platform admin** provisioning and **impersonation audit** expectations in Supabase.

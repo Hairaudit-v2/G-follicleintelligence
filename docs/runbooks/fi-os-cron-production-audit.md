@@ -9,8 +9,8 @@
 
 | Endpoint | Methods | Schedule (expected) | Secret | Feature / module | Idempotency | Safe to run twice? | Failure behaviour | Logging / retries |
 |----------|---------|------------------------|--------|-------------------|-------------|--------------------|-------------------|-------------------|
-| `/api/cron/fi-reminder-jobs` | `POST`, `GET` | Every **1–5 minutes** (ops recommendation in platform doc) | `FI_REMINDER_CRON_SECRET` (Bearer or `x-fi-reminder-secret`) | ReminderOS — `processReminderJobsOnce` | **Yes** — job claim uses `pending` → `processing` conditional update | **Yes** — duplicate cron may claim different jobs; same job not double-sent if claim fails | Returns **503** if secret missing/short; **401** bad secret; **500** processor error JSON `{ ok:false, error }` | Processor: **1 retry** on failure (`attempt_count`); ineligible → `cancelled`; see `reminderProcessor.server.ts` |
-| `/api/cron/iiohr-hr-perth-staff-sync` | `POST` only (`GET` → 405) | **Daily** early AM (Brisbane) per runbook | `CRON_SECRET` (Bearer) | HR → FI staff sync (Evolved Perth) | **Partial** — each run creates `fi_staff_sync_runs`; POST to staff-sync is **commit** | **Mostly** — second run starts new sync; may race if overlapping (wall timeout **55s**) | **503** missing `CRON_SECRET`, `EVOLVED_PERTH_TENANT_ID`, etc.; **401** bad secret; **200/400/504** per `runScheduled` outcome | Timeout → **504**; `maybeStaffSyncAlertAfterCronRun` for alert intent; no email send yet |
+| `/api/cron/fi-reminder-jobs` | `POST`, `GET` | Every **1–5 minutes** (ops recommendation in platform doc) | `FI_REMINDER_CRON_SECRET` (Bearer or `x-fi-reminder-secret`) | ReminderOS — `processReminderJobsOnce` | **Yes** — job claim uses `pending` → `processing` conditional update | **Yes** — duplicate cron may claim different jobs; same job not double-sent if claim fails | Returns **503** if secret missing/short (generic body); **401** bad secret; **500** processor error uses generic `Processor unavailable.` (no stack traces) | Processor: **1 retry** on failure (`attempt_count`); ineligible → `cancelled`; see `reminderProcessor.server.ts` |
+| `/api/cron/iiohr-hr-perth-staff-sync` | `POST` only (`GET` → 405) | **Daily** early AM (Brisbane) per runbook | `CRON_SECRET` (Bearer) | HR → FI staff sync (Evolved Perth) | **Partial** — each run creates `fi_staff_sync_runs`; POST to staff-sync is **commit** | **Mostly** — second run starts new sync; may race if overlapping (wall timeout **55s**) | **503** missing/short `CRON_SECRET` or bad `EVOLVED_PERTH_TENANT_ID` (generic where applicable); **401** bad secret; **200/400/504** per `runScheduled` outcome | Timeout → **504**; `maybeStaffSyncAlertAfterCronRun` for alert intent; no email send yet |
 | `/api/tenants/[tenantId]/tick-jobs` | `POST` | **Not a Vercel cron route** — on-demand / external if wired | `FI_ADMIN_API_KEY` **or** CRM session (`assertCrmTenantWriteAllowed`) | LeadFlow pipeline / `runPipeline` | **Yes** — locking in job runner (`getQueuedJobs` + pipeline) | **Yes** with same limits | `mapCrmRouteError` → structured JSON | Per-job results in response array |
 
 ---
@@ -46,6 +46,17 @@
 |---------|------|
 | Supabase Edge Functions | `supabase/functions/fi-reminder-processor/README.md` documents delegating to Next cron — align **single active processor** to avoid duplicate sends |
 | In-app “tick” | `tick-jobs` is authenticated pipeline drain, not a cron secret route |
+
+---
+
+## Vercel cron matrix (operational)
+
+| Endpoint | Method | Schedule (typical) | Secret env | Auth header(s) | **200** | **401** | **503** | Notes |
+|----------|--------|-------------------|------------|----------------|---------|---------|---------|--------|
+| `/api/cron/fi-reminder-jobs` | **GET** or **POST** | Every **1–5 minutes** | `FI_REMINDER_CRON_SECRET` (≥16 chars, trimmed) | `Authorization: Bearer <secret>` **or** `x-fi-reminder-secret: <secret>` | Jobs drained (JSON includes processor fields) | Bearer / header missing or wrong (timing-safe compare) | Secret missing or shorter than 16 chars | **Only one** active reminder worker (Next cron **or** Supabase Edge delegator — not both sending duplicate traffic). |
+| `/api/cron/iiohr-hr-perth-staff-sync` | **POST only** (`GET` → **405**) | **Daily** (early AM, tenant TZ / ops choice) | `CRON_SECRET` (≥16 chars, trimmed) | `Authorization: Bearer <secret>` **only** | Scheduled sync finished (see `rowsSent`, `runId`, etc.) | Bearer missing or wrong | `CRON_SECRET` missing/short, or `EVOLVED_PERTH_TENANT_ID` missing/invalid UUID, or other preflight misconfig | Wall timeout **55s** → **504**; keep **one** POST cron per environment. |
+
+**Smoke test (no mutations):** `pnpm run smoke:prod` with `FI_BASE_URL` + `FI_SMOKE_TENANT_ID` (see `scripts/fi-production-smoke-test.ts`).
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Scope:** Full-repo scan of `process.env.*` in `*.{ts,tsx,js,jsx,mjs,cjs}` (2026-06-12).  
 **Related:** [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md), [`.env.example`](../../.env.example).  
-**Validation:** There is **no** `@t3-oss/env-nextjs` / Zod env package; behaviour is ad hoc per call site (missing vars often → 503/401/500 or silent feature disable).
+**Validation:** Central checks live in **`src/lib/env/fiEnv.server.ts`** (`validateFiServerEnv`, `assertFiServerEnv`, Zod-backed URL rules). Run **`pnpm run check:env`** before production deploys (CI-friendly; does not auto-run `next dev`).
 
 ## Legend
 
@@ -13,7 +13,7 @@
 | **Vercel prod** | Needed on production Vercel project |
 | **Source** | Where the value comes from |
 | **.env.ex** | Present in [`.env.example`](../../.env.example) (commented counts as documented) |
-| **Zod / typed validation** | Central schema validation at boot |
+| **Zod / typed validation** | `validateFiServerEnv` in `src/lib/env/fiEnv.server.ts` (production + conditional secrets); `pnpm run check:env` |
 
 ---
 
@@ -147,26 +147,35 @@
 
 ---
 
-## Missing from `.env.example` (gaps)
+## Previously missing from `.env.example` (now documented)
 
-High-value additions for the next documentation patch (no code changes in this audit):
+The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (commented placeholders):
 
 - `CRON_SECRET`, `EVOLVED_PERTH_TENANT_ID`, `FI_BASE_URL`, `IIOHR_HR_SYNC_SECRET`, `IIOHR_HR_PERTH_STAFF_FEED_URL`, `IIOHR_HR_PERTH_STAFF_FEED_KEY`, `ALLOW_EMPTY_HR_SYNC`
 - `FI_STORAGE_BUCKET_INTAKES`
-- `NEXT_PUBLIC_APP_URL` (scripts / absolute URL callers)
+- `NEXT_PUBLIC_APP_URL`
 - `OPENAI_PATHOLOGY_INTERPRETATION_MODEL`
 - `FI_REMINDERS_LIVE_DELIVERY`, `FI_REMINDER_TEST_EMAIL`, `FI_REMINDERS_TEST_SEND`
 - `STAFF_SYNC_STALE_WARNING_HOURS`, `STAFF_SYNC_ALERT_EMAIL`
 - `FI_DEVELOPMENT_ADMIN_AUTH_USER_IDS`, `FI_ALLOW_CALENDAR_UAT_SEED`
 - `FI_HUBSPOT_IMPORT_TENANT_ID`, `FI_IMPORT_ADMIN_KEY`, `FI_EVOLVED_*` provisioning trio
+- `FI_LEGACY_FI_API_*`, `FI_ALLOW_INSECURE_API`, `FI_ALLOW_ADMIN_KEY_QUERY`
 
 ---
 
-## Missing central validation (risk)
+## ~~Missing from `.env.example` (gaps)~~ (resolved — see above)
 
-- No single Zod/env schema at application startup: misconfiguration surfaces as **runtime 500/503/401** on first use.
+## Central validation (mitigated)
+
+- **`src/lib/env/fiEnv.server.ts`** — `validateFiServerEnv` / `assertFiServerEnv` (Zod URL checks, production forbidden flags, conditional secret lengths). Run **`pnpm run check:env`** in CI or before go-live with the same env as production. Not auto-imported by `next dev` (explicit check first).
+- **Residual:** misconfiguration can still surface at runtime if `check:env` is skipped; consider a CI gate on merge to main.
+
+---
+
+## Remaining deployment risks (not fully covered by central validation)
+
 - **Service role** is widely required; a typo in `NEXT_PUBLIC_SUPABASE_URL` vs service URL alignment may not fail until first DB call.
-- **`FI_ADMIN_API_KEY`** in query string / header enables powerful bypass — must never leak to browser bundles (today it is server-only; keep that invariant).
+- **`FI_ADMIN_API_KEY`** in header / body enables powerful bypass — must never leak to browser bundles (today it is server-only; keep that invariant).
 
 ---
 
@@ -195,4 +204,6 @@ High-value additions for the next documentation patch (no code changes in this a
 | Site URL / app URL | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL` |
 | Tenant bootstrap | Provisioning / HubSpot script vars |
 | Staff feed / HR sync | HR table |
+| Central env validation | `validateFiServerEnv` / `pnpm run check:env` ([`src/lib/env/fiEnv.server.ts`](../../src/lib/env/fiEnv.server.ts)) |
+| Smoke (cron / webhook hygiene) | `pnpm run smoke:prod` — [`scripts/fi-production-smoke-test.ts`](../../scripts/fi-production-smoke-test.ts) |
 | Pathology / reminder email | OpenAI + Resend + reminder toggles |

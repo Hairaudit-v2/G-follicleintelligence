@@ -11,10 +11,10 @@
 | `POST /api/tenants/[tenantId]/integrations/timely/patient` | Timely (Zapier) | `Authorization: Bearer` → `FI_TIMELY_WEBHOOK_SECRET` | Path `tenantId` UUID | Zod `timelyPatientWebhookSchema` | Processor may write business tables; discovery uses `fi_integration_webhook_events` |
 | `POST /api/tenants/[tenantId]/integrations/timely/appointment` | Timely | same | path | Zod (appointment schema) | same |
 | `POST /api/tenants/[tenantId]/integrations/timely/discovery` | Timely (temporary) | same | path | Raw JSON → `insertTimelyZapierDiscoveryWebhookEvent` | **`fi_integration_webhook_events`** |
-| `POST /api/tenants/[tenantId]/integrations/iiohr-hr/staff-sync` | IIOHR HR | Header `x-iiohr-sync-secret` vs `IIOHR_HR_SYNC_SECRET` | path | `processIiohrHrStaffSyncPost` (row limits, etc.) | **`fi_staff_sync_runs`** (+ metadata trigger) |
+| `POST /api/tenants/[tenantId]/integrations/iiohr-hr/staff-sync` | IIOHR HR | Header `x-iiohr-sync-secret` vs `IIOHR_HR_SYNC_SECRET` (trimmed, ≥16 when set; timing-safe) | path | Auth **before** JSON body in HTTP wrapper; `processIiohrHrStaffSyncPost` for rows | **`fi_staff_sync_runs`** (+ metadata trigger) |
 | `POST /api/cron/iiohr-hr-perth-staff-sync` | Internal cron | Bearer `CRON_SECRET` | Env `EVOLVED_PERTH_TENANT_ID` | N/A (orchestrator) | Delegates to staff-sync |
 | `POST /api/cron/fi-reminder-jobs` | Internal cron | Bearer `FI_REMINDER_CRON_SECRET` | DB-driven | N/A | Updates `fi_reminder_jobs` |
-| `POST /api/fi/events` | HLI / HairAudit / generic FI | **None** | From envelope payload | `parseFiEventEnvelope` + typed discriminated union | Depends on handler (writes via service role) |
+| `POST /api/fi/events` | HLI / HairAudit / generic FI | **Bearer** `FI_LEGACY_FI_API_SECRET` when `FI_LEGACY_FI_API_ENABLED`; else **404** | From envelope payload | `ingestFiEvent` | Depends on handler |
 
 ### HubSpot
 
@@ -49,9 +49,11 @@
 
 | Mechanism | Used where | Notes |
 |-----------|------------|-------|
-| Bearer (timing-safe) | Timely, reminder cron, HR cron | Timely uses SHA256-based compare (`timingSafeSecretEquals`) |
-| Shared header secret | IIOHR staff-sync | Compared in `processIiohrHrStaffSyncPost` |
-| None | `/api/fi/events` | **Critical gap** for internet exposure |
+| Bearer (SHA256 digest timing-safe) | Timely | `assertTimelyWebhookAuthorized` — min **16** chars when secret set; **503** if missing/short; **401** if bearer wrong |
+| Shared header secret | IIOHR staff-sync | `postIiohrHrStaffSyncHttp` validates header before `request.json()`; `processIiohrHrStaffSyncPost` for row rules |
+| Bearer + header | Reminder cron | `FI_REMINDER_CRON_SECRET` via Bearer **or** `x-fi-reminder-secret` (UTF-8 timing-safe) |
+| Bearer | HR Perth cron | `CRON_SECRET` **Bearer only** |
+| Legacy FI machine routes | `/api/fi/events` (and siblings) | `FI_LEGACY_FI_API_*` (Patch PR 1); no query-string secrets |
 
 ---
 
@@ -61,7 +63,7 @@
 |-------------|-----------|
 | Timely routes | Return `{ success:false, error }` — messages are mostly controlled |
 | HR cron | Explicitly avoids stack traces (`iiohrHrPerthStaffSyncCron.ts` comment) |
-| FI events | Generic 500 may include `Error.message` from handlers — review before exposing |
+| FI events | Legacy `/api/fi/events` returns controlled JSON; processor errors in cron should stay generic in production |
 
 ---
 

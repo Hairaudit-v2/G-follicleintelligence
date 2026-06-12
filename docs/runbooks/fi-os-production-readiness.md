@@ -3,7 +3,7 @@
 **Audit date:** 2026-06-10  
 **Scope:** Follicle Intelligence OS operational surfaces (ClinicOS, SurgeryOS, reception, staff PIN, **manual** payment records, tenant-local calendars). This is a **deployment and access** checklist — not a penetration test or full data-governance review.
 
-**See also (2026-06-12 hardening audits):** [Master checklist](fi-os-production-hardening-master-checklist.md) · [Env vars](fi-os-env-vars-production-audit.md) · [Auth](fi-os-auth-production-audit.md) · [Backup & recovery](fi-os-backup-recovery-production.md) · [Cron](fi-os-cron-production-audit.md) · [Webhooks](fi-os-webhook-production-audit.md)
+**See also (2026-06-12 hardening audits):** [Master checklist](fi-os-production-hardening-master-checklist.md) · [Env vars](fi-os-env-vars-production-audit.md) · [Auth](fi-os-auth-production-audit.md) · [Backup & recovery](fi-os-backup-recovery-production.md) · [Supabase backup / PITR setup](fi-os-supabase-backup-setup.md) · [Storage backup / restore drill](fi-os-storage-backup-restore-drill.md) · [Production release checklist](fi-os-production-release-checklist.md) · [Rollback playbook](fi-os-rollback-playbook.md) · [Cron](fi-os-cron-production-audit.md) · [Webhooks](fi-os-webhook-production-audit.md)
 
 ## Commercial integrations — explicit non-scope
 
@@ -23,6 +23,8 @@ The following are **not live** in this product as integrated, automated financia
 |---|---------|--------|
 | 1 | **Pending database migrations** | Production (and any preview DB used for FI OS) must apply **all** migrations the release branch expects, through at least **`20260718120002_fi_case_procedures_v11_team_milestones.sql`**. Missing columns on `fi_case_procedures` breaks procedure day V1.1 (team + milestones). |
 | 2 | **Supabase server configuration** | **`NEXT_PUBLIC_SUPABASE_URL`**, **`NEXT_PUBLIC_SUPABASE_ANON_KEY`**, and **`SUPABASE_SERVICE_ROLE_KEY`** must be set on the deployment; many loaders short-circuit when service role or URL is absent. |
+| 2b | **Environment validation** | Run **`pnpm run check:env`** with production-like variables (same as Vercel / runtime). Fails fast on missing Supabase keys, unsafe production flags, short secrets, and invalid public Supabase URL. See [`src/lib/env/fiEnv.server.ts`](../../src/lib/env/fiEnv.server.ts). |
+| 2c | **Smoke (cron / webhooks / legacy API)** | After deploy, run **`pnpm run smoke:prod`** with **`FI_BASE_URL`** + **`FI_SMOKE_TENANT_ID`** (optional secrets only for labelling SKIPPED checks). Probes health, legacy `/api/fi/events` negative auth, global search gate, reminder cron + Timely discovery **wrong-secret** paths (must never return **200**). See [`scripts/fi-production-smoke-test.ts`](../../scripts/fi-production-smoke-test.ts). |
 | 3 | **`NODE_ENV` + tenant portal API gate** | Production **HTML** route guards key off **`NODE_ENV === 'production'`** (not `VERCEL_ENV`). **`checkFiTenantPortalApiAccess`** (global search, `/api/fi/report`, audit APIs, patient-twin) requires a **session** in production; optional insecure bypass uses **`FI_ALLOW_INSECURE_API`** only when `NODE_ENV !== 'production'`. See [`docs/fi-os-access-production.md`](../fi-os-access-production.md). |
 
 **Verify after deploy:** tenant **`default_timezone`** / operational calendar settings (e.g. **Australia/Perth** for Evolved) for “today” windows, agenda buckets, and deposit due-date copy.
@@ -80,7 +82,7 @@ For **incremental** releases that already have the June 2026 FI foundation, the 
 | Variable | Purpose |
 |----------|---------|
 | `NEXT_PUBLIC_SITE_URL` | Password reset / invite fallback when `Host` / `X-Forwarded-*` are missing in server actions. |
-| `FI_ADMIN_API_KEY` | Operator-key path for selected admin mutations (including some **payment record** writes when keyed — see `assertPaymentRecordWriteAllowed` / CRM gates). |
+| `FI_ADMIN_API_KEY` | Operator-key path for selected admin mutations (including some **payment record** writes when keyed — see `assertPaymentRecordWriteAllowed` / CRM gates). Tenant REST routes: prefer **`x-fi-admin-key`** or **`Authorization: Bearer`**; **`?adminKey=`** is production-blocked (non-prod opt-in: **`FI_ALLOW_ADMIN_KEY_QUERY`**). |
 | `FI_TIMELY_WEBHOOK_SECRET` | **Required in production** for Timely Zapier webhooks to `POST /api/tenants/[tenantId]/integrations/timely/patient|appointment|discovery` when those routes are used. |
 | `FI_REMINDER_CRON_SECRET` | Cron: `POST/GET /api/cron/fi-reminder-jobs` (min 16 chars when enabled). |
 | `RESEND_*` / `TWILIO_*` | Reminder and related email/SMS delivery (see `.env.example`). |
@@ -88,7 +90,8 @@ For **incremental** releases that already have the June 2026 FI foundation, the 
 | `CRON_SECRET`, `EVOLVED_PERTH_TENANT_ID`, `FI_BASE_URL`, `IIOHR_HR_SYNC_SECRET`, `IIOHR_HR_PERTH_STAFF_FEED_URL`, `IIOHR_HR_PERTH_STAFF_FEED_KEY` | IIOHR / Evolved Perth HR sync cron and staff feed (see [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md)). |
 
 **Local development only:** `FI_ENABLE_DEV_ADMIN_ACCESS` — **ignored when `NODE_ENV=production`**.  
-**Local / private non-prod only:** `FI_ALLOW_INSECURE_API` — when `true`/`1`/`yes`, skips session checks for **`checkFiTenantPortalApiAccess`**; **ignored when `NODE_ENV=production`** (previews stay session-gated).
+**Local / private non-prod only:** `FI_ALLOW_INSECURE_API` — when `true`/`1`/`yes`, skips session checks for **`checkFiTenantPortalApiAccess`**; **ignored when `NODE_ENV=production`** (previews stay session-gated).  
+**Local / private non-prod only:** `FI_ALLOW_ADMIN_KEY_QUERY` — when `true`/`1`/`yes`, allows **`?adminKey=`** on tenant CRM API routes (`extractAdminKeyFromRequest`); **ignored when `NODE_ENV=production`**.
 
 Full inventory: [`.env.example`](../../.env.example) and [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md).
 
@@ -237,11 +240,13 @@ End-to-end **operational** path for a hair-restoration tenant (e.g. Evolved). **
 
 ## 10. Post-deploy verification checklist
 
+For the **ordered** promote flow (git clean → `pnpm install` → `check:env` → tests → lint → `tsc` → migrations → Vercel → **`pnpm run smoke:prod`** → manual module checks → sign-off), use **[`fi-os-production-release-checklist.md`](fi-os-production-release-checklist.md)**.
+
 - [ ] **Migrations** — production DB at or past **`20260718120002_fi_case_procedures_v11_team_milestones.sql`**.  
 - [ ] **Procedure day links** — case links use procedure-day anchor where implemented (`caseProcedureDayDetailHref` in `src/lib/cases/caseDetailNavConstants.ts`; loaders e.g. `surgeryReadinessBoardLoader.server.ts`).  
 - [ ] **Staff PIN** — restricted routes redirect to **`/calendar`**; reception usable on floor.  
 - [ ] **Env** — Supabase trio set; optional keys per integrations in use.  
-- [ ] **Lint / unit / tsc** — re-run §7 before each production promote.
+- [ ] **Lint / unit / tsc** — re-run §7 before each production promote (release checklist uses **`pnpm exec next lint`** and **`pnpm run`** scripts from repo root).
 
 ---
 
@@ -249,6 +254,10 @@ End-to-end **operational** path for a hair-restoration tenant (e.g. Evolved). **
 
 | Document | Use |
 |----------|-----|
+| [`docs/runbooks/fi-os-production-release-checklist.md`](fi-os-production-release-checklist.md) | Ordered production promote + `smoke:prod` + manual sign-off. |
+| [`docs/runbooks/fi-os-rollback-playbook.md`](fi-os-rollback-playbook.md) | Vercel rollback, DB PITR/restore, pause cron/webhooks. |
+| [`docs/runbooks/fi-os-supabase-backup-setup.md`](fi-os-supabase-backup-setup.md) | PITR, backups, RPO/RTO, service role rotation, PHI warnings. |
+| [`docs/runbooks/fi-os-storage-backup-restore-drill.md`](fi-os-storage-backup-restore-drill.md) | Bucket scope, quarterly restore drill, signed URLs. |
 | [`docs/fi-os-access-production.md`](../fi-os-access-production.md) | Production gates, roles, `/api/tenants`, password reset. |
 | [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md) | Full env inventory. |
 | [`docs/dev-provision-evolved-tenant.md`](../dev-provision-evolved-tenant.md) | Evolved tenant provisioning. |

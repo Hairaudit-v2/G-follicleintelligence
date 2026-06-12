@@ -277,8 +277,4 @@ export async function assertCrmTenantStaffManageAllowed(opts: {
   }
 }
 
-export function parseAdminKeyFromUnknown(body: unknown): string | undefined {
-  if (!body || typeof body !== "object") return undefined;
-  const ak = (body as Record<string, unknown>).adminKey;
-  return typeof ak === "string" ? ak : undefined;
-}
+export { parseAdminKeyFromJsonBody as parseAdminKeyFromUnknown } from "./fiAdminKeyTransport";

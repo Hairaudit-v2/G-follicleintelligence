@@ -1,5 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
+import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH } from "@/src/lib/security/timingSafeSecret";
+
 export class TimelyWebhookAuthError extends Error {
   constructor(
     public readonly status: number,
@@ -32,23 +34,23 @@ function extractBearerToken(request: Request): string | null {
  * Zapier Timely webhooks: require `Authorization: Bearer <FI_TIMELY_WEBHOOK_SECRET>`.
  * Used by patient/appointment sync routes and the temporary discovery endpoint
  * `POST /api/tenants/[tenantId]/integrations/timely/discovery`.
- * In production, rejects all requests when the secret env var is missing or empty (fail closed).
+ * In production, rejects all requests when the secret env var is missing, empty, or shorter than the minimum (fail closed).
  */
 export function assertTimelyWebhookAuthorized(request: Request): void {
   const isProd = process.env.NODE_ENV === "production";
   const configured = process.env.FI_TIMELY_WEBHOOK_SECRET?.trim() ?? "";
 
-  if (isProd && !configured) {
-    throw new TimelyWebhookAuthError(503, "Timely webhook is not configured.");
+  if (isProd && (!configured || configured.length < CRON_OR_WEBHOOK_SECRET_MIN_LENGTH)) {
+    throw new TimelyWebhookAuthError(503, "Service unavailable.");
   }
 
-  if (!configured) {
-    throw new TimelyWebhookAuthError(503, "FI_TIMELY_WEBHOOK_SECRET is not set.");
+  if (!configured || configured.length < CRON_OR_WEBHOOK_SECRET_MIN_LENGTH) {
+    throw new TimelyWebhookAuthError(503, "Service unavailable.");
   }
 
   const token = extractBearerToken(request);
   if (!token) {
-    throw new TimelyWebhookAuthError(401, "Missing or invalid Authorization bearer token.");
+    throw new TimelyWebhookAuthError(401, "Unauthorized.");
   }
 
   if (!timingSafeSecretEquals(configured, token)) {

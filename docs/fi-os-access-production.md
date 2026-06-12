@@ -39,6 +39,10 @@ Users with `fi_os_identities.os_role` of **`fi_platform_admin`**, **`fi_admin`**
 
 Provision these identities deliberately; they are appropriate for internal staff and auditors, not clinic-only accounts.
 
+### Tenant REST — `FI_ADMIN_API_KEY` (operator bypass)
+
+For **`/api/tenants/[tenantId]/…`** routes that call **`extractAdminKeyFromRequest`** (`src/lib/crm/crmHttp.ts` → **`src/lib/crm/fiAdminKeyTransport.ts`**), production accepts the key only via **`x-fi-admin-key`**, **`Authorization: Bearer`** when the bearer token equals the configured **`FI_ADMIN_API_KEY`**, or JSON body **`adminKey`**. The query parameter **`?adminKey=`** is **not** read in production (and in non-production only when **`FI_ALLOW_ADMIN_KEY_QUERY=true`**). Prefer headers or Bearer for scripts so secrets do not appear in URLs.
+
 ## Post-login redirects (server)
 
 Implemented in `src/lib/fiOs/fiOsRedirect.server.ts` (after `fiOsPasswordSignInAction` sets cookies). The `next` form field is only honoured if it is a **relative path** starting with `/` and not `//` (open redirect hardening).

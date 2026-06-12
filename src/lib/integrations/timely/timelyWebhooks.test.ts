@@ -58,6 +58,15 @@ describe("Timely webhook auth", () => {
       (e: unknown) => e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 503
     );
   });
+
+  it("rejects when configured secret is too short", () => {
+    process.env.FI_TIMELY_WEBHOOK_SECRET = "short_secret";
+    env.NODE_ENV = "test";
+    assert.throws(
+      () => assertTimelyWebhookAuthorized(reqWithAuth("short_secret")),
+      (e: unknown) => e instanceof TimelyWebhookAuthError && (e as TimelyWebhookAuthError).status === 503
+    );
+  });
 });
 
 describe("Timely discovery webhook helpers", () => {
