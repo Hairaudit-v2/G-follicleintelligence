@@ -140,7 +140,7 @@ const ROLE_LENS = [
   {
     icon: Landmark,
     title: "Standards / review body",
-    focus: "Traceability, review pathways, and methodology alignment.",
+    focus: "Traceability, review pathways, and standards alignment.",
     example:
       "An IIOHR-aligned reviewer sees separation between internal adjudication and any public summary, exports a structured case packet for committee review, and ties findings back to training modules—without raw operational noise in the institutional record.",
   },
@@ -161,7 +161,7 @@ export default function DashboardDemoPage() {
             Under the UI, the same intelligence core connects{" "}
             <strong className="font-medium text-foreground">HairAudit</strong> surgical evidence,{" "}
             <strong className="font-medium text-foreground">HLI</strong> longitudinal biology where integrated,
-            and <strong className="font-medium text-foreground">IIOHR</strong>-aligned methodology. The
+            and <strong className="font-medium text-foreground">IIOHR</strong>-aligned standards programs. The
             dashboard is how that compound signal becomes decisions.
           </p>
           <VisualPlaceholder
@@ -328,7 +328,7 @@ export default function DashboardDemoPage() {
             label="Benchmark panel with percentile ribbon or ladder graphic; optional map or site list for multi-location operators."
           />
           <ExplainGrid
-            see="Rank or band vs selected cohorts, plus internal targets; drift and rule-version notes where methodology changes."
+            see="Rank or band vs selected cohorts, plus internal targets; drift and rule-version notes where scoring rules change."
             mean="Investors see proprietary cohort depth; buyers see whether marketing claims survive an internal benchmark."
             action="Adjust targets, defend differentiation with evidence, or escalate when standing slips for multiple periods."
           />
@@ -400,7 +400,7 @@ export default function DashboardDemoPage() {
               <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
                 <li className="flex gap-2">
                   <span className="text-primary">·</span>
-                  Full domain breakdown, reviewer notes, and benchmark methodology footnotes
+                  Full domain breakdown, reviewer notes, and benchmark rule footnotes
                 </li>
                 <li className="flex gap-2">
                   <span className="text-primary">·</span>

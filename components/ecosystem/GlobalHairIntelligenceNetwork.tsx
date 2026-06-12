@@ -37,7 +37,7 @@ const OUTER_NODES: OuterNodeData[] = [
     id: "iiohr",
     title: "IIOHR™",
     subtitle: "Training Intelligence Layer",
-    detail: "Methodology · Credentialing · Governance",
+    detail: "Standards · Credentialing · Governance",
     label: "TRAINING",
   },
   {
@@ -148,15 +148,15 @@ export interface GlobalHairIntelligenceNetworkProps {
   className?: string;
   /** Accessible name for the diagram (aria-label). */
   title?: string;
-  /** Optional footer line under the SVG (defaults to “GLOBAL HAIR INTELLIGENCE NETWORK”). */
+  /** Optional footer line under the SVG (defaults to a short platform caption). */
   footerCaption?: string;
   nodeLinks?: Partial<Record<GlobalNetworkNodeId, string>>;
   /** "hero" = square, larger; "compact" = smaller text, fits in narrow sections */
   size?: "hero" | "compact";
 }
 
-const DEFAULT_TITLE = "Global Hair Intelligence Network";
-const DEFAULT_FOOTER_CAPTION = "GLOBAL HAIR INTELLIGENCE NETWORK";
+const DEFAULT_TITLE = "Connected clinical intelligence";
+const DEFAULT_FOOTER_CAPTION = "OUTCOMES · DIAGNOSTICS · STANDARDS";
 
 export function GlobalHairIntelligenceNetwork({
   theme = "auto",

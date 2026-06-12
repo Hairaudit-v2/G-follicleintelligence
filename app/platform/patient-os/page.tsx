@@ -155,7 +155,7 @@ export default function PatientOsPage() {
       <Section className="border-b border-border/50">
         <FadeIn>
           <SectionIntro
-            eyebrow="Ecosystem"
+            eyebrow="Connected workflows"
             title="Connected to every clinical system."
             description="PatientOS becomes the central intelligence record connecting ConsultationOS, ImagingOS, SurgeryOS, AuditOS and AnalyticsOS."
           />

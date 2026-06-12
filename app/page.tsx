@@ -69,13 +69,13 @@ export const metadata: Metadata = {
 const ECOSYSTEM_HEADING = "Follicle Intelligence: the platform. Three specialist intelligence layers.";
 const ECOSYSTEM_DESCRIPTION = `Follicle Intelligence™ is the master operating system—where clinic, surgical, longitudinal, and governance signal becomes one longitudinal spine.
 
-Under that platform, three named engines deepen specific work: HairAudit™ as the Outcome Intelligence Layer (surgical evidence, scoring, and audit-grade comparability), Hair Longevity Institute™ as the Diagnostic Intelligence Layer (biology and longitudinal treatment intelligence), and IIOHR™ as the Training Intelligence Layer (methodology, standards, and credible review framing).
+Under that platform, three named engines deepen specific work: HairAudit™ as the Outcome Intelligence Layer (surgical evidence, scoring, and audit-grade comparability), Hair Longevity Institute™ as the Diagnostic Intelligence Layer (biology and longitudinal treatment intelligence), and IIOHR™ as the Training Intelligence Layer (standards programs, credentialing, and credible review framing).
 
-Evidence still originates in operational systems you already trust; FI unifies benchmarks and governance so improvement compounds network-wide—without replacing your source of record.
+Evidence still originates in operational systems you already trust; FI unifies benchmarks and governance so improvement compounds across enterprise deployments—without replacing your source of record.
 
 A reinforcing loop: richer evidence sharpens benchmarks; clearer benchmarks raise accountability; stronger accountability feeds better training and standards.`;
 
-const GLOBAL_NETWORK_SECTION_TITLE = "How Follicle Intelligence connects the ecosystem";
+const GLOBAL_NETWORK_SECTION_TITLE = "How Follicle Intelligence connects clinical workflows";
 const GLOBAL_NETWORK_FOOTER_CAPTION = "ONE PLATFORM · THREE INTELLIGENCE LAYERS";
 
 const GlobalHairIntelligenceSectionDynamic = dynamic(
@@ -363,7 +363,7 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10 border-t border-white/[0.07] pt-8">
-              <p className="sr-only">Intelligence domains across the network</p>
+              <p className="sr-only">Intelligence domains across connected workflows</p>
               <ul className="flex flex-wrap items-center gap-x-1 gap-y-2 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground sm:text-[11px]">
                 {[
                   "Clinical Intelligence",
@@ -431,9 +431,9 @@ export default function HomePage() {
       <Section className="py-14 md:py-16">
         <FadeIn>
           <SectionIntro
-            eyebrow="The flywheel"
+            eyebrow="Operating loop"
             title="One platform. Three intelligence layers."
-            description="Follicle Intelligence™ is the master system: benchmarks, governance, Patient Twin continuity, and the clinic OS spine. HairAudit™, Hair Longevity Institute™, and IIOHR™ are specialist engines underneath—outcome, diagnostic, and training intelligence—that feed the same learning loop so improvement is measurable at ecosystem scale."
+            description="Follicle Intelligence™ is the master system: benchmarks, governance, Patient Twin continuity, and the clinic OS spine. HairAudit™, Hair Longevity Institute™, and IIOHR™ are specialist engines underneath—outcome, diagnostic, and training intelligence—that feed the same structured workflows so improvement is measurable at enterprise scale."
           />
           <ul className="mt-10 grid gap-6 border-t border-border/50 pt-10 sm:grid-cols-2 lg:grid-cols-4">
             <li className="flex flex-col gap-2">
@@ -465,7 +465,7 @@ export default function HomePage() {
                 IIOHR™ — Training Intelligence Layer
               </span>
               <p className="text-sm leading-6 text-muted-foreground">
-                Methodology, training, and standards framing that makes Follicle Intelligence outputs reviewable and improvement programs institutionally legitimate.
+                Training programs, standards framing, and governance alignment that make Follicle Intelligence outputs reviewable and improvement programs institutionally legitimate.
               </p>
             </li>
           </ul>
@@ -770,22 +770,22 @@ export default function HomePage() {
                     Training Intelligence Layer (IIOHR™)
                   </p>
                   <h2 className="mt-3 text-2xl font-semibold text-foreground md:text-3xl">
-                    Governance and scoring backed by formal methodology—inside Follicle Intelligence.
+                    Governance and scoring backed by documented standards—inside Follicle Intelligence.
                   </h2>
                 </div>
               </div>
               <p className="mt-6 text-base leading-7 text-muted-foreground">
                 Follicle Intelligence is the master platform for audit and benchmarks; IIOHR™ is the Training
-                Intelligence Layer that supplies methodology, training architecture, and standards framing—so scores
+                Intelligence Layer that supplies structured training architecture and standards framing—so scores
                 mean something in professional context and can travel into governance, credentialing, and institutional
                 programs without losing defensibility.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button asChild className="rounded-xl">
-                  <Link href="/methodology">Explore methodology &amp; IIOHR™ alignment</Link>
+                  <Link href="/methodology">Explore standards &amp; IIOHR™ alignment</Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-xl">
-                  <Link href="/methodology">View Methodology</Link>
+                  <Link href="/methodology">View governance overview</Link>
                 </Button>
               </div>
             </div>
@@ -796,7 +796,7 @@ export default function HomePage() {
               {[
                 {
                   icon: ClipboardList,
-                  title: "Structured methodology",
+                  title: "Structured scoring model",
                   desc: "A formal scoring framework that supports consistency, comparability, and defensible assessment.",
                 },
                 {
@@ -831,7 +831,7 @@ export default function HomePage() {
           <SectionIntro
             eyebrow="Infrastructure & expansion"
             title="Built as category infrastructure—not a single-product feature."
-            description="Follicle Intelligence strengthens as more evidence types and standards programs connect: deeper cohorts, sharper benchmarks, and harder-to-replace workflow integration. Hair restoration is the live wedge; the architecture is modular for procedural and cosmetic verticals that share audit-shaped problems."
+            description="Follicle Intelligence strengthens as more evidence types and standards programs connect: deeper cohorts, sharper benchmarks, and harder-to-replace workflow integration. Hair restoration is the live category focus; the modular architecture extends to procedural and cosmetic verticals that share audit-shaped problems."
           />
         </FadeIn>
         <FadeIn delay={0.04} className="mt-10">

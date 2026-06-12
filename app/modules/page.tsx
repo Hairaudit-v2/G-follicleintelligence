@@ -171,7 +171,7 @@ export default function ModulesPage() {
         <FadeIn>
           <SectionIntro
             eyebrow="Consumption"
-            title="How modules feed the ecosystem."
+            title="How modules feed the platform."
             description="The same primitives power public applications, longitudinal programs, partner deployments, and road-mapped categories—so intelligence accumulates in one place instead of siloing by brand."
           />
         </FadeIn>
@@ -233,7 +233,7 @@ export default function ModulesPage() {
           <SectionIntro
             eyebrow="Pipeline"
             title="Composition in the processing path."
-            description="Deployments tune depth—full pipeline or selective components—while staying on a core that supports audit rhythm, cohort learning, and IIOHR-aligned methodology. The diagram below is the same structural story told visually; the sections that follow document each engine."
+            description="Deployments tune depth—full pipeline or selective components—while staying on a core that supports audit rhythm, cohort learning, and IIOHR-aligned standards. The diagram below is the same structural story told visually; the sections that follow document each engine."
           />
         </FadeIn>
         <FadeIn delay={0.06} className="mt-8">

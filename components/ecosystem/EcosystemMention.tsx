@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 /**
- * One-line ecosystem mention for use on marketing pages.
- * Aligns roles: HairAudit = surgical evidence/audit surface, HLI = biology/longitudinal, IIOHR = methodology/standards.
+ * One-line mention for use on marketing pages.
+ * Aligns roles: HairAudit = surgical evidence/audit surface, HLI = biology/longitudinal, IIOHR = standards/training.
  */
 export function EcosystemMention({ className = "" }: { className?: string }) {
   return (
@@ -34,7 +34,7 @@ export function EcosystemMention({ className = "" }: { className?: string }) {
       >
         IIOHR
       </Link>{" "}
-      (methodology, training, standards, and governance alignment).
+      (structured training programs, standards, and governance alignment).
     </p>
   );
 }

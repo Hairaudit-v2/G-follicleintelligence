@@ -42,11 +42,11 @@ const WHO_SHOULD = [
   },
   {
     title: "Institutions and standards bodies",
-    body: "You represent associations, training programs, or multi-site quality initiatives where methodology, credibility, and IIOHR-aligned framing matter as much as software.",
+    body: "You represent associations, training programs, or multi-site quality initiatives where governance credibility and IIOHR-aligned framing matter as much as software.",
   },
   {
     title: "Platforms and strategic partners",
-    body: "You embed intelligence in an existing stack, pursue white-label or volume licensing, or want to align roadmap and data flywheel depth before committing integration work.",
+    body: "You embed intelligence in an existing stack, pursue white-label or volume licensing, or want to align roadmap and cohort depth before committing integration work.",
   },
 ];
 
@@ -59,7 +59,7 @@ const WHAT_NEXT = [
   {
     step: "2",
     title: "Routing to the right conversation",
-    body: "General and methodological questions stay with product-aligned correspondence; commercial, demo, and partnership requests go to the path that can scope deployment, licensing, and timelines.",
+    body: "General and product-alignment questions stay with product correspondence; commercial, demo, and partnership requests go to the path that can scope deployment, licensing, and timelines.",
   },
   {
     step: "3",
@@ -73,8 +73,8 @@ const PRIMARY_PATHS = [
     icon: Mail,
     title: "General and product",
     value:
-      "Best when you need orientation on the platform, methodology, or onboarding—and want a direct line without a commercial thread unless you ask for one.",
-    body: "Platform access, onboarding, methodology questions, and non-commercial enquiries.",
+      "Best when you need orientation on the platform, governance standards, or onboarding—and want a direct line without a commercial thread unless you ask for one.",
+    body: "Platform access, onboarding, standards questions, and non-commercial enquiries.",
     href: "mailto:hello@follicleintelligence.ai",
     cta: "Write to hello@follicleintelligence.ai",
   },
@@ -108,14 +108,14 @@ const INTENT_PATHS = [
     icon: Handshake,
     title: "Strategic partnership",
     value: "Explore long-term alignment—category expansion, co-development, and how the intelligence layer fits your roadmap beyond a single integration.",
-    copy: "Discuss data flywheel depth, specialty expansion, and long-term infrastructure alignment.",
+    copy: "Discuss cohort depth, specialty expansion, and long-term infrastructure alignment.",
     email: "sales@follicleintelligence.ai?subject=Strategic%20Partnership",
   },
   {
     icon: MessageSquare,
     title: "Institutional and standards",
-    value: "Connect methodology, advisory, and quality programs when the question is institutional credibility and standards scale, not only a software seat.",
-    copy: "IIOHR-aligned methodology, advisory engagement, and quality programs at association scale.",
+    value: "Connect standards programs, advisory, and quality initiatives when the question is institutional credibility and scale, not only a software seat.",
+    copy: "IIOHR-aligned standards, advisory engagement, and quality programs at association scale.",
     email: "hello@follicleintelligence.ai?subject=Institutional%20Interest",
   },
 ];

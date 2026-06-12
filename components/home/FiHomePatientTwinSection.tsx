@@ -315,11 +315,11 @@ function GrowthCascade() {
         </span>
         <div className="w-full max-w-2xl rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-[rgb(10_16_26_/0.7)] to-[rgb(6_10_16_/0.85)] px-6 py-6 text-center shadow-[0_0_48px_hsl(var(--primary)/0.15)] backdrop-blur-md sm:px-10 sm:py-8">
           <p className="font-display text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-            Global Hair Restoration Intelligence Network
+            Global clinical intelligence at patient scale
           </p>
           <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
             Scale compounds: enough structured twins make cohort effects visible—patterns that no single clinic could
-            justify alone, but that the network can learn from with governance and consent in scope.
+            surface alone, yet each deployment stays permissioned and governable under tenant policy.
           </p>
         </div>
       </motion.div>

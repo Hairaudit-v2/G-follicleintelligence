@@ -9,7 +9,7 @@ import { FadeIn } from "@/components/ui/fade-in";
 import { Braces, CheckCircle2, FileSearch2, GaugeCircle, Sigma, Target } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Methodology: Reviewable Audit Intelligence & IIOHR Alignment | Follicle Intelligence",
+  title: "Governance, Review Standards & IIOHR Alignment | Follicle Intelligence",
   description:
     "How FI structures evidence, weighting, confidence, benchmark context, and adjudication—so scores are reviewable, not black-box outputs. Standards alignment through IIOHR.",
 };
@@ -43,7 +43,7 @@ function DiagramPlaceholder({ label }: { label: string }) {
   );
 }
 
-/** Preserved six-stage methodology pipeline */
+/** Six-stage structured quality pipeline (capture through closed-loop review). */
 const METHOD_STEPS = [
   {
     icon: FileSearch2,
@@ -91,7 +91,7 @@ const EVIDENCE_WEIGHTING = [
 const CONFIDENCE_INTEGRITY = [
   {
     title: "Evidence density",
-    body: "Signals how much structured input supported a conclusion relative to what the methodology expects for that domain—useful for prioritizing review, not for claiming precision that the record does not support.",
+    body: "Signals how much structured input supported a conclusion relative to what the scoring model expects for that domain—useful for prioritizing review, not for claiming precision that the record does not support.",
   },
   {
     title: "Integrity and consistency checks",
@@ -102,18 +102,18 @@ const CONFIDENCE_INTEGRITY = [
 const BENCHMARK_CONTEXT = [
   {
     title: "Cohort definition",
-    body: "Standing is always relative to a defined cohort or baseline: peer sets, historical internal bands, or policy targets. Rule sets are versioned where methodology changes—so a shift in “top quartile” reflects policy or membership change when applicable, not silent drift.",
+    body: "Standing is always relative to a defined cohort or baseline: peer sets, historical internal bands, or policy targets. Rule sets are versioned when scoring or eligibility rules change—so a shift in “top quartile” reflects policy or membership change when applicable, not silent drift.",
   },
   {
     title: "Denominators and eligibility",
-    body: "Benchmarks require clear inclusion logic. FI’s methodology treats denominator and eligibility as explicit inputs to interpretation: a score without a cohort label is an incomplete administrative object, not a public ranking.",
+    body: "Benchmarks require clear inclusion logic. FI treats denominator and eligibility as explicit inputs to interpretation: a score without a cohort label is an incomplete administrative object, not a public ranking.",
   },
 ];
 
 const REVIEW_ADJUDICATION = [
   {
     title: "Separation of roles",
-    body: "Scoring produces structured outputs; governance assigns review ownership (clinical lead, quality office, committee) per tenant policy. The methodology supports separation between who generates signal and who adjudicates exceptions—aligned with serious quality programs.",
+    body: "Scoring produces structured outputs; governance assigns review ownership (clinical lead, quality office, committee) per tenant policy. The platform supports separation between who generates signal and who adjudicates exceptions—aligned with serious quality programs.",
   },
   {
     title: "States, not vibes",
@@ -132,7 +132,7 @@ const WHY_REVIEWABLE = [
 const CONFIDENCE_INTERPRETATION = [
   {
     label: "Higher confidence",
-    text: "Generally indicates more complete, consistent evidence against methodology expectations for that domain. It does not imply clinical certainty or legal proof—it means the structured record supports the conclusion more strongly.",
+    text: "Generally indicates more complete, consistent evidence against the documented scoring expectations for that domain. It does not imply clinical certainty or legal proof—it means the structured record supports the conclusion more strongly.",
   },
   {
     label: "Lower confidence",
@@ -145,23 +145,23 @@ const CONFIDENCE_INTERPRETATION = [
 ];
 
 const IIOHR_ALIGNMENT = [
-  "Methodology documentation and review pathways are designed to sit alongside IIOHR-aligned training and standards work—not to replace professional bodies, but to make institutional programs operable.",
+  "Governance documentation and review pathways are designed to sit alongside IIOHR-aligned training and standards work—not to replace professional bodies, but to make institutional programs operable.",
   "Versioning and auditability expectations match what associations and institutes need when they adopt third-party infrastructure: explicit rules, traceable changes, and exportable review records where policy allows.",
-  "Advisory alignment with IIOHR is organizational and methodological; specific certifications or endorsements are stated only where contractually and factually accurate.",
+  "Advisory alignment with IIOHR is organizational and tied to documented review standards; specific certifications or endorsements are stated only where contractually and factually accurate.",
 ];
 
 export default function MethodologyPage() {
   return (
     <>
       <PageHero
-        eyebrow="Methodology"
+        eyebrow="Standards & governance"
         title="Structured, reviewable intelligence—not a black-box score."
-        subtitle="Enterprise buyers, standards bodies, and investors should ask the same question: can we defend how conclusions were reached? Follicle Intelligence is built so evidence, weighting, confidence, benchmark context, and adjudication are explicit—methodology is the difference between marketing claims and reviewable quality."
+        subtitle="Enterprise buyers, standards bodies, and investors should ask the same question: can we defend how conclusions were reached? Follicle Intelligence is built so evidence, weighting, confidence, benchmark context, and adjudication are explicit—that traceability is the difference between marketing claims and reviewable quality."
       />
 
       <Section>
         <FadeIn>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">Method framework</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/85">Structured workflows</p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             Repeatability, traceability, institutional credibility.
           </h2>
@@ -232,7 +232,7 @@ export default function MethodologyPage() {
           <SectionIntro
             eyebrow="Benchmarks"
             title="Benchmark context."
-            description="A number without context is not a benchmark—it is a label. Methodology requires explicit cohort membership, baselines, and versioning so standing can be interpreted and audited."
+            description="A number without context is not a benchmark—it is a label. The platform requires explicit cohort membership, baselines, and versioning so standing can be interpreted and audited."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -253,7 +253,7 @@ export default function MethodologyPage() {
           <SectionIntro
             eyebrow="Governance"
             title="Review layers and adjudication."
-            description="Scoring produces candidates for judgment; governance produces decisions. The methodology separates those concerns so institutions can map roles, escalation, and disclosure to policy."
+            description="Scoring produces candidates for judgment; governance produces decisions. FI separates those concerns so institutions can map roles, escalation, and disclosure to policy."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -292,7 +292,7 @@ export default function MethodologyPage() {
           <SectionIntro
             eyebrow="Interpretation"
             title="How confidence should be interpreted."
-            description="Misread confidence and you either over-trust thin evidence or under-use strong signal. The following guardrails are methodological, not promotional."
+            description="Misread confidence and you either over-trust thin evidence or under-use strong signal. The following guardrails are operational, not promotional."
           />
         </FadeIn>
         <div className="mt-10 space-y-5">
@@ -312,7 +312,7 @@ export default function MethodologyPage() {
           <SectionIntro
             eyebrow="Standards"
             title="Alignment with IIOHR and institutional practice."
-            description="FI does not claim to be a professional regulator. Methodology alignment means operable frameworks, review pathways, and traceability that institutes can adopt alongside IIOHR-led training and governance—not a substitute for professional judgment or statutory requirements."
+            description="FI does not claim to be a professional regulator. Standards alignment means operable frameworks, review pathways, and traceability that institutes can adopt alongside IIOHR-led training and governance—not a substitute for professional judgment or statutory requirements."
           />
         </FadeIn>
         <FadeIn delay={0.06} className="mt-8">
@@ -327,7 +327,7 @@ export default function MethodologyPage() {
         </FadeIn>
         <FadeIn delay={0.1}>
           <div className="mt-10 rounded-2xl border border-border/60 bg-card/60 p-8 md:p-10">
-            <p className="fi-trust text-xs uppercase tracking-[0.22em]">Ecosystem</p>
+            <p className="fi-trust text-xs uppercase tracking-[0.22em]">Platform</p>
             <p className="mt-4 max-w-4xl leading-relaxed text-muted-foreground">
               The same framework underpins{" "}
               <Link

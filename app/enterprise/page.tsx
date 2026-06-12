@@ -88,7 +88,7 @@ const AUDIENCE_SEGMENTS: {
   {
     icon: GraduationCap,
     title: "For training institutions",
-    body: "Pair structured methodology with measurable practice signals. Programs can align curriculum, certification pathways, and review standards to evidence that survives oversight—not slide decks that age the moment they ship.",
+    body: "Pair structured clinical workflows with measurable practice signals. Programs can align curriculum, certification pathways, and review standards to evidence that survives oversight—not slide decks that age the moment they ship.",
   },
   {
     icon: Stethoscope,
@@ -135,7 +135,7 @@ const CAPABILITY_TOPICS: {
   {
     icon: Shield,
     title: "Outcome benchmarking",
-    body: "Cohort-relative standing with honest denominators: confidence, completeness, and methodology visibility so benchmarks strengthen credibility instead of eroding it.",
+    body: "Cohort-relative standing with honest denominators: confidence, completeness, and transparent scoring rules so benchmarks strengthen credibility instead of eroding it.",
   },
   {
     icon: Tags,
@@ -161,7 +161,7 @@ export default function EnterprisePage() {
     <>
       <PageHero
         eyebrow="Enterprise"
-        title="Enterprise Infrastructure For The Future Of Hair Restoration"
+        title="Enterprise infrastructure for hair restoration at scale"
         subtitle="Purpose-built operating intelligence for large clinic groups, institutions, networks, white-label programs, and strategic partners who need scale without sacrificing governance."
         body="Follicle Intelligence is modular infrastructure you can deploy as a connected system: acquisition through outcomes, with audit-ready workflows and benchmark context where your program demands it."
       />

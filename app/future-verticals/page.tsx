@@ -12,7 +12,7 @@ import { ArrowRightLeft, HeartPulse, ScanLine, Smile, Sparkles, Syringe } from "
 export const metadata: Metadata = {
   title: "Future Verticals: Beyond Hair Restoration | Follicle Intelligence",
   description:
-    "Hair first with a reusable audit and benchmark architecture—disciplined expansion into adjacent procedural and aesthetic categories when methodology and evidence patterns align.",
+    "Hair first with a reusable audit and benchmark architecture—disciplined expansion into adjacent procedural and aesthetic categories when scoring models and evidence patterns align.",
 };
 
 const VERTICALS = [
@@ -53,8 +53,8 @@ export default function FutureVerticalsPage() {
     <>
       <PageHero
         eyebrow="Future verticals"
-        title="Hair is the wedge—not the ceiling."
-        subtitle="The Follicle Intelligence architecture is modular: audit-shaped workflows, benchmark cores, and governance patterns that transfer when evidence and standards allow. Expansion is deliberate—each vertical should earn the same methodological rigor as hair, not borrow the brand for thin adjacencies."
+        title="Hair is the lead category—not the ceiling."
+        subtitle="The Follicle Intelligence platform is modular: audit-shaped workflows, benchmark cores, and governance patterns that transfer when evidence and standards allow. Expansion is deliberate—each vertical should earn the same operational rigor as hair, not borrow the brand for thin adjacencies."
       />
       <Section>
         <FadeIn>

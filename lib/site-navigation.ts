@@ -3,7 +3,7 @@ export const PRIMARY_NAV = [
   { href: "/solutions", label: "Solutions" },
   { href: "/hair-intelligence", label: "Hair Intelligence" },
   { href: "/white-label", label: "White Label" },
-  { href: "/methodology", label: "Methodology" },
+  { href: "/methodology", label: "Standards & governance" },
   { href: "/dashboard-demo", label: "Dashboard Demo" },
   { href: "/future-verticals", label: "Future Verticals" },
   { href: "https://iiohr.com", label: "IIOHR" },
@@ -50,7 +50,7 @@ export type EcosystemSiteId = "iiohr" | "hairaudit" | "follicleintelligence" | "
 
 /** Shared ecosystem band: tagline + 4 links. Use in footer and header for consistency. */
 export const ECOSYSTEM_BAND = {
-  tagline: "Part of the Surgical Intelligence Ecosystem™",
+  tagline: "Connected intelligence across outcomes, diagnostics, and standards",
   links: [
     { id: "iiohr" as EcosystemSiteId, label: "IIOHR", role: "training", href: "https://iiohr.com" },
     { id: "hairaudit" as EcosystemSiteId, label: "HairAudit", role: "measurement", href: "https://hairaudit.com" },
@@ -65,7 +65,7 @@ export const ECOSYSTEM_DIAGRAM_NODES = {
   central: {
     id: "follicleintelligence" as EcosystemSiteId,
     label: "Follicle Intelligence™",
-    roleLabel: "Central engine",
+    roleLabel: "Platform core",
     href: "/",
   },
   /** Satellites (order: HairAudit, HLI, IIOHR for consistent layout). */

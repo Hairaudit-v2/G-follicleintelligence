@@ -9,7 +9,7 @@ import { FadeIn } from "@/components/ui/fade-in";
 export const metadata: Metadata = {
   title: "About Follicle Intelligence | Mission, Intent & Infrastructure",
   description:
-    "Why Follicle Intelligence exists: accountable quality infrastructure for hair restoration—transparency, benchmarks, governance, and standards across HairAudit, HLI, and IIOHR. Mission, ecosystem intent, and long-term direction.",
+    "Why Follicle Intelligence exists: accountable quality infrastructure for hair restoration—transparency, benchmarks, governance, and standards across HairAudit, HLI, and IIOHR. Mission, platform direction, and long-term focus.",
 };
 
 function SectionIntro({
@@ -61,7 +61,7 @@ export default function AboutPage() {
             <SectionIntro
               eyebrow="The problem we started from"
               title="Fragmented excellence in a global, narrative-driven market."
-              description="The trigger was not a single product idea—it was a structural failure: surgical outcomes, biological follow-up, and professional standards lived in disconnected workflows. Without a shared intelligence layer, institutions could not align training, benchmarks, and public trust. Point tools score cases; they do not coordinate how an industry proves quality. FI was conceived to solve that coordination problem at infrastructure depth."
+              description="The trigger was not a single product idea—it was a structural failure: surgical outcomes, biological follow-up, and professional standards lived in disconnected workflows. Without a shared intelligence layer, institutions could not align training, benchmarks, and public trust. Point tools score cases; they do not coordinate how an industry proves quality. FI was built to solve that coordination problem at infrastructure depth."
             />
             <ul className="mt-6 space-y-3 border-l-2 border-primary/25 pl-5 text-sm leading-relaxed text-muted-foreground md:text-base">
               <li>Technical quality varies widely under the same commercial language.</li>
@@ -72,9 +72,9 @@ export default function AboutPage() {
 
           <FadeIn delay={0.12}>
             <SectionIntro
-              eyebrow="Why the ecosystem had to be connected"
-              title="One architecture for surgery, biology, and standards."
-              description="Hair restoration is not only a procedure snapshot. Longitudinal biology and professional methodology are part of the full quality story—yet they rarely sat in one technical system. A connected ecosystem was necessary so Follicle Intelligence could learn across:"
+              eyebrow="Why the platform had to unify surgery, biology, and standards"
+              title="One modular architecture for surgery, biology, and standards."
+              description="Hair restoration is not only a procedure snapshot. Longitudinal biology and professional standards are part of the full quality story—yet they rarely sat in one technical system. A connected operating layer was necessary so Follicle Intelligence could compound signal across:"
             />
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {[
@@ -88,7 +88,7 @@ export default function AboutPage() {
                 },
                 {
                   name: "IIOHR",
-                  line: "Methodology, training, and governance alignment—where improvement becomes legitimate inside the profession.",
+                  line: "Standards programs, training, and governance alignment—where improvement becomes legitimate inside the profession.",
                 },
               ].map((item) => (
                 <div
@@ -138,13 +138,13 @@ export default function AboutPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.26em] text-primary/90">Long-term mission</p>
               <p className="mt-5 text-lg font-medium leading-relaxed text-foreground md:text-xl">
                 Make accountable quality the default expectation in hair restoration—and extend the same
-                disciplined infrastructure to adjacent procedural medicine only when evidence and methodology
+                disciplined infrastructure to adjacent procedural medicine only when evidence and governance models
                 justify it.
               </p>
               <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
                 We measure success by whether operators, institutions, and partners can run quality programs
                 that hold up to scrutiny: benchmarks that deepen over time, governance that leaves a trace, and
-                standards that translate into training—not slogans. Hair is the live wedge; the mission is
+                standards that translate into training—not slogans. Hair is the live category focus; the mission is
                 broader, but the expansion bar stays high.
               </p>
             </div>
@@ -184,7 +184,7 @@ export default function AboutPage() {
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 Follicle Intelligence was organized around a specific market failure and a specific class of
                 solution—infrastructure for evidence-led quality, not opportunistic software. We are deliberate
-                about scope, methodology alignment, and how we engage institutions and strategic partners.
+                about scope, standards alignment, and how we engage institutions and strategic partners.
               </p>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 We do not use this page as a biography. Investors, boards, and enterprise buyers who need
@@ -207,7 +207,7 @@ export default function AboutPage() {
             <SectionIntro
               eyebrow="Roadmap"
               title="Discipline over expansion noise."
-              description="Hair restoration remains the focus that builds proprietary depth. Adjacent categories enter the roadmap only when audit-shaped workflows and methodology alignment match—never to chase a slide-deck TAM."
+              description="Hair restoration remains the focus that builds proprietary depth. Adjacent categories enter the roadmap only when audit-shaped workflows and standards alignment match—never to chase a slide-deck TAM."
             />
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild className="rounded-xl">

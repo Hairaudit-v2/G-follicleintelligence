@@ -12,7 +12,7 @@ import { BadgeCheck, Building2, Hospital, Shield, UserRound } from "lucide-react
 export const metadata: Metadata = {
   title: "White-Label: Branded Audit & Benchmark Infrastructure | Follicle Intelligence",
   description:
-    "Deploy the central intelligence layer under your brand: governance, benchmarks, and reporting—with HairAudit, HLI, and IIOHR ecosystem depth behind the scenes.",
+    "Deploy the central intelligence layer under your brand: governance, benchmarks, and reporting—with HairAudit, HLI, and IIOHR connected behind the scenes.",
 };
 
 const WHITE_LABEL_MODELS = [
@@ -29,7 +29,7 @@ const WHITE_LABEL_MODELS = [
   {
     icon: Hospital,
     title: "Institutional programs",
-    desc: "Standards-aligned environments for advisory panels, training organizations, and quality oversight—methodology and review depth institutions expect.",
+    desc: "Standards-aligned environments for advisory panels, training organizations, and quality oversight—with the review depth institutions expect.",
   },
   {
     icon: Shield,
@@ -44,7 +44,7 @@ export default function WhiteLabelPage() {
       <PageHero
         eyebrow="White-label"
         title="Your brand. Our intelligence backbone."
-        subtitle="White-label is not cosmetic skinning—it is how serious operators deploy category infrastructure under their governance model. You keep brand and policy; Follicle Intelligence supplies scoring depth, benchmark logic, and ecosystem connectivity across HairAudit, HLI, and IIOHR-aligned standards."
+        subtitle="White-label is not cosmetic skinning—it is how serious operators deploy category infrastructure under their governance model. You keep brand and policy; Follicle Intelligence supplies scoring depth, benchmark logic, and connected workflows across HairAudit, HLI, and IIOHR-aligned standards."
       />
       <Section>
         <FadeIn>

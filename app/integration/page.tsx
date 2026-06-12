@@ -80,7 +80,7 @@ const IMPLEMENTATION_PATTERNS = [
 const PARTNER_MODELS = [
   {
     title: "Native HairAudit / FI-connected workflows",
-    body: "Events and APIs align with HairAudit and ecosystem producers (e.g. HLI-related intake). Best when your organization already participates in the FI event model and wants minimal custom middleware.",
+    body: "Events and APIs align with HairAudit and connected producers (e.g. HLI-related intake). Best when your organization already participates in the FI event model and wants minimal custom middleware.",
   },
   {
     title: "Platform or EHR-embedded",

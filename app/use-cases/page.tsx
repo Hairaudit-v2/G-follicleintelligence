@@ -5,9 +5,9 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/page-hero";
 
 export const metadata: Metadata = {
-  title: "Hair Audit Use Cases: Clinics, Labs, Telehealth & Research | Follicle Intelligence",
+  title: "Hair Audit Use Cases: Clinics, Labs, Telehealth & Program Analytics | Follicle Intelligence",
   description:
-    "Trichology clinics, diagnostic labs, telehealth providers, and clinical research. One infrastructure for evidence-based scoring and benchmarking across settings.",
+    "Trichology clinics, diagnostic labs, telehealth providers, and multi-site quality programs. One infrastructure for evidence-based scoring and benchmarking across settings.",
 };
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
@@ -31,8 +31,8 @@ const USE_CASES = [
   },
   {
     icon: Users,
-    title: "Clinical research",
-    desc: "Cohort analysis. Score aggregation. De-identified data exports for studies.",
+    title: "Program analytics",
+    desc: "Cohort analysis. Score aggregation. De-identified data exports for governance and studies.",
   },
 ];
 
@@ -42,7 +42,7 @@ export default function UseCasesPage() {
       <PageHero
         eyebrow="Use cases"
         title="Where Follicle Intelligence fits"
-        subtitle="Clinics, labs, telehealth, and research. Scalable infrastructure for precision trichology."
+        subtitle="Clinics, labs, telehealth, and program analytics. Scalable infrastructure for precision trichology."
       />
       <Section>
         <div className="grid gap-8 md:grid-cols-2">

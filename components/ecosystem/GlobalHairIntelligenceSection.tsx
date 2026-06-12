@@ -17,7 +17,7 @@ export interface GlobalHairIntelligenceSectionProps {
   heading: string;
   /** Short explanatory copy below the heading (site-specific). */
   description: string;
-  /** Accessible name / internal title for the network diagram (defaults to “Global Hair Intelligence Network”). */
+  /** Accessible name / internal title for the network diagram (defaults to “Connected clinical intelligence”). */
   networkTitle?: string;
   /** Optional caption rendered beneath the network SVG (e.g. platform hierarchy line). */
   networkFooterCaption?: string;
@@ -34,7 +34,7 @@ export interface GlobalHairIntelligenceSectionProps {
 }
 
 /**
- * Reusable section wrapper for the Global Hair Intelligence Network.
+ * Reusable section wrapper for the connected intelligence diagram.
  * Use on homepage (size="hero") or secondary pages (size="compact").
  * Copy and supporting text are passed in so the component stays brand-neutral.
  */
@@ -73,7 +73,7 @@ export function GlobalHairIntelligenceSection({
             theme={theme}
             showBackground={false}
             size={size}
-            title={networkTitle ?? "Global Hair Intelligence Network"}
+            title={networkTitle ?? "Connected clinical intelligence"}
             footerCaption={networkFooterCaption}
             nodeLinks={nodeLinks}
           />

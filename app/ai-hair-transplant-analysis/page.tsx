@@ -161,7 +161,7 @@ export default function AIHairTransplantAnalysisPage() {
                 <Link href="/hair-intelligence">Explore Hair Intelligence</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/methodology">View Methodology</Link>
+                <Link href="/methodology">View governance overview</Link>
               </Button>
             </div>
           </div>
@@ -232,7 +232,7 @@ export default function AIHairTransplantAnalysisPage() {
             compared, and improved in a structured way. AI-based analysis supports that by making
             evaluation consistent and visible: domain-level scores, benchmarks, and confidence
             indicators give clinicians and institutions a shared language. When scores are tied to
-            evidence and methodology—and when the methodology is aligned with standards such as
+            evidence and versioned scoring rules—and when those rules align with standards such as
             those promoted by{" "}
             <Link
               href="https://iiohr.com"
@@ -270,14 +270,14 @@ export default function AIHairTransplantAnalysisPage() {
       <Section className="border-y border-border/40">
         <FadeIn>
           <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-            Connection to the wider ecosystem
+            Connection to the broader platform
           </h2>
           <p className="mt-6 max-w-4xl leading-relaxed text-muted-foreground">
-            AI hair transplant analysis does not sit in isolation. It fits into a broader
-            surgical intelligence ecosystem that spans audit and scoring, biological and
+            AI hair transplant analysis does not sit in isolation. It fits into the broader
+            clinical intelligence stack that spans audit and scoring, biological and
             treatment-pathway insight, and training and certification. Follicle Intelligence
-            provides the core engine—the methodology, scoring logic, and infrastructure—that powers
-            applications and partners across that ecosystem.
+            provides the core engine—scoring logic, workflow orchestration, and infrastructure—that powers
+            applications and partners across that stack.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             <Card className="border-border/70 bg-card/60">
@@ -352,8 +352,8 @@ export default function AIHairTransplantAnalysisPage() {
                   >
                     IIOHR
                   </Link>{" "}
-                  provides training and certification frameworks. The methodology underlying
-                  AI-based analysis is aligned with IIOHR advisory and standards, so that audit
+                  provides training and certification frameworks. The scoring and review standards underlying
+                  AI-based analysis are aligned with IIOHR advisory and standards, so that audit
                   outputs support institutional and training use cases.
                 </CardDescription>
                 <Button asChild variant="outline" size="sm" className="mt-4">
@@ -379,7 +379,7 @@ export default function AIHairTransplantAnalysisPage() {
             </h2>
             <p className="mt-4 max-w-3xl text-muted-foreground">
               If you are a clinic, group, or institution interested in structured hair transplant
-              analysis and audit intelligence, we can walk you through the platform, methodology, and
+              analysis and audit intelligence, we can walk you through the platform, governance model, and
               how it connects to HairAudit, Hair Longevity Institute, and IIOHR.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">

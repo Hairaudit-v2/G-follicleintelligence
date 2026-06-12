@@ -110,7 +110,7 @@ const REPLICATION_MOAT = [
   },
   {
     title: "Multi-surface coupling",
-    body: "Surgery (HairAudit), longitudinal biology (HLI), and methodology (IIOHR) are separate operating realities; FI is where they meet. Replicating one surface is not replicating the flywheel.",
+    body: "Surgery (HairAudit), longitudinal biology (HLI), and standards programs (IIOHR) are separate operating realities; FI is where they meet. Replicating one surface is not replicating the full operating loop.",
   },
   {
     title: "Governance as product",
@@ -135,7 +135,7 @@ const CROSS_SURFACE = [
   },
   {
     surface: "IIOHR",
-    role: "Methodology, training, standards",
+    role: "Training, standards, governance",
     toFi: "Anchors what “good” means in a professional frame: credentialing, remediation, and institutional legitimacy.",
   },
 ];
@@ -151,7 +151,7 @@ const DEPLOYMENT_MODES = [
   },
   {
     title: "Institutional and standards-led",
-    body: "Programs that require methodology versioning, committee review, and exportable packets for oversight. IIOHR alignment is not a marketing badge here—it is how review pathways stay credible when professions and regulators ask questions.",
+    body: "Programs that require versioned scoring rules, committee review, and exportable packets for oversight. IIOHR alignment is not a marketing badge here—it is how review pathways stay credible when professions and regulators ask questions.",
   },
 ];
 
@@ -179,7 +179,7 @@ export default function PlatformPage() {
                 <p className="text-sm font-semibold text-foreground">What tools alone cannot do</p>
                 <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                   <li>Hold a single definition of “standing” across surgeons and sites.</li>
-                  <li>Version cohort rules when methodology changes—without erasing history.</li>
+                  <li>Version cohort rules when scoring or eligibility rules change—without erasing history.</li>
                   <li>Separate internal adjudication from cleared external disclosure by design.</li>
                 </ul>
               </div>
@@ -240,7 +240,7 @@ export default function PlatformPage() {
           ))}
         </div>
         <DiagramPlaceholder
-          label="Suggested: flywheel diagram—evidence in → cohorts deepen → benchmarks sharpen → more operators adopt → governance history grows—with FI at center and HairAudit / HLI / IIOHR as inputs."
+          label="Suggested: operating loop diagram—evidence in → cohorts deepen → benchmarks sharpen → more operators adopt → governance history grows—with FI at center and HairAudit / HLI / IIOHR as inputs."
         />
       </Section>
 
@@ -283,9 +283,9 @@ export default function PlatformPage() {
       <Section className="border-t border-border/50">
         <FadeIn>
           <SectionIntro
-            eyebrow="Ecosystem"
-            title="Cross-surface learning is the moat multiplier."
-            description="Each surface—HairAudit, HLI, IIOHR—could exist as a standalone product. The defensibility argument is that FI learns across them: surgical evidence, longitudinal biology, and professional methodology feed one benchmark and governance substrate. A competitor with only one stream cannot reproduce the same network effects."
+            eyebrow="Connected intelligence"
+            title="Cross-surface signal is the moat multiplier."
+            description="Each surface—HairAudit, HLI, IIOHR—could exist as a standalone product. The defensibility argument is that FI compounds across them: surgical evidence, longitudinal biology, and professional standards feed one benchmark and governance substrate. A competitor with only one stream cannot reproduce the same integration depth."
           />
         </FadeIn>
         <div className="mt-10 space-y-6">
@@ -406,7 +406,7 @@ export default function PlatformPage() {
               >
                 IIOHR
               </Link>{" "}
-              for methodology, training, and standards.
+              for training programs and professional standards.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild className="rounded-xl">

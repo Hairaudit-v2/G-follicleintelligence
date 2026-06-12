@@ -277,7 +277,7 @@ function PatientJourneyFlow() {
         </p>
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
           Each patient touchpoint emits structured signal into Follicle Intelligence—the receiving layer where those
-          streams fuse—so cohorts sharpen, governance holds, and improvement compounds across the ecosystem.
+          streams fuse—so cohorts sharpen, governance holds, and improvement compounds across every enterprise deployment.
         </p>
       </div>
 

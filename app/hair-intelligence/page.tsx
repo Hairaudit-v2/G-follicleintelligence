@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "HairAudit & Hair Restoration: Why Hair Is the Category Wedge | Follicle Intelligence",
+  title: "HairAudit & Hair Restoration: Why Hair Is the Lead Category | Follicle Intelligence",
   description:
     "Hair restoration is the ideal launch category for benchmarked audit intelligence: high stakes, uneven quality, and narrative-heavy markets. HairAudit is the first live FI application—proof in production, deepened by HLI and IIOHR.",
 };
@@ -72,7 +72,7 @@ const WHY_HAIR_FIRST = [
   {
     icon: Scale,
     title: "Fragmented standards visibility",
-    text: "Professional standards exist, but public visibility of who meets them is weak. Connecting surgical evidence (HairAudit), methodology (IIOHR), and longitudinal biology (HLI) in one architecture makes standards-led improvement operational—not a poster on a wall.",
+    text: "Professional standards exist, but public visibility of who meets them is weak. Connecting surgical evidence (HairAudit), IIOHR-led standards programs, and longitudinal biology (HLI) in one modular architecture makes standards-led improvement operational—not a poster on a wall.",
   },
 ];
 
@@ -121,7 +121,7 @@ const ECOSYSTEM_DEEPEN = [
   },
   {
     title: "IIOHR",
-    body: "Methodology, training, and governance alignment turn scores into professional credibility. IIOHR is the institutional frame that makes remediation and credentialing legitimate—so HairAudit’s audit signal can route into training and standards programs that institutions will run, not just read.",
+    body: "Structured training, credentialing, and governance alignment turn scores into professional credibility. IIOHR is the institutional frame that makes remediation and credentialing legitimate—so HairAudit’s audit signal can route into training and standards programs that institutions will run, not just read.",
   },
 ];
 
@@ -131,7 +131,7 @@ export default function HairIntelligencePage() {
       <PageHero
         eyebrow="HairAudit · Follicle Intelligence"
         title="Hair restoration is the right category to prove benchmarked audit intelligence."
-        subtitle="Follicle Intelligence is the central intelligence layer. HairAudit is the first live application—where transplant evidence becomes scored, benchmarked, and reviewable. It is not an arbitrary first market: hair restoration combines high stakes, uneven technical quality, and narrative-heavy competition, which makes the need for transparency, accountability, and standards unusually acute. That is why hair is the wedge."
+        subtitle="Follicle Intelligence is the central intelligence layer. HairAudit is the first live application—where transplant evidence becomes scored, benchmarked, and reviewable. It is not an arbitrary first market: hair restoration combines high stakes, uneven technical quality, and narrative-heavy competition, which makes the need for transparency, accountability, and standards unusually acute. That is why hair leads the roadmap."
       />
 
       <Section>
@@ -174,7 +174,7 @@ export default function HairIntelligencePage() {
           <SectionIntro
             eyebrow="HairAudit"
             title="What the application delivers."
-            description="HairAudit is the surgical audit surface: domain-level evidence, scoring, and benchmarking—powered by Follicle Intelligence. It is the front door for transplant quality; FI is what learns across the network."
+            description="HairAudit is the surgical audit surface: domain-level evidence, scoring, and benchmarking—powered by Follicle Intelligence. It is the front door for transplant quality; FI is what compounds signal across connected deployments."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -218,9 +218,9 @@ export default function HairIntelligencePage() {
       <Section className="border-t border-border/50 pt-12 md:pt-14">
         <FadeIn>
           <SectionIntro
-            eyebrow="Ecosystem depth"
+            eyebrow="Platform depth"
             title="How HLI and IIOHR deepen the hair advantage."
-            description="HairAudit alone addresses surgical evidence. The full hair ecosystem adds biology over time and professional methodology—both feed Follicle Intelligence and make the category harder to copy from a single-surface competitor."
+            description="HairAudit alone addresses surgical evidence. The full hair platform adds biology over time and professional standards programs—both feed Follicle Intelligence and make the category harder to copy from a single-surface competitor."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -254,7 +254,7 @@ export default function HairIntelligencePage() {
             >
               IIOHR
             </Link>{" "}
-            are the surfaces that connect biology and standards into the same learning system—without replacing
+            are the surfaces that connect biology and standards into the same operating system—without replacing
             your operational tools of record.
           </p>
         </FadeIn>
@@ -266,7 +266,7 @@ export default function HairIntelligencePage() {
             <SectionIntro
               eyebrow="Beyond hair"
               title="Disciplined expansion—when the evidence pattern matches."
-              description="The FI architecture is built for procedural categories where structured evidence, cohort benchmarks, and governance matter. Hair is the live wedge because the need is acute and the proof surface is in production. Expansion is not a land grab: new verticals are added when methodology and evidence models justify the same discipline—not when a slide deck needs a new TAM."
+              description="The FI modular architecture is built for procedural categories where structured evidence, cohort benchmarks, and governance matter. Hair is the live category focus because the need is acute and the proof surface is in production. Expansion stays disciplined: new verticals are added when scoring models and evidence patterns justify the same rigor—not when a slide deck needs a new TAM."
             />
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild variant="outline" className="rounded-xl">
