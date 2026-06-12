@@ -7,6 +7,8 @@
  * `warnings` as signals for partial coverage, not as errors.
  */
 
+import type { HliPhotoProtocolClinicalContext, HliPhotoProtocolComplianceSummary } from "@/src/lib/hair-intelligence/photoProtocols/types";
+
 export const PATIENT_TWIN_VERSION = "patient-twin.v1" as const;
 
 export const PATIENT_TWIN_LOADER_VERSION = "patient-twin-loader.v1" as const;
@@ -126,11 +128,66 @@ export type PatientTwinMediaSection = {
   >;
 };
 
+export type PatientTwinImagingGalleryItem = {
+  id: string;
+  thumbnail_url: string;
+  signed_expires_at: string;
+  taken_at: string | null;
+  created_at: string;
+  ai_image_category: string | null;
+  ai_image_category_confidence: number | null;
+  ai_hair_state: string | null;
+  ai_shave_state: string | null;
+  ai_surgery_stage: string | null;
+  ai_image_review_status: string;
+  ai_image_ai_notes: string | null;
+  ai_image_classified_at: string | null;
+};
+
+export type PatientTwinImagingGalleryUiSection = {
+  key: string;
+  title: string;
+  items: PatientTwinImagingGalleryItem[];
+};
+
+export type PatientTwinImagingGallerySection = {
+  items: PatientTwinImagingGalleryItem[];
+  ui_sections: PatientTwinImagingGalleryUiSection[];
+};
+
 export type PatientTwinImagingSection = {
   active_image_total: number;
   by_library_axis: Record<string, number>;
   latest_captured_at: string | null;
   imaging_workspace_href: string;
+  gallery: PatientTwinImagingGallerySection;
+};
+
+export type PatientTwinPhotoProtocolChecklistRow = {
+  session_slot_id: string;
+  slot_id: string;
+  slot_slug: string;
+  label: string;
+  is_required: boolean;
+  capture_guidance: string | null;
+  quality_guidance: string | null;
+  status: string;
+  patient_image_id: string | null;
+  ai_match_confidence: number | null;
+  staff_note: string | null;
+};
+
+export type PatientTwinPhotoProtocolSection = {
+  clinical_context: HliPhotoProtocolClinicalContext;
+  template_slug: string;
+  template_name: string;
+  active_session_id: string | null;
+  active_session_status: string | null;
+  /** True when all required session slots are accepted or strongly captured (FI OS session only). */
+  can_complete_session: boolean;
+  compliance: HliPhotoProtocolComplianceSummary;
+  checklist: PatientTwinPhotoProtocolChecklistRow[];
+  unclassified_image_ids: string[];
 };
 
 /** Foundation timeline only (`fi_timeline_events`); CRM activity lives under `crm`. */
@@ -302,6 +359,8 @@ export type PatientTwinV1 = {
   audits: PatientTwinAuditRollupSection;
   media: PatientTwinMediaSection;
   imaging: PatientTwinImagingSection;
+  /** Stage 8B — Smart Clinical Photography Protocol (HLI) read model for Twin. */
+  photo_protocol: PatientTwinPhotoProtocolSection | null;
   pathology: PatientTwinPathologySection;
   timeline: PatientTwinTimelineSection;
   clinical: PatientTwinClinicalSection;

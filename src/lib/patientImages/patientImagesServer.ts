@@ -11,6 +11,13 @@ import {
 } from "./patientImageChangedFields";
 import type { PatientImagePatchBody } from "./patientImageApiSchemas";
 import {
+  normalizeFiAiHairState,
+  normalizeFiAiImageCategory,
+  normalizeFiAiImageReviewStatus,
+  normalizeFiAiShaveState,
+  normalizeFiAiSurgeryStage,
+} from "@/src/lib/hair-intelligence/imageClassification/enumValidation";
+import {
   assertAllowedPatientImageContentType,
   assertArchiveReasonLength,
   assertCaptionLength,
@@ -34,7 +41,7 @@ const SIGNED_URL_TTL_SEC = 3600;
 const ACTIVE_SIGNED_LIMIT = 50;
 const ARCHIVED_LIST_LIMIT = 200;
 
-function mapRow(data: Record<string, unknown>): PatientImageRow {
+export function mapRow(data: Record<string, unknown>): PatientImageRow {
   const meta = data.metadata;
   return {
     id: String(data.id),
@@ -77,6 +84,32 @@ function mapRow(data: Record<string, unknown>): PatientImageRow {
     archive_reason: data.archive_reason != null ? String(data.archive_reason) : null,
     created_at: String(data.created_at),
     updated_at: String(data.updated_at),
+    ai_image_category:
+      data.ai_image_category != null && String(data.ai_image_category).trim()
+        ? normalizeFiAiImageCategory(data.ai_image_category)
+        : null,
+    ai_image_category_confidence:
+      data.ai_image_category_confidence != null && data.ai_image_category_confidence !== ""
+        ? Number(data.ai_image_category_confidence)
+        : null,
+    ai_hair_state:
+      data.ai_hair_state != null && String(data.ai_hair_state).trim() ? normalizeFiAiHairState(data.ai_hair_state) : null,
+    ai_shave_state:
+      data.ai_shave_state != null && String(data.ai_shave_state).trim()
+        ? normalizeFiAiShaveState(data.ai_shave_state)
+        : null,
+    ai_surgery_stage:
+      data.ai_surgery_stage != null && String(data.ai_surgery_stage).trim()
+        ? normalizeFiAiSurgeryStage(data.ai_surgery_stage)
+        : null,
+    ai_image_ai_notes: data.ai_image_ai_notes != null ? String(data.ai_image_ai_notes) : null,
+    ai_image_review_status: normalizeFiAiImageReviewStatus(data.ai_image_review_status ?? "pending"),
+    ai_image_reviewed_by_staff_id:
+      data.ai_image_reviewed_by_staff_id != null ? String(data.ai_image_reviewed_by_staff_id) : null,
+    ai_image_reviewed_at: data.ai_image_reviewed_at != null ? String(data.ai_image_reviewed_at) : null,
+    ai_image_classified_at: data.ai_image_classified_at != null ? String(data.ai_image_classified_at) : null,
+    ai_image_classifier_version:
+      data.ai_image_classifier_version != null ? String(data.ai_image_classifier_version) : null,
   };
 }
 

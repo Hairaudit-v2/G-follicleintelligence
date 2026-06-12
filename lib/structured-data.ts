@@ -7,6 +7,13 @@ import { PUBLIC_IMAGE_PATHS } from "@/src/lib/brand/publicImages";
 
 const SCHEMA_CONTEXT = "https://schema.org";
 
+/** Canonical SEO title and meta description (root layout, homepage, JSON-LD WebSite). */
+export const SITE_SEO_TITLE =
+  "Follicle Intelligence | The World's First Hair Restoration Operating System";
+
+export const SITE_SEO_DESCRIPTION =
+  "Follicle Intelligence is the world's first operating system built specifically for hair restoration clinics, connecting CRM, consultations, imaging, surgery workflows, patient intelligence, training, and outcome analytics.";
+
 export interface OrganizationOptions {
   name?: string;
   logoPath?: string;
@@ -54,8 +61,7 @@ export function buildWebSiteSchema(
 ): object {
   const {
     name = "Follicle Intelligence",
-    description =
-      "Central intelligence layer connecting HairAudit surgical evidence, Hair Longevity Institute biology, and IIOHR methodology—benchmarked quality, accountability, and standards for global hair restoration.",
+    description = SITE_SEO_DESCRIPTION,
   } = options;
   const base = siteUrl.replace(/\/$/, "");
   return {

@@ -16,12 +16,15 @@ import {
 } from "@/src/lib/fi/foundation/patientRecord";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { calculatePatientTwinCompleteness, type PatientTwinV1ForCompleteness } from "./patientTwinCompleteness";
+import { buildPatientJourneyGallery, buildTwinImagingUiSections } from "./patientJourneyGallery";
 import { patientTwinV1Schema } from "./patientTwinSchema";
 import {
   loadActiveTherapyPlanSummary,
   loadPatientTherapyEventsForPatient,
 } from "@/src/lib/medicationOs/medicationOsLoaders.server";
 import { normalizeImagingLibraryAxis } from "@/src/lib/patientImages/patientImagePolicy";
+import { loadPatientTwinPhotoProtocolSection } from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolLoader.server";
+import { loadPatientTwinImagingGallerySection } from "@/src/lib/patientTwin/patientTwinImagingGallery.server";
 import {
   buildPatientTwinMedicationsSection,
   emptyPatientTwinMedicationsSection,
@@ -75,6 +78,11 @@ const SOURCE_TABLES_USED = [
   "fi_pathology_result_items",
   "fi_pathology_ai_interpretations",
   "fi_patient_images",
+  "hli_image_classifications",
+  "hli_photo_protocol_templates",
+  "hli_photo_protocol_slots",
+  "hli_photo_protocol_sessions",
+  "hli_photo_protocol_session_slots",
   "fi_medication_os_canonical",
   "fi_patient_therapy_plans",
   "fi_patient_therapy_plan_items",
@@ -82,6 +90,14 @@ const SOURCE_TABLES_USED = [
 ] as const;
 
 const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
+
+function emptyTwinImagingGalleryShell(): PatientTwinImagingSection["gallery"] {
+  const j = buildPatientJourneyGallery([]);
+  return {
+    items: [],
+    ui_sections: buildTwinImagingUiSections(j).map((s) => ({ key: s.key, title: s.title, items: [] })),
+  };
+}
 
 function uniqueStrings(ids: (string | null | undefined)[]): string[] {
   const s = new Set<string>();
@@ -604,6 +620,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     by_library_axis: {},
     latest_captured_at: null,
     imaging_workspace_href: imagingWorkspaceHref,
+    gallery: emptyTwinImagingGalleryShell(),
   };
 
   const { data: imgTwinRows, error: imgTwinErr } = await supabase
@@ -634,7 +651,30 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       by_library_axis,
       latest_captured_at,
       imaging_workspace_href: imagingWorkspaceHref,
+      gallery: emptyTwinImagingGalleryShell(),
     };
+  }
+
+  try {
+    const gallery = await loadPatientTwinImagingGallerySection(tid, primaryFoundation, supabase);
+    imaging = { ...imaging, gallery };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    pushWarning(warnings, "generic", `Imaging AI gallery skipped: ${msg}`);
+  }
+
+  let photo_protocol: PatientTwinV1["photo_protocol"] = null;
+  try {
+    photo_protocol = await loadPatientTwinPhotoProtocolSection({
+      tenantId: tid,
+      patientId: primaryFoundation,
+      galleryItems: imaging.gallery.items,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
+      pushWarning(warnings, "generic", `Photo protocol section skipped: ${msg}`);
+    }
   }
 
   const timelineItems = buildFoundationTimeline(base);
@@ -863,6 +903,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     audits,
     media,
     imaging,
+    photo_protocol,
     pathology,
     timeline: {
       order: "newest_first",

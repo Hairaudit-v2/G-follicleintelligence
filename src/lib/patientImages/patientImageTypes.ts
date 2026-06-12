@@ -51,6 +51,18 @@ export type PatientImageRow = {
   archive_reason: string | null;
   created_at: string;
   updated_at: string;
+  /** Stage 8A — Hair Image Intelligence (nullable until classified). */
+  ai_image_category: string | null;
+  ai_image_category_confidence: number | null;
+  ai_hair_state: string | null;
+  ai_shave_state: string | null;
+  ai_surgery_stage: string | null;
+  ai_image_ai_notes: string | null;
+  ai_image_review_status: string;
+  ai_image_reviewed_by_staff_id: string | null;
+  ai_image_reviewed_at: string | null;
+  ai_image_classified_at: string | null;
+  ai_image_classifier_version: string | null;
 };
 
 /** Returned from loaders for active tiles that include a time-limited URL. */

@@ -1,9 +1,18 @@
 import Link from "next/link";
 
 import { FiSection } from "@/src/components/fi-design/FiSection";
+import { PatientTwinImagingGalleryClient } from "@/src/components/fi-admin/patientTwin/PatientTwinImagingGalleryClient";
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
-export function PatientTwinImagingCard({ twin }: { twin: PatientTwinV1 }) {
+export function PatientTwinImagingCard({
+  tenantId,
+  patientId,
+  twin,
+}: {
+  tenantId: string;
+  patientId: string;
+  twin: PatientTwinV1;
+}) {
   const { imaging } = twin;
   const axes = Object.entries(imaging.by_library_axis).sort((a, b) => b[1] - a[1]);
 
@@ -11,8 +20,8 @@ export function PatientTwinImagingCard({ twin }: { twin: PatientTwinV1 }) {
     <FiSection
       surfaceVariant="darkGlass"
       headingId="patient-twin-imaging-heading"
-      title="ImagingOS"
-      description="Active clinical images by library axis — opens the full Imaging workspace for capture, protocols, scalp maps, and compare."
+      title="ImagingOS & AI gallery"
+      description="Active clinical images by library axis; Hair Image Intelligence groups photos for Twin review. Opens ImagingOS for full capture workflows."
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -48,6 +57,22 @@ export function PatientTwinImagingCard({ twin }: { twin: PatientTwinV1 }) {
           ))}
         </ul>
       )}
+
+      {imaging.gallery.items.length > 0 ? (
+        <div className="mt-6 border-t border-white/10 pt-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">Most recent</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {imaging.gallery.items.slice(0, 8).map((img) => (
+              <li key={img.id} className="h-16 w-16 overflow-hidden rounded-md ring-1 ring-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <PatientTwinImagingGalleryClient tenantId={tenantId} patientId={patientId} uiSections={imaging.gallery.ui_sections} />
     </FiSection>
   );
 }

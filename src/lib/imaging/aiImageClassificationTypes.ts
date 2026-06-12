@@ -1,0 +1,18 @@
+export {
+  FI_AI_HAIR_STATES,
+  FI_AI_IMAGE_CATEGORIES,
+  FI_AI_IMAGE_REVIEW_STATUSES,
+  FI_AI_SHAVE_STATES,
+  FI_AI_SURGERY_STAGES,
+  HLI_CLINICAL_USE_CONTEXTS,
+  HLI_SOURCE_SYSTEMS,
+  type FiAiHairState,
+  type FiAiImageCategory,
+  type FiAiImageClassificationResult,
+  type FiAiImageReviewStatus,
+  type FiAiShaveState,
+  type FiAiSurgeryStage,
+  type HliClinicalUseContext,
+  type HliImageClassificationInsert,
+  type HliSourceSystem,
+} from "@/src/lib/hair-intelligence/imageClassification/types";

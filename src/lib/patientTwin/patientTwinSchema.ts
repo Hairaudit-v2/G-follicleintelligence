@@ -1,5 +1,16 @@
 import { z } from "zod";
+import {
+  HLI_PHOTO_PROTOCOL_CLINICAL_CONTEXTS,
+  type HliPhotoProtocolClinicalContext,
+  type HliPhotoProtocolSlot,
+} from "@/src/lib/hair-intelligence/photoProtocols/types";
 import { PATIENT_TWIN_VERSION } from "./patientTwinTypes";
+
+const hliPhotoProtocolClinicalContextSchema: z.ZodType<HliPhotoProtocolClinicalContext> = z.custom<HliPhotoProtocolClinicalContext>(
+  (val): val is HliPhotoProtocolClinicalContext =>
+    typeof val === "string" &&
+    (HLI_PHOTO_PROTOCOL_CLINICAL_CONTEXTS as readonly string[]).includes(val as HliPhotoProtocolClinicalContext)
+);
 
 const warningCodeSchema = z.enum([
   "missing_foundation_patient",
@@ -115,11 +126,86 @@ export const patientTwinMediaSectionSchema = z.object({
   ),
 });
 
+export const patientTwinImagingGalleryItemSchema = z.object({
+  id: z.string().uuid(),
+  thumbnail_url: z.string().min(1),
+  signed_expires_at: z.string(),
+  taken_at: z.string().nullable(),
+  created_at: z.string(),
+  ai_image_category: z.string().nullable(),
+  ai_image_category_confidence: z.number().nullable(),
+  ai_hair_state: z.string().nullable(),
+  ai_shave_state: z.string().nullable(),
+  ai_surgery_stage: z.string().nullable(),
+  ai_image_review_status: z.string(),
+  ai_image_ai_notes: z.string().nullable(),
+  ai_image_classified_at: z.string().nullable(),
+});
+
+export const patientTwinImagingGalleryUiSectionSchema = z.object({
+  key: z.string(),
+  title: z.string(),
+  items: z.array(patientTwinImagingGalleryItemSchema),
+});
+
+export const patientTwinImagingGallerySectionSchema = z.object({
+  items: z.array(patientTwinImagingGalleryItemSchema),
+  ui_sections: z.array(patientTwinImagingGalleryUiSectionSchema),
+});
+
 export const patientTwinImagingSectionSchema = z.object({
   active_image_total: z.number().int().nonnegative(),
   by_library_axis: z.record(z.string(), z.number().int().nonnegative()),
   latest_captured_at: z.string().nullable(),
   imaging_workspace_href: z.string(),
+  gallery: patientTwinImagingGallerySectionSchema,
+});
+
+const patientTwinPhotoProtocolSuggestedMatchSchema = z.object({
+  image_id: z.string().uuid(),
+  score: z.number(),
+  reasons: z.array(z.string()),
+});
+
+const patientTwinPhotoProtocolMissingSlotsSchema: z.ZodType<HliPhotoProtocolSlot[]> = z.custom<HliPhotoProtocolSlot[]>(
+  (val): val is HliPhotoProtocolSlot[] => Array.isArray(val)
+);
+
+export const patientTwinPhotoProtocolComplianceSchema = z.object({
+  required_count: z.number().int().nonnegative(),
+  captured_count: z.number().int().nonnegative(),
+  missing_count: z.number().int().nonnegative(),
+  needs_review_count: z.number().int().nonnegative(),
+  complete: z.boolean(),
+  missing_slots: patientTwinPhotoProtocolMissingSlotsSchema,
+  suggested_matches: z.record(z.string(), z.array(patientTwinPhotoProtocolSuggestedMatchSchema)),
+  warnings: z.array(z.string()),
+});
+
+export const patientTwinPhotoProtocolChecklistRowSchema = z.object({
+  session_slot_id: z.string(),
+  slot_id: z.string().uuid(),
+  slot_slug: z.string(),
+  label: z.string(),
+  is_required: z.boolean(),
+  capture_guidance: z.string().nullable(),
+  quality_guidance: z.string().nullable(),
+  status: z.string(),
+  patient_image_id: z.string().uuid().nullable(),
+  ai_match_confidence: z.number().nullable(),
+  staff_note: z.string().nullable(),
+});
+
+export const patientTwinPhotoProtocolSectionSchema = z.object({
+  clinical_context: hliPhotoProtocolClinicalContextSchema,
+  template_slug: z.string(),
+  template_name: z.string(),
+  active_session_id: z.string().uuid().nullable(),
+  active_session_status: z.string().nullable(),
+  can_complete_session: z.boolean(),
+  compliance: patientTwinPhotoProtocolComplianceSchema,
+  checklist: z.array(patientTwinPhotoProtocolChecklistRowSchema),
+  unclassified_image_ids: z.array(z.string().uuid()),
 });
 
 export const patientTwinPathologyRequestRowSchema = z.object({
@@ -294,6 +380,7 @@ export const patientTwinV1Schema = z.object({
   audits: patientTwinAuditRollupSectionSchema,
   media: patientTwinMediaSectionSchema,
   imaging: patientTwinImagingSectionSchema,
+  photo_protocol: patientTwinPhotoProtocolSectionSchema.nullable(),
   pathology: patientTwinPathologySectionSchema,
   timeline: patientTwinTimelineSectionSchema,
   clinical: patientTwinClinicalSectionSchema,

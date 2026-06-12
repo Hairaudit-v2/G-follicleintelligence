@@ -14,6 +14,7 @@ import { PatientTwinCrmCard } from "./PatientTwinCrmCard";
 import { PatientTwinHeader } from "./PatientTwinHeader";
 import { PatientTwinIdentityCard } from "./PatientTwinIdentityCard";
 import { PatientTwinImagingCard } from "./PatientTwinImagingCard";
+import { PatientTwinPhotoProtocolCard } from "./PatientTwinPhotoProtocolCard";
 import { PatientTwinMediaCard } from "./PatientTwinMediaCard";
 import { PatientTwinTimelineCard } from "./PatientTwinTimelineCard";
 import { PatientTwinWarningsCard } from "./PatientTwinWarningsCard";
@@ -28,7 +29,7 @@ export type PatientTwinDashboardProps = {
 };
 
 /**
- * Executive read-only layout for PatientTwin V1 — no client fetches, no writes.
+ * Patient Twin dashboard: imaging + Smart Photography Protocol support client actions on the protocol card; other sections remain read-oriented unless otherwise noted.
  */
 export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel, outcomeMeasurements, outcomeProtocols }: PatientTwinDashboardProps) {
   return (
@@ -61,7 +62,9 @@ export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel,
 
       <PatientTwinPathologyCard tenantId={tenantId} patientId={patientId} twin={twin} />
 
-      <PatientTwinImagingCard twin={twin} />
+      <PatientTwinImagingCard tenantId={tenantId} patientId={patientId} twin={twin} />
+
+      <PatientTwinPhotoProtocolCard tenantId={tenantId} patientId={patientId} twin={twin} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
         <PatientTwinAuditCard tenantId={tenantId} twin={twin} />
