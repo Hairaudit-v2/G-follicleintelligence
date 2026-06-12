@@ -4,6 +4,7 @@ import { BarChart3, Percent, Scissors, Stethoscope, UserPlus } from "lucide-reac
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import type { TenantLaunchControl, TenantQuickStats } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import { FI_DASHBOARD_WIDGET_LABELS } from "@/src/config/fiDashboardRegistry";
 
 function formatConversion(rate: number | null, won: number, closed: number): string {
   if (rate == null || closed === 0) return "—";
@@ -58,33 +59,27 @@ export function DashboardClinicMetrics(props: {
     quickStats.conversionClosedLast30d > 0
       ? `${quickStats.conversionWonLast30d} won / ${quickStats.conversionClosedLast30d} closed · 30d`
       : "30-day pipeline outcomes";
+  const meta = FI_DASHBOARD_WIDGET_LABELS.clinic_metrics;
 
   return (
     <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-metrics-heading">
       <SectionHeader
         id="dash-metrics-heading"
         kicker="Performance"
-        title="Clinic metrics"
-        description="Lightweight KPIs for the week and month — open analytics for deeper reporting."
+        title={meta.title}
+        description={meta.description}
       />
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
         <MetricPill
           href={`${base}/crm`}
-          label="New leads"
+          label="New leads this week"
           value={quickStats.newLeadsThisWeek}
           foot="This week"
           icon={<UserPlus className="h-3.5 w-3.5" />}
         />
         <MetricPill
-          href={`${base}/consultations`}
-          label="Consultations"
-          value={quickStats.openConsultations}
-          foot="Open workspaces"
-          icon={<Stethoscope className="h-3.5 w-3.5" />}
-        />
-        <MetricPill
           href={`${base}/crm`}
-          label="Conversion"
+          label="Conversion rate"
           value={conversion}
           foot={conversionFoot}
           icon={<Percent className="h-3.5 w-3.5" />}
@@ -98,10 +93,17 @@ export function DashboardClinicMetrics(props: {
         />
         <MetricPill
           href={`${base}/analytics`}
-          label="Revenue"
+          label="Revenue this week"
           value={launchControl.revenueAvailable ? "Live" : "—"}
           foot={launchControl.revenueAvailable ? "Connected" : "Billing not connected"}
           icon={<BarChart3 className="h-3.5 w-3.5" />}
+        />
+        <MetricPill
+          href={`${base}/consultations`}
+          label="Open consultations"
+          value={quickStats.openConsultations}
+          foot="Open workspaces"
+          icon={<Stethoscope className="h-3.5 w-3.5" />}
         />
       </div>
     </DashboardCard>

@@ -1,10 +1,14 @@
 export { DashboardTodayAgenda } from "./DashboardTodayAgenda";
+export { DashboardOperationalWorkspace } from "./DashboardOperationalWorkspace";
+export { DashboardSurgeryPipeline } from "./DashboardSurgeryPipeline";
+export { DashboardMyWorkspace } from "./DashboardMyWorkspace";
 export { DashboardStaleLeads } from "./DashboardStaleLeads";
 export { DashboardTasksDue } from "./DashboardTasksDue";
 export { DashboardQuickStats } from "./DashboardQuickStats";
 export { DashboardQuickActions } from "./DashboardQuickActions";
 export { DashboardEmptyState } from "./DashboardEmptyState";
 export { DashboardPrimaryActions } from "./DashboardPrimaryActions";
+export { DashboardQuickActionsBar } from "./DashboardQuickActionsBar";
 export { DashboardClinicToday } from "./DashboardClinicToday";
 export { DashboardActionCentre } from "./DashboardActionCentre";
 export { DashboardClinicMetrics } from "./DashboardClinicMetrics";

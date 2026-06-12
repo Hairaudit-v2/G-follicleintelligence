@@ -37,7 +37,7 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
 
   let data;
   try {
-    data = await loadTenantOperationalDashboard(tenantId);
+    data = await loadTenantOperationalDashboard(tenantId, { includeReceptionBoard: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
     if (msg === "Tenant not found") notFound();

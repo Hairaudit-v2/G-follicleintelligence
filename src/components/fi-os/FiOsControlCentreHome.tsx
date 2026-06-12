@@ -5,14 +5,18 @@ import { cn } from "@/lib/utils";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { DashboardActionCentre } from "@/src/components/fi-admin/dashboard/DashboardActionCentre";
 import { DashboardClinicMetrics } from "@/src/components/fi-admin/dashboard/DashboardClinicMetrics";
-import { DashboardClinicToday } from "@/src/components/fi-admin/dashboard/DashboardClinicToday";
-import { DashboardPrimaryActions } from "@/src/components/fi-admin/dashboard/DashboardPrimaryActions";
-import { DashboardTodayAgenda } from "@/src/components/fi-admin/dashboard/DashboardTodayAgenda";
+import { DashboardMyWorkspace } from "@/src/components/fi-admin/dashboard/DashboardMyWorkspace";
+import { DashboardOperationalWorkspace } from "@/src/components/fi-admin/dashboard/DashboardOperationalWorkspace";
+import { DashboardQuickActionsBar } from "@/src/components/fi-admin/dashboard/DashboardQuickActionsBar";
+import { DashboardSurgeryPipeline } from "@/src/components/fi-admin/dashboard/DashboardSurgeryPipeline";
 import { TenantHomeQuickCallIn } from "@/src/components/fi-admin/TenantHomeQuickCallIn";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { resolveDashboardQuickActions } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
 
 /**
- * FI OS tenant home — clinic operating centre (agenda-first, premium glass layout).
+ * FI OS tenant home — clinic operating centre.
+ *
+ * Section order is aligned with `FI_DASHBOARD_HOME_WIDGET_ORDER` in `src/config/fiDashboardRegistry.ts` (Stage 2 widget filtering).
  */
 export function FiOsControlCentreHome(props: {
   data: TenantOperationalDashboard;
@@ -21,6 +25,9 @@ export function FiOsControlCentreHome(props: {
 }) {
   const { data, showCrmNav, showBookingsBoard } = props;
   const base = `/fi-admin/${data.tenantId}`;
+  const quickActionItems = resolveDashboardQuickActions(base, { showCrmNav, showBookingsBoard });
+
+  const readyForSurgeryApprox = Math.max(0, data.launchControl.surgeriesThisWeek - data.actionCentre.surgeryReadinessAlerts);
 
   const now = new Date();
   const dateLine = new Intl.DateTimeFormat(undefined, {
@@ -53,25 +60,34 @@ export function FiOsControlCentreHome(props: {
         </div>
       </header>
 
-      <DashboardPrimaryActions base={base} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />
-
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-5">
-        <div className="space-y-4 xl:col-span-5">
-          <DashboardClinicToday base={base} clinicToday={data.clinicToday} />
-          <DashboardActionCentre base={base} actionCentre={data.actionCentre} showCrmNav={showCrmNav} />
-        </div>
-
-        <div className="min-w-0 xl:col-span-7">
-          <DashboardTodayAgenda
-            tenantId={data.tenantId}
-            agendaRange={data.agendaRange}
-            agendaByBucket={data.agendaByBucket}
-            variant="launch"
-          />
-        </div>
-      </div>
+      <DashboardQuickActionsBar items={quickActionItems} />
 
       <DashboardClinicMetrics base={base} quickStats={data.quickStats} launchControl={data.launchControl} />
+
+      <DashboardOperationalWorkspace
+        tenantId={data.tenantId}
+        base={base}
+        operationalDay={data.operationalDay}
+        agendaByBucket={data.agendaByBucket}
+        receptionCards={data.receptionBoard.cards}
+      />
+
+      <DashboardSurgeryPipeline
+        base={base}
+        planningProxyCount={data.actionCentre.consultationsAwaitingCompletion}
+        readyForSurgeryApprox={readyForSurgeryApprox}
+        postOpProxyCount={data.medicationReorderReviewsPending}
+        followUpsDue={data.actionCentre.followUpsDue}
+      />
+
+      <DashboardMyWorkspace
+        base={base}
+        viewerFiUserId={data.viewerFiUserId}
+        tasksDue={data.tasksDue}
+        upcomingReminders={data.upcomingReminders}
+      />
+
+      <DashboardActionCentre base={base} actionCentre={data.actionCentre} showCrmNav={showCrmNav} />
     </div>
   );
 }
