@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { createStaffAction, updateStaffAction } from "@/lib/actions/fi-staff-actions";
+import { StaffFeatureAccessPanel } from "@/src/components/fi/staff/StaffFeatureAccessPanel";
 import { StaffHrNotificationBadge, StaffHrNotificationDetailCard } from "@/src/components/fi/staff/StaffHrNotificationBadge";
 import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrollMetadataPanel";
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
@@ -547,6 +548,13 @@ export function StaffDirectoryClient({
                   onUpdated={() => router.refresh()}
                 />
               </div>
+              {data.canManageStaffFeatureVisibility ? (
+                <StaffFeatureAccessPanel
+                  tenantId={tenantId}
+                  staffId={editingRow.id}
+                  dbOverrides={data.staffFeatureAccessByStaffId[editingRow.id] ?? {}}
+                />
+              ) : null}
             </>
           ) : null}
         </section>

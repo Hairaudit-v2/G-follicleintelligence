@@ -1,3 +1,4 @@
+import { normalizeFiDeploymentBaseUrl } from "@/src/lib/env/fiDeploymentBaseUrl";
 import {
   executeFiStaffSyncPost,
   scrubSecretFromMessage,
@@ -10,7 +11,7 @@ function readFiBaseUrl(): string {
   if (!raw) {
     throw new Error("FI_BASE_URL is not configured; cannot push staff sync to Follicle Intelligence.");
   }
-  return raw.replace(/\/+$/, "");
+  return normalizeFiDeploymentBaseUrl(raw);
 }
 
 function readSyncSecret(): string {

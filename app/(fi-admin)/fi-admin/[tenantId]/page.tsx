@@ -4,7 +4,14 @@ import { notFound } from "next/navigation";
 import { FiTenantOperationalHome } from "@/src/components/fi-admin/FiTenantOperationalHome";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
+import { FI_DASHBOARD_HOME_WIDGET_ORDER } from "@/src/config/fiDashboardRegistry";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
+import {
+  fiDashboardWidgetVisibleByFeatureAccess,
+  filterResolvedQuickActionsByFeatureAccess,
+} from "@/src/lib/fi-os/stage2FeatureVisibility";
+import { resolveDashboardQuickActions } from "@/src/lib/fiAdmin/dashboardQuickActionsConfig";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
@@ -30,10 +37,20 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
     );
   }
 
-  const [showCrmNav, showBookingsBoard] = await Promise.all([
+  const [showCrmNav, showBookingsBoard, featureAccess] = await Promise.all([
     getCrmShellNavAllowed(tenantId),
     getBookingsBoardNavAllowed(tenantId),
+    loadFiOsFeatureAccessMapOrNullForViewer(tenantId),
   ]);
+
+  const base = `/fi-admin/${tenantId.trim()}`;
+  const quickActionItems = filterResolvedQuickActionsByFeatureAccess(
+    resolveDashboardQuickActions(base, { showCrmNav, showBookingsBoard }),
+    featureAccess
+  );
+  const homeWidgetOrder = FI_DASHBOARD_HOME_WIDGET_ORDER.filter((w) =>
+    fiDashboardWidgetVisibleByFeatureAccess(w, featureAccess)
+  );
 
   let data;
   try {
@@ -46,7 +63,14 @@ export default async function FiAdminTenantHomePage({ params }: { params: Promis
 
   return (
     <CalendarToastProvider>
-      <FiTenantOperationalHome data={data} showCrmNav={showCrmNav} showBookingsBoard={showBookingsBoard} />
+      <FiTenantOperationalHome
+        data={data}
+        showCrmNav={showCrmNav}
+        showBookingsBoard={showBookingsBoard}
+        featureAccess={featureAccess}
+        homeWidgetOrder={homeWidgetOrder}
+        quickActionItems={quickActionItems}
+      />
     </CalendarToastProvider>
   );
 }

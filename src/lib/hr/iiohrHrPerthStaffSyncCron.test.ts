@@ -1,19 +1,22 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { NextRequest } from "next/server";
+
 import type { ScheduledIiohrHrStaffSyncCoreResult } from "@/src/lib/hr/runScheduledIiohrHrStaffSyncCore";
 import { handleIiohrHrPerthStaffSyncCronPost } from "@/src/lib/hr/iiohrHrPerthStaffSyncCron";
 
 const CRON = "0123456789abcdef"; // 16 chars
+const HR_CRON = "fedcba9876543210"; // 16 chars
 const TENANT = "00000000-0000-4000-8000-000000000001";
 
 function envMap(m: Record<string, string | undefined>): (k: string) => string | undefined {
   return (k) => m[k];
 }
 
-test("cron rejects missing CRON_SECRET configuration", async () => {
+test("cron rejects missing cron secret configuration", async () => {
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
+    new NextRequest("https://fi.example/api/cron", {
       method: "POST",
       headers: { authorization: "Bearer anything" },
     }),
@@ -26,19 +29,16 @@ test("cron rejects missing CRON_SECRET configuration", async () => {
 });
 
 test("cron rejects missing Authorization", async () => {
-  const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", { method: "POST" }),
-    {
-      getEnv: envMap({ CRON_SECRET: CRON, EVOLVED_PERTH_TENANT_ID: TENANT }),
-      runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
-    }
-  );
+  const res = await handleIiohrHrPerthStaffSyncCronPost(new NextRequest("https://fi.example/api/cron", { method: "POST" }), {
+    getEnv: envMap({ CRON_SECRET: CRON, EVOLVED_PERTH_TENANT_ID: TENANT }),
+    runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
+  });
   assert.equal(res.status, 401);
 });
 
 test("cron rejects invalid Authorization", async () => {
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
+    new NextRequest("https://fi.example/api/cron", {
       method: "POST",
       headers: { authorization: "Bearer wrong-secret-123456" },
     }),
@@ -50,9 +50,23 @@ test("cron rejects invalid Authorization", async () => {
   assert.equal(res.status, 401);
 });
 
+test("cron accepts FI_HR_SYNC_CRON_SECRET when CRON_SECRET unset", async () => {
+  const res = await handleIiohrHrPerthStaffSyncCronPost(
+    new NextRequest("https://fi.example/api/cron", {
+      method: "GET",
+      headers: { authorization: `Bearer ${HR_CRON}` },
+    }),
+    {
+      getEnv: envMap({ FI_HR_SYNC_CRON_SECRET: HR_CRON, EVOLVED_PERTH_TENANT_ID: TENANT }),
+      runScheduled: async () => ({ ok: true, rowsSent: 0, runId: null, created: null, updated: null, linked: null, skipped: null, warnings: [] }),
+    }
+  );
+  assert.equal(res.status, 200);
+});
+
 test("cron rejects missing EVOLVED_PERTH_TENANT_ID", async () => {
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
+    new NextRequest("https://fi.example/api/cron", {
       method: "POST",
       headers: { authorization: `Bearer ${CRON}` },
     }),
@@ -66,7 +80,7 @@ test("cron rejects missing EVOLVED_PERTH_TENANT_ID", async () => {
 
 test("cron rejects invalid EVOLVED_PERTH_TENANT_ID", async () => {
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
+    new NextRequest("https://fi.example/api/cron", {
       method: "POST",
       headers: { authorization: `Bearer ${CRON}` },
     }),
@@ -91,7 +105,7 @@ test("cron returns 400 when scheduled run refuses empty feed", async () => {
     warnings: [],
   };
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
+    new NextRequest("https://fi.example/api/cron", {
       method: "POST",
       headers: { authorization: `Bearer ${CRON}` },
     }),
@@ -107,8 +121,8 @@ test("cron returns 400 when scheduled run refuses empty feed", async () => {
 
 test("cron returns 200 for empty-feed no-op when allowed", async () => {
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
-      method: "POST",
+    new NextRequest("https://fi.example/api/cron", {
+      method: "GET",
       headers: { authorization: `Bearer ${CRON}` },
     }),
     {
@@ -130,7 +144,7 @@ test("cron returns 200 for empty-feed no-op when allowed", async () => {
 
 test("successful cron returns FI runId in JSON", async () => {
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
+    new NextRequest("https://fi.example/api/cron", {
       method: "POST",
       headers: { authorization: `Bearer ${CRON}` },
     }),
@@ -158,7 +172,7 @@ test("successful cron returns FI runId in JSON", async () => {
 test("cron 500 response does not echo shared secrets from thrown errors", async () => {
   const leak = "never-leak-this-cron-secret-xyz";
   const res = await handleIiohrHrPerthStaffSyncCronPost(
-    new Request("https://fi.example/api/cron", {
+    new NextRequest("https://fi.example/api/cron", {
       method: "POST",
       headers: { authorization: `Bearer ${CRON}` },
     }),

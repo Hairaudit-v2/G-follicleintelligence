@@ -1,7 +1,7 @@
 # FI OS — Cron jobs production audit
 
 **Scope:** `app/api/cron/**`, scheduled HR sync implementation, reminder processor (2026-06-12).  
-**Vercel:** Repo has **no `vercel.json`** — schedules must be configured in **Vercel Dashboard → Cron Jobs** or external scheduler (see [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md)).
+**Vercel:** Root **`vercel.json`** declares production cron paths and UTC schedules. Override or supplement in **Vercel Dashboard → Cron Jobs** if needed. See [`fi-os-production-env-and-cron.md`](fi-os-production-env-and-cron.md).
 
 ---
 
@@ -10,7 +10,7 @@
 | Endpoint | Methods | Schedule (expected) | Secret | Feature / module | Idempotency | Safe to run twice? | Failure behaviour | Logging / retries |
 |----------|---------|------------------------|--------|-------------------|-------------|--------------------|-------------------|-------------------|
 | `/api/cron/fi-reminder-jobs` | `POST`, `GET` | Every **1–5 minutes** (ops recommendation in platform doc) | `FI_REMINDER_CRON_SECRET` (Bearer or `x-fi-reminder-secret`) | ReminderOS — `processReminderJobsOnce` | **Yes** — job claim uses `pending` → `processing` conditional update | **Yes** — duplicate cron may claim different jobs; same job not double-sent if claim fails | Returns **503** if secret missing/short (generic body); **401** bad secret; **500** processor error uses generic `Processor unavailable.` (no stack traces) | Processor: **1 retry** on failure (`attempt_count`); ineligible → `cancelled`; see `reminderProcessor.server.ts` |
-| `/api/cron/iiohr-hr-perth-staff-sync` | `POST` only (`GET` → 405) | **Daily** early AM (Brisbane) per runbook | `CRON_SECRET` (Bearer) | HR → FI staff sync (Evolved Perth) | **Partial** — each run creates `fi_staff_sync_runs`; POST to staff-sync is **commit** | **Mostly** — second run starts new sync; may race if overlapping (wall timeout **55s**) | **503** missing/short `CRON_SECRET` or bad `EVOLVED_PERTH_TENANT_ID` (generic where applicable); **401** bad secret; **200/400/504** per `runScheduled` outcome | Timeout → **504**; `maybeStaffSyncAlertAfterCronRun` for alert intent; no email send yet |
+| `/api/cron/iiohr-hr-perth-staff-sync` | `GET`, `POST` | **Hourly** in `vercel.json` (adjust to daily early AM if preferred) | `CRON_SECRET` or `FI_HR_SYNC_CRON_SECRET` (Bearer) | HR → FI staff sync (Evolved Perth) | **Partial** — each run creates `fi_staff_sync_runs`; POST to staff-sync is **commit** | **Mostly** — second run starts new sync; may race if overlapping (wall timeout **55s**) | **503** no valid-length cron secret configured, or bad `EVOLVED_PERTH_TENANT_ID` (generic where applicable); **401** bad secret; **200/400/504** per `runScheduled` outcome | Timeout → **504**; `maybeStaffSyncAlertAfterCronRun` for alert intent; no email send yet |
 | `/api/tenants/[tenantId]/tick-jobs` | `POST` | **Not a Vercel cron route** — on-demand / external if wired | `FI_ADMIN_API_KEY` **or** CRM session (`assertCrmTenantWriteAllowed`) | LeadFlow pipeline / `runPipeline` | **Yes** — locking in job runner (`getQueuedJobs` + pipeline) | **Yes** with same limits | `mapCrmRouteError` → structured JSON | Per-job results in response array |
 
 ---
@@ -34,8 +34,8 @@
 |------|--------|
 | File | `app/api/cron/iiohr-hr-perth-staff-sync/route.ts` |
 | Handler core | `src/lib/hr/iiohrHrPerthStaffSyncCron.ts` |
-| Required env | `CRON_SECRET`, `EVOLVED_PERTH_TENANT_ID` (UUID), plus outbound chain per [`docs/iiohr-hr-perth-staff-sync-cron.md`](../iiohr-hr-perth-staff-sync-cron.md): `FI_BASE_URL`, `IIOHR_HR_SYNC_SECRET`, `IIOHR_HR_PERTH_STAFF_FEED_URL`, optional `IIOHR_HR_PERTH_STAFF_FEED_KEY`, `ALLOW_EMPTY_HR_SYNC` |
-| Vercel cron | **Compatible** — `POST` only: Vercel Cron must use **POST** (supported on Vercel; confirm project setting) **or** use external scheduler |
+| Required env | At least one of **`CRON_SECRET`** or **`FI_HR_SYNC_CRON_SECRET`** (≥16 chars), **`EVOLVED_PERTH_TENANT_ID`** (UUID), plus outbound chain per [`docs/iiohr-hr-perth-staff-sync-cron.md`](../iiohr-hr-perth-staff-sync-cron.md): `FI_BASE_URL` (site root), `IIOHR_HR_SYNC_SECRET`, `IIOHR_HR_PERTH_STAFF_FEED_URL`, optional `IIOHR_HR_PERTH_STAFF_FEED_KEY`, `ALLOW_EMPTY_HR_SYNC` |
+| Vercel cron | **Compatible** — Vercel invokes **GET**; route accepts **GET** and **POST** with the same Bearer auth |
 | Overlap | `Promise.race` with 55s timeout — overlapping invocations possible under misconfiguration |
 
 ---
@@ -53,8 +53,8 @@
 
 | Endpoint | Method | Schedule (typical) | Secret env | Auth header(s) | **200** | **401** | **503** | Notes |
 |----------|--------|-------------------|------------|----------------|---------|---------|---------|--------|
-| `/api/cron/fi-reminder-jobs` | **GET** or **POST** | Every **1–5 minutes** | `FI_REMINDER_CRON_SECRET` (≥16 chars, trimmed) | `Authorization: Bearer <secret>` **or** `x-fi-reminder-secret: <secret>` | Jobs drained (JSON includes processor fields) | Bearer / header missing or wrong (timing-safe compare) | Secret missing or shorter than 16 chars | **Only one** active reminder worker (Next cron **or** Supabase Edge delegator — not both sending duplicate traffic). |
-| `/api/cron/iiohr-hr-perth-staff-sync` | **POST only** (`GET` → **405**) | **Daily** (early AM, tenant TZ / ops choice) | `CRON_SECRET` (≥16 chars, trimmed) | `Authorization: Bearer <secret>` **only** | Scheduled sync finished (see `rowsSent`, `runId`, etc.) | Bearer missing or wrong | `CRON_SECRET` missing/short, or `EVOLVED_PERTH_TENANT_ID` missing/invalid UUID, or other preflight misconfig | Wall timeout **55s** → **504**; keep **one** POST cron per environment. |
+| `/api/cron/fi-reminder-jobs` | **GET** or **POST** | Every **5 minutes** (`vercel.json`) | `FI_REMINDER_CRON_SECRET` and/or `CRON_SECRET` (≥16 chars) | `Authorization: Bearer <secret>` **or** `x-fi-reminder-secret: <secret>` | Jobs drained (JSON includes processor fields) | Bearer / header missing or wrong (timing-safe compare) | No valid-length secret in configured list | **Only one** active reminder worker (Next cron **or** Supabase Edge delegator — not both sending duplicate traffic). |
+| `/api/cron/iiohr-hr-perth-staff-sync` | **GET** or **POST** | **Hourly** in `vercel.json` (ops may prefer daily) | `CRON_SECRET` and/or `FI_HR_SYNC_CRON_SECRET` | `Authorization: Bearer <secret>` | Scheduled sync finished (see `rowsSent`, `runId`, etc.) | Bearer missing or wrong | No valid-length cron secret, or `EVOLVED_PERTH_TENANT_ID` missing/invalid UUID, or other preflight misconfig | Wall timeout **55s** → **504**; Vercel Cron uses **GET**. |
 
 **Smoke test (no mutations):** `pnpm run smoke:prod` with `FI_BASE_URL` + `FI_SMOKE_TENANT_ID` (see `scripts/fi-production-smoke-test.ts`).
 
@@ -62,9 +62,8 @@
 
 ## Vercel compatibility checklist
 
-- [ ] Create **two** cron jobs if both processors enabled — different secrets (`FI_REMINDER_CRON_SECRET` vs `CRON_SECRET`)
-- [ ] Reminder job: `GET` or `POST` with `Authorization: Bearer ...`
-- [ ] HR job: **`POST`** required
+- [ ] Reminder job: `GET` or `POST` with `Authorization: Bearer ...` (or `x-fi-reminder-secret`). For **native Vercel Cron**, include the same **`CRON_SECRET`** value in the accepted list **or** set `FI_REMINDER_CRON_SECRET` equal to `CRON_SECRET` in the dashboard (Vercel only injects **`CRON_SECRET`** into the `Authorization` header).
+- [ ] HR job: **`GET` or `POST`** with Bearer `CRON_SECRET` or `FI_HR_SYNC_CRON_SECRET`
 - [ ] Set env vars on the **same** Vercel environment that receives cron traffic
 - [ ] Ensure route **does not** require geo blocking that breaks Vercel’s cron egress IPs
 

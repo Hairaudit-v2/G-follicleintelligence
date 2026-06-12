@@ -1,3 +1,4 @@
+import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { getClinicOsShellActiveNavId } from "@/src/lib/fiAdmin/clinicOsShellConfig";
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { tenantAdminRoleAllowsBookingsBoardNav } from "@/src/lib/tenantAdmin/tenantAdminRoles";
@@ -6,6 +7,8 @@ export type FiOsPrimarySidebarSubItem = {
   id: string;
   label: string;
   href: string;
+  /** Stage 2: optional UI visibility key (does not replace route guards). */
+  featureKey?: FiFeatureKey;
 };
 
 export type FiOsPrimarySidebarItem = {
@@ -18,6 +21,8 @@ export type FiOsPrimarySidebarItem = {
   hint?: string;
   /** Nested links (SurgeryOS readiness, ConsultationOS conversion). */
   subItems?: FiOsPrimarySidebarSubItem[];
+  /** Stage 2: optional UI visibility key (does not replace route guards). */
+  featureKey?: FiFeatureKey;
 };
 
 function normalizeBase(base: string): string {
@@ -80,9 +85,10 @@ export function resolveFiOsPrimarySidebarItems(
     tenantBackendAdminRole != null ? !showAuditOsNav : blocks.audit;
   const calendarEligible = showBookingsBoard || tenantAdminRoleAllowsBookingsBoardNav(tenantBackendAdminRole ?? null);
   const items: FiOsPrimarySidebarItem[] = [
-    { id: "dashboard", label: "Dashboard", shortLabel: "Home", href: b, disabled: false },
+    { id: "dashboard", featureKey: "dashboard", label: "Dashboard", shortLabel: "Home", href: b, disabled: false },
     {
       id: "doctor-workspace",
+      featureKey: "consultations",
       label: "Doctor workspace",
       shortLabel: "Doctor",
       href: hrefFor(b, "doctor"),
@@ -94,6 +100,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "calendar",
+      featureKey: "calendar",
       label: "Calendar",
       shortLabel: "Cal",
       href: hrefFor(b, "calendar"),
@@ -105,6 +112,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "operations-centre",
+      featureKey: "dashboard",
       label: "Operations centre",
       shortLabel: "Ops",
       href: hrefFor(b, "operations"),
@@ -112,6 +120,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "reception-board",
+      featureKey: "dashboard",
       label: "Reception board",
       shortLabel: "Rec",
       href: hrefFor(b, "reception"),
@@ -119,6 +128,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "tomorrow-board",
+      featureKey: "calendar",
       label: "Tomorrow board",
       shortLabel: "Tmrw",
       href: hrefFor(b, "tomorrow"),
@@ -126,6 +136,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "patients",
+      featureKey: "patients",
       label: "Patients",
       shortLabel: "Patients",
       href: hrefFor(b, "patients"),
@@ -134,6 +145,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "crm",
+      featureKey: "crm",
       label: "CRM / LeadFlow",
       shortLabel: "CRM",
       href: hrefFor(b, "crm"),
@@ -142,6 +154,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "consultations",
+      featureKey: "consultations",
       label: "Consultations",
       shortLabel: "Consult",
       href: hrefFor(b, "consultations"),
@@ -154,12 +167,23 @@ export function resolveFiOsPrimarySidebarItems(
         !showBookingsBoard && !showCrmNav
           ? undefined
           : [
-              { id: "consultations-index", label: "Consultations", href: hrefFor(b, "consultations") },
-              { id: "consultation-conversion-board", label: "Conversion board", href: hrefFor(b, "consultation-conversion") },
+              {
+                id: "consultations-index",
+                featureKey: "consultations",
+                label: "Consultations",
+                href: hrefFor(b, "consultations"),
+              },
+              {
+                id: "consultation-conversion-board",
+                featureKey: "consultations",
+                label: "Conversion board",
+                href: hrefFor(b, "consultation-conversion"),
+              },
             ],
     },
     {
       id: "cases",
+      featureKey: "cases",
       label: "Cases / SurgeryOS",
       shortLabel: "Cases",
       href: hrefFor(b, "cases"),
@@ -168,13 +192,24 @@ export function resolveFiOsPrimarySidebarItems(
       subItems: blocks.cases
         ? undefined
         : [
-            { id: "cases-worklist", label: "Cases", href: hrefFor(b, "cases") },
-            { id: "surgery-readiness-board", label: "Readiness board", href: hrefFor(b, "surgery-readiness") },
-            { id: "procedure-day-board", label: "Procedure day", href: hrefFor(b, "procedure-day") },
+            { id: "cases-worklist", featureKey: "cases", label: "Cases", href: hrefFor(b, "cases") },
+            {
+              id: "surgery-readiness-board",
+              featureKey: "cases",
+              label: "Readiness board",
+              href: hrefFor(b, "surgery-readiness"),
+            },
+            {
+              id: "procedure-day-board",
+              featureKey: "procedure_day",
+              label: "Procedure day",
+              href: hrefFor(b, "procedure-day"),
+            },
           ],
     },
     {
       id: "prescriptions",
+      featureKey: "prescriptions",
       label: "Prescriptions",
       shortLabel: "Rx",
       href: hrefFor(b, "prescriptions"),
@@ -183,6 +218,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "patient-twin",
+      featureKey: "patient_twin",
       label: "Patient Twin",
       shortLabel: "Twin",
       href: hrefFor(b, "foundation-integrity"),
@@ -191,6 +227,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "auditos",
+      featureKey: "audit",
       label: "AuditOS",
       shortLabel: "Audit",
       href: hrefFor(b, "audit"),
@@ -199,6 +236,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "academyos",
+      featureKey: "academy",
       label: "AcademyOS",
       shortLabel: "Academy",
       href: "#",
@@ -207,6 +245,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "analytics",
+      featureKey: "analytics",
       label: "AnalyticsOS",
       shortLabel: "Analytics",
       href: hrefFor(b, "analytics"),
@@ -215,6 +254,7 @@ export function resolveFiOsPrimarySidebarItems(
     },
     {
       id: "settings",
+      featureKey: "settings",
       label: "Settings",
       shortLabel: "Settings",
       href: hrefFor(b, "configuration"),
@@ -225,6 +265,34 @@ export function resolveFiOsPrimarySidebarItems(
     },
   ];
   return items;
+}
+
+function fiFeatureVisibleForNav(access: ReadonlyMap<FiFeatureKey, boolean> | null, key?: FiFeatureKey): boolean {
+  if (!access || !key) return true;
+  return access.get(key) !== false;
+}
+
+/**
+ * Stage 2 UI visibility: removes primary-nav rows whose feature flag is off.
+ * Does not alter `disabled` / RBAC-driven hints — callers should still resolve items with RBAC first.
+ */
+export function filterFiOsPrimarySidebarItemsByFeatureAccess(
+  items: FiOsPrimarySidebarItem[],
+  access: ReadonlyMap<FiFeatureKey, boolean> | null
+): FiOsPrimarySidebarItem[] {
+  if (!access) return items;
+  const out: FiOsPrimarySidebarItem[] = [];
+  for (const item of items) {
+    if (!fiFeatureVisibleForNav(access, item.featureKey)) continue;
+    const rawSubs = item.subItems;
+    if (rawSubs?.length) {
+      const subs = rawSubs.filter((s) => fiFeatureVisibleForNav(access, s.featureKey));
+      out.push(subs.length === rawSubs.length ? item : { ...item, subItems: subs.length ? subs : undefined });
+    } else {
+      out.push(item);
+    }
+  }
+  return out;
 }
 
 /**

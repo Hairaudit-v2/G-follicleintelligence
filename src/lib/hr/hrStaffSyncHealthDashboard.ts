@@ -74,7 +74,8 @@ const ENV_ITEMS: { key: string; label: string; optional?: boolean }[] = [
   { key: "FI_BASE_URL", label: "FI base URL" },
   { key: "IIOHR_HR_SYNC_SECRET", label: "IIOHR HR sync secret" },
   { key: "EVOLVED_PERTH_TENANT_ID", label: "Evolved Perth tenant id" },
-  { key: "CRON_SECRET", label: "Cron secret" },
+  { key: "CRON_SECRET", label: "Cron secret (Vercel Bearer)" },
+  { key: "FI_HR_SYNC_CRON_SECRET", label: "HR cron secret (optional alias)", optional: true },
 ];
 
 function triggerOf(metadata: Record<string, unknown>): string | null {

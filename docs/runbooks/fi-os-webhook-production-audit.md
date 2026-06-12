@@ -12,8 +12,8 @@
 | `POST /api/tenants/[tenantId]/integrations/timely/appointment` | Timely | same | path | Zod (appointment schema) | same |
 | `POST /api/tenants/[tenantId]/integrations/timely/discovery` | Timely (temporary) | same | path | Raw JSON → `insertTimelyZapierDiscoveryWebhookEvent` | **`fi_integration_webhook_events`** |
 | `POST /api/tenants/[tenantId]/integrations/iiohr-hr/staff-sync` | IIOHR HR | Header `x-iiohr-sync-secret` vs `IIOHR_HR_SYNC_SECRET` (trimmed, ≥16 when set; timing-safe) | path | Auth **before** JSON body in HTTP wrapper; `processIiohrHrStaffSyncPost` for rows | **`fi_staff_sync_runs`** (+ metadata trigger) |
-| `POST /api/cron/iiohr-hr-perth-staff-sync` | Internal cron | Bearer `CRON_SECRET` | Env `EVOLVED_PERTH_TENANT_ID` | N/A (orchestrator) | Delegates to staff-sync |
-| `POST /api/cron/fi-reminder-jobs` | Internal cron | Bearer `FI_REMINDER_CRON_SECRET` | DB-driven | N/A | Updates `fi_reminder_jobs` |
+| `GET` / `POST /api/cron/iiohr-hr-perth-staff-sync` | Internal cron | Bearer `CRON_SECRET` or `FI_HR_SYNC_CRON_SECRET` | Env `EVOLVED_PERTH_TENANT_ID` | N/A (orchestrator) | Delegates to staff-sync |
+| `GET` / `POST /api/cron/fi-reminder-jobs` | Internal cron | Bearer `FI_REMINDER_CRON_SECRET` or `CRON_SECRET`; or `x-fi-reminder-secret` | DB-driven | N/A | Updates `fi_reminder_jobs` |
 | `POST /api/fi/events` | HLI / HairAudit / generic FI | **Bearer** `FI_LEGACY_FI_API_SECRET` when `FI_LEGACY_FI_API_ENABLED`; else **404** | From envelope payload | `ingestFiEvent` | Depends on handler |
 
 ### HubSpot
@@ -51,8 +51,8 @@
 |-----------|------------|-------|
 | Bearer (SHA256 digest timing-safe) | Timely | `assertTimelyWebhookAuthorized` — min **16** chars when secret set; **503** if missing/short; **401** if bearer wrong |
 | Shared header secret | IIOHR staff-sync | `postIiohrHrStaffSyncHttp` validates header before `request.json()`; `processIiohrHrStaffSyncPost` for row rules |
-| Bearer + header | Reminder cron | `FI_REMINDER_CRON_SECRET` via Bearer **or** `x-fi-reminder-secret` (UTF-8 timing-safe) |
-| Bearer | HR Perth cron | `CRON_SECRET` **Bearer only** |
+| Bearer + header | Reminder cron | `FI_REMINDER_CRON_SECRET` or `CRON_SECRET` via Bearer **or** `x-fi-reminder-secret` (UTF-8 timing-safe) |
+| Bearer | HR Perth cron | `CRON_SECRET` or `FI_HR_SYNC_CRON_SECRET` (**GET** or **POST**; Vercel Cron uses **GET**) |
 | Legacy FI machine routes | `/api/fi/events` (and siblings) | `FI_LEGACY_FI_API_*` (Patch PR 1); no query-string secrets |
 
 ---

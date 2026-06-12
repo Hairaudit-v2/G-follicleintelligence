@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/fi-reminder-jobs",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/iiohr-hr-perth-staff-sync",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

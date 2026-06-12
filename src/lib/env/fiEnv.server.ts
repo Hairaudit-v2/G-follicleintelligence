@@ -74,6 +74,7 @@ export function validateFiServerEnv(env: NodeJS.ProcessEnv = process.env): FiEnv
 
   minSecretLength("FI_REMINDER_CRON_SECRET", g("FI_REMINDER_CRON_SECRET"), 16, errors);
   minSecretLength("CRON_SECRET", g("CRON_SECRET"), 16, errors);
+  minSecretLength("FI_HR_SYNC_CRON_SECRET", g("FI_HR_SYNC_CRON_SECRET"), 16, errors);
   minSecretLength("FI_TIMELY_WEBHOOK_SECRET", g("FI_TIMELY_WEBHOOK_SECRET"), 16, errors);
   minSecretLength("IIOHR_HR_SYNC_SECRET", g("IIOHR_HR_SYNC_SECRET"), 16, errors);
 

@@ -4,16 +4,17 @@ Evolved Hair Restoration Perth staff are read from the IIOHR HR JSON feed and pu
 
 ## Endpoint
 
-- **URL:** `POST /api/cron/iiohr-hr-perth-staff-sync`
-- **Auth:** `Authorization: Bearer <CRON_SECRET>` (same pattern as other FI cron routes).
+- **URL:** `GET` or `POST /api/cron/iiohr-hr-perth-staff-sync` (Vercel Cron invokes **GET** with `Authorization: Bearer`.)
+- **Auth:** `Authorization: Bearer` with `CRON_SECRET` or `FI_HR_SYNC_CRON_SECRET` (minimum **16** characters, trimmed; timing-safe compare).
 
 ## Required environment variables
 
 | Variable | Purpose |
 |----------|---------|
-| `CRON_SECRET` | Bearer token for cron auth (**minimum 16 characters**, same pattern as `FI_REMINDER_CRON_SECRET`). |
+| `CRON_SECRET` | Bearer token for cron auth when using Vercel Cron or a single shared secret (**minimum 16 characters**). |
+| `FI_HR_SYNC_CRON_SECRET` | Optional second accepted Bearer value (e.g. dedicated HR scheduler secret). If unset, only `CRON_SECRET` is used. |
 | `EVOLVED_PERTH_TENANT_ID` | UUID of the Evolved Perth FI tenant receiving the sync. |
-| `FI_BASE_URL` | Absolute base URL of this FI deployment (used by the outbound client to POST to itself or another FI host). |
+| `FI_BASE_URL` | Absolute **site root** URL of this FI deployment (no `/fi-admin` suffix). Used by the outbound client to POST to `/api/tenants/.../staff-sync`. |
 | `IIOHR_HR_SYNC_SECRET` | Must match the FI staff-sync API secret (`x-iiohr-sync-secret`). |
 | `IIOHR_HR_PERTH_STAFF_FEED_URL` | GET URL returning Perth HR staff JSON (`staff`, `rows`, or array). Readiness fields optional per row (see runbook). |
 

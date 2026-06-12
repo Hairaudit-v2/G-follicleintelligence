@@ -5,7 +5,13 @@ import { usePathname } from "next/navigation";
 
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
 import { FI_ADMIN_NEUTRAL_ACCENT, safeBrandingColourHex } from "@/src/lib/fi/foundation/brandingCss";
-import { getFiOsShellActiveSidebarId, resolveFiOsPrimarySidebarItems } from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
+import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
+import { applyPartialFeatureOverrides, buildDefaultFeatureAccessAllEnabled } from "@/src/config/fiFeatureAccessRegistry";
+import {
+  filterFiOsPrimarySidebarItemsByFeatureAccess,
+  getFiOsShellActiveSidebarId,
+  resolveFiOsPrimarySidebarItems,
+} from "@/src/lib/fiAdmin/fiOsShellPrimaryNav";
 import { isFiOsTenantCalendarPath } from "@/src/lib/fiAdmin/fiOsTenantCalendarRoute";
 import { CLINIC_OS_OPEN_GLOBAL_SEARCH_EVENT } from "@/src/lib/fiAdmin/clinicOsShellSearchEvent";
 import { CLINIC_OS_OPEN_CREATE_LEAD_EVENT } from "@/src/lib/fiAdmin/clinicOsShellCreateLeadEvent";
@@ -36,6 +42,7 @@ export function FiOsAppShell({
   showRemindersSettingsNav = true,
   showAuditOsNav = true,
   showConfigurationHubNav = true,
+  featureAccess = null,
   effective,
   userEmail,
   impersonationDisplayName,
@@ -62,6 +69,8 @@ export function FiOsAppShell({
   showAuditOsNav?: boolean;
   /** `/configuration` hub link in primary sidebar. */
   showConfigurationHubNav?: boolean;
+  /** Stage 2: serialized feature map; null skips clinic-settings strip filtering. */
+  featureAccess?: Partial<Record<FiFeatureKey, boolean>> | null;
   effective: EffectiveBranding;
   userEmail: string | null;
   impersonationDisplayName?: string | null;
@@ -86,18 +95,33 @@ export function FiOsAppShell({
   const clinicLabel =
     effective.clinic_display_name?.trim() || effective.brand_name?.trim() || "Clinic workspace";
 
-  const sidebarItems = useMemo(
-    () =>
-      resolveFiOsPrimarySidebarItems(
-        base,
-        showCrmNav,
-        showBookingsBoard,
-        tenantBackendAdminRole ?? null,
-        showAuditOsNav,
-        showConfigurationHubNav
-      ),
-    [base, showCrmNav, showBookingsBoard, tenantBackendAdminRole, showAuditOsNav, showConfigurationHubNav]
-  );
+  const featureAccessMap = useMemo(() => {
+    if (!featureAccess) return null;
+    return applyPartialFeatureOverrides(
+      buildDefaultFeatureAccessAllEnabled(),
+      featureAccess as Partial<Record<FiFeatureKey, boolean>>
+    );
+  }, [featureAccess]);
+
+  const sidebarItems = useMemo(() => {
+    const raw = resolveFiOsPrimarySidebarItems(
+      base,
+      showCrmNav,
+      showBookingsBoard,
+      tenantBackendAdminRole ?? null,
+      showAuditOsNav,
+      showConfigurationHubNav
+    );
+    return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
+  }, [
+    base,
+    showCrmNav,
+    showBookingsBoard,
+    tenantBackendAdminRole,
+    showAuditOsNav,
+    showConfigurationHubNav,
+    featureAccessMap,
+  ]);
   const activeSidebarId = getFiOsShellActiveSidebarId(pathname, base);
   useEffect(() => {
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
@@ -198,6 +222,7 @@ export function FiOsAppShell({
               showConfigurationHubNav={showConfigurationHubNav}
               showTaxLocalisationSettingsNav={showTaxLocalisationSettingsNav}
               showRemindersSettingsNav={showRemindersSettingsNav}
+              featureAccess={featureAccess}
             />
             {children}
           </main>

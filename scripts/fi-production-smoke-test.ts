@@ -9,13 +9,15 @@
  */
 import { randomUUID } from "node:crypto";
 
+import { normalizeFiDeploymentBaseUrl } from "../src/lib/env/fiDeploymentBaseUrl";
+
 function baseUrl(): string {
   const raw = process.env.FI_BASE_URL?.trim();
   if (!raw) {
-    console.error("Missing FI_BASE_URL (e.g. https://your-app.vercel.app)");
+    console.error("Missing FI_BASE_URL (e.g. https://your-app.vercel.app — site root, not /fi-admin)");
     process.exit(1);
   }
-  return raw.replace(/\/$/, "");
+  return normalizeFiDeploymentBaseUrl(raw);
 }
 
 function tenantId(): string {

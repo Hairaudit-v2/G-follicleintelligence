@@ -1,23 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import type { ScheduledIiohrHrStaffSyncCoreResult } from "@/src/lib/hr/runScheduledIiohrHrStaffSyncCore";
-import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH, timingSafeUtf8Equal } from "@/src/lib/security/timingSafeSecret";
+import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
+import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH } from "@/src/lib/security/timingSafeSecret";
 
 export const MIN_CRON_SECRET_LENGTH = CRON_OR_WEBHOOK_SECRET_MIN_LENGTH;
-
-export function extractCronBearer(req: Request): string | null {
-  const auth = req.headers.get("authorization");
-  const m = auth?.match(/^Bearer\s+(.+)$/i);
-  return m?.[1]?.trim() || null;
-}
-
-function isAuthorizedCron(req: Request, expected: string | undefined): boolean {
-  if (!expected) return false;
-  const got = extractCronBearer(req);
-  if (!got) return false;
-  return timingSafeUtf8Equal(expected, got);
-}
 
 export type IiohrHrPerthStaffSyncCronPostOptions = {
   getEnv: (key: string) => string | undefined;
@@ -51,26 +39,21 @@ function jsonBody(
 }
 
 /**
- * POST handler for `/api/cron/iiohr-hr-perth-staff-sync`. No stack traces or secrets in responses.
+ * GET or POST handler for `/api/cron/iiohr-hr-perth-staff-sync`. No stack traces or secrets in responses.
  */
 export async function handleIiohrHrPerthStaffSyncCronPost(
-  req: Request,
+  req: NextRequest,
   opts: IiohrHrPerthStaffSyncCronPostOptions
 ): Promise<Response> {
-  if (req.method !== "POST") {
+  if (req.method !== "POST" && req.method !== "GET") {
     return NextResponse.json({ ok: false, error: "Method not allowed." }, { status: 405 });
   }
 
-  const expected = opts.getEnv("CRON_SECRET")?.trim();
-  if (!expected) {
-    return NextResponse.json({ ok: false, error: "Service unavailable." }, { status: 503 });
-  }
-  if (expected.length < MIN_CRON_SECRET_LENGTH) {
-    return NextResponse.json({ ok: false, error: "Service unavailable." }, { status: 503 });
-  }
-  if (!isAuthorizedCron(req, expected)) {
-    return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
-  }
+  const authRes = assertCronAuthorized(req, [
+    opts.getEnv("CRON_SECRET") ?? "",
+    opts.getEnv("FI_HR_SYNC_CRON_SECRET") ?? "",
+  ]);
+  if (authRes) return authRes;
 
   const tenantId = opts.getEnv("EVOLVED_PERTH_TENANT_ID")?.trim();
   if (!tenantId) {

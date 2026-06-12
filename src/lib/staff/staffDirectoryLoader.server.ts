@@ -1,9 +1,11 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isFiFeatureKey, type FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { isCrmStaffManageRole } from "@/src/lib/crm/crmGatePolicy";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { resolveCanManageStaffFeatureAccessSettings } from "@/src/lib/fi-os/featureAccess.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsElevatedOsOperatorRole } from "@/src/lib/fiOs/fiOsRoles";
 import { loadAllStaffForTenant, type FiStaffRow } from "@/src/lib/staff/staff.server";
@@ -22,6 +24,10 @@ export type StaffDirectoryClinicOption = {
 export type StaffDirectoryPageResult = {
   staff: FiStaffRow[];
   canManageStaff: boolean;
+  /** Tenant admins / FI admins — can edit FI OS feature visibility per staff row. */
+  canManageStaffFeatureVisibility: boolean;
+  /** Sparse DB overrides keyed by staff id (only when `canManageStaffFeatureVisibility`). */
+  staffFeatureAccessByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>>;
   /** Staff profile id linked to the signed-in tenant user (`fi_staff.fi_user_id` = `fi_users.id`), if any. */
   viewerStaffId: string | null;
   fiUsersForLink: { id: string; email: string | null }[];
@@ -138,6 +144,27 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     : new Map<string, StaffPinMetadata>();
   const pinMetadataByStaffId = Object.fromEntries(pinMap.entries());
   const staffIds = staffRes.map((s) => s.id);
+  const canManageStaffFeatureVisibility = await resolveCanManageStaffFeatureAccessSettings(tid);
+
+  const staffFeatureAccessByStaffId: Record<string, Partial<Record<FiFeatureKey, boolean>>> = {};
+  if (canManageStaffFeatureVisibility && staffIds.length) {
+    const { data: faRows, error: faErr } = await supabase
+      .from("fi_staff_feature_access")
+      .select("staff_id, feature_key, enabled")
+      .eq("tenant_id", tid)
+      .in("staff_id", staffIds);
+    if (!faErr && faRows) {
+      for (const raw of faRows) {
+        const r = raw as { staff_id: string; feature_key: string; enabled: boolean };
+        const sid = String(r.staff_id ?? "");
+        const fk = String(r.feature_key ?? "");
+        if (!sid || !isFiFeatureKey(fk)) continue;
+        if (!staffFeatureAccessByStaffId[sid]) staffFeatureAccessByStaffId[sid] = {};
+        staffFeatureAccessByStaffId[sid][fk] = Boolean(r.enabled);
+      }
+    }
+  }
+
   const [payrollByStaffId, hrNotificationByStaffId] = await Promise.all([
     loadPayrollSourceByStaffId(tid, staffIds),
     loadHrNotificationByStaffId(tid, staffIds),
@@ -146,6 +173,8 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
   return {
     staff: staffRes,
     canManageStaff,
+    canManageStaffFeatureVisibility,
+    staffFeatureAccessByStaffId,
     viewerStaffId,
     fiUsersForLink,
     pinMetadataByStaffId,

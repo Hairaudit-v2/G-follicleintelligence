@@ -17,6 +17,8 @@ import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { assertFiTenantExists, assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermissions";
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
+import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
+import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
 import {
   canAccessTenantReminderSettings,
   canManageTenantAdminUsersRoute,
@@ -93,8 +95,9 @@ export default async function TenantAdminLayout({
     showRemindersSettingsNav,
     showAuditOsNav,
     showConfigurationHubNav,
+    featureAccessMap,
   ] = pinFloorMode
-    ? [false, true, pinSession!.staffName, false, null, false, false, false, false]
+    ? [false, true, pinSession!.staffName, false, null, false, false, false, false, null]
     : await Promise.all([
         getCrmShellNavAllowed(tenantId),
         getBookingsBoardNavAllowed(tenantId),
@@ -107,9 +110,15 @@ export default async function TenantAdminLayout({
         canAccessTenantReminderSettings(tenantId),
         canViewSecurityAuditNav(tenantId),
         canViewTenantConfigurationHub(tenantId),
+        loadFiOsFeatureAccessMapOrNullForViewer(tenantId),
       ]);
   const tenantBackendAdminRole = pinFloorMode ? null : adminProf?.adminRole ?? null;
   const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
+
+  const featureAccessRecord =
+    pinFloorMode || !featureAccessMap
+      ? null
+      : (Object.fromEntries(featureAccessMap) as Record<FiFeatureKey, boolean>);
 
   let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
   try {
@@ -146,6 +155,7 @@ export default async function TenantAdminLayout({
         showRemindersSettingsNav={showRemindersSettingsNav}
         showAuditOsNav={showAuditOsNav}
         showConfigurationHubNav={showConfigurationHubNav}
+        featureAccess={featureAccessRecord}
         effective={effective}
         userEmail={userEmail}
         impersonationDisplayName={impersonationDisplayName}
