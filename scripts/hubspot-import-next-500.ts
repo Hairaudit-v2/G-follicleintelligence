@@ -8,7 +8,11 @@
  *   npm run hubspot:import-next-500 -- --last           # commit last N after a passing dry-run
  *
  * Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ * Commit mode also requires: FI_HUBSPOT_IMPORT_CONFIRM=1 (not required for --dry-run).
  * Tenant: FI_HUBSPOT_IMPORT_TENANT_ID or FI_EVOLVED_TENANT_SLUG (default evolved)
+ *
+ * Prefer npm scripts `hubspot:import-last-500` / `hubspot:import-last-500-dry-run` on Windows so
+ * `--last` is not swallowed by npm.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -195,6 +199,27 @@ async function main(): Promise<void> {
     console.log(JSON.stringify(drySummary, null, 2));
     if (!drySummary.ok) process.exitCode = 1;
     return;
+  }
+
+  const importConfirm = process.env.FI_HUBSPOT_IMPORT_CONFIRM?.trim();
+  if (importConfirm !== "1") {
+    const selectionMode = last ? "last_by_csv_order" : "first_by_csv_order";
+    console.error(
+      JSON.stringify(
+        {
+          error:
+            "Import aborted: FI_HUBSPOT_IMPORT_CONFIRM=1 is required for commit mode. Dry-run does not require this flag.",
+          intended_selection_mode: selectionMode,
+          planned_row_count: toImport.length,
+          csv: fromCsv,
+          max_requested: max,
+          hint: "Example: FI_HUBSPOT_IMPORT_CONFIRM=1 npm run hubspot:import-last-500",
+        },
+        null,
+        2
+      )
+    );
+    process.exit(1);
   }
 
   const initialMetadata = {

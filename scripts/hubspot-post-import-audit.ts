@@ -2,34 +2,62 @@
  * Post-import audit for a HubSpot Stage 1 batch (metadata.import_batch_id).
  *
  * Usage:
+ *   npx tsx scripts/hubspot-post-import-audit.ts <import_batch_uuid>
  *   npx tsx --env-file=.env.local scripts/hubspot-post-import-audit.ts <import_batch_uuid>
  *
- * Requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
+ * Loads `.env.local` then `.env` from repo root (first wins for each key). Requires
+ * NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
+ *
+ * If you see `TypeError: fetch failed` to Supabase on Windows, try:
+ *   set NODE_OPTIONS=--dns-result-order=ipv4first
+ * (this script also sets IPv4-first DNS for the process when possible.)
  */
 import { createClient } from "@supabase/supabase-js";
+import { setDefaultResultOrder } from "node:dns";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { inspect } from "node:util";
 
 import { buildFiPersonsMetadataSearchOrFilter, patientDirectorySearchIlikePattern } from "../src/lib/patients/patientDirectorySearch";
 
-function loadEnvLocal(): void {
-  const p = resolve(process.cwd(), ".env.local");
-  if (!existsSync(p)) return;
-  for (const line of readFileSync(p, "utf8").split(/\r?\n/)) {
-    const t = line.trim();
-    if (!t || t.startsWith("#")) continue;
-    const eq = t.indexOf("=");
-    if (eq <= 0) continue;
-    const key = t.slice(0, eq).trim();
-    let val = t.slice(eq + 1).trim();
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-      val = val.slice(1, -1);
+function loadRepoEnvFiles(): void {
+  for (const name of [".env.local", ".env"] as const) {
+    const p = resolve(process.cwd(), name);
+    if (!existsSync(p)) continue;
+    let raw = readFileSync(p, "utf8");
+    if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1);
+    for (const line of raw.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const withoutExport = trimmed.startsWith("export ") ? trimmed.slice(7).trim() : trimmed;
+      const eq = withoutExport.indexOf("=");
+      if (eq <= 0) continue;
+      const key = withoutExport.slice(0, eq).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+      let val = withoutExport.slice(eq + 1).trim();
+      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        val = val.slice(1, -1);
+      }
+      if (process.env[key] === undefined) process.env[key] = val;
     }
-    if (!process.env[key]) process.env[key] = val;
   }
 }
 
-loadEnvLocal();
+loadRepoEnvFiles();
+
+/** Retrying fetch for flaky TLS / IPv6 / transient network to Supabase. */
+async function fetchWithRetry(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  let last: unknown;
+  for (let attempt = 1; attempt <= 6; attempt++) {
+    try {
+      return await fetch(input, init);
+    } catch (e) {
+      last = e;
+      await new Promise((r) => setTimeout(r, Math.min(2500, 350 * attempt ** 2)));
+    }
+  }
+  throw last;
+}
 
 const BATCH_ID = (process.argv[2] ?? "").trim();
 if (!BATCH_ID) {
@@ -51,12 +79,21 @@ function str(v: unknown): string | null {
 }
 
 async function main(): Promise<void> {
+  try {
+    setDefaultResultOrder("ipv4first");
+  } catch {
+    /* ignore if unavailable */
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY (use .env.local or --env-file)");
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY (use .env.local / .env or --env-file)");
   }
-  const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const supabase = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: fetchWithRetry },
+  });
 
   const { data: batchRow, error: be } = await supabase
     .from("fi_import_batches")
@@ -361,6 +398,24 @@ async function main(): Promise<void> {
 }
 
 main().catch((e) => {
-  console.error(e instanceof Error ? e.message : e);
+  const err = e instanceof Error ? e : new Error(String(e));
+  console.error(err.message);
+  const c = err.cause;
+  if (c !== undefined && c !== null) {
+    console.error("cause:", c instanceof Error ? `${c.name}: ${c.message}` : String(c));
+    if (c instanceof Error && c.cause) console.error("cause.cause:", String(c.cause));
+  }
+  if (err.name === "AggregateError" && "errors" in err && Array.isArray((err as AggregateError).errors)) {
+    console.error(
+      "aggregate errors:",
+      (err as AggregateError).errors.map((x) => (x instanceof Error ? x.message : String(x))).join(" | ")
+    );
+  }
+  if (process.env.DEBUG_HUBSPOT_AUDIT === "1") {
+    console.error(inspect(e, { depth: 5, colors: false }));
+  }
+  console.error(
+    "Hint: confirm NEXT_PUBLIC_SUPABASE_URL is reachable (browser/curl), VPN/firewall allows outbound HTTPS, and try: NODE_OPTIONS=--dns-result-order=ipv4first"
+  );
   process.exit(1);
 });

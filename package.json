@@ -35,7 +35,9 @@
     "hubspot:commit-latest-batch": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-commit-latest-dry-run-batch.ts",
     "hubspot:import-next-500": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-next-500.ts",
     "hubspot:import-last-500-dry-run": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-next-500.ts --last --dry-run",
-    "hubspot:import-last-500": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-next-500.ts --last"
+    "hubspot:import-last-500": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-next-500.ts --last",
+    "hubspot:rollback-plan": "tsx scripts/hubspot-import-batch-rollback-plan.ts",
+    "hubspot:rollback-execute": "tsx scripts/hubspot-import-batch-rollback-execute.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

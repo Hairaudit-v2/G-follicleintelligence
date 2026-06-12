@@ -87,7 +87,10 @@ export function validateFiServerEnv(env: NodeJS.ProcessEnv = process.env): FiEnv
     errors.push("FI_ADMIN_API_KEY");
   }
 
-  if (errors.length) return { ok: false, errors: [...new Set(errors)].sort() };
+  if (errors.length) {
+    const deduped = errors.filter((e, i, a) => a.indexOf(e) === i).sort();
+    return { ok: false, errors: deduped };
+  }
   return { ok: true };
 }
 
