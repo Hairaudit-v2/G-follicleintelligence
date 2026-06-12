@@ -5,6 +5,7 @@ import { CASE_DETAIL_SECTION_IDS } from "@/src/lib/cases/caseDetailNavConstants"
 import { UniversalCaseRecord } from "@/src/components/fi/UniversalCaseRecord";
 import type { UniversalCaseRecordResult } from "@/src/lib/fi/foundation/caseRecord";
 import { CaseClinicalIntelligencePanel } from "@/src/components/fi-admin/cases/CaseClinicalIntelligencePanel";
+import { CaseOutcomeIntelligencePanel } from "@/src/components/fi-admin/cases/CaseOutcomeIntelligencePanel";
 import { CaseAppointmentsCard } from "./CaseAppointmentsCard";
 import { CaseDetailBackLink } from "./CaseDetailBackLink";
 import { CaseDetailSection } from "./CaseDetailSection";
@@ -28,9 +29,12 @@ import type { CaseTimelineItem } from "@/src/lib/cases/caseTimelineTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
-import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
+import { CaseRevenuePaymentsCard } from "@/src/components/fi-admin/revenue/CaseRevenuePaymentsCard";
+import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
+import type { CaseOutcomeIntelligenceView } from "@/src/lib/fi-os/outcomeIntelligence.server";
+import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
 
 function caseSelfQuery(casesListReturnQuery?: string, opts?: { foundation?: "1" }): string {
   const p = new URLSearchParams();
@@ -57,6 +61,8 @@ export function CaseDetailPageView({
   operationalTodayYmd,
   initialPaymentRecords = [],
   canMutatePaymentRecords = false,
+  outcomeIntelligence,
+  casePaymentReadiness,
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
@@ -77,6 +83,8 @@ export function CaseDetailPageView({
   operationalTodayYmd: string;
   initialPaymentRecords?: PaymentRecordRow[];
   canMutatePaymentRecords?: boolean;
+  outcomeIntelligence: CaseOutcomeIntelligenceView;
+  casePaymentReadiness: CasePaymentReadiness;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
   /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
@@ -178,6 +186,15 @@ export function CaseDetailPageView({
               noManualPaymentRecordsCopy="No manual payment records linked to this case yet."
             />
           </div>
+          <div className="mt-6">
+            <CaseRevenuePaymentsCard
+              tenantId={tenantId}
+              caseId={detail.id}
+              patientFoundationId={twinFoundationPatientId}
+              readiness={casePaymentReadiness}
+              canMutate={canMutatePaymentRecords}
+            />
+          </div>
         </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.caseIntelligence}>
@@ -187,6 +204,10 @@ export function CaseDetailPageView({
             patientFoundationId={twinFoundationPatientId}
             readiness={readiness}
           />
+        </CaseDetailSection>
+
+        <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.outcomeIntelligence}>
+          <CaseOutcomeIntelligencePanel view={outcomeIntelligence} />
         </CaseDetailSection>
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.timeline}>

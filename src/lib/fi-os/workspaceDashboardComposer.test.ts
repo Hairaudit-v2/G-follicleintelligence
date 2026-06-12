@@ -13,6 +13,7 @@ test("composer: surgeon profile includes clinical intelligence widget", () => {
     availableWidgets: FI_DASHBOARD_WIDGET_KEYS,
   });
   assert.ok(got.includes("clinical_intelligence_summary"));
+  assert.ok(got.includes("outcome_intelligence_summary"));
 });
 
 test("composer: consultant profile does not include clinical intelligence by default", () => {
@@ -23,6 +24,7 @@ test("composer: consultant profile does not include clinical intelligence by def
     availableWidgets: FI_DASHBOARD_WIDGET_KEYS,
   });
   assert.ok(!got.includes("clinical_intelligence_summary"));
+  assert.ok(!got.includes("outcome_intelligence_summary"));
 });
 
 test("composer: default profile matches Stage 2 baseline order (filtered)", () => {

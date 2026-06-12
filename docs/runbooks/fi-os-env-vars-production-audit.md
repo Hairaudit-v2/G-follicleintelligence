@@ -187,6 +187,7 @@ The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (
 | IIOHR HR → FI | `IIOHR_HR_SYNC_SECRET` | `POST /api/tenants/[tenantId]/integrations/iiohr-hr/staff-sync` (`x-iiohr-sync-secret`) |
 | HubSpot | **No dedicated inbound webhook route found** in `app/api` | Imports via FI Admin + server actions (`lib/actions/fi-hubspot-crm-import-actions.ts`) — keys/secrets belong in **scripts** or **server env** for API clients if added later |
 | Generic integration inbox | N/A (table exists) | `fi_integration_webhook_events` (see webhook audit) |
+| FI RevenueOS / Stripe | `STRIPE_WEBHOOK_SECRET`, `STRIPE_SECRET_KEY` | `POST /api/fi-payments/stripe/webhook` (see [`docs/runbooks/fi-os-stage7-revenue-payments.md`](fi-os-stage7-revenue-payments.md)) |
 
 ---
 

@@ -15,6 +15,7 @@ import { pickPrimaryLinkedSurgeryBookingYmd } from "@/src/lib/cases/caseProcedur
 import { loadProcedureTeamPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 import { buildCaseReadiness } from "@/src/lib/cases/caseReadinessBuild";
+import { loadCasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import { buildCaseTimeline } from "@/src/lib/cases/caseTimelineBuild";
 import { loadCaseTimelineExtraSources } from "@/src/lib/cases/caseTimelineLoaders";
 import { loadUniversalCaseRecord } from "@/src/lib/fi/foundation/caseRecord";
@@ -22,6 +23,7 @@ import { sanitizeFromCasesSearchParam } from "@/src/lib/cases/caseDetailFromCase
 import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 import { loadPaymentRecordsForCases } from "@/src/lib/payments/paymentRecordLoaders.server";
+import { buildCaseOutcomeIntelligenceView, loadCaseOutcomeMeasurements, loadCaseOutcomeProtocols } from "@/src/lib/fi-os/outcomeIntelligence.server";
 
 export const metadata = {
   title: "Patient",
@@ -50,7 +52,7 @@ export default async function CaseDetailRoutePage({
   const { data: tenant, error: te } = await supabase.from("fi_tenants").select("id").eq("id", tenantId).maybeSingle();
   if (te || !tenant) notFound();
 
-  const [detail, surgeryPlan, procedureDay, teamUserOptions, postOpTracking, followUps, timelineExtra] =
+  const [detail, surgeryPlan, procedureDay, teamUserOptions, postOpTracking, followUps, timelineExtra, measurementRows, protocolRows, casePaymentReadiness] =
     await Promise.all([
       loadCaseAdminDetail(tenantId, caseId),
       loadSurgeryPlanForCase(tenantId, caseId),
@@ -59,6 +61,9 @@ export default async function CaseDetailRoutePage({
       loadPostOpTrackingForCase(tenantId, caseId),
       loadFollowUpsForCase(tenantId, caseId),
       loadCaseTimelineExtraSources(tenantId, caseId),
+      loadCaseOutcomeMeasurements(tenantId, caseId),
+      loadCaseOutcomeProtocols(tenantId, caseId),
+      loadCasePaymentReadiness(tenantId, caseId),
     ]);
   if (!detail) notFound();
 
@@ -80,6 +85,18 @@ export default async function CaseDetailRoutePage({
     postOpTracking,
     followUps,
     timelineItems,
+    revenueReadiness: {
+      depositRuleSignalsBlock: casePaymentReadiness.depositReadinessBlock,
+      message: casePaymentReadiness.depositReadinessMessage,
+    },
+  });
+
+  const followCheckpoints = followUps.filter((f) => f.follow_up_status === "completed").map((f) => f.checkpoint);
+  const outcomeIntelligence = buildCaseOutcomeIntelligenceView({
+    followUpCheckpoints: followCheckpoints,
+    measurementRows,
+    protocolRows,
+    linkedImageCount: detail.images?.length ?? 0,
   });
 
   const casesListReturnQuery = sanitizeFromCasesSearchParam(sp.fromCases);
@@ -128,6 +145,8 @@ export default async function CaseDetailRoutePage({
       operationalTodayYmd={operationalTodayYmd}
       initialPaymentRecords={initialPaymentRecords}
       canMutatePaymentRecords={payCap.canMutate}
+      outcomeIntelligence={outcomeIntelligence}
+      casePaymentReadiness={casePaymentReadiness}
     />
   );
 

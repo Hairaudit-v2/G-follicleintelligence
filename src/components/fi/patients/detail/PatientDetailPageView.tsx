@@ -25,7 +25,9 @@ import { PatientAppointmentsTab } from "./PatientAppointmentsTab";
 import { PatientDocumentsTab } from "./PatientDocumentsTab";
 import { PatientVoiceClinicalNotesCard } from "@/src/components/fi/clinical-notes/PatientVoiceClinicalNotesCard";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
+import { PatientRevenueInvoicesPanel } from "@/src/components/fi-admin/revenue/PatientRevenueInvoicesPanel";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
+import type { PatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 
 export function PatientDetailPageView({
@@ -37,6 +39,7 @@ export function PatientDetailPageView({
   operationalTodayYmd,
   initialPaymentRecords = [],
   canMutatePaymentRecords = false,
+  patientInvoiceSummary,
   /** Server-rendered async tab; passed from the route so this client module never imports prescribing loaders. */
   prescriptionsTab,
 }: {
@@ -48,6 +51,7 @@ export function PatientDetailPageView({
   operationalTodayYmd: string;
   initialPaymentRecords?: PaymentRecordRow[];
   canMutatePaymentRecords?: boolean;
+  patientInvoiceSummary: PatientInvoiceSummary;
   prescriptionsTab?: ReactNode;
 }) {
   const { profile } = initialPayload;
@@ -178,6 +182,10 @@ export function PatientDetailPageView({
       ) : null}
 
       {activeTab === "prescriptions" ? prescriptionsTab : null}
+
+      {activeTab === "payments" ? (
+        <PatientRevenueInvoicesPanel tenantId={tenantId} patientId={patientId} summary={patientInvoiceSummary} />
+      ) : null}
 
       {activeTab === "documents" ? <PatientDocumentsTab tenantId={tenantId} data={profile} /> : null}
     </div>

@@ -58,6 +58,10 @@ export function fiDashboardWidgetVisibleByFeatureAccess(
         on(access, "dashboard") &&
         onAny(access, ["patients", "cases", "pathology", "imaging", "audit"])
       );
+    case "outcome_intelligence_summary":
+      return (
+        on(access, "dashboard") && onAny(access, ["analytics", "audit", "cases", "patient_twin"])
+      );
     default:
       return true;
   }

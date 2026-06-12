@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 
 import { PatientTwinDashboard } from "@/src/components/fi-admin/patientTwin/PatientTwinDashboard";
 import { derivePatientTwinIntegritySignals, type PatientClinicalIntelligenceView } from "@/src/lib/fi-os/clinicalIntelligenceSignals";
+import { loadPatientOutcomeMeasurements, loadPatientOutcomeProtocols } from "@/src/lib/fi-os/outcomeIntelligence.server";
 import { loadPatientTwinV1 } from "@/src/lib/patientTwin/patientTwinLoader.server";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +48,11 @@ export default async function PatientTwinV1RoutePage({
   const twin = await loadPatientTwinV1({ tenantId: tid, foundationPatientId: pid });
   if (!twin) notFound();
 
+  const [outcomeMeasurements, outcomeProtocols] = await Promise.all([
+    loadPatientOutcomeMeasurements(tid, pid),
+    loadPatientOutcomeProtocols(tid, pid),
+  ]);
+
   const clinicalIntel: PatientClinicalIntelligenceView = {
     signals: derivePatientTwinIntegritySignals(twin),
     recommendedNextStep: twin.completeness?.recommended_actions?.[0]?.label ?? null,
@@ -63,7 +69,14 @@ export default async function PatientTwinV1RoutePage({
         <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
         Back to patient profile
       </Link>
-      <PatientTwinDashboard tenantId={tid} patientId={pid} twin={twin} clinicalIntel={clinicalIntel} />
+      <PatientTwinDashboard
+        tenantId={tid}
+        patientId={pid}
+        twin={twin}
+        clinicalIntel={clinicalIntel}
+        outcomeMeasurements={outcomeMeasurements}
+        outcomeProtocols={outcomeProtocols}
+      />
     </div>
   );
 }

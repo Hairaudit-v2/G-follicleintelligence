@@ -21,6 +21,7 @@ import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
 import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGuard.server";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
+import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import {
   canAccessTenantReminderSettings,
   canManageTenantAdminUsersRoute,
@@ -140,6 +141,8 @@ export default async function TenantAdminLayout({
     effective = NEUTRAL_EFFECTIVE;
   }
 
+  const showFiPaymentsInboxNav = pinFloorMode ? false : readFiPaymentsEnabled();
+
   const mainSurface = (
     <div className={cn(fiOsChromeClasses.tenantMainSurface, "flex min-h-0 min-w-0 flex-1 flex-col")}>
       <div
@@ -166,6 +169,7 @@ export default async function TenantAdminLayout({
         showRemindersSettingsNav={showRemindersSettingsNav}
         showAuditOsNav={showAuditOsNav}
         showConfigurationHubNav={showConfigurationHubNav}
+        showFiPaymentsInboxNav={showFiPaymentsInboxNav}
         workspaceProfileKey={workspaceProfileKey}
         featureAccess={featureAccessRecord}
         effective={effective}

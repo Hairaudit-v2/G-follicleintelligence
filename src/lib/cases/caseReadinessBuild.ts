@@ -14,6 +14,11 @@ export type CaseReadinessBuildInput = {
   postOpTracking: CasePostOpTrackingRow | null;
   followUps: CaseFollowUpRow[];
   timelineItems: CaseTimelineItem[];
+  /** Optional RevenueOS deposit readiness (rule-based; staff-overridable). */
+  revenueReadiness?: {
+    depositRuleSignalsBlock: boolean;
+    message: string | null;
+  } | null;
 };
 
 function hasLinkedPatient(d: CaseAdminDetail): boolean {
@@ -96,7 +101,7 @@ export type BuildCaseReadinessOptions = {
  * Computes SurgeryOS-style readiness from data already loaded on the case detail route (read-only).
  */
 export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: BuildCaseReadinessOptions): CaseReadinessReport {
-  const { detail, surgeryPlan, procedureDay, postOpTracking, followUps, timelineItems } = input;
+  const { detail, surgeryPlan, procedureDay, postOpTracking, followUps, timelineItems, revenueReadiness } = input;
   const worklistMode = options?.worklistMode === true;
 
   const fu1 = followUpRow("day_1", followUps);
@@ -256,7 +261,18 @@ export function buildCaseReadiness(input: CaseReadinessBuildInput, options?: Bui
     checks: imageChecks,
   });
 
-  const bookingChecks = [{ id: "count", label: "At least one linked booking", ok: detail.bookings.length >= 1 }];
+  const bookingChecks = [
+    { id: "count", label: "At least one linked booking", ok: detail.bookings.length >= 1 },
+    ...(revenueReadiness?.depositRuleSignalsBlock
+      ? [
+          {
+            id: "deposit_invoice_rule",
+            label: revenueReadiness.message ?? "Deposit invoice expectation (RevenueOS)",
+            ok: false,
+          },
+        ]
+      : []),
+  ];
   const bookingSection = finalizeSection({
     key: "bookings",
     title: caseReadinessSectionTitle("bookings"),

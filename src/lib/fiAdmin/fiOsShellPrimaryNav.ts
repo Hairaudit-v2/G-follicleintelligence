@@ -79,7 +79,8 @@ export function resolveFiOsPrimarySidebarItems(
   showBookingsBoard: boolean,
   tenantBackendAdminRole?: FiTenantAdminRole | null,
   showAuditOsNav: boolean = true,
-  showConfigurationHubNav: boolean = true
+  showConfigurationHubNav: boolean = true,
+  showFiPaymentsInboxNav: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -261,6 +262,14 @@ export function resolveFiOsPrimarySidebarItems(
       hint: "Coming soon.",
     },
     {
+      id: "payments-inbox",
+      label: "Payments",
+      shortLabel: "Pay",
+      href: hrefFor(b, "payments"),
+      disabled: !showFiPaymentsInboxNav,
+      hint: !showFiPaymentsInboxNav ? "RevenueOS payments are disabled (FI_PAYMENTS_ENABLED)." : undefined,
+    },
+    {
       id: "analytics",
       featureKey: "analytics",
       label: "Analytics",
@@ -345,7 +354,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
-    if (firstEarly === "procedure-day") return "cases";
+    if (firstEarly === "payments") return "payments-inbox";
     if (firstEarly === "staff") return "staff";
   }
 
@@ -370,7 +379,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (npRaw.startsWith(nb)) {
     const rest = npRaw.slice(nb.length).replace(/^\//, "");
     const first = rest.split("/")[0] ?? "";
-    if (first === "staff") return "staff";
+    if (first === "payments") return "payments-inbox";
     if (first === "system-status") return "calendar";
     if (first === "settings") return "settings";
   }

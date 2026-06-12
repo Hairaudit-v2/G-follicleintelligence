@@ -30,6 +30,23 @@ test("dashboard widgets: clinical_intelligence_summary needs dashboard plus clin
   assert.equal(fiDashboardWidgetVisibleByFeatureAccess("clinical_intelligence_summary", on), true);
 });
 
+test("dashboard widgets: outcome_intelligence_summary needs dashboard plus analytics|audit|cases|patient_twin", () => {
+  const off = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    dashboard: true,
+    analytics: false,
+    audit: false,
+    cases: false,
+    patient_twin: false,
+  });
+  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("outcome_intelligence_summary", off), false);
+
+  const on = applyPartialFeatureOverrides(buildDefaultFeatureAccessAllEnabled(), {
+    dashboard: true,
+    cases: true,
+  });
+  assert.equal(fiDashboardWidgetVisibleByFeatureAccess("outcome_intelligence_summary", on), true);
+});
+
 test("dashboard widgets: null access keeps full order", () => {
   const filtered = FI_DASHBOARD_HOME_WIDGET_ORDER.filter((w) => fiDashboardWidgetVisibleByFeatureAccess(w, null));
   assert.deepEqual(filtered, [...FI_DASHBOARD_HOME_WIDGET_ORDER]);

@@ -3,7 +3,7 @@ import { BarChart3, Percent, Scissors, Stethoscope, UserPlus } from "lucide-reac
 
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
-import type { TenantLaunchControl, TenantQuickStats } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import type { TenantLaunchControl, TenantQuickStats, TenantRevenueCollections } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { FI_DASHBOARD_WIDGET_LABELS } from "@/src/config/fiDashboardRegistry";
 
 function formatConversion(rate: number | null, won: number, closed: number): string {
@@ -48,8 +48,9 @@ export function DashboardClinicMetrics(props: {
   base: string;
   quickStats: TenantQuickStats;
   launchControl: TenantLaunchControl;
+  revenueCollections?: TenantRevenueCollections;
 }) {
-  const { base, quickStats, launchControl } = props;
+  const { base, quickStats, launchControl, revenueCollections } = props;
   const conversion = formatConversion(
     quickStats.conversionRateLast30d,
     quickStats.conversionWonLast30d,
@@ -92,10 +93,16 @@ export function DashboardClinicMetrics(props: {
           icon={<Scissors className="h-3.5 w-3.5" />}
         />
         <MetricPill
-          href={`${base}/analytics`}
+          href={launchControl.revenueAvailable ? `${base}/settings/payments` : `${base}/analytics`}
           label="Revenue this week"
           value={launchControl.revenueAvailable ? "Live" : "—"}
-          foot={launchControl.revenueAvailable ? "Connected" : "Billing not connected"}
+          foot={
+            launchControl.revenueAvailable
+              ? revenueCollections?.moduleEnabled
+                ? `${revenueCollections.unpaidIssuedInvoiceCount} unpaid invoice(s) · ${revenueCollections.overdueInvoiceCount} overdue`
+                : "Connected"
+              : "Billing not connected"
+          }
           icon={<BarChart3 className="h-3.5 w-3.5" />}
         />
         <MetricPill

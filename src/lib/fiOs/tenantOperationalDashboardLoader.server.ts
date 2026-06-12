@@ -18,6 +18,8 @@ import { computeOperationalLocalDayUtcWindow } from "@/src/lib/fiOs/tenantOperat
 import { aggregateActiveLeadVolumeByPipelineStage } from "@/src/lib/fiOs/tenantOperationalDashboardCrmLeadVolume";
 import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReorder/medicationReorderLoaders.server";
 import { loadPaymentSummaryForOperations } from "@/src/lib/payments/paymentRecordLoaders.server";
+import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
+import { loadRevenueCollectionsDashboardKpis } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
   bookingAgendaBucket,
@@ -125,8 +127,14 @@ const launchControlSchema = z.object({
   leadsNeedingFollowUp: z.number().int().nonnegative(),
   /** Active CRM tasks (same visibility filter as tasks-due list; count not capped). */
   openTasks: z.number().int().nonnegative(),
-  /** Reserved for billing integration — UI shows placeholder when false. */
+  /** When true, FI Revenue / Payments module is enabled (env-driven; not a clinical guarantee). */
   revenueAvailable: z.boolean(),
+});
+
+const revenueCollectionsSchema = z.object({
+  moduleEnabled: z.boolean(),
+  unpaidIssuedInvoiceCount: z.number().int().nonnegative(),
+  overdueInvoiceCount: z.number().int().nonnegative(),
 });
 
 const paymentCommercialKpisSchema = z.object({
@@ -136,6 +144,8 @@ const paymentCommercialKpisSchema = z.object({
 });
 
 export type TenantLaunchControl = z.infer<typeof launchControlSchema>;
+
+export type TenantRevenueCollections = z.infer<typeof revenueCollectionsSchema>;
 
 export type TenantPaymentCommercialKpis = z.infer<typeof paymentCommercialKpisSchema>;
 
@@ -280,6 +290,8 @@ export const tenantOperationalDashboardSchema = z.object({
   crmPipelineLeadVolume: crmPipelineLeadVolumeSchema,
   /** Manual payment tracking KPIs (deposits / overdue — not integrated billing). */
   paymentCommercialKpis: paymentCommercialKpisSchema,
+  /** Stage 7: issued invoice collection signals (separate from `fi_payment_records`). */
+  revenueCollections: revenueCollectionsSchema,
   /** Reception board cards for `operationalDay` (tenant-local); empty when loader skips enrichment. */
   receptionBoard: receptionBoardPayloadSchema,
 });
@@ -937,6 +949,7 @@ export async function loadTenantOperationalDashboard(
     crmPipelineLeadVolume,
     paymentCommercialKpis,
     receptionBoardCards,
+    revenueCollections,
   ] = await Promise.all([
     loadAgendaBookings(tid, now),
     loadStaleLeads(tid, staleDays, now, pipelineStages),
@@ -952,6 +965,7 @@ export async function loadTenantOperationalDashboard(
     includeReceptionBoard
       ? loadReceptionBoardCards(tid, operationalLocalDay.localStartIso, operationalLocalDay.localEndIso)
       : Promise.resolve([]),
+    loadRevenueCollectionsDashboardKpis(tid, operationalTodayYmd),
   ]);
 
   return tenantOperationalDashboardSchema.parse({
@@ -972,7 +986,7 @@ export async function loadTenantOperationalDashboard(
       surgeriesThisWeek: clinicCounts.surgeriesThisWeek,
       leadsNeedingFollowUp: staleLeads.length,
       openTasks: openTasksCount,
-      revenueAvailable: false,
+      revenueAvailable: readFiPaymentsEnabled(),
     },
     clinicToday: clinicCounts.clinicToday,
     actionCentre,
@@ -986,6 +1000,7 @@ export async function loadTenantOperationalDashboard(
     crmPipelineStages,
     crmPipelineLeadVolume,
     paymentCommercialKpis: paymentCommercialKpisSchema.parse(paymentCommercialKpis),
+    revenueCollections: revenueCollectionsSchema.parse(revenueCollections),
     receptionBoard: receptionBoardPayloadSchema.parse({ cards: receptionBoardCards }),
   });
 }

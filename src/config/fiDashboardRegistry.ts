@@ -28,6 +28,8 @@ export const FI_DASHBOARD_WIDGET_KEYS = [
   "staff_intelligence_summary",
   /** Stage 5 — neutral clinical journey signals (no AI; no treatment advice). */
   "clinical_intelligence_summary",
+  /** Stage 6 — structured outcome intelligence (tenant-safe; no cross-tenant patient data). */
+  "outcome_intelligence_summary",
 ] as const;
 
 export type FiDashboardWidgetKey = (typeof FI_DASHBOARD_WIDGET_KEYS)[number];
@@ -104,6 +106,11 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
   clinical_intelligence_summary: {
     title: "Clinical Intelligence",
     description: "Neutral patient journey and outcome support signals for clinical leadership (no automated medical advice).",
+  },
+  outcome_intelligence_summary: {
+    title: "Outcome Intelligence",
+    description:
+      "Structured outcome checkpoints, imaging and audit references, and anonymisation-ready aggregates (no predictions).",
   },
 } as const satisfies Record<FiDashboardWidgetKey, { title: string; description?: string }>;
 

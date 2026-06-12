@@ -41,13 +41,17 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
 });
 
 test("getFiOsShellActiveSidebarId: surgery readiness route stays under Cases / SurgeryOS", () => {
-  const base = "/fi-admin/t-1";
   assert.equal(getFiOsShellActiveSidebarId(`${base}/surgery-readiness`, base), "cases");
 });
 
 test("getFiOsShellActiveSidebarId: procedure day route stays under Cases / SurgeryOS", () => {
   const b = "/fi-admin/t-1";
   assert.equal(getFiOsShellActiveSidebarId(`${b}/procedure-day`, b), "cases");
+});
+
+test("getFiOsShellActiveSidebarId: payments inbox maps to payments-inbox tab", () => {
+  const b = "/fi-admin/t-1";
+  assert.equal(getFiOsShellActiveSidebarId(`${b}/payments`, b), "payments-inbox");
 });
 
 test("resolveFiOsPrimarySidebarItems: cases entry includes readiness and procedure day sub-links when enabled", () => {

@@ -29,6 +29,10 @@ test("resolve: patients default", () => {
   assert.equal(resolveRequiredFiFeatureForTenantSuffix("patients/u1"), "patients");
 });
 
+test("resolve: payments inbox → settings feature gate", () => {
+  assert.equal(resolveRequiredFiFeatureForTenantSuffix("payments"), "settings");
+});
+
 test("resolve: procedure day nested under cases", () => {
   assert.equal(resolveRequiredFiFeatureForTenantSuffix("cases/u1/procedure-day"), "procedure_day");
 });

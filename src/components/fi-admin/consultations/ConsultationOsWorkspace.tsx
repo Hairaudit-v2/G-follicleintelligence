@@ -17,6 +17,7 @@ import { ConsultationOsMedicalHairLossPanel } from "@/src/components/fi-admin/co
 import { ConsultationOsMedicalPanel } from "@/src/components/fi-admin/consultations/ConsultationOsMedicalPanel";
 import { ConsultationOsNotesPanel } from "@/src/components/fi-admin/consultations/ConsultationOsNotesPanel";
 import { ConsultationOsQuotePanel } from "@/src/components/fi-admin/consultations/ConsultationOsQuotePanel";
+import { ConsultationQuoteRevenueActions } from "@/src/components/fi-admin/revenue/ConsultationQuoteRevenueActions";
 import { ConsultationOsRecommendationsPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRecommendationsPanel";
 import { ConsultationOsRegenerativeAssessmentPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRegenerativeAssessmentPanel";
 import { LabeledTextInput, LabeledTextarea } from "@/src/components/fi-admin/consultations/consultationOsPreviewFields";
@@ -839,7 +840,17 @@ export function ConsultationOsWorkspace({
             />
           </FiSection>
           {showQuote ? (
-            <ConsultationOsQuotePanel values={quoteData} onFieldChange={onQuoteFieldChange} disabled={!canEdit} />
+            <>
+              <ConsultationOsQuotePanel values={quoteData} onFieldChange={onQuoteFieldChange} disabled={!canEdit} />
+              {mode === "edit" && consultationId && canMutatePaymentRecords ? (
+                <ConsultationQuoteRevenueActions
+                  tenantId={tenantId}
+                  consultationId={consultationId}
+                  adminKey={adminKey}
+                  caseId={initialRow?.case_id ?? null}
+                />
+              ) : null}
+            </>
           ) : null}
         </div>
       </div>

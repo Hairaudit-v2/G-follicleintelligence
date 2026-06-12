@@ -1,11 +1,14 @@
-import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
+import Link from "next/link";
 import type { PatientClinicalIntelligenceView } from "@/src/lib/fi-os/clinicalIntelligenceSignals";
+import type { OutcomeMeasurementRow, OutcomeProtocolRow } from "@/src/lib/fi-os/outcomeIntelligence.server";
+import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 
 import { PatientTwinAuditCard } from "./PatientTwinAuditCard";
 import { PatientTwinCasesCard } from "./PatientTwinCasesCard";
 import { PatientTwinClinicalIntelligenceCard } from "./PatientTwinClinicalIntelligenceCard";
 import { PatientTwinClinicalCard } from "./PatientTwinClinicalCard";
 import { PatientTwinMedicationsCard } from "./PatientTwinMedicationsCard";
+import { PatientTwinOutcomeJourneyCard } from "./PatientTwinOutcomeJourneyCard";
 import { PatientTwinPathologyCard } from "./PatientTwinPathologyCard";
 import { PatientTwinCrmCard } from "./PatientTwinCrmCard";
 import { PatientTwinHeader } from "./PatientTwinHeader";
@@ -20,15 +23,30 @@ export type PatientTwinDashboardProps = {
   patientId: string;
   twin: PatientTwinV1;
   clinicalIntel: PatientClinicalIntelligenceView;
+  outcomeMeasurements: OutcomeMeasurementRow[];
+  outcomeProtocols: OutcomeProtocolRow[];
 };
 
 /**
  * Executive read-only layout for PatientTwin V1 — no client fetches, no writes.
  */
-export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel }: PatientTwinDashboardProps) {
+export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel, outcomeMeasurements, outcomeProtocols }: PatientTwinDashboardProps) {
   return (
     <div className="scroll-mt-4 space-y-5">
       <PatientTwinHeader tenantId={tenantId} patientId={patientId} twin={twin} />
+
+      <div className="rounded-lg border border-white/[0.08] bg-[#0b1220]/80 p-4 text-sm text-slate-200">
+        <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400/90">Payments</p>
+        <p className="mt-2 text-sm text-slate-400">
+          Structured invoices and balances live on the patient profile Payments tab (RevenueOS).
+        </p>
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}?tab=payments`}
+          className="mt-3 inline-block text-sm font-medium text-cyan-300 hover:underline"
+        >
+          Open Payments tab
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
         <PatientTwinIdentityCard twin={twin} />
@@ -38,6 +56,8 @@ export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel 
       <PatientTwinCasesCard tenantId={tenantId} twin={twin} />
 
       <PatientTwinClinicalIntelligenceCard tenantId={tenantId} patientId={patientId} view={clinicalIntel} />
+
+      <PatientTwinOutcomeJourneyCard measurements={outcomeMeasurements} protocols={outcomeProtocols} />
 
       <PatientTwinPathologyCard tenantId={tenantId} patientId={patientId} twin={twin} />
 

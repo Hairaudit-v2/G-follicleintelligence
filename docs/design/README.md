@@ -32,6 +32,15 @@ Design for FI as a **shared intelligence and analytics platform** alongside Hair
 |-----|--------|
 | [FI Admin without login](../dev-local-fi-admin.md) | `FI_ENABLE_DEV_ADMIN_ACCESS` — optional `fi_tenants` listing when no Supabase session (non-production only). |
 
+## FI OS implementation runbooks
+
+| Runbook | Scope |
+|---------|--------|
+| [Outcome intelligence network (foundation)](../fi-os-outcome-intelligence-network-foundation.md) | Entry index: Stage 6 schema + code map + link to full runbook. |
+| [Stage 6 — Outcome intelligence network](../runbooks/fi-os-stage6-outcome-intelligence-network.md) | Tables, RLS, anonymisation, UI, TODO, Stage 7. |
+| [Stage 5 — Clinical intelligence](../runbooks/fi-os-stage5-clinical-intelligence.md) | Signals, events, snapshots, UI. |
+| [Stage 7 — Revenue & payments](../runbooks/fi-os-stage7-revenue-payments.md) | Payment/revenue ops (separate track). |
+
 ## FI OS access & launch
 
 | Doc | Content |

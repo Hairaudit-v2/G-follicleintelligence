@@ -106,6 +106,11 @@ export function FiOsClinicSettingsNav({
             Tax &amp; Localisation
           </Link>
         ) : null}
+        {(showReminders || showTax) ? (
+          <Link href={`${base}/settings/payments`} className={linkCls(`${base}/settings/payments`)}>
+            Payments
+          </Link>
+        ) : null}
         {showAdminUsers ? (
           <Link
             href={`${base}/settings/admin-users`}

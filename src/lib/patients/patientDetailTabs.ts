@@ -7,6 +7,7 @@ export const PATIENT_DETAIL_TABS = [
   "timeline",
   "prescriptions",
   "documents",
+  "payments",
 ] as const;
 
 export type PatientDetailTabId = (typeof PATIENT_DETAIL_TABS)[number];
@@ -22,6 +23,7 @@ export const PATIENT_DETAIL_TAB_LABELS: Record<PatientDetailTabId, string> = {
   timeline: "Timeline",
   prescriptions: "Prescriptions",
   documents: "Documents",
+  payments: "Payments",
 };
 
 export function parsePatientDetailTab(raw: string | string[] | undefined): PatientDetailTabId {

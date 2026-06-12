@@ -14,6 +14,7 @@ import { DashboardOperationalWorkspace } from "@/src/components/fi-admin/dashboa
 import { DashboardQuickActionsBar } from "@/src/components/fi-admin/dashboard/DashboardQuickActionsBar";
 import { DashboardSurgeryPipeline } from "@/src/components/fi-admin/dashboard/DashboardSurgeryPipeline";
 import { DashboardClinicalIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardClinicalIntelligenceSummary";
+import { DashboardOutcomeIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardOutcomeIntelligenceSummary";
 import { DashboardStaffIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardStaffIntelligenceSummary";
 import { DashboardWidgetPlaceholder } from "@/src/components/fi-admin/dashboard/DashboardWidgetPlaceholder";
 import { TenantHomeQuickCallIn } from "@/src/components/fi-admin/TenantHomeQuickCallIn";
@@ -24,6 +25,10 @@ import {
   filterResolvedQuickActionsByFeatureAccess,
 } from "@/src/lib/fi-os/stage2FeatureVisibility";
 import { EMPTY_TENANT_CLINICAL_INTELLIGENCE_SUMMARY, type TenantClinicalIntelligenceSummary } from "@/src/lib/fi-os/clinicalIntelligence.server";
+import {
+  EMPTY_TENANT_OUTCOME_INTELLIGENCE_SUMMARY,
+  type TenantOutcomeIntelligenceSummary,
+} from "@/src/lib/fi-os/outcomeIntelligence.server";
 import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 
@@ -54,6 +59,8 @@ function resolveDashboardPlaceholderHref(tenantBase: string, key: FiDashboardWid
       return `${b}/staff`;
     case "clinical_intelligence_summary":
       return `${b}/surgery-readiness`;
+    case "outcome_intelligence_summary":
+      return `${b}/cases`;
     default:
       return null;
   }
@@ -76,6 +83,8 @@ export function FiOsControlCentreHome(props: {
   workspaceProfile?: FiWorkspaceProfileKey;
   /** Stage 5: optional tenant clinical intelligence snapshot for dashboard cards. */
   clinicalIntelligenceSummary?: TenantClinicalIntelligenceSummary | null;
+  /** Stage 6: optional tenant outcome intelligence snapshot for dashboard cards. */
+  outcomeIntelligenceSummary?: TenantOutcomeIntelligenceSummary | null;
 }) {
   const {
     data,
@@ -86,6 +95,7 @@ export function FiOsControlCentreHome(props: {
     quickActionItems,
     workspaceProfile,
     clinicalIntelligenceSummary = null,
+    outcomeIntelligenceSummary = null,
   } = props;
   const base = `/fi-admin/${data.tenantId}`;
   const baseResolved = resolveDashboardQuickActions(base, { showCrmNav, showBookingsBoard });
@@ -112,7 +122,14 @@ export function FiOsControlCentreHome(props: {
       case "quick_actions":
         return <DashboardQuickActionsBar items={resolvedQuick} />;
       case "clinic_metrics":
-        return <DashboardClinicMetrics base={base} quickStats={data.quickStats} launchControl={data.launchControl} />;
+        return (
+          <DashboardClinicMetrics
+            base={base}
+            quickStats={data.quickStats}
+            launchControl={data.launchControl}
+            revenueCollections={data.revenueCollections}
+          />
+        );
       case "operational_workspace":
         return (
           <DashboardOperationalWorkspace
@@ -152,6 +169,13 @@ export function FiOsControlCentreHome(props: {
           <DashboardClinicalIntelligenceSummary
             tenantBase={base}
             summary={clinicalIntelligenceSummary ?? EMPTY_TENANT_CLINICAL_INTELLIGENCE_SUMMARY}
+          />
+        );
+      case "outcome_intelligence_summary":
+        return (
+          <DashboardOutcomeIntelligenceSummary
+            tenantBase={base}
+            summary={outcomeIntelligenceSummary ?? EMPTY_TENANT_OUTCOME_INTELLIGENCE_SUMMARY}
           />
         );
       case "analytics_summary":

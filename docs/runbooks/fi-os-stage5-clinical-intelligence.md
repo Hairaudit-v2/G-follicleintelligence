@@ -98,11 +98,15 @@ Until this runs in an environment, `recordClinicalIntelligenceEvent` will fail i
 
 ---
 
-## Stage 6 roadmap (forward-looking)
+## Stage 6–7 roadmap (forward-looking)
 
-1. **Real outcome intelligence loaders** — structured fields, agreed thresholds, non-punitive presentation.
-2. **Scheduled patient snapshots** — populate `fi_patient_clinical_intelligence_snapshots` from a cron or queue worker (tenant-scoped).
-3. **Benchmarking framework** — tenant-aggregated or explicitly governed cohorts; **no** leaking identifiable patient data across tenants.
+**Stage 6 (outcome intelligence network foundation)** is implemented — see **[Outcome intelligence network foundation](../fi-os-outcome-intelligence-network-foundation.md)** and **[Stage 6 runbook](../runbooks/fi-os-stage6-outcome-intelligence-network.md)** (tables, RLS, UI, anonymisation).
+
+Remaining from the original Stage 6 bullet list:
+
+1. **Scheduled patient snapshots** — populate `fi_patient_clinical_intelligence_snapshots` from a cron or queue worker (tenant-scoped).
+2. **HairAudit / formal score ingestion** — structured refs or metrics into outcome measurements (governed).
+3. **Network publish pipeline** — job-driven `fi_global_outcome_aggregates` when app-layer gates pass; tenant-vs-network UI (Stage 7).
 4. **Predictive analytics** — only after governance, opt-in policy, and explainability; Stage 5 registry and events table are intended to support **source-linked** narratives, not black-box scores.
 
 ---

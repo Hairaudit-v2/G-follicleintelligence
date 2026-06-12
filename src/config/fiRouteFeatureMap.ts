@@ -50,7 +50,7 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "medication-reorders" || f.startsWith("medication-reorders/"), feature: "prescriptions" },
   { test: (f) => f === "audit" || f.startsWith("audit/"), feature: "audit" },
   { test: (f) => f === "academy" || f.startsWith("academy/"), feature: "academy" },
-  { test: (f) => f === "analytics" || f.startsWith("analytics/"), feature: "analytics" },
+  { test: (f) => f === "payments" || f.startsWith("payments/"), feature: "settings" },
   { test: (f) => f === "staff" || f.startsWith("staff/"), feature: "staff" },
   { test: (f) => f.startsWith("hr/"), feature: "staff" },
 ];
