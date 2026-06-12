@@ -36,23 +36,23 @@ const OUTER_NODES: OuterNodeData[] = [
   {
     id: "iiohr",
     title: "IIOHR™",
-    subtitle: "Methodology, training & standards",
-    detail: "Frameworks · Credentialing · Governance",
-    label: "STANDARDS",
+    subtitle: "Training Intelligence Layer",
+    detail: "Methodology · Credentialing · Governance",
+    label: "TRAINING",
   },
   {
     id: "hairaudit",
     title: "HairAudit™",
-    subtitle: "Surgical evidence & audit surface",
+    subtitle: "Outcome Intelligence Layer",
     detail: "Evidence · Scoring · Benchmark visibility",
     label: "OUTCOMES",
   },
   {
     id: "hli",
     title: "Hair Longevity Institute™",
-    subtitle: "Biology & longitudinal intelligence",
+    subtitle: "Diagnostic Intelligence Layer",
     detail: "Diagnosis · Treatment · Follow-up signal",
-    label: "DATA",
+    label: "DIAGNOSTICS",
   },
 ];
 
@@ -146,13 +146,17 @@ export interface GlobalHairIntelligenceNetworkProps {
   expandable?: boolean;
   showBackground?: boolean;
   className?: string;
+  /** Accessible name for the diagram (aria-label). */
   title?: string;
+  /** Optional footer line under the SVG (defaults to “GLOBAL HAIR INTELLIGENCE NETWORK”). */
+  footerCaption?: string;
   nodeLinks?: Partial<Record<GlobalNetworkNodeId, string>>;
   /** "hero" = square, larger; "compact" = smaller text, fits in narrow sections */
   size?: "hero" | "compact";
 }
 
 const DEFAULT_TITLE = "Global Hair Intelligence Network";
+const DEFAULT_FOOTER_CAPTION = "GLOBAL HAIR INTELLIGENCE NETWORK";
 
 export function GlobalHairIntelligenceNetwork({
   theme = "auto",
@@ -164,6 +168,7 @@ export function GlobalHairIntelligenceNetwork({
   showBackground = false,
   className = "",
   title = DEFAULT_TITLE,
+  footerCaption,
   nodeLinks,
   size = "hero",
 }: GlobalHairIntelligenceNetworkProps) {
@@ -237,7 +242,7 @@ export function GlobalHairIntelligenceNetwork({
           letterSpacing="0.2em"
           fill={colors.networkLabel}
         >
-          GLOBAL HAIR INTELLIGENCE NETWORK
+          {footerCaption ?? DEFAULT_FOOTER_CAPTION}
         </text>
 
         {positions.map((pos, i) => (
@@ -376,7 +381,7 @@ function CenterNode({
         fill={colors.textPrimary}
         opacity={0.9}
       >
-        Central intelligence layer
+        Central intelligence platform
       </text>
       <text
         x={CX}

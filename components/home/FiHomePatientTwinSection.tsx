@@ -5,78 +5,129 @@ import {
   Activity,
   BarChart3,
   Camera,
+  ClipboardList,
   Droplets,
   GraduationCap,
   HeartPulse,
+  LineChart,
   Pill,
+  RefreshCw,
   Ruler,
-  Scan,
   Smile,
   Stethoscope,
+  Syringe,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 const DATA_KEYS = [
-  "photos",
-  "trichoscopy",
-  "blood",
-  "meds",
-  "surgical",
-  "density",
-  "satisfaction",
+  "clinicalImaging",
+  "hairLossProgression",
+  "bloodMarkers",
+  "medications",
+  "treatmentHistory",
+  "prpExosomes",
+  "surgeryHistory",
+  "followUpProgression",
+  "outcomeMeasurements",
+  "patientSatisfaction",
 ] as const;
 
 type DataKey = (typeof DATA_KEYS)[number];
 
 const DATA_META: Record<DataKey, { label: string; Icon: LucideIcon }> = {
-  photos: { label: "Photos", Icon: Camera },
-  trichoscopy: { label: "Trichoscopy", Icon: Scan },
-  blood: { label: "Blood markers", Icon: Droplets },
-  meds: { label: "Medications", Icon: Pill },
-  surgical: { label: "Surgical metrics", Icon: Activity },
-  density: { label: "Density measurements", Icon: Ruler },
-  satisfaction: { label: "Patient satisfaction", Icon: Smile },
+  clinicalImaging: { label: "Clinical imaging", Icon: Camera },
+  hairLossProgression: { label: "Hair loss progression", Icon: LineChart },
+  bloodMarkers: { label: "Blood markers", Icon: Droplets },
+  medications: { label: "Medications", Icon: Pill },
+  treatmentHistory: { label: "Treatment history", Icon: ClipboardList },
+  prpExosomes: { label: "PRP and exosomes", Icon: Syringe },
+  surgeryHistory: { label: "Surgery history", Icon: Activity },
+  followUpProgression: { label: "Follow-up progression", Icon: RefreshCw },
+  outcomeMeasurements: { label: "Outcome measurements", Icon: Ruler },
+  patientSatisfaction: { label: "Patient satisfaction", Icon: Smile },
 };
 
 const TIMELINE: { title: string; points: DataKey[] }[] = [
-  { title: "Consultation", points: ["photos", "trichoscopy", "satisfaction"] },
-  { title: "Hair Loss Assessment", points: ["photos", "trichoscopy"] },
-  { title: "Blood Analysis", points: ["blood"] },
-  { title: "Treatment Plan", points: ["meds", "photos", "trichoscopy"] },
-  { title: "PRP / Exosomes", points: ["meds", "photos"] },
-  { title: "Hair Transplant", points: ["surgical", "photos", "density"] },
-  { title: "6 Month Review", points: ["photos", "density", "satisfaction"] },
-  { title: "12 Month Outcome", points: ["photos", "density", "trichoscopy", "satisfaction"] },
-  { title: "Lifetime Monitoring", points: ["photos", "blood", "meds", "trichoscopy", "surgical", "density", "satisfaction"] },
+  {
+    title: "Consultation",
+    points: ["clinicalImaging", "hairLossProgression", "patientSatisfaction"],
+  },
+  { title: "Hair Loss Assessment", points: ["clinicalImaging", "hairLossProgression"] },
+  { title: "Blood Analysis", points: ["bloodMarkers"] },
+  {
+    title: "Treatment Plan",
+    points: ["medications", "clinicalImaging", "treatmentHistory"],
+  },
+  {
+    title: "PRP / Exosomes",
+    points: ["prpExosomes", "medications", "clinicalImaging"],
+  },
+  {
+    title: "Hair Transplant",
+    points: ["surgeryHistory", "clinicalImaging", "outcomeMeasurements"],
+  },
+  {
+    title: "6 Month Review",
+    points: [
+      "clinicalImaging",
+      "followUpProgression",
+      "outcomeMeasurements",
+      "patientSatisfaction",
+    ],
+  },
+  {
+    title: "12 Month Outcome",
+    points: [
+      "clinicalImaging",
+      "outcomeMeasurements",
+      "hairLossProgression",
+      "patientSatisfaction",
+    ],
+  },
+  {
+    title: "Lifetime Monitoring",
+    points: [
+      "clinicalImaging",
+      "bloodMarkers",
+      "medications",
+      "treatmentHistory",
+      "prpExosomes",
+      "surgeryHistory",
+      "followUpProgression",
+      "outcomeMeasurements",
+      "hairLossProgression",
+      "patientSatisfaction",
+    ],
+  },
 ];
 
 const INTELLIGENCE_CARDS: { title: string; body: string; icon: LucideIcon }[] = [
   {
     title: "Clinical Intelligence",
     icon: Stethoscope,
-    body: "The Twin preserves clinical context across visits—so diagnostics, plans, and responses stay comparable over years, not fragmented across folders.",
+    body: "Imaging, labs, meds, and every documented decision stay attached to one identity—so today’s work is always comparable to yesterday’s baseline.",
   },
   {
     title: "Surgical Intelligence",
     icon: Activity,
-    body: "Procedural artefacts attach to the same identity: graft design, execution metrics, and imaging that make technical quality auditable long after discharge.",
+    body: "Transplant episodes, regenerative protocols, and procedural detail live beside the same imaging spine—audit-ready history, not scattered files.",
   },
   {
     title: "Outcome Intelligence",
     icon: HeartPulse,
-    body: "Follow-up density, imagery, and patient-reported signal accumulate into defensible trajectories—fuel for benchmarks, not one-off anecdotes.",
+    body: "Follow-up cadence, objective measures, and patient-reported signal stack into trajectories you can defend, refine, and learn from over time.",
   },
   {
     title: "Training Intelligence",
     icon: GraduationCap,
-    body: "Longitudinal twins expose where standards land in practice—informing curricula and review pathways grounded in real cohort behaviour.",
+    body: "Rich twins show how standards behave in the real world—powering teaching, review, and safer defaults grounded in longitudinal behaviour.",
   },
   {
     title: "Business Intelligence",
     icon: BarChart3,
-    body: "Operational and commercial views inherit the same longitudinal spine—cohort integrity without reconciling ten different patient IDs.",
+    body: "Operations and growth inherit one longitudinal spine—clean cohorts and continuity without stitching together duplicate patient records.",
   },
 ];
 
@@ -295,14 +346,14 @@ export function FiHomePatientTwinSection() {
             id="fi-patient-twin-heading"
             className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl md:leading-[1.12]"
           >
-            Every Patient. One Record. For Life.
+            Meet The Patient Twin™
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg md:leading-relaxed">
-            Consultations, diagnostics, treatment plans, procedural episodes, surgical metrics, outcomes, and follow-up
-            assessments do not live in parallel silos. The Patient Twin™ unifies them into one longitudinal record—so
-            every touchpoint strengthens the same identity, the same timeline, and the same defensible clinical story
-            across the life of care.
-          </p>
+          <div className="mt-5 space-y-4 text-base leading-relaxed text-muted-foreground md:text-lg md:leading-relaxed">
+            <p>Every patient becomes a living intelligence record.</p>
+            <p>One patient.</p>
+            <p>One timeline.</p>
+            <p>Connected forever.</p>
+          </div>
         </header>
 
         <PatientTwinTimeline />
@@ -344,13 +395,7 @@ export function FiHomePatientTwinSection() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,hsl(var(--primary)/0.14),transparent_55%)]" />
           <div className="relative text-center">
             <p className="font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl">
-              Every Interaction Makes The Network Smarter
-            </p>
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base md:leading-relaxed">
-              Aggregated Patient Twins—always within policy, consent, and tenancy—supply the density that modern models
-              need. Similar presentations, treatment responses, surgical fingerprints, and long-run outcomes surface as
-              patterns the ecosystem can interrogate: not to replace clinicians, but to sharpen triage, benchmarking, and
-              research-grade questions across the network.
+              Every patient interaction improves future clinical decision making.
             </p>
           </div>
         </motion.div>

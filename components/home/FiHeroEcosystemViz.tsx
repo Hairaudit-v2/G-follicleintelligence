@@ -5,15 +5,17 @@ import { useMemo } from "react";
 
 const CENTRAL = "Follicle Intelligence";
 
-const SATELLITES = [
-  "HairAudit",
-  "Hair Longevity Institute",
-  "IIOHR",
+type HeroSatellite = string | { primary: string; secondary: string };
+
+const SATELLITES: HeroSatellite[] = [
+  { primary: "HairAudit™", secondary: "Outcome Intelligence Layer" },
+  { primary: "HLI™", secondary: "Diagnostic Intelligence Layer" },
+  { primary: "IIOHR™", secondary: "Training Intelligence Layer" },
   "Patient Twin",
   "SurgeryOS",
   "ClinicOS",
   "AnalyticsOS",
-] as const;
+];
 
 function polarToPct(index: number, total: number, radiusPct: number) {
   const angle = -Math.PI / 2 + (index * 2 * Math.PI) / total;
@@ -30,6 +32,7 @@ export function FiHeroEcosystemViz() {
     const r = 38;
     return SATELLITES.map((label, i) => ({
       label,
+      key: typeof label === "string" ? label : label.primary,
       ...polarToPct(i, SATELLITES.length, r),
       delay: i * 0.12,
     }));
@@ -39,7 +42,7 @@ export function FiHeroEcosystemViz() {
     <div
       className="relative mx-auto w-full max-w-[min(100%,520px)]"
       role="img"
-      aria-label="Follicle Intelligence at the centre of an ecosystem: HairAudit, Hair Longevity Institute, IIOHR, Patient Twin, SurgeryOS, ClinicOS, and AnalyticsOS, with animated data connections."
+      aria-label="Follicle Intelligence at the centre: HairAudit Outcome Intelligence Layer, HLI Diagnostic Intelligence Layer, IIOHR Training Intelligence Layer, plus Patient Twin, SurgeryOS, ClinicOS, and AnalyticsOS—with animated data connections."
     >
       <div
         className="relative aspect-[1/1.05] min-h-[320px] w-full overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-gradient-to-br from-[rgb(12_18_28_/0.92)] via-[rgb(8_13_22_/0.88)] to-[rgb(6_10_18_/0.95)] shadow-[0_24px_80px_rgb(0_0_0_/0.45),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-xl sm:min-h-[380px] md:min-h-[420px]"
@@ -54,7 +57,7 @@ export function FiHeroEcosystemViz() {
           aria-hidden
         >
           {nodes.map((n) => (
-            <g key={n.label}>
+            <g key={n.key}>
               <line
                 x1="50"
                 y1="50"
@@ -126,7 +129,7 @@ export function FiHeroEcosystemViz() {
 
         {nodes.map((n) => (
           <div
-            key={n.label}
+            key={n.key}
             className="absolute z-10 max-w-[38%] sm:max-w-[34%]"
             style={{ left: `${n.x}%`, top: `${n.y}%`, transform: "translate(-50%, -50%)" }}
           >
@@ -140,15 +143,18 @@ export function FiHeroEcosystemViz() {
               }}
             >
               <div className="rounded-xl border border-white/[0.09] bg-[rgb(8_13_22_/0.5)] px-2 py-1.5 text-center shadow-[inset_0_1px_0_rgb(255_255_255_/0.05)] backdrop-blur-sm sm:px-2.5 sm:py-2">
-                <p
-                  className={`font-medium leading-tight text-foreground/95 ${
-                    n.label === "Hair Longevity Institute"
-                      ? "text-[9px] sm:text-[10px]"
-                      : "text-[10px] sm:text-[11px]"
-                  }`}
-                >
-                  {n.label}
-                </p>
+                {typeof n.label === "string" ? (
+                  <p className="font-medium leading-tight text-foreground/95 text-[10px] sm:text-[11px]">{n.label}</p>
+                ) : (
+                  <>
+                    <p className="text-[10px] font-medium leading-tight text-foreground/95 sm:text-[11px]">
+                      {n.label.primary}
+                    </p>
+                    <p className="mt-0.5 text-[8px] font-medium leading-snug text-muted-foreground/95 sm:text-[9px]">
+                      {n.label.secondary}
+                    </p>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>

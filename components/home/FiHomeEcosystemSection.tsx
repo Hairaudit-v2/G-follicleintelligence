@@ -7,9 +7,12 @@ import {
   ArrowRight,
   BarChart3,
   Building2,
+  Camera,
+  ClipboardCheck,
+  ClipboardList,
   GraduationCap,
-  ScanSearch,
-  Stethoscope,
+  Megaphone,
+  Users,
 } from "lucide-react";
 import { Fragment, useId, useMemo } from "react";
 
@@ -17,11 +20,14 @@ import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 const MODULES = [
-  "HairAudit",
-  "Hair Longevity Institute",
-  "IIOHR",
-  "SurgeryOS",
+  "LeadFlow",
   "ClinicOS",
+  "PatientOS",
+  "ConsultationOS",
+  "ImagingOS",
+  "SurgeryOS",
+  "AuditOS",
+  "AcademyOS",
   "AnalyticsOS",
 ] as const;
 
@@ -45,7 +51,7 @@ function EcosystemNetworkDiagram() {
     <div
       className="relative mx-auto w-full max-w-5xl"
       role="img"
-      aria-label="Diagram: Follicle Intelligence intelligence core connected to HairAudit, Hair Longevity Institute, IIOHR, SurgeryOS, ClinicOS, and AnalyticsOS with animated data flows."
+      aria-label="Diagram: Follicle Intelligence core connected to nine operating systems—LeadFlow, ClinicOS, PatientOS, ConsultationOS, ImagingOS, SurgeryOS, AuditOS, AcademyOS, and AnalyticsOS—with animated data flows."
     >
       <div
         className={cn(
@@ -148,14 +154,7 @@ function EcosystemNetworkDiagram() {
                   "bg-[rgb(7_11_18_/0.52)] shadow-[inset_0_1px_0_rgb(255_255_255_/0.05)] backdrop-blur-sm"
                 )}
               >
-                <p
-                  className={cn(
-                    "font-medium leading-tight text-foreground/94",
-                    n.label === "Hair Longevity Institute"
-                      ? "text-[9px] sm:text-[10px]"
-                      : "text-[10px] sm:text-[11px] md:text-xs"
-                  )}
-                >
+                <p className="text-[10px] font-medium leading-tight text-foreground/94 sm:text-[11px] md:text-xs">
                   {n.label}
                 </p>
               </div>
@@ -178,52 +177,66 @@ const PLATFORM_CARDS: {
   external?: boolean;
 }[] = [
   {
-    name: "HairAudit",
-    intelligence: "Outcome Intelligence",
-    icon: ScanSearch,
-    description:
-      "Structured surgical evidence and follow-up signal feed benchmark-ready outcome models—so quality is comparable across sites, not inferred from marketing.",
-    href: "https://hairaudit.com",
-    external: true,
-  },
-  {
-    name: "HLI",
-    intelligence: "Clinical Intelligence",
-    icon: Stethoscope,
-    description:
-      "Longitudinal biology and treatment trajectories enrich the same ontology as procedural evidence—closing the gap between episode snapshots and real-world response.",
-    href: "/hair-intelligence",
-  },
-  {
-    name: "IIOHR",
-    intelligence: "Training Intelligence",
-    icon: GraduationCap,
-    description:
-      "Standards, curricula, and review pathways produce governed labels and competencies that anchor what “good” means across the network.",
-    href: "/methodology",
-  },
-  {
-    name: "SurgeryOS",
-    intelligence: "Procedural Intelligence",
-    icon: Activity,
-    description:
-      "Operating-room and case lifecycle data refine extraction, documentation, and handoff quality—where small variance compounds into measurable deltas.",
-    href: "/solutions",
-  },
-  {
-    name: "ClinicOS",
-    intelligence: "Operational Intelligence",
-    icon: Building2,
-    description:
-      "Scheduling, CRM, and front-office workflows generate demand, adherence, and throughput signals that explain outcomes in context—not in isolation.",
+    name: "LeadFlow",
+    intelligence: "Acquisition layer",
+    icon: Megaphone,
+    description: "CRM, patient acquisition, follow-up automation.",
     href: "/platform",
   },
   {
+    name: "ClinicOS",
+    intelligence: "Operations layer",
+    icon: Building2,
+    description: "Scheduling, operations, staff calendars, clinic workflow.",
+    href: "/platform",
+  },
+  {
+    name: "PatientOS",
+    intelligence: "Patient record layer",
+    icon: Users,
+    description: "Unified patient records and Patient Twin.",
+    href: "/hair-intelligence",
+  },
+  {
+    name: "ConsultationOS",
+    intelligence: "Clinical decision layer",
+    icon: ClipboardList,
+    description: "Assessments, treatment planning, pathology, recommendations.",
+    href: "/hair-intelligence",
+  },
+  {
+    name: "ImagingOS",
+    intelligence: "Imaging layer",
+    icon: Camera,
+    description: "Clinical photography, scalp mapping, AI image classification.",
+    href: "/platform",
+  },
+  {
+    name: "SurgeryOS",
+    intelligence: "Procedure layer",
+    icon: Activity,
+    description: "Surgical planning, graft tracking, procedure workflows.",
+    href: "/solutions",
+  },
+  {
+    name: "AuditOS",
+    intelligence: "Quality layer",
+    icon: ClipboardCheck,
+    description: "Outcome measurement and quality intelligence.",
+    href: "/methodology",
+  },
+  {
+    name: "AcademyOS",
+    intelligence: "Competency layer",
+    icon: GraduationCap,
+    description: "Training, certification, competencies.",
+    href: "/methodology",
+  },
+  {
     name: "AnalyticsOS",
-    intelligence: "Business Intelligence",
+    intelligence: "Performance layer",
     icon: BarChart3,
-    description:
-      "Portfolio, cohort, and board-grade views translate technical and clinical signal into capital, expansion, and governance decisions with a shared denominator.",
+    description: "Revenue, conversion, performance intelligence.",
     href: "/dashboard-demo",
   },
 ];
@@ -263,8 +276,8 @@ function PatientJourneyFlow() {
           Individually Powerful. Collectively Transformational.
         </p>
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          Each patient touchpoint emits structured signal. Follicle Intelligence is the receiving layer where those streams
-          fuse—so cohorts sharpen, governance holds, and improvement compounds across the ecosystem.
+          Each patient touchpoint emits structured signal into Follicle Intelligence—the receiving layer where those
+          streams fuse—so cohorts sharpen, governance holds, and improvement compounds across the ecosystem.
         </p>
       </div>
 
@@ -375,15 +388,16 @@ export function FiHomeEcosystemSection() {
 
       <div className="relative mx-auto max-w-6xl px-6 py-16 md:py-24">
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary/88">Ecosystem</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary/88">Platform</p>
           <h2
             id="fi-home-ecosystem-heading"
             className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl md:leading-[1.12]"
           >
-            One Ecosystem. One Intelligence Layer.
+            One Platform. Nine Operating Systems.
           </h2>
           <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg md:leading-relaxed">
-            Every platform contributes to a shared intelligence network designed specifically for hair restoration.
+            Everything a modern hair restoration clinic needs on the Follicle Intelligence platform—connected from
+            enquiry to long-term outcome.
           </p>
         </header>
 

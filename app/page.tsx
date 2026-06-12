@@ -11,7 +11,9 @@ import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { SITE_SEO_DESCRIPTION, SITE_SEO_TITLE } from "@/lib/structured-data";
 import { cn } from "@/lib/utils";
+import { PUBLIC_IMAGES } from "@/src/lib/brand/publicImages";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -36,18 +38,44 @@ import {
   Workflow,
 } from "lucide-react";
 
+const OG_IMAGE = PUBLIC_IMAGES.appleTouchIcon;
+
 export const metadata: Metadata = {
-  title: "Follicle Intelligence | Hair Restoration Intelligence Network",
-  description:
-    "The intelligence layer connecting diagnosis, treatment, surgery, outcomes, training and business intelligence across the global hair restoration ecosystem—learning with every interaction.",
+  title: SITE_SEO_TITLE,
+  description: SITE_SEO_DESCRIPTION,
+  openGraph: {
+    title: SITE_SEO_TITLE,
+    description: SITE_SEO_DESCRIPTION,
+    siteName: "Follicle Intelligence",
+    type: "website",
+    images: [
+      {
+        url: OG_IMAGE.src,
+        width: OG_IMAGE.width,
+        height: OG_IMAGE.height,
+        alt: "Follicle Intelligence — The World's First Hair Restoration Operating System",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_SEO_TITLE,
+    description: SITE_SEO_DESCRIPTION,
+    images: [OG_IMAGE.src],
+  },
 };
 
-const ECOSYSTEM_HEADING = "One intelligence layer. Three operational surfaces.";
-const ECOSYSTEM_DESCRIPTION = `Follicle Intelligence sits at the center—not as another point solution, but as the system that learns across HairAudit™ (surgical evidence and audit surface), Hair Longevity Institute™ (biology and longitudinal treatment intelligence), and IIOHR™ (methodology, training, and standards).
+const ECOSYSTEM_HEADING = "Follicle Intelligence: the platform. Three specialist intelligence layers.";
+const ECOSYSTEM_DESCRIPTION = `Follicle Intelligence™ is the master operating system—where clinic, surgical, longitudinal, and governance signal becomes one longitudinal spine.
 
-Evidence and standards enter at the edges; FI unifies scoring, benchmarks, and governance signals so improvement compounds network-wide—without replacing any source system of record.
+Under that platform, three named engines deepen specific work: HairAudit™ as the Outcome Intelligence Layer (surgical evidence, scoring, and audit-grade comparability), Hair Longevity Institute™ as the Diagnostic Intelligence Layer (biology and longitudinal treatment intelligence), and IIOHR™ as the Training Intelligence Layer (methodology, standards, and credible review framing).
+
+Evidence still originates in operational systems you already trust; FI unifies benchmarks and governance so improvement compounds network-wide—without replacing your source of record.
 
 A reinforcing loop: richer evidence sharpens benchmarks; clearer benchmarks raise accountability; stronger accountability feeds better training and standards.`;
+
+const GLOBAL_NETWORK_SECTION_TITLE = "How Follicle Intelligence connects the ecosystem";
+const GLOBAL_NETWORK_FOOTER_CAPTION = "ONE PLATFORM · THREE INTELLIGENCE LAYERS";
 
 const GlobalHairIntelligenceSectionDynamic = dynamic(
   () =>
@@ -89,7 +117,7 @@ const MARKET_WHY_POINTS: { title: string; desc: string }[] = [
   },
   {
     title: "The shift underway",
-    desc: "Stakeholders are asking for transparency that survives scrutiny—not slogans. FI exists to make quality legible: scored where evidence allows, benchmarked where cohorts exist, and governed where standards and review matter.",
+    desc: "Stakeholders are asking for transparency that survives scrutiny—not slogans. Follicle Intelligence exists to make quality legible: scored where evidence allows, benchmarked where cohorts exist, and governed where standards and review matter.",
   },
 ];
 
@@ -214,7 +242,7 @@ const VERTICALS = [
   {
     title: "Hair restoration",
     status: "Live focus",
-    desc: "HairAudit, HLI, and IIOHR are the live surfaces; FI is the central layer learning across surgical evidence, biology, and standards.",
+    desc: "Follicle Intelligence ships as the clinic OS, with HairAudit™ (outcomes), HLI™ (diagnostics), and IIOHR™ (training) as live intelligence layers that deepen the same platform—not competing products.",
   },
   {
     title: "Facial aesthetics",
@@ -298,19 +326,18 @@ export default function HomePage() {
         <div className="relative mx-auto grid max-w-6xl gap-14 px-6 py-20 md:grid-cols-12 md:gap-16 md:py-28">
           <FadeIn className="md:col-span-6 lg:col-span-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-primary/90">
-              Hair Restoration Intelligence Platform
+              Enterprise hair restoration platform
             </p>
             <h1 className="mt-5 max-w-3xl font-display text-4xl font-semibold tracking-tight text-foreground md:text-5xl md:leading-[1.08] lg:text-[3.15rem]">
-              The World&apos;s First Hair Restoration Intelligence Network
+              The World&apos;s First Hair Restoration Operating System
             </h1>
             <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-foreground/92 md:text-xl md:leading-relaxed">
-              Connecting diagnosis, treatment, surgery, outcomes, training and business intelligence into a single
-              ecosystem.
+              Manage every part of your clinic from first enquiry to long-term patient outcome.
             </p>
             <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base md:leading-relaxed">
-              Follicle Intelligence sits at the centre of a growing global ecosystem connecting clinics, surgeons,
-              educators, researchers and patients. Every interaction contributes to a continuously learning intelligence
-              network designed specifically for hair restoration.
+              One connected platform built specifically for modern hair restoration clinics — connecting lead generation,
+              patient management, consultations, clinical imaging, surgery workflows, outcome tracking, staff training,
+              and business intelligence.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -319,7 +346,7 @@ export default function HomePage() {
                 size="lg"
                 className="h-11 rounded-xl px-6 shadow-[0_10px_36px_hsl(var(--primary)/0.2)]"
               >
-                <Link href="/contact?intent=demo">Request a Demo</Link>
+                <Link href="/contact?intent=demo">Book Demo</Link>
               </Button>
               <Button
                 asChild
@@ -328,7 +355,7 @@ export default function HomePage() {
                 className="h-11 rounded-xl border-white/10 bg-background/25 px-6 backdrop-blur-sm"
               >
                 <Link href="/#ecosystem" className="inline-flex items-center gap-2">
-                  Explore the Ecosystem
+                  Explore Platform
                   <ArrowRight className="h-4 w-4 opacity-80" aria-hidden />
                 </Link>
               </Button>
@@ -374,7 +401,7 @@ export default function HomePage() {
           <SectionIntro
             eyebrow="Market context"
             title="Why the industry needs a shared intelligence layer."
-            description="Hair restoration is a global, high-stakes field where outcomes are difficult to compare and quality is uneven. Marketing narratives outrun verifiable evidence; standards exist but rarely attach to comparable benchmarks across clinics and regions. FI addresses the gap—not with noise, but with structured audit, cohort visibility, and governance-grade reporting."
+            description="Hair restoration is a global, high-stakes field where outcomes are difficult to compare and quality is uneven. Marketing narratives outrun verifiable evidence; standards exist but rarely attach to comparable benchmarks across clinics and regions. Follicle Intelligence addresses the gap as the master platform—not with noise, but with structured audit, cohort visibility, and governance-grade reporting, amplified by specialist outcome, diagnostic, and training layers."
           />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {MARKET_WHY_POINTS.map((item) => (
@@ -394,6 +421,8 @@ export default function HomePage() {
         variant="follicle-intelligence"
         heading={ECOSYSTEM_HEADING}
         description={ECOSYSTEM_DESCRIPTION}
+        networkTitle={GLOBAL_NETWORK_SECTION_TITLE}
+        networkFooterCaption={GLOBAL_NETWORK_FOOTER_CAPTION}
         size="hero"
         theme="dark"
       />
@@ -402,40 +431,40 @@ export default function HomePage() {
         <FadeIn>
           <SectionIntro
             eyebrow="The flywheel"
-            title="Three surfaces. One learning system."
-            description="HairAudit, HLI, and IIOHR each generate distinct evidence and standards signal. Follicle Intelligence is where those streams compound—so benchmarks sharpen, accountability scales, and improvement is measurable across the ecosystem."
+            title="One platform. Three intelligence layers."
+            description="Follicle Intelligence™ is the master system: benchmarks, governance, Patient Twin continuity, and the clinic OS spine. HairAudit™, Hair Longevity Institute™, and IIOHR™ are specialist engines underneath—outcome, diagnostic, and training intelligence—that feed the same learning loop so improvement is measurable at ecosystem scale."
           />
           <ul className="mt-10 grid gap-6 border-t border-border/50 pt-10 sm:grid-cols-2 lg:grid-cols-4">
-            <li className="flex flex-col gap-2">
-              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
-                HairAudit™
-              </span>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Surgical evidence and the audit surface: case-level scoring, review workflows, and the comparability layer for transplant quality.
-              </p>
-            </li>
-            <li className="flex flex-col gap-2">
-              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
-                Hair Longevity Institute™
-              </span>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Biology and longitudinal treatment intelligence: how patients respond over time—feeding FI with signal beyond a single procedure snapshot.
-              </p>
-            </li>
-            <li className="flex flex-col gap-2">
-              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
-                IIOHR™
-              </span>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Methodology, training, and standards: the institutional frame that makes scores reviewable and improvement programs legitimate.
-              </p>
-            </li>
             <li className="flex flex-col gap-2">
               <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
                 Follicle Intelligence™
               </span>
               <p className="text-sm leading-6 text-muted-foreground">
-                Central intelligence layer: benchmarks, governance signals, and cross-platform learning—without owning any single operational database.
+                Master hair restoration platform: the command layer, longitudinal record, benchmarks, and governance—without replacing your operational systems of record.
+              </p>
+            </li>
+            <li className="flex flex-col gap-2">
+              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+                HairAudit™ — Outcome Intelligence Layer
+              </span>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Surgical evidence and audit-grade scoring under Follicle Intelligence: case-level review workflows and comparability for transplant quality.
+              </p>
+            </li>
+            <li className="flex flex-col gap-2">
+              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+                Hair Longevity Institute™ — Diagnostic Intelligence Layer
+              </span>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Biology and longitudinal treatment intelligence inside the FI substrate—signal beyond a single procedure snapshot.
+              </p>
+            </li>
+            <li className="flex flex-col gap-2">
+              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+                IIOHR™ — Training Intelligence Layer
+              </span>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Methodology, training, and standards framing that makes Follicle Intelligence outputs reviewable and improvement programs institutionally legitimate.
               </p>
             </li>
           </ul>
@@ -531,7 +560,7 @@ export default function HomePage() {
           <SectionIntro
             eyebrow="How it works"
             title="Upload. Analyze. Score. Benchmark. Improve."
-            description="Operational evidence enters from connected surfaces; what exits is comparable quality signal—ready for governance, training, and—where you choose—transparent disclosure."
+            description="Operational evidence enters from connected surfaces under Follicle Intelligence; what exits is comparable quality signal—ready for governance, training, and—where you choose—transparent disclosure."
           />
         </FadeIn>
         <div className="mt-10 grid gap-5 xl:grid-cols-5">
@@ -737,22 +766,22 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="fi-trust text-xs font-semibold uppercase tracking-[0.28em]">
-                    IIOHR Methodology Anchor
+                    Training Intelligence Layer (IIOHR™)
                   </p>
                   <h2 className="mt-3 text-2xl font-semibold text-foreground md:text-3xl">
-                    Governance and scoring backed by formal methodology.
+                    Governance and scoring backed by formal methodology—inside Follicle Intelligence.
                   </h2>
                 </div>
               </div>
               <p className="mt-6 text-base leading-7 text-muted-foreground">
-                FI is an intelligence layer, not a slogan factory. IIOHR supplies methodology, training
-                architecture, and standards framing—so scores mean something in professional context and
-                can travel into governance, credentialing, and institutional programs without losing
-                defensibility.
+                Follicle Intelligence is the master platform for audit and benchmarks; IIOHR™ is the Training
+                Intelligence Layer that supplies methodology, training architecture, and standards framing—so scores
+                mean something in professional context and can travel into governance, credentialing, and institutional
+                programs without losing defensibility.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button asChild className="rounded-xl">
-                  <Link href="/methodology">Explore IIOHR Methodology</Link>
+                  <Link href="/methodology">Explore methodology &amp; IIOHR™ alignment</Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-xl">
                   <Link href="/methodology">View Methodology</Link>
@@ -801,7 +830,7 @@ export default function HomePage() {
           <SectionIntro
             eyebrow="Infrastructure & expansion"
             title="Built as category infrastructure—not a single-product feature."
-            description="The data flywheel strengthens as more evidence types and standards programs connect: deeper cohorts, sharper benchmarks, and harder-to-replace workflow integration. Hair restoration is the live wedge; the architecture is modular for procedural and cosmetic verticals that share audit-shaped problems."
+            description="Follicle Intelligence strengthens as more evidence types and standards programs connect: deeper cohorts, sharper benchmarks, and harder-to-replace workflow integration. Hair restoration is the live wedge; the architecture is modular for procedural and cosmetic verticals that share audit-shaped problems."
           />
         </FadeIn>
         <div className="mt-10 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -815,7 +844,7 @@ export default function HomePage() {
                   {
                     icon: Cpu,
                     title: "Follicle Intelligence engine",
-                    desc: "Scoring logic, benchmark computation, confidence layers, governance rules, and reporting—shared across HairAudit, HLI, and IIOHR-connected workflows.",
+                    desc: "Scoring logic, benchmark computation, confidence layers, governance rules, and reporting—one master stack that HairAudit™ (outcomes), HLI™ (diagnostics), and IIOHR™ (training) extend as intelligence layers.",
                   },
                   {
                     icon: Sparkles,
@@ -874,8 +903,9 @@ export default function HomePage() {
                   </h2>
                   <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
                     Whether you run clinics, train surgeons, set standards, or deploy enterprise
-                    platforms: FI is the central layer for benchmarked quality and accountable reporting
-                    across the global hair restoration industry. Request a demo, explore white-label, or
+                    platforms: Follicle Intelligence is the master platform for benchmarked quality and
+                    accountable reporting across the global hair restoration industry—with outcome, diagnostic,
+                    and training layers where your program needs depth. Request a demo, explore white-label, or
                     discuss institutional partnership.
                   </p>
                 </div>

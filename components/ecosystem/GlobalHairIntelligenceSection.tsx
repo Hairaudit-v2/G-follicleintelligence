@@ -17,6 +17,10 @@ export interface GlobalHairIntelligenceSectionProps {
   heading: string;
   /** Short explanatory copy below the heading (site-specific). */
   description: string;
+  /** Accessible name / internal title for the network diagram (defaults to “Global Hair Intelligence Network”). */
+  networkTitle?: string;
+  /** Optional caption rendered beneath the network SVG (e.g. platform hierarchy line). */
+  networkFooterCaption?: string;
   /** "hero" = large feature section; "compact" = smaller for secondary pages. */
   size?: "hero" | "compact";
   /** Light or dark theme for the network. Default follows light section styling. */
@@ -38,6 +42,8 @@ export function GlobalHairIntelligenceSection({
   variant,
   heading,
   description,
+  networkTitle,
+  networkFooterCaption,
   size = "hero",
   theme = "light",
   id = "global-hair-intelligence-network",
@@ -67,7 +73,8 @@ export function GlobalHairIntelligenceSection({
             theme={theme}
             showBackground={false}
             size={size}
-            title="Global Hair Intelligence Network"
+            title={networkTitle ?? "Global Hair Intelligence Network"}
+            footerCaption={networkFooterCaption}
             nodeLinks={nodeLinks}
           />
         </div>

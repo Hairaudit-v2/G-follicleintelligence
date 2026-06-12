@@ -5,10 +5,8 @@ import {
   Activity,
   BarChart3,
   FlaskConical,
-  Globe2,
   GraduationCap,
   HeartPulse,
-  Sparkles,
   Stethoscope,
   Users,
 } from "lucide-react";
@@ -47,7 +45,7 @@ function NetworkCoreVisual() {
     <div
       className="relative mx-auto w-full max-w-4xl"
       role="img"
-      aria-label="Diagram: six data streams—clinical, surgical, outcome, training, business, and patient experience—flowing into the Follicle Intelligence core."
+      aria-label="Diagram: six data streams flowing into the Follicle Intelligence core, representing how clinic signal compounds into network intelligence."
     >
       <div
         className={cn(
@@ -209,19 +207,19 @@ function NetworkCoreVisual() {
 
 const INSIGHT_CARDS: { title: string; body: string; icon: LucideIcon }[] = [
   {
-    title: "Real-World Outcome Intelligence",
+    title: "Clinical and biological signal",
     icon: FlaskConical,
-    body: "Understand which treatments, techniques and protocols produce stronger long-term results across different patient profiles.",
+    body: "Diagnostic Intelligence (HLI™) and clinic workflows feed Follicle Intelligence—so cohorts sharpen inside one platform without flattening individual nuance.",
   },
   {
-    title: "Global Benchmarking",
-    icon: Globe2,
-    body: "Compare clinical, surgical and operational performance against anonymised ecosystem-wide benchmarks.",
+    title: "Surgical and imaging fidelity",
+    icon: Activity,
+    body: "Outcome Intelligence (HairAudit™) anchors technical quality in evidence under the same Follicle Intelligence spine—variance visible before it becomes narrative.",
   },
   {
-    title: "Predictive Intelligence",
-    icon: Sparkles,
-    body: "Support better decision making by identifying patterns across diagnosis, treatment response, surgical execution and long-term outcomes.",
+    title: "Long arcs that define restoration",
+    icon: GraduationCap,
+    body: "Training Intelligence (IIOHR™) connects standards-led learning to longitudinal outcomes—what happens in the chair linked to what holds years later, inside FI.",
   },
 ];
 
@@ -240,19 +238,29 @@ export function FiHomeGlobalIntelligenceSection() {
       <div className="relative mx-auto max-w-6xl px-6 py-16 md:py-24">
         <header className="mx-auto max-w-3xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-primary/88">
-            The Global Hair Restoration Intelligence Network
+            Collective intelligence
           </p>
           <h2
             id="fi-global-intelligence-heading"
             className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl md:leading-[1.12]"
           >
-            Every Patient Journey Strengthens The Network.
+            The network grows inside Follicle Intelligence
           </h2>
           <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg md:leading-relaxed">
-            Follicle Intelligence connects diagnosis, treatment, surgery, education, outcomes and business performance
-            into one structured intelligence layer. As the ecosystem grows, every verified patient journey contributes to
-            a deeper understanding of what produces better long-term hair restoration outcomes.
+            Every patient journey strengthens the master platform.
           </p>
+          <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg md:leading-relaxed">
+            As clinics run on Follicle Intelligence, the system continuously learns from:
+          </p>
+          <ul className="mx-auto mt-5 max-w-xl list-disc space-y-2 pl-5 text-left text-base leading-relaxed text-muted-foreground marker:text-primary/80 md:text-lg md:leading-relaxed">
+            <li>Diagnosis patterns</li>
+            <li>Treatment response</li>
+            <li>Surgical variables</li>
+            <li>Imaging analysis</li>
+            <li>Long-term patient retention</li>
+            <li>Outcome tracking</li>
+            <li>Training pathways</li>
+          </ul>
         </header>
 
         <div className="mt-12 md:mt-16">
@@ -297,12 +305,7 @@ export function FiHomeGlobalIntelligenceSection() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_50%,hsl(var(--primary)/0.1),transparent_55%)]" />
           <div className="relative text-center">
             <p className="font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl md:leading-snug">
-              From Software Platform To Industry Intelligence Layer
-            </p>
-            <p className="mx-auto mt-5 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base md:leading-relaxed">
-              Most platforms help clinics manage activity. Follicle Intelligence helps the industry understand performance.
-              By connecting the full patient journey across HairAudit, HLI, IIOHR, SurgeryOS, ClinicOS and AnalyticsOS,
-              the platform creates a continuously learning ecosystem that becomes more valuable as it grows.
+              A global structured dataset—owned by the Follicle Intelligence platform, deepened by outcome, diagnostic, and training layers.
             </p>
           </div>
         </motion.div>
