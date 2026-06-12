@@ -1,6 +1,10 @@
 /**
  * CRM foundation — types and pure helpers safe to import from any context.
  * Database mutations and service-role loaders live in `./server` (server-only).
+ *
+ * Do not re-export server-only helpers that depend on `node:crypto` (e.g. `isFiAdminApiKeyMatch`
+ * from `./crmFiAdminApiKeyMatch`): importing this barrel from client components would pull those
+ * modules into the browser bundle. Import `crmFiAdminApiKeyMatch` directly from server code.
  */
 
 export type {
@@ -62,7 +66,6 @@ export {
   isCrmMutationRole,
   isCrmShellNavRole,
 } from "./crmGatePolicy";
-export { isFiAdminApiKeyMatch } from "./crmFiAdminApiKeyMatch";
 export {
   CRM_LEAD_DETAIL_PRIORITY_VALUES,
   CRM_LEAD_DETAIL_STATUS_VALUES,
