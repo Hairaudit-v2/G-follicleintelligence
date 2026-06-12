@@ -3,6 +3,8 @@
 **Audit date:** 2026-06-10  
 **Scope:** Follicle Intelligence OS operational surfaces (ClinicOS, SurgeryOS, reception, staff PIN, **manual** payment records, tenant-local calendars). This is a **deployment and access** checklist — not a penetration test or full data-governance review.
 
+**See also (2026-06-12 hardening audits):** [Master checklist](fi-os-production-hardening-master-checklist.md) · [Env vars](fi-os-env-vars-production-audit.md) · [Auth](fi-os-auth-production-audit.md) · [Backup & recovery](fi-os-backup-recovery-production.md) · [Cron](fi-os-cron-production-audit.md) · [Webhooks](fi-os-webhook-production-audit.md)
+
 ## Commercial integrations — explicit non-scope
 
 The following are **not live** in this product as integrated, automated financial systems:

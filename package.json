@@ -30,7 +30,8 @@
     "import:approved-services": "tsx scripts/import-approved-fi-services.ts",
     "import:iiohr-hr-staff": "tsx scripts/import-iiohr-hr-staff.ts",
     "import:evolved-payroll-staff": "tsx scripts/import-evolved-payroll-staff.ts",
-    "hubspot:commit-latest-batch": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-commit-latest-dry-run-batch.ts"
+    "hubspot:commit-latest-batch": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-commit-latest-dry-run-batch.ts",
+    "hubspot:import-next-500": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/hubspot-import-next-500.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

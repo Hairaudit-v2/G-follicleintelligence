@@ -40,3 +40,4 @@ docs/timely-import/input/ServiceSales.csv
 
 # Supabase CLI local link state (do not commit)
 supabase/.temp/
+supabase/.branches/
