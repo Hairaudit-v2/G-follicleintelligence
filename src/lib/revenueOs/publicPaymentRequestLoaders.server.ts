@@ -3,7 +3,6 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readFiPaymentsEnabled, readFiPaymentProviderId } from "@/src/lib/payments/fiPaymentEnv.server";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
-import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import {
   derivePublicPaymentPageState,

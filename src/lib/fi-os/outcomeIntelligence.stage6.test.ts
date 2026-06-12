@@ -21,7 +21,7 @@ import {
   computeGlobalOutcomeAggregateDraft,
   computeTenantOutcomeAggregateDraft,
 } from "@/src/lib/fi-os/outcomeIntelligenceDrafts";
-import { buildCaseOutcomeIntelligenceView } from "@/src/lib/fi-os/outcomeIntelligence.server";
+import { buildCaseOutcomeIntelligenceView } from "@/src/lib/fi-os/outcomeIntelligenceCaseView";
 import {
   deriveOutcomeConfidenceLevel,
   missingOutcomeCheckpoints,

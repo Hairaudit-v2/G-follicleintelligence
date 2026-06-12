@@ -74,11 +74,7 @@ function matchesPatientQuery(label: string | null, q: string): boolean {
   return label.toLowerCase().includes(needle);
 }
 
-function passesInvoiceFilters(
-  inv: PaymentsInboxInvoiceRow,
-  f: PaymentsInboxFilters,
-  _todayYmd: string
-): boolean {
+function passesInvoiceFilters(inv: PaymentsInboxInvoiceRow, f: PaymentsInboxFilters): boolean {
   if (f.clinicId?.trim() && inv.clinic_id !== f.clinicId.trim()) return false;
   if (f.caseLinkedOnly && !inv.case_id) return false;
   if (f.dueFrom?.trim() && inv.due_date && inv.due_date < f.dueFrom.trim()) return false;
@@ -150,7 +146,7 @@ export async function loadPaymentsInboxSnapshot(
     patient_label: inv.patient_id ? patientLabels.get(inv.patient_id) || null : null,
   }));
 
-  const filtered = withLabels.filter((inv) => passesInvoiceFilters(inv, filters, todayYmd));
+  const filtered = withLabels.filter((inv) => passesInvoiceFilters(inv, filters));
 
   const overdue: PaymentsInboxInvoiceRow[] = [];
   const unpaidIssued: PaymentsInboxInvoiceRow[] = [];
