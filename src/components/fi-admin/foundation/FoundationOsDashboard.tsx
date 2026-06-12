@@ -11,6 +11,8 @@ import { FiKpiTile } from "@/src/components/fi-design/FiKpiTile";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
 
+import { PhotoProtocolAnalyticsCard } from "./PhotoProtocolAnalyticsCard";
+import { PhotoProtocolIncompleteSessionsTable } from "./PhotoProtocolIncompleteSessionsTable";
 import { FoundationOsBackfillCard } from "./FoundationOsBackfillCard";
 
 function isNewClinicSnapshot(m: FoundationIntegrityMetrics): boolean {
@@ -52,7 +54,20 @@ function coveragePercentLabel(value: number | null): string {
   return value === null ? "—" : `${value}%`;
 }
 
-export function FoundationOsDashboard({ tenantId, data }: { tenantId: string; data: FoundationOsDashboardPayload }) {
+export function FoundationOsDashboard({
+  tenantId,
+  data,
+  photoProtocol,
+}: {
+  tenantId: string;
+  data: FoundationOsDashboardPayload;
+  photoProtocol?: {
+    summary: import("@/src/lib/hair-intelligence/photoProtocols/protocolAnalytics").PhotoProtocolAnalyticsSummary;
+    alerts: import("@/src/lib/hair-intelligence/photoProtocols/protocolAlerts").PhotoProtocolAlert[];
+    incomplete_sessions: import("@/src/lib/hair-intelligence/photoProtocols/photoProtocolAnalyticsLoader.server").PhotoProtocolIncompleteSessionRow[];
+    scan_note: string | null;
+  } | null;
+}) {
   const tid = tenantId.trim();
   const base = `/fi-admin/${tid}`;
   const m = data.integrity;
@@ -152,6 +167,18 @@ export function FoundationOsDashboard({ tenantId, data }: { tenantId: string; da
           <FiKpiTile label="Reports (fi_reports)" value={String(th.reports_total)} description="HairAudit / report pipeline rows" tone="neutral" />
         </div>
       </SectionCard>
+
+      {photoProtocol ? (
+        <div className="space-y-6">
+          <PhotoProtocolAnalyticsCard
+            tenantId={tid}
+            summary={photoProtocol.summary}
+            alerts={photoProtocol.alerts}
+            scanNote={photoProtocol.scan_note}
+          />
+          <PhotoProtocolIncompleteSessionsTable rows={photoProtocol.incomplete_sessions} />
+        </div>
+      ) : null}
 
       <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2">
         <SectionCard

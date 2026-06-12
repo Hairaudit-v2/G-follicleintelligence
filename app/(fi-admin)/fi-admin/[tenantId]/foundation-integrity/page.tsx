@@ -3,6 +3,10 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { FoundationOsDashboard } from "@/src/components/fi-admin/foundation/FoundationOsDashboard";
 import { loadFoundationOsDashboard } from "@/src/lib/fi/foundation/foundationOsDashboardRead.server";
+import {
+  loadIncompletePhotoProtocolSessionsForTenant,
+  loadPhotoProtocolAnalyticsForTenant,
+} from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolAnalyticsLoader.server";
 
 export const metadata = {
   title: "FoundationOS",
@@ -17,11 +21,35 @@ export default async function FoundationIntegrityPage({ params }: { params: Prom
   const { tenantId } = await params;
   if (!tenantId?.trim()) notFound();
 
-  const data = await loadFoundationOsDashboard(tenantId.trim());
+  const tid = tenantId.trim();
+
+  const data = await loadFoundationOsDashboard(tid);
+
+  let analytics: Awaited<ReturnType<typeof loadPhotoProtocolAnalyticsForTenant>> | null = null;
+  let incomplete: Awaited<ReturnType<typeof loadIncompletePhotoProtocolSessionsForTenant>> = [];
+  try {
+    analytics = await loadPhotoProtocolAnalyticsForTenant(tid, {});
+  } catch {
+    analytics = null;
+  }
+  try {
+    incomplete = await loadIncompletePhotoProtocolSessionsForTenant(tid, {});
+  } catch {
+    incomplete = [];
+  }
+
+  const photoProtocol = analytics
+    ? {
+        summary: analytics.summary,
+        alerts: analytics.alerts,
+        incomplete_sessions: incomplete.slice(0, 100),
+        scan_note: analytics.scan_note,
+      }
+    : null;
 
   return (
     <div className="mx-auto max-w-[88rem] min-w-0 space-y-6 px-4 py-6 sm:px-6">
-      <FoundationOsDashboard tenantId={tenantId.trim()} data={data} />
+      <FoundationOsDashboard tenantId={tid} data={data} photoProtocol={photoProtocol} />
     </div>
   );
 }

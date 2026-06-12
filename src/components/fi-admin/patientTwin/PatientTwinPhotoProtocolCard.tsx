@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 
 import {
@@ -59,6 +60,14 @@ export function PatientTwinPhotoProtocolCard({
         </div>
         <div className="text-right text-xs text-slate-400">
           {pp.active_session_id ? <span>Session: {pp.active_session_id.slice(0, 8)}… ({pp.active_session_status})</span> : <span>No active session</span>}
+          <div className="mt-1">
+            <Link
+              href={`/fi-admin/${encodeURIComponent(tenantId)}/foundation-integrity#fi-os-photo-protocol-analytics`}
+              className="text-cyan-300/90 hover:underline"
+            >
+              Tenant protocol analytics
+            </Link>
+          </div>
         </div>
       </div>
 
