@@ -11,6 +11,8 @@ export {
   type PatientTwinHairProgressionSection,
   type PatientTwinIdentityResolutionSection,
   type PatientTwinIntelligenceSection,
+  type PatientTwinRecipientCandidacySection,
+  type PatientTwinRecipientCandidacyReviewRow,
   type PatientTwinImagingGalleryItem,
   type PatientTwinImagingGallerySection,
   type PatientTwinImagingGalleryUiSection,
