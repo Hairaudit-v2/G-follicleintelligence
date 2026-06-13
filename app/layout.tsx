@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         url: OG_IMAGE.src,
         width: OG_IMAGE.width,
         height: OG_IMAGE.height,
-        alt: "Follicle Intelligence — The World's First Hair Restoration Operating System",
+        alt: "Follicle Intelligence — The Operating System For The Future Of Hair Restoration",
       },
     ],
   },
