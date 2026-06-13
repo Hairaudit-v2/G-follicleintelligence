@@ -11,6 +11,10 @@ const sectionHeadingToneStyles = {
     eyebrow: "text-cyan-200/72",
     rule: "from-cyan-300/55 via-cyan-400/18",
   },
+  intelligence: {
+    eyebrow: "text-violet-200/72",
+    rule: "from-violet-300/55 via-fuchsia-400/22",
+  },
 } as const;
 
 export type SectionHeadingTone = keyof typeof sectionHeadingToneStyles;
