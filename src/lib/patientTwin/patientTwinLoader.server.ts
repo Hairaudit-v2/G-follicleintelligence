@@ -25,6 +25,7 @@ import {
 import { normalizeImagingLibraryAxis } from "@/src/lib/patientImages/patientImagePolicy";
 import { loadPatientTwinPhotoProtocolSection } from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolLoader.server";
 import { loadPatientTwinImagingGallerySection } from "@/src/lib/patientTwin/patientTwinImagingGallery.server";
+import { loadPatientTwinDonorSection } from "@/src/lib/patientTwin/patientTwinDonorIntelligence.server";
 import { loadPatientTwinHairLossSection } from "@/src/lib/patientTwin/patientTwinHairLossClassification.server";
 import {
   emptyPatientTwinHairProgressionIntelligence,
@@ -93,6 +94,7 @@ const SOURCE_TABLES_USED = [
   "fi_patient_therapy_plan_items",
   "fi_patient_therapy_events",
   "hair_intelligence_hair_loss_classifications",
+  "hair_intelligence_donor_assessments",
   "hair_intelligence_progression_network_buckets",
 ] as const;
 
@@ -698,6 +700,20 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     }
   }
 
+  let donor: PatientTwinV1["intelligence"]["donor"] = {
+    latest: null,
+    recent: [],
+    recent_cap: 5,
+  };
+  try {
+    donor = await loadPatientTwinDonorSection(tid, primaryFoundation, supabase);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
+      pushWarning(warnings, "generic", `Donor intelligence section skipped: ${msg}`);
+    }
+  }
+
   let hair_progression: PatientTwinV1["intelligence"]["hair_progression"] = emptyPatientTwinHairProgressionIntelligence();
   try {
     hair_progression = await loadPatientTwinHairProgressionSection(tid, primaryFoundation, {
@@ -956,6 +972,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       model_outputs: [],
       hair_loss,
       hair_progression,
+      donor,
     },
     provenance: {
       generated_at: generatedAt,

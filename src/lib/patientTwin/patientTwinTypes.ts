@@ -286,6 +286,31 @@ export type PatientTwinHairLossSection = {
   recent_cap: number;
 };
 
+export type PatientTwinDonorAssessmentRow = {
+  id: string;
+  source_record_id: string | null;
+  donor_region: string;
+  donor_quality_rating: string;
+  confidence_score: number;
+  estimated_density_band: string | null;
+  miniaturisation_risk: string | null;
+  retrograde_risk: string | null;
+  overharvesting_risk: string | null;
+  safe_donor_capacity_band: string | null;
+  lifetime_graft_budget_band: string | null;
+  extraction_caution_level: string | null;
+  review_status: string;
+  clinical_observations: string | null;
+  ai_notes: string | null;
+  created_at: string;
+};
+
+export type PatientTwinDonorSection = {
+  latest: PatientTwinDonorAssessmentRow | null;
+  recent: PatientTwinDonorAssessmentRow[];
+  recent_cap: number;
+};
+
 export type PatientTwinHairProgressionSection = HairProgressionIntelligence;
 
 export type PatientTwinIntelligenceSection = {
@@ -296,6 +321,8 @@ export type PatientTwinIntelligenceSection = {
   hair_loss: PatientTwinHairLossSection;
   /** HIE Stage 9B — longitudinal velocity, stability, therapy contrast, forecast, cohort context. */
   hair_progression: PatientTwinHairProgressionSection;
+  /** HIE Stage 9C — donor-zone quality / capacity band estimates (image-based). */
+  donor: PatientTwinDonorSection;
 };
 
 export type PatientTwinCompletenessMissingArea =

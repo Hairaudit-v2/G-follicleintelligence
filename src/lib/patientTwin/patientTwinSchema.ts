@@ -346,12 +346,38 @@ export const patientTwinHairLossSectionSchema = z.object({
   recent_cap: z.number().int().positive(),
 });
 
+export const patientTwinDonorAssessmentRowSchema = z.object({
+  id: z.string().uuid(),
+  source_record_id: z.string().nullable(),
+  donor_region: z.string(),
+  donor_quality_rating: z.string(),
+  confidence_score: z.number(),
+  estimated_density_band: z.string().nullable(),
+  miniaturisation_risk: z.string().nullable(),
+  retrograde_risk: z.string().nullable(),
+  overharvesting_risk: z.string().nullable(),
+  safe_donor_capacity_band: z.string().nullable(),
+  lifetime_graft_budget_band: z.string().nullable(),
+  extraction_caution_level: z.string().nullable(),
+  review_status: z.string(),
+  clinical_observations: z.string().nullable(),
+  ai_notes: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const patientTwinDonorSectionSchema = z.object({
+  latest: patientTwinDonorAssessmentRowSchema.nullable(),
+  recent: z.array(patientTwinDonorAssessmentRowSchema),
+  recent_cap: z.number().int().positive(),
+});
+
 export const patientTwinIntelligenceSectionSchema = z.object({
   risk_score: z.null(),
   predicted_outcome: z.null(),
   model_outputs: z.array(z.never()),
   hair_loss: patientTwinHairLossSectionSchema,
   hair_progression: patientTwinHairProgressionSectionSchema,
+  donor: patientTwinDonorSectionSchema,
 });
 
 export const patientTwinProvenanceSectionSchema = z.object({
