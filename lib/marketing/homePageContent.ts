@@ -37,6 +37,7 @@ export type HomeProductShowcaseShell =
   | "consultation-workflow"
   | "surgical-planning"
   | "audit-report"
+  | "academy-learning"
   | "metrics-dashboard";
 
 export type HomeProductShowcaseCard = {
@@ -51,11 +52,21 @@ export type HomeProductShowcaseCard = {
   screenshotSrc?: string;
 };
 
-/** Homepage authority metrics: `emphasis` renders as the premium counter line; `description` completes the claim. */
-export type HomeAuthorityMetric = {
+/** Homepage industry authority cards: optional `statSuffix` pairs with `headline` for numeric proof lines. */
+export type HomeAuthorityCard = {
   id: string;
-  emphasis: string;
-  description: string;
+  /** Primary title; when `statSuffix` is set, `headline` is styled as the large numeric line. */
+  headline: string;
+  statSuffix?: string;
+  label: string;
+  copy: string;
+};
+
+export type HomeAuthorityFounderPanel = {
+  eyebrow: string;
+  headline: string;
+  body: string;
+  closingLine: string;
 };
 
 /** Homepage platform comparison: one row per capability across three columns. */
@@ -162,54 +173,63 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Product depth",
     headline: "Built On Real Operational Infrastructure",
     subtext:
-      "Follicle Intelligence is not a concept. Every layer of the operating system has already been built, tested, and deployed across real clinical workflows.",
+      "Follicle Intelligence is not a concept. Every layer of the operating system is designed around real clinical, operational, surgical, training, and intelligence workflows.",
+    previewDisclaimer:
+      "Product previews are representative of the platform architecture and can be replaced with live screenshots as modules are finalised.",
     cards: [
       {
         id: "clinic-os",
         name: "ClinicOS",
-        description: "Scheduling spine, room rhythm, and the operational calendar serious programmes run every day.",
+        description: "Scheduling, appointments, staff availability, clinic operations.",
         shell: "clinic-calendar",
         // screenshotSrc: "/marketing/product-showcase/clinic-os.png",
       },
       {
         id: "leadflow-os",
         name: "LeadFlowOS",
-        description: "Pipeline truth from first enquiry through booked consultation—CRM built for hair restoration velocity.",
+        description: "CRM pipelines, tasks, follow-ups, patient acquisition.",
         shell: "crm-pipeline",
         // screenshotSrc: "/marketing/product-showcase/leadflow-os.png",
       },
       {
         id: "foundation-os",
         name: "PatientOS / FoundationOS",
-        description: "Patient twin, longitudinal records, and handoff-safe context that survives years of care.",
+        description: "Patient Twin, timelines, records, longitudinal intelligence.",
         shell: "patient-twin",
         // screenshotSrc: "/marketing/product-showcase/foundation-os.png",
       },
       {
         id: "consultation-os",
         name: "ConsultationOS",
-        description: "Structured consultation workflows, evidence capture, and conversion-grade clinical documentation.",
+        description: "Clinical assessment, diagnosis, recommendations, quotes.",
         shell: "consultation-workflow",
         // screenshotSrc: "/marketing/product-showcase/consultation-os.png",
       },
       {
         id: "surgery-os",
         name: "SurgeryOS",
-        description: "Donor economics, density planning, and procedure-day orchestration aligned to the OR.",
+        description: "Surgical planning, graft tracking, procedure day intelligence.",
         shell: "surgical-planning",
         // screenshotSrc: "/marketing/product-showcase/surgery-os.png",
       },
       {
         id: "audit-os",
         name: "AuditOS",
-        description: "HairAudit-aligned review packets, scoring primitives, and governance-ready verification views.",
+        description: "HairAudit review, evidence capture, outcome verification.",
         shell: "audit-report",
         // screenshotSrc: "/marketing/product-showcase/audit-os.png",
       },
       {
+        id: "academy-os",
+        name: "AcademyOS",
+        description: "Training, certification, competency tracking.",
+        shell: "academy-learning",
+        // screenshotSrc: "/marketing/product-showcase/academy-os.png",
+      },
+      {
         id: "analytics-os",
         name: "AnalyticsOS",
-        description: "Portfolio metrics that stay married to clinical signal—conversion, productivity, and cohort truth.",
+        description: "Revenue, conversion, productivity, outcome intelligence.",
         shell: "metrics-dashboard",
         // screenshotSrc: "/marketing/product-showcase/analytics-os.png",
       },
@@ -495,37 +515,55 @@ export const HOME_PAGE_CONTENT = {
 
   authority: {
     id: "authority-trust",
-    storyEyebrow: "Trust & authority",
+    storyEyebrow: "Industry authority",
     headline: "Built By Industry Experts Who Understand The Problem Firsthand",
-    metrics: [
+    subtext:
+      "Follicle Intelligence was built by professionals who have spent decades working inside hair restoration — across consultation, surgery, training, auditing, clinical governance, and patient outcomes.",
+    cards: [
       {
-        id: "years-experience",
-        emphasis: "30+",
-        description: "Years Industry Experience",
+        id: "industry-experience",
+        headline: "30+",
+        statSuffix: "years",
+        label: "Industry experience",
+        copy: "Built from decades of firsthand experience in trichology, surgical planning, clinic operations, and patient care.",
       },
       {
-        id: "consultations",
-        emphasis: "Thousands",
-        description: "Of Clinical Consultations Analysed",
+        id: "clinical-depth",
+        headline: "Clinical depth",
+        label: "Beyond generic software",
+        copy: "Designed around the real workflows that determine outcomes in hair restoration — not adapted from general clinic software.",
       },
       {
-        id: "training",
-        emphasis: "Advanced",
-        description: "Hair Restoration Training Infrastructure",
+        id: "training-infrastructure",
+        headline: "Training infrastructure",
+        label: "Workforce development",
+        copy: "Connected to doctor, nurse, consultant, and technician education pathways through the International Institute of Hair Restoration.",
       },
       {
-        id: "audit-methods",
-        emphasis: "Global",
-        description: "Audit Methodologies In Development",
+        id: "audit-methodology",
+        headline: "Audit methodology",
+        label: "Outcome accountability",
+        copy: "Linked to independent review, quality scoring, and evidence-based benchmarking through HairAudit.",
       },
       {
-        id: "layers",
-        emphasis: "Built",
-        description: "Across Clinical, Surgical, Educational And Intelligence Layers",
+        id: "longitudinal-intelligence",
+        headline: "Longitudinal intelligence",
+        label: "Patient twin foundation",
+        copy: "Structured to learn from patient journeys, treatment response, procedure history, and long-term outcomes.",
       },
-    ] satisfies HomeAuthorityMetric[],
-    founderAuthorityQuote:
-      "Follicle Intelligence was built by professionals who have spent decades working inside the hair restoration industry and understand where existing systems continue to fail.",
+      {
+        id: "global-ambition",
+        headline: "Global ambition",
+        label: "Industry standardisation",
+        copy: "Built to support clinics, surgeons, educators, and multi-clinic groups scaling with quality control.",
+      },
+    ] satisfies HomeAuthorityCard[],
+    founderPanel: {
+      eyebrow: "Founder authority",
+      headline: "Built by people who have lived the industry.",
+      body: "The strongest systems are built by people who understand where the existing ones break. Follicle Intelligence was created from years of observing the same problem from every angle: clinical knowledge, operational systems, training standards, surgical execution, and patient outcomes were disconnected.",
+      closingLine: "That is the gap this platform was built to close.",
+    },
   },
 
   founder: {

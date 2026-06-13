@@ -1,8 +1,9 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 import { Section } from "@/components/layout/section";
 import { FadeIn } from "@/components/ui/fade-in";
-import type { HomeProductShowcaseCard } from "@/lib/marketing/homePageContent";
+import type { HomePageContent, HomeProductShowcaseCard } from "@/lib/marketing/homePageContent";
 import { cn } from "@/lib/utils";
 
 import { ProductShowcaseShell } from "@/components/home/productShowcaseShells";
@@ -39,6 +40,25 @@ function SectionHeading({
         <p className="mt-5 max-w-3xl text-base leading-[1.65] text-muted-foreground sm:text-lg md:leading-relaxed">{description}</p>
       ) : null}
     </header>
+  );
+}
+
+/** Compact phone-style bezel around the same in-app preview (alternates with full-width browser chrome in the grid). */
+function DeviceShowcaseBezel({ children }: { children: ReactNode }) {
+  return (
+    <div className="mx-auto w-full max-w-[11.5rem] sm:max-w-[12.25rem]">
+      <div
+        className={cn(
+          "rounded-[1.65rem] border-[0.2rem] border-white/[0.12] bg-gradient-to-b from-[rgb(28_30_36)] via-[rgb(10_12_18)] to-black p-[0.3rem]",
+          "shadow-[0_28px_72px_rgb(0_0_0_/0.55),inset_0_1px_0_rgb(255_255_255_/0.07)]"
+        )}
+      >
+        <div className="flex justify-center pt-1.5 pb-0.5" aria-hidden>
+          <span className="h-1.5 w-10 rounded-full bg-black/80 ring-1 ring-white/[0.08]" />
+        </div>
+        <div className="overflow-hidden rounded-[1.05rem] ring-1 ring-black/60">{children}</div>
+      </div>
+    </div>
   );
 }
 
@@ -91,21 +111,14 @@ function BrowserProductFrame({ card, urlSlug }: { card: HomeProductShowcaseCard;
   );
 }
 
-export function FiMarketingProductShowcaseSection({
-  section,
-}: {
-  section: {
-    id: string;
-    storyEyebrow: string;
-    headline: string;
-    subtext: string;
-    cards: readonly HomeProductShowcaseCard[];
-  };
-}) {
+export function FiMarketingProductShowcaseSection({ section }: { section: HomePageContent["productShowcase"] }) {
   return (
     <Section
       id={section.id}
-      className="border-b border-border/50 bg-gradient-to-b from-background via-[rgb(6_9_14_/0.35)] to-background py-20 sm:py-24 md:py-28"
+      className={cn(
+        "border-b border-white/[0.05] py-20 sm:py-24 md:py-28",
+        "bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.07),transparent_42%),radial-gradient(ellipse_at_0%_50%,rgb(212_175_55_/0.04),transparent_38%),linear-gradient(180deg,rgb(2_4_8)_0%,rgb(5_8_14)_38%,rgb(3_5_10)_100%)]"
+      )}
       aria-labelledby={`${section.id}-heading`}
     >
       <FadeIn>
@@ -115,43 +128,56 @@ export function FiMarketingProductShowcaseSection({
           title={section.headline}
           description={section.subtext}
         />
-        <ul className="mt-12 grid list-none grid-cols-1 gap-8 sm:mt-14 sm:gap-9 md:grid-cols-2 xl:grid-cols-3 xl:gap-10">
-          {section.cards.map((card) => (
-            <li key={card.id} className="min-w-0">
-              <article
-                className={cn(
-                  "group relative flex h-full flex-col rounded-[1.35rem] border border-white/[0.07] bg-gradient-to-br from-white/[0.07] via-white/[0.025] to-[rgb(4_7_12_/0.55)] p-4 shadow-[0_20px_56px_rgb(0_0_0_/0.38),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md sm:p-5",
-                  "transition-[transform,border-color,box-shadow] duration-500 ease-out will-change-transform",
-                  "hover:-translate-y-0.5 hover:border-amber-400/20 hover:shadow-[0_28px_80px_rgb(0_0_0_/0.45),0_0_40px_rgb(212_175_55_/0.05),inset_0_1px_0_rgb(255_255_255_/0.08)]"
-                )}
-              >
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-[1.35rem] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                  style={{
-                    background:
-                      "radial-gradient(800px 240px at 50% 0%, rgb(212 175 55 / 0.07), transparent 55%)",
-                  }}
-                />
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-display text-lg font-semibold tracking-tight text-foreground sm:text-xl">{card.name}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">{card.description}</p>
+        <ul className="mt-12 grid list-none grid-cols-1 gap-8 sm:mt-14 sm:gap-9 md:grid-cols-2 xl:grid-cols-4 xl:gap-8 2xl:gap-10">
+          {section.cards.map((card, index) => {
+            const useDeviceFrame = index % 2 === 1;
+            return (
+              <li key={card.id} className="min-w-0">
+                <article
+                  className={cn(
+                    "group relative flex h-full flex-col rounded-[1.35rem] border border-white/[0.08] bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-[rgb(4_7_12_/0.65)] p-4 shadow-[0_20px_56px_rgb(0_0_0_/0.45),inset_0_1px_0_rgb(255_255_255_/0.07)] backdrop-blur-md sm:p-5",
+                    "transition-[transform,border-color,box-shadow] duration-500 ease-out will-change-transform",
+                    "hover:-translate-y-0.5 hover:border-amber-400/22 hover:shadow-[0_28px_80px_rgb(0_0_0_/0.5),0_0_40px_rgb(212_175_55_/0.06),inset_0_1px_0_rgb(255_255_255_/0.09)]"
+                  )}
+                >
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-[1.35rem] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    style={{
+                      background:
+                        "radial-gradient(800px 240px at 50% 0%, rgb(212 175 55 / 0.08), transparent 55%)",
+                    }}
+                  />
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-display text-lg font-semibold tracking-tight text-foreground sm:text-xl">{card.name}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">{card.description}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full border border-amber-400/15 bg-amber-400/[0.06] px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.18em] text-amber-200/65 sm:text-[9px]">
+                        Live
+                      </span>
                     </div>
-                    <span className="shrink-0 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.18em] text-amber-200/55 sm:text-[9px]">
-                      Live
-                    </span>
-                  </div>
 
-                  <div className="mt-5">
-                    <BrowserProductFrame card={card} urlSlug={card.id} />
+                    <div className={cn("mt-5", useDeviceFrame && "flex justify-center")}>
+                      {useDeviceFrame ? (
+                        <DeviceShowcaseBezel>
+                          <BrowserProductFrame card={card} urlSlug={card.id} />
+                        </DeviceShowcaseBezel>
+                      ) : (
+                        <BrowserProductFrame card={card} urlSlug={card.id} />
+                      )}
+                    </div>
                   </div>
-                </div>
-              </article>
-            </li>
-          ))}
+                </article>
+              </li>
+            );
+          })}
         </ul>
+
+        <p className="mx-auto mt-14 max-w-3xl border-t border-white/[0.08] pt-8 text-center text-sm leading-relaxed text-muted-foreground/95 sm:mt-16 sm:text-[0.9375rem]">
+          {section.previewDisclaimer}
+        </p>
       </FadeIn>
     </Section>
   );
