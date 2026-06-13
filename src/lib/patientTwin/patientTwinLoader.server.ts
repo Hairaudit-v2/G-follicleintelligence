@@ -28,6 +28,7 @@ import { loadPatientTwinImagingGallerySection } from "@/src/lib/patientTwin/pati
 import { loadPatientTwinDonorSection } from "@/src/lib/patientTwin/patientTwinDonorIntelligence.server";
 import { loadPatientTwinHairLossSection } from "@/src/lib/patientTwin/patientTwinHairLossClassification.server";
 import { loadPatientTwinRecipientCandidacySection } from "@/src/lib/patientTwin/patientTwinRecipientCandidacy.server";
+import { loadPatientTwinConsultationChecklistSection } from "@/src/lib/patientTwin/patientTwinConsultationChecklist.server";
 import {
   emptyPatientTwinHairProgressionIntelligence,
   loadPatientTwinHairProgressionSection,
@@ -98,6 +99,7 @@ const SOURCE_TABLES_USED = [
   "hair_intelligence_donor_assessments",
   "hair_intelligence_progression_network_buckets",
   "hair_intelligence_recipient_candidacy_reviews",
+  "hair_intelligence_consultation_checklists",
 ] as const;
 
 const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
@@ -743,6 +745,20 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     }
   }
 
+  let consultation_checklist: PatientTwinV1["intelligence"]["consultation_checklist"] = {
+    latest: null,
+    recent: [],
+    recent_cap: 5,
+  };
+  try {
+    consultation_checklist = await loadPatientTwinConsultationChecklistSection(tid, primaryFoundation, supabase);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
+      pushWarning(warnings, "generic", `Consultation checklist intelligence skipped: ${msg}`);
+    }
+  }
+
   const timelineItems = buildFoundationTimeline(base);
 
   const pathologyCap = 12;
@@ -990,6 +1006,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       hair_progression,
       donor,
       recipient_candidacy,
+      consultation_checklist,
     },
     provenance: {
       generated_at: generatedAt,

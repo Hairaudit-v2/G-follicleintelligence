@@ -20,6 +20,7 @@ import { ConsultationOsQuotePanel } from "@/src/components/fi-admin/consultation
 import { ConsultationQuoteRevenueActions } from "@/src/components/fi-admin/revenue/ConsultationQuoteRevenueActions";
 import { ConsultationOsRecommendationsPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRecommendationsPanel";
 import { ConsultationOsRegenerativeAssessmentPanel } from "@/src/components/fi-admin/consultations/ConsultationOsRegenerativeAssessmentPanel";
+import { ConsultationPreparationChecklistPanel } from "@/src/components/fi-admin/consultations/ConsultationPreparationChecklistPanel";
 import { LabeledTextInput, LabeledTextarea } from "@/src/components/fi-admin/consultations/consultationOsPreviewFields";
 import { StaffClinicalSelect } from "@/src/components/fi/staff/StaffClinicalPickerFields";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
@@ -30,6 +31,7 @@ import {
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { FiSection } from "@/src/components/fi-design/FiSection";
+import type { PatientTwinConsultationChecklistRow } from "@/src/lib/patientTwin/patientTwinTypes";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
@@ -124,6 +126,8 @@ export type ConsultationOsWorkspaceProps = {
   operationalTodayYmd: string;
   initialPaymentRecords?: PaymentRecordRow[];
   canMutatePaymentRecords?: boolean;
+  /** Latest HIE Stage 10 checklist for the linked patient (server-loaded on edit). */
+  initialConsultationChecklistPreview?: PatientTwinConsultationChecklistRow | null;
 };
 
 function renderMainSection(
@@ -172,6 +176,7 @@ export function ConsultationOsWorkspace({
   operationalTodayYmd,
   initialPaymentRecords = [],
   canMutatePaymentRecords = false,
+  initialConsultationChecklistPreview = null,
 }: ConsultationOsWorkspaceProps) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -697,6 +702,13 @@ export function ConsultationOsWorkspace({
           </dl>
         </FiSection>
       </FiCard>
+
+      {linkedPatientId?.trim() ? (
+        <ConsultationPreparationChecklistPanel
+          checklist={initialConsultationChecklistPreview}
+          patientTwinHref={`${base}/patients/${linkedPatientId.trim()}/twin`}
+        />
+      ) : null}
 
       {mode === "edit" && consultationId?.trim() ? (
         <FiCard>

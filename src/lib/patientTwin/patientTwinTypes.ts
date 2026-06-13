@@ -337,6 +337,34 @@ export type PatientTwinRecipientCandidacySection = {
   recent_cap: number;
 };
 
+export type PatientTwinConsultationChecklistRow = {
+  id: string;
+  source_record_id: string | null;
+  priority_level: string;
+  checklist_status: string;
+  confidence_score: number;
+  medication_discussion_required: boolean;
+  stabilisation_discussion_required: boolean;
+  donor_preservation_discussion_required: boolean;
+  expectation_management_required: boolean;
+  consent_complexity_level: string | null;
+  documentation_required: boolean;
+  follow_up_required: boolean;
+  delay_recommended: boolean;
+  checklist_items: string[];
+  risk_flags: string[];
+  consultation_summary: string | null;
+  review_status: string;
+  ai_notes: string | null;
+  created_at: string;
+};
+
+export type PatientTwinConsultationChecklistSection = {
+  latest: PatientTwinConsultationChecklistRow | null;
+  recent: PatientTwinConsultationChecklistRow[];
+  recent_cap: number;
+};
+
 export type PatientTwinHairProgressionSection = HairProgressionIntelligence;
 
 export type PatientTwinIntelligenceSection = {
@@ -351,6 +379,8 @@ export type PatientTwinIntelligenceSection = {
   donor: PatientTwinDonorSection;
   /** HIE Stage 9D — recipient-area candidacy review signals (clinician topics only). */
   recipient_candidacy: PatientTwinRecipientCandidacySection;
+  /** HIE Stage 10 — surgeon consultation checklist topics (discussion preparation only). */
+  consultation_checklist: PatientTwinConsultationChecklistSection;
 };
 
 export type PatientTwinCompletenessMissingArea =

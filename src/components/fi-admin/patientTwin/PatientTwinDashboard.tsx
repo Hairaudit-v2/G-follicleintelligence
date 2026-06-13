@@ -10,6 +10,7 @@ import { PatientTwinClinicalCard } from "./PatientTwinClinicalCard";
 import { PatientDonorIntelligenceCard } from "./PatientDonorIntelligenceCard";
 import { PatientHairLossClassificationCard } from "./PatientHairLossClassificationCard";
 import { PatientRecipientCandidacyCard } from "./PatientRecipientCandidacyCard";
+import { PatientConsultationChecklistCard } from "./PatientConsultationChecklistCard";
 import { PatientTwinHairProgressionCard } from "./PatientTwinHairProgressionCard";
 import { PatientTwinMedicationsCard } from "./PatientTwinMedicationsCard";
 import { PatientTwinOutcomeJourneyCard } from "./PatientTwinOutcomeJourneyCard";
@@ -69,6 +70,8 @@ export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel,
       <PatientDonorIntelligenceCard key={`donor-${tenantId}-${patientId}`} tenantId={tenantId} patientId={patientId} twin={twin} />
 
       <PatientRecipientCandidacyCard key={`recipient-${tenantId}-${patientId}`} tenantId={tenantId} patientId={patientId} twin={twin} />
+
+      <PatientConsultationChecklistCard key={`checklist-${tenantId}-${patientId}`} tenantId={tenantId} patientId={patientId} twin={twin} />
 
       <PatientTwinOutcomeJourneyCard measurements={outcomeMeasurements} protocols={outcomeProtocols} />
 

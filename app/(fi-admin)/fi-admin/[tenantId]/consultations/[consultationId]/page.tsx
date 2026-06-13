@@ -8,6 +8,7 @@ import { loadConsultationForTenant, loadConsultationWorkspaceDisplay } from "@/s
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 import { loadPaymentRecordsForConsultationId } from "@/src/lib/payments/paymentRecordLoaders.server";
+import { loadLatestConsultationChecklistForPatientWorkspace } from "@/src/lib/patientTwin/patientTwinConsultationChecklist.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 
 export const metadata = {
@@ -43,6 +44,12 @@ export default async function ConsultationOsEditRoutePage({
     ]);
   const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
 
+  const patientIdForChecklist = row.patient_id?.trim() ?? null;
+  const initialConsultationChecklistPreview =
+    patientIdForChecklist != null
+      ? await loadLatestConsultationChecklistForPatientWorkspace(tid, patientIdForChecklist).catch(() => null)
+      : null;
+
   return (
     <ConsultationOsEditPage
       tenantId={tid}
@@ -54,6 +61,7 @@ export default async function ConsultationOsEditRoutePage({
       operationalTodayYmd={operationalTodayYmd}
       initialPaymentRecords={initialPaymentRecords}
       canMutatePaymentRecords={payCap.canMutate}
+      initialConsultationChecklistPreview={initialConsultationChecklistPreview}
     />
   );
 }

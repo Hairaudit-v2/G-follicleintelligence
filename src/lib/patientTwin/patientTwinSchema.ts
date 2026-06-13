@@ -397,6 +397,34 @@ export const patientTwinRecipientCandidacySectionSchema = z.object({
   recent_cap: z.number().int().positive(),
 });
 
+export const patientTwinConsultationChecklistRowSchema = z.object({
+  id: z.string().uuid(),
+  source_record_id: z.string().nullable(),
+  priority_level: z.string(),
+  checklist_status: z.string(),
+  confidence_score: z.number(),
+  medication_discussion_required: z.boolean(),
+  stabilisation_discussion_required: z.boolean(),
+  donor_preservation_discussion_required: z.boolean(),
+  expectation_management_required: z.boolean(),
+  consent_complexity_level: z.string().nullable(),
+  documentation_required: z.boolean(),
+  follow_up_required: z.boolean(),
+  delay_recommended: z.boolean(),
+  checklist_items: z.array(z.string()),
+  risk_flags: z.array(z.string()),
+  consultation_summary: z.string().nullable(),
+  review_status: z.string(),
+  ai_notes: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const patientTwinConsultationChecklistSectionSchema = z.object({
+  latest: patientTwinConsultationChecklistRowSchema.nullable(),
+  recent: z.array(patientTwinConsultationChecklistRowSchema),
+  recent_cap: z.number().int().positive(),
+});
+
 export const patientTwinIntelligenceSectionSchema = z.object({
   risk_score: z.null(),
   predicted_outcome: z.null(),
@@ -405,6 +433,7 @@ export const patientTwinIntelligenceSectionSchema = z.object({
   hair_progression: patientTwinHairProgressionSectionSchema,
   donor: patientTwinDonorSectionSchema,
   recipient_candidacy: patientTwinRecipientCandidacySectionSchema,
+  consultation_checklist: patientTwinConsultationChecklistSectionSchema,
 });
 
 export const patientTwinProvenanceSectionSchema = z.object({
