@@ -32,7 +32,7 @@ export function EcosystemMention({ className = "" }: { className?: string }) {
         rel="noopener noreferrer"
         className="font-medium text-foreground underline decoration-primary/50 underline-offset-2 transition-colors hover:text-primary"
       >
-        IIOHR
+        International Institute of Hair Restoration
       </Link>{" "}
       (structured training programs, standards, and governance alignment).
     </p>

@@ -40,10 +40,15 @@ export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiM
       <div
         className="relative aspect-[1/1.05] min-h-[300px] w-full overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-gradient-to-br from-[rgb(16_20_32_/0.97)] via-[rgb(8_12_20_/0.94)] to-[rgb(4_7_12_/0.98)] shadow-[0_32px_100px_rgb(0_0_0_/0.55),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-xl sm:min-h-[360px] md:min-h-[400px]"
       >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 fi-grid opacity-[0.22] [mask-image:radial-gradient(ellipse_at_50%_45%,black_15%,transparent_70%)]"
+        />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_38%,hsl(var(--primary)/0.14),transparent_58%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_14%_10%,rgb(212_175_55_/0.09),transparent_45%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_88%_16%,rgb(120_160_200_/0.07),transparent_36%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.05),transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.08),transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgb(212_175_55_/0.04),transparent_45%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/15 to-transparent" />
 
         <svg
@@ -101,7 +106,7 @@ export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiM
 
         <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
           <motion.div
-            className="w-[min(88vw,248px)] rounded-2xl border border-amber-300/25 bg-[rgb(10_14_22_/0.72)] px-4 py-4 text-center shadow-[0_0_52px_rgb(212_175_55_/0.14),inset_0_1px_0_rgb(255_255_255_/0.1)] ring-1 ring-amber-400/10 backdrop-blur-md sm:w-[min(88%,248px)] sm:px-5 sm:py-4"
+            className="w-[min(88vw,260px)] rounded-2xl border border-amber-300/30 bg-[rgb(10_14_22_/0.78)] px-4 py-4 text-center shadow-[0_0_60px_rgb(212_175_55_/0.18),inset_0_1px_0_rgb(255_255_255_/0.12)] ring-1 ring-amber-400/15 backdrop-blur-md sm:w-[min(88%,260px)] sm:px-5 sm:py-4"
             animate={
               reduceMotion
                 ? {}
@@ -138,7 +143,7 @@ export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiM
                 delay: n.delay,
               }}
             >
-              <div className="relative overflow-hidden rounded-xl border border-white/[0.1] bg-[rgb(8_12_20_/0.62)] px-2.5 py-2 text-center shadow-[0_12px_32px_rgb(0_0_0_/0.35),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md transition-[border-color,box-shadow] duration-300 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-amber-300/45 before:to-transparent hover:border-amber-300/25 hover:shadow-[0_14px_36px_rgb(212_175_55_/0.08)] sm:px-3 sm:py-2.5">
+              <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-[rgb(8_12_20_/0.72)] px-2.5 py-2 text-center shadow-[0_14px_38px_rgb(0_0_0_/0.4),inset_0_1px_0_rgb(255_255_255_/0.08)] backdrop-blur-md transition-[border-color,box-shadow,transform] duration-300 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-amber-300/45 before:to-transparent hover:border-amber-300/28 hover:shadow-[0_16px_44px_rgb(212_175_55_/0.12)] sm:px-3 sm:py-2.5">
                 <p className="text-[10px] font-semibold leading-tight text-foreground/95 sm:text-[11px]">{n.label}</p>
                 <p className="mt-0.5 text-[8px] font-medium leading-snug text-amber-100/75 sm:text-[9px]">
                   {n.subtitle}

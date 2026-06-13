@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function SurgeonsPage() {
-  return <FiMarketingPlaceholderPage eyebrow="Surgeons" headline={c.headline} description={c.description} />;
+  return <FiMarketingPlaceholderPage eyebrow="Surgeons" headline={c.headline} description={c.description} comingNext={c.comingNext} />;
 }

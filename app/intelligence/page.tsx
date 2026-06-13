@@ -12,6 +12,6 @@ export const metadata: Metadata = {
 
 export default function IntelligencePage() {
   return (
-    <FiMarketingPlaceholderPage eyebrow="Intelligence" headline={c.headline} description={c.description} />
+    <FiMarketingPlaceholderPage eyebrow="Intelligence" headline={c.headline} description={c.description} comingNext={c.comingNext} />
   );
 }

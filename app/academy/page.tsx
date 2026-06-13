@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function AcademyPage() {
-  return <FiMarketingPlaceholderPage eyebrow="Academy" headline={c.headline} description={c.description} />;
+  return <FiMarketingPlaceholderPage eyebrow="Academy" headline={c.headline} description={c.description} comingNext={c.comingNext} />;
 }

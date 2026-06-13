@@ -17,6 +17,7 @@ export default function DemoPage() {
       headline={c.headline}
       description={c.description}
       variant="demo"
+      comingNext={c.comingNext}
     />
   );
 }

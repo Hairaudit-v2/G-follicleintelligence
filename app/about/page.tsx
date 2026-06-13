@@ -9,7 +9,7 @@ import { FadeIn } from "@/components/ui/fade-in";
 export const metadata: Metadata = {
   title: "About Follicle Intelligence | Built To Raise The Standard Worldwide",
   description:
-    "Why Follicle Intelligence exists: accountable quality infrastructure for hair restoration—transparency, benchmarks, governance, and standards across HairAudit, HLI, and IIOHR. Mission, platform direction, and long-term focus.",
+    "Why Follicle Intelligence exists: accountable quality infrastructure for hair restoration—transparency, benchmarks, governance, and standards across HairAudit, HLI, and the International Institute of Hair Restoration. Mission, platform direction, and long-term focus.",
 };
 
 function SectionIntro({
@@ -87,8 +87,8 @@ export default function AboutPage() {
                   line: "Biology and longitudinal treatment intelligence—where response over time matters as much as day-one photos.",
                 },
                 {
-                  name: "IIOHR",
-                  line: "Standards programs, training, and governance alignment—where improvement becomes legitimate inside the profession.",
+                  name: "International Institute of Hair Restoration",
+                  line: "Standards programmes, training, and governance alignment—where improvement becomes legitimate inside the profession.",
                 },
               ].map((item) => (
                 <div
@@ -128,7 +128,7 @@ export default function AboutPage() {
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-foreground underline decoration-primary/50 underline-offset-2 hover:text-primary"
               >
-                IIOHR
+                International Institute of Hair Restoration
               </Link>
             </div>
           </FadeIn>

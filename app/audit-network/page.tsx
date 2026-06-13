@@ -12,6 +12,6 @@ export const metadata: Metadata = {
 
 export default function AuditNetworkPage() {
   return (
-    <FiMarketingPlaceholderPage eyebrow="Audit network" headline={c.headline} description={c.description} />
+    <FiMarketingPlaceholderPage eyebrow="Audit network" headline={c.headline} description={c.description} comingNext={c.comingNext} />
   );
 }

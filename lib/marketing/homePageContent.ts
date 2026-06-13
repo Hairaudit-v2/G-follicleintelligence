@@ -14,8 +14,19 @@ export type HomeEcosystemModule = {
 };
 
 export type HomeAudienceCard = {
+  headline: string;
+  outcome: string;
+  cta: { label: string; href: string };
+};
+
+export type HomeTrainingTrack = {
   title: string;
-  body: string;
+  detail: string;
+};
+
+export type HomeIntelligenceGroup = {
+  title: string;
+  items: readonly string[];
 };
 
 export const HOME_PAGE_CONTENT = {
@@ -23,19 +34,19 @@ export const HOME_PAGE_CONTENT = {
     eyebrow: "Enterprise hair restoration infrastructure",
     headline: "The Operating System For The Future Of Hair Restoration",
     subheadline:
-      "From first contact through diagnosis, surgery, independent verification, training, and longitudinal outcome intelligence—a unified substrate built to govern every layer of modern hair restoration.",
+      "A unified substrate for acquisition, clinical depth, surgery, independent verification, workforce certification, and longitudinal outcome intelligence—built so serious operators can govern quality at scale.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
     secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
     supportingLine:
-      "Built for independent surgeons, clinical enterprises, educators, and global operators advancing the next generation of hair restoration.",
+      "For independent surgeons, clinic builders, multi-site groups, education partners, and investors who believe the category deserves infrastructure—not another generic clinic stack.",
     orbitModules: [
-      { label: "LeadFlowOS", subtitle: "CRM, capture & pipeline" },
-      { label: "ClinicOS", subtitle: "Scheduling & clinical spine" },
-      { label: "HairIntel", subtitle: "AI intake & diagnostics" },
+      { label: "LeadFlowOS", subtitle: "Acquisition & pipeline" },
+      { label: "ClinicOS", subtitle: "Operations spine" },
+      { label: "HairIntel", subtitle: "Diagnostics & AI intake" },
       { label: "SurgeryOS", subtitle: "Planning & procedure day" },
-      { label: "AuditOS", subtitle: "HairAudit & verification" },
-      { label: "AcademyOS", subtitle: "Training & certification" },
-      { label: "AnalyticsOS", subtitle: "BI & performance" },
+      { label: "AuditOS", subtitle: "HairAudit layer" },
+      { label: "AcademyOS", subtitle: "Certification & CPD" },
+      { label: "AnalyticsOS", subtitle: "Performance intelligence" },
       { label: "FoundationOS", subtitle: "Patient twin & records" },
     ] satisfies HomeOrbitModule[],
     coreEyebrow: "Intelligence core",
@@ -47,18 +58,19 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "The industry problem",
     headline: "Hair Restoration Has Scaled Faster Than Quality Control",
     subtext:
-      "Global demand is outpacing the governance, standards, and longitudinal systems required to protect quality, consistency, patient safety, and long-term clinical excellence.",
+      "Demand is global; governance is local and uneven. Without shared evidence, longitudinal structure, and accountable review, quality becomes a narrative instead of a measurable standard.",
     cards: [
-      "Limited procedural training",
-      "Inconsistent outcomes",
-      "Weak operational oversight",
-      "Fragmented patient data",
-      "No global benchmarking",
-      "Poor long-term outcome tracking",
-      "Limited clinical governance",
-      "No unified intelligence network",
+      "Limited procedural depth in training pathways",
+      "Inconsistent outcomes across markets",
+      "Weak operational oversight at scale",
+      "Fragmented patient intelligence",
+      "No defensible global benchmarking",
+      "Thin long-term outcome signal",
+      "Clinical governance that does not travel",
+      "No single operating layer connecting the full journey",
     ],
-    transition: "The industry does not need another CRM. It needs a new operating system.",
+    transition:
+      "The category does not need another horizontal clinic tool. It needs an operating system that connects every layer of serious hair restoration.",
   },
 
   onePlatform: {
@@ -66,39 +78,40 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "The operating system",
     headline: "One Platform. Every Layer Of Hair Restoration.",
     subtext:
-      "Follicle Intelligence unifies every critical function of a modern hair restoration enterprise—commercial, clinical, surgical, educational, and analytical—into one connected intelligence substrate.",
+      "Eight modules share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
+    architectureCaption: "Connected OS modules · single intelligence substrate",
     modules: [
       {
         name: "LeadFlowOS",
-        description: "CRM, lead capture, follow-ups, and pipeline intelligence.",
+        description: "Acquisition, CRM, follow-up, and pipeline intelligence—before a patient ever enters the clinical spine.",
       },
       {
         name: "ClinicOS",
-        description: "Scheduling, staff, services, and the clinical operations spine across sites.",
+        description: "Scheduling, services, staff, and the operational rhythm that keeps high-volume hair programs coherent.",
       },
       {
         name: "HairIntel",
-        description: "AI intake, HLI diagnostics, blood review, and treatment intelligence.",
+        description: "AI-assisted intake, diagnostics, blood intelligence, and treatment reasoning aligned to restoration workflows.",
       },
       {
         name: "SurgeryOS",
-        description: "Surgical planning, grafts, donor intelligence, and procedure day orchestration.",
+        description: "Surgical planning, donor intelligence, graft economics, and procedure-day orchestration built for the OR.",
       },
       {
         name: "AuditOS",
-        description: "HairAudit, independent outcome verification, and quality scoring.",
+        description: "HairAudit-aligned verification, independent review, and quality scoring that makes excellence legible.",
       },
       {
         name: "AcademyOS",
-        description: "Doctor, nurse, consultant, and technician training pathways.",
+        description: "Doctor, nurse, consultant, and technician pathways—anchored to the International Institute of Hair Restoration.",
       },
       {
         name: "AnalyticsOS",
-        description: "Business intelligence, conversion, revenue, and staff productivity.",
+        description: "Conversion, revenue, productivity, and cohort performance—without divorcing commercial signal from clinical truth.",
       },
       {
         name: "FoundationOS",
-        description: "Patient records, patient twin continuity, and longitudinal timelines.",
+        description: "Patient records, digital twin continuity, and longitudinal timelines that survive handoffs across years.",
       },
     ] satisfies HomeEcosystemModule[],
   },
@@ -106,9 +119,9 @@ export const HOME_PAGE_CONTENT = {
   patientJourney: {
     id: "patient-journey",
     storyEyebrow: "The full patient journey",
-    headline: "The Entire Patient Journey Connected In One System",
+    headline: "From First Enquiry To Global Intelligence—One Continuous Pipeline",
     subtext:
-      "Every interaction becomes structured intelligence that improves future clinical decision-making.",
+      "Each stage emits structured signal the next stage can trust—so improvement compounds instead of resetting at every handoff.",
     steps: [
       "Patient enquiry",
       "AI qualification",
@@ -122,78 +135,120 @@ export const HOME_PAGE_CONTENT = {
       "Follow-up",
       "Audit verification",
       "Global intelligence dataset",
-    ],
+    ] as const,
   },
 
   builtForOperators: {
     id: "built-for-operators",
     storyEyebrow: "Who it is for",
-    headline: "Built For Every Business Shaping The Future Of Hair Restoration",
+    headline: "Built For The People Who Run Hair Restoration At Serious Scale",
     audiences: [
       {
-        title: "For Surgeons",
-        body: "Become a world-class hair restoration surgeon through structured training, procedural intelligence, surgical auditing, and performance benchmarking.",
+        headline: "Surgeons",
+        outcome: "Sharper preparation, measurable technique signal, and audit-grade evidence that supports reputation under scrutiny—not vanity metrics.",
+        cta: { label: "Surgeon pathway", href: "/surgeons" as const },
       },
       {
-        title: "For Practice & Group Leaders",
-        body: "Run the full hair restoration enterprise—sites, staff, services, and revenue—from one operating system designed for the category.",
+        headline: "Clinic Owners",
+        outcome: "One operating layer for revenue, operations, and clinical coherence—so the business scales without the brand drifting.",
+        cta: { label: "Owner playbook", href: "/clinic-owners" as const },
       },
       {
-        title: "For Multi-Site Enterprises",
-        body: "Scale nationally and internationally while maintaining operational consistency, governance, and surgical quality across every site in the portfolio.",
+        headline: "Multi-Clinic Groups",
+        outcome: "Portfolio governance with comparable signal across regions—standards that travel, exceptions that surface early.",
+        cta: { label: "Enterprise deployments", href: "/enterprise" as const },
       },
       {
-        title: "For Industry Organisations",
-        body: "Build training systems, certification pathways, and global standards that improve outcomes across the industry.",
+        headline: "Industry Organisations",
+        outcome: "Training infrastructure and standards programs that connect to evidence—so certification reflects defensible practice, not attendance alone.",
+        cta: { label: "Academy & partnerships", href: "/academy" as const },
       },
     ] satisfies HomeAudienceCard[],
   },
 
   training: {
     id: "training-infrastructure",
-    storyEyebrow: "The training layer",
-    headline: "Better Training Creates Better Outcomes",
-    subtext: "Education, certification, and clinical performance are finally connected.",
+    storyEyebrow: "Workforce infrastructure",
+    headline: "Training Is Operating Infrastructure—Not A Course Catalogue",
+    subtext:
+      "Certification, competency, and longitudinal performance belong in the same system as clinical work—so workforce quality compounds with case evidence.",
+    poweredByLabel: "Standards & pathways anchored to",
     poweredBy: "International Institute of Hair Restoration",
     tracks: [
-      "Doctor certification",
-      "Nurse surgical training",
-      "Hair consultant education",
-      "Technician competency",
-      "Clinical assessment frameworks",
-      "CPD tracking",
-      "Performance-based accreditation",
-    ],
+      {
+        title: "Doctor certification",
+        detail: "Structured progression with assessment gates tied to real clinical evidence—not checklist theatre.",
+      },
+      {
+        title: "Nurse surgical training",
+        detail: "OR-adjacent competencies aligned to how hair teams actually run procedure day.",
+      },
+      {
+        title: "Hair consultant education",
+        detail: "Consultation quality, consent depth, and expectation integrity as measurable professional skills.",
+      },
+      {
+        title: "Technician competency",
+        detail: "Role-specific standards with performance signal that leadership can review and remediate.",
+      },
+      {
+        title: "Clinical assessment frameworks",
+        detail: "Shared rubrics so reviewers, trainers, and operators speak one professional language.",
+      },
+      {
+        title: "CPD tracking",
+        detail: "Continuing education that connects to live workflows—not disconnected LMS credits.",
+      },
+      {
+        title: "Performance-based accreditation",
+        detail: "Accreditation that can tighten when signal weakens and expand when evidence supports it.",
+      },
+    ] satisfies HomeTrainingTrack[],
   },
 
   surgicalIntelligence: {
     id: "surgical-intelligence",
     storyEyebrow: "Surgical intelligence",
     headline: "Every Procedure Becomes Measurable Intelligence",
-    variables: [
-      "Graft counts",
-      "Hair counts",
-      "Punch size",
-      "Extraction speed",
-      "Transection rate",
-      "Donor quality",
-      "Recipient density planning",
-      "Team performance",
-      "Medication protocols",
-      "Implantation methods",
-      "Procedure timelines",
-      "Healing progression",
-      "12-month outcomes",
-    ],
+    intelligenceGroups: [
+      {
+        title: "Procedure metrics",
+        items: ["Graft counts", "Hair counts", "Punch size", "Extraction speed", "Transection rate", "Procedure timelines"],
+      },
+      {
+        title: "Donor intelligence",
+        items: ["Donor quality", "Recipient density planning", "Donor recovery signal", "Follicle economics context"],
+      },
+      {
+        title: "Team performance",
+        items: ["Role throughput", "Handoff quality", "OR consistency", "Exception patterns"],
+      },
+      {
+        title: "Clinical protocols",
+        items: ["Implantation methods", "Medication protocols", "Pre- and post-op pathways"],
+      },
+      {
+        title: "Outcome tracking",
+        items: ["Healing progression", "12-month outcomes", "Patient-reported signal", "Audit-ready evidence packets"],
+      },
+    ] satisfies HomeIntelligenceGroup[],
     closing:
-      "Purpose-built surgical intelligence captures variables general practice systems were never designed to observe—and ties them to governance, audit, and longitudinal outcomes.",
+      "Purpose-built surgical intelligence captures variables general systems were never designed to hold—and connects them to governance, HairAudit verification, and longitudinal outcomes so improvement has a denominator.",
   },
 
   auditNetwork: {
     id: "audit-network",
-    storyEyebrow: "Independent audit",
-    headline: "The First Independent Audit Network In Hair Restoration",
+    storyEyebrow: "Trust & accountability",
+    headline: "HairAudit: Independent Review, Evidence, And Benchmark Discipline",
+    subtext:
+      "HairAudit exists as the accountability layer: independent review, disciplined scoring, outcome verification, and benchmarking that serious operators can stand behind under scrutiny.",
     poweredBy: "HairAudit",
+    trustPillars: [
+      { title: "Independent review", detail: "Review paths designed to reduce self-graded quality and narrative drift." },
+      { title: "Quality scoring", detail: "Transparent scoring primitives so standing is legible—not a black box index." },
+      { title: "Outcome verification", detail: "Evidence-linked outcomes that can support internal QA and cleared external disclosure where policy allows." },
+      { title: "Evidence-based benchmarking", detail: "Cohort context with honest denominators—so comparison strengthens credibility instead of eroding it." },
+    ],
     metrics: [
       "Graft survival analysis",
       "Density assessment",
@@ -203,17 +258,19 @@ export const HOME_PAGE_CONTENT = {
       "Complication monitoring",
       "Long-term growth assessment",
       "Global benchmarking",
-      "Independent verification",
     ],
+    cta: { label: "Explore the audit network", href: "/audit-network" as const },
   },
 
   globalIntelligence: {
     id: "global-intelligence",
     storyEyebrow: "Global intelligence",
-    headline: "Every Patient Makes The Entire Industry Smarter",
+    headline: "Structured Signal That Makes The Entire Network Smarter—Responsibly",
     subtext:
-      "Every patient interaction contributes to a continuously expanding intelligence network. Over time, the system learns from every outcome.",
-    twinDataLabel: "Patient Digital Twin data",
+      "As structured outcome data grows across participating programmes, cohorts deepen and comparisons become more informative. Follicle Intelligence is built to compound that signal with governance—not to confuse marketing reach with clinical truth.",
+    futureFacingNote:
+      "Today, the platform prioritises structured capture, reviewability, and transparent limitations. Predictive layers are a forward roadmap—not a promise that every model is production-ready for every jurisdiction tomorrow.",
+    twinDataLabel: "Patient digital twin signal (examples)",
     twinDataPoints: [
       "Baseline imaging",
       "Trichoscopy",
@@ -232,35 +289,40 @@ export const HOME_PAGE_CONTENT = {
 
   predictiveFuture: {
     id: "predictive-future",
-    storyEyebrow: "Predictive future",
-    headline: "Building The Largest Hair Restoration Intelligence Dataset In The World",
-    modelsLabel: "Predictive model examples",
+    storyEyebrow: "Future-facing intelligence",
+    headline: "A Dataset Built For The Next Decade Of Hair Restoration Science",
+    intro:
+      "As structured outcome data grows and review norms mature, future models may help clinicians better understand progression risk, donor economics, and long-term density—always bounded by evidence quality, jurisdiction, and clinical judgement.",
+    modelsLabel: "Research directions (examples—not universal clinical guarantees)",
     models: [
-      "Hair loss progression",
-      "Donor depletion risk",
-      "Medication response",
-      "Surgical candidacy",
-      "Graft survival probability",
-      "Complication risk",
-      "Long-term density forecasting",
-      "Biological ageing impact",
+      "Hair loss progression patterns",
+      "Donor depletion risk context",
+      "Medication response signal",
+      "Surgical candidacy support",
+      "Graft survival probability modelling",
+      "Complication risk surfacing",
+      "Long-term density forecasting (where data supports it)",
+      "Biological ageing interactions",
     ],
+    closing:
+      "Ambition here is institutional: build the deepest defensible hair restoration intelligence substrate in the world—while staying medically responsible about what is proven today versus what becomes possible as data and methods mature.",
   },
 
   founder: {
     id: "founder-story",
     storyEyebrow: "Why it exists",
-    headline: "Built By People Who Have Lived The Industry",
-    body: `After decades working inside hair restoration, one truth became impossible to ignore: the industry was scaling globally faster than the systems designed to ensure quality, accountability, and patient safety.
+    headline: "Why This Operating System Had To Exist",
+    pullQuote: "Built by people who have lived the industry.",
+    body: `After decades inside hair restoration, one truth became impossible to ignore: the field was scaling faster than the systems designed to protect quality, accountability, and patient safety.
 
-Follicle Intelligence was built to solve that problem—not for a single operator, but for the future of the entire industry.`,
+Follicle Intelligence exists to change that—not for a single operator, but as category infrastructure for the next generation of serious programmes.`,
   },
 
   finalCta: {
     id: "final-cta",
     headline: "The Future Of Hair Restoration Starts Now",
     subtext:
-      "Whether you are an independent surgeon, practice operator, enterprise organisation, or global education provider, Follicle Intelligence was built to help you scale intelligently.",
+      "Whether you lead surgery, own clinics, run a multi-site group, represent an industry body, or invest behind accountable quality—this is the operating layer built to scale with evidence.",
     primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
     secondaryCta: { label: "Explore The Platform", href: "/platform" as const },
   },

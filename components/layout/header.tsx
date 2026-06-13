@@ -34,7 +34,7 @@ export function Header() {
       transition={{ duration: 0.5 }}
       className="sticky top-0 z-50 border-b border-border/60 bg-background/88 backdrop-blur-xl"
     >
-      <div className="mx-auto flex h-auto min-h-[4.5rem] max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:gap-6 sm:px-6 md:min-h-[5rem]">
+      <div className="mx-auto flex h-auto min-h-[4.5rem] max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-5 sm:px-6 md:min-h-[5rem]">
         <Link href="/" className="flex min-w-0 items-center gap-4 font-semibold tracking-tight">
           <div className="fi-panel-muted flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70">
             <Image
@@ -58,13 +58,13 @@ export function Header() {
           aria-label="Primary"
           className="hidden min-w-0 flex-1 justify-end overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] lg:flex lg:[&::-webkit-scrollbar]:hidden"
         >
-          <ul className="flex items-center gap-3 whitespace-nowrap pr-1 pt-1 md:gap-4">
+          <ul className="flex items-center gap-2 whitespace-nowrap pr-1 pt-1 xl:gap-3">
             {headerNav.map((item) => (
-              <li key={`${item.label}:${item.href}`}>
+              <li key={`${item.label}:${item.href}`} className="shrink-0">
                 <Link
                   href={item.href}
                   className={cn(
-                    "text-[13px] font-medium transition-colors hover:text-foreground md:text-sm",
+                    "text-[11px] font-medium transition-colors hover:text-foreground xl:text-[13px]",
                     navItemIsActive(pathname, item.href) ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
@@ -85,7 +85,7 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-56 max-h-[min(70vh,28rem)] overflow-y-auto">
               {headerNav.map((item) => (
                 <DropdownMenuItem key={`${item.label}:${item.href}`} asChild>
                   <Link href={item.href}>{item.label}</Link>
