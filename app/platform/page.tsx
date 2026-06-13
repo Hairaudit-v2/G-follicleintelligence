@@ -19,9 +19,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Platform: Category Infrastructure for Audit, Benchmarks & Governance | Follicle Intelligence",
+  title: "Platform: The Complete Hair Restoration Operating System | Follicle Intelligence",
   description:
-    "Follicle Intelligence is infrastructure for hair restoration quality: compounding benchmarks, governance and review, and cross-surface learning across HairAudit, HLI, and IIOHR—private, white-label, and institutional deployment.",
+    "Follicle Intelligence is the complete operating system for hair restoration: compounding benchmarks, governance and review, and cross-surface learning across HairAudit, HLI, and IIOHR—private, white-label, and institutional deployment.",
 };
 
 function SectionIntro({
@@ -160,7 +160,7 @@ export default function PlatformPage() {
     <>
       <PageHero
         eyebrow="Platform"
-        title="Infrastructure for accountable quality—not a toolkit for prettier charts."
+        title="The Complete Operating System For Hair Restoration"
         subtitle="Hair restoration is global, fragmented, and reputation-driven. Point solutions can score a case or display a dashboard; they do not make quality comparable across jurisdictions, time, and professional standards. Follicle Intelligence is built as category infrastructure: evidence structuring, cohort logic, governance workflow, and cross-surface learning—so adoption deepens the moat instead of merely renewing a subscription."
       />
 

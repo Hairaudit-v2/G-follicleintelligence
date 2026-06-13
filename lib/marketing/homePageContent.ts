@@ -25,7 +25,7 @@ export const HOME_PAGE_CONTENT = {
     subheadline:
       "From first contact through diagnosis, surgery, independent verification, training, and longitudinal outcome intelligence—a unified substrate built to govern every layer of modern hair restoration.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/contact" as const },
+    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
     supportingLine:
       "Built for independent surgeons, clinical enterprises, educators, and global operators advancing the next generation of hair restoration.",
     orbitModules: [
@@ -139,8 +139,8 @@ export const HOME_PAGE_CONTENT = {
         body: "Run the full hair restoration enterprise—sites, staff, services, and revenue—from one operating system designed for the category.",
       },
       {
-        title: "For Multi-Clinic Groups",
-        body: "Scale nationally and internationally while maintaining operational consistency, governance, and surgical quality.",
+        title: "For Multi-Site Enterprises",
+        body: "Scale nationally and internationally while maintaining operational consistency, governance, and surgical quality across every site in the portfolio.",
       },
       {
         title: "For Industry Organisations",
@@ -261,7 +261,7 @@ Follicle Intelligence was built to solve that problem—not for a single operato
     headline: "The Future Of Hair Restoration Starts Now",
     subtext:
       "Whether you are an independent surgeon, practice operator, enterprise organisation, or global education provider, Follicle Intelligence was built to help you scale intelligently.",
-    primaryCta: { label: "Book Enterprise Demo", href: "/contact" as const },
+    primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
     secondaryCta: { label: "Explore The Platform", href: "/platform" as const },
   },
 

@@ -25,7 +25,7 @@ import {
 
 const OG_IMAGE = PUBLIC_IMAGES.appleTouchIcon;
 
-const PAGE_TITLE = "Enterprise: Infrastructure for Large Clinic Groups & Partners | Follicle Intelligence";
+const PAGE_TITLE = "Enterprise: Scale Globally Without Losing Quality | Follicle Intelligence";
 
 const PAGE_DESCRIPTION =
   "Enterprise-grade Follicle Intelligence for multi-location groups, training institutions, surgical networks, white-label programs, and strategic partnerships—central reporting, cross-location analytics, certification networks, and private deployments.";
@@ -161,8 +161,8 @@ export default function EnterprisePage() {
     <>
       <PageHero
         eyebrow="Enterprise"
-        title="Enterprise infrastructure for hair restoration at scale"
-        subtitle="Purpose-built operating intelligence for large clinic groups, institutions, networks, white-label programs, and strategic partners who need scale without sacrificing governance."
+        title="Scale Globally Without Losing Quality"
+        subtitle="Purpose-built operating intelligence for multi-site groups, institutions, networks, white-label programs, and strategic partners who need scale without sacrificing governance."
         body="Follicle Intelligence is modular infrastructure you can deploy as a connected system: acquisition through outcomes, with audit-ready workflows and benchmark context where your program demands it."
       />
 

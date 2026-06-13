@@ -5,6 +5,13 @@ const BASE_URL = "https://www.follicleintelligence.ai";
 const STATIC_PAGES: { path: string; priority: number; changeFrequency: "yearly" | "monthly" | "weekly" }[] = [
   { path: "/", priority: 1, changeFrequency: "monthly" },
   { path: "/platform", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/surgeons", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/clinic-owners", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/enterprise", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/academy", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/audit-network", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/intelligence", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/demo", priority: 0.9, changeFrequency: "monthly" },
   { path: "/solutions", priority: 0.9, changeFrequency: "monthly" },
   { path: "/hair-intelligence", priority: 0.9, changeFrequency: "monthly" },
   { path: "/ai-hair-transplant-analysis", priority: 0.85, changeFrequency: "monthly" },

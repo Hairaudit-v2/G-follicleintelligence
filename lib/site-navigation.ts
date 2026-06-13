@@ -1,29 +1,29 @@
 export const PRIMARY_NAV = [
   { href: "/platform", label: "Platform" },
-  { href: "/solutions", label: "Solutions" },
-  { href: "/hair-intelligence", label: "Hair Intelligence" },
-  { href: "/white-label", label: "White Label" },
-  { href: "/methodology", label: "Standards & governance" },
-  { href: "/dashboard-demo", label: "Dashboard Demo" },
-  { href: "/future-verticals", label: "Future Verticals" },
-  { href: "https://iiohr.com", label: "IIOHR" },
+  { href: "/surgeons", label: "Surgeons" },
+  { href: "/clinic-owners", label: "Clinic owners" },
+  { href: "/enterprise", label: "Enterprise" },
+  { href: "/academy", label: "Academy" },
+  { href: "/audit-network", label: "Audit network" },
+  { href: "/intelligence", label: "Intelligence" },
   { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export type FooterNavLink = { label: string; href: string };
 
-/** Public footer — Platform column */
+/** Public footer — primary OS story routes */
 export const FOOTER_PLATFORM: FooterNavLink[] = [
-  { label: "Platform Overview", href: "/" },
-  { label: "Technology", href: "/technology" },
-  { label: "Patient Twin", href: "/patient-twin" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Security", href: "/technology" },
-  { label: "Enterprise", href: "/technology" },
+  { label: "Platform", href: "/platform" },
+  { label: "Surgeons", href: "/surgeons" },
+  { label: "Clinic owners", href: "/clinic-owners" },
+  { label: "Enterprise", href: "/enterprise" },
+  { label: "Academy", href: "/academy" },
+  { label: "Audit network", href: "/audit-network" },
+  { label: "Intelligence", href: "/intelligence" },
+  { label: "Book demo", href: "/demo" },
 ];
 
-/** Public footer — product modules */
+/** Public footer — product modules (deep links) */
 export const FOOTER_MODULES: FooterNavLink[] = [
   { label: "SurgeryOS", href: "/platform/surgery-os" },
   { label: "PatientOS", href: "/platform/patient-os" },
@@ -33,17 +33,19 @@ export const FOOTER_MODULES: FooterNavLink[] = [
   { label: "AnalyticsOS", href: "/platform/analytics-os" },
 ];
 
-/** Supporting intelligence layers (external) */
+/** Ecosystem (external) — full names for clarity */
 export const FOOTER_INTELLIGENCE_LAYERS: FooterNavLink[] = [
   { label: "HairAudit", href: "https://hairaudit.com" },
-  { label: "HLI", href: "https://hairlongevityinstitute.com" },
-  { label: "IIOHR", href: "https://iiohr.com" },
+  { label: "Hair Longevity Institute", href: "https://hairlongevityinstitute.com" },
+  { label: "International Institute of Hair Restoration", href: "https://iiohr.com" },
 ];
 
 export const FOOTER_COMPANY: FooterNavLink[] = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
-  { label: "Book Demo", href: "/contact?intent=demo" },
+  { label: "Solutions", href: "/solutions" },
+  { label: "Hair intelligence", href: "/hair-intelligence" },
+  { label: "Methodology", href: "/methodology" },
 ];
 
 export type EcosystemSiteId = "iiohr" | "hairaudit" | "follicleintelligence" | "hli";
@@ -70,8 +72,23 @@ export const ECOSYSTEM_DIAGRAM_NODES = {
   },
   /** Satellites (order: HairAudit, HLI, IIOHR for consistent layout). */
   satellites: [
-    { id: "hairaudit" as EcosystemSiteId, label: "HairAudit™", roleLabel: "Surgical audit and scoring", href: "https://hairaudit.com" },
-    { id: "hli" as EcosystemSiteId, label: "Hair Longevity Institute™", roleLabel: "Diagnosis and treatment pathway", href: "https://hairlongevityinstitute.com" },
-    { id: "iiohr" as EcosystemSiteId, label: "IIOHR™", roleLabel: "Training and certification", href: "https://iiohr.com" },
+    {
+      id: "hairaudit" as EcosystemSiteId,
+      label: "HairAudit™",
+      roleLabel: "Surgical audit and scoring",
+      href: "https://hairaudit.com",
+    },
+    {
+      id: "hli" as EcosystemSiteId,
+      label: "Hair Longevity Institute™",
+      roleLabel: "Diagnosis and treatment pathway",
+      href: "https://hairlongevityinstitute.com",
+    },
+    {
+      id: "iiohr" as EcosystemSiteId,
+      label: "IIOHR™",
+      roleLabel: "Training and certification",
+      href: "https://iiohr.com",
+    },
   ],
 } as const;

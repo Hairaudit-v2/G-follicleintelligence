@@ -43,6 +43,8 @@ export function FiMarketingOsHeroVisual({ modules, coreEyebrow, coreTitle }: FiM
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_38%,hsl(var(--primary)/0.14),transparent_58%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_14%_10%,rgb(212_175_55_/0.09),transparent_45%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_88%_16%,rgb(120_160_200_/0.07),transparent_36%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.05),transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/15 to-transparent" />
 
         <svg
           className="absolute inset-0 h-full w-full text-amber-200/35"

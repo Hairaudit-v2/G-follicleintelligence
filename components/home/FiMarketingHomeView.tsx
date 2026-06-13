@@ -73,14 +73,14 @@ function SectionHeading({
       <h2
         id={id}
         className={cn(
-          "font-display font-semibold tracking-tight text-foreground text-balance",
+          "max-w-[52rem] font-display font-semibold tracking-tight text-foreground text-balance",
           eyebrow ? "mt-5 text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]" : "text-3xl sm:text-4xl md:text-[2.75rem] md:leading-[1.12]"
         )}
       >
         {title}
       </h2>
       {description ? (
-        <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg md:leading-relaxed">
+        <p className="mt-5 max-w-3xl text-base leading-[1.65] text-muted-foreground sm:text-lg md:leading-relaxed">
           {description}
         </p>
       ) : null}
@@ -91,7 +91,7 @@ function SectionHeading({
 const glassVariants = {
   default:
     "border-white/[0.08] bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-white/[0.015] shadow-[0_20px_56px_rgb(0_0_0_/0.4),inset_0_1px_0_rgb(255_255_255_/0.06)] hover:border-white/[0.12]",
-  os: "border-white/[0.06] bg-gradient-to-b from-white/[0.1] via-white/[0.035] to-transparent shadow-[0_18px_52px_rgb(0_0_0_/0.42),inset_0_1px_0_rgb(255_255_255_/0.07)] ring-1 ring-inset ring-white/[0.04] transition-[border-color,box-shadow] duration-300 hover:border-amber-400/22 hover:shadow-[0_22px_64px_rgb(212_175_55_/0.08),inset_0_1px_0_rgb(255_255_255_/0.08)]",
+  os: "border-white/[0.06] bg-gradient-to-b from-white/[0.11] via-white/[0.04] to-[rgb(4_8_14_/0.55)] shadow-[0_20px_56px_rgb(0_0_0_/0.45),inset_0_1px_0_rgb(255_255_255_/0.08)] ring-1 ring-inset ring-white/[0.05] transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-amber-400/25 hover:shadow-[0_26px_72px_rgb(212_175_55_/0.1),inset_0_1px_0_rgb(255_255_255_/0.09)]",
   problem:
     "border-amber-400/[0.09] bg-gradient-to-br from-white/[0.06] to-amber-950/[0.08] shadow-[0_16px_48px_rgb(0_0_0_/0.38),inset_0_1px_0_rgb(255_255_255_/0.05)] hover:border-amber-400/18",
 } as const;
@@ -122,17 +122,19 @@ function GlassCard({
 
 function OsModuleCard({ index, name, description }: { index: number; name: string; description: string }) {
   return (
-    <GlassCard variant="os" className="group flex h-full flex-col">
-      <div className="flex items-center border-b border-white/[0.06] pb-3">
-        <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/50">
+    <GlassCard variant="os" className="group flex h-full min-h-[10.5rem] flex-col sm:min-h-[11.5rem]">
+      <div className="flex items-center border-b border-white/[0.07] pb-3">
+        <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
           {String(index + 1).padStart(2, "0")}
         </span>
         <span
-          className="ml-auto h-px w-10 bg-gradient-to-r from-amber-400/35 to-transparent"
+          className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent"
           aria-hidden
         />
       </div>
-      <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95">{name}</p>
+      <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
+        {name}
+      </p>
       <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
     </GlassCard>
   );
@@ -144,7 +146,7 @@ function ChipList({ items }: { items: readonly string[] }) {
       {items.map((item) => (
         <li
           key={item}
-          className="rounded-xl border border-white/[0.06] border-l-2 border-l-amber-400/45 bg-gradient-to-r from-amber-400/[0.07] via-transparent to-transparent px-4 py-3 text-sm leading-snug text-foreground/95 shadow-[inset_0_1px_0_rgb(255_255_255_/0.04)]"
+          className="rounded-xl border border-white/[0.06] border-l-2 border-l-amber-400/45 bg-gradient-to-r from-amber-400/[0.07] via-transparent to-transparent px-4 py-3 text-sm leading-snug text-foreground/95 shadow-[inset_0_1px_0_rgb(255_255_255_/0.04)] transition-[border-color,background-color,box-shadow] duration-200 hover:border-amber-400/30 hover:bg-amber-400/[0.06] hover:shadow-[inset_0_1px_0_rgb(255_255_255_/0.06)]"
         >
           {item}
         </li>
@@ -166,16 +168,21 @@ export function FiMarketingHomeView() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_12%_-5%,rgb(212_175_55_/0.14),transparent_48%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_92%_8%,hsl(var(--primary)/0.16),transparent_44%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgb(0_0_0_/0.45),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-amber-950/[0.03] to-background" />
 
         <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:gap-14 sm:px-6 sm:py-20 md:grid-cols-12 md:gap-16 md:py-28">
-          <FadeIn className="md:col-span-6 lg:col-span-5">
+          <FadeIn className="relative md:col-span-6 lg:col-span-5">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-3 -z-10 rounded-[1.5rem] bg-[radial-gradient(ellipse_at_20%_20%,rgb(212_175_55_/0.06),transparent_62%)] opacity-90 sm:-inset-4"
+            />
             <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-amber-200/90 sm:text-[11px]">
               {c.hero.eyebrow}
             </p>
+            <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
             <h1
               id="hero-heading"
-              className="mt-4 max-w-[22rem] font-display text-[2.125rem] font-semibold leading-[1.1] tracking-tight text-foreground text-balance drop-shadow-[0_1px_28px_rgb(0_0_0_/0.35)] sm:mt-5 sm:max-w-2xl sm:text-4xl md:text-5xl md:leading-[1.08] lg:max-w-3xl lg:text-[3.15rem]"
+              className="mt-5 max-w-[min(100%,24rem)] font-display text-[2.25rem] font-semibold leading-[1.1] tracking-tight text-foreground text-balance drop-shadow-[0_2px_32px_rgb(0_0_0_/0.4)] sm:mt-6 sm:max-w-2xl sm:text-4xl md:text-5xl md:leading-[1.08] lg:max-w-3xl lg:text-[3.2rem]"
             >
               {c.hero.headline}
             </h1>
@@ -339,7 +346,7 @@ export function FiMarketingHomeView() {
             title={c.training.headline}
             description={c.training.subtext}
           />
-          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-amber-200/85">
             Powered by <span className="text-foreground/95">{c.training.poweredBy}</span>
           </p>
           <ChipList items={c.training.tracks} />
@@ -375,7 +382,7 @@ export function FiMarketingHomeView() {
             eyebrow={c.auditNetwork.storyEyebrow}
             title={c.auditNetwork.headline}
           />
-          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-primary/90">
+          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-amber-200/85">
             Powered by <span className="text-foreground/95">{c.auditNetwork.poweredBy}</span>
           </p>
           <ChipList items={c.auditNetwork.metrics} />
@@ -422,7 +429,7 @@ export function FiMarketingHomeView() {
             eyebrow={c.predictiveFuture.storyEyebrow}
             title={c.predictiveFuture.headline}
           />
-          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-amber-200/75">
             {c.predictiveFuture.modelsLabel}
           </p>
           <ChipList items={c.predictiveFuture.models} />
@@ -461,9 +468,10 @@ export function FiMarketingHomeView() {
               <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">Get started</p>
+                  <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
                   <h2
                     id={`${c.finalCta.id}-heading`}
-                    className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-5xl"
+                    className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground text-balance md:text-5xl"
                   >
                     {c.finalCta.headline}
                   </h2>

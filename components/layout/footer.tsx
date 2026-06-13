@@ -53,7 +53,7 @@ export function Footer() {
       transition={{ duration: 0.5 }}
       className="border-t border-border/60 bg-background/75"
     >
-      <div className="mx-auto max-w-6xl px-6 py-12">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="fi-panel rounded-[1.5rem] p-7 md:p-8">
           <Link href="/" className="inline-block">
             <Image
@@ -65,8 +65,8 @@ export function Footer() {
             />
           </Link>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Follicle Intelligence is the world&apos;s first operating system built specifically for
-            modern hair restoration clinics.
+            Follicle Intelligence is the operating system for the future of hair restoration—commercial, clinical,
+            surgical, training, audit, and longitudinal intelligence in one connected substrate.
           </p>
         </div>
 
@@ -80,9 +80,7 @@ export function Footer() {
             <FooterLinkList items={FOOTER_MODULES} />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground/80">
-              Intelligence Layers
-            </p>
+            <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground/80">Ecosystem</p>
             <FooterLinkList items={FOOTER_INTELLIGENCE_LAYERS} tone="supporting" />
           </div>
           <div>

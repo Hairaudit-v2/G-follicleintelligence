@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 
 export const metadata: Metadata = {
-  title: "About Follicle Intelligence | Mission, Intent & Infrastructure",
+  title: "About Follicle Intelligence | Built To Raise The Standard Worldwide",
   description:
     "Why Follicle Intelligence exists: accountable quality infrastructure for hair restoration—transparency, benchmarks, governance, and standards across HairAudit, HLI, and IIOHR. Mission, platform direction, and long-term focus.",
 };
@@ -43,7 +43,7 @@ export default function AboutPage() {
     <>
       <PageHero
         eyebrow="About"
-        title="We build the layer that makes quality legible."
+        title="Built To Raise The Standard Of Hair Restoration Worldwide"
         subtitle="Follicle Intelligence exists to raise the standard of evidence in global hair restoration: what was done, how it compares, and how improvement is governed—not what a campaign claims. We are not a clinic brand chasing volume; we are builders of infrastructure for transparency, accountability, and professional standards—so the best operators can be recognized for the right reasons."
       />
 

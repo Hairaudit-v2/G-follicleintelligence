@@ -34,7 +34,7 @@ export function Header() {
       transition={{ duration: 0.5 }}
       className="sticky top-0 z-50 border-b border-border/60 bg-background/88 backdrop-blur-xl"
     >
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-6 px-6">
+      <div className="mx-auto flex h-auto min-h-[4.5rem] max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:gap-6 sm:px-6 md:min-h-[5rem]">
         <Link href="/" className="flex min-w-0 items-center gap-4 font-semibold tracking-tight">
           <div className="fi-panel-muted flex h-12 w-12 items-center justify-center rounded-2xl border border-border/70">
             <Image
@@ -49,29 +49,35 @@ export function Header() {
           <div className="min-w-0 leading-none">
             <span className="block text-sm text-foreground md:text-base">Follicle Intelligence</span>
             <span className="mt-1 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground md:text-[11px]">
-              Clinical Audit Intelligence
+              Hair restoration operating system
             </span>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-5 lg:flex">
-          {headerNav.map((item) => (
-            <Link
-              key={`${item.label}:${item.href}`}
-              href={item.href}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-foreground",
-                navItemIsActive(pathname, item.href) ? "text-foreground" : "text-muted-foreground"
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav
+          aria-label="Primary"
+          className="hidden min-w-0 flex-1 justify-end overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] lg:flex lg:[&::-webkit-scrollbar]:hidden"
+        >
+          <ul className="flex items-center gap-3 whitespace-nowrap pr-1 pt-1 md:gap-4">
+            {headerNav.map((item) => (
+              <li key={`${item.label}:${item.href}`}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "text-[13px] font-medium transition-colors hover:text-foreground md:text-sm",
+                    navItemIsActive(pathname, item.href) ? "text-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </nav>
 
         <div className="flex items-center gap-4">
-          <Button asChild size="sm" className="hidden md:inline-flex">
-            <Link href="/contact?intent=demo">Book Demo</Link>
+          <Button asChild size="sm" className="hidden border-amber-300/25 bg-amber-200/10 text-foreground hover:bg-amber-200/15 md:inline-flex">
+            <Link href="/demo">Book demo</Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="lg:hidden">
@@ -86,7 +92,7 @@ export function Header() {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuItem asChild>
-                <Link href="/contact?intent=demo">Book Demo</Link>
+                <Link href="/demo">Book demo</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

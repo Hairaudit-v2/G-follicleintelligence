@@ -21,11 +21,11 @@ export function PageHero({ eyebrow, title, subtitle, body }: PageHeroProps) {
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,hsl(var(--primary)/0.14),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_90%_10%,rgb(166_184_198_/_10%),transparent_40%)]" />
-      <div className="relative mx-auto max-w-6xl px-6 py-16 md:py-20">
+      <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-20">
         {eyebrow && (
-          <p className="text-xs font-medium uppercase tracking-[0.24em] text-primary/90">{eyebrow}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-amber-200/85">{eyebrow}</p>
         )}
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
+        <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight text-foreground text-balance md:text-5xl">
           {title}
         </h1>
         {subtitle && (
