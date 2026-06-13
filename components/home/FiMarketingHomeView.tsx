@@ -15,6 +15,7 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthoritySection";
 import { FiMarketingComparisonSection } from "@/components/home/FiMarketingComparisonSection";
+import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 
 const GlobalHairIntelligenceSectionClient = dynamic(
@@ -614,6 +615,8 @@ export function FiMarketingHomeView() {
           <p className="mt-10 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">{c.predictiveFuture.closing}</p>
         </FadeIn>
       </Section>
+
+      <FiMarketingMoonshotSection section={c.moonshot} />
 
       <Section
         id={c.founder.id}

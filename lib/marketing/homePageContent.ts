@@ -77,6 +77,18 @@ export type HomeComparisonRow = {
   follicleIntelligence: string;
 };
 
+/** Future-facing infrastructure vision cards (careful, non-definitive language). */
+export type HomeMoonshotPredictionCard = {
+  headline: string;
+  copy: string;
+};
+
+export type HomeMoonshotClosingBlock = {
+  headline: string;
+  body: string;
+  finalLine: string;
+};
+
 export const HOME_PAGE_CONTENT = {
   hero: {
     eyebrow: "Enterprise hair restoration infrastructure",
@@ -511,6 +523,45 @@ export const HOME_PAGE_CONTENT = {
     ],
     closing:
       "Ambition here is institutional: build the deepest defensible hair restoration intelligence substrate in the world—while staying medically responsible about what is proven today versus what becomes possible as data and methods mature.",
+  },
+
+  moonshot: {
+    id: "future-infrastructure",
+    storyEyebrow: "The future",
+    headline: "The Future Of Hair Restoration Is Predictive",
+    subtext:
+      "As structured clinical, surgical, and longitudinal outcome data grows across the network, future intelligence models may help clinicians better understand patterns that have never been visible before.",
+    predictions: [
+      {
+        headline: "Treatment Response Prediction",
+        copy: "Better understand which patients may respond differently to therapies such as finasteride, minoxidil, regenerative medicine, and combination treatment protocols.",
+      },
+      {
+        headline: "Donor Preservation Intelligence",
+        copy: "Identify extraction strategies that may improve long-term donor management and reduce the risk of unnecessary overharvesting.",
+      },
+      {
+        headline: "Surgical Performance Benchmarking",
+        copy: "Understand procedural patterns that may contribute to stronger graft survival, improved density outcomes, and greater long-term consistency.",
+      },
+      {
+        headline: "Clinic Performance Intelligence",
+        copy: "Identify operational systems, workflows, and team structures associated with consistently stronger patient outcomes.",
+      },
+      {
+        headline: "Long-Term Hair Loss Forecasting",
+        copy: "Better understand progression patterns, treatment durability, and future loss risk across different patient profiles.",
+      },
+      {
+        headline: "Global Outcome Intelligence",
+        copy: "As the network grows, clinicians may gain access to the largest structured intelligence layer ever created in hair restoration.",
+      },
+    ] satisfies HomeMoonshotPredictionCard[],
+    closing: {
+      headline: "Every Patient Makes The Entire Industry Smarter",
+      body: "For the first time, hair restoration may evolve from isolated clinic decision-making into a connected intelligence network where every consultation, every procedure, every audit, and every outcome contributes to improving future care.",
+      finalLine: "This is bigger than software. This is infrastructure for the future of the industry.",
+    },
   },
 
   authority: {
