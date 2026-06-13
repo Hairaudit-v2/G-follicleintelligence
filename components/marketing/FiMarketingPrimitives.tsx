@@ -2,23 +2,39 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
+const sectionHeadingToneStyles = {
+  default: {
+    eyebrow: "text-amber-200/75",
+    rule: "from-amber-300/70 via-amber-400/25",
+  },
+  audit: {
+    eyebrow: "text-cyan-200/72",
+    rule: "from-cyan-300/55 via-cyan-400/18",
+  },
+} as const;
+
+export type SectionHeadingTone = keyof typeof sectionHeadingToneStyles;
+
 export function SectionHeading({
   id,
   title,
   description,
   eyebrow,
+  tone = "default",
 }: {
   id: string;
   title: string;
   description?: string;
   eyebrow?: string;
+  tone?: SectionHeadingTone;
 }) {
+  const toneClass = sectionHeadingToneStyles[tone];
   return (
     <header className="max-w-4xl">
       {eyebrow ? (
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-amber-200/75">{eyebrow}</p>
-          <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
+          <p className={cn("text-[11px] font-semibold uppercase tracking-[0.26em]", toneClass.eyebrow)}>{eyebrow}</p>
+          <div className={cn("mt-3 h-px w-14 bg-gradient-to-r to-transparent", toneClass.rule)} aria-hidden />
         </div>
       ) : null}
       <h2
