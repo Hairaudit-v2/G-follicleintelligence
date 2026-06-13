@@ -311,6 +311,32 @@ export type PatientTwinDonorSection = {
   recent_cap: number;
 };
 
+export type PatientTwinRecipientCandidacyReviewRow = {
+  id: string;
+  source_record_id: string | null;
+  recipient_quality_rating: string;
+  confidence_score: number;
+  diffuse_thinning_risk: string | null;
+  shock_loss_risk: string | null;
+  density_expectation_risk: string | null;
+  medication_stabilisation_needed: boolean;
+  pathology_review_recommended: boolean;
+  surgical_timing_risk: string | null;
+  patient_expectation_risk: string | null;
+  documentation_gap_detected: boolean;
+  review_topics: string[];
+  candidacy_summary: string | null;
+  review_status: string;
+  ai_notes: string | null;
+  created_at: string;
+};
+
+export type PatientTwinRecipientCandidacySection = {
+  latest: PatientTwinRecipientCandidacyReviewRow | null;
+  recent: PatientTwinRecipientCandidacyReviewRow[];
+  recent_cap: number;
+};
+
 export type PatientTwinHairProgressionSection = HairProgressionIntelligence;
 
 export type PatientTwinIntelligenceSection = {
@@ -323,6 +349,8 @@ export type PatientTwinIntelligenceSection = {
   hair_progression: PatientTwinHairProgressionSection;
   /** HIE Stage 9C — donor-zone quality / capacity band estimates (image-based). */
   donor: PatientTwinDonorSection;
+  /** HIE Stage 9D — recipient-area candidacy review signals (clinician topics only). */
+  recipient_candidacy: PatientTwinRecipientCandidacySection;
 };
 
 export type PatientTwinCompletenessMissingArea =

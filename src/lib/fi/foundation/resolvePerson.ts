@@ -68,6 +68,7 @@ export async function resolveOrCreatePerson(
         .from("fi_persons")
         .select("id, tenant_id, metadata, created_at, updated_at")
         .eq("id", mapped.data.person_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (row.error || !row.data) throw new Error(row.error?.message ?? "Person not found for mapping.");
       return { person: asPersonRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
@@ -88,12 +89,14 @@ export async function resolveOrCreatePerson(
         .from("fi_patients")
         .select("person_id")
         .eq("id", psi.data.patient_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (pat.data?.person_id) {
         const row = await supabase
           .from("fi_persons")
           .select("id, tenant_id, metadata, created_at, updated_at")
           .eq("id", pat.data.person_id)
+          .eq("tenant_id", tenantId)
           .single();
         if (row.data) {
           const mappingCreated = await ensurePersonSourceMapping(
@@ -171,6 +174,7 @@ export async function resolveOrCreatePerson(
         .from("fi_persons")
         .select("id, tenant_id, metadata, created_at, updated_at")
         .eq("id", retry.data.person_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (row.data) return { person: asPersonRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
     }

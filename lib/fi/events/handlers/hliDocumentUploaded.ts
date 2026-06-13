@@ -158,6 +158,7 @@ async function handleHliDocumentUploadedImpl(
   }
 
   await markFiEventStatus({
+    tenantId: envelope.tenant_id,
     eventId: eventLog.row.id,
     status: "processing",
   });
@@ -213,6 +214,7 @@ async function handleHliDocumentUploadedImpl(
     });
 
     await linkEventToEntities({
+      tenantId: envelope.tenant_id,
       eventId: eventLog.row.id,
       globalCaseId: linkedGlobalCase.id,
       fiCaseId: fiCase.id,
@@ -253,6 +255,7 @@ async function handleHliDocumentUploadedImpl(
       : undefined;
 
     await markFiEventStatus({
+      tenantId: envelope.tenant_id,
       eventId: eventLog.row.id,
       status: "processed",
     });
@@ -281,6 +284,7 @@ async function handleHliDocumentUploadedImpl(
     };
   } catch (e: unknown) {
     await attachFiEventError({
+      tenantId: envelope.tenant_id,
       eventId: eventLog.row.id,
       errorText: e instanceof Error ? e.message : "Unexpected error.",
     });

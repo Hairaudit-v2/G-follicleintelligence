@@ -74,6 +74,7 @@ export async function resolveOrCreateOrganisation(
         .from("fi_organisations")
         .select("id, tenant_id, name, slug, organisation_type, metadata, created_at, updated_at")
         .eq("id", mapped.data.organisation_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (org.error || !org.data) throw new Error(org.error?.message ?? "Organisation not found for mapping.");
       return { organisation: asOrgRow(org.data as Record<string, unknown>), created: false, mapping_created: false };
@@ -155,6 +156,7 @@ export async function resolveOrCreateOrganisation(
         .from("fi_organisations")
         .select("id, tenant_id, name, slug, organisation_type, metadata, created_at, updated_at")
         .eq("id", retry.data.organisation_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (org.data) {
         return { organisation: asOrgRow(org.data as Record<string, unknown>), created: false, mapping_created: false };

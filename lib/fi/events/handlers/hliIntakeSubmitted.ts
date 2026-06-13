@@ -123,6 +123,7 @@ async function handleHliIntakeSubmittedImpl(
   }
 
   await markFiEventStatus({
+    tenantId: envelope.tenant_id,
     eventId: eventLog.row.id,
     status: "processing",
   });
@@ -186,6 +187,7 @@ async function handleHliIntakeSubmittedImpl(
     });
 
     await linkEventToEntities({
+      tenantId: envelope.tenant_id,
       eventId: eventLog.row.id,
       globalCaseId: linkedGlobalCase.id,
       fiCaseId: fiCase.id,
@@ -212,6 +214,7 @@ async function handleHliIntakeSubmittedImpl(
     });
 
     await markFiEventStatus({
+      tenantId: envelope.tenant_id,
       eventId: eventLog.row.id,
       status: "processed",
     });
@@ -232,6 +235,7 @@ async function handleHliIntakeSubmittedImpl(
     };
   } catch (e: unknown) {
     await attachFiEventError({
+      tenantId: envelope.tenant_id,
       eventId: eventLog.row.id,
       errorText: e instanceof Error ? e.message : "Unexpected error.",
     });

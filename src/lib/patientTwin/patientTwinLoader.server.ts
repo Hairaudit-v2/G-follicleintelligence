@@ -27,6 +27,7 @@ import { loadPatientTwinPhotoProtocolSection } from "@/src/lib/hair-intelligence
 import { loadPatientTwinImagingGallerySection } from "@/src/lib/patientTwin/patientTwinImagingGallery.server";
 import { loadPatientTwinDonorSection } from "@/src/lib/patientTwin/patientTwinDonorIntelligence.server";
 import { loadPatientTwinHairLossSection } from "@/src/lib/patientTwin/patientTwinHairLossClassification.server";
+import { loadPatientTwinRecipientCandidacySection } from "@/src/lib/patientTwin/patientTwinRecipientCandidacy.server";
 import {
   emptyPatientTwinHairProgressionIntelligence,
   loadPatientTwinHairProgressionSection,
@@ -96,6 +97,7 @@ const SOURCE_TABLES_USED = [
   "hair_intelligence_hair_loss_classifications",
   "hair_intelligence_donor_assessments",
   "hair_intelligence_progression_network_buckets",
+  "hair_intelligence_recipient_candidacy_reviews",
 ] as const;
 
 const CRM_TERMINAL_LEAD_STATUSES = new Set(["converted", "archived", "lost"]);
@@ -727,6 +729,20 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     }
   }
 
+  let recipient_candidacy: PatientTwinV1["intelligence"]["recipient_candidacy"] = {
+    latest: null,
+    recent: [],
+    recent_cap: 5,
+  };
+  try {
+    recipient_candidacy = await loadPatientTwinRecipientCandidacySection(tid, primaryFoundation, supabase);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
+      pushWarning(warnings, "generic", `Recipient candidacy intelligence skipped: ${msg}`);
+    }
+  }
+
   const timelineItems = buildFoundationTimeline(base);
 
   const pathologyCap = 12;
@@ -973,6 +989,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
       hair_loss,
       hair_progression,
       donor,
+      recipient_candidacy,
     },
     provenance: {
       generated_at: generatedAt,

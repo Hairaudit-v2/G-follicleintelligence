@@ -37,6 +37,29 @@ Velocity regression weights each point by `confidence_score × hairLossReviewSta
 
 When the dominant system is **Norwood**, regression slope is positive, and the latest ordinal is below **V**, the engine projects years to reach Norwood **V** using the weighted slope (simple linear extrapolation — not a survival model).
 
+## Patient Twin UI (Stage 9B.1)
+
+The FI Admin **Patient Twin** dashboard renders a read-only **Hair progression intelligence (HIE)** card (`PatientTwinHairProgressionCard`, immediately after the Stage 9A hair loss classification card and before outcome/pathology/imaging blocks) fed by `twin.intelligence.hair_progression` (same DTO as the engine output). It surfaces:
+
+- Dominant classification system, latest grade / ordinal, **Progression velocity** (raw and confidence-weighted grades/year), **Classification stability** (with rationale), first and latest analysed dates, analysed point count, span, and clinician review weighting.
+- **Treatment-associated velocity change** — one block per tracked MedicationOS canonical (`finasteride`, `dutasteride`, `oral_minoxidil`, `topical_minoxidil`, `prp`, `exosomes`) with before/after slopes and delta when computable.
+- **Forecast** — only when the DTO includes a Norwood linear estimate to grade **V** (`estimated_years_to_target`).
+- **Network cohort context** — anonymised bucket match (`hair_intelligence_progression_network_buckets`); safe empty copy when no row matches.
+
+Clinical caution is shown in-card: *AI progression intelligence supports review and does not replace clinical judgement.*
+
+Pure display helpers and unit tests live in `src/lib/hair-intelligence/hairProgressionIntelligence/progressionDisplay.ts` (+ `.test.ts`).
+
+### Manual test steps (FI Admin)
+
+1. Open **Patient Twin** for a patient with **a single** hair-loss classification row: confirm **Insufficient longitudinal data** (insufficient window / points) and that velocity lines show em dashes where the engine returns nulls; stability badge reads **Insufficient longitudinal data** (neutral).
+2. Open Twin for a patient with **two or more** Norwood (or other dominant) graded points spanning **≥ ~6 weeks**: confirm **Classification stability** badge and non-empty **Progression velocity** values where the engine produces slopes; dates and analysed point count align with the ledger.
+3. Open Twin for a patient with **therapy events** (MedicationOS) for at least one tracked code: confirm **Treatment-associated velocity change** lists all six therapies; exposed therapies show first exposure date; before/after/delta populate when enough pre/post grade points exist; notes explain sparse data when not.
+4. Open Twin for a patient whose cohort **does not** match a network bucket (or ingestion empty): **Network cohort context** shows the safe empty state; cohort signature and age band still render from the twin DTO.
+5. (Optional) Norwood-positive slope below V: if `forecast` is non-null, confirm **Years to Norwood V** displays `estimated_years_to_target` only — no extra forecasting beyond the DTO.
+
+Developer checks: `npm run typecheck`, `npm run lint`, `npx tsx --test src/lib/hair-intelligence/hairProgressionIntelligence/progressionDisplay.test.ts`.
+
 ## Related
 
 - Stage 9A runbook: [`hie-stage9a-hair-loss-classification-engine.md`](./hie-stage9a-hair-loss-classification-engine.md)

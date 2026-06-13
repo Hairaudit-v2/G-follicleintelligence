@@ -12,6 +12,11 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function nonEmptyTenantIdForWebhookRow(tenantId: string | null | undefined): string | null {
+  const t = tenantId?.trim();
+  return t ? t : null;
+}
+
 export async function POST(req: NextRequest) {
   if (!readFiPaymentsEnabled()) {
     return NextResponse.json({ ok: false, error: "FI payments disabled" }, { status: 503 });
@@ -71,10 +76,13 @@ export async function POST(req: NextRequest) {
         paymentRequestId: mapped.paymentRequestId,
         todayYmd,
       });
-      await supabase
+      const completedTenantFilter = nonEmptyTenantIdForWebhookRow(mapped.tenantId);
+      let completedQ = supabase
         .from("fi_payment_webhook_events")
         .update({ processing_status: "processed", updated_at: new Date().toISOString() })
         .eq("id", webhookRowId);
+      if (completedTenantFilter) completedQ = completedQ.eq("tenant_id", completedTenantFilter);
+      await completedQ;
     } else if (mapped.kind === "checkout_failed") {
       const tid = mapped.tenantId?.trim();
       if (tid) {
@@ -106,12 +114,16 @@ export async function POST(req: NextRequest) {
           paymentRequestId: mapped.paymentRequestId,
         });
       }
-      await supabase
+      const failedTenantFilter = nonEmptyTenantIdForWebhookRow(mapped.tenantId);
+      let failedQ = supabase
         .from("fi_payment_webhook_events")
         .update({ processing_status: "processed", updated_at: new Date().toISOString() })
         .eq("id", webhookRowId);
+      if (failedTenantFilter) failedQ = failedQ.eq("tenant_id", failedTenantFilter);
+      await failedQ;
     } else {
-      await supabase
+      const ignoredTenantFilter = nonEmptyTenantIdForWebhookRow(tenantHint);
+      let ignoredQ = supabase
         .from("fi_payment_webhook_events")
         .update({
           processing_status: "ignored",
@@ -119,10 +131,13 @@ export async function POST(req: NextRequest) {
           metadata: { reason: mapped.reason },
         })
         .eq("id", webhookRowId);
+      if (ignoredTenantFilter) ignoredQ = ignoredQ.eq("tenant_id", ignoredTenantFilter);
+      await ignoredQ;
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : "processing_error";
-    await supabase
+    const errTenantFilter = nonEmptyTenantIdForWebhookRow(tenantHint);
+    let errQ = supabase
       .from("fi_payment_webhook_events")
       .update({
         processing_status: "error",
@@ -130,6 +145,8 @@ export async function POST(req: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", webhookRowId);
+    if (errTenantFilter) errQ = errQ.eq("tenant_id", errTenantFilter);
+    await errQ;
     return NextResponse.json({ ok: false, error: msg }, { status: 500 });
   }
 

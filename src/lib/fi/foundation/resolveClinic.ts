@@ -70,6 +70,7 @@ export async function resolveOrCreateClinic(
         .from("fi_clinics")
         .select("id, tenant_id, organisation_id, display_name, metadata, created_at, updated_at")
         .eq("id", mapped.data.clinic_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (row.error || !row.data) throw new Error(row.error?.message ?? "Clinic not found for mapping.");
       return { clinic: asClinicRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
@@ -132,6 +133,7 @@ export async function resolveOrCreateClinic(
         .from("fi_clinics")
         .select("id, tenant_id, organisation_id, display_name, metadata, created_at, updated_at")
         .eq("id", retry.data.clinic_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (row.data) return { clinic: asClinicRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
     }

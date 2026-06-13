@@ -4,7 +4,8 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getLatestFiEventLink, type FiEventRow } from "@/lib/fi/events/idempotency";
+import { getLatestFiEventLink } from "@/lib/fi/events/mapping";
+import type { FiEventRow } from "@/lib/fi/events/idempotency";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { FiEventEnvelope, FiEventType, FiSourceSystem } from "@/src/types/fi-events";
 import { dualWriteFoundationFromFiEvent } from "./dualWriteEvent";
@@ -39,7 +40,7 @@ export async function reconstructFiEventEnvelopeForDualWrite(
   const row = await loadFiEventRow(supabase, eventId);
   if (!row || row.status !== "processed") return null;
 
-  const link = await getLatestFiEventLink(supabase, eventId);
+  const link = await getLatestFiEventLink(supabase, eventId, row.tenant_id);
   if (!link.fi_case_id) return null;
 
   let source_case_id: string | undefined;

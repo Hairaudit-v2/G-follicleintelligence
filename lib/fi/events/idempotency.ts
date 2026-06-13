@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { FiEventEnvelope, FiEventType, FiSourceSystem } from "@/src/types/fi-events";
-import { linkEventToEntities } from "./mapping";
+import { getLatestFiEventLink, linkEventToEntities } from "./mapping";
 
 export type FiEventStatus = "received" | "processing" | "processed" | "ignored" | "failed";
 
@@ -44,6 +44,7 @@ type CreateFiEventParams = {
 };
 
 type MarkFiEventStatusParams = {
+  tenantId: string;
   eventId: string;
   status: FiEventStatus;
   errorText?: string | null;
@@ -69,50 +70,20 @@ async function getExistingFiEventBySourceKeyWithClient(
   return (result.data as FiEventRow | null) ?? null;
 }
 
-/** Latest fi_event_links row for an event (ingest resolution). Exported for foundation backfill. */
-export async function getLatestFiEventLink(
-  supabase: SupabaseClient,
-  eventId: string
-): Promise<{
-  fi_case_id: string | null;
-  global_case_id: string | null;
-  global_patient_id: string | null;
-}> {
-  const link = await supabase
-    .from("fi_event_links")
-    .select("fi_case_id, global_case_id, global_patient_id")
-    .eq("event_id", eventId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (link.error || !link.data) {
-    return {
-      fi_case_id: null,
-      global_case_id: null,
-      global_patient_id: null,
-    };
-  }
-
-  return {
-    fi_case_id: link.data.fi_case_id ?? null,
-    global_case_id: link.data.global_case_id ?? null,
-    global_patient_id: link.data.global_patient_id ?? null,
-  };
-}
-
 async function loadEventLogRow(
   supabase: SupabaseClient,
-  eventId: string
+  eventId: string,
+  tenantId: string
 ): Promise<FiEventLogRow | null> {
   const event = await supabase
     .from("fi_events")
     .select("id, status, error_text")
     .eq("id", eventId)
+    .eq("tenant_id", tenantId.trim())
     .maybeSingle();
 
   if (event.error || !event.data) return null;
-  const links = await getLatestFiEventLink(supabase, eventId);
+  const links = await getLatestFiEventLink(supabase, eventId, tenantId);
 
   return {
     id: event.data.id,
@@ -186,6 +157,7 @@ export async function markFiEventStatus(params: MarkFiEventStatusParams): Promis
     .from("fi_events")
     .update(payload)
     .eq("id", params.eventId)
+    .eq("tenant_id", params.tenantId.trim())
     .select(eventColumns())
     .single();
 
@@ -197,10 +169,12 @@ export async function markFiEventStatus(params: MarkFiEventStatusParams): Promis
 }
 
 export async function attachFiEventError(params: {
+  tenantId: string;
   eventId: string;
   errorText: string;
 }): Promise<FiEventRow> {
   return markFiEventStatus({
+    tenantId: params.tenantId,
     eventId: params.eventId,
     status: "failed",
     errorText: params.errorText,
@@ -231,7 +205,7 @@ export async function createOrLoadEventLog(
       .single();
 
     if (!insert.error && insert.data) {
-      const row = await loadEventLogRow(supabase, insert.data.id);
+      const row = await loadEventLogRow(supabase, insert.data.id, event.tenant_id);
       if (!row) return { ok: false, error: "Failed to load created fi_events row." };
       return { ok: true, duplicate: false, row };
     }
@@ -249,7 +223,7 @@ export async function createOrLoadEventLog(
       return { ok: false, error: "Duplicate fi_events row detected but existing row could not be loaded." };
     }
 
-    const row = await loadEventLogRow(supabase, existing.id);
+    const row = await loadEventLogRow(supabase, existing.id, event.tenant_id);
     if (!row) return { ok: false, error: "Failed to load duplicate fi_events row." };
     return { ok: true, duplicate: true, row };
   } catch (e: unknown) {
@@ -263,6 +237,7 @@ export async function createOrLoadEventLog(
 export async function markEventProcessed(
   supabase: SupabaseClient,
   eventId: string,
+  tenantId: string,
   links: {
     fi_case_id?: string | null;
     global_case_id?: string | null;
@@ -276,10 +251,12 @@ export async function markEventProcessed(
       updated_at: new Date().toISOString(),
       error_text: null,
     })
-    .eq("id", eventId);
+    .eq("id", eventId)
+    .eq("tenant_id", tenantId.trim());
 
   if (links.fi_case_id || links.global_case_id || links.global_patient_id) {
     await linkEventToEntities({
+      tenantId,
       eventId,
       fiCaseId: links.fi_case_id ?? null,
       globalCaseId: links.global_case_id ?? null,
@@ -291,6 +268,7 @@ export async function markEventProcessed(
 export async function markEventFailed(
   supabase: SupabaseClient,
   eventId: string,
+  tenantId: string,
   error: string
 ): Promise<void> {
   await supabase
@@ -300,5 +278,9 @@ export async function markEventFailed(
       error_text: error,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", eventId);
+    .eq("id", eventId)
+    .eq("tenant_id", tenantId.trim());
 }
+
+/** Re-export for callers that historically imported `getLatestFiEventLink` from this module. */
+export { getLatestFiEventLink } from "./mapping";

@@ -36,6 +36,13 @@ export type FiGlobalCaseRow = {
   updated_at: string;
 };
 
+/** Exported for unit tests; used when linking `fi_cases` to `fi_global_cases`. */
+export function assertFiCaseTenantMatchesGlobalTenant(fiCaseTenantId: string, globalCaseTenantId: string): void {
+  if (fiCaseTenantId.trim() !== globalCaseTenantId.trim()) {
+    throw new Error("fi_case tenant_id does not match fi_global_cases tenant_id.");
+  }
+}
+
 export type FiEventLinkRow = {
   id: string;
   event_id: string;
@@ -95,6 +102,67 @@ function globalCaseColumns() {
 
 function eventLinkColumns() {
   return "id, event_id, global_case_id, fi_case_id, global_patient_id, created_at";
+}
+
+/** Ensures `fi_events.id` exists and belongs to `tenantId` before any `fi_event_links` access. */
+export async function assertFiEventBelongsToTenant(
+  supabase: SupabaseClient,
+  eventId: string,
+  tenantId: string
+): Promise<void> {
+  const tid = tenantId.trim();
+  const eid = eventId.trim();
+  if (!tid) throw new Error("tenantId is required for fi_events ownership check.");
+  if (!eid) throw new Error("eventId is required for fi_events ownership check.");
+
+  const { data, error } = await supabase
+    .from("fi_events")
+    .select("id, tenant_id")
+    .eq("id", eid)
+    .eq("tenant_id", tid)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new Error(
+      "fi_events ownership mismatch or missing event: no fi_events row for this id and tenant_id."
+    );
+  }
+}
+
+/** Latest fi_event_links row for an event (ingest resolution). Exported for foundation backfill. */
+export async function getLatestFiEventLink(
+  supabase: SupabaseClient,
+  eventId: string,
+  tenantId: string
+): Promise<{
+  fi_case_id: string | null;
+  global_case_id: string | null;
+  global_patient_id: string | null;
+}> {
+  await assertFiEventBelongsToTenant(supabase, eventId, tenantId);
+
+  const link = await supabase
+    .from("fi_event_links")
+    .select("fi_case_id, global_case_id, global_patient_id")
+    .eq("event_id", eventId.trim())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (link.error || !link.data) {
+    return {
+      fi_case_id: null,
+      global_case_id: null,
+      global_patient_id: null,
+    };
+  }
+
+  return {
+    fi_case_id: link.data.fi_case_id ?? null,
+    global_case_id: link.data.global_case_id ?? null,
+    global_patient_id: link.data.global_patient_id ?? null,
+  };
 }
 
 export function buildPlaceholderIntake(
@@ -329,6 +397,18 @@ export async function attachFiCaseIdToGlobalCase(params: {
   }
 
   const row = existing.data as unknown as FiGlobalCaseRow;
+  const fiCaseRow = await supabase
+    .from("fi_cases")
+    .select("id, tenant_id")
+    .eq("id", params.fiCaseId)
+    .maybeSingle();
+
+  if (fiCaseRow.error || !fiCaseRow.data) {
+    throw new Error(fiCaseRow.error?.message ?? "fi_cases row not found for attachFiCaseIdToGlobalCase.");
+  }
+  const fiTenant = String((fiCaseRow.data as { tenant_id: string }).tenant_id);
+  assertFiCaseTenantMatchesGlobalTenant(fiTenant, row.tenant_id);
+
   if (row.fi_case_id === params.fiCaseId) return row;
   if (row.fi_case_id && row.fi_case_id !== params.fiCaseId) {
     throw new Error(`Global case ${params.globalCaseId} is already linked to a different fi_case_id.`);
@@ -341,6 +421,7 @@ export async function attachFiCaseIdToGlobalCase(params: {
       updated_at: new Date().toISOString(),
     })
     .eq("id", params.globalCaseId)
+    .eq("tenant_id", row.tenant_id)
     .select(globalCaseColumns())
     .single();
 
@@ -352,12 +433,17 @@ export async function attachFiCaseIdToGlobalCase(params: {
 }
 
 export async function linkEventToEntities(params: {
+  tenantId: string;
   eventId: string;
   globalCaseId?: string | null;
   fiCaseId?: string | null;
   globalPatientId?: string | null;
+  /** For tests; production uses service role. */
+  client?: SupabaseClient;
 }): Promise<FiEventLinkRow> {
-  const supabase = supabaseAdmin();
+  const supabase = params.client ?? supabaseAdmin();
+  await assertFiEventBelongsToTenant(supabase, params.eventId, params.tenantId);
+
   const globalCaseId = normalizeSourceId(params.globalCaseId);
   const fiCaseId = normalizeSourceId(params.fiCaseId);
   const globalPatientId = normalizeSourceId(params.globalPatientId);

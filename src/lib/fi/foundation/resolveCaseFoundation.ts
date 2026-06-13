@@ -75,7 +75,7 @@ export async function resolveOrCreateCaseFoundation(
       patch.status = input.status;
     }
 
-    const updated = await supabase.from("fi_cases").update(patch).eq("id", id).select().single();
+    const updated = await supabase.from("fi_cases").update(patch).eq("id", id).eq("tenant_id", tenantId).select().single();
     if (updated.error) throw new Error(updated.error.message);
     return { case: asCaseRow(updated.data as Record<string, unknown>), created: false, updated: true };
   }

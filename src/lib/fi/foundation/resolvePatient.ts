@@ -76,6 +76,7 @@ export async function resolveOrCreatePatient(
         .from("fi_patients")
         .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
         .eq("id", mapped.data.patient_id)
+        .eq("tenant_id", tenantId)
         .single();
       if (row.error || !row.data) throw new Error(row.error?.message ?? "Patient not found for mapping.");
       return { patient: asPatientRow(row.data as Record<string, unknown>), created: false, mapping_created: false };
@@ -106,6 +107,7 @@ export async function resolveOrCreatePatient(
           .from("fi_patients")
           .select("id, tenant_id, person_id, primary_clinic_id, metadata, admin_note, patient_status, created_at, updated_at")
           .eq("id", mapped.data.patient_id)
+          .eq("tenant_id", tenantId)
           .single();
         if (row.data) {
           return { patient: asPatientRow(row.data as Record<string, unknown>), created: false, mapping_created: false };

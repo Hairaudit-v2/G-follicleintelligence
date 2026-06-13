@@ -243,7 +243,9 @@ export async function attachPatientImageToSessionSlot(params: {
 
   const { data: img, error: iErr } = await supabase
     .from("fi_patient_images")
-    .select("id, patient_id")
+    .select(
+      "id, patient_id, ai_image_category, ai_image_category_confidence, ai_hair_state, ai_shave_state, ai_surgery_stage, ai_image_review_status"
+    )
     .eq("tenant_id", params.tenantId.trim())
     .eq("id", params.patientImageId.trim())
     .eq("image_status", "active")
@@ -256,12 +258,7 @@ export async function attachPatientImageToSessionSlot(params: {
   const { data: slotDef } = await supabase.from("hli_photo_protocol_slots").select("*").eq("id", String((row as { slot_id: string }).slot_id)).maybeSingle();
   if (!slotDef) throw new Error("Slot definition missing.");
   const slot = mapSlot(slotDef as Record<string, unknown>);
-  const { data: imgRow } = await supabase
-    .from("fi_patient_images")
-    .select("id, ai_image_category, ai_image_category_confidence, ai_hair_state, ai_shave_state, ai_surgery_stage, ai_image_review_status")
-    .eq("id", params.patientImageId.trim())
-    .single();
-  const ir = imgRow as Record<string, unknown> | null;
+  const ir = img as Record<string, unknown>;
   const complianceImg = {
     id: params.patientImageId.trim(),
     ai_image_category: ir?.ai_image_category != null ? String(ir.ai_image_category) : null,
@@ -322,7 +319,11 @@ export async function markSessionSlotStatus(params: {
     patch.reviewed_at = now;
     patch.reviewed_by_user_id = params.reviewedByUserId ?? null;
   }
-  const { error: uErr } = await supabase.from("hli_photo_protocol_session_slots").update(patch).eq("id", params.sessionSlotRowId.trim());
+  const { error: uErr } = await supabase
+    .from("hli_photo_protocol_session_slots")
+    .update(patch)
+    .eq("id", params.sessionSlotRowId.trim())
+    .eq("session_id", params.sessionId.trim());
   if (uErr) throw new Error(uErr.message);
 }
 
