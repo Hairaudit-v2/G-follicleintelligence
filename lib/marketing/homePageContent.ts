@@ -29,6 +29,43 @@ export type HomeIntelligenceGroup = {
   items: readonly string[];
 };
 
+/** Visual variant for the in-browser placeholder UI (swap for real screenshots via `screenshotSrc`). */
+export type HomeProductShowcaseShell =
+  | "clinic-calendar"
+  | "crm-pipeline"
+  | "patient-twin"
+  | "consultation-workflow"
+  | "surgical-planning"
+  | "audit-report"
+  | "metrics-dashboard";
+
+export type HomeProductShowcaseCard = {
+  id: string;
+  name: string;
+  description: string;
+  shell: HomeProductShowcaseShell;
+  /**
+   * When set, replaces the placeholder shell with a static image from `/public`
+   * (e.g. `/marketing/product-showcase/clinic-os.png` → file at `public/marketing/product-showcase/clinic-os.png`).
+   */
+  screenshotSrc?: string;
+};
+
+/** Homepage authority metrics: `emphasis` renders as the premium counter line; `description` completes the claim. */
+export type HomeAuthorityMetric = {
+  id: string;
+  emphasis: string;
+  description: string;
+};
+
+/** Homepage platform comparison: one row per capability across three columns. */
+export type HomeComparisonRow = {
+  capability: string;
+  traditionalCrm: string;
+  genericClinic: string;
+  follicleIntelligence: string;
+};
+
 export const HOME_PAGE_CONTENT = {
   hero: {
     eyebrow: "Enterprise hair restoration infrastructure",
@@ -114,6 +151,154 @@ export const HOME_PAGE_CONTENT = {
         description: "Patient records, digital twin continuity, and longitudinal timelines that survive handoffs across years.",
       },
     ] satisfies HomeEcosystemModule[],
+  },
+
+  /**
+   * Product depth: real screenshots can be dropped into `public/marketing/product-showcase/`
+   * and wired per-card via `screenshotSrc` on each entry in `cards`.
+   */
+  productShowcase: {
+    id: "product-showcase",
+    storyEyebrow: "Product depth",
+    headline: "Built On Real Operational Infrastructure",
+    subtext:
+      "Follicle Intelligence is not a concept. Every layer of the operating system has already been built, tested, and deployed across real clinical workflows.",
+    cards: [
+      {
+        id: "clinic-os",
+        name: "ClinicOS",
+        description: "Scheduling spine, room rhythm, and the operational calendar serious programmes run every day.",
+        shell: "clinic-calendar",
+        // screenshotSrc: "/marketing/product-showcase/clinic-os.png",
+      },
+      {
+        id: "leadflow-os",
+        name: "LeadFlowOS",
+        description: "Pipeline truth from first enquiry through booked consultation—CRM built for hair restoration velocity.",
+        shell: "crm-pipeline",
+        // screenshotSrc: "/marketing/product-showcase/leadflow-os.png",
+      },
+      {
+        id: "foundation-os",
+        name: "PatientOS / FoundationOS",
+        description: "Patient twin, longitudinal records, and handoff-safe context that survives years of care.",
+        shell: "patient-twin",
+        // screenshotSrc: "/marketing/product-showcase/foundation-os.png",
+      },
+      {
+        id: "consultation-os",
+        name: "ConsultationOS",
+        description: "Structured consultation workflows, evidence capture, and conversion-grade clinical documentation.",
+        shell: "consultation-workflow",
+        // screenshotSrc: "/marketing/product-showcase/consultation-os.png",
+      },
+      {
+        id: "surgery-os",
+        name: "SurgeryOS",
+        description: "Donor economics, density planning, and procedure-day orchestration aligned to the OR.",
+        shell: "surgical-planning",
+        // screenshotSrc: "/marketing/product-showcase/surgery-os.png",
+      },
+      {
+        id: "audit-os",
+        name: "AuditOS",
+        description: "HairAudit-aligned review packets, scoring primitives, and governance-ready verification views.",
+        shell: "audit-report",
+        // screenshotSrc: "/marketing/product-showcase/audit-os.png",
+      },
+      {
+        id: "analytics-os",
+        name: "AnalyticsOS",
+        description: "Portfolio metrics that stay married to clinical signal—conversion, productivity, and cohort truth.",
+        shell: "metrics-dashboard",
+        // screenshotSrc: "/marketing/product-showcase/analytics-os.png",
+      },
+    ] satisfies HomeProductShowcaseCard[],
+  },
+
+  platformComparison: {
+    id: "platform-comparison",
+    storyEyebrow: "Category clarity",
+    headline: "More Than Software. Industry Infrastructure.",
+    subtext:
+      "Generic tools optimise a single department. Follicle Intelligence connects acquisition, clinical depth, surgery, verification, workforce standards, and longitudinal intelligence in one governed substrate.",
+    footnote:
+      "The Follicle Intelligence column reflects one integrated operating system—not a patchwork of disconnected vendor modules.",
+    columns: ["Traditional CRM", "Generic Clinic Software", "Follicle Intelligence"] as const,
+    rows: [
+      {
+        capability: "Lead management",
+        traditionalCrm: "Sales pipelines without restoration-specific clinical substrate.",
+        genericClinic: "Enquiry logs and light CRM—weak linkage into medical truth.",
+        follicleIntelligence: "LeadFlowOS with pipeline intelligence tied to consultation and clinical spine.",
+      },
+      {
+        capability: "Scheduling",
+        traditionalCrm: "Not built for OR density, rooms, or hair-program rhythm.",
+        genericClinic: "Appointment grids—rarely procedure-day and resource orchestration.",
+        follicleIntelligence: "ClinicOS scheduling aligned to services, staff, and high-volume hair workflows.",
+      },
+      {
+        capability: "Patient records",
+        traditionalCrm: "Contact records—not longitudinal restoration intelligence.",
+        genericClinic: "Charts and attachments—often fragmented across tools.",
+        follicleIntelligence: "FoundationOS: digital twin continuity and handoff-safe records across years.",
+      },
+      {
+        capability: "Hair loss diagnostics",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "Basic notes or third-party bolt-ons.",
+        follicleIntelligence: "HairIntel: structured classification, imaging context, and restoration-aligned reasoning.",
+      },
+      {
+        capability: "Blood interpretation",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "PDF uploads or generic lab flags.",
+        follicleIntelligence: "Blood intelligence mapped to hair restoration treatment and monitoring workflows.",
+      },
+      {
+        capability: "Surgical workflow management",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "Peri-op checklists—thin on donor economics and OR orchestration.",
+        follicleIntelligence: "SurgeryOS: planning, donor intelligence, graft economics, procedure-day command.",
+      },
+      {
+        capability: "Procedure intelligence",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "Billing codes or free-text—weak procedural variables.",
+        follicleIntelligence: "Native surgical variables, team throughput, and evidence-grade procedure signal.",
+      },
+      {
+        capability: "Outcome benchmarking",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "Ad-hoc photos—limited cohort discipline.",
+        follicleIntelligence: "Structured outcomes with honest denominators and governance-ready comparison context.",
+      },
+      {
+        capability: "Independent auditing",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "Internal QA only—hard to externalise credibly.",
+        follicleIntelligence: "AuditOS / HairAudit-aligned review, scoring primitives, and verification packets.",
+      },
+      {
+        capability: "Staff certification",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "Disconnected LMS or vendor certificates.",
+        follicleIntelligence: "AcademyOS pathways anchored to IIHR with competency tied to live clinical evidence.",
+      },
+      {
+        capability: "Global intelligence dataset",
+        traditionalCrm: "Not in scope.",
+        genericClinic: "Siloed per clinic—no network learning substrate.",
+        follicleIntelligence: "Governed structured signal designed to compound responsibly across programmes.",
+      },
+      {
+        capability: "Predictive intelligence",
+        traditionalCrm: "Generic sales forecasting only.",
+        genericClinic: "Rarely connected to longitudinal clinical evidence.",
+        follicleIntelligence: "Forward roadmap grounded in structured capture—bounded by evidence quality and policy.",
+      },
+    ] satisfies HomeComparisonRow[],
   },
 
   patientJourney: {
@@ -306,6 +491,41 @@ export const HOME_PAGE_CONTENT = {
     ],
     closing:
       "Ambition here is institutional: build the deepest defensible hair restoration intelligence substrate in the world—while staying medically responsible about what is proven today versus what becomes possible as data and methods mature.",
+  },
+
+  authority: {
+    id: "authority-trust",
+    storyEyebrow: "Trust & authority",
+    headline: "Built By Industry Experts Who Understand The Problem Firsthand",
+    metrics: [
+      {
+        id: "years-experience",
+        emphasis: "30+",
+        description: "Years Industry Experience",
+      },
+      {
+        id: "consultations",
+        emphasis: "Thousands",
+        description: "Of Clinical Consultations Analysed",
+      },
+      {
+        id: "training",
+        emphasis: "Advanced",
+        description: "Hair Restoration Training Infrastructure",
+      },
+      {
+        id: "audit-methods",
+        emphasis: "Global",
+        description: "Audit Methodologies In Development",
+      },
+      {
+        id: "layers",
+        emphasis: "Built",
+        description: "Across Clinical, Surgical, Educational And Intelligence Layers",
+      },
+    ] satisfies HomeAuthorityMetric[],
+    founderAuthorityQuote:
+      "Follicle Intelligence was built by professionals who have spent decades working inside the hair restoration industry and understand where existing systems continue to fail.",
   },
 
   founder: {

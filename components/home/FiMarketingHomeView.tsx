@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
+import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthoritySection";
+import { FiMarketingComparisonSection } from "@/components/home/FiMarketingComparisonSection";
+import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 
 const GlobalHairIntelligenceSectionClient = dynamic(
   () =>
@@ -431,6 +434,10 @@ export function FiMarketingHomeView() {
         </FadeIn>
       </Section>
 
+      <FiMarketingProductShowcaseSection section={c.productShowcase} />
+
+      <FiMarketingComparisonSection section={c.platformComparison} />
+
       <Section
         id={c.patientJourney.id}
         className="border-b border-border/50 py-20 sm:py-24 md:py-28"
@@ -637,6 +644,8 @@ export function FiMarketingHomeView() {
           </div>
         </FadeIn>
       </Section>
+
+      <FiMarketingAuthoritySection section={c.authority} />
 
       <section
         id={c.finalCta.id}
