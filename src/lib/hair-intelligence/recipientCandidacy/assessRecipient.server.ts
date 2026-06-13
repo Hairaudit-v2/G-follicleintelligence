@@ -200,17 +200,30 @@ async function latestHairLossClassificationBundle(
   };
 }
 
-async function latestDonorAssessmentId(supabase: SupabaseClient, tenantId: string, patientId: string): Promise<string | null> {
+async function latestDonorAssessmentSummary(
+  supabase: SupabaseClient,
+  tenantId: string,
+  patientId: string
+): Promise<{ id: string; summary: Record<string, unknown> } | null> {
   const { data, error } = await supabase
     .from("hair_intelligence_donor_assessments")
-    .select("id")
+    .select("id, donor_quality_rating, miniaturisation_risk, retrograde_risk, safe_donor_capacity_band")
     .eq("tenant_id", tenantId)
     .eq("patient_id", patientId)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error || !data) return null;
-  return String((data as { id: string }).id);
+  const x = data as Record<string, unknown>;
+  return {
+    id: String(x.id),
+    summary: {
+      donor_quality_rating: x.donor_quality_rating,
+      miniaturisation_risk: x.miniaturisation_risk,
+      retrograde_risk: x.retrograde_risk,
+      safe_donor_capacity_band: x.safe_donor_capacity_band,
+    },
+  };
 }
 
 async function pathologyRecordsPresent(supabase: SupabaseClient, tenantId: string, patientId: string): Promise<boolean> {
@@ -276,9 +289,9 @@ export async function assessRecipient(params: AssessRecipientParams): Promise<As
   const context: Record<string, unknown> = {};
 
   if (tenantId && patientId) {
-    const [hairLoss, donorId, progression, therapyEvents, activeSummary, pathologyPresent] = await Promise.all([
+    const [hairLoss, donorBundle, progression, therapyEvents, activeSummary, pathologyPresent] = await Promise.all([
       latestHairLossClassificationBundle(supabase, tenantId, patientId),
-      latestDonorAssessmentId(supabase, tenantId, patientId),
+      latestDonorAssessmentSummary(supabase, tenantId, patientId),
       loadPatientTwinHairProgressionSection(tenantId, patientId, {}, supabase).catch(() => null),
       loadPatientTherapyEventsForPatient(supabase, tenantId, patientId, { limit: 200 }).catch(() => [] as PatientTherapyEventRow[]),
       loadActiveTherapyPlanSummary(supabase, tenantId, patientId).catch(() => null),
@@ -286,7 +299,7 @@ export async function assessRecipient(params: AssessRecipientParams): Promise<As
     ]);
 
     hairLossClassificationId = hairLoss.id;
-    donorAssessmentId = donorId;
+    donorAssessmentId = donorBundle?.id ?? null;
 
     if (patientImageId) {
       recipientImageClassificationId = await latestRecipientHliClassificationIdForPatientImage(supabase, patientImageId);
@@ -304,7 +317,7 @@ export async function assessRecipient(params: AssessRecipientParams): Promise<As
 
     Object.assign(context, {
       hair_loss_classification: hairLoss.summary,
-      donor_assessment: donorId ? { donor_assessment_id: donorId } : null,
+      donor_assessment: donorBundle ? { donor_assessment_id: donorBundle.id, ...donorBundle.summary } : null,
       hair_progression: progression
         ? {
             stability_label: progression.stability.label,
