@@ -28,9 +28,20 @@ export function supabaseAdmin(): SupabaseClient {
       );
     }
     tryApplyIpv4FirstDns();
+    // Node < 22 has no global WebSocket; @supabase/realtime-js requires `ws` as transport for scripts/CLI.
+    let wsTransport: typeof import("ws") | undefined;
+    if (typeof window === "undefined" && typeof process !== "undefined" && process.versions?.node) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports -- keep Edge bundles from statically linking `ws`
+        wsTransport = require("ws") as typeof import("ws");
+      } catch {
+        wsTransport = undefined;
+      }
+    }
     _client = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
       global: { fetch: supabaseAdminFetchWithRetry },
+      ...(wsTransport ? { realtime: { transport: wsTransport as never } } : {}),
     });
   }
   return _client;
