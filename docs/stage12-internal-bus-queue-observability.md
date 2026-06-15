@@ -44,6 +44,6 @@ No migrations to roll back.
 - External workers, DB-backed queues, and network dispatch.
 - Policy-approved cross-system emit / export (Stage 10 defaults unchanged).
 
-## Stage 13 recommendation
+## Stage 13 (implemented)
 
-Design an **additive** persistent `intelligence_core_event_log` (name TBD) with strict payload sanitization columns, correlation keys, and replay pointers; keep writes **disabled** until governance signs off. Pair with a durable outbox or queue consumer that respects the same policy gates as HTTP ingest.
+See `docs/stage13-persistent-intelligence-event-log.md` — additive `public.fi_intelligence_event_logs`, sanitized writes, `FI_INTELLIGENCE_EVENT_LOG_PERSIST_ENABLED` gate (off in production), optional wiring from this queue’s enqueue/drain paths.

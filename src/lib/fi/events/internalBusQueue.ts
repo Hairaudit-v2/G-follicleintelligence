@@ -1,6 +1,7 @@
 /**
  * Stage 12: in-memory internal intelligence event queue (dev/test only, disabled by default).
- * No DB, no workers, no downstream or network I/O.
+ * Optional Stage 13: when `FI_INTELLIGENCE_EVENT_LOG_PERSIST_ENABLED=1` (non-production), sanitized
+ * lifecycle rows may be written to `fi_intelligence_event_logs` — failures never affect enqueue/drain.
  */
 
 import type { IntelligenceEventEnvelope } from "@follicle/intelligence-core";
@@ -9,6 +10,7 @@ import {
   isInternalIntelligenceInternalBusQueueEnabled,
   type InternalBusQueueEnvOptions,
 } from "./internalBusQueueEnv";
+import { isFiIntelligenceEventLogPersistEnabled } from "./persistentEventLogEnv";
 
 const ADAPTER_MIRROR = "__fiAdapterRoundTrip" as const;
 
@@ -106,6 +108,19 @@ export async function enqueueInternalIntelligenceEvent(
   const envelope_for_handlers = sanitizeIntelligenceEnvelopeForQueue(envelope);
 
   queue.push({ summary, envelope_for_handlers });
+
+  if (isFiIntelligenceEventLogPersistEnabled(options)) {
+    try {
+      const { persistIntelligenceEventLog } = await import("./persistIntelligenceEventLog.server");
+      await persistIntelligenceEventLog(
+        { status: "enqueued", summary, envelope_for_payload_shape: envelope },
+        options
+      );
+    } catch {
+      /* persistence must not affect enqueue */
+    }
+  }
+
   return { status: "enqueued", queue_item_id, depth_after: queue.length };
 }
 
@@ -156,6 +171,24 @@ export async function drainInternalIntelligenceEventQueue(
       event_name: next.summary.event_name,
       handler_errors,
     });
+
+    if (isFiIntelligenceEventLogPersistEnabled(options)) {
+      try {
+        const { persistIntelligenceEventLog } = await import("./persistIntelligenceEventLog.server");
+        const errCount = handler_errors.length;
+        await persistIntelligenceEventLog(
+          {
+            status: errCount ? "error" : "processed",
+            summary: next.summary,
+            payload_summary_extra: { handler_error_count: errCount },
+            error_message: errCount ? `handler_errors:${errCount}` : null,
+          },
+          options
+        );
+      } catch {
+        /* persistence must not affect drain */
+      }
+    }
   }
 
   return { status: "drained", drained, items };

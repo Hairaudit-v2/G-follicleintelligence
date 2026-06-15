@@ -16,6 +16,7 @@ const LINKS: { href: string; label: string }[] = [
   { href: "/fi-admin/system/services", label: "Services" },
   { href: "/fi-admin/system/medication-catalogue", label: "Medication catalogue" },
   { href: "/fi-admin/system/audit-logs", label: "Audit logs" },
+  { href: "/fi-admin/system/intelligence-event-logs", label: "Intelligence logs" },
   { href: "/fi-admin/system/permissions", label: "Permissions" },
   { href: "/fi-admin/system/system-settings", label: "System settings" },
   { href: "/fi-admin/system/users", label: "User impersonation" },
