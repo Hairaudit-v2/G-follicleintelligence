@@ -79,6 +79,11 @@ describe("intelligenceCoreAdapter", () => {
 });
 
 describe("cross-system event drift guard", () => {
+  it("hairaudit.audit.completed is allowlisted for bus/shadow (not an FI HTTP ingest type today)", () => {
+    const allow = new Set<string>(INTELLIGENCE_EVENT_NAMES);
+    assert.ok(allow.has("hairaudit.audit.completed"));
+  });
+
   it("intelligence-core includes all FI ingest cross-system event names", () => {
     const allow = new Set<string>(INTELLIGENCE_EVENT_NAMES);
     for (const name of FI_INGEST_CROSS_SYSTEM_EVENT_TYPES) {

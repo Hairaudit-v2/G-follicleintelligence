@@ -5,6 +5,7 @@ import { handleHairAuditImagesUploaded } from "./handlers/hairauditImagesUploade
 import { handleHliDocumentUploaded } from "./handlers/hliDocumentUploaded";
 import { handleHliIntakeSubmitted } from "./handlers/hliIntakeSubmitted";
 import { parseFiEventEnvelope } from "./schema";
+import { maybeEmitShadowHairAuditAuditCompletedFromImagesIngest } from "@/src/lib/fi/events/shadowHairAuditAuditCompletedBus";
 
 export type FiEventIngestResult = {
   ok: boolean;
@@ -78,6 +79,9 @@ async function dispatchValidatedFiEvent(envelope: FiEventEnvelope): Promise<FiEv
     }
     case "hairaudit.images.uploaded": {
       const result = await handleHairAuditImagesUploaded({ envelope });
+      if (result.ok) {
+        await maybeEmitShadowHairAuditAuditCompletedFromImagesIngest(envelope);
+      }
       return {
         ok: result.ok,
         eventType: envelope.event_type,
