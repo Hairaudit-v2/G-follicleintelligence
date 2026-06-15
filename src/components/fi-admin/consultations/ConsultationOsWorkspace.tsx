@@ -504,12 +504,20 @@ export function ConsultationOsWorkspace({
           secondaryAction={
             <div className="flex flex-wrap gap-2">
               {mode === "edit" && consultationId?.trim() ? (
-                <Link
-                  href={`${base}/consultations/${consultationId.trim()}/forms`}
-                  className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-950 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 dark:border-emerald-500/35 dark:bg-emerald-950/50 dark:text-emerald-50 dark:hover:bg-emerald-900/60"
-                >
-                  Open guided consultation form
-                </Link>
+                <>
+                  <Link
+                    href={`${base}/consultations/${consultationId.trim()}/forms`}
+                    className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-950 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 dark:border-emerald-500/35 dark:bg-emerald-950/50 dark:text-emerald-50 dark:hover:bg-emerald-900/60"
+                  >
+                    Hair transplant guided form
+                  </Link>
+                  <Link
+                    href={`${base}/consultations/${consultationId.trim()}/forms/hair-loss-treatment`}
+                    className="inline-flex items-center justify-center rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-950 shadow-sm transition hover:border-violet-300 hover:bg-violet-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-violet-500/40 focus-visible:ring-offset-2 dark:border-violet-500/35 dark:bg-violet-950/50 dark:text-violet-50 dark:hover:bg-violet-900/60"
+                  >
+                    Hair loss / HLI guided form
+                  </Link>
+                </>
               ) : null}
               {appointmentHref ? (
                 <Link

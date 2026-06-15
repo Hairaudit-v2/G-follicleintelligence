@@ -55,6 +55,12 @@ export type ConsultationCompletionSummary = {
   areaMapHighlights: ConsultationCompletionAreaMapHighlight[];
   clinicianNotesPreview: string;
   source: "rules_v1";
+  /** Pathway 2 (hair-loss-treatment-consultation) — populated by HLI completion rules. */
+  hairLossPatternTypeLabel?: string;
+  bloodAnalysisRecommended?: boolean;
+  treatmentPriorityLabel?: string;
+  treatmentTimelineLabel?: string;
+  hliPathwayRecommendedLabel?: string;
 };
 
 export type ConsultationCompletionInput = {

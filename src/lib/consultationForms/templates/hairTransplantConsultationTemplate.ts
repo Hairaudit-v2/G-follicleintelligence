@@ -23,7 +23,8 @@ const COMPLETION_OUTCOME_OPTIONS: ConsultationFormOption[] = [
   { value: "undecided", label: "Undecided / exploratory" },
 ];
 
-const RECOMMENDED_ZONE_OPTIONS: ConsultationFormOption[] = [
+/** Exported for deterministic clinical draft / labels outside the template module. */
+export const HAIR_TRANSPLANT_V2_RECOMMENDED_ZONE_OPTIONS: ConsultationFormOption[] = [
   { value: "hairline", label: "Hairline" },
   { value: "temples", label: "Temples" },
   { value: "midscalp", label: "Mid-scalp / top" },
@@ -31,7 +32,8 @@ const RECOMMENDED_ZONE_OPTIONS: ConsultationFormOption[] = [
   { value: "donor", label: "Donor optimisation" },
 ];
 
-const RECOMMENDED_TREATMENT_OPTIONS: ConsultationFormOption[] = [
+/** Exported for deterministic clinical draft / labels outside the template module. */
+export const HAIR_TRANSPLANT_V2_RECOMMENDED_TREATMENT_OPTIONS: ConsultationFormOption[] = [
   { value: "finasteride", label: "Finasteride / dutasteride" },
   { value: "oral_minoxidil", label: "Oral minoxidil" },
   { value: "topical_minoxidil", label: "Topical minoxidil" },
@@ -40,6 +42,9 @@ const RECOMMENDED_TREATMENT_OPTIONS: ConsultationFormOption[] = [
   { value: "surgery_fu", label: "Surgery (FUE / FUT)" },
   { value: "mesotherapy", label: "Mesotherapy" },
 ];
+
+const RECOMMENDED_ZONE_OPTIONS = HAIR_TRANSPLANT_V2_RECOMMENDED_ZONE_OPTIONS;
+const RECOMMENDED_TREATMENT_OPTIONS = HAIR_TRANSPLANT_V2_RECOMMENDED_TREATMENT_OPTIONS;
 
 /** Primary objectives that open the surgical assessment pathway (donor / recipient / map). */
 export const HAIR_TRANSPLANT_V2_SURGICAL_PRIMARY_OBJECTIVES = ["ht_primary", "ht_plus_medical", "repair_revision"] as const;

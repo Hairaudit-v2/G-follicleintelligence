@@ -1,4 +1,10 @@
 import { getClinicalNoteText, getVoiceNoteTranscript } from "../consultationFormNoteModel";
+import {
+  aggregateBodyAreaMapByRegionLabel,
+  normalizeBodyAreaMapValue,
+  BODY_AREA_MAP_VIEW_LABELS,
+  type BodyAreaMapViewId,
+} from "../bodyAreaMapModel";
 
 export function readString(v: unknown): string {
   if (v == null) return "";
@@ -66,20 +72,17 @@ export function mergeUniqueStrings(...groups: string[][]): string[] {
 
 export function extractBodyAreaMapHighlights(concernMap: unknown, limit = 12): { view: string; label: string; severity: string }[] {
   if (!concernMap || typeof concernMap !== "object" || Array.isArray(concernMap)) return [];
-  const ann = (concernMap as { annotations?: unknown }).annotations;
-  if (!Array.isArray(ann)) return [];
-  const out: { view: string; label: string; severity: string }[] = [];
-  for (const a of ann) {
-    if (!a || typeof a !== "object" || Array.isArray(a)) continue;
-    const o = a as Record<string, unknown>;
-    const view = readString(o.view);
-    const label = readString(o.label);
-    const severity = readString(o.severity) || "not_assessed";
-    if (!view && !label) continue;
-    out.push({ view: view || "unknown", label: label || "marker", severity });
-    if (out.length >= limit) break;
-  }
-  return out;
+  const { annotations } = normalizeBodyAreaMapValue(concernMap);
+  const agg = aggregateBodyAreaMapByRegionLabel(annotations);
+  return agg.slice(0, limit).map((row) => ({
+    view:
+      row.views
+        .map((v) => BODY_AREA_MAP_VIEW_LABELS[v as BodyAreaMapViewId] ?? String(v))
+        .filter(Boolean)
+        .join(" · ") || "—",
+    label: row.labelValue,
+    severity: row.severity,
+  }));
 }
 
 export function buildClinicianNotesPreview(values: Record<string, unknown>, maxLen = 420): string {

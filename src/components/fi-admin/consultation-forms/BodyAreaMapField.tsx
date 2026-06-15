@@ -15,6 +15,7 @@ import {
   type BodyAreaMapSeverity,
   type BodyAreaMapValue,
   type BodyAreaMapViewId,
+  aggregateBodyAreaMapByRegionLabel,
   labelDisplayForBodyAreaMap,
   normalizeBodyAreaMapValue,
   viewDisplayForBodyAreaMap,
@@ -418,6 +419,7 @@ export function BodyAreaMapAnnotationsSummary({
 }) {
   const allowed = useAllowedViews(allowedViews);
   const { annotations } = normalizeBodyAreaMapValue(value, allowed);
+  const byRegion = useMemo(() => aggregateBodyAreaMapByRegionLabel(annotations), [annotations]);
   if (annotations.length === 0) {
     return (
       <div className="rounded-lg border border-slate-200 bg-slate-50/90 px-3 py-2 text-sm text-slate-700">
@@ -436,22 +438,23 @@ export function BodyAreaMapAnnotationsSummary({
         <p className="text-sm font-semibold text-slate-900">{fieldLabel}</p>
       ) : null}
       <ul className="space-y-2">
-        {annotations.map((a) => (
+        {byRegion.map((row) => (
           <li
-            key={a.id}
+            key={row.labelValue}
             className="rounded-md border border-slate-200/90 bg-white px-3 py-2 text-sm text-slate-800"
           >
-            <div className="font-medium text-slate-900">
-              {viewDisplayForBodyAreaMap(a.view)} · {labelDisplayForBodyAreaMap(a.label)}
+            <div className="font-medium text-slate-900">{row.labelDisplay}</div>
+            <div className="mt-0.5 text-xs text-slate-600">
+              {row.views.map((v) => viewDisplayForBodyAreaMap(v)).join(" · ")}
+              {row.markerCount > 1 ? (
+                <span className="text-slate-500"> · {row.markerCount} markers merged</span>
+              ) : null}
             </div>
             <div className="mt-0.5 text-xs text-slate-600">
-              Severity: <span className="font-medium capitalize">{a.severity.replace(/_/g, " ")}</span>
+              Severity: <span className="font-medium capitalize">{row.severity.replace(/_/g, " ")}</span>
             </div>
-            {a.notes.trim() ? (
-              <div className="mt-1 text-xs text-slate-700">Notes: {a.notes.trim()}</div>
-            ) : null}
-            {a.tags.length > 0 ? (
-              <div className="mt-1 text-xs text-slate-500">Tags: {a.tags.join(", ")}</div>
+            {row.combinedNotes.trim() ? (
+              <div className="mt-1 text-xs text-slate-700">Notes: {row.combinedNotes.trim()}</div>
             ) : null}
           </li>
         ))}

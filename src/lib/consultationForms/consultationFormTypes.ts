@@ -54,7 +54,15 @@ export type ConsultationFormOptionSetId =
   | "consultation_duration_band"
   | "consultation_primary_objective"
   | "yes_no"
-  | "yes_no_unsure";
+  | "yes_no_unsure"
+  | "hair_loss_pattern_type"
+  | "hli_primary_objective"
+  | "hli_hormonal_flags"
+  | "hli_stress_sleep_flags"
+  | "hli_nutrition_flags"
+  | "hli_treatment_priority"
+  | "hli_treatment_timeline"
+  | "hli_pathway_recommended";
 
 export type ConsultationFormOption = {
   value: string;

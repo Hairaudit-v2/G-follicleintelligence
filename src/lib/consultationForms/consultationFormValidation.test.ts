@@ -9,6 +9,7 @@ import {
   validateConsultationFormRequiredFields,
   validateVoiceNoteClinicalNoteShapesInValues,
 } from "./consultationFormValidation";
+import { hairLossTreatmentConsultationSchemaV1 } from "./templates/hairLossTreatmentConsultationTemplate";
 
 describe("validateConsultationFormRequiredFields", () => {
   it("flags missing required visible fields", () => {
@@ -196,5 +197,42 @@ describe("voice_note / clinical_note validation", () => {
       c_opt: { mode: "clinical_note", note: "" },
     });
     assert.equal(issues.length, 0);
+  });
+});
+
+describe("Hair Loss Treatment template validation", () => {
+  it("hidden classification fields do not fail validation when pattern omits them", () => {
+    const values: Record<string, unknown> = {
+      priority_focus: "general",
+      duration_band: "3_12m",
+      primary_objective: "patient_twin_baseline",
+      shedding_reported: "none",
+      previous_treatment_yes_no: "no",
+      pattern_type: "unknown",
+      hair_calibre: "fine",
+      scalp_condition: "normal",
+      medical_flags: [],
+      hormonal_flags: [],
+      stress_sleep_flags: [],
+      nutrition_flags: [],
+      pathology_recommended_explicit: false,
+      recommended_treatments: ["topical_minoxidil"],
+      blood_analysis_recommended: false,
+      treatment_priority: "patient_led_pacing",
+      treatment_timeline: "watchful",
+      hli_pathway_recommended: "patient_twin_lite",
+      consultation_outcome_type: "review_later",
+      structured_clinical_note: { mode: "clinical_note", note: "Telogen effluvium query; watch." },
+      follow_up_urgency: "routine",
+    };
+
+    const requiredIssues = validateConsultationFormRequiredFields(hairLossTreatmentConsultationSchemaV1, values);
+    assert.equal(requiredIssues.length, 0);
+
+    const shapeIssues = validateVoiceNoteClinicalNoteShapesInValues(hairLossTreatmentConsultationSchemaV1, values);
+    assert.equal(shapeIssues.length, 0);
+
+    const mapIssues = validateBodyAreaMapShapesInValues(hairLossTreatmentConsultationSchemaV1, values);
+    assert.equal(mapIssues.length, 0);
   });
 });

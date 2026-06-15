@@ -73,9 +73,47 @@ describe("buildHairTransplantCompletionSummary", () => {
       })
     );
     assert.equal(s.areaMapHighlights.length, 1);
-    assert.equal(s.areaMapHighlights[0]?.view, "frontal_hairline");
+    assert.ok(s.areaMapHighlights[0]?.view.includes("Frontal"));
     assert.equal(s.areaMapHighlights[0]?.label, "temple_recession");
     assert.equal(s.areaMapHighlights[0]?.severity, "moderate");
+  });
+
+  it("concern_map highlights merge duplicate region labels across views", () => {
+    const s = buildHairTransplantCompletionSummary(
+      baseInput({
+        concern_map: {
+          view: "frontal_hairline",
+          annotations: [
+            {
+              id: "1",
+              view: "frontal_hairline",
+              x: 10,
+              y: 20,
+              label: "temple_recession",
+              severity: "mild",
+              tags: [],
+              notes: "",
+              createdAt: "t",
+            },
+            {
+              id: "2",
+              view: "crown",
+              x: 30,
+              y: 40,
+              label: "temple_recession",
+              severity: "severe",
+              tags: [],
+              notes: "",
+              createdAt: "t",
+            },
+          ],
+        },
+      })
+    );
+    assert.equal(s.areaMapHighlights.length, 1);
+    assert.equal(s.areaMapHighlights[0]?.severity, "severe");
+    assert.ok(s.areaMapHighlights[0]?.view.includes("Frontal"));
+    assert.ok(s.areaMapHighlights[0]?.view.includes("Crown"));
   });
 
   it("voice/clinical notes preview extracted", () => {

@@ -177,3 +177,64 @@ export function labelDisplayForBodyAreaMap(value: string): string {
 export function viewDisplayForBodyAreaMap(view: BodyAreaMapViewId): string {
   return BODY_AREA_MAP_VIEW_LABELS[view] ?? view;
 }
+
+const SEVERITY_RANK: Record<BodyAreaMapSeverity, number> = {
+  not_assessed: 0,
+  mild: 1,
+  moderate: 2,
+  severe: 3,
+};
+
+function worseSeverity(a: BodyAreaMapSeverity, b: BodyAreaMapSeverity): BodyAreaMapSeverity {
+  return SEVERITY_RANK[a] >= SEVERITY_RANK[b] ? a : b;
+}
+
+/** One row per anatomical region label — merges duplicate markers (same label, same or different views). */
+export type BodyAreaMapRegionAggregate = {
+  labelValue: string;
+  labelDisplay: string;
+  views: BodyAreaMapViewId[];
+  severity: BodyAreaMapSeverity;
+  markerCount: number;
+  combinedNotes: string;
+};
+
+export function aggregateBodyAreaMapByRegionLabel(annotations: readonly BodyAreaMapAnnotation[]): BodyAreaMapRegionAggregate[] {
+  type Acc = {
+    views: Set<BodyAreaMapViewId>;
+    severity: BodyAreaMapSeverity;
+    markerCount: number;
+    notes: string[];
+  };
+  const byLabel = new Map<string, Acc>();
+  for (const a of annotations) {
+    const key = a.label.trim() || DEFAULT_LABEL;
+    const cur = byLabel.get(key) ?? {
+      views: new Set<BodyAreaMapViewId>(),
+      severity: "not_assessed",
+      markerCount: 0,
+      notes: [],
+    };
+    cur.views.add(a.view);
+    cur.severity = worseSeverity(cur.severity, a.severity);
+    cur.markerCount += 1;
+    const n = a.notes.trim();
+    if (n && !cur.notes.includes(n)) cur.notes.push(n);
+    byLabel.set(key, cur);
+  }
+  const viewOrder = new Map(BODY_AREA_MAP_VIEWS.map((v, i) => [v, i] as const));
+  const rows: BodyAreaMapRegionAggregate[] = [];
+  for (const [labelValue, acc] of byLabel) {
+    const views = [...acc.views].sort((x, y) => (viewOrder.get(x) ?? 99) - (viewOrder.get(y) ?? 99));
+    rows.push({
+      labelValue,
+      labelDisplay: labelDisplayForBodyAreaMap(labelValue),
+      views,
+      severity: acc.severity,
+      markerCount: acc.markerCount,
+      combinedNotes: acc.notes.join("; "),
+    });
+  }
+  rows.sort((a, b) => a.labelDisplay.localeCompare(b.labelDisplay));
+  return rows;
+}

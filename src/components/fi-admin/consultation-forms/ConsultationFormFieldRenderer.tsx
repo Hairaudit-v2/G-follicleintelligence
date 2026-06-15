@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { AiGeneratedClinicalNoteField } from "@/src/components/fi-admin/consultation-forms/AiGeneratedClinicalNoteField";
 import { BodyAreaMapAnnotationsSummary, BodyAreaMapField } from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
 import { ClinicalNoteField, ClinicalNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/ClinicalNoteField";
 import { VoiceNoteField, VoiceNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/VoiceNoteField";
@@ -8,6 +9,7 @@ import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
 import { optionsForField } from "@/src/lib/consultationForms/consultationFormOptionSets";
+import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormField, ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
 
 function readStringArray(v: unknown): string[] {
@@ -31,6 +33,8 @@ export function ConsultationFormFieldRenderer({
   onChange,
   disabled,
   persistence = null,
+  sectionId,
+  templateSlug,
 }: {
   field: ConsultationFormField;
   values: Record<string, unknown>;
@@ -38,9 +42,35 @@ export function ConsultationFormFieldRenderer({
   onChange: (next: unknown) => void;
   disabled: boolean;
   persistence?: ConsultationFormPersistenceContext | null;
+  /** Active section id — used for Hair Transplant v2 handoff UX. */
+  sectionId?: string;
+  templateSlug?: string;
 }) {
   if (!evaluateConsultationFormCondition(field.showWhen, values)) {
     return null;
+  }
+
+  const slug = templateSlug?.trim() ?? "";
+  const sec = sectionId?.trim() ?? "";
+  const hairTransplantHandoffUx =
+    slug === HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG && sec === "clinical_summary_handoff";
+
+  if (hairTransplantHandoffUx && field.id === "clinician_voice_note") {
+    return null;
+  }
+
+  if (hairTransplantHandoffUx && field.type === "clinical_note" && field.id === "structured_clinical_note") {
+    return (
+      <AiGeneratedClinicalNoteField
+        label={field.label}
+        description={field.description}
+        required={field.required}
+        values={values}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+      />
+    );
   }
 
   const opts = optionsForField(field);

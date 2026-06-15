@@ -4,17 +4,17 @@ import { notFound } from "next/navigation";
 import { ConsultationFormRunner } from "@/src/components/fi-admin/consultation-forms/ConsultationFormRunner";
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
 import { loadConsultationHandoffState } from "@/src/lib/consultationForms/handoff/consultationHandoffMutations.server";
-import { ensureInRoomHairTransplantConsultationFormInstance } from "@/src/lib/consultationForms/consultationFormMutations.server";
+import { ensureInRoomHairLossTreatmentConsultationFormInstance } from "@/src/lib/consultationForms/consultationFormMutations.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
 export const metadata = {
-  title: "Consultation form",
+  title: "Hair loss treatment consultation",
   robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function ConsultationGuidedFormPage({
+export default async function HairLossTreatmentGuidedFormPage({
   params,
 }: {
   params: Promise<{ tenantId: string; consultationId: string }>;
@@ -30,16 +30,16 @@ export default async function ConsultationGuidedFormPage({
   const row = await loadConsultationForTenant(tid, cid);
   if (!row) notFound();
 
-  const instance = await ensureInRoomHairTransplantConsultationFormInstance(tid, cid);
+  const instance = await ensureInRoomHairLossTreatmentConsultationFormInstance(tid, cid);
 
   const handoffInitial = await loadConsultationHandoffState(tid, cid, instance.id);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <p className="mb-4 text-sm text-slate-600">
-        Hair transplant pathway (surgical planning). For non-surgical Hair Longevity / Patient Twin intake, use the{" "}
-        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms/hair-loss-treatment`} className="font-semibold text-violet-700 underline">
-          hair loss treatment form
+        Non-surgical Hair Longevity / Patient Twin pathway. For transplant planning, use the{" "}
+        <Link href={`/fi-admin/${tid}/consultations/${cid}/forms`} className="font-semibold text-emerald-800 underline">
+          hair transplant guided form
         </Link>
         .
       </p>

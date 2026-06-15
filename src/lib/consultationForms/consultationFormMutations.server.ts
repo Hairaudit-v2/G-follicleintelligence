@@ -8,14 +8,15 @@ import { createTimelineEvent } from "@/src/lib/fi/foundation/createTimelineEvent
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
 
 import type { ConsultationCompletionSummary } from "./completion/consultationCompletionTypes";
-import { buildHairTransplantCompletionSummary } from "./completion/hairTransplantCompletionRules";
-import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "./consultationFormConstants";
+import { buildConsultationCompletionSummary } from "./completion/buildConsultationCompletionSummary";
+import { HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG, HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "./consultationFormConstants";
 import { loadConsultationFormInstance, mapConsultationFormInstanceRow } from "./consultationFormLoad.server";
 import type { ConsultationFormChannel, ConsultationFormInstanceWithTemplate } from "./consultationFormTypes";
 import {
   hairTransplantConsultationSchemaV1,
   hairTransplantConsultationSchemaV2,
 } from "./templates/hairTransplantConsultationTemplate";
+import { hairLossTreatmentConsultationSchemaV1 } from "./templates/hairLossTreatmentConsultationTemplate";
 
 export type CreateConsultationFormInstanceInput = {
   tenantId: string;
@@ -220,6 +221,154 @@ export async function ensureInRoomHairTransplantConsultationFormInstance(
   if (!tid || !cid) throw new Error("tenantId and consultationId are required.");
 
   const { templateVersionId } = await ensureGlobalHairTransplantConsultationTemplate(supabase);
+
+  const { data: existing, error: ee } = await supabase
+    .from("fi_consultation_form_instances")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("consultation_id", cid)
+    .eq("channel", "in_room")
+    .eq("template_version_id", templateVersionId)
+    .maybeSingle();
+  if (ee) throw new Error(ee.message);
+  if (existing?.id) {
+    const loaded = await loadConsultationFormInstance(tid, String((existing as { id: string }).id));
+    if (!loaded) throw new Error("Could not load existing form instance.");
+    return loaded;
+  }
+
+  try {
+    return await createConsultationFormInstance(
+      { tenantId: tid, consultationId: cid, templateVersionId, channel: "in_room" },
+      supabase
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("duplicate key") && !msg.includes("unique constraint")) throw e;
+    const { data: again, error: e2 } = await supabase
+      .from("fi_consultation_form_instances")
+      .select("id")
+      .eq("tenant_id", tid)
+      .eq("consultation_id", cid)
+      .eq("channel", "in_room")
+      .eq("template_version_id", templateVersionId)
+      .maybeSingle();
+    if (e2) throw new Error(e2.message);
+    if (!again?.id) throw e;
+    const loaded = await loadConsultationFormInstance(tid, String((again as { id: string }).id));
+    if (!loaded) throw new Error("Could not load form instance after duplicate.");
+    return loaded;
+  }
+}
+
+/**
+ * Ensures the global Hair Loss Treatment / HLI consultation template exists with a **published** version.
+ */
+export async function ensureGlobalHairLossTreatmentConsultationTemplate(
+  client?: SupabaseClient
+): Promise<{ templateVersionId: string }> {
+  const supabase = client ?? supabaseAdmin();
+  const slug = HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG;
+
+  const { data: existingTpl, error: te1 } = await supabase
+    .from("fi_consultation_form_templates")
+    .select("id")
+    .is("tenant_id", null)
+    .eq("slug", slug)
+    .maybeSingle();
+  if (te1) throw new Error(te1.message);
+
+  let templateId: string;
+  if (existingTpl?.id) {
+    templateId = String((existingTpl as { id: string }).id);
+  } else {
+    const { data: insTpl, error: te2 } = await supabase
+      .from("fi_consultation_form_templates")
+      .insert({
+        tenant_id: null,
+        slug,
+        name: "Hair Loss Treatment Consultation",
+        treatment_program: "hair_longevity_medical",
+        description:
+          "ConsultationOS pathway 2 — non-surgical hair loss, treatment planning, and Hair Longevity / Patient Twin alignment.",
+        is_active: true,
+        metadata: { consultation_os_pathway: "hli_v1" },
+      })
+      .select("id")
+      .single();
+    if (te2) {
+      const { data: again, error: te3 } = await supabase
+        .from("fi_consultation_form_templates")
+        .select("id")
+        .is("tenant_id", null)
+        .eq("slug", slug)
+        .maybeSingle();
+      if (te3) throw new Error(te3.message);
+      if (!again?.id) throw new Error(te2.message);
+      templateId = String((again as { id: string }).id);
+    } else {
+      templateId = String((insTpl as { id: string }).id);
+    }
+  }
+
+  const { data: published, error: pe } = await supabase
+    .from("fi_consultation_form_template_versions")
+    .select("id, version")
+    .eq("template_id", templateId)
+    .eq("status", "published")
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (pe) throw new Error(pe.message);
+  if (published?.id) {
+    return { templateVersionId: String((published as { id: string }).id) };
+  }
+
+  const { data: insVer, error: ve } = await supabase
+    .from("fi_consultation_form_template_versions")
+    .insert({
+      template_id: templateId,
+      version: 1,
+      status: "published",
+      schema: hairLossTreatmentConsultationSchemaV1 as unknown as Record<string, unknown>,
+      ui_layout: {},
+      published_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (!ve && insVer?.id) {
+    return { templateVersionId: String((insVer as { id: string }).id) };
+  }
+  const msg = ve?.message ?? "";
+  if (!msg.includes("duplicate") && !msg.includes("unique")) {
+    throw new Error(msg || "Could not insert Hair Loss Treatment Consultation template version.");
+  }
+  const { data: recovered, error: re } = await supabase
+    .from("fi_consultation_form_template_versions")
+    .select("id")
+    .eq("template_id", templateId)
+    .eq("version", 1)
+    .maybeSingle();
+  if (re) throw new Error(re.message);
+  if (!recovered?.id) throw new Error(ve?.message ?? "Could not resolve Hair Loss Treatment template version.");
+  return { templateVersionId: String((recovered as { id: string }).id) };
+}
+
+/**
+ * Loads or creates the in-room Hair Loss Treatment / HLI consultation instance for this consultation.
+ */
+export async function ensureInRoomHairLossTreatmentConsultationFormInstance(
+  tenantId: string,
+  consultationId: string,
+  client?: SupabaseClient
+): Promise<ConsultationFormInstanceWithTemplate> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = tenantId.trim();
+  const cid = consultationId.trim();
+  if (!tid || !cid) throw new Error("tenantId and consultationId are required.");
+
+  const { templateVersionId } = await ensureGlobalHairLossTreatmentConsultationTemplate(supabase);
 
   const { data: existing, error: ee } = await supabase
     .from("fi_consultation_form_instances")
@@ -543,7 +692,7 @@ export async function completeConsultationFormInstance(
   if (!cons) throw new Error("Consultation not found.");
 
   const nowIso = new Date().toISOString();
-  const summary = buildHairTransplantCompletionSummary({
+  const summary = buildConsultationCompletionSummary({
     consultationId: cid,
     formInstanceId: iid,
     templateSlug: existing.template.slug,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { cn } from "@/lib/utils";
 import {
   autosaveConsultationFormInstanceAction,
   completeConsultationFormInstanceAction,
@@ -14,6 +15,7 @@ import { ConsultationCompletionSummaryCard } from "@/src/components/fi-admin/con
 import { ConsultationHandoffPanel } from "@/src/components/fi-admin/consultation-forms/ConsultationHandoffPanel";
 import { ConsultationFormFieldRenderer } from "@/src/components/fi-admin/consultation-forms/ConsultationFormFieldRenderer";
 import { ConsultationFormSectionNav } from "@/src/components/fi-admin/consultation-forms/ConsultationFormSectionNav";
+import { ConsultationPostCompleteRouting } from "@/src/components/fi-admin/consultation-forms/ConsultationPostCompleteRouting";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
@@ -23,7 +25,7 @@ import type {
   ConsultationFormPersistenceContext,
 } from "@/src/lib/consultationForms/consultationFormTypes";
 import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/consultationCompletionTypes";
-import { buildHairTransplantCompletionSummary } from "@/src/lib/consultationForms/completion/hairTransplantCompletionRules";
+import { buildConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/buildConsultationCompletionSummary";
 import type { ConsultationHandoffInitialIds } from "@/src/lib/consultationForms/handoff/consultationHandoffTypes";
 
 const AUTOSAVE_MS = 900;
@@ -36,6 +38,43 @@ function parseStoredCompletion(raw: Record<string, unknown> | undefined): Consul
   if (!raw || typeof raw !== "object") return null;
   if (typeof raw.consultationId !== "string" || typeof raw.completedAt !== "string") return null;
   return raw as unknown as ConsultationCompletionSummary;
+}
+
+type WorkflowPhase = "editing" | "review" | "complete";
+
+function ConsultationWorkflowStepper({ phase }: { phase: WorkflowPhase }) {
+  const steps: { id: WorkflowPhase; n: number; title: string }[] = [
+    { id: "editing", n: 1, title: "Edit consultation" },
+    { id: "review", n: 2, title: "Review summary" },
+    { id: "complete", n: 3, title: "Approve & complete" },
+  ];
+  const activeIdx = phase === "editing" ? 0 : phase === "review" ? 1 : 2;
+  return (
+    <nav aria-label="Consultation workflow" className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+      <ol className="flex flex-wrap items-stretch gap-2 sm:gap-3">
+        {steps.map((s, i) => {
+          const active = i === activeIdx;
+          const done = i < activeIdx;
+          return (
+            <li
+              key={s.id}
+              className={cn(
+                "flex min-h-[44px] min-w-[140px] flex-1 flex-col justify-center rounded-lg border px-3 py-2 text-left text-xs sm:text-sm",
+                active && "border-sky-500 bg-sky-50 font-semibold text-sky-950 shadow-sm",
+                done && !active && "border-emerald-200 bg-emerald-50/50 text-emerald-950",
+                !active && !done && "border-slate-200 bg-white text-slate-600"
+              )}
+            >
+              <span className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">Step {s.n}</span>
+              <span className="mt-0.5 leading-snug">{s.title}</span>
+              {done ? <span className="mt-1 text-[0.65rem] font-medium text-emerald-800">Done</span> : null}
+              {active ? <span className="mt-1 text-[0.65rem] font-medium text-sky-800">Current</span> : null}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
 }
 
 export function ConsultationFormRunner({
@@ -178,7 +217,7 @@ export function ConsultationFormRunner({
     [initialInstance.completion_summary]
   );
 
-  const formIsCompleted = initialInstance.status === "locked" && Boolean(initialInstance.completed_at);
+  const formIsLocked = status === "locked" || initialInstance.status === "locked";
 
   const handoffState = handoffInitial ?? {
     followUpTaskId: null,
@@ -188,13 +227,13 @@ export function ConsultationFormRunner({
   };
 
   const canShowHandoffs = useMemo(
-    () => formIsCompleted && Boolean(persistedCompletion) && persistedCompletion!.source === "rules_v1",
-    [formIsCompleted, persistedCompletion]
+    () => formIsLocked && Boolean(persistedCompletion) && persistedCompletion!.source === "rules_v1",
+    [formIsLocked, persistedCompletion]
   );
 
   const previewCompletionSummary = useMemo(
     () =>
-      buildHairTransplantCompletionSummary({
+      buildConsultationCompletionSummary({
         consultationId: cid,
         formInstanceId: initialInstance.id,
         templateSlug: initialInstance.template.slug,
@@ -205,23 +244,28 @@ export function ConsultationFormRunner({
   );
 
   const displayCompletionSummary: ConsultationCompletionSummary | null = useMemo(() => {
-    if (formIsCompleted && persistedCompletion) return persistedCompletion;
-    if (formIsCompleted) return previewCompletionSummary;
-    if (initialInstance.status === "submitted" && !initialInstance.completed_at) return previewCompletionSummary;
+    if (formIsLocked && persistedCompletion) return persistedCompletion;
+    if (formIsLocked) return previewCompletionSummary;
+    if (!formIsLocked && status === "submitted") return previewCompletionSummary;
     return null;
   }, [
-    formIsCompleted,
+    formIsLocked,
     persistedCompletion,
     previewCompletionSummary,
-    initialInstance.status,
-    initialInstance.completed_at,
+    status,
   ]);
 
   const showCompleteConsultationCta =
     initialInstance.status === "submitted" && !initialInstance.completed_at;
 
-  const showCompletionSection =
-    initialInstance.status === "submitted" || initialInstance.status === "locked";
+  const workflowPhase: WorkflowPhase = useMemo(() => {
+    if (status === "draft") return "editing";
+    if (status === "locked" || initialInstance.status === "locked") return "complete";
+    if (status === "submitted") return "review";
+    return "complete";
+  }, [status, initialInstance.status]);
+
+  const templateSlug = initialInstance.template.slug;
 
   const onCompleteConsultation = useCallback(async () => {
     if (!showCompleteConsultationCta) return;
@@ -261,7 +305,7 @@ export function ConsultationFormRunner({
   const autosaveLabel = useMemo(() => {
     if (!canEdit) {
       if (initialInstance.completed_at) return "Consultation completed";
-      if (status === "submitted") return "Submitted — complete consultation below";
+      if (status === "submitted") return "Submitted — review summary, then complete consultation";
       return "Locked";
     }
     if (autosaveState === "saving") return "Saving draft…";
@@ -269,6 +313,62 @@ export function ConsultationFormRunner({
     if (autosaveState === "saved") return "Draft saved";
     return "Autosave on pause";
   }, [autosaveState, canEdit, initialInstance.completed_at, status]);
+
+  const areaMapReadOnlyBlock =
+    !canEdit && bodyAreaMapFields.length > 0 ? (
+      <div className="space-y-3 border-t border-slate-200 pt-4">
+        <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Area map summary</h3>
+        {bodyAreaMapFields.map((f) => (
+          <BodyAreaMapAnnotationsSummary
+            key={f.id}
+            fieldLabel={f.label}
+            value={values[f.id]}
+            allowedViews={f.views}
+          />
+        ))}
+      </div>
+    ) : null;
+
+  const formWorkspace = (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,240px)_1fr]">
+      <aside className="lg:sticky lg:top-4 lg:self-start">
+        <ConsultationFormSectionNav
+          sections={visibleSections.map((s) => ({ id: s.id, title: s.title }))}
+          activeSectionId={activeSectionId}
+          onSelect={setActiveSectionId}
+        />
+      </aside>
+      <FiCard className="space-y-6 p-4 sm:p-6">
+        {activeSection ? (
+          <>
+            <div>
+              <h2 className={fiOsLightFormSurfaceClassNames.sectionTitle}>{activeSection.title}</h2>
+              {activeSection.description?.trim() ? (
+                <p className={`mt-1 ${fiOsLightFormSurfaceClassNames.bodyMuted}`}>{activeSection.description}</p>
+              ) : null}
+            </div>
+            <div className="space-y-5">
+              {activeSection.fields.map((field) => (
+                <ConsultationFormFieldRenderer
+                  key={field.id}
+                  field={field}
+                  values={values}
+                  value={values[field.id]}
+                  disabled={!canEdit}
+                  persistence={persistence}
+                  sectionId={activeSection.id}
+                  templateSlug={templateSlug}
+                  onChange={(next) => onFieldChange(field.id, next)}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className={fiOsLightFormSurfaceClassNames.bodyMuted}>This form has no sections.</p>
+        )}
+      </FiCard>
+    </div>
+  );
 
   return (
     <div className="space-y-5">
@@ -312,25 +412,44 @@ export function ConsultationFormRunner({
             {completeError.trim()}
           </p>
         ) : null}
-        {!canEdit && bodyAreaMapFields.length > 0 ? (
-          <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
-            <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Area map summary</h3>
-            {bodyAreaMapFields.map((f) => (
-              <BodyAreaMapAnnotationsSummary
-                key={f.id}
-                fieldLabel={f.label}
-                value={values[f.id]}
-                allowedViews={f.views}
-              />
-            ))}
-          </div>
-        ) : null}
       </FiCard>
 
-      {showCompletionSection && displayCompletionSummary ? (
-        <div className="space-y-4">
-          <h2 className={fiOsLightFormSurfaceClassNames.panelCaption}>Consultation completion</h2>
+      <ConsultationWorkflowStepper phase={workflowPhase} />
+
+      {workflowPhase === "review" && displayCompletionSummary ? (
+        <section className="space-y-4" aria-labelledby="consultation-review-heading">
+          <h2 id="consultation-review-heading" className={fiOsLightFormSurfaceClassNames.panelCaption}>
+            Clinical review
+          </h2>
           <ConsultationCompletionSummaryCard summary={displayCompletionSummary} isPreview={showCompleteConsultationCta} />
+          {showCompleteConsultationCta ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => void onCompleteConsultation()}
+                disabled={busyComplete}
+                className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {busyComplete ? "Completing…" : "Complete consultation"}
+              </button>
+              <p className={`max-w-xl ${fiOsLightFormSurfaceClassNames.helper}`}>
+                Locks this form, persists the rules-based snapshot, and unlocks routing plus optional CRM, pathology, and
+                SurgeryOS hand-offs. Nothing downstream runs automatically.
+              </p>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {workflowPhase === "complete" ? (
+        <div className="space-y-6">
+          <ConsultationPostCompleteRouting
+            tenantId={tid}
+            consultationId={cid}
+            caseId={caseId}
+            leadId={leadId}
+            patientId={patientId}
+          />
           {canShowHandoffs && persistedCompletion ? (
             <ConsultationHandoffPanel
               tenantId={tid}
@@ -343,62 +462,35 @@ export function ConsultationFormRunner({
               handoffInitial={handoffState}
             />
           ) : null}
-          {showCompleteConsultationCta ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => void onCompleteConsultation()}
-                disabled={busyComplete}
-                className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {busyComplete ? "Completing…" : "Complete consultation"}
-              </button>
-              <p className={`max-w-xl ${fiOsLightFormSurfaceClassNames.helper}`}>
-                Finalizes the guided consultation: locks this form, stores the summary on the consultation record, and
-                records a timeline event when a case is linked. Optional CRM, pathology, and SurgeryOS hand-offs appear
-                below after completion; they are never created automatically.
-              </p>
+          <details className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+            <summary className="cursor-pointer select-none text-sm font-semibold text-slate-900">
+              Chart snapshot and guided form record
+            </summary>
+            <div className="mt-4 space-y-6">
+              {persistedCompletion ? <ConsultationCompletionSummaryCard summary={persistedCompletion} /> : null}
+              {areaMapReadOnlyBlock}
+              {formWorkspace}
             </div>
-          ) : null}
+          </details>
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,240px)_1fr]">
-        <aside className="lg:sticky lg:top-4 lg:self-start">
-          <ConsultationFormSectionNav
-            sections={visibleSections.map((s) => ({ id: s.id, title: s.title }))}
-            activeSectionId={activeSectionId}
-            onSelect={setActiveSectionId}
-          />
-        </aside>
-        <FiCard className="space-y-6 p-4 sm:p-6">
-          {activeSection ? (
-            <>
-              <div>
-                <h2 className={fiOsLightFormSurfaceClassNames.sectionTitle}>{activeSection.title}</h2>
-                {activeSection.description?.trim() ? (
-                  <p className={`mt-1 ${fiOsLightFormSurfaceClassNames.bodyMuted}`}>{activeSection.description}</p>
-                ) : null}
-              </div>
-              <div className="space-y-5">
-                {activeSection.fields.map((field) => (
-                  <ConsultationFormFieldRenderer
-                    key={field.id}
-                    field={field}
-                    values={values}
-                    value={values[field.id]}
-                    disabled={!canEdit}
-                    persistence={persistence}
-                    onChange={(next) => onFieldChange(field.id, next)}
-                  />
-                ))}
-              </div>
-            </>
-          ) : (
-            <p className={fiOsLightFormSurfaceClassNames.bodyMuted}>This form has no sections.</p>
-          )}
-        </FiCard>
-      </div>
+      {workflowPhase === "review" ? (
+        <details
+          className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+          open
+        >
+          <summary className="cursor-pointer select-none text-sm font-semibold text-slate-900">
+            Guided form answers (read-only)
+          </summary>
+          <div className="mt-4 space-y-6">
+            {areaMapReadOnlyBlock}
+            {formWorkspace}
+          </div>
+        </details>
+      ) : null}
+
+      {workflowPhase === "editing" ? formWorkspace : null}
     </div>
   );
 }
