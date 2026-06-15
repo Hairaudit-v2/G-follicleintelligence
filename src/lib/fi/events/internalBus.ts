@@ -65,3 +65,24 @@ export async function emitInternalIntelligenceEvent(
     await h(envelope);
   }
 }
+
+/**
+ * Invokes registered handlers inline without consulting `resolveDefaultMode()`.
+ * Used by Stage 12 in-memory queue drain so handler failures can be captured per handler.
+ */
+export async function invokeInternalIntelligenceHandlersInlineCapturingErrors(
+  envelope: IntelligenceEventEnvelope
+): Promise<{ handler_errors: string[] }> {
+  const set = handlers.get(envelope.event_name);
+  if (!set || set.size === 0) return { handler_errors: [] };
+
+  const handler_errors: string[] = [];
+  for (const h of set) {
+    try {
+      await h(envelope);
+    } catch (e) {
+      handler_errors.push(e instanceof Error ? e.message : String(e));
+    }
+  }
+  return { handler_errors };
+}

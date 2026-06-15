@@ -12,6 +12,7 @@ import {
   registerInternalIntelligenceHandler,
   __resetInternalIntelligenceHandlersForTests,
 } from "./internalBus";
+import { __resetInternalIntelligenceEventQueueForTests } from "./internalBusQueue";
 
 describe("internalBusEnv (Stage 11 shadow gate)", () => {
   it("is disabled by default (unset flag)", () => {
@@ -61,12 +62,16 @@ describe("internalBusEnv (Stage 11 shadow gate)", () => {
 describe("shadow hairaudit.audit.completed bus (Stage 11)", () => {
   beforeEach(() => {
     __resetInternalIntelligenceHandlersForTests();
+    __resetInternalIntelligenceEventQueueForTests();
     delete process.env.FI_INTELLIGENCE_INTERNAL_BUS_SHADOW_ENABLED;
+    delete process.env.FI_INTELLIGENCE_INTERNAL_BUS_QUEUE_ENABLED;
   });
 
   afterEach(() => {
     __resetInternalIntelligenceHandlersForTests();
+    __resetInternalIntelligenceEventQueueForTests();
     delete process.env.FI_INTELLIGENCE_INTERNAL_BUS_SHADOW_ENABLED;
+    delete process.env.FI_INTELLIGENCE_INTERNAL_BUS_QUEUE_ENABLED;
   });
 
   const imagesEnvelope = {

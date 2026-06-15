@@ -4,7 +4,7 @@
  */
 
 import type { FiEventRow, FiEventLogRow } from "@/lib/fi/events/idempotency";
-import type { FiEventType, FiSourceSystem } from "@/src/types/fi-events";
+import type { FiSourceSystem } from "@/src/types/fi-events";
 import type { IntelligenceEventLogRecord } from "@follicle/intelligence-core";
 import { mapFiSourceSystemToIntelligenceSource } from "./intelligenceCoreAdapter";
 

@@ -139,7 +139,8 @@ export function fromIntelligenceEventEnvelope(
   const warnings: AdapterWarning[] = [];
   const raw = envelope.payload as Record<string, unknown>;
   const mirrorRaw = raw[ADAPTER_PAYLOAD_MIRROR_KEY];
-  const { [ADAPTER_PAYLOAD_MIRROR_KEY]: _strip, ...rest } = { ...raw };
+  const rest = { ...raw };
+  delete rest[ADAPTER_PAYLOAD_MIRROR_KEY];
 
   const mirror =
     mirrorRaw && typeof mirrorRaw === "object" && !Array.isArray(mirrorRaw)

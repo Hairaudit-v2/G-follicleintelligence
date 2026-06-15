@@ -9,6 +9,8 @@ import type { IntelligenceEventEnvelope } from "@follicle/intelligence-core";
 import { toIntelligenceEventEnvelope } from "./intelligenceCoreAdapter";
 import { emitInternalIntelligenceEvent } from "./internalBus";
 import { isInternalIntelligenceBusShadowEnabled, type InternalBusShadowEnvOptions } from "./internalBusEnv";
+import { enqueueInternalIntelligenceEvent } from "./internalBusQueue";
+import { isInternalIntelligenceInternalBusQueueEnabled } from "./internalBusQueueEnv";
 
 export type FiHairAuditImagesUploadedEnvelope = FiEventEnvelope & { event_type: "hairaudit.images.uploaded" };
 
@@ -29,6 +31,8 @@ export function buildShadowHairAuditAuditCompletedIntelligenceEnvelope(
 
 /**
  * Emits shadow bus event when shadow mode is enabled. Swallows all errors (logs only).
+ * When Stage 12 queue is enabled (`FI_INTELLIGENCE_INTERNAL_BUS_QUEUE_ENABLED === "1"`, non-production),
+ * enqueues a sanitized copy instead of calling `emitInternalIntelligenceEvent` directly.
  * Does not change ingest outcomes or handler behavior.
  */
 export async function maybeEmitShadowHairAuditAuditCompletedFromImagesIngest(
@@ -42,7 +46,11 @@ export async function maybeEmitShadowHairAuditAuditCompletedFromImagesIngest(
     const shadowEnvelope = buildShadowHairAuditAuditCompletedIntelligenceEnvelope(
       envelope as FiHairAuditImagesUploadedEnvelope
     );
-    await emitInternalIntelligenceEvent(shadowEnvelope, { mode: "inline_dev_only" });
+    if (isInternalIntelligenceInternalBusQueueEnabled(shadowEnv)) {
+      await enqueueInternalIntelligenceEvent(shadowEnvelope, shadowEnv);
+    } else {
+      await emitInternalIntelligenceEvent(shadowEnvelope, { mode: "inline_dev_only" });
+    }
   } catch (err) {
     console.error("[FI_INTELLIGENCE_INTERNAL_BUS_SHADOW] emit failed (non-fatal)", err);
   }
