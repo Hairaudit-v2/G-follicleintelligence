@@ -21,7 +21,7 @@ export function ConsultationFormSectionNav({
             type="button"
             onClick={() => onSelect(s.id)}
             className={cn(
-              "rounded-lg px-3 py-2 text-left text-sm font-medium transition",
+              "w-full min-h-[44px] touch-manipulation rounded-lg px-3 py-2.5 text-left text-sm font-medium transition",
               active
                 ? "bg-sky-600 text-white shadow-sm"
                 : "bg-slate-100 text-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
