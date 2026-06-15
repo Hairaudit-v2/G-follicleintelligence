@@ -6,6 +6,7 @@ import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes"
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import type { PatientTwinConsultationChecklistRow } from "@/src/lib/patientTwin/patientTwinTypes";
+import type { ConsultationPathwayLauncherViewModel } from "@/src/lib/consultations/consultationPathwayLauncherModel";
 
 export function ConsultationOsEditPage({
   tenantId,
@@ -18,6 +19,7 @@ export function ConsultationOsEditPage({
   initialPaymentRecords = [],
   canMutatePaymentRecords = false,
   initialConsultationChecklistPreview = null,
+  pathwayLauncher,
 }: {
   tenantId: string;
   consultationId: string;
@@ -29,6 +31,7 @@ export function ConsultationOsEditPage({
   initialPaymentRecords?: PaymentRecordRow[];
   canMutatePaymentRecords?: boolean;
   initialConsultationChecklistPreview?: PatientTwinConsultationChecklistRow | null;
+  pathwayLauncher: ConsultationPathwayLauncherViewModel;
 }) {
   return (
     <ConsultationOsWorkspace
@@ -44,6 +47,7 @@ export function ConsultationOsEditPage({
       initialPaymentRecords={initialPaymentRecords}
       canMutatePaymentRecords={canMutatePaymentRecords}
       initialConsultationChecklistPreview={initialConsultationChecklistPreview}
+      pathwayLauncher={pathwayLauncher}
     />
   );
 }

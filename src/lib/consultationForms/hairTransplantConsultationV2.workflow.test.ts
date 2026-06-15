@@ -8,10 +8,17 @@ import {
   validateBodyAreaMapShapesInValues,
   validateConsultationFormRequiredFields,
 } from "./consultationFormValidation";
+import type { ConsultationFormSchema } from "./consultationFormTypes";
 import {
   HAIR_TRANSPLANT_V2_SURGICAL_PRIMARY_OBJECTIVES,
+  hairTransplantConsultationSchema,
   hairTransplantConsultationSchemaV2,
+  hairTransplantConsultationSchemaV2_1,
 } from "./templates/hairTransplantConsultationTemplate";
+
+function collectFieldIds(schema: ConsultationFormSchema): string[] {
+  return schema.sections.flatMap((s) => s.fields.map((f) => f.id));
+}
 
 const v2 = hairTransplantConsultationSchemaV2;
 
@@ -214,6 +221,23 @@ describe("Hair Transplant Consultation v2 — completion summary", () => {
       )
     );
     assert.match(s.diagnosisImpression, /Norwood IV/i);
+  });
+});
+
+describe("Hair Transplant Consultation v2.1 template (latest seeded schema)", () => {
+  it("latest alias schema has no clinician_voice_note field", () => {
+    assert.equal(collectFieldIds(hairTransplantConsultationSchema).includes("clinician_voice_note"), false);
+  });
+
+  it("v2.1 explicit schema omits dictation; v2 snapshot still includes it for historical rows", () => {
+    assert.equal(collectFieldIds(hairTransplantConsultationSchemaV2_1).includes("clinician_voice_note"), false);
+    assert.equal(collectFieldIds(hairTransplantConsultationSchemaV2).includes("clinician_voice_note"), true);
+  });
+
+  it("v2.1 matches v2 field count minus one in handoff section only", () => {
+    const n2 = hairTransplantConsultationSchemaV2.sections.reduce((n, s) => n + s.fields.length, 0);
+    const n21 = hairTransplantConsultationSchemaV2_1.sections.reduce((n, s) => n + s.fields.length, 0);
+    assert.equal(n21, n2 - 1);
   });
 });
 

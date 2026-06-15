@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { completeConsultationDraftAction, createConsultationDraftAction, updateConsultationDraftAction } from "@/lib/actions/fi-consultation-actions";
+import { ConsultationPathwayLauncher } from "@/src/components/fi-admin/consultations/ConsultationPathwayLauncher";
 import { ConsultationOsAssessmentPanel } from "@/src/components/fi-admin/consultations/ConsultationOsAssessmentPanel";
 import { ConsultationLeadLinkField } from "@/src/components/fi-admin/consultations/ConsultationLeadLinkField";
 import { ConsultationPatientLinkField } from "@/src/components/fi-admin/consultations/ConsultationPatientLinkField";
@@ -37,6 +38,7 @@ import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRe
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
 import type { ConsultationLinkSearchLeadHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
 import type { ConsultationLinkSearchPatientHit } from "@/src/lib/consultations/consultationLinkSearchLoader.server";
+import type { ConsultationPathwayLauncherViewModel } from "@/src/lib/consultations/consultationPathwayLauncherModel";
 import type { ConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import {
   CONSULTATION_TYPE_DEFINITIONS,
@@ -128,6 +130,8 @@ export type ConsultationOsWorkspaceProps = {
   canMutatePaymentRecords?: boolean;
   /** Latest HIE Stage 10 checklist for the linked patient (server-loaded on edit). */
   initialConsultationChecklistPreview?: PatientTwinConsultationChecklistRow | null;
+  /** ConsultationOS v2 pathway cards + recommendation (edit mode only). */
+  pathwayLauncher?: ConsultationPathwayLauncherViewModel | null;
 };
 
 function renderMainSection(
@@ -177,6 +181,7 @@ export function ConsultationOsWorkspace({
   initialPaymentRecords = [],
   canMutatePaymentRecords = false,
   initialConsultationChecklistPreview = null,
+  pathwayLauncher = null,
 }: ConsultationOsWorkspaceProps) {
   const router = useRouter();
   const base = `/fi-admin/${tenantId.trim()}`;
@@ -503,22 +508,6 @@ export function ConsultationOsWorkspace({
           }
           secondaryAction={
             <div className="flex flex-wrap gap-2">
-              {mode === "edit" && consultationId?.trim() ? (
-                <>
-                  <Link
-                    href={`${base}/consultations/${consultationId.trim()}/forms`}
-                    className="inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-950 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 dark:border-emerald-500/35 dark:bg-emerald-950/50 dark:text-emerald-50 dark:hover:bg-emerald-900/60"
-                  >
-                    Hair transplant guided form
-                  </Link>
-                  <Link
-                    href={`${base}/consultations/${consultationId.trim()}/forms/hair-loss-treatment`}
-                    className="inline-flex items-center justify-center rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-950 shadow-sm transition hover:border-violet-300 hover:bg-violet-100 focus-visible:outline focus-visible:ring-2 focus-visible:ring-violet-500/40 focus-visible:ring-offset-2 dark:border-violet-500/35 dark:bg-violet-950/50 dark:text-violet-50 dark:hover:bg-violet-900/60"
-                  >
-                    Hair loss / HLI guided form
-                  </Link>
-                </>
-              ) : null}
               {appointmentHref ? (
                 <Link
                   href={appointmentHref}
@@ -560,6 +549,10 @@ export function ConsultationOsWorkspace({
         autosave on this page when status is draft or in progress; there is no AI summary, voice dictation, quote
         automation, or case conversion in this stage.
       </div>
+
+      {mode === "edit" && consultationId?.trim() && pathwayLauncher ? (
+        <ConsultationPathwayLauncher model={pathwayLauncher} />
+      ) : null}
 
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">

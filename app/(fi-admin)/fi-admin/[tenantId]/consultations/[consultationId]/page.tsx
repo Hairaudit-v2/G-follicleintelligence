@@ -10,6 +10,8 @@ import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRe
 import { loadPaymentRecordsForConsultationId } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { loadLatestConsultationChecklistForPatientWorkspace } from "@/src/lib/patientTwin/patientTwinConsultationChecklist.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
+import { loadConsultationFormInstances } from "@/src/lib/consultationForms/consultationFormLoad.server";
+import { buildConsultationPathwayLauncherViewModel } from "@/src/lib/consultations/consultationPathwayLauncherModel";
 
 export const metadata = {
   title: "Consultation",
@@ -33,7 +35,7 @@ export default async function ConsultationOsEditRoutePage({
 
   const tid = tenantId.trim();
   const cid = consultationId.trim();
-  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap] =
+  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap, formInstances] =
     await Promise.all([
       getCrmShellNavAllowed(tid),
       loadConsultationWorkspaceDisplay(tid, row),
@@ -41,7 +43,14 @@ export default async function ConsultationOsEditRoutePage({
       loadTenantOperationalCalendarSettings(tid),
       loadPaymentRecordsForConsultationId(tid, cid),
       getPaymentRecordMutationCapability(tid),
+      loadConsultationFormInstances(tid, cid),
     ]);
+  const pathwayLauncher = buildConsultationPathwayLauncherViewModel({
+    tenantId: tid,
+    consultationId: cid,
+    row,
+    instances: formInstances,
+  });
   const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
 
   const patientIdForChecklist = row.patient_id?.trim() ?? null;
@@ -62,6 +71,7 @@ export default async function ConsultationOsEditRoutePage({
       initialPaymentRecords={initialPaymentRecords}
       canMutatePaymentRecords={payCap.canMutate}
       initialConsultationChecklistPreview={initialConsultationChecklistPreview}
+      pathwayLauncher={pathwayLauncher}
     />
   );
 }

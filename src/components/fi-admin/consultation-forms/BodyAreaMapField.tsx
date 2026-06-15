@@ -16,7 +16,6 @@ import {
   type BodyAreaMapValue,
   type BodyAreaMapViewId,
   aggregateBodyAreaMapByRegionLabel,
-  labelDisplayForBodyAreaMap,
   normalizeBodyAreaMapValue,
   viewDisplayForBodyAreaMap,
 } from "@/src/lib/consultationForms/bodyAreaMapModel";

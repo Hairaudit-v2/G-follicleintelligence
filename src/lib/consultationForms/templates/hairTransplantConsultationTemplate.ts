@@ -51,7 +51,7 @@ export const HAIR_TRANSPLANT_V2_SURGICAL_PRIMARY_OBJECTIVES = ["ht_primary", "ht
 
 /**
  * Immutable published JSON schema for Hair Transplant Consultation **version 1** (16 sections).
- * Do not change this object — new edits belong in {@link hairTransplantConsultationSchemaV2}.
+ * Do not change this object — new pathway edits belong in {@link hairTransplantConsultationSchemaV2_1}.
  */
 export const hairTransplantConsultationSchemaV1: ConsultationFormSchema = {
   schemaRevision: 2,
@@ -762,5 +762,21 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
   ],
 };
 
-/** Alias: current Hair Transplant Consultation schema used for new published template versions. */
-export const hairTransplantConsultationSchema = hairTransplantConsultationSchemaV2;
+/**
+ * ConsultationOS v2.1 — same adaptive pathway as {@link hairTransplantConsultationSchemaV2}, but removes
+ * `clinician_voice_note` from the handoff section (canonical chart note uses structured + suggested draft only).
+ * Published as **DB template version 3**; v1/v2 rows in `fi_consultation_form_template_versions` stay immutable.
+ */
+export const hairTransplantConsultationSchemaV2_1: ConsultationFormSchema = {
+  ...hairTransplantConsultationSchemaV2,
+  /** Monotonic revision — v2.1 (pairs with DB template `version` 3). */
+  schemaRevision: 4,
+  sections: hairTransplantConsultationSchemaV2.sections.map((sec) =>
+    sec.id === "clinical_summary_handoff"
+      ? { ...sec, fields: sec.fields.filter((f) => f.id !== "clinician_voice_note") }
+      : sec
+  ),
+};
+
+/** Alias: latest Hair Transplant Consultation schema used for **new** publishes and app-side defaults. */
+export const hairTransplantConsultationSchema = hairTransplantConsultationSchemaV2_1;

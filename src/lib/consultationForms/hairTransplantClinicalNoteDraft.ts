@@ -1,5 +1,5 @@
 /**
- * Deterministic “AI-style” clinical note draft for Hair Transplant Consultation v2.
+ * Deterministic “AI-style” clinical note draft for Hair Transplant Consultation v2 / v2.1.
  * Assembles readable prose from structured fields only (no backend LLM).
  * Intentionally does not read `structured_clinical_note` or dictation fields to avoid feedback loops.
  */
