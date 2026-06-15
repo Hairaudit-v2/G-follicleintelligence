@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { logStructured } from "@/src/lib/server/structuredLog";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { isStripeWebhookDuplicateInsert } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { createStripePaymentProvider } from "@/src/lib/payments/providers/stripe/stripePaymentProvider.server";
@@ -147,7 +148,16 @@ export async function POST(req: NextRequest) {
       .eq("id", webhookRowId);
     if (errTenantFilter) errQ = errQ.eq("tenant_id", errTenantFilter);
     await errQ;
-    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
+    logStructured("error", "stripe_webhook_processing_failed", {
+      webhook_row_id: webhookRowId,
+      stripe_event_id: ev.id ?? null,
+      stripe_event_type: ev.type ?? null,
+      mapped_kind: mapped.kind,
+      error_message: msg,
+    });
+    // 200: failure is persisted on fi_payment_webhook_events — avoid Stripe retry storms
+    // that could duplicate side effects when handlers are not fully idempotent.
+    return NextResponse.json({ ok: false, error: msg }, { status: 200 });
   }
 
   return NextResponse.json({ ok: true });

@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
+import { logStructured } from "@/src/lib/server/structuredLog";
 import { runFiPaymentRemindersCronOnce, runFiPaymentRemindersCronOnceForTenant } from "@/src/lib/revenueOs/fiPaymentRemindersCron.server";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,13 @@ async function handle(req: NextRequest) {
       ? await runFiPaymentRemindersCronOnceForTenant(tenantId, { runDateYmd, dryRun, limit })
       : await runFiPaymentRemindersCronOnce({ runDateYmd, dryRun, limit });
     return NextResponse.json({ ok: true, ...result });
-  } catch {
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "unknown_error";
+    logStructured("error", "fi_payment_reminders_cron_failed", {
+      message,
+      dry_run: dryRun,
+      tenant_id: tenantId,
+    });
     return NextResponse.json({ ok: false, error: "Processor unavailable." }, { status: 500 });
   }
 }

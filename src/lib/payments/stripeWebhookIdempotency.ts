@@ -10,3 +10,16 @@ export function isStripeWebhookDuplicateInsert(error: { code?: string; message?:
 }
 
 export const isPostgresUniqueViolation = isStripeWebhookDuplicateInsert;
+
+/**
+ * `fi_payments` partial unique index on (tenant_id, provider_payment_intent_id) for Stripe.
+ * Use when interpreting insert errors from `recordGatewayPaymentSuccess`.
+ */
+export function isFiStripeGatewayPaymentIntentDuplicateInsert(
+  error: { code?: string; message?: string } | null | undefined,
+  args: { provider: string; paymentIntentId?: string | null | undefined },
+): boolean {
+  if (!args.paymentIntentId?.trim()) return false;
+  if (args.provider.trim().toLowerCase() !== "stripe") return false;
+  return isStripeWebhookDuplicateInsert(error);
+}

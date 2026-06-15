@@ -8,7 +8,7 @@
 
 ## Executive summary
 
-The Follicle Intelligence **FI Admin** surface today is a single Next.js app segment under `/fi-admin`, with **tenant-scoped** routes under `/fi-admin/[tenantId]/*`. Access is layered: **shell** (`assertFiAdminShellAccess`), **tenant portal** (`assertFiTenantPortalAccess`), optional **CRM shell** (`assertCrmShellPageAccess` / `getCrmShellNavAllowed`), and **mutations** gated by **`FI_ADMIN_API_KEY`** and/or **`assertCrmTenantWriteAllowed`** (admin key or specific `fi_users.role` values). Foundation tables use **conservative RLS** (tenant-member `SELECT` only for most foundation entities); **`fi_cases` intentionally has no RLS** in migrations. Writes for foundation org/clinic creation and settings upserts use **service role** on the server behind explicit gates.
+The Follicle Intelligence **FI Admin** surface today is a single Next.js app segment under `/fi-admin`, with **tenant-scoped** routes under `/fi-admin/[tenantId]/*`. Access is layered: **shell** (`assertFiAdminShellAccess`), **tenant portal** (`assertFiTenantPortalAccess`), optional **CRM shell** (`assertCrmShellPageAccess` / `getCrmShellNavAllowed`), and **mutations** gated by **`FI_ADMIN_API_KEY`** and/or **`assertCrmTenantWriteAllowed`** (admin key or specific `fi_users.role` values). Foundation tables use **conservative RLS** (tenant-member `SELECT` only for most foundation entities), including **`fi_cases`** (tenant-member `SELECT` for `authenticated`; case writes use **service role** on the server behind explicit gates). The same service-role pattern applies to foundation org/clinic creation and settings upserts.
 
 **Stable foundation (do not regress):** tenant/org/clinic creation and configuration flows, directory search, cases index filters and loaders, foundation integrity read model, `FI_ADMIN_API_KEY` behaviour, CRM gate policy constants, and existing RLS posture.
 
@@ -118,7 +118,7 @@ Legend: **tenant_id** = row scoped to `fi_tenants.id` where applicable. **RLS** 
 
 | Table | Columns (core) | tenant_id | RLS | UI creation |
 | --- | --- | --- | --- | --- |
-| `fi_cases` | `patient_id` (legacy), `status` (**includes `consultation`**), `metadata`, **`clinic_id`**, **`organisation_id`**, **`foundation_patient_id`**, **`treatment_type`**, **`planning_notes`**, `latest_report_id`, `partner_id`, … | Yes | **No RLS** (by design in migration comment) | Ingest, APIs, first-case wizard, CRM flows |
+| `fi_cases` | `patient_id` (legacy), `status` (**includes `consultation`**), `metadata`, **`clinic_id`**, **`organisation_id`**, **`foundation_patient_id`**, **`treatment_type`**, **`planning_notes`**, `latest_report_id`, `partner_id`, … | Yes | **RLS:** tenant-member `SELECT` for `authenticated`; DML via **service_role** routes / ingestion | Ingest, APIs, first-case wizard, CRM flows |
 | `fi_intakes` | PII intake per case | Yes | Legacy | Intake flows |
 
 ### 2.6 CRM
@@ -351,7 +351,7 @@ Map **existing** mechanics to **future** roles:
 
 **Do not change without explicit design + QA:**
 
-- Existing **RLS policies** and the explicit **“no RLS on `fi_cases`”** decision.
+- Existing **RLS policies**, including **`fi_cases`** tenant-member `SELECT`.
 - **Foundation creation** semantics (org/clinic insert rules, slug validation).
 - **`FI_ADMIN_API_KEY`** gates on configuration, directory writes, backfill (first-case wizard uses role-based write + optional admin key; not admin-key-only).
 - **Configuration** action field validation and service-role write paths.

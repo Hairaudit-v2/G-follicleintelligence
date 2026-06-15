@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
 import { readFiPaymentsEnabled, readFiPaymentProviderId } from "@/src/lib/payments/fiPaymentEnv.server";
+import { isFiStripeGatewayPaymentIntentDuplicateInsert } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { resolvePaymentProvider } from "@/src/lib/payments/providers/registry.server";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import { computeNextInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceMath";
@@ -700,6 +701,24 @@ export async function recordGatewayPaymentSuccess(args: {
   if (!inv) throw new Error("Invoice not found.");
   const payAmt = Math.max(0, Math.floor(args.amountCents));
   const supabase = supabaseAdmin();
+  const providerNorm = args.provider.trim().toLowerCase();
+  const intentId = args.paymentIntentId?.trim() || null;
+
+  if (providerNorm === "stripe" && intentId) {
+    const { data: existingRows, error: existingErr } = await supabase
+      .from("fi_payments")
+      .select("id")
+      .eq("tenant_id", tid)
+      .eq("provider", "stripe")
+      .eq("provider_payment_intent_id", intentId)
+      .limit(1);
+    if (existingErr) throw new Error(existingErr.message);
+    if (existingRows && existingRows.length > 0) {
+      const current = await loadInvoiceForTenant(tid, iid);
+      if (!current) throw new Error("Invoice not found.");
+      return current;
+    }
+  }
 
   const { error: pe } = await supabase.from("fi_payments").insert({
     tenant_id: tid,
@@ -715,12 +734,24 @@ export async function recordGatewayPaymentSuccess(args: {
     tax_cents: 0,
     total_cents: payAmt,
     currency: args.currency.trim().toUpperCase(),
-    provider: args.provider,
+    provider: providerNorm === "stripe" ? "stripe" : args.provider.trim(),
     provider_ref: args.providerRef,
-    provider_payment_intent_id: args.paymentIntentId?.trim() || null,
+    provider_payment_intent_id: intentId,
     metadata: {},
   });
-  if (pe) throw new Error(pe.message);
+  if (pe) {
+    if (
+      isFiStripeGatewayPaymentIntentDuplicateInsert(pe, {
+        provider: args.provider,
+        paymentIntentId: args.paymentIntentId,
+      })
+    ) {
+      const current = await loadInvoiceForTenant(tid, iid);
+      if (!current) throw new Error("Invoice not found.");
+      return current;
+    }
+    throw new Error(pe.message);
+  }
 
   const nextPaid = inv.amount_paid_cents + payAmt;
   const updated = await patchInvoiceAfterPayment(tid, iid, nextPaid, args.todayYmd ?? null);

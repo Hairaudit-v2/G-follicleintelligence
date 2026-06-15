@@ -1,7 +1,7 @@
 # FI OS — Environment variables production audit
 
 **Scope:** Full-repo scan of `process.env.*` in `*.{ts,tsx,js,jsx,mjs,cjs}` (2026-06-12).  
-**Related:** [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md), [`.env.example`](../../.env.example).  
+**Related:** [`docs/FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md`](../FI_OS_ENVIRONMENT_AND_PLATFORM_SETUP.md), [`.env.example`](../../.env.example), [`fi-os-machine-ingest-hmac-runbook.md`](fi-os-machine-ingest-hmac-runbook.md).  
 **Validation:** Central checks live in **`src/lib/env/fiEnv.server.ts`** (`validateFiServerEnv`, `assertFiServerEnv`, Zod-backed URL rules). Run **`pnpm run check:env`** before production deploys (CI-friendly; does not auto-run `next dev`).
 
 ## Legend
@@ -38,6 +38,14 @@
 | `FI_IMPORT_ADMIN_KEY` | optional (script) | `scripts/import-approved-fi-services.ts` | Service import script | Script only | CI secret if used | Same as or distinct from `FI_ADMIN_API_KEY` | `fi_import_...` | **No** | Compared to `FI_ADMIN_API_KEY` in script |
 
 \*Several flows work without it if the user is authenticated with appropriate roles; many **tenant API routes** accept `x-fi-admin-key` / query `adminKey` / body when this is set.
+
+---
+
+## Machine ingest (signed HMAC)
+
+| Env var | Req | Primary file(s) | Module | Local | Vercel prod | Source | Safe example | .env.ex | Validation |
+|---------|-----|-------------------|--------|-------|-------------|--------|--------------|---------|--------------|
+| `FI_MACHINE_INGEST_MASTER_KEY` | **required** for signed ingest routes | `src/lib/fi/machineIngest/machineIngestHmacVerify.server.ts`, `machineIngestSecretCrypto.server.ts` | AES-256-GCM encryption of per-tenant HMAC secrets in DB; verify path | Yes if testing `/api/ingest/**` | **Yes** when machine ingest is used | CSPRNG / password manager — long random string | `(32+ chars in prod; see runbook)` | **No** | **Production** (`NODE_ENV` or `VERCEL_ENV` = `production`): trimmed length **≥ 32** or **503** / `master_key_weak`; unset → **503** / `missing_master_key`. See [`fi-os-machine-ingest-hmac-runbook.md`](fi-os-machine-ingest-hmac-runbook.md). |
 
 ---
 
@@ -160,6 +168,7 @@ The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (
 - `FI_DEVELOPMENT_ADMIN_AUTH_USER_IDS`, `FI_ALLOW_CALENDAR_UAT_SEED`
 - `FI_HUBSPOT_IMPORT_TENANT_ID`, `FI_IMPORT_ADMIN_KEY`, `FI_EVOLVED_*` provisioning trio
 - `FI_LEGACY_FI_API_*`, `FI_ALLOW_INSECURE_API`, `FI_ALLOW_ADMIN_KEY_QUERY`
+- `FI_ENABLE_PUBLIC_COPY_CHECK` — when `true`/`1`/`yes`, allows unauthenticated `POST /api/fi/copy-check` in **production** (default off; avoid unless behind edge controls)
 
 ---
 
@@ -176,6 +185,7 @@ The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (
 
 - **Service role** is widely required; a typo in `NEXT_PUBLIC_SUPABASE_URL` vs service URL alignment may not fail until first DB call.
 - **`FI_ADMIN_API_KEY`** in header / body enables powerful bypass — must never leak to browser bundles (today it is server-only; keep that invariant).
+- **`FI_MACHINE_INGEST_MASTER_KEY`** protects all per-tenant HMAC secrets at rest; loss or accidental commit compromises every integrator key encrypted under it — store only in Vercel/env manager, rotate with a full re-encrypt plan (see machine ingest runbook).
 
 ---
 
@@ -207,4 +217,5 @@ The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (
 | Staff feed / HR sync | HR table |
 | Central env validation | `validateFiServerEnv` / `pnpm run check:env` ([`src/lib/env/fiEnv.server.ts`](../../src/lib/env/fiEnv.server.ts)) |
 | Smoke (cron / webhook hygiene) | `pnpm run smoke:prod` — [`scripts/fi-production-smoke-test.ts`](../../scripts/fi-production-smoke-test.ts) |
+| Machine ingest master key | `FI_MACHINE_INGEST_MASTER_KEY` — [`fi-os-machine-ingest-hmac-runbook.md`](fi-os-machine-ingest-hmac-runbook.md) |
 | Pathology / reminder email | OpenAI + Resend + reminder toggles |

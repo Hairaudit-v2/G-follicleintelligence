@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import type { ScheduledIiohrHrStaffSyncCoreResult } from "@/src/lib/hr/runScheduledIiohrHrStaffSyncCore";
 import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
+import { logStructured } from "@/src/lib/server/structuredLog";
 import { CRON_OR_WEBHOOK_SECRET_MIN_LENGTH } from "@/src/lib/security/timingSafeSecret";
 
 export const MIN_CRON_SECRET_LENGTH = CRON_OR_WEBHOOK_SECRET_MIN_LENGTH;
@@ -74,6 +75,10 @@ export async function handleIiohrHrPerthStaffSyncCronPost(
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Request failed.";
     const isTimeout = msg.includes("timed out");
+    logStructured("error", "iiohr_hr_perth_staff_sync_cron_failed", {
+      message: msg,
+      timeout: isTimeout,
+    });
     const failureResult: ScheduledIiohrHrStaffSyncCoreResult = {
       ok: false,
       rowsSent: 0,

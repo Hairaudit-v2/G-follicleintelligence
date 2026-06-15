@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
+import { logStructured } from "@/src/lib/server/structuredLog";
 import { upsertPhotoProtocolAlertEventsForTenant } from "@/src/lib/hair-intelligence/photoProtocols/protocolAlertEvents.server";
 
 export const dynamic = "force-dynamic";
@@ -65,7 +66,12 @@ async function handle(req: NextRequest) {
       tenants: ids.length,
       results: perTenant,
     });
-  } catch {
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "unknown_error";
+    logStructured("error", "fi_photo_protocol_alerts_cron_failed", {
+      message,
+      tenant_id: singleTenant,
+    });
     return NextResponse.json({ ok: false, error: "Processor unavailable." }, { status: 500 });
   }
 }

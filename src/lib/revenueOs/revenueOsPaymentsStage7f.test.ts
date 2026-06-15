@@ -11,7 +11,10 @@ import {
 import { derivePublicPaymentPageState, isPaymentPublicTokenFormat } from "@/src/lib/revenueOs/publicPaymentRequestModel";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { isStripeWebhookDuplicateInsert } from "@/src/lib/payments/stripeWebhookIdempotency";
+import {
+  isFiStripeGatewayPaymentIntentDuplicateInsert,
+  isStripeWebhookDuplicateInsert,
+} from "@/src/lib/payments/stripeWebhookIdempotency";
 
 test("parseMoneyStringToCentsAud: AUD-ish strings", () => {
   assert.equal(parseMoneyStringToCentsAud("$1,250.50 AUD"), 125050);
@@ -107,4 +110,23 @@ test("isStripeWebhookDuplicateInsert", () => {
   assert.equal(isStripeWebhookDuplicateInsert({ code: "23505" }), true);
   assert.equal(isStripeWebhookDuplicateInsert({ message: "duplicate key value violates unique constraint" }), true);
   assert.equal(isStripeWebhookDuplicateInsert({ code: "22P02" }), false);
+});
+
+test("isFiStripeGatewayPaymentIntentDuplicateInsert", () => {
+  assert.equal(
+    isFiStripeGatewayPaymentIntentDuplicateInsert({ code: "23505" }, { provider: "stripe", paymentIntentId: "pi_1" }),
+    true,
+  );
+  assert.equal(
+    isFiStripeGatewayPaymentIntentDuplicateInsert({ message: "duplicate key" }, { provider: "Stripe", paymentIntentId: "pi_1" }),
+    true,
+  );
+  assert.equal(
+    isFiStripeGatewayPaymentIntentDuplicateInsert({ code: "23505" }, { provider: "stripe", paymentIntentId: "  " }),
+    false,
+  );
+  assert.equal(
+    isFiStripeGatewayPaymentIntentDuplicateInsert({ code: "23505" }, { provider: "manual", paymentIntentId: "pi_1" }),
+    false,
+  );
 });

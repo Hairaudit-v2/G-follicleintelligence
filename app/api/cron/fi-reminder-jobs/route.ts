@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processReminderJobsOnce } from "@/src/lib/reminders/reminderProcessor.server";
 import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
+import { logStructured } from "@/src/lib/server/structuredLog";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,9 @@ async function handle(req: NextRequest) {
   try {
     const result = await processReminderJobsOnce({ limit: 25 });
     return NextResponse.json({ ok: true, ...result });
-  } catch {
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "unknown_error";
+    logStructured("error", "fi_reminder_jobs_cron_failed", { message });
     return NextResponse.json({ ok: false, error: "Processor unavailable." }, { status: 500 });
   }
 }

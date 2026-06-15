@@ -277,7 +277,11 @@ create trigger trg_fi_payment_requests_set_updated_at
   for each row
   execute procedure public.fi_os_stage35_set_updated_at();
 
--- FK from fi_payments → fi_payment_requests (created after both tables exist)
+-- FK from fi_payments → fi_payment_requests (created after both tables exist).
+-- Idempotent: DBs that already applied this FK out-of-band (or partial push) must not fail here.
+alter table public.fi_payments
+  drop constraint if exists fi_payments_payment_request_fk;
+
 alter table public.fi_payments
   add constraint fi_payments_payment_request_fk
   foreign key (payment_request_id) references public.fi_payment_requests (id) on delete set null;
@@ -305,6 +309,39 @@ create table if not exists public.fi_deposit_rules (
   constraint fi_deposit_rules_fixed_nonneg check (fixed_amount_cents is null or fixed_amount_cents >= 0),
   constraint fi_deposit_rules_metadata_object check (jsonb_typeof (metadata) = 'object')
 );
+
+-- Older DBs may already have `fi_deposit_rules` from a partial apply; `CREATE TABLE IF NOT EXISTS` skips
+-- every column. Bring the table up to this migration's shape before indexes / checks.
+alter table public.fi_deposit_rules add column if not exists clinic_id uuid references public.fi_clinics (id) on delete set null;
+alter table public.fi_deposit_rules add column if not exists name text not null default '';
+alter table public.fi_deposit_rules add column if not exists priority integer not null default 0;
+alter table public.fi_deposit_rules add column if not exists rule_kind text not null default 'manual_only';
+alter table public.fi_deposit_rules add column if not exists percent_bp integer;
+alter table public.fi_deposit_rules add column if not exists fixed_amount_cents bigint;
+alter table public.fi_deposit_rules add column if not exists blocks_surgery_readiness_when_unpaid boolean not null default false;
+alter table public.fi_deposit_rules add column if not exists is_active boolean not null default true;
+alter table public.fi_deposit_rules add column if not exists metadata jsonb not null default '{}'::jsonb;
+alter table public.fi_deposit_rules add column if not exists created_at timestamptz not null default now();
+alter table public.fi_deposit_rules add column if not exists updated_at timestamptz not null default now();
+
+alter table public.fi_deposit_rules drop constraint if exists fi_deposit_rules_percent_bp;
+alter table public.fi_deposit_rules
+  add constraint fi_deposit_rules_percent_bp check (percent_bp is null or (percent_bp >= 0 and percent_bp <= 10000));
+
+alter table public.fi_deposit_rules drop constraint if exists fi_deposit_rules_fixed_nonneg;
+alter table public.fi_deposit_rules
+  add constraint fi_deposit_rules_fixed_nonneg check (fixed_amount_cents is null or fixed_amount_cents >= 0);
+
+alter table public.fi_deposit_rules drop constraint if exists fi_deposit_rules_metadata_object;
+alter table public.fi_deposit_rules
+  add constraint fi_deposit_rules_metadata_object check (jsonb_typeof (metadata) = 'object');
+
+alter table public.fi_deposit_rules drop constraint if exists fi_deposit_rules_rule_kind_check;
+alter table public.fi_deposit_rules drop constraint if exists fi_deposit_rules_rule_kind_chk;
+alter table public.fi_deposit_rules
+  add constraint fi_deposit_rules_rule_kind_chk check (
+    rule_kind in ('percent_of_procedure_fee', 'fixed_cents', 'manual_only')
+  );
 
 comment on table public.fi_deposit_rules is
   'FI OS Stage 7: configurable deposit hints (percent/fixed/manual). Staff may override; never auto-charges.';
