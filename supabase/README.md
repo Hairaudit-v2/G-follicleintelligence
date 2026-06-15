@@ -60,6 +60,8 @@ npx supabase db push
 
 Use hosted project credentials from the Supabase dashboard; never commit secrets.
 
+**Follicle Intelligence hosted project:** see [docs/runbooks/supabase-follicle-intelligence-migration-push.md](../docs/runbooks/supabase-follicle-intelligence-migration-push.md) for an exact remote-vs-local migration map, `db push --dry-run` steps, and notes on the `fi_imaging_os` version skew / `migration repair`.
+
 ## Troubleshooting
 
 ### `relation "fi_patients" does not exist` (SQLSTATE 42P01)
