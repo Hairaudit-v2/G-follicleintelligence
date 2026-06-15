@@ -34,4 +34,21 @@ describe("evaluateConsultationFormCondition", () => {
     assert.equal(evaluateConsultationFormCondition({ fieldId: "x", operator: "isEmpty" }, { x: "" }), true);
     assert.equal(evaluateConsultationFormCondition({ fieldId: "x", operator: "isNotEmpty" }, { x: "z" }), true);
   });
+
+  it("supports in for single-value membership", () => {
+    assert.equal(
+      evaluateConsultationFormCondition(
+        { fieldId: "primary_objective", operator: "in", value: ["ht_primary", "repair_revision"] },
+        { primary_objective: "ht_primary" }
+      ),
+      true
+    );
+    assert.equal(
+      evaluateConsultationFormCondition(
+        { fieldId: "primary_objective", operator: "in", value: ["ht_primary", "repair_revision"] },
+        { primary_objective: "medical_non_surgical" }
+      ),
+      false
+    );
+  });
 });

@@ -1,7 +1,15 @@
 import { CONSULTATION_FORM_OPTION_SETS } from "../consultationFormOptionSets";
 import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "../consultationFormConstants";
+import {
+  canonicalHairTransplantDiagnosisBody,
+  canonicalHairTransplantDurationKey,
+  canonicalHairTransplantGraftBounds,
+  canonicalHairTransplantNorwoodKey,
+  canonicalHairTransplantRecommendedPlanText,
+  canonicalHairTransplantRiskFlagValues,
+  canonicalHairTransplantTreatmentValues,
+} from "../normalize/hairTransplantConsultationNormalize";
 import type {
-  ConsultationCompletionAreaMapHighlight,
   ConsultationCompletionInput,
   ConsultationCompletionSummary,
   ConsultationOutcomeType,
@@ -15,12 +23,8 @@ import {
   buildClinicianNotesPreview,
   extractBodyAreaMapHighlights,
   labelForOptionValue,
-  mergeUniqueStrings,
-  parseGraftRangeText,
   readBoolean,
-  readNumber,
   readString,
-  readStringArray,
 } from "./consultationCompletionExtractors";
 
 function parseOutcome(raw: unknown): ConsultationOutcomeType {
@@ -63,9 +67,26 @@ function emptySummaryBase(input: ConsultationCompletionInput): Omit<Consultation
   };
 }
 
+function buildDiagnosisImpressionText(values: Record<string, unknown>): string {
+  const nwKey = canonicalHairTransplantNorwoodKey(values);
+  const nwLine = nwKey
+    ? `Pattern: ${labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.norwood_scale, nwKey)}.`
+    : "";
+
+  const durKey = canonicalHairTransplantDurationKey(values);
+  const durLine = durKey
+    ? `Duration: ${labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.consultation_duration_band, durKey) || durKey}.`
+    : "";
+
+  const body = canonicalHairTransplantDiagnosisBody(values);
+
+  const parts = [nwLine, durLine, body].map((s) => s.trim()).filter(Boolean);
+  return parts.join("\n\n").trim();
+}
+
 /**
  * Rules-based completion summary for the Hair Transplant Consultation template (`hair-transplant-consultation`).
- * Tolerant of missing fields; deterministic only.
+ * Dual-reads legacy 16-section instances and ConsultationOS v2 adaptive pathway values.
  */
 export function buildHairTransplantCompletionSummary(input: ConsultationCompletionInput): ConsultationCompletionSummary {
   const v = input.values ?? {};
@@ -75,52 +96,37 @@ export function buildHairTransplantCompletionSummary(input: ConsultationCompleti
     return { ...base, clinicianNotesPreview: buildClinicianNotesPreview(v) };
   }
 
-  const explicitOutcome = parseOutcome(v.consultation_outcome_type);
-  const outcomeType: ConsultationOutcomeType = explicitOutcome !== "undecided" ? explicitOutcome : "undecided";
+  const outcomeType = parseOutcome(v.consultation_outcome_type);
 
   const primaryFocus = readString(v.priority_focus);
   const primaryConcern = labelForOptionValue(CONSULTATION_FORM_OPTION_SETS.consultation_priority, primaryFocus);
 
-  const diagnosisImpression = readString(v.diagnosis_free_text);
+  const diagnosisImpression = buildDiagnosisImpressionText(v);
 
   const surgicalSuitability = parseSuitability(v.surgical_suitability);
   const medicalSuitability = parseSuitability(v.medical_suitability);
 
-  const recommendedProcedure = readString(v.recommended_plan_summary).trim();
+  const recommendedProcedure = canonicalHairTransplantRecommendedPlanText(v);
 
-  let estimatedGraftsMin = readNumber(v.completion_estimated_grafts_min);
-  let estimatedGraftsMax = readNumber(v.completion_estimated_grafts_max);
-  if (estimatedGraftsMin == null && estimatedGraftsMax == null) {
-    const parsed = parseGraftRangeText(readString(v.graft_range_estimate));
-    if (parsed) {
-      estimatedGraftsMin = parsed.min;
-      estimatedGraftsMax = parsed.max;
-    }
-  }
+  const { min: estimatedGraftsMin, max: estimatedGraftsMax } = canonicalHairTransplantGraftBounds(v);
 
-  const zones = readStringArray(v.recommended_zones);
-  let treatments = readStringArray(v.recommended_treatments);
-  if (treatments.length === 0) {
-    treatments = readStringArray(v.treatment_interest);
-  }
+  const zones = Array.isArray(v.recommended_zones) ? (v.recommended_zones as unknown[]).map((x) => String(x).trim()).filter(Boolean) : [];
 
-  const medicalFlags = readStringArray(v.medical_flags);
-  const riskConfirmed = readStringArray(v.risk_flags_confirmed);
-  const riskFlags = mergeUniqueStrings(medicalFlags, riskConfirmed);
+  const treatments = canonicalHairTransplantTreatmentValues(v);
+
+  const riskFlags = canonicalHairTransplantRiskFlagValues(v);
 
   const pathologyExplicit = readBoolean(v.pathology_recommended_explicit);
-  const pathologyFromFlags =
-    riskFlags.includes("medical_review_required") ||
-    riskFlags.includes("blood_tests_recommended") ||
-    medicalFlags.includes("medical_review_required") ||
-    medicalFlags.includes("blood_tests_recommended");
-  const pathologyRecommended =
-    pathologyExplicit || pathologyFromFlags || outcomeType === "needs_blood_tests";
+  const pathologyFromRiskFlags =
+    riskFlags.includes("medical_review_required") || riskFlags.includes("blood_tests_recommended");
+  const pathologyFromOutcome = outcomeType === "needs_blood_tests";
+  const pathologyFromFlags = pathologyFromRiskFlags || pathologyFromOutcome;
+  const pathologyRecommended = pathologyExplicit || pathologyFromFlags;
 
   let pathologyReason = readString(v.pathology_reason).trim();
   if (pathologyRecommended && !pathologyReason) {
-    if (pathologyFromFlags) pathologyReason = "Discussed / flagged on consultation form.";
-    else if (outcomeType === "needs_blood_tests") pathologyReason = "Outcome set to needs blood tests.";
+    if (pathologyFromRiskFlags) pathologyReason = "Discussed / flagged on consultation form.";
+    else if (pathologyFromOutcome) pathologyReason = "Outcome set to needs blood tests.";
     else pathologyReason = "Clinician indicated pathology / screening.";
   }
 
@@ -137,7 +143,7 @@ export function buildHairTransplantCompletionSummary(input: ConsultationCompleti
     followUpReason = `Follow-up suggested (urgency: ${urgency}).`;
   }
 
-  const areaMapHighlights: ConsultationCompletionAreaMapHighlight[] = extractBodyAreaMapHighlights(v.concern_map);
+  const areaMapHighlights = extractBodyAreaMapHighlights(v.concern_map);
 
   const clinicianNotesPreview = buildClinicianNotesPreview(v);
 

@@ -88,8 +88,11 @@ export function buildClinicianNotesPreview(values: Record<string, unknown>, maxL
     const t = s.trim();
     if (t) parts.push(t);
   };
-  push(getClinicalNoteText(values.diagnosis_clinical_note));
+  /** Prefer v2 canonical note, then AI plan draft, then legacy diagnosis surfaces, then dictation / final lines. */
   push(getClinicalNoteText(values.structured_clinical_note));
+  push(readString(values.ai_recommended_plan_summary));
+  push(getClinicalNoteText(values.diagnosis_clinical_note));
+  push(readString(values.diagnosis_free_text));
   push(getVoiceNoteTranscript(values.clinician_voice_note));
   push(readString(values.final_clinician_comments));
   const merged = parts.join("\n\n").replace(/\s+/g, " ").trim();

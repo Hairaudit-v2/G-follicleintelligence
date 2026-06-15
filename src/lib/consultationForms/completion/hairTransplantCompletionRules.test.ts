@@ -109,4 +109,31 @@ describe("buildHairTransplantCompletionSummary", () => {
       )
     );
   });
+
+  it("v2: duration_band and norwood_classification feed diagnosis impression", () => {
+    const s = buildHairTransplantCompletionSummary(
+      baseInput({
+        duration_band: "1_3y",
+        norwood_classification: "nw3",
+        structured_clinical_note: { mode: "clinical_note", note: "Stable AGA." },
+        ai_recommended_plan_summary: "FUE 2000–2500 grafts hairline+crown.",
+      })
+    );
+    assert.match(s.diagnosisImpression, /Norwood III/i);
+    assert.match(s.diagnosisImpression, /1–3 years/i);
+    assert.match(s.diagnosisImpression, /Stable AGA/i);
+    assert.equal(s.recommendedProcedure, "FUE 2000–2500 grafts hairline+crown.");
+  });
+
+  it("canonical risk flags merge legacy risk_flags_confirmed without duplication", () => {
+    const s = buildHairTransplantCompletionSummary(
+      baseInput({
+        medical_flags: ["smoking", "medical_review_required"],
+        risk_flags_confirmed: ["smoking", "diabetes"],
+      })
+    );
+    assert.equal(s.riskFlags.includes("smoking"), true);
+    assert.equal(s.riskFlags.includes("diabetes"), true);
+    assert.equal(s.riskFlags.filter((x) => x === "smoking").length, 1);
+  });
 });

@@ -60,6 +60,7 @@ export function validateConsultationFormRequiredFields(
   const issues: ConsultationFormValidationIssue[] = [];
 
   for (const section of schema.sections) {
+    if (!evaluateConsultationFormCondition(section.showWhen, values)) continue;
     for (const field of section.fields) {
       if (!field.required) continue;
       if (!evaluateConsultationFormCondition(field.showWhen, values)) continue;
@@ -87,6 +88,7 @@ export function validateBodyAreaMapShapesInValues(
 ): ConsultationFormValidationIssue[] {
   const issues: ConsultationFormValidationIssue[] = [];
   for (const section of schema.sections) {
+    if (!evaluateConsultationFormCondition(section.showWhen, values)) continue;
     for (const field of section.fields) {
       if (field.type !== "body_area_map") continue;
       const v = values[field.id];
@@ -109,6 +111,7 @@ export function validateVoiceNoteClinicalNoteShapesInValues(
 ): ConsultationFormValidationIssue[] {
   const issues: ConsultationFormValidationIssue[] = [];
   for (const section of schema.sections) {
+    if (!evaluateConsultationFormCondition(section.showWhen, values)) continue;
     for (const field of section.fields) {
       const v = values[field.id];
       if (v === null || v === undefined) continue;

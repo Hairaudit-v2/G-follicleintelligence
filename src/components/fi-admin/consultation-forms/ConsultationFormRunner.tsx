@@ -17,6 +17,7 @@ import { ConsultationFormSectionNav } from "@/src/components/fi-admin/consultati
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
+import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
 import type {
   ConsultationFormInstanceWithTemplate,
   ConsultationFormPersistenceContext,
@@ -76,17 +77,24 @@ export function ConsultationFormRunner({
 
   const [activeSectionId, setActiveSectionId] = useState(() => sections[0]?.id ?? "");
 
+  const [values, setValues] = useState<Record<string, unknown>>(() => cloneValues(initialInstance.values));
+
+  const visibleSections = useMemo(
+    () => sections.filter((s) => evaluateConsultationFormCondition(s.showWhen, values)),
+    [sections, values]
+  );
+
   const activeSection = useMemo(
-    () => sections.find((s) => s.id === activeSectionId) ?? sections[0] ?? null,
-    [sections, activeSectionId]
+    () => visibleSections.find((s) => s.id === activeSectionId) ?? visibleSections[0] ?? null,
+    [visibleSections, activeSectionId]
   );
 
   useEffect(() => {
     if (!sections.length) return;
-    setActiveSectionId((prev) => (sections.some((s) => s.id === prev) ? prev : sections[0]!.id));
-  }, [sections]);
+    if (!visibleSections.length) return;
+    setActiveSectionId((prev) => (visibleSections.some((s) => s.id === prev) ? prev : visibleSections[0]!.id));
+  }, [sections, visibleSections]);
 
-  const [values, setValues] = useState<Record<string, unknown>>(() => cloneValues(initialInstance.values));
   const [status, setStatus] = useState(initialInstance.status);
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [autosaveError, setAutosaveError] = useState<string | null>(null);
@@ -358,7 +366,7 @@ export function ConsultationFormRunner({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,240px)_1fr]">
         <aside className="lg:sticky lg:top-4 lg:self-start">
           <ConsultationFormSectionNav
-            sections={sections.map((s) => ({ id: s.id, title: s.title }))}
+            sections={visibleSections.map((s) => ({ id: s.id, title: s.title }))}
             activeSectionId={activeSectionId}
             onSelect={setActiveSectionId}
           />

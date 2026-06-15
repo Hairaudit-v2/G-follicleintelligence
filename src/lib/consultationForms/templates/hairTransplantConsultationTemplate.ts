@@ -41,11 +41,14 @@ const RECOMMENDED_TREATMENT_OPTIONS: ConsultationFormOption[] = [
   { value: "mesotherapy", label: "Mesotherapy" },
 ];
 
+/** Primary objectives that open the surgical assessment pathway (donor / recipient / map). */
+export const HAIR_TRANSPLANT_V2_SURGICAL_PRIMARY_OBJECTIVES = ["ht_primary", "ht_plus_medical", "repair_revision"] as const;
+
 /**
- * Published JSON schema for the Hair Transplant Consultation guided form (Stage 1).
- * Dropdown-first; advanced capture types use placeholder renderers until later stages.
+ * Immutable published JSON schema for Hair Transplant Consultation **version 1** (16 sections).
+ * Do not change this object — new edits belong in {@link hairTransplantConsultationSchemaV2}.
  */
-export const hairTransplantConsultationSchema: ConsultationFormSchema = {
+export const hairTransplantConsultationSchemaV1: ConsultationFormSchema = {
   schemaRevision: 2,
   sections: [
     {
@@ -484,3 +487,275 @@ export const hairTransplantConsultationSchema: ConsultationFormSchema = {
     },
   ],
 };
+
+/**
+ * ConsultationOS v2 — Hair Transplant adaptive pathway (≤6 sections, clinic-fast).
+ * Quote builder, duplicate Norwood / risk checklists, and follow-up task lists live outside this form.
+ */
+export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
+  schemaRevision: 3,
+  sections: [
+    {
+      id: "rapid_intake",
+      title: "Rapid Intake",
+      description: "Triage what matters today — under five minutes from here to handoff when familiar.",
+      fields: [
+        fld({
+          id: "priority_focus",
+          label: "Primary focus today",
+          type: "select",
+          optionSet: "consultation_priority",
+          required: true,
+        }),
+        fld({
+          id: "duration_band",
+          label: "Approximate duration of concern",
+          type: "select",
+          optionSet: "consultation_duration_band",
+          required: true,
+        }),
+        fld({
+          id: "primary_objective",
+          label: "Primary objective",
+          type: "select",
+          optionSet: "consultation_primary_objective",
+          required: true,
+          description: "Drives whether surgical planning fields appear.",
+        }),
+        fld({
+          id: "previous_treatment_yes_no",
+          label: "Previous non-surgical treatment for hair loss?",
+          type: "select",
+          optionSet: "yes_no",
+          required: true,
+        }),
+        fld({
+          id: "previous_surgery_yes_no",
+          label: "Previous hair transplant surgery?",
+          type: "select",
+          optionSet: "yes_no",
+          required: true,
+        }),
+      ],
+    },
+    {
+      id: "clinical_pattern",
+      title: "Clinical Pattern",
+      fields: [
+        fld({
+          id: "onset_pattern",
+          label: "Onset / progression pattern",
+          type: "select",
+          optionSet: "hair_loss_onset_pattern",
+          required: true,
+        }),
+        fld({
+          id: "norwood_classification",
+          label: "Norwood / pattern classification",
+          type: "select",
+          optionSet: "norwood_scale",
+          required: true,
+          description: "Single canonical Norwood capture for this consultation (replaces duplicate confirm fields).",
+        }),
+        fld({
+          id: "shedding_reported",
+          label: "Patient-reported shedding",
+          type: "select",
+          optionSet: "shedding_severity",
+        }),
+        fld({
+          id: "scalp_condition",
+          label: "Scalp condition",
+          type: "select",
+          optionSet: "scalp_condition",
+          required: true,
+        }),
+        fld({
+          id: "hair_calibre",
+          label: "Hair calibre",
+          type: "select",
+          optionSet: "hair_calibre",
+          required: true,
+        }),
+        fld({
+          id: "miniaturisation_clinical",
+          label: "Clinical impression of miniaturisation",
+          type: "select",
+          optionSet: "yes_no_unsure",
+        }),
+      ],
+    },
+    {
+      id: "medical_screening",
+      title: "Medical Screening",
+      fields: [
+        fld({
+          id: "medical_flags",
+          label: "Medical / lifestyle flags (select all that apply)",
+          type: "multi_select",
+          optionSet: "medical_risk_flags",
+          description: "Single checklist — do not duplicate into a second “risk confirmed” list.",
+        }),
+        fld({
+          id: "medication_tolerance",
+          label: "Tolerance to prior / current hair medications",
+          type: "select",
+          optionSet: "medication_tolerance",
+        }),
+        fld({
+          id: "pathology_recommended_explicit",
+          label: "Recommend pathology / blood screening",
+          type: "boolean",
+        }),
+        fld({
+          id: "pathology_reason",
+          label: "Pathology / screening reason",
+          type: "textarea",
+          showWhen: { fieldId: "pathology_recommended_explicit", operator: "equals", value: true },
+          required: true,
+        }),
+        fld({
+          id: "medical_exception_note",
+          label: "Medical exception / nuance (optional)",
+          type: "textarea",
+          placeholder: "Short caveat only — detailed tasks move to LeadFlow.",
+        }),
+        fld({
+          id: "risks_discussed_confirmed",
+          label: "Key risks and limitations discussed with the patient",
+          type: "boolean",
+          description: "Medicolegal acknowledgement without re-capturing the full flag list.",
+        }),
+      ],
+    },
+    {
+      id: "surgical_assessment",
+      title: "Surgical Assessment",
+      description: "Shown when the primary objective includes transplant or repair planning.",
+      showWhen: {
+        fieldId: "primary_objective",
+        operator: "in",
+        value: [...HAIR_TRANSPLANT_V2_SURGICAL_PRIMARY_OBJECTIVES],
+      },
+      fields: [
+        fld({
+          id: "donor_quality",
+          label: "Donor quality",
+          type: "select",
+          optionSet: "donor_quality",
+          required: true,
+        }),
+        fld({
+          id: "donor_density_estimate",
+          label: "Estimated grafts/cm² (optional)",
+          type: "number",
+          min: 0,
+          max: 200,
+          step: 1,
+        }),
+        fld({
+          id: "recipient_quality",
+          label: "Recipient / midscalp skin quality",
+          type: "select",
+          optionSet: "recipient_area_quality",
+          required: true,
+        }),
+        fld({
+          id: "concern_map",
+          label: "Concern / zone map",
+          type: "body_area_map",
+          description: "Mark priority zones; recommended zones can be edited independently in the next step.",
+          bodyAreaMapViews: ["frontal_hairline", "top_scalp", "crown", "donor_back"],
+        }),
+        fld({
+          id: "prior_ht_year",
+          label: "Year of prior hair transplant",
+          type: "text",
+          placeholder: "e.g. 2019",
+          showWhen: { fieldId: "previous_surgery_yes_no", operator: "equals", value: "yes" },
+        }),
+      ],
+    },
+    {
+      id: "recommendation",
+      title: "Recommendation",
+      fields: [
+        fld({
+          id: "recommended_treatments",
+          label: "Recommended treatments (structured)",
+          type: "multi_select",
+          options: RECOMMENDED_TREATMENT_OPTIONS,
+          required: true,
+        }),
+        fld({
+          id: "recommended_zones",
+          label: "Recommended treatment zones",
+          type: "multi_select",
+          options: RECOMMENDED_ZONE_OPTIONS,
+          description: "Pre-filled in future builds from the concern map; always editable here.",
+        }),
+        fld({
+          id: "consultation_outcome_type",
+          label: "Consultation outcome (completion)",
+          type: "select",
+          options: COMPLETION_OUTCOME_OPTIONS,
+          required: true,
+        }),
+        fld({
+          id: "medical_suitability",
+          label: "Medical suitability",
+          type: "select",
+          options: COMPLETION_SUITABILITY_OPTIONS,
+          required: true,
+        }),
+        fld({
+          id: "surgical_suitability",
+          label: "Surgical suitability",
+          type: "select",
+          options: COMPLETION_SUITABILITY_OPTIONS,
+          required: true,
+        }),
+        fld({
+          id: "ai_recommended_plan_summary",
+          label: "Plan summary (AI draft — clinician editable)",
+          type: "textarea",
+          placeholder: "Short narrative plan for the chart. AI-generated content will land here later.",
+        }),
+      ],
+    },
+    {
+      id: "clinical_summary_handoff",
+      title: "Clinical Summary / Handoff",
+      fields: [
+        fld({
+          id: "structured_clinical_note",
+          label: "Structured clinical note (canonical)",
+          type: "clinical_note",
+          required: true,
+          description: "Single primary note for this encounter. Replaces scattered diagnosis / final comment fields.",
+        }),
+        fld({
+          id: "clinician_voice_note",
+          label: "Clinician dictation (voice / text)",
+          type: "voice_note",
+          description: "Optional adjunct; use “Save to clinical notes” when persisting to DoctorOS.",
+        }),
+        fld({
+          id: "follow_up_required_explicit",
+          label: "Follow-up required (explicit)",
+          type: "boolean",
+        }),
+        fld({
+          id: "follow_up_urgency",
+          label: "Follow-up timeline urgency",
+          type: "select",
+          optionSet: "urgency",
+          required: true,
+        }),
+      ],
+    },
+  ],
+};
+
+/** Alias: current Hair Transplant Consultation schema used for new published template versions. */
+export const hairTransplantConsultationSchema = hairTransplantConsultationSchemaV2;

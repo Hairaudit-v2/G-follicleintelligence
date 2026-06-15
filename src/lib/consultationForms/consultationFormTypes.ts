@@ -37,6 +37,7 @@ export type ConsultationFormOptionSetId =
   | "ludwig_scale"
   | "sinclair_scale"
   | "donor_quality"
+  | "recipient_area_quality"
   | "hair_calibre"
   | "scalp_condition"
   | "shedding_severity"
@@ -50,6 +51,9 @@ export type ConsultationFormOptionSetId =
   | "family_history_pattern"
   | "previous_treatment_types"
   | "consultation_priority"
+  | "consultation_duration_band"
+  | "consultation_primary_objective"
+  | "yes_no"
   | "yes_no_unsure";
 
 export type ConsultationFormOption = {
@@ -107,6 +111,8 @@ export type ConsultationFormSection = {
   id: string;
   title: string;
   description?: string;
+  /** When set, the whole section (nav + fields) is hidden unless the condition passes. */
+  showWhen?: ConsultationFormCondition;
   fields: ConsultationFormField[];
 };
 

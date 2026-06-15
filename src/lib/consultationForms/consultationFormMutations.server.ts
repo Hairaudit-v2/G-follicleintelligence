@@ -12,7 +12,10 @@ import { buildHairTransplantCompletionSummary } from "./completion/hairTransplan
 import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "./consultationFormConstants";
 import { loadConsultationFormInstance, mapConsultationFormInstanceRow } from "./consultationFormLoad.server";
 import type { ConsultationFormChannel, ConsultationFormInstanceWithTemplate } from "./consultationFormTypes";
-import { hairTransplantConsultationSchema } from "./templates/hairTransplantConsultationTemplate";
+import {
+  hairTransplantConsultationSchemaV1,
+  hairTransplantConsultationSchemaV2,
+} from "./templates/hairTransplantConsultationTemplate";
 
 export type CreateConsultationFormInstanceInput = {
   tenantId: string;
@@ -37,8 +40,9 @@ export type SubmitConsultationFormInstanceInput = {
 };
 
 /**
- * Ensures the global Hair Transplant Consultation template exists (published v1).
- * Idempotent; safe under concurrent first requests (unique slug / version).
+ * Ensures the global Hair Transplant Consultation template exists with a **published** template version.
+ * Publishes immutable v1 (legacy 16-section) when bootstrapping an empty template, then publishes **v2**
+ * (ConsultationOS adaptive pathway). New in-room instances always bind to the highest published version.
  */
 export async function ensureGlobalHairTransplantConsultationTemplate(
   client?: SupabaseClient
@@ -86,47 +90,84 @@ export async function ensureGlobalHairTransplantConsultationTemplate(
     }
   }
 
-  const { data: published, error: pe } = await supabase
-    .from("fi_consultation_form_template_versions")
-    .select("id")
-    .eq("template_id", templateId)
-    .eq("status", "published")
-    .order("version", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (pe) throw new Error(pe.message);
-  if (published?.id) {
-    return { templateVersionId: String((published as { id: string }).id) };
-  }
-
-  const { data: insVer, error: ve } = await supabase
-    .from("fi_consultation_form_template_versions")
-    .insert({
-      template_id: templateId,
-      version: 1,
-      status: "published",
-      schema: hairTransplantConsultationSchema as unknown as Record<string, unknown>,
-      ui_layout: {},
-      published_at: new Date().toISOString(),
-    })
-    .select("id")
-    .single();
-
-  if (ve) {
-    const { data: againV, error: ve2 } = await supabase
+  const fetchLatestPublished = async () => {
+    const { data, error } = await supabase
       .from("fi_consultation_form_template_versions")
-      .select("id")
+      .select("id, version")
       .eq("template_id", templateId)
       .eq("status", "published")
       .order("version", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (ve2) throw new Error(ve2.message);
-    if (!againV?.id) throw new Error(ve.message);
-    return { templateVersionId: String((againV as { id: string }).id) };
+    if (error) throw new Error(error.message);
+    return (data as { id: string; version: number } | null) ?? null;
+  };
+
+  const insertPublishedVersion = async (version: number, schema: Record<string, unknown>) => {
+    const { data, error } = await supabase
+      .from("fi_consultation_form_template_versions")
+      .insert({
+        template_id: templateId,
+        version,
+        status: "published",
+        schema,
+        ui_layout: {},
+        published_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+    return { data: data as { id: string } | null, error };
+  };
+
+  const latest = await fetchLatestPublished();
+  if (latest && latest.version >= 2) {
+    return { templateVersionId: String(latest.id) };
   }
 
-  return { templateVersionId: String((insVer as { id: string }).id) };
+  if (latest && latest.version === 1) {
+    const { data, error } = await insertPublishedVersion(2, hairTransplantConsultationSchemaV2 as unknown as Record<string, unknown>);
+    if (!error && data?.id) {
+      return { templateVersionId: String(data.id) };
+    }
+    const msg = error?.message ?? "";
+    if (!msg.includes("duplicate") && !msg.includes("unique")) {
+      throw new Error(msg || "Could not insert Hair Transplant Consultation template version 2.");
+    }
+    const { data: row2, error: e2 } = await supabase
+      .from("fi_consultation_form_template_versions")
+      .select("id")
+      .eq("template_id", templateId)
+      .eq("version", 2)
+      .maybeSingle();
+    if (e2) throw new Error(e2.message);
+    if (!row2?.id) throw new Error(error?.message ?? "Template version 2 missing after insert race.");
+    return { templateVersionId: String((row2 as { id: string }).id) };
+  }
+
+  const { error: ve1 } = await insertPublishedVersion(
+    1,
+    hairTransplantConsultationSchemaV1 as unknown as Record<string, unknown>
+  );
+  if (ve1) {
+    const msg = ve1.message ?? "";
+    if (!msg.includes("duplicate") && !msg.includes("unique")) throw new Error(msg);
+  }
+
+  const { data: insV2, error: ve2 } = await insertPublishedVersion(
+    2,
+    hairTransplantConsultationSchemaV2 as unknown as Record<string, unknown>
+  );
+  if (!ve2 && insV2?.id) {
+    return { templateVersionId: String(insV2.id) };
+  }
+  const msg2 = ve2?.message ?? "";
+  if (!msg2.includes("duplicate") && !msg2.includes("unique")) {
+    throw new Error(msg2 || "Could not insert Hair Transplant Consultation template version 2.");
+  }
+
+  const recovered = await fetchLatestPublished();
+  if (!recovered?.id) throw new Error(ve2?.message ?? "Could not resolve Hair Transplant Consultation template version.");
+  return { templateVersionId: String(recovered.id) };
 }
 
 export async function createConsultationFormInstance(

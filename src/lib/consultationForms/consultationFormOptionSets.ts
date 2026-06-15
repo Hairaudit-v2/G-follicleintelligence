@@ -35,6 +35,33 @@ export const CONSULTATION_FORM_OPTION_SETS: Record<ConsultationFormOptionSetId, 
     { value: "poor", label: "Poor" },
     { value: "not_assessed", label: "Not assessed" },
   ],
+  /** Recipient / midscalp skin quality — same scale language as donor for consistency. */
+  recipient_area_quality: [
+    { value: "excellent", label: "Excellent" },
+    { value: "good", label: "Good" },
+    { value: "fair", label: "Fair" },
+    { value: "poor", label: "Poor" },
+    { value: "not_assessed", label: "Not assessed" },
+  ],
+  consultation_duration_band: [
+    { value: "lt3m", label: "< 3 months" },
+    { value: "3_12m", label: "3–12 months" },
+    { value: "1_3y", label: "1–3 years" },
+    { value: "3y_plus", label: "3+ years" },
+    { value: "lifelong", label: "Lifelong / since adolescence" },
+  ],
+  consultation_primary_objective: [
+    { value: "ht_primary", label: "Hair transplant (surgical) primary focus" },
+    { value: "ht_plus_medical", label: "Transplant + medical therapy combined" },
+    { value: "medical_non_surgical", label: "Medical / non-surgical management primary" },
+    { value: "regenerative", label: "PRP / exosomes / regenerative focus" },
+    { value: "repair_revision", label: "Repair or revision after prior transplant" },
+    { value: "exploratory", label: "Exploratory / undecided" },
+  ],
+  yes_no: [
+    { value: "yes", label: "Yes" },
+    { value: "no", label: "No" },
+  ],
   hair_calibre: [
     { value: "fine", label: "Fine" },
     { value: "medium", label: "Medium" },
