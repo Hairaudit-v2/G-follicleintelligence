@@ -31,6 +31,16 @@ const SHOWCASE = [
     caption: "Live reception rhythm, team handoffs, and same-day operational visibility across the clinic.",
   },
   {
+    file: "Operations centre.jpeg",
+    label: "OperationsOS",
+    caption: "Operations centre view for coordinated scheduling, block readiness, and real-time clinic command.",
+  },
+  {
+    file: "Analyticsos.jpeg",
+    label: "AnalyticsOS",
+    caption: "Analytics layer for pipeline health, performance signals, and decision-ready intelligence across FI OS.",
+  },
+  {
     file: "Patient Twin.jpeg",
     label: "Patient Twin Intelligence",
     caption:
