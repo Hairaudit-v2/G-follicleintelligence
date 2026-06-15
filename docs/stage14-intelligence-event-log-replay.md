@@ -66,7 +66,11 @@ Returned rows are **sanitized persisted shapes only** — no raw clinical payloa
 - **Shadow enqueue:** unset `FI_INTELLIGENCE_INTERNAL_BUS_QUEUE_ENABLED` or run with `NODE_ENV=production` (queue hard-off).
 - **Code removal:** delete Stage 14 modules + script; admin page section; tests — no DB migration dependency for replay itself.
 
-## Stage 15 recommendation (governed dispatch)
+## Stage 15 (governed replay runs)
+
+See [Stage 15 — Governed intelligence replay and dispatch planning](./stage15-governed-intelligence-replay-dispatch.md) for durable replay run records, approval workflow, and strict allow-lists. Stage 14 direct CLI replay behavior is unchanged when governed action flags are not used.
+
+## Stage 16 recommendation (governed dispatch)
 
 Introduce **explicit governance** before any durable replay or production-adjacent dispatch:
 

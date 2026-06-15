@@ -1,18 +1,17 @@
 /**
- * Stage 14: operator CLI for intelligence event log replay (dry-run by default).
- *
- * Run from repo root with Supabase service role (same as other admin scripts):
- *   pnpm exec node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/replay-intelligence-event-logs.ts
- *
- * Or: `pnpm run replay:intelligence-event-logs` (see package.json).
- *
- * Loads `.env.local` / `.env` like other maintenance scripts. Exits non-zero only on invalid args.
+ * Stage 15: operator CLI for governed replay runs + Stage 14 direct replay.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { parseIntelligenceEventLogReplayCliArgs } from "../src/lib/fi/events/intelligenceEventLogReplayCliArgs";
+import { parseReplayIntelligenceEventLogsScriptArgs } from "../src/lib/fi/events/governedIntelligenceReplayCliArgs";
 import { replayIntelligenceEventLogs } from "../src/lib/fi/events/replayIntelligenceEventLogs.server";
+import {
+  approveReplayRun,
+  createReplayRunDraft,
+  executeApprovedReplayRun,
+  submitReplayRunForApproval,
+} from "../src/lib/fi/events/intelligenceReplayRunService.server";
 
 function loadRepoEnvFiles(): void {
   for (const name of [".env.local", ".env"] as const) {
@@ -37,35 +36,105 @@ function loadRepoEnvFiles(): void {
   }
 }
 
+function printJsonLine(printJson: boolean, obj: unknown): void {
+  const text = printJson ? JSON.stringify(obj, null, 2) : JSON.stringify(obj);
+  process.stdout.write(`${text}\n`);
+}
+
 async function main(): Promise<void> {
   loadRepoEnvFiles();
 
-  const parsed = parseIntelligenceEventLogReplayCliArgs(process.argv);
+  const parsed = parseReplayIntelligenceEventLogsScriptArgs(process.argv);
   if (!parsed.ok) {
     process.stderr.write(`${parsed.message}\n`);
     process.exit(parsed.exitCode);
   }
 
-  const { mode, filters, printJson } = parsed.value;
+  const v = parsed.value;
 
-  const result = await replayIntelligenceEventLogs({
-    mode,
-    filters,
-    omitPlatformAdminAssertForOperatorCli: true,
-  });
+  if (v.kind === "direct_replay") {
+    const { mode, filters, printJson } = v.value;
+    if (mode === "dispatch_future") {
+      process.stderr.write("dispatch_future is only valid with --create-run (planning row), not direct replay.\n");
+      process.exit(2);
+    }
+    const result = await replayIntelligenceEventLogs({
+      mode,
+      filters,
+      omitPlatformAdminAssertForOperatorCli: true,
+    });
+    printJsonLine(printJson, { mode, filters, summary: result.summary, warnings: result.warnings, load_error: result.load_error });
+    process.exit(0);
+    return;
+  }
 
-  const out = {
-    mode,
-    filters,
-    summary: result.summary,
-    warnings: result.warnings,
-    load_error: result.load_error,
-  };
+  if (v.kind === "create_run") {
+    const { mode, filters, printJson } = v.value;
+    const r = await createReplayRunDraft({
+      mode,
+      filters,
+      omitPlatformAdminAssertForOperatorCli: true,
+    });
+    printJsonLine(printJson, { action: "create_run", ok: r.ok, ...(r.ok ? { id: r.data.id } : { code: r.code, message: r.message }), filters, mode });
+    process.exit(0);
+    return;
+  }
 
-  const text = printJson ? JSON.stringify(out, null, 2) : JSON.stringify(out);
-  process.stdout.write(`${text}\n`);
+  if (v.kind === "submit_for_approval") {
+    const r = await submitReplayRunForApproval(v.runId, null, { omitPlatformAdminAssertForOperatorCli: true });
+    printJsonLine(v.printJson, {
+      action: "submit_for_approval",
+      runId: v.runId,
+      ok: r.ok,
+      ...(r.ok ? { id: r.data.id } : { code: r.code, message: r.message }),
+    });
+    process.exit(0);
+    return;
+  }
 
-  process.exit(0);
+  if (v.kind === "approve_run") {
+    const r = await approveReplayRun(v.runId, null, { omitPlatformAdminAssertForOperatorCli: true });
+    printJsonLine(v.printJson, {
+      action: "approve_run",
+      runId: v.runId,
+      ok: r.ok,
+      ...(r.ok ? { id: r.data.id } : { code: r.code, message: r.message }),
+    });
+    process.exit(0);
+    return;
+  }
+
+  if (v.kind === "execute_run") {
+    const env = process.env as Record<string, string | undefined>;
+    if (env.FI_INTELLIGENCE_GOVERNED_REPLAY_ENABLED !== "1") {
+      printJsonLine(v.printJson, {
+        action: "execute_run",
+        runId: v.runId,
+        ok: false,
+        code: "governed_replay_disabled",
+        message: "FI_INTELLIGENCE_GOVERNED_REPLAY_ENABLED must be 1 to execute governed replay runs.",
+      });
+      process.exit(0);
+      return;
+    }
+
+    const r = await executeApprovedReplayRun(v.runId, null, {
+      omitPlatformAdminAssertForOperatorCli: true,
+    });
+    printJsonLine(v.printJson, {
+      action: "execute_run",
+      runId: v.runId,
+      ok: r.ok,
+      ...(r.ok
+        ? { replay_summary: r.data.replay_summary, warnings: r.data.warnings, load_error: r.data.load_error }
+        : { code: r.code, message: r.message, warnings: r.warnings }),
+    });
+    process.exit(0);
+    return;
+  }
+
+  process.stderr.write("Unhandled CLI branch\n");
+  process.exit(1);
 }
 
 main().catch((e) => {
