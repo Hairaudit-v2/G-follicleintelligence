@@ -24,6 +24,8 @@ import {
   buildPharmacyOrderPdfContext,
 } from "@/src/lib/prescribing/pharmacyOrderPayload.server";
 import { renderPharmacyOrderPdfBytes } from "@/src/lib/prescribing/pharmacyOrderPdf.server";
+import { FI_RESEND_PUBLIC_SEND_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
+import { sendResendEmailHttp } from "@/src/lib/email/resendHttpSend.server";
 import { buildResendFromAddress, isEmailDeliveryConfigured } from "@/src/lib/reminders/reminderDeliveryConfig";
 import { loadReminderDeliveryConfig } from "@/src/lib/reminders/reminderDeliveryConfig.server";
 
@@ -91,6 +93,7 @@ function buildPharmacyEmailText(snap: PharmacyOrderPayloadSnapshotV1): string {
 }
 
 async function trySendPharmacyEmail(params: {
+  tenantId: string;
   pharmacyEmail: string;
   pdfBytes: Uint8Array;
   prescriptionId: string;
@@ -104,31 +107,34 @@ async function trySendPharmacyEmail(params: {
   const fromHeader = buildResendFromAddress(cfg.resend);
   if (!fromHeader) return { ok: false, error: "RESEND_FROM_EMAIL is not configured." };
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.resend.apiKey!.trim()}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: fromHeader,
-      to: [params.pharmacyEmail.trim()],
-      subject: `Compound order — prescription ${params.prescriptionId.slice(0, 8)}… — ${params.clinicName}`,
-      text: params.structuredBody,
-      attachments: [
-        {
-          filename: `pharmacy-order-${params.prescriptionId.slice(0, 8)}.pdf`,
-          content: Buffer.from(params.pdfBytes).toString("base64"),
-        },
-      ],
-    }),
-  });
-
-  const payload = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
-  if (!res.ok) {
-    return { ok: false, error: payload.message?.trim() || `Resend HTTP ${res.status}` };
+  try {
+    const { resendId } = await sendResendEmailHttp(
+      {
+        apiKey: cfg.resend.apiKey!,
+        from: fromHeader,
+        to: [params.pharmacyEmail.trim()],
+        subject: `Compound order — prescription ${params.prescriptionId.slice(0, 8)}… — ${params.clinicName}`,
+        text: params.structuredBody,
+        attachments: [
+          {
+            filename: `pharmacy-order-${params.prescriptionId.slice(0, 8)}.pdf`,
+            content: Buffer.from(params.pdfBytes).toString("base64"),
+          },
+        ],
+      },
+      {
+        tenant_id: params.tenantId.trim(),
+        prescription_id: params.prescriptionId.trim(),
+        recipient_email_domain: params.pharmacyEmail.includes("@")
+          ? params.pharmacyEmail.split("@")[1]?.toLowerCase() ?? null
+          : null,
+        delivery_path: "pharmacy_compound_order",
+      }
+    );
+    return { ok: true, resendId };
+  } catch {
+    return { ok: false, error: FI_RESEND_PUBLIC_SEND_FAILED_MESSAGE };
   }
-  return { ok: true, resendId: payload.id?.trim() || null };
 }
 
 async function trySendPharmacyApi(params: {
@@ -288,6 +294,7 @@ export async function sendPrescriptionToPharmacyAction(
 
     if (parsed.method === "email") {
       const mail = await trySendPharmacyEmail({
+        tenantId: tid,
         pharmacyEmail: pharmacy.contact_email,
         pdfBytes,
         prescriptionId: rid,

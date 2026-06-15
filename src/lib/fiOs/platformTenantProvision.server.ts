@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveTenantConfig } from "@/lib/fi/tenantConfig";
+import { FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { insertFiTenantAdminAuditEvent } from "@/src/lib/tenantAdmin/tenantAdminAudit.server";
 
@@ -176,7 +177,14 @@ export async function provisionPlatformTenant(
         },
       });
       if (invErr || !inv.user?.id) {
-        throw new Error(invErr?.message ?? "Could not send invitation email for the tenant admin.");
+        logStructured("error", "fi_auth_admin_invite_failed", {
+          source: "platform_tenant_provision",
+          tenant_slug: slug,
+          recipient_email_domain: email.includes("@") ? email.split("@")[1]?.toLowerCase() ?? null : null,
+          auth_error_message: invErr?.message ?? "invite_missing_user",
+          auth_error_name: (invErr as { name?: string } | null)?.name ?? null,
+        });
+        throw new Error(FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE);
       }
       authUserId = inv.user.id;
     }

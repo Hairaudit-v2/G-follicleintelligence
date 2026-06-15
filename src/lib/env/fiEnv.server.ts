@@ -65,6 +65,7 @@ export function validateFiServerEnv(env: NodeJS.ProcessEnv = process.env): FiEnv
     }
 
     if (isAffirmative(g("FI_REMINDERS_LIVE_DELIVERY"))) {
+      // Other Resend-powered surfaces (pathology, pharmacy) are not gated here; see docs/runbooks/resend-and-transactional-email.md
       if (!isPresent(g("RESEND_API_KEY"))) errors.push("RESEND_API_KEY");
       if (!isPresent(g("RESEND_FROM_EMAIL"))) errors.push("RESEND_FROM_EMAIL");
     }

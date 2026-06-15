@@ -50,7 +50,7 @@ Change schedules in `vercel.json` and redeploy. For HR, many operators prefer **
 | `IIOHR_HR_PERTH_STAFF_FEED_KEY` | Optional Bearer for feed fetch |
 | `FI_ADMIN_API_KEY` | **Server-only** — operator bypass for selected tenant APIs and admin actions |
 | `FI_TIMELY_WEBHOOK_SECRET` | Timely/Zapier webhooks — min **16** chars when webhooks used |
-| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_FROM_NAME` | When live reminder email is enabled |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_FROM_NAME`, `RESEND_REPLY_TO` | When live reminder email is enabled (`FI_REMINDERS_LIVE_DELIVERY`) **or** when using in-app Resend features (pathology patient email, pharmacy email). See **`docs/runbooks/resend-and-transactional-email.md`**. |
 | `OPENAI_API_KEY`, `OPENAI_CLINICAL_NOTE_MODEL` | DoctorOS / clinical note flows when used |
 | `FI_HUBSPOT_IMPORT_TENANT_ID`, `FI_HUBSPOT_IMPORT_CONFIRM` | **Scripts / CI** for HubSpot import batches (not a cron route today) |
 
@@ -70,11 +70,14 @@ Change schedules in `vercel.json` and redeploy. For HR, many operators prefer **
 
 ## Resend (reminders)
 
+See **`docs/runbooks/resend-and-transactional-email.md`** for application Resend vs Supabase Auth invite mail, verified domains, and failure logging.
+
 | Variable | When required |
 |----------|----------------|
-| `RESEND_API_KEY` | Live email send (`FI_REMINDERS_LIVE_DELIVERY` path — see `validateFiServerEnv` in `src/lib/env/fiEnv.server.ts`) |
-| `RESEND_FROM_EMAIL` | Verified sender domain |
-| `RESEND_FROM_NAME` | Display name |
+| `RESEND_API_KEY` | Live email send via this app’s Resend integration (see runbook). **Production gate:** required when `FI_REMINDERS_LIVE_DELIVERY` is truthy (`validateFiServerEnv` in `src/lib/env/fiEnv.server.ts`). |
+| `RESEND_FROM_EMAIL` | Verified sender domain on Resend |
+| `RESEND_FROM_NAME` | Display name (optional) |
+| `RESEND_REPLY_TO` | Optional `Reply-To` for Resend sends from this app |
 
 ---
 

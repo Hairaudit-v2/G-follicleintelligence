@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
 import { insertFiTenantAdminAuditEvent } from "@/src/lib/tenantAdmin/tenantAdminAudit.server";
+import { logStructured } from "@/src/lib/server/structuredLog";
 import {
   getTenantAdminUsersManageAllowed,
   resolveActorFiUserIdForTenantAdminActions,
@@ -138,7 +140,14 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
         },
       });
       if (invErr || !inv.user?.id) {
-        return { ok: false, error: invErr?.message ?? "Could not send invitation email." };
+        logStructured("error", "fi_auth_admin_invite_failed", {
+          source: "tenant_admin_invite",
+          tenant_id: tid,
+          recipient_email_domain: email.includes("@") ? email.split("@")[1]?.toLowerCase() ?? null : null,
+          auth_error_message: invErr?.message ?? "invite_missing_user",
+          auth_error_name: (invErr as { name?: string } | null)?.name ?? null,
+        });
+        return { ok: false, error: FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE };
       }
       authUserId = inv.user.id;
     }

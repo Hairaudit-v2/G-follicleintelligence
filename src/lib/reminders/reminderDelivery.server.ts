@@ -1,5 +1,6 @@
 import "server-only";
 
+import { sendResendEmailHttp } from "@/src/lib/email/resendHttpSend.server";
 import type { ReminderTemplateType } from "./reminderConstants";
 import {
   buildResendFromAddress,
@@ -42,27 +43,18 @@ async function sendReminderEmail(params: {
   const from = buildResendFromAddress(params.cfg.resend);
   if (!from) throw new Error("RESEND_FROM_EMAIL is not configured.");
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${params.cfg.resend.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const { resendId } = await sendResendEmailHttp(
+    {
+      apiKey: params.cfg.resend.apiKey!,
       from,
       to: [params.to],
       subject: params.subject,
       text: params.body,
-    }),
-  });
+    },
+    { delivery_path: "fi_reminder_jobs" }
+  );
 
-  const payload = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
-  if (!res.ok) {
-    const detail = payload.message?.trim() || `Resend HTTP ${res.status}`;
-    throw new Error(`Email delivery failed: ${detail}`);
-  }
-
-  return { provider: "resend", externalId: payload.id?.trim() || null };
+  return { provider: "resend", externalId: resendId };
 }
 
 /** Sends a one-off test email to `FI_REMINDER_TEST_EMAIL` (never the patient). Requires `FI_REMINDERS_TEST_SEND=true`. */

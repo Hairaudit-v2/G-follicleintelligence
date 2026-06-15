@@ -13,6 +13,7 @@ import {
   persistPathologyRequestPdfStorage,
 } from "@/src/lib/pathology/pathologyRequestMutations.server";
 import { renderPathologyBloodRequestPdfBytes } from "@/src/lib/pathology/pathologyPdfRender.server";
+import { sendResendEmailHttp } from "@/src/lib/email/resendHttpSend.server";
 import { buildResendFromAddress, isEmailDeliveryConfigured } from "@/src/lib/reminders/reminderDeliveryConfig";
 import { loadReminderDeliveryConfig } from "@/src/lib/reminders/reminderDeliveryConfig.server";
 
@@ -70,13 +71,9 @@ export async function sendPathologyRequestToPatientEmail(params: {
   const fromHeader = buildResendFromAddress(cfg.resend);
   if (!fromHeader) throw new Error("RESEND_FROM_EMAIL is not configured.");
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.resend.apiKey!.trim()}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const { resendId } = await sendResendEmailHttp(
+    {
+      apiKey: cfg.resend.apiKey!,
       from: fromHeader,
       to: [to],
       subject,
@@ -87,14 +84,14 @@ export async function sendPathologyRequestToPatientEmail(params: {
           content: Buffer.from(pdfBytes).toString("base64"),
         },
       ],
-    }),
-  });
-
-  const payload = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
-  if (!res.ok) {
-    const detail = payload.message?.trim() || `Resend HTTP ${res.status}`;
-    throw new Error(`Email delivery failed: ${detail}`);
-  }
+    },
+    {
+      tenant_id: tid,
+      pathology_request_id: rid,
+      recipient_email_domain: to.includes("@") ? to.split("@")[1]?.toLowerCase() ?? null : null,
+      delivery_path: "pathology_patient_pdf",
+    }
+  );
 
   try {
     const { error: upErr } = await supabase.storage
@@ -113,7 +110,6 @@ export async function sendPathologyRequestToPatientEmail(params: {
   const sentAt = new Date().toISOString();
   await markPathologyRequestEmailedToPatient({ tenantId: tid, patientId: pid, requestId: rid, occurredAtIso: sentAt }, supabase);
 
-  const resendId = payload.id?.trim() || null;
   await appendCrmActivityEvent({
     tenantId: tid,
     activityKind: "pathology.blood_request.sent",
