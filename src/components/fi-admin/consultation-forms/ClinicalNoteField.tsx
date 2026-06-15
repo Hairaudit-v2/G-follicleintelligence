@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import {
   normalizeClinicalNoteValue,
   nowIso,
@@ -60,12 +61,12 @@ export function ClinicalNoteField({
   return (
     <div className="space-y-2">
       <div>
-        <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
+        <div className={fiOsLightFormSurfaceClassNames.labelInline}>
           {label}
-          {required ? <span className="text-red-600"> *</span> : null}
+          {required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
         </div>
         {description?.trim() ? (
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>
+          <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
         ) : null}
       </div>
       {!disabled ? (
@@ -75,7 +76,7 @@ export function ClinicalNoteField({
               key={t}
               type="button"
               onClick={() => appendSnippet(t)}
-              className="min-h-[40px] touch-manipulation rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm hover:border-sky-300 hover:bg-sky-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-sky-500/50"
+              className="min-h-[40px] touch-manipulation rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50/50"
             >
               {t}
             </button>
@@ -84,7 +85,8 @@ export function ClinicalNoteField({
       ) : null}
       <textarea
         className={cn(
-          "min-h-[160px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100",
+          "min-h-[160px] w-full",
+          fiOsLightFormSurfaceClassNames.controlInset,
           disabled && "opacity-80"
         )}
         value={note}
@@ -99,9 +101,9 @@ export function ClinicalNoteField({
 export function ClinicalNoteReadOnlySummary({ label, value }: { label: string; value: unknown }) {
   const { note } = normalizeClinicalNoteValue(value);
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-sm dark:border-slate-700 dark:bg-slate-900/50">
-      <p className="font-semibold text-slate-900 dark:text-slate-50">{label}</p>
-      <p className="mt-2 whitespace-pre-wrap text-slate-700 dark:text-slate-300">{note.trim() || "—"}</p>
+    <div className="rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-sm text-slate-800">
+      <p className="font-semibold text-slate-900">{label}</p>
+      <p className="mt-2 whitespace-pre-wrap text-slate-700">{note.trim() || "—"}</p>
     </div>
   );
 }

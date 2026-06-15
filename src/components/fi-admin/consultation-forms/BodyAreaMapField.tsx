@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } 
 
 import { cn } from "@/lib/utils";
 import { FiCard } from "@/src/components/fi-design/FiCard";
+import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import {
   BODY_AREA_MAP_LABEL_OPTIONS,
   BODY_AREA_MAP_SEVERITY_OPTIONS,
@@ -20,7 +21,7 @@ import {
 } from "@/src/lib/consultationForms/bodyAreaMapModel";
 
 function WireframeSvg({ view }: { view: BodyAreaMapViewId }) {
-  const common = "fill-none stroke-current stroke-[1.25] text-slate-500 dark:text-slate-400";
+  const common = "fill-none stroke-current stroke-[1.25] text-slate-500";
   switch (view) {
     case "frontal_hairline":
       return (
@@ -228,12 +229,12 @@ export function BodyAreaMapField({
   return (
     <div className="space-y-3">
       <div>
-        <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
+        <div className={fiOsLightFormSurfaceClassNames.labelInline}>
           {label}
-          {required ? <span className="text-red-600"> *</span> : null}
+          {required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
         </div>
         {description?.trim() ? (
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>
+          <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
         ) : null}
       </div>
 
@@ -255,12 +256,12 @@ export function BodyAreaMapField({
               className={cn(
                 "min-h-[44px] min-w-[44px] touch-manipulation rounded-lg border px-3 py-2 text-left text-sm font-medium transition",
                 active
-                  ? "border-sky-500 bg-sky-50 text-sky-950 dark:border-sky-400 dark:bg-sky-950/50 dark:text-sky-50"
-                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-500"
+                  ? "border-sky-500 bg-sky-50 text-sky-950"
+                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300"
               )}
             >
               <span className="block leading-tight">{BODY_AREA_MAP_VIEW_LABELS[v]}</span>
-              <span className="mt-0.5 block text-xs font-normal text-slate-500 dark:text-slate-400">
+              <span className={cn("mt-0.5 block text-xs font-normal", fiOsLightFormSurfaceClassNames.meta)}>
                 {count} marker{count === 1 ? "" : "s"}
               </span>
             </button>
@@ -268,19 +269,19 @@ export function BodyAreaMapField({
         })}
       </div>
 
-      <FiCard className="overflow-hidden border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+      <FiCard className="overflow-hidden border border-slate-200 bg-slate-50/60 p-3">
         <svg
           ref={svgRef}
           viewBox="0 0 100 100"
           className={cn(
-            "aspect-square w-full max-w-md select-none rounded-lg bg-white dark:bg-slate-950",
+            "aspect-square w-full max-w-md select-none rounded-lg bg-white",
             disabled ? "cursor-not-allowed opacity-70" : "cursor-crosshair"
           )}
           onPointerDown={onSvgPointerDown}
           role="img"
           aria-label={`Wireframe: ${viewDisplayForBodyAreaMap(activeView)}. Tap to add a marker.`}
         >
-          <rect width="100" height="100" className="fill-white dark:fill-slate-950" />
+          <rect width="100" height="100" className="fill-white" />
           <WireframeSvg view={activeView} />
           {markersForActive.map((a) => {
             const sel = a.id === selectedId;
@@ -308,28 +309,28 @@ export function BodyAreaMapField({
           })}
         </svg>
         {!disabled ? (
-          <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+          <p className={cn("mt-2 text-center", fiOsLightFormSurfaceClassNames.meta)}>
             Tap the diagram to add a marker. Tap a marker to edit.
           </p>
         ) : null}
       </FiCard>
 
       {selected && !disabled ? (
-        <FiCard className="space-y-3 border border-slate-200 p-4 dark:border-slate-600">
+        <FiCard className="space-y-3 border border-slate-200 p-4">
           <div className="flex items-center justify-between gap-2">
-            <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-50">Edit marker</h4>
+            <h4 className="text-sm font-semibold text-slate-900">Edit marker</h4>
             <button
               type="button"
               onClick={() => setSelectedId(null)}
-              className="min-h-[44px] rounded-lg px-3 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="min-h-[44px] rounded-lg px-3 text-sm text-slate-600 hover:bg-slate-100"
             >
               Close
             </button>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Label</label>
+            <label className={fiOsLightFormSurfaceClassNames.compactLabel}>Label</label>
             <select
-              className="min-h-[44px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              className={cn("min-h-[44px]", fiOsLightFormSurfaceClassNames.controlInset)}
               value={selected.label}
               onChange={(e) => updateSelected({ label: e.target.value })}
             >
@@ -341,9 +342,9 @@ export function BodyAreaMapField({
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Severity</label>
+            <label className={fiOsLightFormSurfaceClassNames.compactLabel}>Severity</label>
             <select
-              className="min-h-[44px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              className={cn("min-h-[44px]", fiOsLightFormSurfaceClassNames.controlInset)}
               value={selected.severity}
               onChange={(e) => updateSelected({ severity: e.target.value as BodyAreaMapSeverity })}
             >
@@ -355,18 +356,21 @@ export function BodyAreaMapField({
             </select>
           </div>
           <fieldset className="space-y-2">
-            <legend className="text-xs font-medium text-slate-600 dark:text-slate-400">Tags</legend>
+            <legend className={fiOsLightFormSurfaceClassNames.legendCompact}>Tags</legend>
             <div className="grid gap-2 sm:grid-cols-2">
               {BODY_AREA_MAP_TAG_OPTIONS.map((o) => {
                 const on = selected.tags.includes(o.value);
                 return (
                   <label
                     key={o.value}
-                    className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-100 px-2 py-1 text-sm dark:border-slate-700"
+                    className={cn(
+                      fiOsLightFormSurfaceClassNames.choiceRow,
+                      "min-h-[44px] rounded-lg border border-slate-200 px-2 py-1"
+                    )}
                   >
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 text-sky-600"
+                      className={fiOsLightFormSurfaceClassNames.choiceCheckbox}
                       checked={on}
                       onChange={() => {
                         const next = new Set(selected.tags);
@@ -382,9 +386,9 @@ export function BodyAreaMapField({
             </div>
           </fieldset>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Notes</label>
+            <label className={fiOsLightFormSurfaceClassNames.compactLabel}>Notes</label>
             <textarea
-              className="min-h-[88px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              className={cn("min-h-[88px]", fiOsLightFormSurfaceClassNames.controlInset)}
               value={selected.notes}
               onChange={(e) => updateSelected({ notes: e.target.value })}
             />
@@ -392,7 +396,7 @@ export function BodyAreaMapField({
           <button
             type="button"
             onClick={deleteSelected}
-            className="min-h-[44px] w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-100"
+            className="min-h-[44px] w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900 hover:bg-red-100"
           >
             Delete marker
           </button>
@@ -416,10 +420,10 @@ export function BodyAreaMapAnnotationsSummary({
   const { annotations } = normalizeBodyAreaMapValue(value, allowed);
   if (annotations.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
+      <div className="rounded-lg border border-slate-200 bg-slate-50/90 px-3 py-2 text-sm text-slate-700">
         {fieldLabel.trim() ? (
           <>
-            <span className="font-medium text-slate-800 dark:text-slate-200">{fieldLabel}:</span>{" "}
+            <span className="font-medium text-slate-800">{fieldLabel}:</span>{" "}
           </>
         ) : null}
         No markers recorded.
@@ -427,22 +431,24 @@ export function BodyAreaMapAnnotationsSummary({
     );
   }
   return (
-    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/50">
-      {fieldLabel.trim() ? <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">{fieldLabel}</p> : null}
+    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/90 p-3">
+      {fieldLabel.trim() ? (
+        <p className="text-sm font-semibold text-slate-900">{fieldLabel}</p>
+      ) : null}
       <ul className="space-y-2">
         {annotations.map((a) => (
           <li
             key={a.id}
-            className="rounded-md border border-slate-200/80 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+            className="rounded-md border border-slate-200/90 bg-white px-3 py-2 text-sm text-slate-800"
           >
-            <div className="font-medium text-slate-800 dark:text-slate-100">
+            <div className="font-medium text-slate-900">
               {viewDisplayForBodyAreaMap(a.view)} · {labelDisplayForBodyAreaMap(a.label)}
             </div>
-            <div className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+            <div className="mt-0.5 text-xs text-slate-600">
               Severity: <span className="font-medium capitalize">{a.severity.replace(/_/g, " ")}</span>
             </div>
             {a.notes.trim() ? (
-              <div className="mt-1 text-xs text-slate-700 dark:text-slate-300">Notes: {a.notes.trim()}</div>
+              <div className="mt-1 text-xs text-slate-700">Notes: {a.notes.trim()}</div>
             ) : null}
             {a.tags.length > 0 ? (
               <div className="mt-1 text-xs text-slate-500">Tags: {a.tags.join(", ")}</div>

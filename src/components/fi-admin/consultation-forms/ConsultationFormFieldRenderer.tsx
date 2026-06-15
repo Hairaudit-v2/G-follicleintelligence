@@ -1,9 +1,11 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { BodyAreaMapAnnotationsSummary, BodyAreaMapField } from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
 import { ClinicalNoteField, ClinicalNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/ClinicalNoteField";
 import { VoiceNoteField, VoiceNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/VoiceNoteField";
 import { FiCard } from "@/src/components/fi-design/FiCard";
+import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
 import { optionsForField } from "@/src/lib/consultationForms/consultationFormOptionSets";
 import type { ConsultationFormField, ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
@@ -15,9 +17,9 @@ function readStringArray(v: unknown): string[] {
 
 function PlaceholderCard({ title, body }: { title: string; body: string }) {
   return (
-    <FiCard className="border border-dashed border-slate-300 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-900/40">
-      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{title}</p>
-      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{body}</p>
+    <FiCard className="border border-dashed border-slate-300 bg-slate-50/90 p-4">
+      <p className={cn("text-sm font-semibold", fiOsLightFormSurfaceClassNames.labelInline)}>{title}</p>
+      <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.helper)}>{body}</p>
     </FiCard>
   );
 }
@@ -43,15 +45,15 @@ export function ConsultationFormFieldRenderer({
 
   const opts = optionsForField(field);
   const commonLabel = (
-    <label className="block text-sm font-medium text-slate-800 dark:text-slate-100">
+    <label className={fiOsLightFormSurfaceClassNames.label}>
       {field.label}
-      {field.required ? <span className="text-red-600"> *</span> : null}
+      {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
     </label>
   );
 
   const description =
     field.description?.trim() ? (
-      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{field.description}</p>
+      <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{field.description}</p>
     ) : null;
 
   switch (field.type) {
@@ -62,7 +64,7 @@ export function ConsultationFormFieldRenderer({
           {description}
           <input
             type="text"
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            className={fiOsLightFormSurfaceClassNames.controlInset}
             value={typeof value === "string" ? value : value == null ? "" : String(value)}
             placeholder={field.placeholder}
             disabled={disabled}
@@ -76,7 +78,7 @@ export function ConsultationFormFieldRenderer({
           {commonLabel}
           {description}
           <textarea
-            className="min-h-[88px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            className={cn(fiOsLightFormSurfaceClassNames.controlInset, "min-h-[88px]")}
             value={typeof value === "string" ? value : value == null ? "" : String(value)}
             placeholder={field.placeholder}
             disabled={disabled}
@@ -91,7 +93,7 @@ export function ConsultationFormFieldRenderer({
           {description}
           <input
             type="number"
-            className="w-full max-w-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            className={cn(fiOsLightFormSurfaceClassNames.controlInset, "max-w-xs")}
             value={
               typeof value === "number" && !Number.isNaN(value)
                 ? String(value)
@@ -122,7 +124,7 @@ export function ConsultationFormFieldRenderer({
           {description}
           <input
             type="date"
-            className="w-full max-w-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            className={fiOsLightFormSurfaceClassNames.controlInsetDate}
             value={typeof value === "string" ? value : ""}
             disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
@@ -135,15 +137,15 @@ export function ConsultationFormFieldRenderer({
           <input
             id={`cf-${field.id}`}
             type="checkbox"
-            className="mt-1 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 disabled:opacity-60"
+            className={cn("mt-1", fiOsLightFormSurfaceClassNames.choiceCheckbox)}
             checked={Boolean(value)}
             disabled={disabled}
             onChange={(e) => onChange(e.target.checked)}
           />
           <div>
-            <label htmlFor={`cf-${field.id}`} className="text-sm font-medium text-slate-800 dark:text-slate-100">
+            <label htmlFor={`cf-${field.id}`} className={fiOsLightFormSurfaceClassNames.labelInline}>
               {field.label}
-              {field.required ? <span className="text-red-600"> *</span> : null}
+              {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
             </label>
             {description}
           </div>
@@ -155,7 +157,7 @@ export function ConsultationFormFieldRenderer({
           {commonLabel}
           {description}
           <select
-            className="w-full max-w-lg rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            className={cn(fiOsLightFormSurfaceClassNames.controlInset, "max-w-lg")}
             value={typeof value === "string" ? value : ""}
             disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
@@ -174,19 +176,19 @@ export function ConsultationFormFieldRenderer({
       const selected = new Set(readStringArray(value));
       return (
         <fieldset className="space-y-2" disabled={disabled}>
-          <legend className="text-sm font-medium text-slate-800 dark:text-slate-100">
+          <legend className={fiOsLightFormSurfaceClassNames.legend}>
             {field.label}
-            {field.required ? <span className="text-red-600"> *</span> : null}
+            {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
           </legend>
           {description}
           <div className="grid gap-2 sm:grid-cols-2">
             {opts.map((o) => {
               const checked = selected.has(o.value);
               return (
-                <label key={o.value} className="flex items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+                <label key={o.value} className={fiOsLightFormSurfaceClassNames.choiceRow}>
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                    className={fiOsLightFormSurfaceClassNames.choiceCheckbox}
                     checked={checked}
                     disabled={disabled}
                     onChange={() => {
@@ -207,18 +209,18 @@ export function ConsultationFormFieldRenderer({
     case "radio":
       return (
         <fieldset className="space-y-2" disabled={disabled}>
-          <legend className="text-sm font-medium text-slate-800 dark:text-slate-100">
+          <legend className={fiOsLightFormSurfaceClassNames.legend}>
             {field.label}
-            {field.required ? <span className="text-red-600"> *</span> : null}
+            {field.required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
           </legend>
           {description}
           <div className="flex flex-col gap-2">
             {opts.map((o) => (
-              <label key={o.value} className="flex items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+              <label key={o.value} className={fiOsLightFormSurfaceClassNames.choiceRow}>
                 <input
                   type="radio"
                   name={`cf-radio-${field.id}`}
-                  className="h-4 w-4 border-slate-300 text-sky-600 focus:ring-sky-500"
+                  className="h-4 w-4 border-slate-500 text-cyan-600 focus:ring-2 focus:ring-cyan-400/35"
                   value={o.value}
                   checked={value === o.value}
                   disabled={disabled}
@@ -341,8 +343,9 @@ export function ConsultationFormFieldRenderer({
       );
     default:
       return (
-        <p className="text-xs text-amber-800">
-          Unsupported field type: <code>{field.type}</code>
+        <p className="text-xs text-amber-900">
+          Unsupported field type:{" "}
+          <code className="rounded bg-amber-100 px-1 font-mono text-[0.8rem] text-amber-950">{field.type}</code>
         </p>
       );
   }

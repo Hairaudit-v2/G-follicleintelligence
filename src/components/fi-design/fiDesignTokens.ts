@@ -98,6 +98,49 @@ export const fiPageHeaderVariantClassNames = {
 
 export type FiPageHeaderVariant = keyof typeof fiPageHeaderVariantClassNames;
 
+/**
+ * **FI OS light form surfaces** — typography and control colors that stay readable while `<html class="dark">`
+ * is set globally (`app/layout.tsx`). Tailwind’s `dark:` variant still applies under that flag, so patterns
+ * like `text-slate-800 dark:text-slate-100` on a **white** `clinicLight` / `FiCard` default (`bg-white`) card
+ * produce white-on-white text. Use this map for those panels instead of `dark:` text classes.
+ * **Use** for: labels, helpers, section copy, and inset inputs on white/off-white cards rendered inside the FI OS
+ * tenant shell (e.g. ConsultationOS guided form, `FiCard` defaults, `FiSection` with default `clinicLight`).
+ *
+ * **Do not use** for: `darkGlass` / `auditDark` cards, primary sidebar / top bar, or any surface that already
+ * commits to a dark background for both light and dark branches. There, keep explicit dark-theme pairs or OS
+ * chrome tokens (`fiOsChromeClasses`, etc.). If a whole panel flips with `bg-white dark:bg-slate-950` **and**
+ * matching `text-slate-900 dark:text-slate-100`, that is self-consistent — this map is not required.
+ *
+ * **Inset controls** (`controlInset*`) use `#020617`, `text-white`, and `placeholder:text-slate-400` so values
+ * and placeholders stay AA-friendly on the light card without relying on `dark:`.
+ */
+export const fiOsLightFormSurfaceClassNames = {
+  sectionTitle: "text-lg font-semibold text-slate-900",
+  panelCaption: "text-sm font-semibold uppercase tracking-wide text-slate-600",
+  label: "block text-sm font-medium text-slate-800",
+  labelInline: "text-sm font-medium text-slate-800",
+  compactLabel: "text-xs font-medium text-slate-700",
+  legend: "text-sm font-medium text-slate-800",
+  legendCompact: "text-xs font-medium text-slate-700",
+  helper: "text-xs leading-relaxed text-slate-600",
+  meta: "text-xs text-slate-500",
+  body: "text-sm text-slate-800",
+  bodyMuted: "text-sm text-slate-600",
+  choiceRow: "flex items-center gap-2 text-sm text-slate-800",
+  requiredMark: "text-red-600",
+  /** Text-like inputs, selects, textareas — dark control on light card */
+  controlInset:
+    "w-full rounded-lg border border-slate-700 bg-[#020617] px-3 py-2 text-sm text-white shadow-sm placeholder:text-slate-400 selection:bg-cyan-500/25 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60",
+  controlInsetDate:
+    "w-full max-w-xs rounded-lg border border-slate-700 bg-[#020617] px-3 py-2 text-sm text-white shadow-sm [color-scheme:dark] focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 disabled:cursor-not-allowed disabled:opacity-60",
+  /** Boolean / checkbox-group / radio — on white card */
+  choiceCheckbox:
+    "h-4 w-4 shrink-0 rounded border-slate-500 text-cyan-600 focus:ring-2 focus:ring-cyan-400/35 disabled:opacity-60",
+  /** Small bordered chips (quick inserts, secondary buttons) on the light form */
+  chipNeutral:
+    "min-h-[40px] touch-manipulation rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50/50",
+} as const;
+
 /** Full-width interactive button / link affordances (primary actions). */
 export const fiButtonVariantClassNames = {
   /** FI OS gradient CTA (`FiHomeDashboard` empty state / primary CTA pattern). */

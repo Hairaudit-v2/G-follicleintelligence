@@ -10,7 +10,9 @@ import {
   createConsultationQuoteDraftFromSummaryAction,
   createSurgeryPlanningDraftFromConsultationSummaryAction,
 } from "@/lib/actions/fi-consultation-form-actions";
+import { cn } from "@/lib/utils";
 import { FiCard } from "@/src/components/fi-design/FiCard";
+import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/consultationCompletionTypes";
 import {
   followUpTaskRecommended,
@@ -160,7 +162,7 @@ export function ConsultationHandoffPanel({
           ? "Summary indicates follow-up, review later, undecided, or blood tests — a CRM task helps the team close the loop."
           : "Not recommended from this summary — follow-up was not required and outcome does not imply a standing task.",
         requirements: (
-          <ul className="mt-1 list-inside list-disc text-xs text-slate-600 dark:text-slate-400">
+          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
             <li>CRM lead linked: {followUpRequirementsMet ? "yes" : "no (required)"}</li>
             <li>Guided form locked with completion summary: yes</li>
           </ul>
@@ -182,7 +184,7 @@ export function ConsultationHandoffPanel({
         title: "Quote draft",
         why: "Capture consultation plan, graft range, and treatments as a draft quote for pricing and consent workflows.",
         requirements: (
-          <ul className="mt-1 list-inside list-disc text-xs text-slate-600 dark:text-slate-400">
+          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
             <li>CRM lead or case linked: {quoteRequirementsMet ? "yes" : "no (need at least one)"}</li>
           </ul>
         ),
@@ -203,7 +205,7 @@ export function ConsultationHandoffPanel({
           ? "Screening or labs were flagged — this opens a saved blood/pathology request draft for clinical review."
           : "Not recommended from this summary — pathology was not flagged.",
         requirements: (
-          <ul className="mt-1 list-inside list-disc text-xs text-slate-600 dark:text-slate-400">
+          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
             <li>Patient linked: {pathologyRequirementsMet ? "yes" : "no (required)"}</li>
             <li>Pathology recommended in summary: {pathologyRecommended ? "yes" : "no"}</li>
           </ul>
@@ -225,7 +227,7 @@ export function ConsultationHandoffPanel({
         title: "SurgeryOS planning",
         why: "Push structured zones, graft estimates, and strategy notes into the case surgery plan as a draft (does not approve the case).",
         requirements: (
-          <ul className="mt-1 list-inside list-disc text-xs text-slate-600 dark:text-slate-400">
+          <ul className={cn("mt-1 list-inside list-disc", fiOsLightFormSurfaceClassNames.helper)}>
             <li>Case linked: {kase ? "yes" : "no (required)"}</li>
             <li>Outcome proceed to surgery with plan details: {surgeryEligible ? "yes" : "no"}</li>
           </ul>
@@ -261,8 +263,8 @@ export function ConsultationHandoffPanel({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Guided hand-offs</h3>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Guided hand-offs</h3>
+      <p className={fiOsLightFormSurfaceClassNames.helper}>
         Actions below are clinician-triggered. Nothing is created automatically when you complete the consultation. No patient
         emails are sent from here.
       </p>
@@ -270,15 +272,15 @@ export function ConsultationHandoffPanel({
         {cards.map((c) => (
           <FiCard key={c.key} className="flex flex-col gap-3 p-4">
             <div>
-              <h4 className="text-base font-semibold text-slate-900 dark:text-slate-50">{c.title}</h4>
-              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{c.why}</p>
+              <h4 className="text-base font-semibold text-slate-900">{c.title}</h4>
+              <p className={cn("mt-1", fiOsLightFormSurfaceClassNames.helper)}>{c.why}</p>
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Requirements</p>
               {c.requirements}
             </div>
             {c.blockedDetail ? (
-              <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-950">
                 {c.blockedDetail}
               </p>
             ) : null}
@@ -292,18 +294,18 @@ export function ConsultationHandoffPanel({
                 type="button"
                 disabled={c.blocked || busy !== null}
                 onClick={c.onClick}
-                className="inline-flex min-h-[40px] items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                className="inline-flex min-h-[40px] items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy === c.key ? "Working…" : c.cta}
               </button>
               {c.result ? (
-                <span className="text-xs text-slate-600 dark:text-slate-400">
+                <span className={cn(fiOsLightFormSurfaceClassNames.helper, "text-slate-700")}>
                   {c.result.reused ? "Already exists" : "Created"}
                   {c.result.detail ? ` — ${c.result.detail}` : null}
                   {c.result.href ? (
                     <>
                       {" · "}
-                      <Link href={c.result.href} className="font-semibold text-sky-700 underline hover:text-sky-800 dark:text-sky-400">
+                      <Link href={c.result.href} className="font-semibold text-sky-700 underline hover:text-sky-900">
                         Open
                       </Link>
                     </>

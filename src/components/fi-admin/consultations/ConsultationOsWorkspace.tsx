@@ -577,7 +577,7 @@ export function ConsultationOsWorkspace({
             autoComplete="off"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
-            className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
+            className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none ring-sky-400/20 focus-visible:border-sky-300 focus-visible:ring-2"
           />
         </FiCard>
 

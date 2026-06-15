@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { upsertConsultationFormClinicalNoteAction } from "@/lib/actions/fi-consultation-form-actions";
 import { cn } from "@/lib/utils";
 import { FiCard } from "@/src/components/fi-design/FiCard";
+import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import type { ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
 import {
   normalizeVoiceNoteValue,
@@ -190,15 +191,15 @@ export function VoiceNoteField({
   return (
     <div className="space-y-2">
       <div>
-        <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
+        <div className={fiOsLightFormSurfaceClassNames.labelInline}>
           {label}
-          {required ? <span className="text-red-600"> *</span> : null}
+          {required ? <span className={fiOsLightFormSurfaceClassNames.requiredMark}> *</span> : null}
         </div>
         {description?.trim() ? (
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>
+          <p className={cn("mt-0.5", fiOsLightFormSurfaceClassNames.helper)}>{description}</p>
         ) : null}
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className={fiOsLightFormSurfaceClassNames.helper}>
         Dictation availability depends on browser/device support. Use the text area if speech is unavailable.
       </p>
       {!disabled && hasSpeech ? (
@@ -221,25 +222,26 @@ export function VoiceNoteField({
               stopDictation();
               commitTranscript("");
             }}
-            className="min-h-[44px] touch-manipulation rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            className="min-h-[44px] touch-manipulation rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50/50"
           >
             Clear transcript
           </button>
         </div>
       ) : null}
       {listening ? (
-        <FiCard className="border border-amber-200 bg-amber-50/90 px-3 py-2 text-sm font-medium text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-50">
+        <FiCard className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950">
           Dictation active — speak clearly. Tap “Stop dictation” when finished.
         </FiCard>
       ) : null}
       {speechError?.trim() ? (
-        <p className="text-xs text-red-700 dark:text-red-300" role="alert">
+        <p className="text-xs text-red-800" role="alert">
           {speechError}
         </p>
       ) : null}
       <textarea
         className={cn(
-          "min-h-[160px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100",
+          "min-h-[160px] w-full",
+          fiOsLightFormSurfaceClassNames.controlInset,
           disabled && "opacity-80"
         )}
         value={transcript}
@@ -258,17 +260,17 @@ export function VoiceNoteField({
             {saveStatus === "saving" ? "Saving…" : "Save to clinical notes"}
           </button>
           {normalized.clinicalNoteId?.trim() ? (
-            <span className="text-xs text-slate-500">Linked note ID: {normalized.clinicalNoteId.slice(0, 8)}…</span>
+            <span className={fiOsLightFormSurfaceClassNames.meta}>Linked note ID: {normalized.clinicalNoteId.slice(0, 8)}…</span>
           ) : null}
         </div>
       ) : null}
       {saveStatus === "saved" && saveMessage?.trim() ? (
-        <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300" role="status">
+        <p className="text-xs font-medium text-emerald-800" role="status">
           {saveMessage}
         </p>
       ) : null}
       {saveStatus === "error" && saveMessage?.trim() ? (
-        <p className="text-xs font-medium text-red-800 dark:text-red-300" role="alert">
+        <p className="text-xs font-medium text-red-800" role="alert">
           {saveMessage}
         </p>
       ) : null}
@@ -279,11 +281,11 @@ export function VoiceNoteField({
 export function VoiceNoteReadOnlySummary({ label, value }: { label: string; value: unknown }) {
   const { transcript, clinicalNoteId } = normalizeVoiceNoteValue(value);
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-sm dark:border-slate-700 dark:bg-slate-900/50">
-      <p className="font-semibold text-slate-900 dark:text-slate-50">{label}</p>
-      <p className="mt-2 whitespace-pre-wrap text-slate-700 dark:text-slate-300">{transcript.trim() || "—"}</p>
+    <div className="rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-sm text-slate-800">
+      <p className="font-semibold text-slate-900">{label}</p>
+      <p className="mt-2 whitespace-pre-wrap text-slate-700">{transcript.trim() || "—"}</p>
       {clinicalNoteId?.trim() ? (
-        <p className="mt-2 text-xs text-slate-500">Clinical note: {clinicalNoteId}</p>
+        <p className={cn("mt-2", fiOsLightFormSurfaceClassNames.meta)}>Clinical note: {clinicalNoteId}</p>
       ) : null}
     </div>
   );

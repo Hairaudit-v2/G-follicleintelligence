@@ -15,6 +15,7 @@ import { ConsultationHandoffPanel } from "@/src/components/fi-admin/consultation
 import { ConsultationFormFieldRenderer } from "@/src/components/fi-admin/consultation-forms/ConsultationFormFieldRenderer";
 import { ConsultationFormSectionNav } from "@/src/components/fi-admin/consultation-forms/ConsultationFormSectionNav";
 import { FiCard } from "@/src/components/fi-design/FiCard";
+import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import type {
   ConsultationFormInstanceWithTemplate,
@@ -304,10 +305,8 @@ export function ConsultationFormRunner({
           </p>
         ) : null}
         {!canEdit && bodyAreaMapFields.length > 0 ? (
-          <div className="mt-4 space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Area map summary
-            </h3>
+          <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+            <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Area map summary</h3>
             {bodyAreaMapFields.map((f) => (
               <BodyAreaMapAnnotationsSummary
                 key={f.id}
@@ -322,9 +321,7 @@ export function ConsultationFormRunner({
 
       {showCompletionSection && displayCompletionSummary ? (
         <div className="space-y-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
-            Consultation completion
-          </h2>
+          <h2 className={fiOsLightFormSurfaceClassNames.panelCaption}>Consultation completion</h2>
           <ConsultationCompletionSummaryCard summary={displayCompletionSummary} isPreview={showCompleteConsultationCta} />
           {canShowHandoffs && persistedCompletion ? (
             <ConsultationHandoffPanel
@@ -348,7 +345,7 @@ export function ConsultationFormRunner({
               >
                 {busyComplete ? "Completing…" : "Complete consultation"}
               </button>
-              <p className="max-w-xl text-xs text-slate-500 dark:text-slate-400">
+              <p className={`max-w-xl ${fiOsLightFormSurfaceClassNames.helper}`}>
                 Finalizes the guided consultation: locks this form, stores the summary on the consultation record, and
                 records a timeline event when a case is linked. Optional CRM, pathology, and SurgeryOS hand-offs appear
                 below after completion; they are never created automatically.
@@ -370,9 +367,9 @@ export function ConsultationFormRunner({
           {activeSection ? (
             <>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">{activeSection.title}</h2>
+                <h2 className={fiOsLightFormSurfaceClassNames.sectionTitle}>{activeSection.title}</h2>
                 {activeSection.description?.trim() ? (
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{activeSection.description}</p>
+                  <p className={`mt-1 ${fiOsLightFormSurfaceClassNames.bodyMuted}`}>{activeSection.description}</p>
                 ) : null}
               </div>
               <div className="space-y-5">
@@ -390,7 +387,7 @@ export function ConsultationFormRunner({
               </div>
             </>
           ) : (
-            <p className="text-sm text-slate-600">This form has no sections.</p>
+            <p className={fiOsLightFormSurfaceClassNames.bodyMuted}>This form has no sections.</p>
           )}
         </FiCard>
       </div>
