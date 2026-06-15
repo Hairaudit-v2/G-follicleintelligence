@@ -46,7 +46,9 @@ External product databases for HairAudit and HLI are **not** in this repo; integ
 3. **HairAudit case:** `hairaudit.case.submitted` → handler → `fi_events` + global case resolution → dual-write.  
 4. **HairAudit images:** `hairaudit.images.uploaded` → handler → dual-write → pipeline triggers when readiness met.  
 
-**Gap vs intelligence-core draft:** Draft envelope uses `IntelligenceSystemSource` (`fi_os`, `hairaudit`, `iiohr`, `external`) and additional event names (e.g. `iiohr.competency.*`, `fi_os.patient_twin.updated`). Today’s FI ingest uses **`clinic`** instead of **`fi_os`** and has **no** `iiohr` producer path on this API — **identity and taxonomy fragmentation** between design, vocabulary, and live schema.
+**Gap vs intelligence-core draft:** Draft envelope uses `IntelligenceSystemSource` (`fi_os`, `hli`, `hairaudit`, `iiohr`, `external`) and additional event names (e.g. `iiohr.competency.*`, `fi_os.patient_twin.updated`). Today’s FI ingest still uses the legacy wire value **`clinic`** (mapped to `fi_os` in adapters only). There is **no** new `iiohr` producer path on this API in Stage 10 — **taxonomy is aligned in documentation and adapter tests**, not by changing ingress.
+
+**Stage 10 taxonomy:** See [ecosystem-source-system-taxonomy.md](./ecosystem-source-system-taxonomy.md) for the authoritative `clinic` ↔ `fi_os` mapping and reserved systems.
 
 ---
 

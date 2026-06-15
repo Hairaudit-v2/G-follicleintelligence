@@ -115,3 +115,16 @@ export const FI_SIGNAL_META: Record<
 export function isKnownSignalId(value: string): value is FiSignalId {
   return (FI_SIGNAL_IDS as readonly string[]).includes(value);
 }
+
+/**
+ * `FI_EVENT_TYPES` entries that are **not** on the `@follicle/intelligence-core` event allowlist yet.
+ * When promoting a vocabulary event to cross-system ingestion or export, add it to
+ * `INTELLIGENCE_EVENT_NAMES` and remove it here — drift tests enforce coverage.
+ */
+export const FI_VOCABULARY_OUTSIDE_INTELLIGENCE_CORE = {
+  "hli.blood_request.generated": "Roadmap / design vocabulary; no shared envelope yet.",
+  "hli.scalp_imaging.captured": "Roadmap / design vocabulary; no shared envelope yet.",
+  "hli.treatment.recorded": "Roadmap / design vocabulary; no shared envelope yet.",
+  "hairaudit.report.released": "Design alias; intelligence-core uses hairaudit.report.generated for graph/export drafts.",
+  "hairaudit.verification.completed": "Roadmap / design vocabulary; no shared envelope yet.",
+} as const satisfies Partial<Record<FiEventType, string>>;

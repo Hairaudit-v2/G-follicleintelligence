@@ -4,7 +4,7 @@
  */
 
 /** Producer or context for an intelligence event. */
-export type IntelligenceSystemSource = "fi_os" | "hairaudit" | "iiohr" | "external";
+export type IntelligenceSystemSource = "fi_os" | "hli" | "hairaudit" | "iiohr" | "external";
 
 /**
  * Allow-listed event names (examples + production-aligned aliases).
@@ -15,6 +15,7 @@ export const INTELLIGENCE_EVENT_NAMES = [
   "iiohr.competency.export.requested",
   "hairaudit.case.created",
   "hairaudit.case.submitted",
+  "hairaudit.images.uploaded",
   "hairaudit.audit.completed",
   "hairaudit.report.generated",
   "fi_os.clinic.readiness.updated",
@@ -22,6 +23,8 @@ export const INTELLIGENCE_EVENT_NAMES = [
   "hli.intake.submitted",
   "hli.document.uploaded",
   "hli.lab.panel.summary.recorded",
+  /** FI HTTP ingest local-telemetry event; canonical envelope name for bus alignment. */
+  "clinic.ai.usage",
 ] as const;
 
 export type IntelligenceEventName = (typeof INTELLIGENCE_EVENT_NAMES)[number];
@@ -59,7 +62,7 @@ export type IntelligenceEventEnvelopeParseResult =
   | { ok: true; envelope: IntelligenceEventEnvelope }
   | { ok: false; error: string };
 
-const SOURCES = new Set<IntelligenceSystemSource>(["fi_os", "hairaudit", "iiohr", "external"]);
+const SOURCES = new Set<IntelligenceSystemSource>(["fi_os", "hli", "hairaudit", "iiohr", "external"]);
 
 const DELIVERY_MODES = new Set<IntelligenceEventDeliveryMode>([
   "sync_http",
@@ -110,7 +113,7 @@ export function parseIntelligenceEventEnvelope(input: unknown): IntelligenceEven
 
   const source = asTrimmedString(input.source) as IntelligenceSystemSource;
   if (!SOURCES.has(source)) {
-    return { ok: false, error: "source must be one of fi_os, hairaudit, iiohr, external." };
+    return { ok: false, error: "source must be one of fi_os, hli, hairaudit, iiohr, external." };
   }
 
   const event_name = asTrimmedString(input.event_name);

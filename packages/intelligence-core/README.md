@@ -23,7 +23,7 @@ This package is **types-first**: contracts, envelopes, policy decision shapes, a
 
 Production ingestion today uses `FiEventEnvelope` in `src/types/fi-events.ts` with `source_system: "hli" | "hairaudit" | "clinic"`.
 
-`IntelligenceSystemSource` introduces **`fi_os`** and **`iiohr`** for **new** producers and documentation alignment. Stage 10 adds a thin adapter between legacy envelopes and `IntelligenceEventEnvelope` without rewriting existing handlers.
+`IntelligenceSystemSource` includes **`hli`**, **`hairaudit`**, **`fi_os`**, **`iiohr`**, and **`external`**. Legacy wire value **`clinic`** maps to **`fi_os`** in application adapters (`src/lib/fi/events/intelligenceCoreAdapter.ts`) without changing ingress.
 
 ## Usage (Stage 10+)
 
@@ -32,7 +32,7 @@ import type { IntelligenceEventEnvelope } from "@follicle/intelligence-core/even
 import { defaultIntelligenceExportPolicy } from "@follicle/intelligence-core/policy";
 ```
 
-Until workspace path aliases are configured for package name resolution, import via relative paths from application code or add a TypeScript path mapping.
+The repo root `tsconfig.json` maps `@follicle/intelligence-core` to `packages/intelligence-core` for clean imports alongside the `file:` dependency in `package.json`.
 
 ## Versioning
 

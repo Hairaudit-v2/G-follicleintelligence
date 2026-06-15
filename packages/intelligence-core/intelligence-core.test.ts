@@ -31,6 +31,20 @@ describe("intelligence-core events", () => {
     }
   });
 
+  it("parses HLI source", () => {
+    const r = parseIntelligenceEventEnvelope({
+      schema_version: 1,
+      emitted_at: new Date().toISOString(),
+      source: "hli",
+      event_name: "hli.intake.submitted",
+      delivery_mode: "internal_only",
+      privacy_level: "operational_clinical",
+      payload: {},
+    });
+    assert.equal(r.ok, true);
+    if (r.ok) assert.equal(r.envelope.source, "hli");
+  });
+
   it("rejects invalid envelope", () => {
     const r = parseIntelligenceEventEnvelope({
       schema_version: 0,

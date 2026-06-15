@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@follicle/intelligence-core": ["./packages/intelligence-core/index.ts"],
+      "@follicle/intelligence-core/*": ["./packages/intelligence-core/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

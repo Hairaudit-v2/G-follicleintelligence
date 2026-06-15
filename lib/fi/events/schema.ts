@@ -14,6 +14,16 @@ import type {
   HairAuditImagesUploadedPayload,
 } from "@/src/types/fi-events";
 
+/**
+ * HTTP-ingest allow-list (`parseFiEventEnvelope`).
+ *
+ * **Cross-system (default policy may still block emit):** producer-shaped events intended
+ * for shared intelligence envelopes / future bus — must appear in
+ * `@follicle/intelligence-core` `INTELLIGENCE_EVENT_NAMES` (see drift tests).
+ *
+ * **Local-only (FI ingest only):** accepted for idempotency / logging but not treated as
+ * cross-system graph/export signals by default — `clinic.ai.usage`.
+ */
 export const fiEventTypeSchema = [
   "hli.intake.submitted",
   "hli.document.uploaded",
@@ -21,6 +31,17 @@ export const fiEventTypeSchema = [
   "hairaudit.images.uploaded",
   "clinic.ai.usage",
 ] as const;
+
+/** Ingest event types documented as FI-local / telemetry; excluded from cross-system drift set. */
+export const FI_INGEST_LOCAL_ONLY_EVENT_TYPES = ["clinic.ai.usage"] as const;
+
+export type FiIngestLocalOnlyEventType = (typeof FI_INGEST_LOCAL_ONLY_EVENT_TYPES)[number];
+
+/** Ingest names intended for cross-system contract alignment (subset of `fiEventTypeSchema`). */
+export const FI_INGEST_CROSS_SYSTEM_EVENT_TYPES = fiEventTypeSchema.filter(
+  (t): t is Exclude<(typeof fiEventTypeSchema)[number], FiIngestLocalOnlyEventType> =>
+    !(FI_INGEST_LOCAL_ONLY_EVENT_TYPES as readonly string[]).includes(t)
+);
 
 const fiSourceSystemSchema = ["hli", "hairaudit", "clinic"] as const;
 const hliDocumentKinds = ["blood_pdf", "blood_csv", "supporting_docs"] as const;
