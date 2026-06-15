@@ -45,7 +45,16 @@ export default async function IntelligenceEventLogReplayRunsPage() {
 
       <aside className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-3 text-xs text-amber-100/90">
         <strong className="text-amber-100">Production governance required.</strong> Cross-system dispatch and production
-        persistence remain off until org sign-off. Repo docs:{" "}
+        persistence remain off until org sign-off. <strong className="text-amber-100">No production activation</strong> for
+        staging replay rehearsal — follow{" "}
+        <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-amber-50/95">
+          docs/stage18-staging-replay-validation-runbook.md
+        </code>{" "}
+        and{" "}
+        <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-amber-50/95">
+          docs/stage18-staging-replay-release-checklist.md
+        </code>
+        . Repo docs:{" "}
         <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-amber-50/95">docs/governance/README.md</code>,{" "}
         <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-amber-50/95">
           docs/governance/environment-activation-checklist.md
@@ -113,6 +122,11 @@ export default async function IntelligenceEventLogReplayRunsPage() {
             Rollback: unset staging activation, turn off governed replay and internal bus queue per{" "}
             <code className="text-xs text-slate-300">docs/stage17-staging-activation-path.md</code>, inspect replay run + logs, restart if you
             need to clear the process-local queue.
+          </li>
+          <li>
+            Stage 18 operator rehearsal (dry-run → rollback):{" "}
+            <code className="text-xs text-slate-300">docs/stage18-staging-replay-validation-runbook.md</code> —{" "}
+            <strong className="text-slate-200">No production activation</strong>.
           </li>
         </ul>
         <pre className="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-slate-400">
