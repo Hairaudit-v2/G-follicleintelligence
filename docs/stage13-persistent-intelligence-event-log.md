@@ -65,6 +65,12 @@ Helper: `src/lib/fi/events/persistentEventLogEnv.ts`.
 2. Optional: `supabase migration repair` / revert migration in a new migration that `drop table if exists public.fi_intelligence_event_logs` only if the table was never used in production (coordinate with DBA).
 3. No change to Stage 12 in-memory queue semantics when persistence is off.
 
+## Governance (Stage 16)
+
+Before any **production** opt-in for this table’s inserts, complete the **production governance pack**: [`docs/governance/README.md`](./governance/README.md) (retention, legal/privacy, activation checklists). **Production intelligence event log persistence remains disabled** in application code until that sign-off **and** any future explicit policy + code stage — see [disabled-by-default behavior](#disabled-by-default-behavior) above.
+
+---
+
 ## Stage 14 recommendation
 
 Build **replay tooling** for `fi_intelligence_event_logs`:

@@ -55,17 +55,18 @@ Human approval is required before any **governed** execution path mutates run st
 2. Stop using the replay CLI run subcommands; direct `--mode dry_run` replay remains available without governed flags (Stage 14 behavior unchanged).
 3. **Database**: table is additive; to hard-disable reads from app code, remove or gate admin routes; to remove the feature entirely, drop `public.fi_intelligence_replay_runs` in a follow-up migration after backing up rows.
 
-## Stage 16 recommendation
+## Stage 16 — Production governance pack (documentation + guardrails)
 
-Ship a **production governance pack** before enabling any real event dispatch:
+Stage 16 ships the **governance index, policies, operator runbooks, and checklists** required before any real cross-system dispatch, production persistence opt-in, or allow-list widening. **Dispatch is still not enabled**; production behavior matches Stage 15 unless a future approved stage explicitly changes code and flags.
 
-- Consent and data-processing policy documents tied to intelligence events.
-- Retention and minimization policy for logs and replay runs.
-- Operator runbook (who may approve, emergency contacts).
-- Environment activation checklist (flags, Supabase roles, monitoring).
-- Incident rollback checklist (disable flags, purge queues, communicate scope).
-- Legal / privacy review checklist for `operational_clinical` and cross-system routing.
+**Index:** [`docs/governance/README.md`](./governance/README.md)
+
+**Policies & runbooks:** consent / data use, retention, operator runbook, environment activation, incident rollback, legal–privacy checklist — all under `docs/governance/`.
+
+**Enforcement:** source-contract tests in `src/lib/fi/events/intelligenceCore.stage16.test.ts` assert default-off posture and related invariants.
+
+**Production disabled until governance sign-off** — completing the governance checklists alone does not enable dispatch; code gates and env defaults remain as documented above.
 
 ---
 
-*See also:* [Stage 14 — Intelligence event log replay](./stage14-intelligence-event-log-replay.md)
+*See also:* [Stage 14 — Intelligence event log replay](./stage14-intelligence-event-log-replay.md), [Governance README](./governance/README.md)

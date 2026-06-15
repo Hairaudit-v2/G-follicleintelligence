@@ -1,7 +1,9 @@
 # Ecosystem integration guardrails
 
 **Audience:** Engineers working across **FI OS**, **HairAudit**, **IIOHR**, and **HLI**.  
-**Related:** `docs/ecosystem-architecture-stabilization-audit.md`, `packages/intelligence-core/`.
+**Related:** `docs/ecosystem-architecture-stabilization-audit.md`, `packages/intelligence-core/`, [`docs/governance/`](./governance/README.md) (Stage 16 production governance pack).
+
+**Production posture:** Cross-system dispatch, production intelligence event log persistence, and governed `dispatch_future` execution remain **disabled until governance sign-off** — see [`docs/governance/README.md`](./governance/README.md) and linked policies / checklists.
 
 These rules apply to **new** integrations and cross-system features. Legacy paths remain until migrated in Stage 10.
 

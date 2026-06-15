@@ -62,7 +62,7 @@ function createReplayRunsMock(initial?: Map<string, Record<string, unknown>>) {
         },
       };
     },
-    select(_sel: string) {
+    select() {
       return {
         eq(_col: string, val: string) {
           return {

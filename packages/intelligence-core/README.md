@@ -37,3 +37,7 @@ The repo root `tsconfig.json` maps `@follicle/intelligence-core` to `packages/in
 ## Versioning
 
 Contract files export `*_V1_VERSION` constants. Breaking changes require new `V2` interfaces and explicit migration notes.
+
+## Production governance (Stage 16)
+
+Cross-system **dispatch**, **export execution**, and **production** persistence of intelligence audit trails are **not** activated from this package alone. Repository policy, env defaults, and allow-lists are documented under [`docs/governance/README.md`](../../docs/governance/README.md) (consent / data use, retention, operator runbook, activation / rollback / legal checklists). **Production remains disabled until governance sign-off** and any future stage that explicitly enables scoped behavior in application code.

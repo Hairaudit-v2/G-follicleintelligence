@@ -163,9 +163,7 @@ export async function replayIntelligenceEventLogs(
 
   const queueOn = isInternalIntelligenceInternalBusQueueEnabled({ env, nodeEnv });
   if (!queueOn) {
-    for (const _ of candidates) {
-      shadow_skipped_disabled += 1;
-    }
+    shadow_skipped_disabled += candidates.length;
     warnings.push({
       code: "enqueue_shadow_skipped",
       message:

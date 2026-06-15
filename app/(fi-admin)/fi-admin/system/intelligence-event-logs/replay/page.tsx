@@ -39,6 +39,20 @@ export default async function IntelligenceEventLogReplayRunsPage() {
         </p>
       </div>
 
+      <aside className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-3 text-xs text-amber-100/90">
+        <strong className="text-amber-100">Production governance required.</strong> Cross-system dispatch and production
+        persistence remain off until org sign-off. Repo docs:{" "}
+        <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-amber-50/95">docs/governance/README.md</code>,{" "}
+        <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-amber-50/95">
+          docs/governance/environment-activation-checklist.md
+        </code>
+        ,{" "}
+        <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-amber-50/95">
+          docs/governance/legal-privacy-review-checklist.md
+        </code>
+        .
+      </aside>
+
       <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 text-sm text-slate-300">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Environment gates</h2>
         <ul className="mt-2 list-inside list-disc space-y-1 text-slate-400">

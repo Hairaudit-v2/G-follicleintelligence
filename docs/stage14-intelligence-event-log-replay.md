@@ -11,6 +11,8 @@ Stage 14 adds **read-first replay tooling** for `public.fi_intelligence_event_lo
 
 This stage **does not** change producer ingest, handler implementations, or production dispatch policy.
 
+**Governance:** Operator procedures and production activation gates live under [`docs/governance/`](./governance/README.md). **Production dispatch and persistence remain disabled until governance sign-off.**
+
 ## Dry-run default
 
 - The CLI defaults to `--mode dry_run` (load + summary counts only).
