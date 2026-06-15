@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Stays client-only: `Footer` is imported only from `FiPortalChromeGate` (client), and Next.js
+ * forbids client → server imports. Framer `whileInView` on the root `<motion.footer>` also needs
+ * the client runtime. To shrink the boundary later, lift Footer composition from the gate or
+ * pass server-rendered children into a thin motion wrapper from a server layout.
+ */
 import Image from "next/image";
 import Link from "next/link";
 

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Stays client-only: all current importers are client shells (`FiOsSidebar`, `ClinicOsShell`,
+ * `FiTenantBrandFrame`). Next.js forbids importing a Server Component from them. We also use
+ * `onError` + `useState` to hide broken tenant logos without changing the happy-path layout.
+ */
 import Image from "next/image";
 import { useState } from "react";
 

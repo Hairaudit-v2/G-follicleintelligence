@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Presentational only, but must stay a Client Component: several marketing views that import
+ * `Section` are client modules (`PlatformEnterpriseView`, vertical marketing views, etc.).
+ * Next.js forbids importing a Server Component from a Client Component.
+ */
 import { cn } from "@/lib/utils";
 
 interface SectionProps {

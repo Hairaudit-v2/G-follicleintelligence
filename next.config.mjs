@@ -1,4 +1,13 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
+
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+  // Non-interactive: write HTML reports instead of opening a dev server (build exits).
+  openAnalyzer: false,
+  analyzerMode: "static",
+});
+
 const corpHeaders = [
   { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
   { key: "Access-Control-Allow-Origin", value: "*" },
@@ -28,4 +37,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

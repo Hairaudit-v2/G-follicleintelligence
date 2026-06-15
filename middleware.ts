@@ -18,8 +18,7 @@ function withStaticImageHeaders(response: NextResponse): NextResponse {
 function isStaticImageRequest(pathname: string): boolean {
   return (
     STATIC_IMAGE_PATH.test(pathname) ||
-    pathname.includes("evolved-logo") ||
-    pathname.startsWith("/_next/image")
+    pathname.includes("evolved-logo")
   );
 }
 
@@ -36,9 +35,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
+  /**
+   * Matchers intentionally skip `/_next/static` and `/_next/image` in the catch-all so the
+   * bundler and image optimizer do not pay middleware on every asset request. CORP/CORS for
+   * `/_next/image` is applied in `next.config.mjs` `headers()` instead.
+   */
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico).*)",
-    "/_next/image",
     "/evolved-logo.png",
     "/brand/:path*",
     "/icons/:path*",

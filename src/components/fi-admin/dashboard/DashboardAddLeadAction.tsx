@@ -2,7 +2,6 @@
 
 import { UserPlus } from "lucide-react";
 
-import { QuickActionCard } from "@/src/components/fi-admin/dashboard-ui";
 import { dispatchOpenCreateLeadModal } from "@/src/lib/fiAdmin/clinicOsShellCreateLeadEvent";
 
 export function DashboardAddLeadAction() {
@@ -22,15 +21,11 @@ export function DashboardAddLeadAction() {
   );
 }
 
-/** @deprecated Use {@link DashboardAddLeadAction} — kept for tests referencing card layout. */
+/** @deprecated Use {@link DashboardAddLeadAction} — thin wrapper for legacy call sites. */
 export function DashboardAddLeadQuickCard({ className }: { className?: string }) {
   return (
-    <QuickActionCard
-      href="#"
-      title="Add Lead"
-      description="Capture a new enquiry in LeadFlow."
-      icon={<UserPlus className="h-5 w-5" strokeWidth={1.75} aria-hidden />}
-      className={className}
-    />
+    <div className={className}>
+      <DashboardAddLeadAction />
+    </div>
   );
 }

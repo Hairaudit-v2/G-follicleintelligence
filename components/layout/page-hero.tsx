@@ -1,7 +1,6 @@
-"use client";
-
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+
+import { PageHeroMotion } from "@/components/layout/page-hero-motion";
 
 interface PageHeroProps {
   eyebrow?: string;
@@ -13,12 +12,7 @@ interface PageHeroProps {
 
 export function PageHero({ eyebrow, title, subtitle, body }: PageHeroProps) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fi-grid relative overflow-hidden border-b border-border/50 bg-gradient-to-b from-background via-background to-transparent"
-    >
+    <PageHeroMotion>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,hsl(var(--primary)/0.14),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_90%_10%,rgb(166_184_198_/_10%),transparent_40%)]" />
       <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-20">
@@ -37,6 +31,6 @@ export function PageHero({ eyebrow, title, subtitle, body }: PageHeroProps) {
           </div>
         ) : null}
       </div>
-    </motion.section>
+    </PageHeroMotion>
   );
 }

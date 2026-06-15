@@ -30,6 +30,7 @@ const GlobalHairIntelligenceSectionClient = dynamic(
       <GlobalHairIntelligenceSectionPlaceholder
         heading={HOME_PAGE_CONTENT.networkDiagram.heading}
         description={HOME_PAGE_CONTENT.networkDiagram.description}
+        className="scroll-mt-0"
       />
     ),
   }
@@ -518,15 +519,18 @@ export function FiMarketingHomeView() {
         </FadeIn>
       </Section>
 
-      <GlobalHairIntelligenceSectionClient
-        variant="follicle-intelligence"
-        heading={c.networkDiagram.heading}
-        description={c.networkDiagram.description}
-        networkTitle={c.networkDiagram.networkTitle}
-        networkFooterCaption={c.networkDiagram.networkFooterCaption}
-        size="hero"
-        theme="dark"
-      />
+      <div id="ecosystem" className="scroll-mt-20">
+        <GlobalHairIntelligenceSectionClient
+          variant="follicle-intelligence"
+          heading={c.networkDiagram.heading}
+          description={c.networkDiagram.description}
+          networkTitle={c.networkDiagram.networkTitle}
+          networkFooterCaption={c.networkDiagram.networkFooterCaption}
+          size="hero"
+          theme="dark"
+          className="scroll-mt-0"
+        />
+      </div>
 
       <Section
         id={c.predictiveFuture.id}

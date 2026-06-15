@@ -111,10 +111,10 @@ export default function AnalyticsOsPage() {
                 size="lg"
                 className="h-11 rounded-xl border-white/10 bg-background/25 px-6 backdrop-blur-sm"
               >
-                <Link href="/#ecosystem" className="inline-flex items-center gap-2">
+                <a href="/#ecosystem" className="inline-flex items-center gap-2">
                   Explore Follicle Intelligence
                   <ArrowRight className="h-4 w-4 opacity-80" aria-hidden />
-                </Link>
+                </a>
               </Button>
             </div>
           </FadeIn>
