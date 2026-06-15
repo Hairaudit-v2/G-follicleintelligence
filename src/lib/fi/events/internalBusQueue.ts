@@ -72,7 +72,13 @@ export function sanitizeIntelligenceEnvelopeForQueue(
   };
 }
 
-export type EnqueueInternalIntelligenceEventOptions = InternalBusQueueEnvOptions;
+export type EnqueueInternalIntelligenceEventOptions = InternalBusQueueEnvOptions & {
+  /**
+   * When true, skip Stage 13 `fi_intelligence_event_log` inserts for this enqueue (e.g. Stage 14 shadow replay).
+   * Default false — normal bus traffic still optionally persists.
+   */
+  skipIntelligenceEventLogPersist?: boolean;
+};
 
 export type EnqueueInternalIntelligenceEventResult =
   | { status: "skipped_disabled" }
@@ -109,7 +115,7 @@ export async function enqueueInternalIntelligenceEvent(
 
   queue.push({ summary, envelope_for_handlers });
 
-  if (isFiIntelligenceEventLogPersistEnabled(options)) {
+  if (!options?.skipIntelligenceEventLogPersist && isFiIntelligenceEventLogPersistEnabled(options)) {
     try {
       const { persistIntelligenceEventLog } = await import("./persistIntelligenceEventLog.server");
       await persistIntelligenceEventLog(
