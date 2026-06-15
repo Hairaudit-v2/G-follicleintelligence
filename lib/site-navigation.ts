@@ -1,13 +1,22 @@
-export const PRIMARY_NAV = [
-  { href: "/platform", label: "Platform" },
-  { href: "/surgeons", label: "Surgeons" },
-  { href: "/clinic-owners", label: "Clinic owners" },
-  { href: "/enterprise", label: "Enterprise" },
-  { href: "/academy", label: "Academy" },
-  { href: "/audit-network", label: "Audit network" },
-  { href: "/intelligence", label: "Intelligence" },
+/** Top-level marketing header — Vision through Contact (Products handled separately in `Header`). */
+export type HeaderNavItem = { label: string; href: string };
+
+export const HEADER_PRIMARY_LINKS: HeaderNavItem[] = [
   { href: "/vision", label: "Vision" },
-  { href: "/about", label: "About" },
+  { href: "/#ecosystem", label: "Ecosystem" },
+  { href: "/technology", label: "Technology" },
+  { href: "/academy", label: "Institute" },
+  { href: "/contact", label: "Contact" },
+];
+
+export type HeaderProductLink = HeaderNavItem & { external?: boolean };
+
+/** Products dropdown — satellite brands + FI OS (on-site). */
+export const HEADER_PRODUCTS_LINKS: HeaderProductLink[] = [
+  { href: "https://hairaudit.com", label: "HairAudit", external: true },
+  { href: "https://hairlongevityinstitute.com", label: "Hair Longevity Institute", external: true },
+  { href: "https://iiohr.com", label: "International Institute of Hair Restoration", external: true },
+  { href: "/platform", label: "FI OS" },
 ];
 
 export type FooterNavLink = { label: string; href: string };
