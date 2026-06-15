@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { canExecuteGovernedReplayRun, isFiIntelligenceGovernedDispatchEnabled } from "@/src/lib/fi/events/governedReplayEnv";
+import { isStagingIntelligenceActivationEnabled } from "@/src/lib/fi/events/stagingActivationEnv";
+import { getStagingActivationAllowedEvents } from "@/src/lib/fi/events/stagingActivationAllowlist";
 import { loadIntelligenceReplayRunsForAdmin } from "@/src/lib/fi/events/loadIntelligenceReplayRunsForAdmin.server";
 import { replayIntelligenceEventLogs } from "@/src/lib/fi/events/replayIntelligenceEventLogs.server";
 
@@ -12,6 +14,8 @@ export default async function IntelligenceEventLogReplayRunsPage() {
   const nodeEnv = env.NODE_ENV ?? "";
   const governedReplay = canExecuteGovernedReplayRun({ env, nodeEnv });
   const governedDispatchFlag = isFiIntelligenceGovernedDispatchEnabled({ env, nodeEnv });
+  const stagingActivation = isStagingIntelligenceActivationEnabled({ env, nodeEnv });
+  const stagingAllowedEvents = getStagingActivationAllowedEvents();
   const isProd = nodeEnv === "production";
 
   const [runs, templateDryRun] = await Promise.all([
@@ -26,7 +30,7 @@ export default async function IntelligenceEventLogReplayRunsPage() {
     <div className="space-y-6">
       <div>
         <p className={fiOsChromeClasses.sectionEyebrow}>Intelligence core</p>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-50">Governed replay runs (Stage 15)</h1>
+        <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-50">Governed replay runs (Stage 15 / 17)</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
           Durable plans in <code className="text-xs text-slate-300">public.fi_intelligence_replay_runs</code> with draft →
           approval → execute. Execution stays on safe Stage 14 modes only; <strong className="text-slate-200">dispatch_future</strong>{" "}
@@ -71,7 +75,49 @@ export default async function IntelligenceEventLogReplayRunsPage() {
               <span className="text-amber-300/90"> — production: shadow enqueue remains hard-off per Stage 12/14 policy.</span>
             ) : null}
           </li>
+          <li>
+            <code className="text-xs text-slate-300">FI_INTELLIGENCE_STAGING_ACTIVATION_ENABLED</code> +{" "}
+            <code className="text-xs text-slate-300">FI_INTELLIGENCE_STAGING_ALLOWED_EVENT</code> —{" "}
+            <strong className="text-slate-200">{stagingActivation ? "staging path eligible" : "off (default)"}</strong>
+            {isProd ? (
+              <span className="text-amber-300/90"> — staging activation is always false in production.</span>
+            ) : null}
+          </li>
         </ul>
+      </section>
+
+      <section className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] p-4 text-sm text-slate-300">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-cyan-200/90">Stage 17 — staging activation (no UI trigger)</h2>
+        <p className="mt-2 text-slate-400">
+          One explicit staging-only path unlocks <strong className="text-slate-200">CLI</strong> execution of an{" "}
+          <strong className="text-slate-200">approved</strong> governed run in <strong className="text-slate-200">enqueue_shadow</strong>{" "}
+          only, for allow-listed events below. There is <strong className="text-slate-200">no browser activation button</strong> yet; use env
+          flags and the operator script. No downstream dispatch is added; production stays disabled.
+        </p>
+        <ul className="mt-2 list-inside list-disc space-y-1 text-slate-400">
+          <li>
+            Required when using the staging path: <code className="text-xs text-slate-300">NODE_ENV</code> ≠ production,{" "}
+            <code className="text-xs text-slate-300">FI_INTELLIGENCE_GOVERNED_REPLAY_ENABLED=1</code>,{" "}
+            <code className="text-xs text-slate-300">FI_INTELLIGENCE_STAGING_ACTIVATION_ENABLED=1</code>,{" "}
+            <code className="text-xs text-slate-300">FI_INTELLIGENCE_STAGING_ALLOWED_EVENT=hairaudit.audit.completed</code>
+          </li>
+          <li>
+            Allowed event for staging activation:{" "}
+            {stagingAllowedEvents.map((e) => (
+              <code key={e} className="mr-2 text-xs text-slate-300">
+                {e}
+              </code>
+            ))}
+          </li>
+          <li>
+            Rollback: unset staging activation, turn off governed replay and internal bus queue per{" "}
+            <code className="text-xs text-slate-300">docs/stage17-staging-activation-path.md</code>, inspect replay run + logs, restart if you
+            need to clear the process-local queue.
+          </li>
+        </ul>
+        <pre className="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-slate-400">
+{`pnpm run replay:intelligence-event-logs -- --staging-activate-run <approved-run-id> --json`}
+        </pre>
       </section>
 
       <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 text-sm text-slate-300">

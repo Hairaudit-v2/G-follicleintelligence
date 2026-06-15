@@ -12,12 +12,19 @@ export type ReplayIntelligenceEventLogsScriptParsed =
     }
   | { kind: "submit_for_approval"; runId: string; printJson: boolean }
   | { kind: "approve_run"; runId: string; printJson: boolean }
-  | { kind: "execute_run"; runId: string; printJson: boolean };
+  | { kind: "execute_run"; runId: string; printJson: boolean }
+  | { kind: "staging_activate_run"; runId: string; printJson: boolean };
 
 function countGovernedActions(args: string[]): number {
   let c = 0;
   for (const a of args) {
-    if (a === "--create-run" || a === "--submit-for-approval" || a === "--approve-run" || a === "--execute-run") {
+    if (
+      a === "--create-run" ||
+      a === "--submit-for-approval" ||
+      a === "--approve-run" ||
+      a === "--execute-run" ||
+      a === "--staging-activate-run"
+    ) {
       c += 1;
     }
   }
@@ -73,6 +80,19 @@ export function parseReplayIntelligenceEventLogsScriptArgs(
     const id = readRunIdAfterFlag(tail, "--execute-run");
     if (!id.ok) return { ok: false, exitCode: 2, message: id.message };
     return { ok: true, value: { kind: "execute_run", runId: id.runId, printJson } };
+  }
+
+  if (tail.includes("--staging-activate-run")) {
+    const id = readRunIdAfterFlag(tail, "--staging-activate-run");
+    if (!id.ok) return { ok: false, exitCode: 2, message: id.message };
+    if (!printJson) {
+      return {
+        ok: false,
+        exitCode: 2,
+        message: "--staging-activate-run requires --json (JSON-only operator output).",
+      };
+    }
+    return { ok: true, value: { kind: "staging_activate_run", runId: id.runId, printJson } };
   }
 
   const direct = parseIntelligenceEventLogReplayCliArgs(argv);

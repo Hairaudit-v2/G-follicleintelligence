@@ -1,17 +1,20 @@
 /**
- * Stage 15: operator CLI for governed replay runs + Stage 14 direct replay.
+ * Stage 15 / 17: operator CLI for governed replay runs + Stage 14 direct replay.
+ * Stage 17: `--staging-activate-run` (staging-only, JSON-only) for allow-listed shadow replay.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { parseReplayIntelligenceEventLogsScriptArgs } from "../src/lib/fi/events/governedIntelligenceReplayCliArgs";
 import { replayIntelligenceEventLogs } from "../src/lib/fi/events/replayIntelligenceEventLogs.server";
+import { STAGING_INTELLIGENCE_REPLAY_ROLLBACK_INSTRUCTIONS } from "../src/lib/fi/events/stagingActivationEnv";
 import {
   approveReplayRun,
   createReplayRunDraft,
   executeApprovedReplayRun,
   submitReplayRunForApproval,
 } from "../src/lib/fi/events/intelligenceReplayRunService.server";
+import { runStagingIntelligenceReplay } from "../src/lib/fi/events/runStagingIntelligenceReplay.server";
 
 function loadRepoEnvFiles(): void {
   for (const name of [".env.local", ".env"] as const) {
@@ -125,6 +128,40 @@ async function main(): Promise<void> {
       action: "execute_run",
       runId: v.runId,
       ok: r.ok,
+      ...(r.ok
+        ? { replay_summary: r.data.replay_summary, warnings: r.data.warnings, load_error: r.data.load_error }
+        : { code: r.code, message: r.message, warnings: r.warnings }),
+    });
+    process.exit(0);
+    return;
+  }
+
+  if (v.kind === "staging_activate_run") {
+    const env = process.env as Record<string, string | undefined>;
+    const nodeEnv = env.NODE_ENV ?? "";
+    if (nodeEnv === "production") {
+      printJsonLine(true, {
+        action: "staging_activate_run",
+        runId: v.runId,
+        ok: false,
+        code: "staging_replay_production_blocked",
+        message: "NODE_ENV=production blocks --staging-activate-run.",
+        rollback_instructions: [...STAGING_INTELLIGENCE_REPLAY_ROLLBACK_INSTRUCTIONS],
+      });
+      process.exit(0);
+      return;
+    }
+
+    const r = await runStagingIntelligenceReplay(v.runId, null, {
+      omitPlatformAdminAssertForOperatorCli: true,
+      env,
+      nodeEnv,
+    });
+    printJsonLine(true, {
+      action: "staging_activate_run",
+      runId: v.runId,
+      ok: r.ok,
+      rollback_instructions: r.ok ? r.data.rollback_instructions : r.rollback_instructions,
       ...(r.ok
         ? { replay_summary: r.data.replay_summary, warnings: r.data.warnings, load_error: r.data.load_error }
         : { code: r.code, message: r.message, warnings: r.warnings }),
