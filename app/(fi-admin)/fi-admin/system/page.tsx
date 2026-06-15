@@ -18,6 +18,16 @@ export default async function SystemAdminHomePage() {
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
         <li className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4">
+          <p className="text-sm font-semibold text-slate-100">Tenant management</p>
+          <p className="mt-1 text-xs text-slate-500">Provision tenants, default clinics, settings, and first clinic admin.</p>
+          <Link
+            href="/fi-admin/system/tenants"
+            className="mt-3 inline-block text-sm font-medium text-cyan-400 hover:text-cyan-300"
+          >
+            Open tenants →
+          </Link>
+        </li>
+        <li className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4">
           <p className="text-sm font-semibold text-slate-100">User impersonation</p>
           <p className="mt-1 text-xs text-slate-500">Act as another user (session audited). Actions remain attributable to you.</p>
           <Link
