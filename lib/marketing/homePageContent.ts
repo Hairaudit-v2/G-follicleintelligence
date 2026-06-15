@@ -634,6 +634,8 @@ Follicle Intelligence exists to change that—not for a single operator, but as 
       "Whether you lead surgery, own clinics, run a multi-site group, represent an industry body, or invest behind accountable quality—this is the operating layer built to scale with evidence.",
     primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
     secondaryCta: { label: "Explore The Platform", href: "/platform" as const },
+    /** Calm path to the public vision narrative (not a conversion CTA). */
+    visionCta: { label: "The future of hair restoration medicine", href: "/vision" as const },
   },
 
   /** Copy for the lazy-loaded global network diagram (matches loading placeholder). */

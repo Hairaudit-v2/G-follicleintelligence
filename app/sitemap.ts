@@ -18,6 +18,7 @@ const STATIC_PAGES: { path: string; priority: number; changeFrequency: "yearly" 
   { path: "/white-label", priority: 0.9, changeFrequency: "monthly" },
   { path: "/methodology", priority: 0.8, changeFrequency: "yearly" },
   { path: "/about", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/vision", priority: 0.75, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.9, changeFrequency: "monthly" },
   { path: "/dashboard-demo", priority: 0.7, changeFrequency: "monthly" },
   { path: "/future-verticals", priority: 0.7, changeFrequency: "monthly" },

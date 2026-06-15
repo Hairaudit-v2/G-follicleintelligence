@@ -6,6 +6,7 @@ export const PRIMARY_NAV = [
   { href: "/academy", label: "Academy" },
   { href: "/audit-network", label: "Audit network" },
   { href: "/intelligence", label: "Intelligence" },
+  { href: "/vision", label: "Vision" },
   { href: "/about", label: "About" },
 ];
 
@@ -42,6 +43,7 @@ export const FOOTER_INTELLIGENCE_LAYERS: FooterNavLink[] = [
 
 export const FOOTER_COMPANY: FooterNavLink[] = [
   { label: "About", href: "/about" },
+  { label: "Vision", href: "/vision" },
   { label: "Contact", href: "/contact" },
   { label: "Solutions", href: "/solutions" },
   { label: "Hair intelligence", href: "/hair-intelligence" },

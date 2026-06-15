@@ -17,6 +17,7 @@ import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthor
 import { FiMarketingComparisonSection } from "@/components/home/FiMarketingComparisonSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
+import { PartnersInvestorsStrip } from "@/components/marketing/PartnersInvestorsStrip";
 
 const GlobalHairIntelligenceSectionClient = dynamic(
   () =>
@@ -616,12 +617,23 @@ export function FiMarketingHomeView() {
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
                     </Link>
                   </Button>
+                  <p className="pt-1 text-center text-sm text-muted-foreground lg:text-left">
+                    <Link
+                      href={c.finalCta.visionCta.href}
+                      className="font-medium text-foreground/85 underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary/50"
+                    >
+                      {c.finalCta.visionCta.label}
+                    </Link>
+                    <span className="text-muted-foreground/80"> — read the public vision.</span>
+                  </p>
                 </div>
               </div>
             </div>
           </FadeIn>
         </div>
       </section>
+
+      <PartnersInvestorsStrip />
     </>
   );
 }
