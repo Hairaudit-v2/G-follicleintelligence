@@ -31,7 +31,9 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
 import { CaseRevenuePaymentsCard } from "@/src/components/fi-admin/revenue/CaseRevenuePaymentsCard";
+import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
+import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import type { CaseCrmQuoteRow } from "@/src/lib/crm/crmQuoteLoaders.server";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
@@ -65,6 +67,7 @@ export function CaseDetailPageView({
   canMutatePaymentRecords = false,
   outcomeIntelligence,
   casePaymentReadiness,
+  caseFinancialPipeline,
   caseCrmQuotes = [],
 }: {
   tenantId: string;
@@ -88,6 +91,7 @@ export function CaseDetailPageView({
   canMutatePaymentRecords?: boolean;
   outcomeIntelligence: CaseOutcomeIntelligenceView;
   casePaymentReadiness: CasePaymentReadiness;
+  caseFinancialPipeline: FinancialSurgeryPipelineStatus;
   caseCrmQuotes?: CaseCrmQuoteRow[];
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
@@ -200,6 +204,21 @@ export function CaseDetailPageView({
               canMutate={canMutatePaymentRecords}
               noManualPaymentRecordsCopy="No manual payment records linked to this case yet."
             />
+          </div>
+          <div className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-900">FinancialOS · Surgery pipeline</h3>
+            <p className="mt-1 text-xs text-gray-600">
+              Revenue invoices and booking financial overlay — additive to manual payment records above.
+            </p>
+            <div className="mt-3">
+              <FinancialSurgeryPipelineInline
+                tenantId={tenantId}
+                caseId={detail.id}
+                status={caseFinancialPipeline}
+                variant="light"
+                compact={false}
+              />
+            </div>
           </div>
           <div className="mt-6">
             <CaseRevenuePaymentsCard

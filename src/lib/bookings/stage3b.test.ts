@@ -28,6 +28,7 @@ function row(p: Partial<FiBookingRow> & Pick<FiBookingRow, "id">): FiBookingRow 
     assigned_user_id: null,
     booking_type: "consultation",
     booking_status: "scheduled",
+    financial_os_status: null,
     title: null,
     description: null,
     start_at: "2026-06-01T10:00:00.000Z",

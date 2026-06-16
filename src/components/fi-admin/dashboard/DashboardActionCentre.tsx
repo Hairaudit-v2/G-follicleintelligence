@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ClipboardList, Phone, Scissors } from "lucide-react";
+import { AlertTriangle, Banknote, ClipboardList, Phone, Scissors } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -111,7 +111,8 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
     actionCentre.leadsAwaitingContact +
     actionCentre.consultationsAwaitingCompletion +
     actionCentre.followUpsDue +
-    actionCentre.surgeryReadinessAlerts;
+    actionCentre.surgeryReadinessAlerts +
+    actionCentre.surgeryFinancialPaymentAttention;
   const meta = FI_DASHBOARD_WIDGET_LABELS.attention_centre;
 
   return (
@@ -126,7 +127,7 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
         <DashboardEmptyState
           className="mt-4 max-w-xl py-5 sm:px-6 sm:py-6"
           title="You're caught up"
-          description="No leads, consultations, follow-ups, or surgery prep items need attention right now."
+          description="No leads, consultations, follow-ups, surgery prep, or surgery revenue follow-up items need attention right now."
           actionLabel="View calendar"
           actionHref={`${base}/calendar`}
         />
@@ -163,6 +164,14 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             count={actionCentre.surgeryReadinessAlerts}
             icon={<Scissors className="h-4 w-4" />}
             severity={attentionSeverityForRow("surgeryReadiness", actionCentre.surgeryReadinessAlerts)}
+          />
+          <ActionRow
+            href={`${base}/financial/invoices`}
+            label="Surgery payment follow-up"
+            detail="FinancialOS + issued invoices in the next 14-day surgery window — deposits, balances, installments, or failed payments."
+            count={actionCentre.surgeryFinancialPaymentAttention}
+            icon={<Banknote className="h-4 w-4" />}
+            severity={actionCentre.surgeryFinancialPaymentAttention > 0 ? "warning" : "normal"}
           />
         </div>
       )}

@@ -25,6 +25,7 @@ import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRe
 import { loadPaymentRecordsForCases } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { buildCaseOutcomeIntelligenceView, loadCaseOutcomeMeasurements, loadCaseOutcomeProtocols } from "@/src/lib/fi-os/outcomeIntelligence.server";
 import { loadCrmQuotesForCase } from "@/src/lib/crm/crmQuoteLoaders.server";
+import { loadCaseFinancialOsSurgeryPipelineSummary } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 
 export const metadata = {
   title: "Patient",
@@ -127,6 +128,14 @@ export default async function CaseDetailRoutePage({
   const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
   const initialPaymentRecords = payMap.get(caseId.trim()) ?? [];
 
+  const caseFinancialPipeline = await loadCaseFinancialOsSurgeryPipelineSummary(tenantId.trim(), {
+    todayYmd: operationalTodayYmd,
+    calendarTimezone: calendarSettings.calendarTimezone,
+    caseId: caseId.trim(),
+    readiness: casePaymentReadiness,
+    caseAppointmentBookings,
+  });
+
   const linkedSurgery = pickPrimaryLinkedSurgeryBookingYmd(caseAppointmentBookings, calendarSettings.calendarTimezone);
 
   const pageView = (
@@ -149,6 +158,7 @@ export default async function CaseDetailRoutePage({
       canMutatePaymentRecords={payCap.canMutate}
       outcomeIntelligence={outcomeIntelligence}
       casePaymentReadiness={casePaymentReadiness}
+      caseFinancialPipeline={caseFinancialPipeline}
       caseCrmQuotes={caseCrmQuotes}
     />
   );

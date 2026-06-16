@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { TomorrowBoardPayload } from "@/src/lib/clinicOs/tomorrowBoardLoader.server";
 import { SURGERY_READINESS_ISSUE_LABEL } from "@/src/lib/surgery/surgeryReadinessBoardModel";
@@ -104,47 +105,59 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                 <h3 className="text-sm font-semibold text-cyan-200/90">{g.timeLabel}</h3>
                 <ul className="mt-2 divide-y divide-white/[0.06] rounded-lg border border-white/[0.06] bg-[#0a101f]/80">
                   {g.rows.map((r) => (
-                    <li key={r.bookingId} className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <Link href={r.href} className="font-medium text-slate-100 hover:text-cyan-200">
-                          {r.patientLabel}
-                        </Link>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {r.bookingTypeLabel}
-                          {r.providerLabel ? (
-                            <>
-                              <span className="text-slate-600"> · </span>
-                              {r.providerLabel}
-                            </>
-                          ) : null}
-                          {r.roomLabel ? (
-                            <>
-                              <span className="text-slate-600"> · </span>
-                              {r.roomLabel}
-                            </>
-                          ) : null}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-md border border-white/[0.08] bg-black/30 px-2 py-0.5 text-[0.65rem] text-slate-400">
-                          {r.statusLabel}
-                        </span>
-                        {r.paymentBadge ? (
-                          <span
-                            className={cn(
-                              "rounded-md border px-2 py-0.5 text-[0.65rem]",
-                              r.paymentBadge === "Payment due"
-                                ? "border-amber-500/35 bg-amber-500/10 text-amber-100"
-                                : "border-slate-600/40 bg-slate-800/60 text-slate-300"
-                            )}
-                          >
-                            {r.paymentBadge}
-                          </span>
-                        ) : null}
-                        {r.reminderAttention ? (
-                          <span className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[0.65rem] text-violet-100">
-                            Reminder queue
-                          </span>
+                    <li key={r.bookingId} className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <Link href={r.href} className="font-medium text-slate-100 hover:text-cyan-200">
+                              {r.patientLabel}
+                            </Link>
+                            <p className="mt-0.5 text-xs text-slate-500">
+                              {r.bookingTypeLabel}
+                              {r.providerLabel ? (
+                                <>
+                                  <span className="text-slate-600"> · </span>
+                                  {r.providerLabel}
+                                </>
+                              ) : null}
+                              {r.roomLabel ? (
+                                <>
+                                  <span className="text-slate-600"> · </span>
+                                  {r.roomLabel}
+                                </>
+                              ) : null}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-md border border-white/[0.08] bg-black/30 px-2 py-0.5 text-[0.65rem] text-slate-400">
+                              {r.statusLabel}
+                            </span>
+                            {r.paymentBadge ? (
+                              <span
+                                className={cn(
+                                  "rounded-md border px-2 py-0.5 text-[0.65rem]",
+                                  r.paymentBadge === "Payment due"
+                                    ? "border-amber-500/35 bg-amber-500/10 text-amber-100"
+                                    : "border-slate-600/40 bg-slate-800/60 text-slate-300",
+                                )}
+                              >
+                                {r.paymentBadge}
+                              </span>
+                            ) : null}
+                            {r.reminderAttention ? (
+                              <span className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[0.65rem] text-violet-100">
+                                Reminder queue
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                        {r.financialPipeline ? (
+                          <FinancialSurgeryPipelineInline
+                            tenantId={data.tenantId}
+                            caseId={r.caseId}
+                            status={r.financialPipeline}
+                            variant="dark"
+                          />
                         ) : null}
                       </div>
                     </li>

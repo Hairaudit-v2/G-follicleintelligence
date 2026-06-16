@@ -8,6 +8,7 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { ProcedureDayBoardPayload, ProcedureDayScheduleCard } from "@/src/lib/surgery/procedureDayBoardLoader.server";
 import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
+import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import { SURGERY_READINESS_ISSUE_LABEL, type SurgeryReadinessIssueSeverity } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
 function severityChipClass(sev: SurgeryReadinessIssueSeverity): string {
@@ -35,7 +36,7 @@ function CheckCell({ ok }: { ok: boolean }) {
   return <span className={ok ? "text-emerald-400" : "text-amber-400"}>{ok ? "Yes" : "No"}</span>;
 }
 
-function ScheduleCard({ c }: { c: ProcedureDayScheduleCard }) {
+function ScheduleCard({ c, tenantId }: { c: ProcedureDayScheduleCard; tenantId: string }) {
   const displayIssues = c.issues.filter((i) => i.kind !== "no_payment_tracking").slice(0, 6);
   return (
     <article className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm text-slate-200 shadow-sm shadow-black/30">
@@ -113,6 +114,7 @@ function ScheduleCard({ c }: { c: ProcedureDayScheduleCard }) {
           <dd className="text-slate-300">{c.surgeryDepositBadge ?? "No manual record"}</dd>
         </div>
       </dl>
+      <FinancialSurgeryPipelineInline tenantId={tenantId} caseId={c.caseId} status={c.financialPipeline} variant="dark" />
       {displayIssues.length ? (
         <ul className="mt-2 space-y-1">
           {displayIssues.map((it) => (
@@ -223,7 +225,7 @@ export function ProcedureDayBoard({ data }: { data: ProcedureDayBoardPayload }) 
                 <ul className="mt-2 space-y-3">
                   {g.cards.map((c) => (
                     <li key={c.bookingId}>
-                      <ScheduleCard c={c} />
+                      <ScheduleCard c={c} tenantId={data.tenantId} />
                     </li>
                   ))}
                 </ul>

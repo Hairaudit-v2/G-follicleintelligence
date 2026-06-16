@@ -8,6 +8,7 @@ import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { SurgeryReadinessBoardCard, SurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
+import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import {
   SURGERY_READINESS_ISSUE_LABEL,
   cardMatchesManagerFilter,
@@ -69,7 +70,7 @@ function KpiTile(props: {
   );
 }
 
-function SurgeryCard({ card }: { card: SurgeryReadinessBoardCard }) {
+function SurgeryCard({ tenantId, card }: { tenantId: string; card: SurgeryReadinessBoardCard }) {
   const displayIssues = card.issues.filter((i) => i.kind !== "no_payment_tracking").slice(0, 8);
   return (
     <article className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm text-slate-200 shadow-sm shadow-black/30">
@@ -112,6 +113,7 @@ function SurgeryCard({ card }: { card: SurgeryReadinessBoardCard }) {
           <dd className="min-w-0 text-slate-300">{card.surgeryDepositLabel}</dd>
         </div>
       </dl>
+      <FinancialSurgeryPipelineInline tenantId={tenantId} caseId={card.caseId} status={card.financialPipeline} variant="dark" />
       {displayIssues.length ? (
         <ul className="mt-2 space-y-1">
           {displayIssues.map((it) => (
@@ -290,7 +292,7 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
               {filteredColumns[col.id].length === 0 ? (
                 <p className="py-6 text-center text-xs text-slate-600">Nothing in this column (try another filter).</p>
               ) : (
-                filteredColumns[col.id].map((c) => <SurgeryCard key={c.bookingId} card={c} />)
+                filteredColumns[col.id].map((c) => <SurgeryCard key={c.bookingId} tenantId={tenantId} card={c} />)
               )}
             </div>
           </section>

@@ -1,0 +1,298 @@
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { loadBookingsForOperatorView } from "@/src/lib/bookings/bookings";
+import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
+import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
+import type { FiInvoiceRow, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  computeSurgeryReadinessBoardWindow,
+  isActiveSurgeryBookingStatus,
+  isInstantInTenantInclusiveDayWindow,
+} from "@/src/lib/surgery/surgeryReadinessBoardModel";
+import {
+  buildFinancialSurgeryPipelineStatus,
+  type FinancialSurgeryPipelineStatus,
+} from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+
+export type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+
+const BOARD_LIMIT = 240;
+
+function uniqueStrings(ids: (string | null | undefined)[]): string[] {
+  const s = new Set<string>();
+  for (const id of ids) {
+    if (id?.trim()) s.add(id.trim());
+  }
+  return Array.from(s);
+}
+
+function emptyUnavailable(): FinancialSurgeryPipelineStatus {
+  return buildFinancialSurgeryPipelineStatus({
+    todayYmd: "1970-01-01",
+    calendarTimezone: "UTC",
+    booking_status: null,
+    financial_os_status: null,
+    case_id: null,
+    patient_id: null,
+    invoices: [],
+    paymentRequests: [],
+    payments: [],
+    installmentPlans: [],
+  });
+}
+
+async function loadInstallmentRowsForInvoices(
+  supabase: SupabaseClient,
+  tenantId: string,
+  invoiceIds: string[]
+): Promise<Array<{ invoice_id: string; status: string; next_payment_date: string | null; remaining_balance: number }>> {
+  const ids = uniqueStrings(invoiceIds);
+  if (!ids.length) return [];
+  const { data, error } = await supabase
+    .from("fi_installment_plans")
+    .select("invoice_id, status, next_payment_date, remaining_balance")
+    .eq("tenant_id", tenantId.trim())
+    .in("invoice_id", ids);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((raw) => {
+    const r = raw as {
+      invoice_id: string;
+      status: string;
+      next_payment_date: string | null;
+      remaining_balance: number;
+    };
+    return {
+      invoice_id: String(r.invoice_id),
+      status: String(r.status ?? ""),
+      next_payment_date: r.next_payment_date != null ? String(r.next_payment_date).slice(0, 10) : null,
+      remaining_balance: Number(r.remaining_balance ?? 0),
+    };
+  });
+}
+
+async function loadFailedPaymentsForInvoices(
+  supabase: SupabaseClient,
+  tenantId: string,
+  invoiceIds: string[],
+  sinceIso: string
+): Promise<Array<{ invoice_id: string; status: string; created_at: string }>> {
+  const ids = uniqueStrings(invoiceIds);
+  if (!ids.length) return [];
+  const { data, error } = await supabase
+    .from("fi_payments")
+    .select("invoice_id, status, created_at")
+    .eq("tenant_id", tenantId.trim())
+    .eq("status", "failed")
+    .gte("created_at", sinceIso)
+    .in("invoice_id", ids);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((raw) => {
+    const r = raw as { invoice_id: string; status: string; created_at: string };
+    return { invoice_id: String(r.invoice_id), status: String(r.status), created_at: String(r.created_at) };
+  });
+}
+
+/**
+ * Batch-loads FinancialOS + revenue rows for surgery bookings and returns per-booking pipeline status.
+ * On any failure, returns “unavailable” for every booking id (does not throw to callers).
+ */
+export async function loadFinancialSurgeryPipelineStatusByBookings(
+  tenantId: string,
+  input: {
+    todayYmd: string;
+    calendarTimezone: string;
+    bookings: Array<{
+      id: string;
+      case_id: string | null;
+      patient_id: string | null;
+      booking_status: string;
+      financial_os_status?: string | null;
+    }>;
+  }
+): Promise<Map<string, FinancialSurgeryPipelineStatus>> {
+  const out = new Map<string, FinancialSurgeryPipelineStatus>();
+  const tid = tenantId.trim();
+  const { todayYmd, calendarTimezone, bookings } = input;
+  for (const b of bookings) {
+    out.set(b.id, emptyUnavailable());
+  }
+  if (!bookings.length) return out;
+
+  try {
+    const supabase = supabaseAdmin();
+    const caseIds = uniqueStrings(bookings.map((b) => b.case_id));
+    const patientIds = uniqueStrings(bookings.map((b) => b.patient_id));
+
+    const invoiceById = new Map<string, FiInvoiceRow>();
+    if (caseIds.length) {
+      const { data, error } = await supabase
+        .from("fi_invoices")
+        .select("*")
+        .eq("tenant_id", tid)
+        .in("case_id", caseIds)
+        .in("invoice_kind", ["surgery_deposit", "surgery_balance"]);
+      if (error) throw new Error(error.message);
+      for (const raw of data ?? []) {
+        const inv = mapInvoiceRow(raw as Record<string, unknown>);
+        invoiceById.set(inv.id, inv);
+      }
+    }
+    if (patientIds.length) {
+      const { data, error } = await supabase
+        .from("fi_invoices")
+        .select("*")
+        .eq("tenant_id", tid)
+        .in("patient_id", patientIds)
+        .is("case_id", null)
+        .in("invoice_kind", ["surgery_deposit", "surgery_balance"]);
+      if (error) throw new Error(error.message);
+      for (const raw of data ?? []) {
+        const inv = mapInvoiceRow(raw as Record<string, unknown>);
+        invoiceById.set(inv.id, inv);
+      }
+    }
+    const allInvoices = Array.from(invoiceById.values());
+    const invoiceIds = allInvoices.map((i) => i.id);
+
+    let paymentRequests: FiPaymentRequestRow[] = [];
+    if (invoiceIds.length) {
+      const { data: prs, error: pre } = await supabase
+        .from("fi_payment_requests")
+        .select("*")
+        .eq("tenant_id", tid)
+        .in("invoice_id", invoiceIds)
+        .order("created_at", { ascending: false })
+        .limit(800);
+      if (pre) throw new Error(pre.message);
+      paymentRequests = (prs ?? []).map((x) => mapPaymentRequestRow(x as Record<string, unknown>));
+    }
+
+    const failedSince = new Date();
+    failedSince.setUTCDate(failedSince.getUTCDate() - 60);
+    const [installmentPlans, failedPayments] = await Promise.all([
+      loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
+      loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
+    ]);
+
+    for (const b of bookings) {
+      const st = buildFinancialSurgeryPipelineStatus({
+        todayYmd,
+        calendarTimezone,
+        booking_status: b.booking_status,
+        financial_os_status: b.financial_os_status ?? null,
+        case_id: b.case_id?.trim() || null,
+        patient_id: b.patient_id?.trim() || null,
+        invoices: allInvoices,
+        paymentRequests,
+        payments: failedPayments,
+        installmentPlans,
+      });
+      out.set(b.id, st);
+    }
+  } catch {
+    for (const b of bookings) {
+      out.set(b.id, emptyUnavailable());
+    }
+  }
+
+  return out;
+}
+
+/**
+ * Case detail: combines existing case invoice/readiness payload with installment + failed payment reads.
+ */
+export async function loadCaseFinancialOsSurgeryPipelineSummary(
+  tenantId: string,
+  input: {
+    todayYmd: string;
+    calendarTimezone: string;
+    caseId: string;
+    readiness: CasePaymentReadiness;
+    caseAppointmentBookings: FiBookingRow[];
+  }
+): Promise<FinancialSurgeryPipelineStatus> {
+  const tid = tenantId.trim();
+  const { todayYmd, calendarTimezone, caseId, readiness, caseAppointmentBookings } = input;
+  const cid = caseId.trim();
+
+  const surgeryBookings = caseAppointmentBookings.filter(
+    (b) => b.booking_type.trim().toLowerCase() === "surgery" && b.booking_status.trim().toLowerCase() !== "cancelled"
+  );
+  surgeryBookings.sort((a, b) => a.start_at.localeCompare(b.start_at));
+  const primary = surgeryBookings[0] ?? null;
+
+  try {
+    const supabase = supabaseAdmin();
+    const invoiceIds = readiness.invoices.map((i) => i.id);
+    const failedSince = new Date();
+    failedSince.setUTCDate(failedSince.getUTCDate() - 60);
+    const [installmentPlans, failedPayments] = await Promise.all([
+      loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
+      loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
+    ]);
+
+    return buildFinancialSurgeryPipelineStatus({
+      todayYmd,
+      calendarTimezone,
+      booking_status: primary?.booking_status ?? null,
+      financial_os_status: primary?.financial_os_status ?? null,
+      case_id: cid,
+      patient_id: primary?.patient_id?.trim() || null,
+      invoices: readiness.invoices,
+      paymentRequests: readiness.paymentRequests,
+      payments: failedPayments,
+      installmentPlans,
+    });
+  } catch {
+    return emptyUnavailable();
+  }
+}
+
+/**
+ * Counts active surgery bookings in the Surgery readiness 14-day window that require payment attention (FinancialOS + revenue).
+ */
+export async function loadSurgeryFinancialPaymentAttentionCount(tenantId: string, now: Date = new Date()): Promise<number> {
+  const tid = tenantId.trim();
+  try {
+    const { calendarTimezone } = await loadTenantOperationalCalendarSettings(tid);
+    const window = computeSurgeryReadinessBoardWindow(now, calendarTimezone);
+    const rawBookings = await loadBookingsForOperatorView({
+      tenantId: tid,
+      rangeStartIso: window.rangeStartIso,
+      rangeEndIso: window.rangeEndIso,
+      bookingType: "surgery",
+      includeCancelled: false,
+      limit: BOARD_LIMIT,
+    });
+    const surgeryBookings = rawBookings.filter(
+      (b) =>
+        b.booking_type.trim().toLowerCase() === "surgery" &&
+        isActiveSurgeryBookingStatus(b.booking_status) &&
+        isInstantInTenantInclusiveDayWindow(Date.parse(b.start_at), window.calendarTimezone, window.todayYmd, window.windowEndYmd)
+    );
+    if (!surgeryBookings.length) return 0;
+    const map = await loadFinancialSurgeryPipelineStatusByBookings(tid, {
+      todayYmd: window.todayYmd,
+      calendarTimezone: window.calendarTimezone,
+      bookings: surgeryBookings.map((b) => ({
+        id: b.id,
+        case_id: b.case_id,
+        patient_id: b.patient_id,
+        booking_status: b.booking_status,
+        financial_os_status: b.financial_os_status ?? null,
+      })),
+    });
+    let n = 0;
+    for (const b of surgeryBookings) {
+      if (map.get(b.id)?.payment_attention_required) n += 1;
+    }
+    return n;
+  } catch {
+    return 0;
+  }
+}

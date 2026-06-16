@@ -15,6 +15,8 @@ import { loadCasesIndexRowsForIds } from "@/src/lib/cases/caseLoaders";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
+import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
@@ -57,6 +59,8 @@ export type SurgeryReadinessBoardCard = {
   primaryColumn: SurgeryReadinessBoardColumnId;
   /** Manual surgery deposit label for the card chrome. */
   surgeryDepositLabel: string;
+  /** FinancialOS + revenue pipeline snapshot (Phase 1B). */
+  financialPipeline: FinancialSurgeryPipelineStatus;
   hrefs: {
     case: string | null;
     patient: string | null;
@@ -301,10 +305,21 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
   }
 
   const surgeryBookingIds = surgeryBookings.map((b) => b.id);
-  const [pathologySets, consultationsByCase, surgeryPayments] = await Promise.all([
+  const [pathologySets, consultationsByCase, surgeryPayments, financialByBooking] = await Promise.all([
     loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology)),
     loadConsultationsByCaseId(supabase, tid, caseIds),
     loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
+    loadFinancialSurgeryPipelineStatusByBookings(tid, {
+      todayYmd: window.todayYmd,
+      calendarTimezone: window.calendarTimezone,
+      bookings: surgeryBookings.map((b) => ({
+        id: b.id,
+        case_id: b.case_id,
+        patient_id: b.patient_id,
+        booking_status: b.booking_status,
+        financial_os_status: b.financial_os_status ?? null,
+      })),
+    }),
   ]);
   let depositTracked = 0;
   let depositPending = 0;
@@ -406,6 +421,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
       issues,
       primaryColumn: primary,
       surgeryDepositLabel: SURGERY_DEPOSIT_BOARD_COPY[depKey],
+      financialPipeline: financialByBooking.get(b.id)!,
       hrefs: {
         case: caseId ? caseProcedureDayDetailHref(tid, caseId) : null,
         patient: patientHref,

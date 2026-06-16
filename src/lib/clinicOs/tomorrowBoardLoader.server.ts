@@ -26,6 +26,8 @@ import {
   type TomorrowSurgeryReadinessDerived,
 } from "@/src/lib/clinicOs/tomorrowBoardModel";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
+import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import {
   loadLatestPaymentRecordsByBookingIds,
@@ -127,6 +129,9 @@ export type TomorrowScheduleRow = {
   paymentBadge: string | null;
   reminderAttention: boolean;
   href: string;
+  /** FinancialOS + revenue snapshot for surgery rows only. */
+  financialPipeline: FinancialSurgeryPipelineStatus | null;
+  caseId: string | null;
 };
 
 export type TomorrowScheduleGroup = {
@@ -260,6 +265,18 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     bookingLabel,
   });
 
+  const financialByBooking = await loadFinancialSurgeryPipelineStatusByBookings(tid, {
+    todayYmd: window.todayYmd,
+    calendarTimezone: window.calendarTimezone,
+    bookings: surgeryBookings.map((b) => ({
+      id: b.id,
+      case_id: b.case_id,
+      patient_id: b.patient_id,
+      booking_status: b.booking_status,
+      financial_os_status: b.financial_os_status ?? null,
+    })),
+  });
+
   let assignedBookings = 0;
   let unassignedBookings = 0;
   let roomMissingBookings = 0;
@@ -310,6 +327,8 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
 
     const jobs = reminderMap.get(b.id);
 
+    const isSurgery = b.booking_type.trim().toLowerCase() === "surgery";
+
     return {
       bookingId: b.id,
       startAt: b.start_at,
@@ -324,6 +343,8 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
       paymentBadge,
       reminderAttention: reminderJobsNeedAttention(jobs),
       href: `${baseHref}/appointments/${encodeURIComponent(b.id)}`,
+      financialPipeline: isSurgery ? financialByBooking.get(b.id) ?? null : null,
+      caseId: b.case_id?.trim() || null,
     };
   });
 

@@ -20,6 +20,7 @@ import { loadMedicationReorderPendingReviewCount } from "@/src/lib/medicationReo
 import { loadPaymentSummaryForOperations } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { loadRevenueCollectionsDashboardKpis } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
+import { loadSurgeryFinancialPaymentAttentionCount } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
   bookingAgendaBucket,
@@ -171,6 +172,8 @@ const actionCentreSchema = z.object({
   followUpsDue: z.number().int().nonnegative(),
   /** Upcoming surgery bookings missing a linked case (next 14 days — same horizon as Surgery readiness board). */
   surgeryReadinessAlerts: z.number().int().nonnegative(),
+  /** Surgery bookings in the same 14-day window where FinancialOS / revenue signals need follow-up before procedure day. */
+  surgeryFinancialPaymentAttention: z.number().int().nonnegative(),
 });
 
 export type TenantActionCentre = z.infer<typeof actionCentreSchema>;
@@ -582,7 +585,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
   const horizonIso = addHours(now, 14 * 24).toISOString();
   const nowIso = now.toISOString();
 
-  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes] = await Promise.all([
+  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes, surgeryFinancialPaymentAttention] = await Promise.all([
     supabase
       .from("fi_crm_leads")
       .select("id", { count: "exact", head: true })
@@ -610,6 +613,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
       .gte("start_at", nowIso)
       .lt("start_at", horizonIso)
       .is("case_id", null),
+    loadSurgeryFinancialPaymentAttentionCount(tid, now),
   ]);
 
   if (openLeadsRes.error) throw new Error(openLeadsRes.error.message);
@@ -622,6 +626,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
     consultationsAwaitingCompletion: consultRes.count ?? 0,
     followUpsDue: followUpRes.count ?? 0,
     surgeryReadinessAlerts: surgeryReadyRes.count ?? 0,
+    surgeryFinancialPaymentAttention,
   });
 }
 

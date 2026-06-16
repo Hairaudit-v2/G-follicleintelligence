@@ -13,6 +13,8 @@ import { loadCasesIndexRowsForIds } from "@/src/lib/cases/caseLoaders";
 import { fiCaseStatusLabel } from "@/src/lib/cases/caseLabels";
 import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
+import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
+import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { paymentRecordNeedsCollection, surgeryDepositBoardLabel, SURGERY_DEPOSIT_BOARD_COPY } from "@/src/lib/payments/paymentRecordModel";
@@ -154,6 +156,7 @@ export type ProcedureDayScheduleCard = {
   readinessBucketLabel: string | null;
   readinessBucket: CaseWorklistRow["readinessBucket"] | null;
   surgeryDepositBadge: string | null;
+  financialPipeline: FinancialSurgeryPipelineStatus;
   issues: ReturnType<typeof buildTodayProcedureReadinessIssues>;
   preOp: PreOpChecklistFlags;
   procedureProgress: {
@@ -242,12 +245,23 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
     }
   }
 
-  const [pathologySets, consultationsByCase, surgeryPayments, roomNames, fiUserLabels] = await Promise.all([
+  const [pathologySets, consultationsByCase, surgeryPayments, roomNames, fiUserLabels, financialByBooking] = await Promise.all([
     loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology)),
     loadConsultationsByCaseId(supabase, tid, caseIds),
     loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
     loadRoomDisplayNamesById(supabase, tid, roomIds),
     loadFiUserEmailsById(supabase, tid, Array.from(procUserIds)),
+    loadFinancialSurgeryPipelineStatusByBookings(tid, {
+      todayYmd,
+      calendarTimezone: tz,
+      bookings: surgeryBookings.map((b) => ({
+        id: b.id,
+        case_id: b.case_id,
+        patient_id: b.patient_id,
+        booking_status: b.booking_status,
+        financial_os_status: b.financial_os_status ?? null,
+      })),
+    }),
   ]);
 
   const phases: ReturnType<typeof deriveSurgeryDayPipelinePhase>[] = [];
@@ -395,6 +409,7 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
       readinessBucketLabel: work?.readinessBucket ? work.readinessBucket.replace(/_/g, " ") : null,
       readinessBucket: work?.readinessBucket ?? null,
       surgeryDepositBadge,
+      financialPipeline: financialByBooking.get(b.id)!,
       issues,
       preOp,
       procedureProgress: {

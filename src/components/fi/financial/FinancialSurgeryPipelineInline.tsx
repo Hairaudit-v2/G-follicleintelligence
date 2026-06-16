@@ -1,0 +1,132 @@
+"use client";
+
+import Link from "next/link";
+
+import { cn } from "@/lib/utils";
+import {
+  FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY,
+  type FinancialSurgeryPipelineStatus,
+} from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+
+function formatMoney(cents: number, currency: string): string {
+  const n = cents / 100;
+  try {
+    return new Intl.NumberFormat("en-AU", { style: "currency", currency: currency || "AUD" }).format(n);
+  } catch {
+    return `${currency} ${n.toFixed(2)}`;
+  }
+}
+
+export function FinancialSurgeryPipelineInline(props: {
+  tenantId: string;
+  caseId: string | null;
+  status: FinancialSurgeryPipelineStatus;
+  /** Dark SurgeryOS / ClinicOS boards vs light case detail. */
+  variant?: "dark" | "light";
+  /** Single-line chip + micro links (boards). */
+  compact?: boolean;
+}) {
+  const { tenantId, caseId, status, variant = "dark", compact = true } = props;
+  const base = `/fi-admin/${tenantId}/financial`;
+  const muted = !status.financialDataAvailable;
+
+  const toneDark = status.payment_attention_required
+    ? "border-rose-500/40 bg-rose-500/10 text-rose-100"
+    : muted
+      ? "border-white/[0.08] bg-white/[0.03] text-slate-500"
+      : status.summary_label === "Paid in full"
+        ? "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-100"
+        : "border-cyan-500/25 bg-cyan-500/[0.06] text-cyan-100";
+
+  const toneLight = status.payment_attention_required
+    ? "border-rose-200 bg-rose-50 text-rose-900"
+    : muted
+      ? "border-gray-200 bg-gray-50 text-gray-600"
+      : status.summary_label === "Paid in full"
+        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+        : "border-sky-200 bg-sky-50 text-sky-900";
+
+  const tone = variant === "dark" ? toneDark : toneLight;
+  const linkCls =
+    variant === "dark" ? "text-cyan-400/95 hover:text-cyan-300" : "text-blue-700 hover:text-blue-900 hover:underline";
+
+  const label = muted ? FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY : status.summary_label;
+
+  if (compact) {
+    return (
+      <div className="mt-2 flex max-w-full flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3">
+        <span
+          className={cn(
+            "inline-flex w-fit max-w-full rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
+            tone,
+          )}
+        >
+          {label}
+        </span>
+        {!muted ? (
+          <span className="flex flex-wrap gap-x-3 text-[0.62rem] font-medium">
+            <Link href={`${base}/invoices`} className={linkCls}>
+              Invoices
+            </Link>
+            <Link href={`${base}/payment-requests`} className={linkCls}>
+              Payment requests
+            </Link>
+            {caseId ? (
+              <Link href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`} className={linkCls}>
+                Case
+              </Link>
+            ) : null}
+          </span>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "rounded-lg border p-3 text-sm",
+        variant === "dark" ? "border-white/[0.08] bg-white/[0.03]" : "border-gray-200 bg-gray-50/80",
+      )}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className={cn("rounded-md border px-2 py-0.5 text-xs font-semibold", tone)}>{label}</span>
+        {!muted ? (
+          <span className="flex flex-wrap gap-x-3 text-xs">
+            <Link href={`${base}/invoices`} className={linkCls}>
+              Invoices
+            </Link>
+            <Link href={`${base}/payment-requests`} className={linkCls}>
+              Payment requests
+            </Link>
+            {caseId ? (
+              <Link href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`} className={linkCls}>
+                Case
+              </Link>
+            ) : null}
+          </span>
+        ) : null}
+      </div>
+      {!muted ? (
+        <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600 sm:grid-cols-4">
+          <div>
+            <dt className="text-gray-500">Paid</dt>
+            <dd className="font-mono text-gray-900">{formatMoney(status.amount_paid_cents, status.currency)}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Balance due</dt>
+            <dd className="font-mono text-gray-900">{formatMoney(status.balance_due_cents, status.currency)}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Next due</dt>
+            <dd className="font-mono text-gray-900">{status.next_payment_due_date ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Latest pay link</dt>
+            <dd className="truncate text-gray-900">{status.latest_payment_request_status ?? "—"}</dd>
+          </div>
+        </dl>
+      ) : null}
+    </div>
+  );
+}

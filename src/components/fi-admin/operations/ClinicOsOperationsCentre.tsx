@@ -232,40 +232,87 @@ export function ClinicOsOperationsCentre(props: {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
-        <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-surgery-readiness-heading">
-          <SectionHeader
-            id="ops-surgery-readiness-heading"
-            kicker="SurgeryOS"
-            title="Surgery readiness"
-            description="Open the 14-day Surgery readiness board — pathology, consent proxy, confirmations, and case linkage."
-            className="mb-4"
-          />
-          <Link
-            href={`${base}/surgery-readiness`}
-            className={cn(
-              "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
-              data.actionCentre.surgeryReadinessAlerts > 0
-                ? "border-amber-500/25 bg-amber-500/[0.06] hover:border-amber-400/40 hover:bg-amber-500/10"
-                : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
-            )}
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-100">Surgery readiness board</p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Active surgery bookings in the next 14 days without a linked SurgeryOS case — same window as the readiness
-                board; tap for full view.
-              </p>
-            </div>
-            <span
+        <div className="space-y-4">
+          <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-surgery-readiness-heading">
+            <SectionHeader
+              id="ops-surgery-readiness-heading"
+              kicker="SurgeryOS"
+              title="Surgery readiness"
+              description="Open the 14-day Surgery readiness board — pathology, consent proxy, confirmations, and case linkage."
+              className="mb-4"
+            />
+            <Link
+              href={`${base}/surgery-readiness`}
               className={cn(
-                "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
-                data.actionCentre.surgeryReadinessAlerts > 0 ? "bg-amber-500/15 text-amber-100" : "bg-white/[0.04] text-slate-500",
+                "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
+                data.actionCentre.surgeryReadinessAlerts > 0
+                  ? "border-amber-500/25 bg-amber-500/[0.06] hover:border-amber-400/40 hover:bg-amber-500/10"
+                  : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
               )}
             >
-              {data.actionCentre.surgeryReadinessAlerts}
-            </span>
-          </Link>
-        </DashboardCard>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-100">Surgery readiness board</p>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Active surgery bookings in the next 14 days without a linked SurgeryOS case — same window as the readiness
+                  board; tap for full view.
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
+                  data.actionCentre.surgeryReadinessAlerts > 0 ? "bg-amber-500/15 text-amber-100" : "bg-white/[0.04] text-slate-500",
+                )}
+              >
+                {data.actionCentre.surgeryReadinessAlerts}
+              </span>
+            </Link>
+          </DashboardCard>
+
+          <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-surgery-financial-heading">
+            <SectionHeader
+              id="ops-surgery-financial-heading"
+              kicker="FinancialOS"
+              title="Surgery revenue attention"
+              description="Same 14-day surgery window as readiness — unpaid deposits, balance due soon, overdue balances, failed payments, or installment slips."
+              className="mb-4"
+            />
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`${base}/financial/invoices`}
+                className={cn(
+                  "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
+                  data.actionCentre.surgeryFinancialPaymentAttention > 0
+                    ? "border-rose-500/25 bg-rose-500/[0.07] hover:border-rose-400/40 hover:bg-rose-500/12"
+                    : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
+                )}
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-100">Payment attention (surgery dates)</p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Open invoices — follow up before procedure day when deposits, balances, installments, or failed card
+                    attempts need staff action.
+                  </p>
+                </div>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
+                    data.actionCentre.surgeryFinancialPaymentAttention > 0
+                      ? "bg-rose-500/15 text-rose-100"
+                      : "bg-white/[0.04] text-slate-500",
+                  )}
+                >
+                  {data.actionCentre.surgeryFinancialPaymentAttention}
+                </span>
+              </Link>
+              <Link
+                href={`${base}/financial/payment-requests`}
+                className="text-xs font-semibold text-cyan-400/90 hover:text-cyan-300"
+              >
+                Payment requests →
+              </Link>
+            </div>
+          </DashboardCard>
+        </div>
 
         <OperationsCrmPipelineSnapshot base={base} showCrmNav={showCrmNav} data={data} />
       </div>

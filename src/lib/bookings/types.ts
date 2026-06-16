@@ -18,6 +18,8 @@ export type FiBookingRow = {
   assigned_user_id: string | null;
   booking_type: string;
   booking_status: string;
+  /** FinancialOS overlay on the booking (omitted on legacy fixtures / calendar subset reads). */
+  financial_os_status?: string | null;
   title: string | null;
   description: string | null;
   start_at: string;
