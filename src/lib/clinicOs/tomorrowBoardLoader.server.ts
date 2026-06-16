@@ -147,12 +147,17 @@ export type TomorrowStaffPrep = {
   assigneeCounts: { label: string; count: number }[];
 };
 
+/** Surgery readiness rows on the Tomorrow board include FinancialOS pipeline chips (loader merge only). */
+export type TomorrowSurgeryReadinessBoardRow = TomorrowSurgeryReadinessDerived & {
+  financialPipeline: FinancialSurgeryPipelineStatus | null;
+};
+
 export type TomorrowBoardPayload = {
   tenantId: string;
   window: TomorrowOperationalWindow;
   summary: TomorrowBoardSummary;
   scheduleGroups: TomorrowScheduleGroup[];
-  surgeryReadiness: TomorrowSurgeryReadinessDerived[];
+  surgeryReadiness: TomorrowSurgeryReadinessBoardRow[];
   checklist: TomorrowChecklistItem[];
   staffPrep: TomorrowStaffPrep;
   actions: TomorrowActionItem[];
@@ -277,6 +282,11 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     })),
   });
 
+  const surgeryReadinessWithFinancial: TomorrowSurgeryReadinessBoardRow[] = surgeryReadiness.map((row) => ({
+    ...row,
+    financialPipeline: financialByBooking.get(row.bookingId) ?? null,
+  }));
+
   let assignedBookings = 0;
   let unassignedBookings = 0;
   let roomMissingBookings = 0;
@@ -371,7 +381,7 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     window,
     summary,
     scheduleGroups,
-    surgeryReadiness,
+    surgeryReadiness: surgeryReadinessWithFinancial,
     checklist,
     staffPrep,
     actions,

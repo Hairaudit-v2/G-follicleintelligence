@@ -6,6 +6,7 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { TomorrowBoardPayload } from "@/src/lib/clinicOs/tomorrowBoardLoader.server";
+import { FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import { SURGERY_READINESS_ISSUE_LABEL } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
 const CHECKLIST_FLAG_LABEL: Record<string, string> = {
@@ -200,6 +201,31 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                   <span className="shrink-0 rounded-md border border-white/[0.08] bg-black/30 px-2 py-0.5 text-[0.65rem] text-slate-400">
                     {row.bookingStatus}
                   </span>
+                </div>
+                <div
+                  className={cn(
+                    "mt-2",
+                    row.financialPipeline?.payment_attention_required &&
+                      "rounded-md border border-rose-500/40 bg-rose-500/[0.12] py-2 pl-3 pr-2 shadow-[inset_3px_0_0_0_rgba(251,113,133,0.85)]",
+                  )}
+                  role={row.financialPipeline?.payment_attention_required ? "status" : undefined}
+                  aria-label={
+                    row.financialPipeline?.payment_attention_required ? "Financial pipeline requires attention" : undefined
+                  }
+                >
+                  {row.financialPipeline ? (
+                    <div className={row.financialPipeline.payment_attention_required ? "[&>div]:mt-0" : undefined}>
+                      <FinancialSurgeryPipelineInline
+                        tenantId={data.tenantId}
+                        caseId={row.caseId}
+                        status={row.financialPipeline}
+                        variant="dark"
+                        compact
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-[0.65rem] leading-snug text-slate-500">{FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY}</p>
+                  )}
                 </div>
                 <ul className="mt-2 space-y-1">
                   {row.issues
