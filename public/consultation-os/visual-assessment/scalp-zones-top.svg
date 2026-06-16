@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-label="Scalp zones top view reference">
+  <title>Scalp zones</title>
+  <rect width="400" height="400" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="200" y="32" text-anchor="middle" font-size="13" fill="#334155" font-family="system-ui,sans-serif">Top-down scalp  reference (replace with clinical asset)</text>
+  <ellipse cx="200" cy="210" rx="150" ry="185" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+  <text x="200" y="380" text-anchor="middle" font-size="11" fill="#64748b" font-family="system-ui,sans-serif">Use interactive map in the form for precise zone capture.</text>
+</svg>

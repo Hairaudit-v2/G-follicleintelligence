@@ -33,7 +33,7 @@ const FEMALE_PATHWAY_RECOMMENDED_TREATMENT_OPTIONS: ConsultationFormOption[] = [
  * Distinct from male HT and from generic HLI: female-specific language, pattern set, and hormonal screen.
  */
 export const femaleHairLossConsultationSchemaV1: ConsultationFormSchema = {
-  schemaRevision: 1,
+  schemaRevision: 2,
   sections: [
     {
       id: "rapid_intake",
@@ -98,7 +98,7 @@ export const femaleHairLossConsultationSchemaV1: ConsultationFormSchema = {
         fld({
           id: "ludwig_classification",
           label: "Ludwig classification (female-pattern density)",
-          type: "select",
+          type: "visual_ludwig",
           optionSet: "ludwig_scale",
           showWhen: {
             fieldId: "female_pattern_type",
@@ -116,6 +116,13 @@ export const femaleHairLossConsultationSchemaV1: ConsultationFormSchema = {
             operator: "in",
             value: [...FEMALE_HAIR_LOSS_SINCLAIR_TRIGGER_PATTERNS],
           },
+        }),
+        fld({
+          id: "selected_zones",
+          label: "Scalp zones — clinical involvement (visual)",
+          type: "visual_scalp_zones",
+          optionSet: "consultation_scalp_zones",
+          description: "Optional structured zone capture for female-pattern mapping.",
         }),
         fld({
           id: "traction_pattern_present",

@@ -5,6 +5,10 @@ import { AiGeneratedClinicalNoteField } from "@/src/components/fi-admin/consulta
 import { BodyAreaMapAnnotationsSummary, BodyAreaMapField } from "@/src/components/fi-admin/consultation-forms/BodyAreaMapField";
 import { ClinicalNoteField, ClinicalNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/ClinicalNoteField";
 import { VoiceNoteField, VoiceNoteReadOnlySummary } from "@/src/components/fi-admin/consultation-forms/VoiceNoteField";
+import { LudwigVisualAssessmentField } from "@/src/components/fi-admin/consultation-forms/visual-assessment/LudwigVisualAssessmentField";
+import { NorwoodVisualAssessmentField } from "@/src/components/fi-admin/consultation-forms/visual-assessment/NorwoodVisualAssessmentField";
+import { RepairWireframeVisualAssessmentField } from "@/src/components/fi-admin/consultation-forms/visual-assessment/RepairWireframeVisualAssessmentField";
+import { ScalpZonesVisualAssessmentField } from "@/src/components/fi-admin/consultation-forms/visual-assessment/ScalpZonesVisualAssessmentField";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
@@ -320,6 +324,53 @@ export function ConsultationFormFieldRenderer({
           disabled={disabled}
           persistence={persistence}
           onChange={(next) => onChange(next)}
+        />
+      );
+    case "visual_norwood":
+      return (
+        <NorwoodVisualAssessmentField
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          onChange={onChange}
+          options={opts}
+          disabled={disabled}
+        />
+      );
+    case "visual_ludwig":
+      return (
+        <LudwigVisualAssessmentField
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          onChange={onChange}
+          options={opts}
+          disabled={disabled}
+        />
+      );
+    case "visual_scalp_zones":
+      return (
+        <ScalpZonesVisualAssessmentField
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          onChange={onChange}
+          options={opts}
+          disabled={disabled}
+        />
+      );
+    case "visual_repair_annotations":
+      return (
+        <RepairWireframeVisualAssessmentField
+          label={field.label}
+          description={field.description}
+          required={field.required}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
         />
       );
     case "image_upload":

@@ -67,7 +67,7 @@ const REPAIR_COMPLETION_OUTCOME: ConsultationFormOption[] = [
  * Standalone structure (not HT with hidden fields): prior surgery audit, donor/recipient risk, counselling emphasis.
  */
 export const hairTransplantRepairConsultationSchemaV1: ConsultationFormSchema = {
-  schemaRevision: 1,
+  schemaRevision: 2,
   sections: [
     {
       id: "rapid_intake",
@@ -142,6 +142,20 @@ export const hairTransplantRepairConsultationSchemaV1: ConsultationFormSchema = 
           type: "select",
           options: REPAIR_PRIMARY_CONCERN,
           required: true,
+        }),
+        fld({
+          id: "repair_visual_annotations",
+          label: "Repair concern map (visual)",
+          type: "visual_repair_annotations",
+          description:
+            "Optional zone-tagged repair diagram. Choose an issue tag, then tap scalp regions. Stored as JSON object keyed by zone.",
+        }),
+        fld({
+          id: "selected_zones",
+          label: "Scalp zones — clinical involvement (visual)",
+          type: "visual_scalp_zones",
+          optionSet: "consultation_scalp_zones",
+          description: "Optional structured scalp-zone capture alongside the repair narrative.",
         }),
         fld({
           id: "donor_depletion_level",

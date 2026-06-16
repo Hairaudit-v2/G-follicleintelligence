@@ -498,7 +498,7 @@ export const hairTransplantConsultationSchemaV1: ConsultationFormSchema = {
  * Quote builder, duplicate Norwood / risk checklists, and follow-up task lists live outside this form.
  */
 export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
-  schemaRevision: 3,
+  schemaRevision: 5,
   sections: [
     {
       id: "rapid_intake",
@@ -557,7 +557,7 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
         fld({
           id: "norwood_classification",
           label: "Norwood / pattern classification",
-          type: "select",
+          type: "visual_norwood",
           optionSet: "norwood_scale",
           required: true,
           description: "Single canonical Norwood capture for this consultation (replaces duplicate confirm fields).",
@@ -673,6 +673,14 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
           bodyAreaMapViews: ["frontal_hairline", "top_scalp", "crown", "donor_back"],
         }),
         fld({
+          id: "selected_zones",
+          label: "Scalp zones — clinical involvement (visual)",
+          type: "visual_scalp_zones",
+          optionSet: "consultation_scalp_zones",
+          description:
+            "Optional structured scalp-zone capture for analytics / handoff. Distinct from recommended treatment zones in the Recommendation section.",
+        }),
+        fld({
           id: "prior_ht_year",
           label: "Year of prior hair transplant",
           type: "text",
@@ -770,7 +778,7 @@ export const hairTransplantConsultationSchemaV2: ConsultationFormSchema = {
 export const hairTransplantConsultationSchemaV2_1: ConsultationFormSchema = {
   ...hairTransplantConsultationSchemaV2,
   /** Monotonic revision — v2.1 (pairs with DB template `version` 3). */
-  schemaRevision: 4,
+  schemaRevision: 6,
   sections: hairTransplantConsultationSchemaV2.sections.map((sec) =>
     sec.id === "clinical_summary_handoff"
       ? { ...sec, fields: sec.fields.filter((f) => f.id !== "clinician_voice_note") }

@@ -38,7 +38,7 @@ const SINCLAIR_TRIGGERS = ["diffuse", "female_pattern"] as const;
  * Separate from Hair Transplant v2: no donor, grafts, quotes, or surgical suitability.
  */
 export const hairLossTreatmentConsultationSchemaV1: ConsultationFormSchema = {
-  schemaRevision: 1,
+  schemaRevision: 2,
   sections: [
     {
       id: "rapid_intake",
@@ -102,14 +102,14 @@ export const hairLossTreatmentConsultationSchemaV1: ConsultationFormSchema = {
         fld({
           id: "norwood_classification",
           label: "Norwood classification (male-pattern zones)",
-          type: "select",
+          type: "visual_norwood",
           optionSet: "norwood_scale",
           showWhen: { fieldId: "pattern_type", operator: "in", value: [...MALE_PATTERN_NORWOOD_TRIGGERS] },
         }),
         fld({
           id: "ludwig_classification",
           label: "Ludwig classification",
-          type: "select",
+          type: "visual_ludwig",
           optionSet: "ludwig_scale",
           showWhen: { fieldId: "pattern_type", operator: "in", value: [...LUDWIG_TRIGGERS] },
         }),
@@ -119,6 +119,13 @@ export const hairLossTreatmentConsultationSchemaV1: ConsultationFormSchema = {
           type: "select",
           optionSet: "sinclair_scale",
           showWhen: { fieldId: "pattern_type", operator: "in", value: [...SINCLAIR_TRIGGERS] },
+        }),
+        fld({
+          id: "selected_zones",
+          label: "Scalp zones — clinical involvement (visual)",
+          type: "visual_scalp_zones",
+          optionSet: "consultation_scalp_zones",
+          description: "Optional structured zone capture alongside pattern typing.",
         }),
         fld({
           id: "miniaturisation_clinical",

@@ -30,7 +30,12 @@ export type ConsultationFormFieldType =
   | "image_upload"
   | "diagnosis_picker"
   | "treatment_recommendation"
-  | "quote_builder";
+  | "quote_builder"
+  /** Visual Assessment Engine v1 — image / diagram pickers; values match legacy string / string[] / object shapes. */
+  | "visual_norwood"
+  | "visual_ludwig"
+  | "visual_scalp_zones"
+  | "visual_repair_annotations";
 
 export type ConsultationFormOptionSetId =
   | "norwood_scale"
@@ -69,7 +74,9 @@ export type ConsultationFormOptionSetId =
   | "ferritin_history_known"
   | "thyroid_history_known"
   | "female_priority_focus"
-  | "female_primary_objective";
+  | "female_primary_objective"
+  /** Top-down scalp zones for `selected_zones` visual multi-select. */
+  | "consultation_scalp_zones";
 
 export type ConsultationFormOption = {
   value: string;

@@ -32,7 +32,7 @@ describe("ConsultationOS v2 consolidation checkpoint", () => {
     assert.equal(allFieldIdsFromSchema(hairTransplantConsultationSchemaV2_1).includes("clinician_voice_note"), false);
     assert.equal(allFieldIdsFromSchema(hairTransplantConsultationSchema).includes("clinician_voice_note"), false);
     assert.equal(allFieldIdsFromSchema(hairTransplantConsultationSchemaV2).includes("clinician_voice_note"), true);
-    assert.equal(hairTransplantConsultationSchemaV2_1.schemaRevision, 4);
+    assert.equal(hairTransplantConsultationSchemaV2_1.schemaRevision, 6);
   });
 
   it("HT v1 legacy schema object is unchanged and still distinct from v2 pathway", () => {

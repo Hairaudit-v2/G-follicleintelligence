@@ -31,7 +31,7 @@ Consultation-form–related test entry points (non-exhaustive; see `package.json
 | Area | Expected behaviour | Where it lives |
 |------|---------------------|----------------|
 | **New HT instances** | Bind to **latest published** `fi_consultation_form_template_versions` row (today **version 3** = HT v2.1 JSON: no `clinician_voice_note` in schema). | `ensureGlobalHairTransplantConsultationTemplate` + `ensureInRoomHairTransplantConsultationFormInstance` in `consultationFormMutations.server.ts` |
-| **HT v2.1 schema (code)** | `hairTransplantConsultationSchema` / `hairTransplantConsultationSchemaV2_1` omit `clinician_voice_note`; `schemaRevision` 4. | `templates/hairTransplantConsultationTemplate.ts` |
+| **HT v2.1 schema (code)** | `hairTransplantConsultationSchema` / `hairTransplantConsultationSchemaV2_1` omit `clinician_voice_note`; `schemaRevision` 6 (Visual Assessment v1 adds `selected_zones` + `visual_norwood`). | `templates/hairTransplantConsultationTemplate.ts` |
 | **Legacy HT v1/v2 rows** | Never **updated**; instances keep their frozen `template_version_id`. UI still renders fields present in that version’s JSON (including legacy dictation). | DB immutability + `ConsultationFormFieldRenderer` |
 | **Legacy `clinician_voice_note` values** | Still merged into `clinicianNotesPreview` / completion dual-read. | `consultationCompletionExtractors.ts` → `buildHairTransplantCompletionSummary` |
 | **HLI pathway** | Unchanged slug and template; validation tests remain dedicated. | `hairLossTreatmentConsultationTemplate.ts`, `hairLossTreatmentCompletionRules*.ts` |
@@ -80,5 +80,5 @@ Consultation-form–related test entry points (non-exhaustive; see `package.json
 ## Versioning reference
 
 - **DB** `fi_consultation_form_template_versions.version`: `1` = legacy HT v1 schema, `2` = HT v2 (with dictation), `3` = HT v2.1 (no dictation).  
-- **Code** `schemaRevision` on JSON: v1 uses its own revision; v2 uses `3`; v2.1 uses `4` (see template file comments).  
+- **Code** `schemaRevision` on JSON: v1 uses its own revision; v2 uses `5`; v2.1 uses `6` (see template file comments).  
 - **Repair:** published template **version 1** only (separate global template row).

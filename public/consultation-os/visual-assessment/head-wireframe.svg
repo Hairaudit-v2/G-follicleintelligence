@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="420" viewBox="0 0 400 420" role="img" aria-label="Head wireframe reference">
+  <title>Head wireframe</title>
+  <rect width="400" height="420" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="200" y="32" text-anchor="middle" font-size="13" fill="#334155" font-family="system-ui,sans-serif">Head wireframe  reference (replace with clinical asset)</text>
+  <ellipse cx="200" cy="210" rx="150" ry="185" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-dasharray="6 4"/>
+  <text x="200" y="400" text-anchor="middle" font-size="11" fill="#64748b" font-family="system-ui,sans-serif">Tap zones in the interactive map to annotate repair issues.</text>
+</svg>

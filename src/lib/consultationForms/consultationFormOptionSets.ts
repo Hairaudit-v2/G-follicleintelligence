@@ -1,6 +1,16 @@
 import type { ConsultationFormOption, ConsultationFormOptionSetId } from "./consultationFormTypes";
 
 export const CONSULTATION_FORM_OPTION_SETS: Record<ConsultationFormOptionSetId, ConsultationFormOption[]> = {
+  /** Clinical scalp zones — used by Visual Assessment `selected_zones` (string[]). */
+  consultation_scalp_zones: [
+    { value: "frontal", label: "Frontal / hairline" },
+    { value: "crown", label: "Crown / vertex" },
+    { value: "temporal_left", label: "Left temporal" },
+    { value: "temporal_right", label: "Right temporal" },
+    { value: "mid_scalp", label: "Mid-scalp" },
+    { value: "occipital", label: "Occipital" },
+    { value: "donor_safe_zone", label: "Donor safe zone" },
+  ],
   norwood_scale: [
     { value: "nw1", label: "Norwood I" },
     { value: "nw2", label: "Norwood II" },
