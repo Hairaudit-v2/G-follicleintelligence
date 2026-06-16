@@ -34,6 +34,8 @@ import {
 } from "@/lib/calendar/calendarResponsive";
 import { calendarShellVariants } from "@/lib/calendar/calendarMotion";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
+import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
+import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
 import { cn } from "@/lib/utils";
@@ -52,12 +54,7 @@ import {
   parseIsoUtcMs,
   zonedMidnightUtcMs,
 } from "@/src/lib/calendar/calendarTimezone";
-import {
-  buildCalendarHref,
-  mergeCalendarHrefQuery,
-  type CalendarRoute,
-  type ParsedCalendarQuery,
-} from "@/src/lib/bookings/calendarQuery";
+import { buildCalendarHref, mergeCalendarHrefQuery, type CalendarRoute, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import { buildCalendarMonth } from "@/src/lib/bookings/calendarView";
 import { resourceColumnIdForBooking, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type {
@@ -66,6 +63,7 @@ import type {
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
+import { calendarBookingsHydrationFingerprint } from "@/src/lib/calendar/calendarHydrationFingerprint";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -547,7 +545,12 @@ function MonthViewInner({
     () => buildMonthGridCells(monthAnchor, gridConfig.timeZone),
     [monthAnchor, gridConfig.timeZone]
   );
-  const buckets = useMemo(() => bucketBookingsForMonthCells(bookings, cells), [bookings, cells]);
+  const monthBookingsKey = useMemo(() => calendarBookingsHydrationFingerprint(bookings), [bookings]);
+  const buckets = useMemo(
+    () =>
+      measureCalendarSync("calendar.month.buckets", () => bucketBookingsForMonthCells(bookings, cells)),
+    [cells, monthBookingsKey]
+  );
   const monthTitle = useMemo(
     () => formatMonthTitle(monthAnchor, gridConfig.timeZone),
     [monthAnchor, gridConfig.timeZone]
@@ -595,7 +598,8 @@ function MonthViewInner({
         return;
       }
       if (tenantId && query) {
-        router.push(
+        pushCalendarHref(
+          router,
           buildCalendarHref(
             tenantId,
             mergeCalendarHrefQuery(query, { date: nextAnchor, view: "month" }),
@@ -614,7 +618,8 @@ function MonthViewInner({
         return;
       }
       if (tenantId && query) {
-        router.push(
+        pushCalendarHref(
+          router,
           buildCalendarHref(
             tenantId,
             mergeCalendarHrefQuery(query, { view: "day", date: dayKey }),

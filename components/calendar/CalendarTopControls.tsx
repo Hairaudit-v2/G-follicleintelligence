@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Keyboard, MapPin, PanelLeftOpen, Users } from "lucide-react";
 
@@ -14,6 +13,9 @@ import { buildCalendarNavigationHref } from "@/src/lib/calendar/calendarViewNavi
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
+import { CalendarTransitionLink } from "@/components/calendar/CalendarTransitionLink";
+import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
+import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
 
 const VIEW_OPTIONS: { id: CalendarViewMode; label: string }[] = [
@@ -72,7 +74,10 @@ export function CalendarTopControls({
   );
 
   function navigate(patch: Parameters<typeof mergeCalendarHrefQuery>[1]) {
-    router.push(buildCalendarNavigationHref(tenantId, query, patch, hrefOpts));
+    const href = measureCalendarSync("calendar.toolbar.buildHref", () =>
+      buildCalendarNavigationHref(tenantId, query, patch, hrefOpts)
+    );
+    pushCalendarHref(router, href);
   }
 
   const selectedClinic =
@@ -146,15 +151,15 @@ export function CalendarTopControls({
         ) : null}
 
         <div className={inset}>
-          <Link href={prev} className={navBtn} aria-label="Previous period">
+          <CalendarTransitionLink href={prev} className={navBtn} aria-label="Previous period">
             <ChevronLeft className="h-4 w-4" />
-          </Link>
-          <Link href={today} className={todayCls}>
+          </CalendarTransitionLink>
+          <CalendarTransitionLink href={today} className={todayCls}>
             Today
-          </Link>
-          <Link href={next} className={navBtn} aria-label="Next period">
+          </CalendarTransitionLink>
+          <CalendarTransitionLink href={next} className={navBtn} aria-label="Next period">
             <ChevronRight className="h-4 w-4" />
-          </Link>
+          </CalendarTransitionLink>
         </div>
 
         <label className={dateShell}>
@@ -180,7 +185,7 @@ export function CalendarTopControls({
             const href = buildCalendarNavigationHref(tenantId, query, { view: opt.id }, hrefOpts);
             const active = opt.active(query);
             return (
-              <Link
+              <CalendarTransitionLink
                 key={opt.id}
                 href={href}
                 className={cn(
@@ -196,7 +201,7 @@ export function CalendarTopControls({
                 aria-current={active ? "page" : undefined}
               >
                 {opt.label}
-              </Link>
+              </CalendarTransitionLink>
             );
           })}
         </div>

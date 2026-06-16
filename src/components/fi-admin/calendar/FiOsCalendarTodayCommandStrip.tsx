@@ -1,9 +1,9 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { CalendarTransitionLink } from "@/components/calendar/CalendarTransitionLink";
 import { cn } from "@/lib/utils";
 import {
   buildCalendarHref,
@@ -15,6 +15,7 @@ import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezo
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingsOverlappingDayKey, computeFiOsTodayStripCounts } from "@/src/lib/calendar/fiOsCalendarTodayStrip";
+import { calendarBookingsHydrationFingerprint } from "@/src/lib/calendar/calendarHydrationFingerprint";
 
 function chipClass(active: boolean): string {
   return cn(
@@ -43,9 +44,11 @@ export function FiOsCalendarTodayCommandStrip({
   const tz = query.calendarTimezone;
   const todayYmd = calendarDateStringFromInstant(new Date(), tz);
 
+  const bookingsStripKey = useMemo(() => calendarBookingsHydrationFingerprint(bookings), [bookings]);
   const dayRows = useMemo(
     () => bookingsOverlappingDayKey(bookings, lanes, query.dateAnchor),
-    [bookings, lanes, query.dateAnchor]
+    // bookingsStripKey captures visible booking payload; avoids recomputing overlaps when RSC re-sends the same rows with a new array identity.
+    [bookingsStripKey, lanes, query.dateAnchor]
   );
   const counts = useMemo(() => computeFiOsTodayStripCounts(dayRows), [dayRows]);
 
@@ -120,51 +123,51 @@ export function FiOsCalendarTodayCommandStrip({
 
   const chipRow = (
     <div className="flex max-w-full items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:thin]">
-      <Link
+      <CalendarTransitionLink
         href={todayOverviewHref}
         className={chipClass(todayOverviewActive)}
         title="Day view for clinic today · clear type, status, staff, and strip filters"
       >
         <span className="text-slate-400">Appointments today</span>
         <span className="text-slate-100">{counts.all}</span>
-      </Link>
-      <Link href={typeHref("consultation", cConsult)} className={chipClass(cConsult)} title="Toggle consultation filter">
+      </CalendarTransitionLink>
+      <CalendarTransitionLink href={typeHref("consultation", cConsult)} className={chipClass(cConsult)} title="Toggle consultation filter">
         <span className="text-slate-400">Consultations</span>
         <span className="text-slate-100">{counts.consultation}</span>
-      </Link>
-      <Link href={typeHref("prp", cPrp)} className={chipClass(cPrp)} title="Toggle PRP filter">
+      </CalendarTransitionLink>
+      <CalendarTransitionLink href={typeHref("prp", cPrp)} className={chipClass(cPrp)} title="Toggle PRP filter">
         <span className="text-slate-400">PRP</span>
         <span className="text-slate-100">{counts.prp}</span>
-      </Link>
-      <Link href={typeHref("surgery", cSurg)} className={chipClass(cSurg)} title="Toggle surgery filter">
+      </CalendarTransitionLink>
+      <CalendarTransitionLink href={typeHref("surgery", cSurg)} className={chipClass(cSurg)} title="Toggle surgery filter">
         <span className="text-slate-400">Surgeries</span>
         <span className="text-slate-100">{counts.surgery}</span>
-      </Link>
+      </CalendarTransitionLink>
       {route === "fi-admin" ? (
-        <Link
+        <CalendarTransitionLink
           href={`/fi-admin/${tenantId}/surgery-readiness`}
           className={chipClass(false)}
           title="Surgery readiness board — next 14 days"
         >
           <span className="text-slate-400">Readiness</span>
-        </Link>
+        </CalendarTransitionLink>
       ) : null}
-      <Link href={statusHref("arrived", cArrived)} className={chipClass(cArrived)} title="Toggle arrived status">
+      <CalendarTransitionLink href={statusHref("arrived", cArrived)} className={chipClass(cArrived)} title="Toggle arrived status">
         <span className="text-slate-400">Arrived</span>
         <span className="text-slate-100">{counts.arrived}</span>
-      </Link>
-      <Link href={waitingHref(cWaiting)} className={chipClass(cWaiting)} title="Scheduled or confirmed (waiting)">
+      </CalendarTransitionLink>
+      <CalendarTransitionLink href={waitingHref(cWaiting)} className={chipClass(cWaiting)} title="Scheduled or confirmed (waiting)">
         <span className="text-slate-400">Waiting</span>
         <span className="text-slate-100">{counts.waiting}</span>
-      </Link>
-      <Link href={statusHref("completed", cCompleted)} className={chipClass(cCompleted)} title="Toggle completed status">
+      </CalendarTransitionLink>
+      <CalendarTransitionLink href={statusHref("completed", cCompleted)} className={chipClass(cCompleted)} title="Toggle completed status">
         <span className="text-slate-400">Completed</span>
         <span className="text-slate-100">{counts.completed}</span>
-      </Link>
-      <Link href={unassignedHref(cUnassigned)} className={chipClass(cUnassigned)} title="No staff or user assignee">
+      </CalendarTransitionLink>
+      <CalendarTransitionLink href={unassignedHref(cUnassigned)} className={chipClass(cUnassigned)} title="No staff or user assignee">
         <span className="text-slate-400">Unassigned</span>
         <span className="text-slate-100">{counts.unassigned}</span>
-      </Link>
+      </CalendarTransitionLink>
     </div>
   );
 

@@ -32,6 +32,8 @@ import {
 import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { useCalendarAppointments } from "@/hooks/useCalendarAppointments";
 import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
+import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
+import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
 import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
 import { FiOsCalendarTodayCommandStrip } from "@/src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip";
@@ -211,13 +213,14 @@ export function CalendarPage({
 
   const onSearchSubmit = useCallback(
     (q: string) => {
-      router.push(
+      const href = measureCalendarSync("calendar.search.buildHref", () =>
         buildCalendarHref(
           data.tenantId,
           mergeCalendarHrefQuery(data.query, { q: q || undefined }),
           { route }
         )
       );
+      pushCalendarHref(router, href);
     },
     [data.query, data.tenantId, route, router]
   );

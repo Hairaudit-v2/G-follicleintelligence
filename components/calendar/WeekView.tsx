@@ -26,11 +26,8 @@ import { useCalendarKeyboardShortcuts } from "@/hooks/useCalendarKeyboardShortcu
 import { useCalendarLayoutMode } from "@/hooks/useCalendarLayoutMode";
 import { useScrollViewport } from "@/hooks/useScrollViewport";
 import { calendarShellVariants } from "@/lib/calendar/calendarMotion";
-import {
-  calendarPointerSensorOptions,
-  calendarTouchSensorOptions,
-  isSwipeCalendarLayout,
-} from "@/lib/calendar/calendarResponsive";
+import { calendarPointerSensorOptions, calendarTouchSensorOptions, isSwipeCalendarLayout } from "@/lib/calendar/calendarResponsive";
+import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import {
   CALENDAR_COLUMN_MIN_WIDTH_PX,
@@ -307,7 +304,7 @@ function WeekViewInner({
   const navigateCalendar = useCallback(
     (patch: Parameters<typeof mergeCalendarHrefQuery>[1]) => {
       if (!shortcuts) return;
-      router.push(buildCalendarHref(shortcuts.tenantId, mergeCalendarHrefQuery(shortcuts.query, patch)));
+      pushCalendarHref(router, buildCalendarHref(shortcuts.tenantId, mergeCalendarHrefQuery(shortcuts.query, patch)));
     },
     [router, shortcuts]
   );
@@ -315,7 +312,7 @@ function WeekViewInner({
   const keyboardActions = useMemo(
     () => ({
       onNewAppointment: shortcuts?.addAppointmentHref
-        ? () => router.push(shortcuts.addAppointmentHref)
+        ? () => pushCalendarHref(router, shortcuts.addAppointmentHref)
         : undefined,
       onToday: shortcuts
         ? () => navigateCalendar(calendarNavigationHelpers.goToToday())

@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { CalendarTransitionLink } from "@/components/calendar/CalendarTransitionLink";
 import { cn } from "@/lib/utils";
+import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import {
   buildCalendarHref,
   mergeCalendarHrefQuery,
@@ -67,7 +68,7 @@ export function FiOsCalendarQuickFilters({
       }),
       hrefOpts
     );
-    router.push(href);
+    pushCalendarHref(router, href);
   }
 
   function resourceViewHref(view: CalendarResourceView): string {
@@ -84,7 +85,7 @@ export function FiOsCalendarQuickFilters({
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] bg-[#060d18]/80 px-3 py-2.5 backdrop-blur-md sm:px-4">
       <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Quick filters</span>
-      <Link
+      <CalendarTransitionLink
         href={resourceViewHref("staff")}
         className={cn(
           "rounded-full border px-3 py-1 text-xs font-medium transition",
@@ -94,8 +95,8 @@ export function FiOsCalendarQuickFilters({
         )}
       >
         By staff
-      </Link>
-      <Link
+      </CalendarTransitionLink>
+      <CalendarTransitionLink
         href={resourceViewHref("room")}
         className={cn(
           "rounded-full border px-3 py-1 text-xs font-medium transition",
@@ -105,8 +106,8 @@ export function FiOsCalendarQuickFilters({
         )}
       >
         By room
-      </Link>
-      <Link
+      </CalendarTransitionLink>
+      <CalendarTransitionLink
         href={resourceViewHref("clinic")}
         className={cn(
           "rounded-full border px-3 py-1 text-xs font-medium transition",
@@ -116,11 +117,11 @@ export function FiOsCalendarQuickFilters({
         )}
       >
         By clinic
-      </Link>
+      </CalendarTransitionLink>
       {TYPE_CHIPS.map((c) => {
         const active = query.bookingType?.trim() === c.type;
         return (
-          <Link
+          <CalendarTransitionLink
             key={c.id}
             href={typeHref(c.type)}
             className={cn(
@@ -131,10 +132,10 @@ export function FiOsCalendarQuickFilters({
             )}
           >
             {c.label}
-          </Link>
+          </CalendarTransitionLink>
         );
       })}
-      <Link
+      <CalendarTransitionLink
         href={roleHref("doctor")}
         className={cn(
           "rounded-full border px-3 py-1 text-xs font-medium transition",
@@ -144,8 +145,8 @@ export function FiOsCalendarQuickFilters({
         )}
       >
         Doctor
-      </Link>
-      <Link
+      </CalendarTransitionLink>
+      <CalendarTransitionLink
         href={roleHref("nurse")}
         className={cn(
           "rounded-full border px-3 py-1 text-xs font-medium transition",
@@ -155,7 +156,7 @@ export function FiOsCalendarQuickFilters({
         )}
       >
         Nurse
-      </Link>
+      </CalendarTransitionLink>
       <button
         type="button"
         onClick={onClinicRoomClick}

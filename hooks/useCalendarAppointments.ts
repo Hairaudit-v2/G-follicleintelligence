@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, startTransition } from "react";
 
 import { rescheduleCalendarAppointmentRequest } from "@/lib/calendar/appointmentsApiClient";
+import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
 import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
 import {
   calendarAppointmentsSyncKey,
@@ -100,25 +101,29 @@ export function useCalendarAppointments(
    * the same `data.bookings` / `data.bookingDisplay` object identities — see calendarHydrationFingerprint tests.
    */
   useEffect(() => {
-    const useSamples = Boolean(options.useSampleData || data.query.sampleMode);
-    const mergedBookings = useSamples
-      ? mergeBookingsWithSamples(data.bookings, data.tenantId, data.query.dateAnchor)
-      : data.bookings;
-    const mergedDisplay = useSamples
-      ? mergeDisplayWithSamples(data.bookingDisplay, mergedBookings)
-      : data.bookingDisplay;
+    startTransition(() => {
+      const useSamples = Boolean(options.useSampleData || data.query.sampleMode);
+      const mergedBookings = measureCalendarSync("calendar.hydrate.mergeBookings", () =>
+        useSamples ? mergeBookingsWithSamples(data.bookings, data.tenantId, data.query.dateAnchor) : data.bookings
+      );
+      const mergedDisplay = measureCalendarSync("calendar.hydrate.mergeDisplay", () =>
+        useSamples ? mergeDisplayWithSamples(data.bookingDisplay, mergedBookings) : data.bookingDisplay
+      );
 
-    hydrate({
-      tenantId: data.tenantId,
-      syncKey,
-      calendarTimezone: data.calendarTimezone,
-      bookings: mergedBookings,
-      bookingDisplay: mergedDisplay,
-    });
-    logCalendarClientPerf("calendar-hydrate", {
-      bookingCount: mergedBookings.length,
-      displayCount: Object.keys(mergedDisplay).length,
-      syncKeyTail: syncKey.slice(-64),
+      measureCalendarSync("calendar.zustand.hydrate", () => {
+        hydrate({
+          tenantId: data.tenantId,
+          syncKey,
+          calendarTimezone: data.calendarTimezone,
+          bookings: mergedBookings,
+          bookingDisplay: mergedDisplay,
+        });
+      });
+      logCalendarClientPerf("calendar-hydrate", {
+        bookingCount: mergedBookings.length,
+        displayCount: Object.keys(mergedDisplay).length,
+        syncKeyTail: syncKey.slice(-64),
+      });
     });
   }, [
     bookingsHydrationFp,
@@ -135,17 +140,30 @@ export function useCalendarAppointments(
   const activeBookings = storeSyncKey === syncKey ? bookings : data.bookings;
   const activeDisplay = storeSyncKey === syncKey ? bookingDisplay : data.bookingDisplay;
 
+  const laneWindowKey = useMemo(
+    () => data.lanes.map((l) => `${l.dayKey}:${l.startMs}`).join("|"),
+    [data.lanes]
+  );
+  const activeBookingsFingerprint = useMemo(
+    () => calendarBookingsHydrationFingerprint(activeBookings),
+    [activeBookings]
+  );
+
   const buckets = useMemo(() => {
-    const m = bucketBookingsIntoCalendar(activeBookings, data.lanes);
-    const out: Record<string, FiBookingRow[]> = {};
-    for (const lane of data.lanes) {
-      out[lane.dayKey] = m.get(lane.dayKey) ?? [];
-    }
-    return out;
-  }, [activeBookings, data.lanes]);
+    return measureCalendarSync("calendar.grid.buckets", () => {
+      const m = bucketBookingsIntoCalendar(activeBookings, data.lanes);
+      const out: Record<string, FiBookingRow[]> = {};
+      for (const lane of data.lanes) {
+        out[lane.dayKey] = m.get(lane.dayKey) ?? [];
+      }
+      return out;
+    });
+  }, [activeBookingsFingerprint, laneWindowKey]);
 
   const refresh = useCallback(() => {
-    router.refresh();
+    startTransition(() => {
+      router.refresh();
+    });
   }, [router]);
 
   const staffIdToUserId = useMemo(() => staffPickerUserMap(data.staffDirectory), [data.staffDirectory]);
