@@ -9,7 +9,11 @@ import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
 import { optionsForField } from "@/src/lib/consultationForms/consultationFormOptionSets";
-import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG, HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG } from "@/src/lib/consultationForms/consultationFormConstants";
+import {
+  FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+} from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormField, ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
 
 function readStringArray(v: unknown): string[] {
@@ -56,11 +60,16 @@ export function ConsultationFormFieldRenderer({
     (slug === HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG || slug === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) &&
     sec === "clinical_summary_handoff";
 
+  const followUpAiNoteUx =
+    slug === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG && sec === "clinical_summary_next_action";
+
+  const aiGeneratedClinicalNoteUx = hairTransplantHandoffUx || followUpAiNoteUx;
+
   if (hairTransplantHandoffUx && field.id === "clinician_voice_note") {
     return null;
   }
 
-  if (hairTransplantHandoffUx && field.type === "clinical_note" && field.id === "structured_clinical_note") {
+  if (aiGeneratedClinicalNoteUx && field.type === "clinical_note" && field.id === "structured_clinical_note") {
     return (
       <AiGeneratedClinicalNoteField
         label={field.label}

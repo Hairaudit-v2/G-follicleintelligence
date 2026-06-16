@@ -1,10 +1,12 @@
 import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+  FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
 } from "../consultationFormConstants";
 import type { ConsultationCompletionInput, ConsultationCompletionSummary } from "./consultationCompletionTypes";
 import { buildFemaleHairLossCompletionSummary } from "./femaleHairLossCompletionRules";
+import { buildFollowUpReviewCompletionSummary } from "./followUpReviewCompletionRules";
 import { buildHairLossTreatmentCompletionSummary } from "./hairLossTreatmentCompletionRules";
 import { buildHairTransplantRepairCompletionSummary } from "./hairTransplantRepairCompletionRules";
 import { buildHairTransplantCompletionSummary } from "./hairTransplantCompletionRules";
@@ -21,6 +23,9 @@ export function buildConsultationCompletionSummary(input: ConsultationCompletion
   }
   if (input.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) {
     return buildHairTransplantRepairCompletionSummary(input);
+  }
+  if (input.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG) {
+    return buildFollowUpReviewCompletionSummary(input);
   }
   return buildHairTransplantCompletionSummary(input);
 }

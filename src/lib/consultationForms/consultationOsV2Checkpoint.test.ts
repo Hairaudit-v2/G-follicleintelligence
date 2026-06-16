@@ -11,6 +11,7 @@ import { buildHairLossTreatmentCompletionSummary } from "./completion/hairLossTr
 import { buildHairTransplantCompletionSummary } from "./completion/hairTransplantCompletionRules";
 import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+  FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
@@ -160,5 +161,38 @@ describe("ConsultationOS v2 consolidation checkpoint", () => {
     assert.ok(s.repairConsultationCompletionSnapshot?.priorSurgeryHistoryLine);
     assert.equal(s.outcomeType, "review_later");
     assert.equal(s.repairConsultationCompletionSnapshot?.surgeryosPlanningRecommended, false);
+  });
+
+  it("Follow-up / Review completion dispatch returns pathway 5 snapshot fields", () => {
+    const s = buildConsultationCompletionSummary({
+      consultationId: "c-fu2",
+      formInstanceId: "f-fu2",
+      templateSlug: FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
+      values: {
+        review_type: "annual_review",
+        time_since_last_review: "12_month",
+        current_primary_concern: "Routine interval check.",
+        treatment_compliance: "partially_compliant",
+        perceived_improvement: "minimal_improvement",
+        shedding_changes: "unchanged",
+        density_changes: "stable",
+        patient_satisfaction: 6,
+        side_effects_present: false,
+        clinical_progression_assessment: "further_investigation_needed",
+        hairaudit_progression_capture: false,
+        updated_photos_captured: false,
+        treatment_modification_required: true,
+        updated_recommended_treatments: [],
+        next_pathway_recommended: "request_blood_analysis",
+        structured_clinical_note: { mode: "clinical_note", note: "Annual review." },
+        follow_up_required_explicit: true,
+        follow_up_urgency: "priority",
+      },
+      completedAt: "2026-06-16T12:00:00.000Z",
+    });
+    assert.equal(s.templateSlug, FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG);
+    assert.equal(s.outcomeType, "needs_blood_tests");
+    assert.ok(s.followUpReviewCompletionSnapshot?.reviewTypeLabel);
+    assert.equal(s.pathologyRecommended, true);
   });
 });

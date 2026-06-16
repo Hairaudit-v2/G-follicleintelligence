@@ -9,6 +9,7 @@ import {
 } from "./consultationPathwayLauncherModel";
 import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+  FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
@@ -402,4 +403,112 @@ test("buildConsultationPathwayLauncherViewModel repair card is active with Start
   assert.equal(card.progress, "in_progress");
   assert.equal(consultationPathwayCtaLabel(card.progress), "Continue");
   assert.equal(card.recommended, true);
+});
+
+test("recommendConsultationPathwayKey prefers follow-up when review / progress language appears", () => {
+  assert.equal(
+    recommendConsultationPathwayKey(baseRow({ consultation_type: "prp_prf", live_notes: "PRP review — check progress" })),
+    "follow_up_review"
+  );
+  assert.equal(
+    recommendConsultationPathwayKey(baseRow({ consultation_type: "medical_hair_loss", live_notes: "Annual review on finasteride" })),
+    "follow_up_review"
+  );
+});
+
+test("buildConsultationPathwayLauncherViewModel follow-up card is active with href /forms/follow-up", () => {
+  const fu: ConsultationFormInstanceWithTemplate = {
+    id: "fu-1",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "v-fu",
+    channel: "in_room",
+    status: "draft",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: null,
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-02T00:00:00Z",
+    template: {
+      id: "tpl-fu",
+      slug: FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
+      name: "Follow-up",
+      treatment_program: "hair_longevity_medical",
+    },
+    template_version: { id: "v-fu", version: 1, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "exosomes", live_notes: "exosome review visit" }),
+    instances: [fu],
+  });
+
+  const card = vm.cards.find((c) => c.pathKey === "follow_up_review");
+  assert.ok(card);
+  assert.equal(card.availability, "active");
+  assert.equal(card.templateSlug, FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG);
+  assert.ok(card.href?.endsWith("/forms/follow-up"));
+  assert.equal(card.progress, "in_progress");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Continue");
+  assert.equal(card.recommended, true);
+});
+
+test("buildConsultationPathwayLauncherViewModel follow-up card shows Start when no instance", () => {
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "prp_prf", live_notes: "treatment review visit" }),
+    instances: [],
+  });
+  const card = vm.cards.find((c) => c.pathKey === "follow_up_review");
+  assert.ok(card);
+  assert.equal(card.progress, "not_started");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Start");
+  assert.equal(card.recommended, true);
+});
+
+test("buildConsultationPathwayLauncherViewModel follow-up card shows Review when instance submitted", () => {
+  const fuDone: ConsultationFormInstanceWithTemplate = {
+    id: "fu-2",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "v-fu2",
+    channel: "in_room",
+    status: "submitted",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: "2020-01-02T00:00:00Z",
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-03T00:00:00Z",
+    template: {
+      id: "tpl-fu2",
+      slug: FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
+      name: "Follow-up",
+      treatment_program: "hair_longevity_medical",
+    },
+    template_version: { id: "v-fu2", version: 1, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "medical_hair_loss", live_notes: "post surgery review" }),
+    instances: [fuDone],
+  });
+  const card = vm.cards.find((c) => c.pathKey === "follow_up_review");
+  assert.ok(card);
+  assert.equal(card.progress, "submitted");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Review");
 });

@@ -1,5 +1,6 @@
 import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+  FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
@@ -65,6 +66,12 @@ const REPAIR_SIGNAL =
   /\b(repair|revision|failed\s+transplant|poor\s+growth|overharvesting|overharvested|scarring|pluggy|plug\s|unnatural\s+grafts?|unnatural\s+hairline)\b/i;
 
 /**
+ * Follow-up / interval review context (longitudinal visits — not primary intake).
+ */
+const FOLLOW_UP_SIGNAL =
+  /\b(review|progress\s+review|follow\s*-?\s*up|post\s+surgery\s+review|exosome\s+review|prp\s+review|treatment\s+review|annual\s+review|check\s+progress)\b/i;
+
+/**
  * Female-context hair loss signals (conservative overlap with surgery terms → neutral elsewhere).
  */
 const FEMALE_SIGNAL =
@@ -115,6 +122,10 @@ export function recommendConsultationPathwayKey(row: ConsultationRow): Consultat
     SURGERY_SIGNAL.test(userHay) || (TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct);
   if (repairSignal && surgicalContextForRepair && !ambiguousText) {
     return "repair";
+  }
+
+  if (FOLLOW_UP_SIGNAL.test(userHay) && !ambiguousText) {
+    return "follow_up_review";
   }
 
   if ((TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct)) {
@@ -176,6 +187,9 @@ function recommendedHintFor(pathKey: ConsultationPathwayLauncherPathKey | null):
   if (pathKey === "repair") {
     return "Recommended: Repair Consultation - notes suggest prior transplant issues (repair, revision, failed growth, scarring, pluggy hairline, or overharvesting).";
   }
+  if (pathKey === "follow_up_review") {
+    return "Recommended: Follow-up / Review - notes suggest interval review, progress check, PRP/exosome/treatment review, post-surgery review, or annual review.";
+  }
   return null;
 }
 
@@ -205,11 +219,16 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     input.instances,
     HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG
   );
+  const followUpInst = pickLatestInRoomInstanceForTemplateSlug(
+    input.instances,
+    FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG
+  );
 
   const htProgress = progressForInstance(htInst);
   const hliProgress = progressForInstance(hliInst);
   const femaleProgress = progressForInstance(femaleInst);
   const repairProgress = progressForInstance(repairInst);
+  const followUpProgress = progressForInstance(followUpInst);
 
   const recommendedPathKey = recommendConsultationPathwayKey(input.row);
   const recommendedHint = recommendedHintFor(recommendedPathKey);
@@ -269,14 +288,15 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     {
       pathKey: "follow_up_review",
       title: "Follow-up / Review",
-      purpose: "Short revisit after treatment or surgery to track progress and adjust the plan.",
-      whenToUse: "Scheduled review, post-op check-in, or interval monitoring (not the primary intake).",
-      availability: "soon",
-      href: null,
-      templateSlug: null,
-      progress: "not_started",
-      instanceId: null,
-      recommended: false,
+      purpose:
+        "Longitudinal capture for Patient Twin, HairAudit progression, HLI treatment response, and AnalyticsOS — interval reviews, not primary intake (no quote or surgical planning fields).",
+      whenToUse: "Scheduled review, post-treatment or post-surgery check-in, PRP/exosome review, medication review, or annual progress visit.",
+      availability: "active",
+      href: `${base}/forms/follow-up`,
+      templateSlug: FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
+      progress: followUpProgress,
+      instanceId: followUpInst?.id ?? null,
+      recommended: recommendedPathKey === "follow_up_review",
     },
     {
       pathKey: "scalp_pathology",

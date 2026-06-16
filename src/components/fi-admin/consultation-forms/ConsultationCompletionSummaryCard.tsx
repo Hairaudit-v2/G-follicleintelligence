@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/consultationCompletionTypes";
 import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+  FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
@@ -32,6 +33,83 @@ function SectionBlock({ title, children }: { title: string; children: ReactNode 
       <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</h4>
       <div className={cn("mt-1.5 text-sm leading-relaxed text-slate-800", fiOsLightFormSurfaceClassNames.body)}>{children}</div>
     </section>
+  );
+}
+
+function FollowUpReviewCompletionBrief({
+  summary,
+  isPreview,
+}: {
+  summary: ConsultationCompletionSummary;
+  isPreview?: boolean;
+}) {
+  const snap = summary.followUpReviewCompletionSnapshot;
+
+  return (
+    <div className="space-y-4">
+      {isPreview ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950">
+          Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
+        </p>
+      ) : null}
+      <FiCard className="space-y-5 p-4 sm:p-5">
+        <header>
+          <h3 className="text-base font-semibold text-slate-900">Follow-up / review snapshot</h3>
+          <p className={cn("mt-1 text-xs", fiOsLightFormSurfaceClassNames.meta)}>
+            {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
+          </p>
+        </header>
+
+        <div className="space-y-5">
+          <SectionBlock title="Review context">
+            <p>
+              <span className="font-medium">Review type: </span>
+              {snap?.reviewTypeLabel?.trim() || "—"}
+            </p>
+          </SectionBlock>
+
+          <SectionBlock title="Progress trend">
+            <p>{snap?.progressTrendLabel?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Compliance">
+            <p>{snap?.complianceLabel?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Satisfaction (1–10)">
+            <p className="font-medium">{snap?.satisfactionScore != null ? String(snap.satisfactionScore) : "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Treatment response">
+            <p>{snap?.treatmentResponseLine?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Outcome intelligence">
+            <p className="whitespace-pre-wrap">{snap?.outcomeIntelligenceStatusLine?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Next recommended pathway">
+            <p className="font-medium">{snap?.nextPathwayLabel?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Follow-up urgency">
+            <p>{snap?.followUpUrgencyLabel?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Integration (placeholder)">
+            <p className="text-xs text-slate-600">{snap?.integrationPlaceholderLine?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Outcome (rules)">
+            <p className="font-medium">{fmt(summary.outcomeType)}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Clinical narrative">
+            <p className="whitespace-pre-wrap">{summary.recommendedProcedure.trim() || "—"}</p>
+          </SectionBlock>
+        </div>
+      </FiCard>
+    </div>
   );
 }
 
@@ -212,6 +290,10 @@ export function ConsultationCompletionSummaryCard({
   /** When true, banner indicates values are not yet persisted as completion. */
   isPreview?: boolean;
 }) {
+  if (summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG) {
+    return <FollowUpReviewCompletionBrief summary={summary} isPreview={isPreview} />;
+  }
+
   if (summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) {
     return <HairTransplantRepairCompletionBrief summary={summary} isPreview={isPreview} />;
   }

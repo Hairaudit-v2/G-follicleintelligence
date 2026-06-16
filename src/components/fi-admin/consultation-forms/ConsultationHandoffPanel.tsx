@@ -19,7 +19,10 @@ import {
   pathologyHandoffRecommended,
   surgeryPlanningHandoffEligible,
 } from "@/src/lib/consultationForms/handoff/consultationHandoffPure";
-import { HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG } from "@/src/lib/consultationForms/consultationFormConstants";
+import {
+  FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+} from "@/src/lib/consultationForms/consultationFormConstants";
 import type {
   ConsultationHandoffInitialIds,
   ConsultationHandoffMutationResult,
@@ -136,7 +139,11 @@ export function ConsultationHandoffPanel({
   const surgeryEligible = surgeryPlanningHandoffEligible(summary, kase);
   const surgeryReason = surgeryBlockReason(summary, kase);
 
-  const quoteHidden = summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG;
+  const quoteHidden =
+    summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG ||
+    summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG;
+
+  const surgeryHandoffHidden = summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG;
 
   const quoteRequirementsMet = Boolean(lid || kase);
   const followUpRequirementsMet = Boolean(lid);
@@ -254,7 +261,8 @@ export function ConsultationHandoffPanel({
         result: surgeryRes,
       },
     ]
-      .filter((c) => !(quoteHidden && c.key === "quote")),
+      .filter((c) => !(quoteHidden && c.key === "quote"))
+      .filter((c) => !(surgeryHandoffHidden && c.key === "surgery")),
     [
       body,
       cid,
@@ -270,6 +278,7 @@ export function ConsultationHandoffPanel({
       quoteRes,
       run,
       surgeryEligible,
+      surgeryHandoffHidden,
       surgeryReason,
       surgeryRes,
       tid,

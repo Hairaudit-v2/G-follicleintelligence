@@ -84,6 +84,19 @@ export type ConsultationCompletionSummary = {
     surgeryosPlanningRecommended: boolean;
     followUpUrgencyLabel: string;
   };
+  /** Pathway 5 (follow-up-review-consultation) — longitudinal review snapshot. */
+  followUpReviewCompletionSnapshot?: {
+    reviewTypeLabel: string;
+    progressTrendLabel: string;
+    complianceLabel: string;
+    satisfactionScore: number | null;
+    treatmentResponseLine: string;
+    outcomeIntelligenceStatusLine: string;
+    nextPathwayLabel: string;
+    followUpUrgencyLabel: string;
+    /** Reserved for future Twin / HairAudit / HLI / AnalyticsOS orchestration hooks. */
+    integrationPlaceholderLine: string;
+  };
 };
 
 export type ConsultationCompletionInput = {
