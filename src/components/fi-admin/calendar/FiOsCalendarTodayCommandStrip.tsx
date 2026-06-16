@@ -22,7 +22,7 @@ function chipClass(active: boolean): string {
     "inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] font-medium tabular-nums transition",
     active
       ? "border-cyan-400/45 bg-cyan-500/15 text-cyan-50"
-      : "border-white/[0.08] bg-white/[0.03] text-slate-300 hover:border-cyan-500/25 hover:text-white"
+      : "border-[color:var(--fi-cal-ws-controls-inset-border,rgba(255,255,255,0.08))] bg-white/[0.03] text-[var(--fi-cal-ws-muted,#94a3b8)] hover:border-cyan-500/25 hover:text-[var(--fi-cal-ws-text,#f8fafc)]"
   );
 }
 
@@ -128,20 +128,20 @@ export function FiOsCalendarTodayCommandStrip({
         className={chipClass(todayOverviewActive)}
         title="Day view for clinic today · clear type, status, staff, and strip filters"
       >
-        <span className="text-slate-400">Appointments today</span>
-        <span className="text-slate-100">{counts.all}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Appointments today</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.all}</span>
       </CalendarTransitionLink>
       <CalendarTransitionLink href={typeHref("consultation", cConsult)} className={chipClass(cConsult)} title="Toggle consultation filter">
-        <span className="text-slate-400">Consultations</span>
-        <span className="text-slate-100">{counts.consultation}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Consultations</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.consultation}</span>
       </CalendarTransitionLink>
       <CalendarTransitionLink href={typeHref("prp", cPrp)} className={chipClass(cPrp)} title="Toggle PRP filter">
-        <span className="text-slate-400">PRP</span>
-        <span className="text-slate-100">{counts.prp}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">PRP</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.prp}</span>
       </CalendarTransitionLink>
       <CalendarTransitionLink href={typeHref("surgery", cSurg)} className={chipClass(cSurg)} title="Toggle surgery filter">
-        <span className="text-slate-400">Surgeries</span>
-        <span className="text-slate-100">{counts.surgery}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Surgeries</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.surgery}</span>
       </CalendarTransitionLink>
       {route === "fi-admin" ? (
         <CalendarTransitionLink
@@ -149,38 +149,44 @@ export function FiOsCalendarTodayCommandStrip({
           className={chipClass(false)}
           title="Surgery readiness board — next 14 days"
         >
-          <span className="text-slate-400">Readiness</span>
+          <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Readiness</span>
         </CalendarTransitionLink>
       ) : null}
       <CalendarTransitionLink href={statusHref("arrived", cArrived)} className={chipClass(cArrived)} title="Toggle arrived status">
-        <span className="text-slate-400">Arrived</span>
-        <span className="text-slate-100">{counts.arrived}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Arrived</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.arrived}</span>
       </CalendarTransitionLink>
       <CalendarTransitionLink href={waitingHref(cWaiting)} className={chipClass(cWaiting)} title="Scheduled or confirmed (waiting)">
-        <span className="text-slate-400">Waiting</span>
-        <span className="text-slate-100">{counts.waiting}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Waiting</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.waiting}</span>
       </CalendarTransitionLink>
       <CalendarTransitionLink href={statusHref("completed", cCompleted)} className={chipClass(cCompleted)} title="Toggle completed status">
-        <span className="text-slate-400">Completed</span>
-        <span className="text-slate-100">{counts.completed}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Completed</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.completed}</span>
       </CalendarTransitionLink>
       <CalendarTransitionLink href={unassignedHref(cUnassigned)} className={chipClass(cUnassigned)} title="No staff or user assignee">
-        <span className="text-slate-400">Unassigned</span>
-        <span className="text-slate-100">{counts.unassigned}</span>
+        <span className="text-[var(--fi-cal-ws-muted,#94a3b8)]">Unassigned</span>
+        <span className="text-[var(--fi-cal-ws-text,#f1f5f9)]">{counts.unassigned}</span>
       </CalendarTransitionLink>
     </div>
   );
 
   return (
-    <div className="border-b border-white/[0.06] bg-[#050c16]/90 backdrop-blur-md">
+    <div
+      className="border-b backdrop-blur-md"
+      style={{
+        borderBottomColor: "var(--fi-cal-ws-strip-border, rgba(255, 255, 255, 0.06))",
+        background: "var(--fi-cal-ws-strip-bg, rgb(5 12 22 / 0.9))",
+      }}
+    >
       <div className="md:hidden">
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs text-slate-300"
+          className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs text-[var(--fi-cal-ws-muted,#94a3b8)]"
           onClick={() => setMobileOpen((v) => !v)}
           aria-expanded={mobileOpen}
         >
-          <span className="font-medium text-slate-200">Today · {counts.all} appointments</span>
+          <span className="font-medium text-[var(--fi-cal-ws-text,#f1f5f9)]">Today · {counts.all} appointments</span>
           <ChevronDown className={cn("h-4 w-4 shrink-0 text-slate-500 transition", mobileOpen && "rotate-180")} aria-hidden />
         </button>
         {mobileOpen ? <div className="border-t border-white/[0.05] px-3 pb-2 pt-1">{chipRow}</div> : null}

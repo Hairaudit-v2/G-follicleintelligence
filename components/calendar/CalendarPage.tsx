@@ -37,7 +37,25 @@ import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
 import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
 import { FiOsCalendarTodayCommandStrip } from "@/src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip";
+import {
+  FiCalendarWorkspaceDisplayThemeProvider,
+  useFiCalendarWorkspaceDisplayTheme,
+} from "@/src/components/fi-admin/calendar/fiCalendarWorkspaceDisplayTheme";
 import type { CrmShellSession } from "@/src/lib/crm/crmShellAccess";
+
+function isCalendarPrefillResourceColumnId(id: string | undefined): boolean {
+  const t = id?.trim() ?? "";
+  return t.startsWith("s:") || t.startsWith("u:") || t.startsWith("c:") || t.startsWith("r:");
+}
+
+function mergeQuickCreatePrefillColumnId(
+  slotColumnId: string | undefined,
+  filterColumnId: string | undefined
+): string | undefined {
+  if (isCalendarPrefillResourceColumnId(slotColumnId)) return slotColumnId!.trim();
+  const f = filterColumnId?.trim();
+  return f || undefined;
+}
 
 const viewMotion = {
   initial: { opacity: 0, y: 10 },
@@ -59,7 +77,7 @@ export type CalendarPageProps = {
   workspaceVariant?: "default" | "fiOs";
 };
 
-export function CalendarPage({
+function CalendarPageImpl({
   data,
   route = "fi-admin",
   useSampleData = false,
@@ -135,6 +153,8 @@ export function CalendarPage({
   /** Any user who can mutate bookings server-side can open quick-create from slots. */
   const quickCreateEnabled = data.canMutateBookings;
   const isFiOsWorkspace = workspaceVariant === "fiOs";
+  const fiCalendarTheme = useFiCalendarWorkspaceDisplayTheme();
+  const calendarWorkspaceDisplayTheme = fiCalendarTheme?.theme ?? "dark";
   const prefersReducedMotion = useReducedMotion();
   /** FI OS + accessibility: skip view enter/exit motion so Month/Week/Day toggles swap immediately. */
   const instantCalendarViewTransition =
@@ -172,9 +192,10 @@ export function CalendarPage({
       templateId?: CalendarQuickTemplateId
     ) => {
       setSlotContextMenu(null);
+      const columnId = mergeQuickCreatePrefillColumnId(p.columnId, quickCreateColumnIdFromFilters);
       setQuickCreatePrefill({
         localStart: p.localStart.trim(),
-        ...(p.columnId ? { columnId: p.columnId } : {}),
+        ...(columnId ? { columnId } : {}),
         dayKey: p.dayKey,
         ...(p.appointmentTypeUnset ? { appointmentTypeUnset: true } : {}),
         ...(templateId ? { templateId } : {}),
@@ -182,7 +203,7 @@ export function CalendarPage({
       });
       setQuickCreateOpen(true);
     },
-    [data.query.clinicId]
+    [data.query.clinicId, quickCreateColumnIdFromFilters]
   );
 
   const openQuickCreateFromMonthEmptyDay = useCallback(
@@ -237,7 +258,8 @@ export function CalendarPage({
         disableMobileOverlay={isFiOsWorkspace}
         className={cn(
           "border-r-0 dark:border-[#1e2937]",
-          isFiOsWorkspace && "h-full min-h-0 overflow-hidden rounded-none border-[#1e2937]"
+          isFiOsWorkspace &&
+            "h-full min-h-0 overflow-hidden rounded-none border-[color:var(--fi-cal-ws-shell-border,#1e2937)]"
         )}
       />
     ),
@@ -276,9 +298,10 @@ export function CalendarPage({
       className={cn(
         "flex flex-col",
         isFiOsWorkspace
-          ? "min-h-0 flex-1 overflow-hidden bg-[#050a14] text-slate-100"
+          ? "fi-cal-workspace-root min-h-0 flex-1 overflow-hidden bg-[var(--fi-cal-ws-page-bg,#050a14)]"
           : "-mx-3 min-h-[calc(100dvh-8rem)] bg-[#0f172a] sm:-mx-4 lg:-mx-6"
       )}
+      data-fi-cal-display-theme={isFiOsWorkspace ? calendarWorkspaceDisplayTheme : undefined}
     >
       <CalendarTopControls
         tenantId={data.tenantId}
@@ -513,6 +536,7 @@ export function CalendarPage({
           setupRecommendations={data.setupRecommendations}
           services={data.services}
           workflowVariant={isFiOsWorkspace ? "fiOs" : "default"}
+          calendarWorkspaceDisplayTheme={isFiOsWorkspace ? calendarWorkspaceDisplayTheme : "dark"}
           onCreated={(booking, displayLabel) => {
             const tpl = calendarQuickTemplateById(
               (booking.metadata?.quick_template_id as CalendarQuickTemplateId | undefined) ?? "consultation"
@@ -559,7 +583,8 @@ export function CalendarPage({
       <BookingEditDrawer
         tenantId={data.tenantId}
         booking={editing}
-        reminderJobs={editing ? data.reminderJobsByBookingId[editing.id] ?? [] : []}
+        reminderJobs={[]}
+        reminderJobsLazy
         clinicalStaffOptions={data.staffDirectory}
         clinics={data.clinics}
         adminKey=""
@@ -632,4 +657,15 @@ export function CalendarPage({
       ) : null}
     </div>
   );
+}
+
+export function CalendarPage(props: CalendarPageProps) {
+  if (props.workspaceVariant === "fiOs") {
+    return (
+      <FiCalendarWorkspaceDisplayThemeProvider>
+        <CalendarPageImpl {...props} />
+      </FiCalendarWorkspaceDisplayThemeProvider>
+    );
+  }
+  return <CalendarPageImpl {...props} />;
 }

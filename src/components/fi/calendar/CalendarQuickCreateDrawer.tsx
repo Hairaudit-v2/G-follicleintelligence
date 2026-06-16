@@ -195,6 +195,7 @@ export function CalendarQuickCreateDrawer({
   tenantMetadata = null,
   onCreated,
   workflowVariant = "default",
+  calendarWorkspaceDisplayTheme = "dark",
 }: {
   tenantId: string;
   open: boolean;
@@ -217,6 +218,8 @@ export function CalendarQuickCreateDrawer({
   services?: FiServiceRow[];
   onCreated: (booking: FiBookingRow, displayLabel: string) => void;
   workflowVariant?: "default" | "fiOs";
+  /** FI OS calendar workspace display — light surfaces when set to `light`. */
+  calendarWorkspaceDisplayTheme?: "dark" | "light";
 }) {
   const toast = useCalendarToastOptional();
   const titleId = useId();
@@ -863,9 +866,15 @@ export function CalendarQuickCreateDrawer({
 
   const clinicSetupHref = `/fi-admin/${tenantId.trim()}/settings/clinic-setup`;
   const showClinicOverride = clinics.length > 1;
-  const os = fiPageHeaderVariantClassNames.osDark;
-  const inputClass =
-    "mt-1 w-full rounded-lg border border-white/[0.12] bg-slate-950/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-[#22C1FF]/45";
+  const isLightFiOsDrawer = workflowVariant === "fiOs" && calendarWorkspaceDisplayTheme === "light";
+  const os = isLightFiOsDrawer ? fiPageHeaderVariantClassNames.clinicLight : fiPageHeaderVariantClassNames.osDark;
+  const drawerSurfaceClass = isLightFiOsDrawer ? fiSurfaceVariantClassNames.crmLight : fiSurfaceVariantClassNames.darkGlass;
+  const inputClass = isLightFiOsDrawer
+    ? "mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/35"
+    : "mt-1 w-full rounded-lg border border-white/[0.12] bg-slate-950/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-[#22C1FF]/45";
+  const bumpBtnClass = isLightFiOsDrawer
+    ? "inline-flex items-center justify-center rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800 transition hover:bg-slate-200 disabled:opacity-50"
+    : "inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50";
 
   return (
     <div className="fixed inset-0 z-[125] flex justify-end" role="presentation">
@@ -875,7 +884,7 @@ export function CalendarQuickCreateDrawer({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          fiSurfaceVariantClassNames.darkGlass,
+          drawerSurfaceClass,
           "relative m-0 flex h-[100dvh] w-full max-w-full flex-col sm:m-4 sm:h-[min(100dvh-2rem,900px)] sm:max-w-md sm:rounded-2xl"
         )}
       >
@@ -889,7 +898,11 @@ export function CalendarQuickCreateDrawer({
           </div>
           <button
             type="button"
-            className={cn(fiButtonVariantClassNames.ghost, "shrink-0 text-slate-300")}
+            className={cn(
+              fiButtonVariantClassNames.ghost,
+              "shrink-0",
+              isLightFiOsDrawer ? "text-slate-600" : "text-slate-300"
+            )}
             onClick={() => !busy && onClose()}
             aria-label="Close drawer"
           >
@@ -913,7 +926,7 @@ export function CalendarQuickCreateDrawer({
             <div>
               <p className={cn(os.eyebrow, "mb-2")}>Patient or lead</p>
               <div className="grid gap-2">
-                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                   Name <span className="text-rose-300">*</span>
                   <input
                     className={inputClass}
@@ -927,7 +940,7 @@ export function CalendarQuickCreateDrawer({
                     autoComplete="name"
                   />
                 </label>
-                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                   Mobile
                   <input
                     className={inputClass}
@@ -941,7 +954,7 @@ export function CalendarQuickCreateDrawer({
                     placeholder="Optional"
                   />
                 </label>
-                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                   Email
                   <input
                     type="email"
@@ -1084,7 +1097,7 @@ export function CalendarQuickCreateDrawer({
               <p className="mt-2 text-sm font-medium text-sky-100/95 tabular-nums" role="status">
                 {timeSummary}
               </p>
-              <label className={cn("mt-3 block text-xs font-medium text-slate-300", os.meta)}>
+              <label className={cn("mt-3 block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                 Start time
                 <select
                   className={cn(inputClass, "text-base font-semibold tabular-nums")}
@@ -1109,28 +1122,28 @@ export function CalendarQuickCreateDrawer({
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  className={bumpBtnClass}
                   onClick={() => bumpStartByClockMinutes(-30)}
                 >
                   −30 min
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  className={bumpBtnClass}
                   onClick={() => bumpStartByClockMinutes(-15)}
                 >
                   −15 min
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  className={bumpBtnClass}
                   onClick={() => bumpStartByClockMinutes(15)}
                 >
                   +15 min
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-full border border-white/[0.12] bg-slate-950/45 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/[0.06] disabled:opacity-50"
+                  className={bumpBtnClass}
                   onClick={() => bumpStartByClockMinutes(30)}
                 >
                   +30 min
@@ -1177,7 +1190,7 @@ export function CalendarQuickCreateDrawer({
             </details>
 
             {providerOptions.length > 0 ? (
-              <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+              <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                 Provider
                 <StaffClinicalSelect
                   tenantId={tenantId}
@@ -1193,7 +1206,7 @@ export function CalendarQuickCreateDrawer({
               </label>
             ) : null}
 
-            <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+            <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
               Notes <span className="font-normal text-slate-500">(optional)</span>
               <textarea
                 className={cn(inputClass, "min-h-[72px] resize-y")}
@@ -1214,7 +1227,7 @@ export function CalendarQuickCreateDrawer({
                 Advanced scheduling (full booking)
               </summary>
               <div className="space-y-3 border-t border-white/[0.08] px-3 pb-3 pt-2">
-                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                   Start (exact)
                   <input
                     type="datetime-local"
@@ -1226,7 +1239,7 @@ export function CalendarQuickCreateDrawer({
                     }}
                   />
                 </label>
-                <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                   End (exact)
                   <input
                     type="datetime-local"
@@ -1239,7 +1252,7 @@ export function CalendarQuickCreateDrawer({
                   />
                 </label>
                 {showClinicOverride ? (
-                  <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                  <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                     Clinic override
                     <select
                       className={inputClass}
@@ -1260,7 +1273,7 @@ export function CalendarQuickCreateDrawer({
                   </label>
                 ) : null}
                 {clinicId.trim() ? (
-                  <label className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                  <label className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                     Room
                     <select
                       className={inputClass}
@@ -1286,7 +1299,7 @@ export function CalendarQuickCreateDrawer({
                       if (req.resource_type === "staff_role" || req.resource_type === "staff_member") {
                         const ids = resourceSuggest.staffOptionsByRequirementId[req.id] ?? [];
                         return (
-                          <label key={req.id} className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                          <label key={req.id} className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                             {req.requirement_label}
                             {!req.is_required ? <span className="text-slate-500"> (optional)</span> : null}
                             <select
@@ -1309,7 +1322,7 @@ export function CalendarQuickCreateDrawer({
                       }
                       const rooms = resourceSuggest.roomOptionsByRequirementId[req.id] ?? [];
                       return (
-                        <label key={req.id} className={cn("block text-xs font-medium text-slate-300", os.meta)}>
+                        <label key={req.id} className={cn("block text-xs font-medium", isLightFiOsDrawer ? "text-slate-700" : "text-slate-300", os.meta)}>
                           {req.requirement_label}
                           {!req.is_required ? <span className="text-slate-500"> (optional)</span> : null}
                           <select

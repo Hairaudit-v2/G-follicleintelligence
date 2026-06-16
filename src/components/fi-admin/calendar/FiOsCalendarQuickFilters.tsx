@@ -83,8 +83,16 @@ export function FiOsCalendarQuickFilters({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] bg-[#060d18]/80 px-3 py-2.5 backdrop-blur-md sm:px-4">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Quick filters</span>
+    <div
+      className="flex flex-wrap items-center gap-2 border-b px-3 py-2.5 backdrop-blur-md sm:px-4"
+      style={{
+        borderBottomColor: "var(--fi-cal-ws-strip-border, rgba(255, 255, 255, 0.06))",
+        background: "var(--fi-cal-ws-strip-bg, rgb(6 13 24 / 0.8))",
+      }}
+    >
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--fi-cal-ws-time-label,#64748b)]">
+        Quick filters
+      </span>
       <CalendarTransitionLink
         href={resourceViewHref("staff")}
         className={cn(

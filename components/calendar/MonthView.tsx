@@ -27,7 +27,6 @@ import {
 import { CalendarToastProvider, useCalendarToast } from "@/components/calendar/CalendarToast";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
-import { fiCrmCalendarGridClassNames } from "@/lib/design-system";
 import {
   calendarPointerSensorOptions,
   calendarTouchSensorOptions,
@@ -709,10 +708,10 @@ function MonthViewInner({
 
   const monthMain = (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <header className="flex items-center justify-between gap-3 border-b border-[#1e2937] px-4 py-3">
+      <header className="flex items-center justify-between gap-3 border-b border-[color:var(--fi-cal-ws-shell-border,#1e2937)] px-4 py-3">
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold tracking-tight text-slate-50">{monthTitle}</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="truncate text-lg font-semibold tracking-tight text-[var(--fi-cal-ws-text,#f8fafc)]">{monthTitle}</h2>
+          <p className="text-xs text-[var(--fi-cal-ws-muted,#94a3b8)]">
             {monthStats.total > 0 ? (
               <>
                 {monthStats.total} appointment{monthStats.total === 1 ? "" : "s"} this month
@@ -726,11 +725,11 @@ function MonthViewInner({
             )}
           </p>
         </div>
-        <div className="inline-flex shrink-0 items-center rounded-xl border border-[#1e2937] bg-[#0b1220] p-0.5">
+        <div className="inline-flex shrink-0 items-center rounded-xl border border-[color:var(--fi-cal-ws-controls-inset-border,#1e2937)] bg-[var(--fi-cal-ws-controls-inset-bg,#0b1220)] p-0.5">
           <button
             type="button"
             onClick={() => navigateMonth(-1)}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[var(--fi-cal-ws-muted,#94a3b8)] transition hover:bg-black/5 hover:text-[var(--fi-cal-ws-text,#0f172a)] dark:hover:bg-slate-800 dark:hover:text-slate-100"
             aria-label="Previous month"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -738,7 +737,7 @@ function MonthViewInner({
           <button
             type="button"
             onClick={() => navigateMonth(1)}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[var(--fi-cal-ws-muted,#94a3b8)] transition hover:bg-black/5 hover:text-[var(--fi-cal-ws-text,#0f172a)] dark:hover:bg-slate-800 dark:hover:text-slate-100"
             aria-label="Next month"
           >
             <ChevronRight className="h-4 w-4" />
@@ -746,13 +745,12 @@ function MonthViewInner({
         </div>
       </header>
 
-      <div className="grid grid-cols-7 border-b border-[#1e2937] bg-[#0b1220]/60">
+      <div className="grid grid-cols-7 border-b border-[color:var(--fi-cal-ws-shell-border,#1e2937)] bg-[var(--fi-cal-ws-controls-inset-bg,#0b1220)]/60">
         {MONTH_WEEKDAY_LABELS.map((label) => (
           <div
             key={label}
             className={cn(
-              "px-2 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500",
-              fiCrmCalendarGridClassNames.slotLabel
+              "px-2 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-[var(--fi-cal-ws-time-label,#64748b)]"
             )}
           >
             {label}
@@ -796,7 +794,7 @@ function MonthViewInner({
         animate="show"
         className={cn(
           "fi-calendar-shell flex overflow-hidden rounded-xl border shadow-sm ring-1",
-          "border-[#1e2937] bg-[#0f172a] shadow-black/30 ring-white/[0.04] md:rounded-2xl",
+          "border-[color:var(--fi-cal-ws-shell-border,#1e2937)] bg-[var(--fi-cal-ws-shell-bg,#0f172a)] shadow-black/30 ring-[color:var(--fi-cal-ws-shell-ring,rgba(255,255,255,0.04))] md:rounded-2xl",
           shellIsFiOs ? "relative min-h-0 flex-1 flex-col" : "min-h-[min(36rem,78dvh)] flex-col md:min-h-[36rem] lg:min-h-[calc(100dvh-13rem)]"
         )}
       >

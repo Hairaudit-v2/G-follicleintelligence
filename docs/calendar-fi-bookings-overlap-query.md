@@ -48,11 +48,11 @@ Optional: if `EXPLAIN` still shows large sequential scans on `end_at > :range_st
 
 ## Client navigation
 
-Each calendar URL change (Month / Week / Day, date, filters) triggers a **new** RSC request and one `loadOperationalCalendarPageData` run. The client store avoids **duplicate Zustand hydrations** when the server payload fingerprint is unchanged (same logical bookings/display).
+Each calendar URL change (Month / Week / Day, date, filters) triggers a **new** RSC request. FI OS (`/fi-admin/.../calendar`) streams **`loadOperationalCalendarShellData`** first (toolbar, filters, empty grid shell), then **`loadOperationalCalendarGridData`** inside `Suspense` (overlap query + enrichment). Shared directory/services queries dedupe in-flight via React `cache()`. The dashboard calendar still uses **`loadOperationalCalendarPageData`** (shell + grid merged in one await). The client store avoids **duplicate Zustand hydrations** when the server payload fingerprint is unchanged (same logical bookings/display).
 
 ## Month summary vs drawer
 
-Month view skips server-side clinical scales and multi-resource assignment **lines** in `bookingDisplay` to save latency. `BookingCalendarDrawer` does not render `scalesSummary` or resource summary lines — it uses the `FiBookingRow`, clinic/staff props, and `patientSummary` / procedure labels from the page. Opening **Edit** still uses `BookingEditDrawer` with reminder jobs from the page payload. Side panels that show scales should be used in week/day, or after navigation triggers a full-enrichment load.
+Month view skips server-side clinical scales and multi-resource assignment **lines** in `bookingDisplay` to save latency. `BookingCalendarDrawer` does not render `scalesSummary` or resource summary lines — it uses the `FiBookingRow`, clinic/staff props, and `patientSummary` / procedure labels from the page. Opening **Edit** uses `BookingEditDrawer`; reminder jobs load **on demand** via `loadBookingReminderJobsAction` (calendar navigation no longer bulk-fetches reminder rows). Side panels that show scales should be used in week/day, or after navigation triggers a full-enrichment load.
 
 ## Truncation banner
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { updateBookingAction, loadBookingResourceAssignmentsAction } from "@/lib/actions/fi-booking-actions";
+import { updateBookingAction, loadBookingResourceAssignmentsAction, loadBookingReminderJobsAction } from "@/lib/actions/fi-booking-actions";
 import { previewBookingConflictsAction } from "@/lib/actions/fi-booking-conflict-preview-actions";
 import { BookingConflictPreview } from "@/src/components/calendar/BookingConflictPreview";
 import { NextAvailableBookingSlots } from "@/src/components/calendar/NextAvailableBookingSlots";
@@ -33,6 +33,7 @@ export function BookingEditDrawer({
   tenantId,
   booking,
   reminderJobs,
+  reminderJobsLazy = false,
   clinicalStaffOptions,
   clinics,
   adminKey,
@@ -44,6 +45,8 @@ export function BookingEditDrawer({
   tenantId: string;
   booking: FiBookingRow | null;
   reminderJobs: FiReminderJobWithTemplate[];
+  /** When true, ignore {@link reminderJobs} and load jobs after open (operational calendar). */
+  reminderJobsLazy?: boolean;
   clinicalStaffOptions: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
   adminKey: string;
@@ -55,6 +58,8 @@ export function BookingEditDrawer({
 }) {
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [lazyReminderJobs, setLazyReminderJobs] = useState<FiReminderJobWithTemplate[] | null>(null);
+  const [lazyReminderJobsLoading, setLazyReminderJobsLoading] = useState(false);
 
   const [bookingType, setBookingType] = useState("");
   const [bookingStatus, setBookingStatus] = useState<string>("scheduled");
@@ -121,6 +126,33 @@ export function BookingEditDrawer({
       cancelledEffect = true;
     };
   }, [adminKey, booking, cancelled, completed, tenantId]);
+
+  useEffect(() => {
+    if (!booking || cancelled || completed) {
+      setLazyReminderJobs(null);
+      setLazyReminderJobsLoading(false);
+      return;
+    }
+    if (!reminderJobsLazy) {
+      setLazyReminderJobs(null);
+      setLazyReminderJobsLoading(false);
+      return;
+    }
+    let cancelledEffect = false;
+    setLazyReminderJobs(null);
+    setLazyReminderJobsLoading(true);
+    void loadBookingReminderJobsAction(tenantId, booking.id, booking.lead_id, adminKey).then((r) => {
+      if (cancelledEffect) return;
+      setLazyReminderJobsLoading(false);
+      if (r.ok) setLazyReminderJobs(r.reminderJobs);
+      else setLazyReminderJobs([]);
+    });
+    return () => {
+      cancelledEffect = true;
+    };
+  }, [adminKey, booking, cancelled, completed, reminderJobsLazy, tenantId]);
+
+  const effectiveReminderJobs = reminderJobsLazy ? (lazyReminderJobs ?? []) : reminderJobs;
 
   function withAdmin<T extends Record<string, unknown>>(body: T): T & { adminKey?: string } {
     if (adminKey.trim()) return { ...body, adminKey: adminKey.trim() };
@@ -530,11 +562,14 @@ export function BookingEditDrawer({
               {feedback ? <p className="text-sm text-red-600">{feedback}</p> : null}
             </form>
           )}
-          {reminderJobs.length > 0 ? (
+          {reminderJobsLazy && lazyReminderJobsLoading ? (
+            <p className="text-xs text-gray-500">Loading reminders…</p>
+          ) : null}
+          {effectiveReminderJobs.length > 0 ? (
             <div className="rounded border border-gray-200 bg-gray-50 p-3 text-xs text-gray-800">
               <p className="font-semibold text-gray-900">Reminder queue</p>
               <ul className="mt-2 space-y-1">
-                {reminderJobs.map((j) => (
+                {effectiveReminderJobs.map((j) => (
                   <li key={j.id} className="flex flex-wrap justify-between gap-1 border-t border-gray-200 pt-1 first:border-0 first:pt-0">
                     <span className="font-medium">{j.template_name || "Template"}</span>
                     <span className="text-gray-600">
@@ -550,7 +585,7 @@ export function BookingEditDrawer({
                 ))}
               </ul>
             </div>
-          ) : booking.patient_id ? (
+          ) : booking.patient_id && !lazyReminderJobsLoading ? (
             <p className="text-xs text-gray-500">
               No reminder jobs for this booking yet. Jobs appear when the patient has reminder consent and active templates
               exist.

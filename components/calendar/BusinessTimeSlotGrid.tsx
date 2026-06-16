@@ -8,7 +8,6 @@ import {
   generateOperationalCalendarTimeSlots,
   type OperationalGridHours,
 } from "@/lib/calendar/time-slots";
-import { fiCrmCalendarGridClassNames } from "@/lib/design-system";
 import { cn } from "@/lib/utils";
 
 export type BusinessTimeSlotGridProps = {
@@ -33,7 +32,7 @@ export function BusinessTimeSlotGrid({ bodyHeightPx, className, gridHours }: Bus
 
   return (
     <div
-      className={cn("pointer-events-none absolute inset-0 bg-[#0f172a]", className)}
+      className={cn("pointer-events-none absolute inset-0 bg-[var(--fi-cal-ws-grid-bg,#0f172a)]", className)}
       style={{ minHeight: height }}
       aria-hidden
     >
@@ -42,13 +41,15 @@ export function BusinessTimeSlotGrid({ bodyHeightPx, className, gridHours }: Bus
           key={`${gridHours.dayStartHourUtc}-${i}`}
           className={cn(
             "absolute inset-x-0 border-t",
-            i % 2 === 0 ? fiCrmCalendarGridClassNames.slotLine : fiCrmCalendarGridClassNames.slotLineHalf
+            i % 2 === 0
+              ? "border-[color:var(--fi-cal-ws-slot-line,#1e2937)]"
+              : "border-[color:var(--fi-cal-ws-slot-line-half,rgb(30_41_55/0.55))]"
           )}
           style={{ top: i * slotH, height: slotH }}
         />
       ))}
       <div
-        className={cn("absolute inset-x-0 border-t", fiCrmCalendarGridClassNames.slotLine)}
+        className="absolute inset-x-0 border-t border-[color:var(--fi-cal-ws-slot-line,#1e2937)]"
         style={{ top: height - 1 }}
       />
     </div>
@@ -79,12 +80,12 @@ export function BusinessTimeGutter({
     <div
       className={cn(
         "sticky left-0 z-20 w-[var(--fi-calendar-gutter,3.5rem)] shrink-0 self-start border-r",
-        fiCrmCalendarGridClassNames.gutter
+        "border-[color:var(--fi-cal-ws-gutter-border,#1e2937)] bg-[var(--fi-cal-ws-gutter-bg,#0f172a)]"
       )}
     >
       <div
         style={{ height: headerHeightPx }}
-        className="sticky top-0 z-20 border-b border-[#1e2937] bg-[#0f172a]"
+        className="sticky top-0 z-20 border-b border-[color:var(--fi-cal-ws-gutter-border,#1e2937)] bg-[var(--fi-cal-ws-gutter-bg,#0f172a)]"
         aria-hidden
       />
       <div className="relative" style={{ height }}>
@@ -94,7 +95,9 @@ export function BusinessTimeGutter({
             className="absolute left-0 right-0 flex items-start justify-end pr-2 pt-1"
             style={{ top: hourIndex * 2 * slotH, height: slotH * 2 }}
           >
-            <span className={fiCrmCalendarGridClassNames.slotLabel}>{slot.start}</span>
+            <span className="text-[11px] font-medium tabular-nums text-[var(--fi-cal-ws-time-label,#64748b)]">
+              {slot.start}
+            </span>
           </div>
         ))}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Keyboard, MapPin, PanelLeftOpen, Users } from "lucide-react";
+import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Keyboard, MapPin, Moon, PanelLeftOpen, Sun, Users } from "lucide-react";
 
 import {
   mergeCalendarHrefQuery,
@@ -17,6 +17,7 @@ import { CalendarTransitionLink } from "@/components/calendar/CalendarTransition
 import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
 import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
+import { useFiCalendarWorkspaceDisplayTheme } from "@/src/components/fi-admin/calendar/fiCalendarWorkspaceDisplayTheme";
 
 const VIEW_OPTIONS: { id: CalendarViewMode; label: string }[] = [
   { id: "day", label: "Day" },
@@ -63,6 +64,7 @@ export function CalendarTopControls({
   };
 }) {
   const router = useRouter();
+  const fiCalTheme = useFiCalendarWorkspaceDisplayTheme();
   const hrefOpts = { route };
   const prev = buildCalendarNavigationHref(tenantId, query, calendarNavigationHelpers.previousPeriod(query), hrefOpts);
   const next = buildCalendarNavigationHref(tenantId, query, calendarNavigationHelpers.nextPeriod(query), hrefOpts);
@@ -87,10 +89,10 @@ export function CalendarTopControls({
 
   const isFiOs = variant === "fiOs";
   const shell = isFiOs
-    ? "border-b border-white/[0.08] bg-[#0a1424]/95 px-3 py-3 backdrop-blur-xl sm:px-4"
+    ? "border-b border-[color:var(--fi-cal-ws-strip-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-strip-bg,rgb(6_13_24/0.9))] px-3 py-3 backdrop-blur-xl sm:px-4"
     : "border-b border-[#1e2937] bg-[#0f172a] px-4 py-3";
   const inset = isFiOs
-    ? "rounded-xl border border-white/[0.08] bg-[#060d18]/90 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    ? "rounded-xl border border-[color:var(--fi-cal-ws-controls-inset-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-controls-inset-bg,rgb(6_13_24/0.9))] p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
     : "rounded-xl border border-[#1e2937] bg-[#0b1220] p-0.5 shadow-sm shadow-black/20";
   const navBtn = isFiOs
     ? "inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.06] hover:text-cyan-100"
@@ -99,9 +101,9 @@ export function CalendarTopControls({
     ? "rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06] hover:text-white"
     : "rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white";
   const dateShell = isFiOs
-    ? "relative inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#060d18]/90 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    ? "relative inline-flex items-center gap-2 rounded-xl border border-[color:var(--fi-cal-ws-controls-inset-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-controls-inset-bg,rgb(6_13_24/0.9))] px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
     : "relative inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-3 py-1.5 shadow-sm shadow-black/20";
-  const rangeCls = isFiOs ? "hidden text-sm font-medium text-slate-200 lg:block" : "hidden text-sm font-medium text-slate-300 lg:block";
+  const rangeCls = isFiOs ? "hidden text-sm font-medium text-[var(--fi-cal-ws-text,#f1f5f9)] lg:block" : "hidden text-sm font-medium text-slate-300 lg:block";
   const viewOpts = isFiOs ? VIEW_OPTIONS_FI_OS : VIEW_OPTIONS.map((o) => ({ ...o, active: (q: ParsedCalendarQuery) => q.view === o.id }));
 
   return (
@@ -171,7 +173,7 @@ export function CalendarTopControls({
               const v = e.target.value.trim();
               if (v) navigate({ date: v });
             }}
-            className="border-0 bg-transparent p-0 text-sm font-medium text-slate-100 outline-none focus:ring-0 [color-scheme:dark]"
+            className="border-0 bg-transparent p-0 text-sm font-medium text-[var(--fi-cal-ws-text,#f1f5f9)] outline-none focus:ring-0 [color-scheme:var(--fi-cal-ws-date-scheme,dark)]"
             aria-label="Calendar date"
           />
         </label>
@@ -223,7 +225,7 @@ export function CalendarTopControls({
                 assignedUserId: undefined,
               })
             }
-            className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-slate-200 outline-none sm:max-w-[11rem] [color-scheme:dark]"
+            className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-[var(--fi-cal-ws-text,#e2e8f0)] outline-none sm:max-w-[11rem] [color-scheme:var(--fi-cal-ws-date-scheme,dark)]"
           >
             <option value="">All staff</option>
             {staffDirectory.map((a) => (
@@ -246,7 +248,7 @@ export function CalendarTopControls({
           <select
             value={query.clinicId ?? selectedClinic?.id ?? ""}
             onChange={(e) => navigate({ clinicId: e.target.value ? e.target.value : null })}
-            className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-slate-200 outline-none sm:max-w-[12rem] [color-scheme:dark]"
+            className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-[var(--fi-cal-ws-text,#e2e8f0)] outline-none sm:max-w-[12rem] [color-scheme:var(--fi-cal-ws-date-scheme,dark)]"
           >
             <option value="">All locations</option>
             {clinics.length === 0 ? (
@@ -280,6 +282,46 @@ export function CalendarTopControls({
         >
           {canMutateBookings ? "Live" : "Read-only"}
         </span>
+
+        {isFiOs && fiCalTheme ? (
+          <div
+            className={cn(
+              "inline-flex items-center gap-0.5 rounded-xl p-0.5",
+              "border border-[color:var(--fi-cal-ws-controls-inset-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-controls-inset-bg,rgb(6_13_24/0.9))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            )}
+            role="group"
+            aria-label="Calendar display theme"
+          >
+            <button
+              type="button"
+              onClick={() => fiCalTheme.setTheme("dark")}
+              aria-pressed={fiCalTheme.theme === "dark"}
+              title="Dark calendar"
+              className={cn(
+                "inline-flex h-8 w-8 items-center justify-center rounded-lg transition",
+                fiCalTheme.theme === "dark"
+                  ? "bg-cyan-500/20 text-cyan-100 ring-1 ring-cyan-400/30"
+                  : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+              )}
+            >
+              <Moon className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => fiCalTheme.setTheme("light")}
+              aria-pressed={fiCalTheme.theme === "light"}
+              title="Light calendar"
+              className={cn(
+                "inline-flex h-8 w-8 items-center justify-center rounded-lg transition",
+                fiCalTheme.theme === "light"
+                  ? "bg-cyan-500/20 text-cyan-100 ring-1 ring-cyan-400/30"
+                  : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+              )}
+            >
+              <Sun className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        ) : null}
 
         <button
           type="button"

@@ -32,6 +32,7 @@ import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/opera
 // Shared calendar grid tokens (used by WeekView + ProviderColumn)
 // ---------------------------------------------------------------------------
 
+/** Default grid fill when not under `.fi-cal-workspace-root` theme variables. */
 export const CALENDAR_GRID_BG = "#0f172a";
 export const CALENDAR_PX_PER_HOUR = 56;
 export const CALENDAR_GRID_LINE_MINUTES = 30;
@@ -258,25 +259,28 @@ export function ProviderColumnHeader({
   return (
     <div
       className={cn(
-        "sticky top-0 z-10 flex items-center gap-2.5 border-b border-[#1e2937] px-3 backdrop-blur-sm transition-colors",
+        "sticky top-0 z-10 flex items-center gap-2.5 border-b px-3 backdrop-blur-sm transition-colors",
+        "border-[color:var(--fi-cal-ws-shell-border,#1e2937)]",
         highlighted
           ? "bg-sky-950/40 ring-1 ring-inset ring-sky-400/30"
-          : "bg-[#0f172a]/95"
+          : "bg-[var(--fi-cal-ws-header-bg,rgb(15_23_42/0.95))]"
       )}
       style={{ height: CALENDAR_HEADER_HEIGHT_PX }}
     >
-      <Avatar className="h-8 w-8 shrink-0 ring-1 ring-[#1e2937]">
+      <Avatar className="h-8 w-8 shrink-0 ring-1 ring-[color:var(--fi-cal-ws-shell-border,#1e2937)]">
         {photoUrl ? <AvatarImage src={photoUrl} alt={name} /> : null}
-        <AvatarFallback className="bg-slate-800 text-[10px] font-semibold text-slate-300">
+        <AvatarFallback className="bg-slate-200 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
           {providerInitials(name)}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold tracking-tight text-slate-100">{name}</p>
+        <p className="truncate text-sm font-semibold tracking-tight text-[var(--fi-cal-ws-header-title,#f1f5f9)]">{name}</p>
         <div className="flex min-w-0 flex-wrap items-center gap-1">
-          {role ? <p className="truncate text-[11px] font-medium text-slate-400">{role}</p> : null}
+          {role ? (
+            <p className="truncate text-[11px] font-medium text-[var(--fi-cal-ws-header-subtitle,#94a3b8)]">{role}</p>
+          ) : null}
           {ownerColumn ? (
-            <span className="shrink-0 rounded bg-slate-700/80 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-300">
+            <span className="shrink-0 rounded bg-slate-200/90 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-slate-700/80 dark:text-slate-300">
               Owner
             </span>
           ) : null}
@@ -345,6 +349,8 @@ export type ProviderColumnProps = {
    * instead of a fixed minimum width that forces horizontal scrolling.
    */
   fillAvailableWidth?: boolean;
+  /** Day view staff/room columns: subtle vertical rule between adjacent provider columns. */
+  interColumnDivider?: boolean;
   className?: string;
 };
 
@@ -377,6 +383,7 @@ export function ProviderColumn({
   bodyHeightPx: bodyHeightPxProp,
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
   fillAvailableWidth = false,
+  interColumnDivider = false,
   className,
 }: ProviderColumnProps) {
   const bodyHeightPx = bodyHeightPxProp ?? calendarGridBodyHeightPx();
@@ -442,12 +449,22 @@ export function ProviderColumn({
   return (
     <div
       className={cn(
-        "flex flex-col border-[#1e2937]/80 transition-colors",
+        "flex flex-col transition-colors",
         stacked
-          ? "min-w-full w-full flex-none border-b border-l-0 last:border-b-0"
+          ? "min-w-full w-full flex-none border-b border-[color:var(--fi-cal-ws-shell-border,#1e2937)]/80 border-l-0 last:border-b-0"
           : fillAvailableWidth
-            ? "min-w-0 flex-1 border-l first:border-l-0"
-            : "min-w-[var(--col-min)] flex-1 border-l first:border-l-0",
+            ? cn(
+                "min-w-0 flex-1 border-l first:border-l-0",
+                interColumnDivider
+                  ? "border-[color:var(--fi-cal-ws-col-divider,rgba(148,163,184,0.22))]"
+                  : "border-[color:var(--fi-cal-ws-shell-border,#1e2937)]"
+              )
+            : cn(
+                "min-w-[var(--col-min)] flex-1 border-l first:border-l-0",
+                interColumnDivider
+                  ? "border-[color:var(--fi-cal-ws-col-divider,rgba(148,163,184,0.22))]"
+                  : "border-[color:var(--fi-cal-ws-shell-border,#1e2937)]"
+              ),
         highlighted && "bg-sky-950/20 ring-1 ring-inset ring-sky-400/25",
         className
       )}
@@ -474,7 +491,10 @@ export function ProviderColumn({
           "relative flex-1 transition-colors",
           isOver && "bg-sky-950/30 ring-1 ring-inset ring-sky-400/30"
         )}
-        style={{ minHeight: bodyHeightPx, backgroundColor: CALENDAR_GRID_BG }}
+        style={{
+          minHeight: bodyHeightPx,
+          backgroundColor: "var(--fi-cal-ws-grid-bg, #0f172a)",
+        }}
       >
         <BusinessTimeSlotGrid
           bodyHeightPx={bodyHeightPx}
@@ -494,7 +514,7 @@ export function ProviderColumn({
           />
         ) : null}
 
-        <div className="relative z-[2]" style={{ height: bodyHeightPx }}>
+        <div className="relative z-[2] pointer-events-none" style={{ height: bodyHeightPx }}>
           {appointments.map((booking) => {
             const layout = overlapLayouts.get(booking.id);
             if (!layout || !visibleIds.has(booking.id)) return null;
@@ -504,6 +524,7 @@ export function ProviderColumn({
               <AppointmentCardFromBooking
                 key={booking.id}
                 booking={booking}
+                className="pointer-events-auto"
                 display={{
                   anchorLabel: d?.anchorLabel,
                   durationMin: d?.durationMin,

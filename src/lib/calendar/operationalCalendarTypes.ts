@@ -89,3 +89,9 @@ export type OperationalCalendarPageData = {
    */
   calendarOperatorPrimaryClinicId?: string | null;
 };
+
+/** Bookings + derived grid fields streamed after the calendar shell. */
+export type OperationalCalendarGridPatch = Pick<
+  OperationalCalendarPageData,
+  "bookings" | "bookingDisplay" | "buckets" | "reminderJobsByBookingId" | "listTruncated" | "resourceColumns" | "rangeTitle"
+>;

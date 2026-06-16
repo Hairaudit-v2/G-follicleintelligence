@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadBookingsForCalendarOverlap } from "@/src/lib/bookings/bookings";
 import { CALENDAR_VIEW_BOOKINGS_LIMIT } from "@/src/lib/bookings/operatorBookingConstants";
@@ -15,12 +17,15 @@ import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenant
 
 import type {
   OperationalCalendarBookingDisplay,
+  OperationalCalendarGridPatch,
   OperationalCalendarPageData,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
+import { mergeOperationalCalendarShellAndGrid } from "@/src/lib/calendar/operationalCalendarMerge";
 
 export type {
   OperationalCalendarBookingDisplay,
+  OperationalCalendarGridPatch,
   OperationalCalendarPageData,
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
@@ -39,9 +44,6 @@ import {
   normalizeCalendarStaffFilter,
 } from "@/src/lib/calendar/operationalCalendarColumns";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
-import { loadReminderJobsForBookings } from "@/src/lib/reminders/reminderJobs.server";
-import { formatNextReminderHint } from "@/src/lib/reminders/remindersCore";
-import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import { loadClinicRoomsForTenant } from "@/src/lib/rooms/fiClinicRooms.server";
@@ -66,6 +68,30 @@ type ClinicalLite = {
   hairline_pattern: string | null;
   primary_concern: string | null;
 };
+
+const loadTenantCalendarSettingsCached = cache((tenantId: string) => loadTenantOperationalCalendarSettings(tenantId.trim()));
+
+const loadTenantStaffAndResourcesCached = cache(
+  (tenantId: string, resourceView: ParsedCalendarQuery["resourceView"], clinicId: string | null) =>
+    loadTenantStaffAndClinics(tenantId.trim(), {
+      resourceView,
+      clinicId: clinicId?.trim() || null,
+    })
+);
+
+const resolveBookingMutationGateCached = cache((tenantId: string) => resolveBookingMutationGate(tenantId.trim()));
+
+const loadFiServicesForTenantCached = cache((tenantId: string) => loadFiServicesForTenant(tenantId.trim()));
+
+const loadTenantConfigRowCached = cache(async (tenantId: string) => {
+  const { data, error } = await supabaseAdmin()
+    .from("fi_tenants")
+    .select("config_json")
+    .eq("id", tenantId.trim())
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data as { config_json?: unknown } | null;
+});
 
 async function loadClinicalDetailsMap(tenantId: string, patientIds: string[]): Promise<Map<string, ClinicalLite>> {
   const out = new Map<string, ClinicalLite>();
@@ -373,54 +399,32 @@ async function loadCalendarOperatorPrimaryClinicId(
 }
 
 /**
- * FI Admin operational calendar: loads overlapping bookings via {@link loadBookingsForCalendarOverlap}
- * (column subset + DB-level cap) instead of an unbounded `select("*")`, then applies URL filters.
+ * Fast path: tenant settings, directory, services, and layout metadata — no booking overlap query.
+ * Used by FI OS calendar streaming so toolbar / filters can render before appointments resolve.
  */
-export async function loadOperationalCalendarPageData(
+export async function loadOperationalCalendarShellData(
   tenantId: string,
   searchParams: Record<string, string | string[] | undefined>,
   opts?: { route?: CalendarRoute }
 ): Promise<OperationalCalendarPageData> {
   const route = opts?.route ?? "fi-admin";
   const tid = tenantId.trim();
-  const tLoaderStart = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const calendarSettings = await loadTenantOperationalCalendarSettings(tid);
+  const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const calendarSettings = await loadTenantCalendarSettingsCached(tid);
   const parsed = parseCalendarSearchParams(searchParams, new Date(), {
     calendarTimezone: calendarSettings.calendarTimezone,
   });
-  /**
-   * Always trust {@link parseCalendarSearchParams} for `view`. Week is the default when `view`
-   * is omitted from the URL ({@link buildCalendarHref} does not emit `view=` for week); forcing
-   * `day` here broke Week links because they intentionally omit the param.
-   */
   let query = parsed;
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
-  const [rawBookings, resources, mutationGate, services, tenantRow] = await Promise.all([
-    loadBookingsForCalendarOverlap({
-      tenantId: tid,
-      rangeStartIso,
-      rangeEndIso,
-      status: query.status,
-      bookingType: query.bookingType,
-      assignedUserId: query.assignedUserId,
-      assignedStaffId: query.staffId,
-      clinicId: query.clinicId,
-      roomId: query.roomId,
-      includeCancelled: query.includeCancelled,
-      limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
-    }),
-    loadTenantStaffAndClinics(tid, { resourceView: query.resourceView, clinicId: query.clinicId }),
-    resolveBookingMutationGate(tid),
-    loadFiServicesForTenant(tid),
-    supabaseAdmin().from("fi_tenants").select("config_json").eq("id", tid).maybeSingle(),
+  const [resources, mutationGate, services, tenantMetaRow] = await Promise.all([
+    loadTenantStaffAndResourcesCached(tid, query.resourceView, query.clinicId?.trim() || null),
+    resolveBookingMutationGateCached(tid),
+    loadFiServicesForTenantCached(tid),
+    loadTenantConfigRowCached(tid),
   ]);
 
-  /** True when Postgres returned a full cap page — more rows may exist in the visible range. */
-  const hitOverlapDbCap = rawBookings.length >= CALENDAR_VIEW_BOOKINGS_LIMIT;
-
-  const tenantMetaRow = tenantRow.data as { config_json?: unknown } | null;
   const cfg = tenantMetaRow?.config_json;
   const tenantMetadata =
     cfg != null && typeof cfg === "object" && !Array.isArray(cfg) ? (cfg as Record<string, unknown>) : null;
@@ -436,12 +440,123 @@ export async function loadOperationalCalendarPageData(
       ? appendLegacyUserColumns(resources.resourceColumns, {
           userAssignees: resources.assignees,
           staffIdByUserId: resources.staffIdByUserId,
-          bookings: rawBookings,
+          bookings: [],
           filterUserId: parsed.assignedUserId,
         })
       : resources.resourceColumns;
   const { canMutateBookings, bookingMutationBlockedReason } = mutationGate;
   const gridConfig = calendarSettings.gridConfig;
+
+  const buckets: Record<string, FiBookingRow[]> = {};
+  for (const lane of lanes) {
+    buckets[lane.dayKey] = [];
+  }
+
+  const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
+
+  const setupRecommendations = buildSetupRecommendations({
+    servicesCount: services.length,
+    staffDirectory: resources.staffDirectory,
+    timezoneConfigured: calendarSettings.timezoneConfigured,
+  });
+
+  const calendarOperatorPrimaryClinicId = await loadCalendarOperatorPrimaryClinicId(tid, resources.staffDirectory);
+
+  const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
+  logOperationalCalendarServerTiming({
+    phase: "loadOperationalCalendarShellData",
+    durationMs: Math.round(t1 - t0),
+    view: query.view,
+    dateAnchor: query.dateAnchor,
+    rangeStartIso,
+    rangeEndIso,
+  });
+
+  return {
+    tenantId: tid,
+    tenantMetadata,
+    query,
+    calendarTimezone: query.calendarTimezone,
+    rangeStartIso,
+    rangeEndIso,
+    rangeTitle,
+    lanes,
+    buckets,
+    bookings: [],
+    bookingDisplay: {},
+    assignees: resources.assignees,
+    staffDirectory: resources.staffDirectory,
+    clinics: resources.clinics,
+    rooms: resources.rooms,
+    roomDisplayById: resources.roomDisplayById,
+    resourceColumns,
+    gridConfig,
+    listTruncated: false,
+    canMutateBookings,
+    bookingMutationBlockedReason,
+    reminderJobsByBookingId: {},
+    services,
+    setupRecommendations,
+    canonicalRedirectHref,
+    calendarOperatorPrimaryClinicId,
+  };
+}
+
+/**
+ * Booking overlap + enrichment. Dedupes directory/services queries with {@link loadOperationalCalendarShellData}
+ * via React `cache()` for the same navigation request.
+ */
+export async function loadOperationalCalendarGridData(
+  tenantId: string,
+  searchParams: Record<string, string | string[] | undefined>,
+  opts?: { route?: CalendarRoute }
+): Promise<OperationalCalendarGridPatch> {
+  void opts;
+  const tid = tenantId.trim();
+  const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const calendarSettings = await loadTenantCalendarSettingsCached(tid);
+  const parsed = parseCalendarSearchParams(searchParams, new Date(), {
+    calendarTimezone: calendarSettings.calendarTimezone,
+  });
+  let query = parsed;
+  const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
+  const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
+
+  const tOverlapStart = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const [rawBookings, resources, services] = await Promise.all([
+    loadBookingsForCalendarOverlap({
+      tenantId: tid,
+      rangeStartIso,
+      rangeEndIso,
+      status: query.status,
+      bookingType: query.bookingType,
+      assignedUserId: query.assignedUserId,
+      assignedStaffId: query.staffId,
+      clinicId: query.clinicId,
+      roomId: query.roomId,
+      includeCancelled: query.includeCancelled,
+      limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
+    }),
+    loadTenantStaffAndResourcesCached(tid, query.resourceView, query.clinicId?.trim() || null),
+    loadFiServicesForTenantCached(tid),
+  ]);
+  const tOverlapEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
+
+  /** True when Postgres returned a full cap page — more rows may exist in the visible range. */
+  const hitOverlapDbCap = rawBookings.length >= CALENDAR_VIEW_BOOKINGS_LIMIT;
+
+  const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
+  query = normalized.query;
+
+  const resourceColumns =
+    query.resourceView === "staff"
+      ? appendLegacyUserColumns(resources.resourceColumns, {
+          userAssignees: resources.assignees,
+          staffIdByUserId: resources.staffIdByUserId,
+          bookings: rawBookings,
+          filterUserId: parsed.assignedUserId,
+        })
+      : resources.resourceColumns;
 
   const structured = applyStructuredFilters(
     rawBookings,
@@ -451,12 +566,9 @@ export async function loadOperationalCalendarPageData(
     resources.staffDirectory
   );
 
-  /**
-   * Month grid only needs anchor labels + procedure tint metadata for pills — not clinical scales,
-   * multi-resource assignment lines, or extra assignment queries (major latency when many bookings overlap a 6-week grid).
-   */
   const monthSummaryMode = operationalCalendarSkipsHeavyEnrichment(query.view);
 
+  const tEnrichStart = typeof performance !== "undefined" ? performance.now() : Date.now();
   const [displayMaps, clinicalMap, assignmentMap] = await Promise.all([
     loadBookingDisplayContextMaps(tid, structured),
     monthSummaryMode
@@ -472,6 +584,7 @@ export async function loadOperationalCalendarPageData(
           bookingIds: structured.map((b) => b.id),
         }),
   ]);
+  const tEnrichEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
   const staffNameById: Record<string, string> = {};
   for (const s of resources.staffDirectory) {
@@ -540,28 +653,8 @@ export async function loadOperationalCalendarPageData(
 
   searched.sort((a, b) => a.start_at.localeCompare(b.start_at));
 
-  /**
-   * Truncation banner: only when the overlap query returned a full cap page (more rows may exist in-range).
-   * Client-side search/staff filters cannot increase row count beyond the capped raw fetch, so
-   * `searched.length > limit` is not a meaningful truncation signal.
-   */
   const listTruncated = hitOverlapDbCap;
   const bookings = searched.slice(0, CALENDAR_VIEW_BOOKINGS_LIMIT);
-
-  const reminderMap = await loadReminderJobsForBookings(
-    tid,
-    bookings.map((b) => b.id)
-  );
-  const reminderJobsByBookingId: Record<string, FiReminderJobWithTemplate[]> = {};
-  for (const b of bookings) {
-    const jobs = reminderMap.get(b.id) ?? [];
-    reminderJobsByBookingId[b.id] = jobs;
-    const hint = formatNextReminderHint(jobs, query.calendarTimezone);
-    const prev = bookingDisplay[b.id];
-    if (prev) {
-      bookingDisplay[b.id] = { ...prev, reminderHint: hint };
-    }
-  }
 
   const bucketsMap = bucketBookingsIntoCalendar(bookings, lanes);
   const buckets: Record<string, FiBookingRow[]> = {};
@@ -571,18 +664,22 @@ export async function loadOperationalCalendarPageData(
 
   const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
 
-  const setupRecommendations = buildSetupRecommendations({
-    servicesCount: services.length,
-    staffDirectory: resources.staffDirectory,
-    timezoneConfigured: calendarSettings.timezoneConfigured,
-  });
+  const patch: OperationalCalendarGridPatch = {
+    bookings,
+    bookingDisplay,
+    buckets,
+    reminderJobsByBookingId: {},
+    listTruncated,
+    resourceColumns,
+    rangeTitle,
+  };
 
-  const calendarOperatorPrimaryClinicId = await loadCalendarOperatorPrimaryClinicId(tid, resources.staffDirectory);
-
-  const tLoaderEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
   logOperationalCalendarServerTiming({
-    phase: "loadOperationalCalendarPageData",
-    durationMs: Math.round(tLoaderEnd - tLoaderStart),
+    phase: "loadOperationalCalendarGridData",
+    durationMs: Math.round(t1 - t0),
+    subMs_overlapBundle: Math.round(tOverlapEnd - tOverlapStart),
+    subMs_displayEnrichment: Math.round(tEnrichEnd - tEnrichStart),
     view: query.view,
     dateAnchor: query.dateAnchor,
     rangeStartIso,
@@ -595,32 +692,29 @@ export async function loadOperationalCalendarPageData(
     listTruncated,
   });
 
-  return {
-    tenantId: tid,
-    tenantMetadata,
-    query,
-    calendarTimezone: query.calendarTimezone,
-    rangeStartIso,
-    rangeEndIso,
-    rangeTitle,
-    lanes,
-    buckets,
-    bookings,
-    bookingDisplay,
-    assignees: resources.assignees,
-    staffDirectory: resources.staffDirectory,
-    clinics: resources.clinics,
-    rooms: resources.rooms,
-    roomDisplayById: resources.roomDisplayById,
-    resourceColumns,
-    gridConfig,
-    listTruncated,
-    canMutateBookings,
-    bookingMutationBlockedReason,
-    reminderJobsByBookingId,
-    services,
-    setupRecommendations,
-    canonicalRedirectHref,
-    calendarOperatorPrimaryClinicId,
-  };
+  if (process.env.NODE_ENV === "development") {
+    const approxBytes = new TextEncoder().encode(JSON.stringify(patch)).length;
+    logOperationalCalendarServerTiming({
+      phase: "loadOperationalCalendarGridData.payloadBytes",
+      approxBytes,
+      returnedBookingCount: bookings.length,
+    });
+  }
+
+  return patch;
+}
+
+/**
+ * FI Admin operational calendar: loads overlapping bookings via {@link loadBookingsForCalendarOverlap}
+ * (column subset + DB-level cap) instead of an unbounded `select("*")`, then applies URL filters.
+ */
+export async function loadOperationalCalendarPageData(
+  tenantId: string,
+  searchParams: Record<string, string | string[] | undefined>,
+  opts?: { route?: CalendarRoute }
+): Promise<OperationalCalendarPageData> {
+  const shell = await loadOperationalCalendarShellData(tenantId, searchParams, opts);
+  if (shell.canonicalRedirectHref) return shell;
+  const grid = await loadOperationalCalendarGridData(tenantId, searchParams, opts);
+  return mergeOperationalCalendarShellAndGrid(shell, grid);
 }

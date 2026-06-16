@@ -31,7 +31,6 @@ import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import {
   CALENDAR_COLUMN_MIN_WIDTH_PX,
-  CALENDAR_GRID_BG,
   CALENDAR_HEADER_HEIGHT_PX,
   ProviderColumn,
   calendarPxPerMinute,
@@ -446,6 +445,9 @@ function WeekViewInner({
     [rescheduleWithToast]
   );
 
+  const emphasizeResourceColumnDividers =
+    usesProviderColumns(view) && !swipeLayout && columnsForView.length > 1;
+
   const renderProviderColumn = useCallback(
     (col: CalendarColumn) => {
       const lane = usesProviderColumns(view) ? primaryLane! : lanes.find((l) => l.dayKey === col.dayKey);
@@ -484,6 +486,7 @@ function WeekViewInner({
           pendingAppointmentIds={pendingAppointmentIds}
           highlightedBookingId={highlightedBookingId}
           fillAvailableWidth={!swipeLayout}
+          interColumnDivider={emphasizeResourceColumnDividers}
           onSelectAppointment={onSelectBooking}
           onResizeAppointment={onResizeAppointment}
           onEmptySlotClick={onEmptySlotClick}
@@ -497,6 +500,7 @@ function WeekViewInner({
       bookingDisplay,
       buckets,
       canMutateBookings,
+      emphasizeResourceColumnDividers,
       gridConfig,
       highlightedBookingId,
       highlightedColumnId,
@@ -528,7 +532,7 @@ function WeekViewInner({
     return (
       <div
         className="rounded-2xl border border-dashed border-slate-200 px-4 py-12"
-        style={{ backgroundColor: CALENDAR_GRID_BG }}
+        style={{ backgroundColor: "var(--fi-cal-ws-grid-bg, #0f172a)" }}
       >
         <CalendarEmptyState preset="day" title="No day selected" description="Pick a date to load the schedule." />
       </div>
@@ -539,7 +543,7 @@ function WeekViewInner({
     return (
       <div
         className="rounded-2xl border border-dashed border-slate-200 px-4 py-12"
-        style={{ backgroundColor: CALENDAR_GRID_BG }}
+        style={{ backgroundColor: "var(--fi-cal-ws-grid-bg, #0f172a)" }}
       >
         <CalendarEmptyState
           preset="day"
@@ -622,7 +626,8 @@ function WeekViewInner({
         initial="hidden"
         animate="show"
         className={cn(
-          "fi-calendar-shell flex overflow-hidden rounded-xl border border-[#1e2937] bg-[#0f172a] shadow-sm shadow-black/30 ring-1 ring-white/[0.04] md:rounded-2xl",
+          "fi-calendar-shell flex overflow-hidden rounded-xl border shadow-sm ring-1 md:rounded-2xl",
+          "border-[color:var(--fi-cal-ws-shell-border,#1e2937)] bg-[var(--fi-cal-ws-shell-bg,#0f172a)] shadow-black/30 ring-[color:var(--fi-cal-ws-shell-ring,rgba(255,255,255,0.04))]",
           shellIsFiOs
             ? "relative min-h-0 flex-1 flex-col"
             : "min-h-[min(32rem,72dvh)] flex-col md:min-h-[32rem] lg:min-h-[calc(100dvh-13rem)]"

@@ -1,6 +1,6 @@
 "use server";
 
-import { assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
+import { assertCrmTenantReadAllowed, assertCrmTenantWriteAllowed, CrmAccessError, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
 import { StaffPinMutationBlockedError } from "@/src/lib/staffPin/staffPinMutationGuard";
 import {
   bookingCancelBodySchema,
@@ -22,6 +22,8 @@ import {
   loadBookingResourceAssignments,
   type FiBookingResourceAssignmentRow,
 } from "@/src/lib/calendar/bookingResourceRequirements.server";
+import { loadReminderJobsForAppointment } from "@/src/lib/reminders/reminderJobs.server";
+import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import { getBookingsOperatorSessionIfAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadCrmLeadById, appendCrmActivityEvent } from "@/src/lib/crm/server";
 import { z, ZodError } from "zod";
@@ -319,6 +321,26 @@ export async function loadBookingResourceAssignmentsAction(
       bookingId: bookingId.trim(),
     });
     return { ok: true, assignments };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+/** Read reminder jobs for edit drawer (calendar no longer bulk-loads these on every navigation). */
+export async function loadBookingReminderJobsAction(
+  tenantId: string,
+  bookingId: string,
+  leadId: string | null | undefined,
+  adminKey?: string
+): Promise<{ ok: true; reminderJobs: FiReminderJobWithTemplate[] } | { ok: false; error: string }> {
+  try {
+    await assertCrmTenantReadAllowed({ tenantId, adminKey, request: undefined });
+    const reminderJobs = await loadReminderJobsForAppointment(
+      tenantId.trim(),
+      bookingId.trim(),
+      leadId?.trim() || null
+    );
+    return { ok: true, reminderJobs };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

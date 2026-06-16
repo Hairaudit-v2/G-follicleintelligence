@@ -1,9 +1,15 @@
 import { notFound, redirect } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
+import { Suspense } from "react";
+
 import { OperationalCalendarPage } from "@/src/components/fi-admin/calendar/OperationalCalendarPage";
-import { loadOperationalCalendarPageData } from "@/src/lib/calendar/operationalCalendarLoader.server";
+import {
+  loadOperationalCalendarShellData,
+} from "@/src/lib/calendar/operationalCalendarLoader.server";
 import { getClinicFloorSessionIfAllowed } from "@/src/lib/staffPin/clinicFloorAccess";
+import { CalendarBookingsSection } from "./CalendarBookingsSection";
+import { FiOsCalendarGridSkeleton } from "@/src/components/fi-admin/calendar/FiOsCalendarGridSkeleton";
 
 export const metadata = {
   title: "Calendar",
@@ -24,12 +30,18 @@ export default async function TenantCalendarPage({
   if (!tenantId?.trim()) notFound();
 
   const sp = (await searchParams) ?? {};
-  const [data, session] = await Promise.all([
-    loadOperationalCalendarPageData(tenantId.trim(), sp, { route: "fi-admin" }),
+  const [shell, session] = await Promise.all([
+    loadOperationalCalendarShellData(tenantId.trim(), sp, { route: "fi-admin" }),
     getClinicFloorSessionIfAllowed(tenantId.trim()),
   ]);
 
-  if (data.canonicalRedirectHref) redirect(data.canonicalRedirectHref);
+  if (shell.canonicalRedirectHref) redirect(shell.canonicalRedirectHref);
 
-  return <OperationalCalendarPage data={data} session={session} />;
+  return (
+    <OperationalCalendarPage session={session} shell={shell}>
+      <Suspense fallback={<FiOsCalendarGridSkeleton />}>
+        <CalendarBookingsSection tenantId={tenantId.trim()} searchParams={sp} route="fi-admin" />
+      </Suspense>
+    </OperationalCalendarPage>
+  );
 }

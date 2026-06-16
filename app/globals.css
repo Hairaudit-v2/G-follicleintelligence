@@ -256,4 +256,56 @@ body {
       0 2px 4px -2px rgb(0 0 0 / 20%),
       inset 0 1px 0 rgb(255 255 255 / 4%);
   }
+
+  /**
+   * FI OS scheduling workspace only — toggled via `data-fi-cal-display-theme` on `.fi-cal-workspace-root`.
+   * Descendants use `var(--fi-cal-ws-*, <fallback>)` for grid, chrome, and clinical column separators.
+   */
+  .fi-cal-workspace-root[data-fi-cal-display-theme="dark"] {
+    --fi-cal-ws-page-bg: #050a14;
+    --fi-cal-ws-text: #f1f5f9;
+    --fi-cal-ws-muted: #94a3b8;
+    --fi-cal-ws-shell-bg: #0f172a;
+    --fi-cal-ws-shell-border: #1e2937;
+    --fi-cal-ws-shell-ring: rgb(255 255 255 / 0.04);
+    --fi-cal-ws-grid-bg: #0f172a;
+    --fi-cal-ws-slot-line: #1e2937;
+    --fi-cal-ws-slot-line-half: rgb(30 41 55 / 0.55);
+    --fi-cal-ws-gutter-bg: #0f172a;
+    --fi-cal-ws-gutter-border: #1e2937;
+    --fi-cal-ws-time-label: #64748b;
+    --fi-cal-ws-header-bg: rgb(15 23 42 / 0.95);
+    --fi-cal-ws-header-title: #f1f5f9;
+    --fi-cal-ws-header-subtitle: #94a3b8;
+    --fi-cal-ws-col-divider: rgb(148 163 184 / 0.22);
+    --fi-cal-ws-strip-bg: rgb(6 13 24 / 0.9);
+    --fi-cal-ws-strip-border: rgb(255 255 255 / 0.06);
+    --fi-cal-ws-controls-inset-bg: rgb(6 13 24 / 0.9);
+    --fi-cal-ws-controls-inset-border: rgb(255 255 255 / 0.08);
+    --fi-cal-ws-date-scheme: dark;
+  }
+
+  .fi-cal-workspace-root[data-fi-cal-display-theme="light"] {
+    --fi-cal-ws-page-bg: #f1f5f9;
+    --fi-cal-ws-text: #0f172a;
+    --fi-cal-ws-muted: #475569;
+    --fi-cal-ws-shell-bg: #ffffff;
+    --fi-cal-ws-shell-border: #cbd5e1;
+    --fi-cal-ws-shell-ring: rgb(15 23 42 / 0.06);
+    --fi-cal-ws-grid-bg: #f8fafc;
+    --fi-cal-ws-slot-line: #e2e8f0;
+    --fi-cal-ws-slot-line-half: rgb(203 213 225 / 0.85);
+    --fi-cal-ws-gutter-bg: #f8fafc;
+    --fi-cal-ws-gutter-border: #cbd5e1;
+    --fi-cal-ws-time-label: #64748b;
+    --fi-cal-ws-header-bg: rgb(255 255 255 / 0.92);
+    --fi-cal-ws-header-title: #0f172a;
+    --fi-cal-ws-header-subtitle: #475569;
+    --fi-cal-ws-col-divider: rgb(15 23 42 / 0.12);
+    --fi-cal-ws-strip-bg: rgb(255 255 255 / 0.92);
+    --fi-cal-ws-strip-border: rgb(15 23 42 / 0.08);
+    --fi-cal-ws-controls-inset-bg: #ffffff;
+    --fi-cal-ws-controls-inset-border: #e2e8f0;
+    --fi-cal-ws-date-scheme: light;
+  }
 }
