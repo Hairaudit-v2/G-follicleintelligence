@@ -9,7 +9,7 @@ import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
 import { optionsForField } from "@/src/lib/consultationForms/consultationFormOptionSets";
-import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "@/src/lib/consultationForms/consultationFormConstants";
+import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG, HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormField, ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
 
 function readStringArray(v: unknown): string[] {
@@ -53,7 +53,8 @@ export function ConsultationFormFieldRenderer({
   const slug = templateSlug?.trim() ?? "";
   const sec = sectionId?.trim() ?? "";
   const hairTransplantHandoffUx =
-    slug === HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG && sec === "clinical_summary_handoff";
+    (slug === HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG || slug === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) &&
+    sec === "clinical_summary_handoff";
 
   if (hairTransplantHandoffUx && field.id === "clinician_voice_note") {
     return null;

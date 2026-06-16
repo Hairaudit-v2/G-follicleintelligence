@@ -3,6 +3,7 @@ import type {
   ConsultationOutcomeType,
 } from "../completion/consultationCompletionTypes";
 import type { PathologyTemplateId } from "@/src/lib/pathology/pathologyTypes";
+import { HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG } from "../consultationFormConstants";
 
 /** CRM task title from guided consultation outcome (Stage 5A). */
 export function followUpTaskTitleForOutcome(outcomeType: ConsultationOutcomeType): string {
@@ -92,6 +93,11 @@ export function quoteDraftAutomationIntentEligible(summary: ConsultationCompleti
 export function surgeryPlanningHandoffEligible(summary: ConsultationCompletionSummary, caseId: string | null): boolean {
   if (!caseId?.trim()) return false;
   if (summary.outcomeType !== "proceed_surgery") return false;
+
+  if (summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) {
+    return summary.repairConsultationCompletionSnapshot?.surgeryosPlanningRecommended === true;
+  }
+
   const hasPlanSignal =
     Boolean(summary.recommendedProcedure.trim()) ||
     (summary.estimatedGraftsMin != null && summary.estimatedGraftsMax != null) ||

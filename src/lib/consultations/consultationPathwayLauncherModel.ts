@@ -2,6 +2,7 @@ import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormInstanceWithTemplate } from "@/src/lib/consultationForms/consultationFormTypes";
 import {
@@ -57,6 +58,13 @@ const TREATMENT_FORWARD_CONSULTATION_TYPES: readonly ConsultationTypeId[] = [
 const SURGERY_SIGNAL = /\b(fue|fut|transplant|transplantation|surgery|surgical|hairline|grafts?|strip\s+harvest)\b/i;
 
 /**
+ * Prior-transplant repair / revision context (used before default HT routing).
+ * Intentionally overlaps common complaint phrases — still requires surgical context elsewhere in the heuristic.
+ */
+const REPAIR_SIGNAL =
+  /\b(repair|revision|failed\s+transplant|poor\s+growth|overharvesting|overharvested|scarring|pluggy|plug\s|unnatural\s+grafts?|unnatural\s+hairline)\b/i;
+
+/**
  * Female-context hair loss signals (conservative overlap with surgery terms → neutral elsewhere).
  */
 const FEMALE_SIGNAL =
@@ -101,6 +109,13 @@ export function recommendConsultationPathwayKey(row: ConsultationRow): Consultat
   if (ambiguousText) return null;
   if (female && surg) return null;
   if (female && !surg) return "female_hair_loss";
+
+  const repairSignal = REPAIR_SIGNAL.test(userHay);
+  const surgicalContextForRepair =
+    SURGERY_SIGNAL.test(userHay) || (TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct);
+  if (repairSignal && surgicalContextForRepair && !ambiguousText) {
+    return "repair";
+  }
 
   if ((TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct)) {
     if (treat && !surg) return "hair_loss_hli";
@@ -158,6 +173,9 @@ function recommendedHintFor(pathKey: ConsultationPathwayLauncherPathKey | null):
   if (pathKey === "female_hair_loss") {
     return "Recommended: Female Hair Loss - this record mentions female-pattern context, hormones, postpartum, shedding, part widening, traction, or Ludwig / Sinclair grading.";
   }
+  if (pathKey === "repair") {
+    return "Recommended: Repair Consultation - notes suggest prior transplant issues (repair, revision, failed growth, scarring, pluggy hairline, or overharvesting).";
+  }
   return null;
 }
 
@@ -183,10 +201,15 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     input.instances,
     FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG
   );
+  const repairInst = pickLatestInRoomInstanceForTemplateSlug(
+    input.instances,
+    HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG
+  );
 
   const htProgress = progressForInstance(htInst);
   const hliProgress = progressForInstance(hliInst);
   const femaleProgress = progressForInstance(femaleInst);
+  const repairProgress = progressForInstance(repairInst);
 
   const recommendedPathKey = recommendConsultationPathwayKey(input.row);
   const recommendedHint = recommendedHintFor(recommendedPathKey);
@@ -233,14 +256,15 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     {
       pathKey: "repair",
       title: "Repair Consultation",
-      purpose: "Prior surgery review, scar camouflage, and corrective planning.",
-      whenToUse: "Previous transplant issues, poor density, wide scars, or revision planning.",
-      availability: "soon",
-      href: null,
-      templateSlug: null,
-      progress: "not_started",
-      instanceId: null,
-      recommended: false,
+      purpose:
+        "Dedicated prior-surgery audit: donor damage, hairline design, scarring, growth failure, and realistic corrective options — aligned with HairAudit + SurgeryOS (no quote builder).",
+      whenToUse: "Revision after poor outcome, scar issues, unnatural hairline, suspected overharvesting, or corrective planning.",
+      availability: "active",
+      href: `${base}/forms/repair`,
+      templateSlug: HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+      progress: repairProgress,
+      instanceId: repairInst?.id ?? null,
+      recommended: recommendedPathKey === "repair",
     },
     {
       pathKey: "follow_up_review",

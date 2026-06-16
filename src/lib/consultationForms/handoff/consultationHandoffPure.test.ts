@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { ConsultationCompletionSummary } from "../completion/consultationCompletionTypes";
+import { HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG } from "../consultationFormConstants";
 import {
   addBusinessDaysUtc,
   buildQuoteDraftNotesText,
@@ -100,6 +101,43 @@ describe("consultationHandoffPure", () => {
     assert.equal(
       surgeryPlanningHandoffEligible(baseSummary({ outcomeType: "proceed_surgery", recommendedProcedure: "", recommendedZones: ["crown"] }), "case-1"),
       true
+    );
+  });
+
+  it("surgeryPlanningHandoffEligible for repair pathway uses SurgeryOS flag without graft estimates", () => {
+    const repairSlug = HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG;
+    const snap = {
+      priorSurgeryHistoryLine: "Prior procedures: One prior procedure",
+      mainRepairConcernLabel: "Poor density / failed yield",
+      donorRecipientRiskLine: "Donor depletion: Mild",
+      correctiveOptionsLabels: ["Focal FUE / revision grafting"],
+      hairauditRecommended: true,
+      surgeryosPlanningRecommended: true,
+      followUpUrgencyLabel: "Routine (weeks)",
+    };
+    assert.equal(
+      surgeryPlanningHandoffEligible(
+        baseSummary({
+          templateSlug: repairSlug,
+          outcomeType: "proceed_surgery",
+          recommendedProcedure: "",
+          repairConsultationCompletionSnapshot: snap,
+        }),
+        "case-1"
+      ),
+      true
+    );
+    assert.equal(
+      surgeryPlanningHandoffEligible(
+        baseSummary({
+          templateSlug: repairSlug,
+          outcomeType: "proceed_surgery",
+          recommendedProcedure: "Revision plan",
+          repairConsultationCompletionSnapshot: { ...snap, surgeryosPlanningRecommended: false },
+        }),
+        "case-1"
+      ),
+      false
     );
   });
 

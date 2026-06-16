@@ -13,6 +13,7 @@ import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
 } from "./consultationFormConstants";
 import {
   hairTransplantConsultationSchema,
@@ -122,5 +123,42 @@ describe("ConsultationOS v2 consolidation checkpoint", () => {
     });
     assert.equal(s.templateSlug, FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG);
     assert.ok(s.femaleHairLossCompletionSnapshot?.patternLabel);
+  });
+
+  it("Repair pathway completion dispatch returns pathway 4 snapshot fields", () => {
+    const s = buildConsultationCompletionSummary({
+      consultationId: "c-rep",
+      formInstanceId: "f-rep",
+      templateSlug: HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+      values: {
+        priority_focus: "hairline",
+        duration_band: "1_3y",
+        medicolegal_counselling_documented: true,
+        previous_surgery_count: "2",
+        prior_clinic_known: "unsure",
+        prior_surgery_year: "unknown",
+        primary_repair_concern: "donor_scar",
+        donor_depletion_level: "moderate",
+        donor_scarring_level: "severe",
+        recipient_scarring_level: "none",
+        hairline_design_issue: "unsure",
+        growth_failure_suspected: false,
+        pluggy_or_unnatural_grafts: false,
+        transection_or_overharvesting_concern: true,
+        corrective_options: ["strip_scar_revision", "medical_stabilisation"],
+        hairaudit_baseline_recommended: true,
+        surgeryos_planning_recommended: false,
+        corrective_surgical_planning_selected: false,
+        repair_completion_outcome: "review_later",
+        structured_clinical_note: { mode: "clinical_note", note: "Wide scar; counselled." },
+        follow_up_required_explicit: false,
+        follow_up_urgency: "soon",
+      },
+      completedAt: "2026-06-16T12:00:00.000Z",
+    });
+    assert.equal(s.templateSlug, HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG);
+    assert.ok(s.repairConsultationCompletionSnapshot?.priorSurgeryHistoryLine);
+    assert.equal(s.outcomeType, "review_later");
+    assert.equal(s.repairConsultationCompletionSnapshot?.surgeryosPlanningRecommended, false);
   });
 });

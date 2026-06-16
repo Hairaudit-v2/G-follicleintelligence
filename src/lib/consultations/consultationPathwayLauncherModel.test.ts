@@ -11,6 +11,7 @@ import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormInstanceWithTemplate } from "@/src/lib/consultationForms/consultationFormTypes";
 import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes";
@@ -75,7 +76,7 @@ test("recommendConsultationPathwayKey returns null when surgery and treatment si
 test("recommendConsultationPathwayKey can elevate HT from medical type when notes are clearly surgical", () => {
   assert.equal(
     recommendConsultationPathwayKey(
-      baseRow({ consultation_type: "medical_hair_loss", live_notes: "Strip harvest revision; planning FUT scar repair" })
+      baseRow({ consultation_type: "medical_hair_loss", live_notes: "Strip harvest donor planning; planning FUT hairline restoration" })
     ),
     "hair_transplant"
   );
@@ -342,4 +343,63 @@ test("buildConsultationPathwayLauncherViewModel female card shows Review when in
   assert.ok(card);
   assert.equal(card.progress, "submitted");
   assert.equal(consultationPathwayCtaLabel(card.progress), "Review");
+});
+
+test("recommendConsultationPathwayKey prefers repair when revision / failed transplant signals appear", () => {
+  assert.equal(
+    recommendConsultationPathwayKey(
+      baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Patient wants revision after pluggy hairline" })
+    ),
+    "repair"
+  );
+  assert.equal(
+    recommendConsultationPathwayKey(
+      baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Poor growth after prior FUE — overharvesting concern" })
+    ),
+    "repair"
+  );
+});
+
+test("buildConsultationPathwayLauncherViewModel repair card is active with Start / Continue / Review CTAs", () => {
+  const repairDraft: ConsultationFormInstanceWithTemplate = {
+    id: "rep-1",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "v-rep",
+    channel: "in_room",
+    status: "draft",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: null,
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-02T00:00:00Z",
+    template: {
+      id: "tpl-rep",
+      slug: HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+      name: "Repair",
+      treatment_program: "scalp_hair_transplant",
+    },
+    template_version: { id: "v-rep", version: 1, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "repair consultation" }),
+    instances: [repairDraft],
+  });
+
+  const card = vm.cards.find((c) => c.pathKey === "repair");
+  assert.ok(card);
+  assert.equal(card.availability, "active");
+  assert.equal(card.templateSlug, HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG);
+  assert.ok(card.href?.endsWith("/forms/repair"));
+  assert.equal(card.progress, "in_progress");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Continue");
+  assert.equal(card.recommended, true);
 });

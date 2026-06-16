@@ -6,3 +6,6 @@ export const HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG = "hair-loss-treatme
 
 /** ConsultationOS v2 pathway 3 — female-pattern and context-led hair loss (non-surgical; HLI / Patient Twin alignment). */
 export const FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG = "female-hair-loss-consultation";
+
+/** ConsultationOS v2 pathway 4 — hair transplant repair / revision (prior surgery audit; HairAudit + SurgeryOS alignment; no quote builder). */
+export const HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG = "hair-transplant-repair-consultation";

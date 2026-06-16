@@ -74,6 +74,16 @@ export type ConsultationCompletionSummary = {
     treatmentPathwayLabel: string;
     followUpUrgencyLabel: string;
   };
+  /** Pathway 4 (hair-transplant-repair-consultation) — repair audit + routing snapshot. */
+  repairConsultationCompletionSnapshot?: {
+    priorSurgeryHistoryLine: string;
+    mainRepairConcernLabel: string;
+    donorRecipientRiskLine: string;
+    correctiveOptionsLabels: string[];
+    hairauditRecommended: boolean;
+    surgeryosPlanningRecommended: boolean;
+    followUpUrgencyLabel: string;
+  };
 };
 
 export type ConsultationCompletionInput = {
