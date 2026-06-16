@@ -58,10 +58,6 @@ function depositOpen(inv: FiInvoiceRow): boolean {
   return inv.invoice_kind === "surgery_deposit" && isInvoiceOpenForCollection(inv.status) && invoiceBalanceDueCents(inv) > 0;
 }
 
-function balanceOpen(inv: FiInvoiceRow): boolean {
-  return inv.invoice_kind === "surgery_balance" && isInvoiceOpenForCollection(inv.status) && invoiceBalanceDueCents(inv) > 0;
-}
-
 function invoiceOverdue(inv: FiInvoiceRow, todayYmd: string): boolean {
   if (!isInvoiceOpenForCollection(inv.status)) return false;
   if (invoiceBalanceDueCents(inv) <= 0) return false;
