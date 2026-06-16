@@ -277,7 +277,8 @@ body {
     --fi-cal-ws-header-bg: rgb(15 23 42 / 0.95);
     --fi-cal-ws-header-title: #f1f5f9;
     --fi-cal-ws-header-subtitle: #94a3b8;
-    --fi-cal-ws-col-divider: rgb(148 163 184 / 0.22);
+    /* Inter-column hairline — staff/day lanes (desktop); slightly stronger for at-a-glance separation */
+    --fi-cal-ws-col-divider: rgb(255 255 255 / 0.12);
     --fi-cal-ws-strip-bg: rgb(6 13 24 / 0.9);
     --fi-cal-ws-strip-border: rgb(255 255 255 / 0.06);
     --fi-cal-ws-controls-inset-bg: rgb(6 13 24 / 0.9);
@@ -301,7 +302,7 @@ body {
     --fi-cal-ws-header-bg: rgb(255 255 255 / 0.92);
     --fi-cal-ws-header-title: #0f172a;
     --fi-cal-ws-header-subtitle: #475569;
-    --fi-cal-ws-col-divider: rgb(15 23 42 / 0.12);
+    --fi-cal-ws-col-divider: rgb(15 23 42 / 0.1);
     --fi-cal-ws-strip-bg: rgb(255 255 255 / 0.92);
     --fi-cal-ws-strip-border: rgb(15 23 42 / 0.08);
     --fi-cal-ws-controls-inset-bg: #ffffff;

@@ -135,6 +135,8 @@ type CalendarColumn = {
   photoUrl?: string | null;
   readinessWarning?: string | null;
   columnKind?: OperationalCalendarResourceColumn["kind"];
+  /** Set for week/3-day × resource matrix cells — stable unique key for React / swipe slides. */
+  matrixKey?: string;
 };
 
 function snapToQuarterHourModifier(): Modifier {
@@ -224,6 +226,16 @@ function WeekViewInner({
   const modifiers = useMemo(() => [snapToQuarterHourModifier()], []);
 
   const columnsForView = useMemo((): CalendarColumn[] => {
+    const weekLike = view === "week" || view === "3day";
+    const matrixCells = weekLike && lanes.length > 0 && resourceColumns.length > 1 ? lanes.length * resourceColumns.length : 0;
+    const useWeekResourceMatrix =
+      weekLike &&
+      !swipeLayout &&
+      matrixCells > 0 &&
+      matrixCells <= 24 &&
+      lanes.length > 0 &&
+      resourceColumns.length > 1;
+
     if (usesProviderColumns(view) && lanes[0]) {
       const dayKey = lanes[0].dayKey;
       return resourceColumns.map((col) => ({
@@ -236,6 +248,26 @@ function WeekViewInner({
         columnKind: col.kind,
       }));
     }
+
+    if (useWeekResourceMatrix) {
+      const out: CalendarColumn[] = [];
+      for (const lane of lanes) {
+        for (const rc of resourceColumns) {
+          out.push({
+            id: rc.id,
+            matrixKey: `${lane.dayKey}|${rc.id}`,
+            label: `${calendarDayHeading(lane, gridConfig.timeZone)} · ${rc.label}`,
+            subtitle: rc.subtitle,
+            dayKey: lane.dayKey,
+            photoUrl: null,
+            readinessWarning: rc.readinessWarning ?? null,
+            columnKind: rc.kind,
+          });
+        }
+      }
+      return out;
+    }
+
     return lanes.map((lane) => ({
       id: lane.dayKey,
       label: calendarDayHeading(lane, gridConfig.timeZone),
@@ -243,7 +275,12 @@ function WeekViewInner({
       dayKey: lane.dayKey,
       photoUrl: null,
     }));
-  }, [view, lanes, resourceColumns, gridConfig.timeZone]);
+  }, [view, lanes, resourceColumns, gridConfig.timeZone, swipeLayout]);
+
+  const filterColBookingsByResource = useMemo(
+    () => usesProviderColumns(view) || (columnsForView.length > 0 && Boolean(columnsForView[0]?.matrixKey)),
+    [view, columnsForView]
+  );
 
   const primaryLane = lanes[0];
 
@@ -426,7 +463,7 @@ function WeekViewInner({
 
       const targetColumn = columnsForView.find((c) => c.id === drop.columnId && c.dayKey === drop.dayKey);
       const meta: WeekViewRescheduleMeta | undefined =
-        usesProviderColumns(view) && targetColumn
+        filterColBookingsByResource && targetColumn
           ? { ...assigneeFromColumn(targetColumn, staffIdByUserId), clearWaitlist: Boolean(waitlistBookingId) }
           : waitlistBookingId
             ? { clearWaitlist: true }
@@ -435,7 +472,16 @@ function WeekViewInner({
       const message = waitlistBookingId ? "Scheduled from waitlist" : "Appointment moved";
       void rescheduleWithToast(booking, startIso, endIso, meta, message);
     },
-    [bookings, canMutateBookings, columnsForView, gridConfig, lanes, rescheduleWithToast, staffIdByUserId, view]
+    [
+      bookings,
+      canMutateBookings,
+      columnsForView,
+      filterColBookingsByResource,
+      gridConfig,
+      lanes,
+      rescheduleWithToast,
+      staffIdByUserId,
+    ]
   );
 
   const onResizeAppointment = useCallback(
@@ -445,8 +491,8 @@ function WeekViewInner({
     [rescheduleWithToast]
   );
 
-  const emphasizeResourceColumnDividers =
-    usesProviderColumns(view) && !swipeLayout && columnsForView.length > 1;
+  /** Desktop multi-column grids (day staff, week/3-day lanes, etc.) — not mobile swipe or single column. */
+  const showInterColumnDividers = !swipeLayout && columnsForView.length > 1;
 
   const renderProviderColumn = useCallback(
     (col: CalendarColumn) => {
@@ -454,7 +500,7 @@ function WeekViewInner({
       if (!lane) return null;
 
       const dayBookings = buckets[lane.dayKey] ?? [];
-      const colBookings = usesProviderColumns(view)
+      const colBookings = filterColBookingsByResource
         ? dayBookings.filter(
             (b) => resourceColumnIdForBooking(b, { resourceView, staffIdByUserId }) === col.id
           )
@@ -462,7 +508,6 @@ function WeekViewInner({
 
       return (
         <ProviderColumn
-          key={`${col.dayKey}-${col.id}`}
           id={col.id}
           dayKey={lane.dayKey}
           name={col.label}
@@ -475,7 +520,7 @@ function WeekViewInner({
           gridConfig={gridConfig}
           bookingDisplay={bookingDisplay}
           bodyHeightPx={bodyHeightPx}
-          highlighted={usesProviderColumns(view) && highlightedColumnId === col.id}
+          highlighted={filterColBookingsByResource && highlightedColumnId === col.id}
           droppable={canMutateBookings}
           draggable={canMutateBookings}
           resizable={canMutateBookings && layoutMode === "desktop"}
@@ -486,7 +531,7 @@ function WeekViewInner({
           pendingAppointmentIds={pendingAppointmentIds}
           highlightedBookingId={highlightedBookingId}
           fillAvailableWidth={!swipeLayout}
-          interColumnDivider={emphasizeResourceColumnDividers}
+          interColumnDivider={showInterColumnDividers}
           onSelectAppointment={onSelectBooking}
           onResizeAppointment={onResizeAppointment}
           onEmptySlotClick={onEmptySlotClick}
@@ -500,7 +545,8 @@ function WeekViewInner({
       bookingDisplay,
       buckets,
       canMutateBookings,
-      emphasizeResourceColumnDividers,
+      filterColBookingsByResource,
+      showInterColumnDividers,
       gridConfig,
       highlightedBookingId,
       highlightedColumnId,
@@ -580,7 +626,7 @@ function WeekViewInner({
             >
               {columnsForView.map((col, i) => (
                 <motion.div
-                  key={`${col.dayKey}-${col.id}-slide`}
+                  key={`${col.matrixKey ?? `${col.dayKey}-${col.id}`}-slide`}
                   custom={i}
                   initial={{ opacity: 0, x: 8 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -599,7 +645,7 @@ function WeekViewInner({
               }}
             >
               {columnsForView.map((col) => (
-                <div key={`${col.dayKey}-${col.id}-cell`} className="min-h-0 min-w-0">
+                <div key={`${col.matrixKey ?? `${col.dayKey}-${col.id}`}-cell`} className="min-h-0 min-w-0">
                   {renderProviderColumn(col)}
                 </div>
               ))}

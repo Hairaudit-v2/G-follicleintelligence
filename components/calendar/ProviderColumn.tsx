@@ -454,15 +454,15 @@ export function ProviderColumn({
           ? "min-w-full w-full flex-none border-b border-[color:var(--fi-cal-ws-shell-border,#1e2937)]/80 border-l-0 last:border-b-0"
           : fillAvailableWidth
             ? cn(
-                "min-w-0 flex-1 border-l first:border-l-0",
+                "min-w-0 flex-1 border-l border-solid first:border-l-0",
                 interColumnDivider
-                  ? "border-[color:var(--fi-cal-ws-col-divider,rgba(148,163,184,0.22))]"
+                  ? "border-[color:var(--fi-cal-ws-col-divider,rgb(255_255_255/0.12))]"
                   : "border-[color:var(--fi-cal-ws-shell-border,#1e2937)]"
               )
             : cn(
-                "min-w-[var(--col-min)] flex-1 border-l first:border-l-0",
+                "min-w-[var(--col-min)] flex-1 border-l border-solid first:border-l-0",
                 interColumnDivider
-                  ? "border-[color:var(--fi-cal-ws-col-divider,rgba(148,163,184,0.22))]"
+                  ? "border-[color:var(--fi-cal-ws-col-divider,rgb(255_255_255/0.12))]"
                   : "border-[color:var(--fi-cal-ws-shell-border,#1e2937)]"
               ),
         highlighted && "bg-sky-950/20 ring-1 ring-inset ring-sky-400/25",
