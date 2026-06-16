@@ -13,6 +13,7 @@ import { computeNextInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceMath
 import type { FiInvoiceKind, FiInvoiceRow, FiInvoiceStatus, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { resolveConsultationQuoteInvoiceSource } from "@/src/lib/revenueOs/consultationInvoiceAmountResolve";
+import { syncFinancialOsAfterInvoiceSettlement } from "@/src/lib/financialOs/financialOsPaymentSync.server";
 
 function assertUuid(id: string, label: string): string {
   const v = id?.trim();
@@ -683,6 +684,12 @@ export async function markInvoiceManuallyPaid(args: {
     /* CRM row optional when anchors missing */
   }
 
+  try {
+    await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
+  } catch {
+    /* FinancialOS best-effort */
+  }
+
   return updated;
 }
 
@@ -745,6 +752,11 @@ export async function recordGatewayPaymentSuccess(args: {
     if (existingRows && existingRows.length > 0) {
       const current = await loadInvoiceForTenant(tid, iid);
       if (!current) throw new Error("Invoice not found.");
+      try {
+        await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+      } catch {
+        /* FinancialOS best-effort */
+      }
       return current;
     }
   }
@@ -777,6 +789,11 @@ export async function recordGatewayPaymentSuccess(args: {
     ) {
       const current = await loadInvoiceForTenant(tid, iid);
       if (!current) throw new Error("Invoice not found.");
+      try {
+        await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+      } catch {
+        /* FinancialOS best-effort */
+      }
       return current;
     }
     throw new Error(pe.message);
@@ -812,6 +829,12 @@ export async function recordGatewayPaymentSuccess(args: {
     /* optional */
   }
 
+  try {
+    await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
+  } catch {
+    /* FinancialOS best-effort */
+  }
+
   return updated;
 }
 
@@ -839,6 +862,7 @@ export async function recordGatewayPaymentFailure(args: {
       if (!le && row) {
         const prev = (row as { metadata?: Record<string, unknown> }).metadata ?? {};
         const failAt = new Date().toISOString();
+        const prevEsc = Number(prev.stripe_failure_escalation_count ?? 0) || 0;
         await supabase
           .from("fi_payment_requests")
           .update({
@@ -846,6 +870,7 @@ export async function recordGatewayPaymentFailure(args: {
               ...prev,
               stripe_checkout_failed_at: failAt,
               stripe_failure_message: args.message,
+              stripe_failure_escalation_count: prevEsc + 1,
             },
             updated_at: failAt,
           })

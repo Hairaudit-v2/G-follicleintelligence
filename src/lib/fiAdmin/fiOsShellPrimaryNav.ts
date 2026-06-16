@@ -270,6 +270,22 @@ export function resolveFiOsPrimarySidebarItems(
       hint: !showFiPaymentsInboxNav ? "RevenueOS payments are disabled (FI_PAYMENTS_ENABLED)." : undefined,
     },
     {
+      id: "financial-os",
+      featureKey: "settings",
+      label: "FinancialOS",
+      shortLabel: "Fin",
+      href: hrefFor(b, "financial/dashboard"),
+      disabled: false,
+      subItems: [
+        { id: "financial-dashboard", featureKey: "settings", label: "Financial dashboard", href: hrefFor(b, "financial/dashboard") },
+        { id: "financial-invoices", featureKey: "settings", label: "Invoices", href: hrefFor(b, "financial/invoices") },
+        { id: "financial-payments", featureKey: "settings", label: "Payments", href: hrefFor(b, "financial/payments") },
+        { id: "financial-payment-requests", featureKey: "settings", label: "Payment requests", href: hrefFor(b, "financial/payment-requests") },
+        { id: "financial-installments", featureKey: "settings", label: "Installments", href: hrefFor(b, "financial/installments") },
+        { id: "financial-deposit-rules", featureKey: "settings", label: "Deposit rules", href: hrefFor(b, "financial/deposit-rules") },
+      ],
+    },
+    {
       id: "analytics",
       featureKey: "analytics",
       label: "Analytics",
@@ -355,6 +371,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
     if (firstEarly === "payments") return "payments-inbox";
+    if (firstEarly === "financial") return "financial-os";
     if (firstEarly === "staff") return "staff";
   }
 
@@ -380,6 +397,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     const rest = npRaw.slice(nb.length).replace(/^\//, "");
     const first = rest.split("/")[0] ?? "";
     if (first === "payments") return "payments-inbox";
+    if (first === "financial") return "financial-os";
     if (first === "system-status") return "calendar";
     if (first === "settings") return "settings";
   }
