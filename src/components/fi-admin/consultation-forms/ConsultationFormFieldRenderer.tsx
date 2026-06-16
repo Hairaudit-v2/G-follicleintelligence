@@ -13,6 +13,7 @@ import {
   FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+  SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormField, ConsultationFormPersistenceContext } from "@/src/lib/consultationForms/consultationFormTypes";
 
@@ -63,7 +64,10 @@ export function ConsultationFormFieldRenderer({
   const followUpAiNoteUx =
     slug === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG && sec === "clinical_summary_next_action";
 
-  const aiGeneratedClinicalNoteUx = hairTransplantHandoffUx || followUpAiNoteUx;
+  const scalpPathologyAiNoteUx =
+    slug === SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG && sec === "clinical_summary_handoff";
+
+  const aiGeneratedClinicalNoteUx = hairTransplantHandoffUx || followUpAiNoteUx || scalpPathologyAiNoteUx;
 
   if (hairTransplantHandoffUx && field.id === "clinician_voice_note") {
     return null;

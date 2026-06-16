@@ -97,6 +97,16 @@ export type ConsultationCompletionSummary = {
     /** Reserved for future Twin / HairAudit / HLI / AnalyticsOS orchestration hooks. */
     integrationPlaceholderLine: string;
   };
+  /** Pathway 6 (scalp-pathology-consultation) — inflammatory / scarring / infectious scalp workup snapshot. */
+  scalpPathologyCompletionSnapshot?: {
+    symptomsLine: string;
+    findingsLine: string;
+    scarringAutoimmuneRiskLine: string;
+    investigationsLine: string;
+    treatmentPlanLine: string;
+    followUpUrgencyLabel: string;
+    urgencyContextLine: string;
+  };
 };
 
 export type ConsultationCompletionInput = {

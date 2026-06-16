@@ -4,6 +4,7 @@ import {
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+  SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormInstanceWithTemplate } from "@/src/lib/consultationForms/consultationFormTypes";
 import {
@@ -71,6 +72,26 @@ const REPAIR_SIGNAL =
 const FOLLOW_UP_SIGNAL =
   /\b(review|progress\s+review|follow\s*-?\s*up|post\s+surgery\s+review|exosome\s+review|prp\s+review|treatment\s+review|annual\s+review|check\s+progress)\b/i;
 
+/** Biopsy, cicatricial patterns, and high-specificity infectious / autoimmune scalp triggers. */
+export const SCALP_PATHOLOGY_STRONG_NOTE_SIGNAL =
+  /\b(scalp\s+biopsy|skin\s+biopsy|\bbiopsy\b|lichen\s+planopilaris|\blpp\b|discoid\s+lupus|\bcicatricial\b|scarring\s+alopecia|folliculitis\s+decalvans|\bdecalvans\b|tinea\s+capitis|\bkerion\b|cellulitis\s+of\s+scalp|histopath|pathology\s+lab)\b/i;
+
+/** Inflammatory scalp symptoms and common inflammatory diagnoses (used when visit is not clearly a scheduled review). */
+export const SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL =
+  /\b(itchy\s+scalp|itching|pruritus|pruritic|scale|scaling|flaking|dandruff|erythema|pustules|crusting|psoriasis|dermatitis|seborrh|seborrhe|scalp\s+infection|fungal\s+scalp|alopecia\s+areata|\blupus\b|lichen\s+simplex)\b/i;
+
+/**
+ * Lightweight heuristic for pathway 6 — strong signals always qualify; weak signals qualify unless
+ * the note reads like a routine follow-up / review visit.
+ */
+export function notesSuggestScalpPathologyPathway(userHay: string): boolean {
+  const hay = userHay.trim().toLowerCase();
+  if (!hay) return false;
+  if (SCALP_PATHOLOGY_STRONG_NOTE_SIGNAL.test(hay)) return true;
+  if (FOLLOW_UP_SIGNAL.test(hay)) return false;
+  return SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL.test(hay);
+}
+
 /**
  * Female-context hair loss signals (conservative overlap with surgery terms → neutral elsewhere).
  */
@@ -122,6 +143,10 @@ export function recommendConsultationPathwayKey(row: ConsultationRow): Consultat
     SURGERY_SIGNAL.test(userHay) || (TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct);
   if (repairSignal && surgicalContextForRepair && !ambiguousText) {
     return "repair";
+  }
+
+  if (notesSuggestScalpPathologyPathway(userHay) && !ambiguousText) {
+    return "scalp_pathology";
   }
 
   if (FOLLOW_UP_SIGNAL.test(userHay) && !ambiguousText) {
@@ -190,6 +215,9 @@ function recommendedHintFor(pathKey: ConsultationPathwayLauncherPathKey | null):
   if (pathKey === "follow_up_review") {
     return "Recommended: Follow-up / Review - notes suggest interval review, progress check, PRP/exosome/treatment review, post-surgery review, or annual review.";
   }
+  if (pathKey === "scalp_pathology") {
+    return "Recommended: Scalp Disorder / Pathology — notes suggest inflammatory scalp disease, scarring alopecia workup, biopsy-pathology planning, or infectious scalp symptoms.";
+  }
   return null;
 }
 
@@ -223,12 +251,17 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     input.instances,
     FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG
   );
+  const scalpPathologyInst = pickLatestInRoomInstanceForTemplateSlug(
+    input.instances,
+    SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG
+  );
 
   const htProgress = progressForInstance(htInst);
   const hliProgress = progressForInstance(hliInst);
   const femaleProgress = progressForInstance(femaleInst);
   const repairProgress = progressForInstance(repairInst);
   const followUpProgress = progressForInstance(followUpInst);
+  const scalpPathologyProgress = progressForInstance(scalpPathologyInst);
 
   const recommendedPathKey = recommendConsultationPathwayKey(input.row);
   const recommendedHint = recommendedHintFor(recommendedPathKey);
@@ -301,14 +334,16 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     {
       pathKey: "scalp_pathology",
       title: "Scalp Disorder / Pathology",
-      purpose: "Inflammatory scalp disease, scarring alopecia, or biopsy-directed pathways.",
-      whenToUse: "Scalp symptoms beyond pattern loss, suspected scarring alopecia, or pathology-led workup.",
-      availability: "soon",
-      href: null,
-      templateSlug: null,
-      progress: "not_started",
-      instanceId: null,
-      recommended: false,
+      purpose:
+        "Inflammatory, scarring, autoimmune, infectious, and unexplained scalp presentations — HLI + pathology + Patient Twin alignment (no quote, graft, donor, or surgery planning fields).",
+      whenToUse:
+        "Itching, scaling, erythema, pustules, suspected scarring alopecia, alopecia areata, discoid lupus, psoriasis, dermatitis, infection, or biopsy-led workup.",
+      availability: "active",
+      href: `${base}/forms/pathology`,
+      templateSlug: SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
+      progress: scalpPathologyProgress,
+      instanceId: scalpPathologyInst?.id ?? null,
+      recommended: recommendedPathKey === "scalp_pathology",
     },
   ];
 

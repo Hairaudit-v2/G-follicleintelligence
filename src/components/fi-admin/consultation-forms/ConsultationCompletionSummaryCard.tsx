@@ -6,6 +6,7 @@ import {
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+  SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import { labelDisplayForBodyAreaMap } from "@/src/lib/consultationForms/bodyAreaMapModel";
 import { cn } from "@/lib/utils";
@@ -98,6 +99,80 @@ function FollowUpReviewCompletionBrief({
 
           <SectionBlock title="Integration (placeholder)">
             <p className="text-xs text-slate-600">{snap?.integrationPlaceholderLine?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Outcome (rules)">
+            <p className="font-medium">{fmt(summary.outcomeType)}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Clinical narrative">
+            <p className="whitespace-pre-wrap">{summary.recommendedProcedure.trim() || "—"}</p>
+          </SectionBlock>
+        </div>
+      </FiCard>
+    </div>
+  );
+}
+
+function ScalpPathologyCompletionBrief({
+  summary,
+  isPreview,
+}: {
+  summary: ConsultationCompletionSummary;
+  isPreview?: boolean;
+}) {
+  const snap = summary.scalpPathologyCompletionSnapshot;
+
+  return (
+    <div className="space-y-4">
+      {isPreview ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950">
+          Review mode — summary reflects current answers. Complete consultation to persist to the chart and lock the form.
+        </p>
+      ) : null}
+      <FiCard className="space-y-5 p-4 sm:p-5">
+        <header>
+          <h3 className="text-base font-semibold text-slate-900">Scalp disorder / pathology snapshot</h3>
+          <p className={cn("mt-1 text-xs", fiOsLightFormSurfaceClassNames.meta)}>
+            {summary.completedAt ? new Date(summary.completedAt).toLocaleString() : "—"}
+          </p>
+        </header>
+
+        <div className="space-y-5">
+          <SectionBlock title="Symptoms">
+            <p>{snap?.symptomsLine?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Scalp findings">
+            <p>{snap?.findingsLine?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Scarring / autoimmune risk">
+            <p>{snap?.scarringAutoimmuneRiskLine?.trim() || "—"}</p>
+          </SectionBlock>
+
+          <SectionBlock title="Investigations recommended">
+            <p>{snap?.investigationsLine?.trim() || "—"}</p>
+            {summary.pathologyRecommended ? (
+              <p className="mt-2 text-xs text-slate-600">
+                <span className="font-semibold">Pathology / labs context: </span>
+                {summary.pathologyReason.trim() || "—"}
+              </p>
+            ) : null}
+          </SectionBlock>
+
+          <SectionBlock title="Treatment plan (draft)">
+            <p>{snap?.treatmentPlanLine?.trim() || "—"}</p>
+            {summary.recommendedTreatments.length ? (
+              <div className="mt-2">
+                <ListOrDash items={summary.recommendedTreatments} />
+              </div>
+            ) : null}
+          </SectionBlock>
+
+          <SectionBlock title="Urgency">
+            <p className="font-medium">{snap?.followUpUrgencyLabel?.trim() || "—"}</p>
+            <p className="mt-1 text-xs text-slate-600">{snap?.urgencyContextLine?.trim() || "—"}</p>
           </SectionBlock>
 
           <SectionBlock title="Outcome (rules)">
@@ -292,6 +367,10 @@ export function ConsultationCompletionSummaryCard({
 }) {
   if (summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG) {
     return <FollowUpReviewCompletionBrief summary={summary} isPreview={isPreview} />;
+  }
+
+  if (summary.templateSlug.trim() === SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG) {
+    return <ScalpPathologyCompletionBrief summary={summary} isPreview={isPreview} />;
   }
 
   if (summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG) {

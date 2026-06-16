@@ -4,15 +4,23 @@ import assert from "node:assert/strict";
 import {
   buildConsultationPathwayLauncherViewModel,
   consultationPathwayCtaLabel,
+  notesSuggestScalpPathologyPathway,
   pickLatestInRoomInstanceForTemplateSlug,
   recommendConsultationPathwayKey,
+  SCALP_PATHOLOGY_STRONG_NOTE_SIGNAL,
+  SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL,
 } from "./consultationPathwayLauncherModel";
+import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
+import { buildConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/buildConsultationCompletionSummary";
+import { buildScalpPathologyCompletionSummary } from "@/src/lib/consultationForms/completion/scalpPathologyCompletionRules";
+import { scalpPathologyConsultationSchemaV1 } from "@/src/lib/consultationForms/templates/scalpPathologyConsultationTemplate";
 import {
   FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
   FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+  SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormInstanceWithTemplate } from "@/src/lib/consultationForms/consultationFormTypes";
 import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes";
@@ -511,4 +519,159 @@ test("buildConsultationPathwayLauncherViewModel follow-up card shows Review when
   assert.ok(card);
   assert.equal(card.progress, "submitted");
   assert.equal(consultationPathwayCtaLabel(card.progress), "Review");
+});
+
+test("buildConsultationPathwayLauncherViewModel scalp pathology card is active with href /forms/pathology", () => {
+  const sp: ConsultationFormInstanceWithTemplate = {
+    id: "sp-1",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "v-sp",
+    channel: "in_room",
+    status: "draft",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: null,
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-02T00:00:00Z",
+    template: {
+      id: "tpl-sp",
+      slug: SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
+      name: "Scalp pathology",
+      treatment_program: "hair_longevity_medical",
+    },
+    template_version: { id: "v-sp", version: 1, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "medical_hair_loss", live_notes: "Scalp psoriasis with heavy scaling" }),
+    instances: [sp],
+  });
+
+  const card = vm.cards.find((c) => c.pathKey === "scalp_pathology");
+  assert.ok(card);
+  assert.equal(card.availability, "active");
+  assert.equal(card.templateSlug, SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG);
+  assert.ok(card.href?.endsWith("/forms/pathology"));
+  assert.equal(card.progress, "in_progress");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Continue");
+  assert.equal(card.recommended, true);
+});
+
+test("buildConsultationPathwayLauncherViewModel scalp pathology card shows Start when no instance", () => {
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "medical_hair_loss", live_notes: "itchy inflamed scalp dermatitis" }),
+    instances: [],
+  });
+  const card = vm.cards.find((c) => c.pathKey === "scalp_pathology");
+  assert.ok(card);
+  assert.equal(card.progress, "not_started");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Start");
+  assert.equal(card.recommended, true);
+});
+
+test("pathway 6 scalp template has five sections and no quote/graft/donor fields", () => {
+  assert.equal(scalpPathologyConsultationSchemaV1.sections.length, 5);
+  const ids = scalpPathologyConsultationSchemaV1.sections.flatMap((s) => s.fields.map((f) => f.id));
+  assert.ok(!ids.join(" ").includes("quote"));
+  assert.ok(!ids.some((id) => id.includes("graft")));
+  assert.ok(!ids.some((id) => id.includes("donor")));
+});
+
+test("pathway 6 pathology_reason field is gated on pathology_recommended_explicit", () => {
+  const sec = scalpPathologyConsultationSchemaV1.sections.find((s) => s.id === "investigation_treatment_plan");
+  const reason = sec?.fields.find((f) => f.id === "pathology_reason");
+  assert.ok(reason?.showWhen);
+  assert.equal(evaluateConsultationFormCondition(reason!.showWhen, { pathology_recommended_explicit: false }), false);
+  assert.equal(evaluateConsultationFormCondition(reason!.showWhen, { pathology_recommended_explicit: true }), true);
+});
+
+test("pathway 6 completion flags pathology when biopsy recommended", () => {
+  const s = buildScalpPathologyCompletionSummary({
+    consultationId: "c-sp",
+    formInstanceId: "f-sp",
+    templateSlug: SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
+    values: {
+      scalp_symptom_type: "psoriasis_scalp",
+      symptom_duration_band: "3_12m",
+      itching_present: true,
+      pain_or_tenderness_present: false,
+      scaling_or_flaking_present: true,
+      patchy_loss_present: false,
+      erythema_present: true,
+      pustules_or_crusting_present: false,
+      scarring_suspicion: false,
+      autoimmune_flags: ["none_documented"],
+      infection_risk_flags: ["none_documented"],
+      biopsy_recommended: true,
+      blood_analysis_recommended: false,
+      pathology_recommended_explicit: false,
+      urgent_dermatology_referral: false,
+      recommended_treatments: ["topical_corticosteroid"],
+      structured_clinical_note: { mode: "clinical_note", note: "Biopsy discussed." },
+      follow_up_required_explicit: false,
+      follow_up_urgency: "routine",
+    },
+    completedAt: "2026-06-16T12:00:00.000Z",
+  });
+  assert.equal(s.pathologyRecommended, true);
+  assert.match(s.pathologyReason, /biopsy/i);
+});
+
+test("pathway 6 buildConsultationCompletionSummary dispatch returns snapshot", () => {
+  const s = buildConsultationCompletionSummary({
+    consultationId: "c-sp2",
+    formInstanceId: "f-sp2",
+    templateSlug: SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
+    values: {
+      scalp_symptom_type: "inflammatory_dermatitis",
+      symptom_duration_band: "lt3m",
+      itching_present: true,
+      pain_or_tenderness_present: false,
+      scaling_or_flaking_present: true,
+      patchy_loss_present: false,
+      erythema_present: true,
+      pustules_or_crusting_present: false,
+      scarring_suspicion: true,
+      autoimmune_flags: ["none_documented"],
+      infection_risk_flags: ["none_documented"],
+      biopsy_recommended: false,
+      blood_analysis_recommended: false,
+      pathology_recommended_explicit: true,
+      pathology_reason: "Rule out cicatricial change.",
+      urgent_dermatology_referral: false,
+      recommended_treatments: [],
+      structured_clinical_note: { mode: "clinical_note", note: "Scarring suspicion." },
+      follow_up_required_explicit: false,
+      follow_up_urgency: "priority",
+    },
+    completedAt: "2026-06-16T12:00:00.000Z",
+  });
+  assert.ok(s.scalpPathologyCompletionSnapshot?.investigationsLine);
+});
+
+test("pathway 6 heuristic signals cover itching, scaling, scarring alopecia, AA, lupus, psoriasis, dermatitis, infection, biopsy, pathology", () => {
+  assert.equal(SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL.test("itching and scaling on vertex"), true);
+  assert.equal(SCALP_PATHOLOGY_STRONG_NOTE_SIGNAL.test("scarring alopecia — biopsy"), true);
+  assert.equal(SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL.test("alopecia areata patches"), true);
+  assert.equal(SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL.test("discoid lupus rash"), true);
+  assert.equal(SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL.test("scalp psoriasis plaques"), true);
+  assert.equal(SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL.test("seborrhoeic dermatitis"), true);
+  assert.equal(SCALP_PATHOLOGY_WEAK_NOTE_SIGNAL.test("scalp infection concern"), true);
+  assert.equal(SCALP_PATHOLOGY_STRONG_NOTE_SIGNAL.test("scalp biopsy scheduled"), true);
+  assert.equal(SCALP_PATHOLOGY_STRONG_NOTE_SIGNAL.test("send to pathology lab"), true);
+});
+
+test("pathway 6 notesSuggestScalpPathologyPathway skips weak signals for follow-up review phrasing", () => {
+  assert.equal(notesSuggestScalpPathologyPathway("PRP review — check progress"), false);
+  assert.equal(notesSuggestScalpPathologyPathway("itchy scalp with heavy scaling"), true);
 });

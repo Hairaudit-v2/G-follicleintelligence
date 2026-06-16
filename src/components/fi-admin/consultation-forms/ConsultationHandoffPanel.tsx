@@ -22,6 +22,7 @@ import {
 import {
   FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+  SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import type {
   ConsultationHandoffInitialIds,
@@ -141,9 +142,12 @@ export function ConsultationHandoffPanel({
 
   const quoteHidden =
     summary.templateSlug.trim() === HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG ||
-    summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG;
+    summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG ||
+    summary.templateSlug.trim() === SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG;
 
-  const surgeryHandoffHidden = summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG;
+  const surgeryHandoffHidden =
+    summary.templateSlug.trim() === FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG ||
+    summary.templateSlug.trim() === SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG;
 
   const quoteRequirementsMet = Boolean(lid || kase);
   const followUpRequirementsMet = Boolean(lid);

@@ -12,3 +12,6 @@ export const HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG = "hair-transplan
 
 /** ConsultationOS v2 pathway 5 — follow-up / review (longitudinal intelligence; Patient Twin + HairAudit + HLI alignment). */
 export const FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG = "follow-up-review-consultation";
+
+/** ConsultationOS v2 pathway 6 — scalp disorder / pathology (inflammatory, scarring, infectious; HLI + pathology + Patient Twin; no surgical planning fields). */
+export const SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG = "scalp-pathology-consultation";

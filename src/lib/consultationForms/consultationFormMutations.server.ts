@@ -15,6 +15,7 @@ import {
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+  SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "./consultationFormConstants";
 import { loadConsultationFormInstance, mapConsultationFormInstanceRow } from "./consultationFormLoad.server";
 import type { ConsultationFormChannel, ConsultationFormInstanceWithTemplate } from "./consultationFormTypes";
@@ -26,6 +27,7 @@ import {
 import { femaleHairLossConsultationSchemaV1 } from "./templates/femaleHairLossConsultationTemplate";
 import { hairLossTreatmentConsultationSchemaV1 } from "./templates/hairLossTreatmentConsultationTemplate";
 import { followUpReviewConsultationSchemaV1 } from "./templates/followUpReviewConsultationTemplate";
+import { scalpPathologyConsultationSchemaV1 } from "./templates/scalpPathologyConsultationTemplate";
 import { hairTransplantRepairConsultationSchemaV1 } from "./templates/hairTransplantRepairConsultationTemplate";
 
 export type CreateConsultationFormInstanceInput = {
@@ -831,6 +833,154 @@ export async function ensureInRoomFollowUpReviewConsultationFormInstance(
   if (!tid || !cid) throw new Error("tenantId and consultationId are required.");
 
   const { templateVersionId } = await ensureGlobalFollowUpReviewConsultationTemplate(supabase);
+
+  const { data: existing, error: ee } = await supabase
+    .from("fi_consultation_form_instances")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("consultation_id", cid)
+    .eq("channel", "in_room")
+    .eq("template_version_id", templateVersionId)
+    .maybeSingle();
+  if (ee) throw new Error(ee.message);
+  if (existing?.id) {
+    const loaded = await loadConsultationFormInstance(tid, String((existing as { id: string }).id));
+    if (!loaded) throw new Error("Could not load existing form instance.");
+    return loaded;
+  }
+
+  try {
+    return await createConsultationFormInstance(
+      { tenantId: tid, consultationId: cid, templateVersionId, channel: "in_room" },
+      supabase
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("duplicate key") && !msg.includes("unique constraint")) throw e;
+    const { data: again, error: e2 } = await supabase
+      .from("fi_consultation_form_instances")
+      .select("id")
+      .eq("tenant_id", tid)
+      .eq("consultation_id", cid)
+      .eq("channel", "in_room")
+      .eq("template_version_id", templateVersionId)
+      .maybeSingle();
+    if (e2) throw new Error(e2.message);
+    if (!again?.id) throw e;
+    const loaded = await loadConsultationFormInstance(tid, String((again as { id: string }).id));
+    if (!loaded) throw new Error("Could not load form instance after duplicate.");
+    return loaded;
+  }
+}
+
+/**
+ * Ensures the global Scalp Disorder / Pathology consultation template exists with a **published** version.
+ */
+export async function ensureGlobalScalpPathologyConsultationTemplate(
+  client?: SupabaseClient
+): Promise<{ templateVersionId: string }> {
+  const supabase = client ?? supabaseAdmin();
+  const slug = SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG;
+
+  const { data: existingTpl, error: te1 } = await supabase
+    .from("fi_consultation_form_templates")
+    .select("id")
+    .is("tenant_id", null)
+    .eq("slug", slug)
+    .maybeSingle();
+  if (te1) throw new Error(te1.message);
+
+  let templateId: string;
+  if (existingTpl?.id) {
+    templateId = String((existingTpl as { id: string }).id);
+  } else {
+    const { data: insTpl, error: te2 } = await supabase
+      .from("fi_consultation_form_templates")
+      .insert({
+        tenant_id: null,
+        slug,
+        name: "Scalp Disorder / Pathology Consultation",
+        treatment_program: "hair_longevity_medical",
+        description:
+          "ConsultationOS pathway 6 — inflammatory, scarring, autoimmune, and infectious scalp presentations; HLI + pathology + Patient Twin alignment (no quote, graft, donor, or surgery planning fields).",
+        is_active: true,
+        metadata: { consultation_os_pathway: "scalp_pathology_v1" },
+      })
+      .select("id")
+      .single();
+    if (te2) {
+      const { data: again, error: te3 } = await supabase
+        .from("fi_consultation_form_templates")
+        .select("id")
+        .is("tenant_id", null)
+        .eq("slug", slug)
+        .maybeSingle();
+      if (te3) throw new Error(te3.message);
+      if (!again?.id) throw new Error(te2.message);
+      templateId = String((again as { id: string }).id);
+    } else {
+      templateId = String((insTpl as { id: string }).id);
+    }
+  }
+
+  const { data: published, error: pe } = await supabase
+    .from("fi_consultation_form_template_versions")
+    .select("id, version")
+    .eq("template_id", templateId)
+    .eq("status", "published")
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (pe) throw new Error(pe.message);
+  if (published?.id) {
+    return { templateVersionId: String((published as { id: string }).id) };
+  }
+
+  const { data: insVer, error: ve } = await supabase
+    .from("fi_consultation_form_template_versions")
+    .insert({
+      template_id: templateId,
+      version: 1,
+      status: "published",
+      schema: scalpPathologyConsultationSchemaV1 as unknown as Record<string, unknown>,
+      ui_layout: {},
+      published_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (!ve && insVer?.id) {
+    return { templateVersionId: String((insVer as { id: string }).id) };
+  }
+  const msg = ve?.message ?? "";
+  if (!msg.includes("duplicate") && !msg.includes("unique")) {
+    throw new Error(msg || "Could not insert Scalp Pathology Consultation template version.");
+  }
+  const { data: recovered, error: re } = await supabase
+    .from("fi_consultation_form_template_versions")
+    .select("id")
+    .eq("template_id", templateId)
+    .eq("version", 1)
+    .maybeSingle();
+  if (re) throw new Error(re.message);
+  if (!recovered?.id) throw new Error(ve?.message ?? "Could not resolve Scalp Pathology template version.");
+  return { templateVersionId: String((recovered as { id: string }).id) };
+}
+
+/**
+ * Loads or creates the in-room Scalp Disorder / Pathology consultation instance for this consultation.
+ */
+export async function ensureInRoomScalpPathologyConsultationFormInstance(
+  tenantId: string,
+  consultationId: string,
+  client?: SupabaseClient
+): Promise<ConsultationFormInstanceWithTemplate> {
+  const supabase = client ?? supabaseAdmin();
+  const tid = tenantId.trim();
+  const cid = consultationId.trim();
+  if (!tid || !cid) throw new Error("tenantId and consultationId are required.");
+
+  const { templateVersionId } = await ensureGlobalScalpPathologyConsultationTemplate(supabase);
 
   const { data: existing, error: ee } = await supabase
     .from("fi_consultation_form_instances")
