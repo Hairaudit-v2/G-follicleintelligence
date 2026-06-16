@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 
 import {
   buildConsultationPathwayLauncherViewModel,
+  consultationPathwayCtaLabel,
   pickLatestInRoomInstanceForTemplateSlug,
   recommendConsultationPathwayKey,
 } from "./consultationPathwayLauncherModel";
 import {
+  FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
@@ -232,4 +234,112 @@ test("buildConsultationPathwayLauncherViewModel HT card uses template version 3 
   assert.ok(ht);
   assert.equal(ht.progress, "in_progress");
   assert.equal(ht.instanceId, "ht-v3");
+});
+
+test("recommendConsultationPathwayKey suggests female pathway on postpartum / Ludwig signals without surgery text", () => {
+  assert.equal(
+    recommendConsultationPathwayKey(baseRow({ consultation_type: "medical_hair_loss", live_notes: "Postpartum shedding assessment" })),
+    "female_hair_loss"
+  );
+  assert.equal(
+    recommendConsultationPathwayKey(baseRow({ consultation_type: "scalp_hair_transplant", live_notes: "Ludwig II pattern — medical management first" })),
+    "female_hair_loss"
+  );
+});
+
+test("buildConsultationPathwayLauncherViewModel female card is active with Start/Continue/Review from instance", () => {
+  const female: ConsultationFormInstanceWithTemplate = {
+    id: "fem-1",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "v-fem",
+    channel: "in_room",
+    status: "draft",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: null,
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-02T00:00:00Z",
+    template: {
+      id: "tpl-fem",
+      slug: FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+      name: "Female",
+      treatment_program: "hair_longevity_medical",
+    },
+    template_version: { id: "v-fem", version: 1, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "medical_hair_loss" }),
+    instances: [female],
+  });
+
+  const card = vm.cards.find((c) => c.pathKey === "female_hair_loss");
+  assert.ok(card);
+  assert.equal(card.availability, "active");
+  assert.equal(card.progress, "in_progress");
+  assert.equal(card.instanceId, "fem-1");
+  assert.ok(card.href?.endsWith("/forms/female-hair-loss"));
+  assert.equal(card.templateSlug, FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG);
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Continue");
+});
+
+test("buildConsultationPathwayLauncherViewModel female card shows Start when no instance exists", () => {
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "medical_hair_loss" }),
+    instances: [],
+  });
+  const card = vm.cards.find((c) => c.pathKey === "female_hair_loss");
+  assert.ok(card);
+  assert.equal(card.progress, "not_started");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Start");
+});
+
+test("buildConsultationPathwayLauncherViewModel female card shows Review when instance submitted", () => {
+  const female: ConsultationFormInstanceWithTemplate = {
+    id: "fem-2",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "v-fem",
+    channel: "in_room",
+    status: "submitted",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: "2020-01-02T00:00:00Z",
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-02T00:00:00Z",
+    template: {
+      id: "tpl-fem",
+      slug: FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+      name: "Female",
+      treatment_program: "hair_longevity_medical",
+    },
+    template_version: { id: "v-fem", version: 1, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "medical_hair_loss" }),
+    instances: [female],
+  });
+
+  const card = vm.cards.find((c) => c.pathKey === "female_hair_loss");
+  assert.ok(card);
+  assert.equal(card.progress, "submitted");
+  assert.equal(consultationPathwayCtaLabel(card.progress), "Review");
 });

@@ -1,4 +1,5 @@
 import {
+  FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
@@ -56,6 +57,19 @@ const TREATMENT_FORWARD_CONSULTATION_TYPES: readonly ConsultationTypeId[] = [
 const SURGERY_SIGNAL = /\b(fue|fut|transplant|transplantation|surgery|surgical|hairline|grafts?|strip\s+harvest)\b/i;
 
 /**
+ * Female-context hair loss signals (conservative overlap with surgery terms → neutral elsewhere).
+ */
+const FEMALE_SIGNAL =
+  /\b(female\s+hair\s+loss|women'?s\s+hair\s+loss|womens\s+hair\s+loss|female\s+pattern|diffuse\s+female|female\s+thinning|postpartum|menopause|perimenopause|hormone|hormonal|\bpcos\b|polycystic|part\s+widening|\bludwig\b|\bsinclair\b|traction(\s+alopecia)?)\b/i;
+
+function buildFemaleSignalHaystack(row: ConsultationRow): string {
+  const typeLabel = getConsultationTypeDefinition(row.consultation_type as ConsultationTypeId).label;
+  return [typeLabel, row.live_notes ?? "", row.recommendation_notes ?? "", JSON.stringify(row.structured_data ?? {})]
+    .join("\n")
+    .toLowerCase();
+}
+
+/**
  * Non-surgical / medical management signals (kept conservative — overlaps with surgery text are resolved as neutral).
  */
 const TREATMENT_SIGNAL =
@@ -78,17 +92,21 @@ function buildConsultationSignalText(row: ConsultationRow): string {
 export function recommendConsultationPathwayKey(row: ConsultationRow): ConsultationPathwayLauncherPathKey | null {
   const ct = row.consultation_type as ConsultationTypeId;
   const userHay = buildUserSignalText(row);
+  const femaleHay = buildFemaleSignalHaystack(row);
+  const female = FEMALE_SIGNAL.test(femaleHay);
   const surg = SURGERY_SIGNAL.test(userHay);
   const treat = TREATMENT_SIGNAL.test(userHay);
   const ambiguousText = surg && treat;
 
+  if (ambiguousText) return null;
+  if (female && surg) return null;
+  if (female && !surg) return "female_hair_loss";
+
   if ((TRANSPLANT_CONSULTATION_TYPES as readonly string[]).includes(ct)) {
-    if (ambiguousText) return null;
     if (treat && !surg) return "hair_loss_hli";
     return "hair_transplant";
   }
   if ((TREATMENT_FORWARD_CONSULTATION_TYPES as readonly string[]).includes(ct)) {
-    if (ambiguousText) return null;
     if (surg && !treat) return "hair_transplant";
     return "hair_loss_hli";
   }
@@ -137,6 +155,9 @@ function recommendedHintFor(pathKey: ConsultationPathwayLauncherPathKey | null):
   if (pathKey === "hair_loss_hli") {
     return "Recommended: Hair Loss / HLI - this record reads like medical management, shedding, diffuse thinning, or investigation-led care.";
   }
+  if (pathKey === "female_hair_loss") {
+    return "Recommended: Female Hair Loss - this record mentions female-pattern context, hormones, postpartum, shedding, part widening, traction, or Ludwig / Sinclair grading.";
+  }
   return null;
 }
 
@@ -158,9 +179,14 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     input.instances,
     HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG
   );
+  const femaleInst = pickLatestInRoomInstanceForTemplateSlug(
+    input.instances,
+    FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG
+  );
 
   const htProgress = progressForInstance(htInst);
   const hliProgress = progressForInstance(hliInst);
+  const femaleProgress = progressForInstance(femaleInst);
 
   const recommendedPathKey = recommendConsultationPathwayKey(input.row);
   const recommendedHint = recommendedHintFor(recommendedPathKey);
@@ -193,14 +219,16 @@ export function buildConsultationPathwayLauncherViewModel(input: {
     {
       pathKey: "female_hair_loss",
       title: "Female Hair Loss Consultation",
-      purpose: "Dedicated female-pattern workflow with Ludwig-focused assessment (when available).",
-      whenToUse: "Female-pattern loss, hormonal context, or when a female-specific guided pathway is preferred.",
-      availability: "soon",
-      href: null,
-      templateSlug: null,
-      progress: "not_started",
-      instanceId: null,
-      recommended: false,
+      purpose:
+        "Female-context pattern assessment (Ludwig / Sinclair when indicated), hormonal and systemic screening, and HLI / Patient Twin routing — without surgical or graft planning fields.",
+      whenToUse:
+        "Female-pattern thinning, postpartum or hormonal shifts, shedding, part widening, traction concerns, or Ludwig / Sinclair–oriented visits.",
+      availability: "active",
+      href: `${base}/forms/female-hair-loss`,
+      templateSlug: FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+      progress: femaleProgress,
+      instanceId: femaleInst?.id ?? null,
+      recommended: recommendedPathKey === "female_hair_loss",
     },
     {
       pathKey: "repair",

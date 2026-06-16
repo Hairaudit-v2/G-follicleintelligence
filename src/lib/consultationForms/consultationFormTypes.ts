@@ -62,7 +62,14 @@ export type ConsultationFormOptionSetId =
   | "hli_nutrition_flags"
   | "hli_treatment_priority"
   | "hli_treatment_timeline"
-  | "hli_pathway_recommended";
+  | "hli_pathway_recommended"
+  | "female_hair_loss_pattern_type"
+  | "female_hormonal_flags"
+  | "postpartum_status"
+  | "ferritin_history_known"
+  | "thyroid_history_known"
+  | "female_priority_focus"
+  | "female_primary_objective";
 
 export type ConsultationFormOption = {
   value: string;

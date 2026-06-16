@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/consultationCompletionTypes";
 import {
+  FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
   HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
   HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
@@ -174,7 +175,8 @@ export function ConsultationCompletionSummaryCard({
             <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Primary concern</dt>
             <dd className={cn("mt-0.5 text-sm", fiOsLightFormSurfaceClassNames.body)}>{summary.primaryConcern.trim() || "—"}</dd>
           </div>
-          {summary.templateSlug === HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG ? (
+          {summary.templateSlug === HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG ||
+          summary.templateSlug === FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG ? (
             <>
               <div className="sm:col-span-2">
                 <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hair loss pattern</dt>
@@ -204,6 +206,47 @@ export function ConsultationCompletionSummaryCard({
                 <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">HLI / Patient Twin pathway</dt>
                 <dd className={cn("mt-0.5 text-sm font-medium text-violet-900", fiOsLightFormSurfaceClassNames.body)}>
                   {summary.hliPathwayRecommendedLabel?.trim() || "—"}
+                </dd>
+              </div>
+            </>
+          ) : null}
+          {summary.templateSlug === FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG && summary.femaleHairLossCompletionSnapshot ? (
+            <>
+              <div className="sm:col-span-2">
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Female pathway snapshot</dt>
+                <dd className={cn("mt-0.5 space-y-1 text-sm", fiOsLightFormSurfaceClassNames.body)}>
+                  <p>
+                    <span className="font-medium">Duration: </span>
+                    {summary.femaleHairLossCompletionSnapshot.durationLabel}
+                  </p>
+                  <p>
+                    <span className="font-medium">Shedding: </span>
+                    {summary.femaleHairLossCompletionSnapshot.sheddingLabel}
+                  </p>
+                  <p>
+                    <span className="font-medium">Ludwig / Sinclair: </span>
+                    {summary.femaleHairLossCompletionSnapshot.femaleScaleSummary}
+                  </p>
+                  <p>
+                    <span className="font-medium">Hormonal / systemic: </span>
+                    {summary.femaleHairLossCompletionSnapshot.hormonalSystemicSummary}
+                  </p>
+                  <p>
+                    <span className="font-medium">Ferritin history: </span>
+                    {summary.femaleHairLossCompletionSnapshot.ferritinLabel}
+                  </p>
+                  <p>
+                    <span className="font-medium">Thyroid history: </span>
+                    {summary.femaleHairLossCompletionSnapshot.thyroidLabel}
+                  </p>
+                  <p>
+                    <span className="font-medium">Blood / pathology: </span>
+                    {summary.femaleHairLossCompletionSnapshot.bloodPathologySummary}
+                  </p>
+                  <p>
+                    <span className="font-medium">Follow-up urgency: </span>
+                    {summary.femaleHairLossCompletionSnapshot.followUpUrgencyLabel}
+                  </p>
                 </dd>
               </div>
             </>

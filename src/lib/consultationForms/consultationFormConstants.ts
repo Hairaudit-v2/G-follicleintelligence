@@ -3,3 +3,6 @@ export const HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG = "hair-transplant-consu
 
 /** ConsultationOS v2 pathway 2 — non-surgical hair loss / Hair Longevity & Patient Twin intake. */
 export const HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG = "hair-loss-treatment-consultation";
+
+/** ConsultationOS v2 pathway 3 — female-pattern and context-led hair loss (non-surgical; HLI / Patient Twin alignment). */
+export const FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG = "female-hair-loss-consultation";

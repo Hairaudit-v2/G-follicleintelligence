@@ -99,9 +99,10 @@ export function ConsultationPathwayLauncher({ model }: { model: ConsultationPath
         >
           <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
             Direct links are unchanged - you can still open{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms</code> or{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/hair-loss-treatment</code>{" "}
-            from bookmarks or deep links.
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms</code>,{" "}
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/hair-loss-treatment</code>, or{" "}
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/female-hair-loss</code> from
+            bookmarks or deep links.
           </p>
           {model.recommendedHint?.trim() ? (
             <div

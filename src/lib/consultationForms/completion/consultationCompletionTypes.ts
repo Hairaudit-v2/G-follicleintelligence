@@ -61,6 +61,19 @@ export type ConsultationCompletionSummary = {
   treatmentPriorityLabel?: string;
   treatmentTimelineLabel?: string;
   hliPathwayRecommendedLabel?: string;
+  /** Pathway 3 (female-hair-loss-consultation) — structured snapshot for chart / twin handoff. */
+  femaleHairLossCompletionSnapshot?: {
+    patternLabel: string;
+    durationLabel: string;
+    sheddingLabel: string;
+    femaleScaleSummary: string;
+    hormonalSystemicSummary: string;
+    ferritinLabel: string;
+    thyroidLabel: string;
+    bloodPathologySummary: string;
+    treatmentPathwayLabel: string;
+    followUpUrgencyLabel: string;
+  };
 };
 
 export type ConsultationCompletionInput = {

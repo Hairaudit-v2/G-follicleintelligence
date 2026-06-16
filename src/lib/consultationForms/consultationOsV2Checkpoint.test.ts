@@ -6,9 +6,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { buildConsultationCompletionSummary } from "./completion/buildConsultationCompletionSummary";
 import { buildHairLossTreatmentCompletionSummary } from "./completion/hairLossTreatmentCompletionRules";
 import { buildHairTransplantCompletionSummary } from "./completion/hairTransplantCompletionRules";
-import { HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG, HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "./consultationFormConstants";
+import {
+  FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
+} from "./consultationFormConstants";
 import {
   hairTransplantConsultationSchema,
   hairTransplantConsultationSchemaV1,
@@ -80,5 +85,42 @@ describe("ConsultationOS v2 consolidation checkpoint", () => {
     });
     assert.equal(s.templateSlug, HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG);
     assert.ok(s.hliPathwayRecommendedLabel?.length);
+  });
+
+  it("Female hair loss completion dispatch returns pathway 3 snapshot fields", () => {
+    const s = buildConsultationCompletionSummary({
+      consultationId: "c-fem",
+      formInstanceId: "f-fem",
+      templateSlug: FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
+      values: {
+        priority_focus: "vertex_part_density",
+        duration_band: "1_3y",
+        primary_objective: "stabilise_shedding",
+        shedding_reported: "mild",
+        postpartum_status: "not_recently_postpartum",
+        previous_treatment_yes_no: "no",
+        female_pattern_type: "diffuse",
+        ludwig_classification: "l1",
+        sinclair_classification: "s2",
+        traction_pattern_present: false,
+        scalp_condition: "normal",
+        hair_calibre: "medium",
+        hormonal_flags: [],
+        medical_flags: [],
+        ferritin_history_known: "not_checked",
+        thyroid_history_known: "unknown",
+        pathology_recommended_explicit: false,
+        recommended_treatments: ["topical_minoxidil"],
+        blood_analysis_recommended: false,
+        hli_pathway_recommended: "hli_core",
+        treatment_priority: "patient_led_pacing",
+        treatment_timeline: "watchful",
+        structured_clinical_note: { mode: "clinical_note", note: "Diffuse FPHL." },
+        follow_up_urgency: "routine",
+      },
+      completedAt: "2026-06-16T12:00:00.000Z",
+    });
+    assert.equal(s.templateSlug, FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG);
+    assert.ok(s.femaleHairLossCompletionSnapshot?.patternLabel);
   });
 });
