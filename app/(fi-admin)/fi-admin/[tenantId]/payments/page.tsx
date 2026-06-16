@@ -83,6 +83,24 @@ export default async function TenantPaymentsInboxPage({
                 {r.case_id ? " · case-linked" : ""}
                 {r.patient_label ? ` · ${r.patient_label}` : ""}
               </p>
+              {r.crm_quote_id ? (
+                <p className="text-[11px] text-slate-600">
+                  Source quote:{" "}
+                  {r.case_id ? (
+                    <Link
+                      href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}
+                      className="font-semibold text-sky-800 underline"
+                      title={r.crm_quote_id}
+                    >
+                      {r.crm_quote_title ?? "CRM quote"}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-slate-800" title={r.crm_quote_id}>
+                      {r.crm_quote_title ?? r.crm_quote_id}
+                    </span>
+                  )}
+                </p>
+              ) : null}
               {r.due_date ? <p className="text-slate-500">Due {r.due_date}</p> : null}
               <p className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-sky-800">
                 {r.case_id ? (
@@ -214,6 +232,14 @@ export default async function TenantPaymentsInboxPage({
                     <p className="text-slate-600">
                       {p.status} · {formatMoney(p.total_cents, p.currency)}
                     </p>
+                    {p.crm_quote_id ? (
+                      <p className="mt-0.5 text-[11px] text-slate-600">
+                        Source quote:{" "}
+                        <span className="font-medium text-slate-800" title={p.crm_quote_id}>
+                          {p.crm_quote_title ?? p.crm_quote_id}
+                        </span>
+                      </p>
+                    ) : null}
                     {p.failure_at ? <p className="text-slate-500">Failed {p.failure_at.slice(0, 19)}</p> : null}
                   </li>
                 ))}
@@ -229,9 +255,28 @@ export default async function TenantPaymentsInboxPage({
             ) : (
               <ul className="divide-y divide-slate-100 rounded border border-slate-200 text-xs">
                 {snap.paymentsToday.map((p) => (
-                  <li key={p.id} className="flex justify-between gap-2 px-2 py-2">
-                    <span className="text-slate-600">{p.created_at.slice(0, 19)}</span>
-                    <span className="font-semibold">{formatMoney(p.total_cents, p.currency)}</span>
+                  <li key={p.id} className="space-y-1 px-2 py-2">
+                    <div className="flex justify-between gap-2">
+                      <span className="text-slate-600">{p.created_at.slice(0, 19)}</span>
+                      <span className="font-semibold">{formatMoney(p.total_cents, p.currency)}</span>
+                    </div>
+                    <p className="flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-sky-800">
+                      {p.case_id ? (
+                        <Link href={`/fi-admin/${tid}/cases/${encodeURIComponent(p.case_id)}`} className="underline">
+                          Case
+                        </Link>
+                      ) : null}
+                      {p.patient_id ? (
+                        <Link href={`/fi-admin/${tid}/patients/${encodeURIComponent(p.patient_id)}`} className="underline">
+                          Patient
+                        </Link>
+                      ) : null}
+                      {p.crm_quote_id ? (
+                        <span className="text-slate-700" title={p.crm_quote_id}>
+                          Quote: <span className="font-semibold">{p.crm_quote_title ?? "CRM quote"}</span>
+                        </span>
+                      ) : null}
+                    </p>
                   </li>
                 ))}
               </ul>
@@ -246,9 +291,28 @@ export default async function TenantPaymentsInboxPage({
             ) : (
               <ul className="divide-y divide-slate-100 rounded border border-slate-200 text-xs">
                 {snap.paymentsThisWeek.map((p) => (
-                  <li key={p.id} className="flex justify-between gap-2 px-2 py-2">
-                    <span className="text-slate-600">{p.created_at.slice(0, 19)}</span>
-                    <span className="font-semibold">{formatMoney(p.total_cents, p.currency)}</span>
+                  <li key={p.id} className="space-y-1 px-2 py-2">
+                    <div className="flex justify-between gap-2">
+                      <span className="text-slate-600">{p.created_at.slice(0, 19)}</span>
+                      <span className="font-semibold">{formatMoney(p.total_cents, p.currency)}</span>
+                    </div>
+                    <p className="flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-sky-800">
+                      {p.case_id ? (
+                        <Link href={`/fi-admin/${tid}/cases/${encodeURIComponent(p.case_id)}`} className="underline">
+                          Case
+                        </Link>
+                      ) : null}
+                      {p.patient_id ? (
+                        <Link href={`/fi-admin/${tid}/patients/${encodeURIComponent(p.patient_id)}`} className="underline">
+                          Patient
+                        </Link>
+                      ) : null}
+                      {p.crm_quote_id ? (
+                        <span className="text-slate-700" title={p.crm_quote_id}>
+                          Quote: <span className="font-semibold">{p.crm_quote_title ?? "CRM quote"}</span>
+                        </span>
+                      ) : null}
+                    </p>
                   </li>
                 ))}
               </ul>

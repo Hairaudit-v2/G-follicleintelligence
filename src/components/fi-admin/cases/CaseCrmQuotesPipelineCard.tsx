@@ -8,16 +8,12 @@ import { markCrmQuoteAcceptedAction } from "@/lib/actions/fi-crm-quote-actions";
 import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
+import { buildSurgeryAppointmentPrefillFromAcceptedQuote } from "@/src/lib/crm/acceptedCrmQuoteSurgeryPrefill";
+import { crmQuoteDisplayTitle } from "@/src/lib/crm/crmQuoteDisplayTitle";
 import type { CaseCrmQuoteRow } from "@/src/lib/crm/crmQuoteLoaders.server";
 
 function quoteTitle(q: CaseCrmQuoteRow): string {
-  const t = typeof q.metadata.quote_title === "string" ? q.metadata.quote_title.trim() : "";
-  if (t) return t;
-  if (Array.isArray(q.line_items_snapshot) && q.line_items_snapshot[0] && typeof q.line_items_snapshot[0] === "object") {
-    const li = q.line_items_snapshot[0] as { title?: string };
-    if (typeof li.title === "string" && li.title.trim()) return li.title.trim();
-  }
-  return "Quote";
+  return crmQuoteDisplayTitle(q.metadata, q.line_items_snapshot);
 }
 
 export function CaseCrmQuotesPipelineCard(props: {
@@ -71,6 +67,14 @@ export function CaseCrmQuotesPipelineCard(props: {
     (q: CaseCrmQuoteRow) => {
       if (!slide) return;
       const title = quoteTitle(q);
+      const { description, initialMetadata } = buildSurgeryAppointmentPrefillFromAcceptedQuote({
+        id: q.id,
+        consultation_id: q.consultation_id,
+        subtotal_amount: q.subtotal_amount,
+        total_amount: q.total_amount,
+        metadata: q.metadata,
+        line_items_snapshot: q.line_items_snapshot,
+      });
       slide.openCreateAppointment({
         caseId: cid,
         patientId: props.patientFoundationId,
@@ -79,6 +83,9 @@ export function CaseCrmQuotesPipelineCard(props: {
         clinicId: props.clinicId,
         bookingType: "surgery",
         title: title.length > 120 ? `${title.slice(0, 117)}…` : title,
+        description,
+        consultationId: q.consultation_id,
+        initialMetadata,
       });
     },
     [cid, props.clinicId, props.leadId, props.personId, props.patientFoundationId, slide]

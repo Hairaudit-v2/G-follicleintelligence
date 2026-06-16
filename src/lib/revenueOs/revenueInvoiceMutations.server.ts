@@ -12,7 +12,7 @@ import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenue
 import { computeNextInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceMath";
 import type { FiInvoiceKind, FiInvoiceRow, FiInvoiceStatus, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { resolveConsultationQuoteInvoiceAmountCents } from "@/src/lib/revenueOs/consultationInvoiceAmountResolve";
+import { resolveConsultationQuoteInvoiceSource } from "@/src/lib/revenueOs/consultationInvoiceAmountResolve";
 
 function assertUuid(id: string, label: string): string {
   const v = id?.trim();
@@ -76,16 +76,25 @@ export async function createInvoiceFromConsultationQuote(args: {
 
   const { data: quoteRows } = await supabase
     .from("fi_crm_quotes")
-    .select("line_items_snapshot, metadata, subtotal_amount, total_amount")
+    .select("id, line_items_snapshot, metadata, subtotal_amount, total_amount")
     .eq("tenant_id", tid)
     .eq("consultation_id", cid)
     .order("updated_at", { ascending: false })
     .limit(8);
 
+  const quoteSource = resolveConsultationQuoteInvoiceSource(consultation, quoteRows ?? []);
   const parsed =
     args.amountCentsOverride != null && Number.isFinite(args.amountCentsOverride)
       ? Math.max(0, Math.floor(args.amountCentsOverride))
-      : resolveConsultationQuoteInvoiceAmountCents(consultation, quoteRows ?? []);
+      : quoteSource.amountCents;
+  const crmQuoteId =
+    quoteSource.crmQuoteId?.trim() ||
+    (() => {
+      const raw = quoteRows?.[0]?.id;
+      return typeof raw === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(raw.trim())
+        ? raw.trim()
+        : null;
+    })();
   if (parsed == null || parsed <= 0) {
     throw new Error(
       "Could not derive a quote amount in cents — enter an amount on the action, set Price quoted on the consultation, or include an amount in the CRM quote draft."
@@ -124,6 +133,9 @@ export async function createInvoiceFromConsultationQuote(args: {
       source: "consultation_quote",
       consultation_id: consultation.id,
       quote_snapshot: consultation.quote_data,
+      ...(crmQuoteId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(crmQuoteId)
+        ? { crm_quote_id: crmQuoteId }
+        : {}),
     },
     created_by_fi_user_id: args.createdByFiUserId?.trim() || null,
   };
@@ -389,6 +401,13 @@ export async function createPaymentRequestForInvoice(args: {
   const staffNote = args.staffNote?.trim() || null;
   const baseMeta: Record<string, unknown> = {};
   if (staffNote) baseMeta.staff_note = staffNote;
+  const invCq = inv.metadata?.crm_quote_id;
+  if (typeof invCq === "string" && invCq.trim()) {
+    const cq = invCq.trim();
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cq)) {
+      baseMeta.crm_quote_id = cq;
+    }
+  }
 
   const { data: pr, error } = await supabase
     .from("fi_payment_requests")

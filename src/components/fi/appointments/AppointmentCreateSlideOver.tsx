@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createBookingAction } from "@/lib/actions/fi-booking-actions";
@@ -62,6 +63,8 @@ export function AppointmentCreateSlideOver({
   const [clinicId, setClinicId] = useState(prefill.clinicId ?? "");
   const [location, setLocation] = useState("");
 
+  const [notesBody, setNotesBody] = useState(prefill.description ?? "");
+
   const selectedStaff = useMemo(
     () => assignees.find((a) => a.id === assignee.trim()) ?? null,
     [assignees, assignee]
@@ -90,6 +93,7 @@ export function AppointmentCreateSlideOver({
     setEndLocal(toDatetimeLocalValue(prefill.endIso, tenantCalendarTimezone));
     setAssignee(prefill.assignedStaffId ?? prefill.assignedUserId ?? "");
     setClinicId(prefill.clinicId ?? "");
+    setNotesBody(prefill.description ?? "");
     setError(null);
   }, [prefill, tenantCalendarTimezone]);
 
@@ -163,6 +167,10 @@ export function AppointmentCreateSlideOver({
       patientId: prefill.patientId,
       caseId: prefill.caseId,
     };
+    const baseMeta =
+      prefill.initialMetadata && typeof prefill.initialMetadata === "object" && !Array.isArray(prefill.initialMetadata)
+        ? { ...prefill.initialMetadata }
+        : {};
     if (!anchors.leadId && !anchors.personId && !anchors.patientId && !anchors.caseId) {
       setError("Link at least one of lead, person, patient, or case before booking.");
       return;
@@ -181,8 +189,8 @@ export function AppointmentCreateSlideOver({
         clinicId: clinicId.trim() || null,
         location: location.trim() || null,
         timezone: null,
-        description: null,
-        metadata: {},
+        description: notesBody.trim() || null,
+        metadata: baseMeta,
       });
       if (!r.ok) {
         setError(r.error);
@@ -228,6 +236,27 @@ export function AppointmentCreateSlideOver({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Consultation — …"
+          />
+        </label>
+        {prefill.consultationId?.trim() ? (
+          <p className="text-[11px] text-gray-600">
+            Linked consultation{" "}
+            <Link
+              href={`/fi-admin/${tenantId}/consultations/${encodeURIComponent(prefill.consultationId.trim())}`}
+              className="font-semibold text-blue-700 underline"
+            >
+              open record
+            </Link>
+            .
+          </p>
+        ) : null}
+        <label className="block text-xs text-gray-600">
+          Clinical / scheduling notes
+          <textarea
+            className="mt-0.5 min-h-[120px] w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            value={notesBody}
+            onChange={(e) => setNotesBody(e.target.value)}
+            placeholder="Optional — pre-filled when scheduling from a quote."
           />
         </label>
         <label className="block text-xs text-gray-600">

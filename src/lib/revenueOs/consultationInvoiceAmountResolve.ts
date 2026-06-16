@@ -6,6 +6,7 @@ import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes"
 import { parseMoneyStringToCentsAud } from "@/src/lib/revenueOs/quoteAmountParse";
 
 export type FiCrmQuoteRowLike = {
+  id?: unknown;
   line_items_snapshot?: unknown;
   metadata?: unknown;
   subtotal_amount?: unknown;
@@ -38,6 +39,55 @@ function parseNumericMoney(v: unknown): number | null {
   return parseMoneyStringToCentsAud(s);
 }
 
+function quoteRowUuid(q: FiCrmQuoteRowLike): string | null {
+  const raw = q.id;
+  const s = typeof raw === "string" ? raw.trim() : "";
+  if (!s || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s)) return null;
+  return s;
+}
+
+export type ConsultationQuoteInvoiceSource = {
+  amountCents: number | null;
+  /** `fi_crm_quotes.id` when a CRM quote row informed the amount or is the primary draft for this consultation. */
+  crmQuoteId: string | null;
+};
+
+/**
+ * Best-effort amount + CRM quote linkage for RevenueOS consultation-quote invoices.
+ */
+export function resolveConsultationQuoteInvoiceSource(
+  consultation: Pick<ConsultationRow, "quote_data">,
+  crmQuotes?: FiCrmQuoteRowLike[] | null
+): ConsultationQuoteInvoiceSource {
+  const qd = consultation.quote_data && typeof consultation.quote_data === "object" ? consultation.quote_data : {};
+  const quotes = crmQuotes ?? [];
+  const primaryQuoteId = quotes.length ? quoteRowUuid(quotes[0]!) : null;
+
+  const fromPanel = parseMoneyStringToCentsAud(String((qd as { price_quoted?: unknown }).price_quoted ?? ""));
+  if (fromPanel != null && fromPanel > 0) {
+    return { amountCents: fromPanel, crmQuoteId: primaryQuoteId };
+  }
+
+  for (const q of quotes) {
+    const qid = quoteRowUuid(q);
+    const sub = parseNumericMoney(q.subtotal_amount);
+    if (sub != null && sub > 0) return { amountCents: sub, crmQuoteId: qid };
+    const tot = parseNumericMoney(q.total_amount);
+    if (tot != null && tot > 0) return { amountCents: tot, crmQuoteId: qid };
+    const meta = asRecord(q.metadata);
+    const metaHint = parseMoneyStringToCentsAud(String(meta.price_quoted_hint ?? ""));
+    if (metaHint != null && metaHint > 0) return { amountCents: metaHint, crmQuoteId: qid };
+    const metaPrice = parseMoneyStringToCentsAud(String(meta.price_quoted ?? ""));
+    if (metaPrice != null && metaPrice > 0) return { amountCents: metaPrice, crmQuoteId: qid };
+
+    const blob = textFromLineItems(q.line_items_snapshot);
+    const fromBlob = parseMoneyStringToCentsAud(blob);
+    if (fromBlob != null && fromBlob > 0) return { amountCents: fromBlob, crmQuoteId: qid };
+  }
+
+  return { amountCents: null, crmQuoteId: null };
+}
+
 /**
  * Best-effort: returns null when no reliable amount is found (caller must require override or user input).
  */
@@ -45,26 +95,5 @@ export function resolveConsultationQuoteInvoiceAmountCents(
   consultation: Pick<ConsultationRow, "quote_data">,
   crmQuotes?: FiCrmQuoteRowLike[] | null
 ): number | null {
-  const qd = consultation.quote_data && typeof consultation.quote_data === "object" ? consultation.quote_data : {};
-  const fromPanel = parseMoneyStringToCentsAud(String((qd as { price_quoted?: unknown }).price_quoted ?? ""));
-  if (fromPanel != null && fromPanel > 0) return fromPanel;
-
-  const quotes = crmQuotes ?? [];
-  for (const q of quotes) {
-    const sub = parseNumericMoney(q.subtotal_amount);
-    if (sub != null && sub > 0) return sub;
-    const tot = parseNumericMoney(q.total_amount);
-    if (tot != null && tot > 0) return tot;
-    const meta = asRecord(q.metadata);
-    const metaHint = parseMoneyStringToCentsAud(String(meta.price_quoted_hint ?? ""));
-    if (metaHint != null && metaHint > 0) return metaHint;
-    const metaPrice = parseMoneyStringToCentsAud(String(meta.price_quoted ?? ""));
-    if (metaPrice != null && metaPrice > 0) return metaPrice;
-
-    const blob = textFromLineItems(q.line_items_snapshot);
-    const fromBlob = parseMoneyStringToCentsAud(blob);
-    if (fromBlob != null && fromBlob > 0) return fromBlob;
-  }
-
-  return null;
+  return resolveConsultationQuoteInvoiceSource(consultation, crmQuotes).amountCents;
 }

@@ -99,6 +99,9 @@ const defaultCreatePrefillBase = (calendarTimezone: string): AppointmentCreatePr
     assignedUserId: null,
     assignedStaffId: null,
     clinicId: null,
+    description: null,
+    consultationId: null,
+    initialMetadata: null,
   };
 };
 
@@ -147,6 +150,9 @@ export function AppointmentSlideOverProvider({
         personId: prefill?.personId !== undefined ? prefill.personId : base.personId,
         patientId: prefill?.patientId !== undefined ? prefill.patientId : base.patientId,
         caseId: prefill?.caseId !== undefined ? prefill.caseId : base.caseId,
+        description: prefill?.description !== undefined ? prefill.description : base.description,
+        consultationId: prefill?.consultationId !== undefined ? prefill.consultationId : base.consultationId,
+        initialMetadata: prefill?.initialMetadata !== undefined ? prefill.initialMetadata : base.initialMetadata,
       });
     },
     [calendarTimezone]
