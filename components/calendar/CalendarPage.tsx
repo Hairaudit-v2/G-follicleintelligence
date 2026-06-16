@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Phone, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -133,6 +133,10 @@ export function CalendarPage({
   /** Any user who can mutate bookings server-side can open quick-create from slots. */
   const quickCreateEnabled = data.canMutateBookings;
   const isFiOsWorkspace = workspaceVariant === "fiOs";
+  const prefersReducedMotion = useReducedMotion();
+  /** FI OS + accessibility: skip view enter/exit motion so Month/Week/Day toggles swap immediately. */
+  const instantCalendarViewTransition =
+    isFiOsWorkspace || prefersReducedMotion === true;
 
   useEffect(() => {
     if (!highlightedBookingId) return;
@@ -323,13 +327,10 @@ export function CalendarPage({
       ) : null}
 
       <div className="flex min-h-0 flex-1 flex-col">
-        {/*
-          AnimatePresence `mode="wait"` forces the outgoing Month/Week view to fully unmount before the next mounts,
-          which made Month ↔ Week toggles feel "stuck" while exit animations ran. `sync` keeps navigation responsive.
-        */}
-        <AnimatePresence mode="sync">
-          {isMonthView ? (
-            <motion.div key="month" className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
+        {/* FI OS + prefers-reduced-motion: no AnimatePresence / motion wrappers — instant view swap. */}
+        {instantCalendarViewTransition ? (
+          isMonthView ? (
+            <div key="month" className="flex min-h-0 flex-1 flex-col">
               <MonthView
                 sidebar={sidebarForGrid}
                 rightPanel={rightPanelForGrid}
@@ -350,9 +351,9 @@ export function CalendarPage({
                 fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
                 onEmptyDayQuickCreate={quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined}
               />
-            </motion.div>
+            </div>
           ) : (
-            <motion.div key={data.query.view} className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
+            <div key={data.query.view} className="flex min-h-0 flex-1 flex-col">
               <CalendarGrid
                 sidebar={sidebarForGrid}
                 rightPanel={rightPanelForGrid}
@@ -394,9 +395,80 @@ export function CalendarPage({
                 calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                 fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          )
+        ) : (
+          <AnimatePresence mode="sync">
+              {isMonthView ? (
+                <motion.div key="month" className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
+                  <MonthView
+                    sidebar={sidebarForGrid}
+                    rightPanel={rightPanelForGrid}
+                    monthAnchor={data.query.dateAnchor}
+                    bookings={bookings}
+                    bookingDisplay={bookingDisplay}
+                    resourceColumns={data.resourceColumns}
+                    staffIdByUserId={staffIdByUserId}
+                    gridConfig={data.gridConfig}
+                    canMutateBookings={data.canMutateBookings}
+                    onSelectBooking={openBookingDrawer}
+                    onRescheduleBooking={rescheduleBooking}
+                    pendingAppointmentIds={pendingIds}
+                    tenantId={data.tenantId}
+                    query={data.query}
+                    calendarRoute={route}
+                    calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
+                    fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
+                    onEmptyDayQuickCreate={quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div key={data.query.view} className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
+                  <CalendarGrid
+                    sidebar={sidebarForGrid}
+                    rightPanel={rightPanelForGrid}
+                    view={data.query.view as "day" | "3day" | "week"}
+                    lanes={data.lanes}
+                    buckets={buckets}
+                    gridConfig={data.gridConfig}
+                    bookingDisplay={bookingDisplay}
+                    resourceColumns={data.resourceColumns}
+                    resourceView={data.query.resourceView}
+                    staffIdByUserId={staffIdByUserId}
+                    canMutateBookings={data.canMutateBookings}
+                    bookings={bookings}
+                    highlightedColumnId={highlightedColumnId}
+                    onSelectBooking={openBookingDrawer}
+                    onRescheduleBooking={rescheduleBooking}
+                    pendingAppointmentIds={pendingIds}
+                    shortcuts={{
+                      tenantId: data.tenantId,
+                      query: data.query,
+                      addAppointmentHref: `${base}/bookings/new`,
+                    }}
+                    highlightedBookingId={highlightedBookingId}
+                    onEmptySlotClick={
+                      quickCreateEnabled ? (info) => openQuickCreateFromSlot(info, "consultation") : undefined
+                    }
+                    onEmptySlotContextMenu={
+                      quickCreateEnabled
+                        ? (info) =>
+                            setSlotContextMenu({
+                              x: info.clientX,
+                              y: info.clientY,
+                              dayKey: info.dayKey,
+                              columnId: info.columnId,
+                              localStart: info.localStart,
+                            })
+                        : undefined
+                    }
+                    calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
+                    fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+        )}
       </div>
 
       {slotContextMenu && quickCreateEnabled ? (

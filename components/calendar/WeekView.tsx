@@ -12,7 +12,8 @@ import {
   type DragStartEvent,
   type Modifier,
 } from "@dnd-kit/core";
-import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -124,7 +125,7 @@ export type WeekViewProps = {
   onEmptySlotClick?: (info: { dayKey: string; columnId: string; localStart: string }) => void;
   /** Right-click empty cell — context menu (parent supplies drawer presets). */
   onEmptySlotContextMenu?: (info: { dayKey: string; columnId: string; localStart: string; clientX: number; clientY: number }) => void;
-  /** FI OS: agenda + insights render as overlays; grid stays centered (~90% width). */
+  /** FI OS: agenda + insights render as overlays; grid uses full workspace width (no centered max-width rail). */
   calendarShellMode?: "default" | "fiOs";
   /** FI OS: closes agenda + insights backdrop (both panels). */
   fiOsDrawerDismiss?: () => void;
@@ -198,6 +199,19 @@ function WeekViewInner({
   const viewportRange = useScrollViewport(gridScrollRef);
   const layoutMode = useCalendarLayoutMode();
   const swipeLayout = isSwipeCalendarLayout(layoutMode);
+  const prefersReducedMotion = useReducedMotion();
+  /** FI OS + prefers-reduced-motion: skip shell mount animation (instant grid). */
+  const instantCalendarShell = shellIsFiOs || prefersReducedMotion === true;
+  const calendarShellMotion: Variants = useMemo(
+    () =>
+      instantCalendarShell
+        ? {
+            hidden: { opacity: 1, y: 0 },
+            show: { opacity: 1, y: 0, transition: { duration: 0 } },
+          }
+        : calendarShellVariants,
+    [instantCalendarShell]
+  );
   const { success, error: toastError } = useCalendarToast();
 
   const scrollGridBy = useCallback((deltaPx: number) => {
@@ -472,6 +486,7 @@ function WeekViewInner({
           pinnedAppointmentId={activeDragId}
           pendingAppointmentIds={pendingAppointmentIds}
           highlightedBookingId={highlightedBookingId}
+          fillAvailableWidth={!swipeLayout}
           onSelectAppointment={onSelectBooking}
           onResizeAppointment={onResizeAppointment}
           onEmptySlotClick={onEmptySlotClick}
@@ -549,8 +564,8 @@ function WeekViewInner({
         />
       ) : null}
 
-      <div ref={gridScrollRef} className="flex min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
-        <div className="flex min-h-min min-w-0 flex-1" style={{ height: bodyHeightPx }}>
+      <div ref={gridScrollRef} className="flex min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
+        <div className="flex min-h-0 min-w-0 w-full flex-1" style={{ height: bodyHeightPx }}>
           <BusinessTimeGutter
             bodyHeightPx={bodyHeightPx}
             headerHeightPx={CALENDAR_HEADER_HEIGHT_PX}
@@ -576,18 +591,16 @@ function WeekViewInner({
               ))}
             </div>
           ) : (
-            <div className="flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
-              {columnsForView.map((col, i) => (
-                <motion.div
-                  key={`${col.dayKey}-${col.id}-wrap`}
-                  custom={i}
-                  initial={{ opacity: 0, x: 6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.16, delay: Math.min(i * 0.03, 0.1) }}
-                  className="flex min-w-0 flex-1"
-                >
+            <div
+              className="grid min-h-0 min-w-0 flex-1"
+              style={{
+                gridTemplateColumns: `repeat(${columnsForView.length}, minmax(0, 1fr))`,
+              }}
+            >
+              {columnsForView.map((col) => (
+                <div key={`${col.dayKey}-${col.id}-cell`} className="min-h-0 min-w-0">
                   {renderProviderColumn(col)}
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -608,7 +621,7 @@ function WeekViewInner({
       onDragCancel={onDragCancel}
     >
       <motion.div
-        variants={calendarShellVariants}
+        variants={calendarShellMotion}
         initial="hidden"
         animate="show"
         className={cn(
@@ -620,10 +633,8 @@ function WeekViewInner({
       >
         {shellIsFiOs ? (
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-            <div className="flex min-h-0 min-w-0 flex-1 justify-center px-1 sm:px-2">
-              <div className="flex min-h-0 w-[min(100%,92vw)] max-w-[min(100%,1400px)] min-w-0 flex-1 flex-col">
-                {gridColumn}
-              </div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col px-1 sm:px-2">
+              <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col">{gridColumn}</div>
             </div>
 
             {fiOsPanelsOpen && fiOsDrawerDismiss ? (

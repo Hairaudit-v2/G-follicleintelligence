@@ -13,7 +13,8 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -31,7 +32,7 @@ import {
   calendarPointerSensorOptions,
   calendarTouchSensorOptions,
 } from "@/lib/calendar/calendarResponsive";
-import { calendarShellVariants, staggerContainerVariants } from "@/lib/calendar/calendarMotion";
+import { calendarShellVariants } from "@/lib/calendar/calendarMotion";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
 import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
@@ -418,12 +419,8 @@ const MonthDayCell = memo(function MonthDayCell({
   const openEmptyDayQuickCreate = isQuietDay && onEmptyDayQuickCreate ? onEmptyDayQuickCreate : null;
 
   return (
-    <motion.div
+    <div
       ref={setNodeRef}
-      variants={{
-        hidden: { opacity: 0, y: 4 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.14 } },
-      }}
       className={cn(
         "group/cell flex min-h-[7.5rem] flex-col border-b border-r border-[#1e2937] p-2 transition-colors last:border-r-0",
         "bg-[#0f172a] hover:bg-[#111827]",
@@ -507,7 +504,7 @@ const MonthDayCell = memo(function MonthDayCell({
           </button>
         ) : null}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -692,6 +689,18 @@ function MonthViewInner({
 
   const shellIsFiOs = calendarShellMode === "fiOs";
   const fiOsPanelsOpen = shellIsFiOs && Boolean(sidebar || rightPanel);
+  const prefersReducedMotion = useReducedMotion();
+  const instantCalendarShell = shellIsFiOs || prefersReducedMotion === true;
+  const calendarShellMotion: Variants = useMemo(
+    () =>
+      instantCalendarShell
+        ? {
+            hidden: { opacity: 1, y: 0 },
+            show: { opacity: 1, y: 0, transition: { duration: 0 } },
+          }
+        : calendarShellVariants,
+    [instantCalendarShell]
+  );
 
   const monthMain = (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -746,12 +755,7 @@ function MonthViewInner({
         ))}
       </div>
 
-      <motion.div
-        variants={staggerContainerVariants}
-        initial="hidden"
-        animate="show"
-        className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 overflow-y-auto overscroll-y-contain"
-      >
+      <div className="grid min-h-0 flex-1 auto-rows-fr overflow-y-auto overscroll-y-contain [grid-template-columns:repeat(7,minmax(0,1fr))]">
         {cells.map((cell) => (
           <MonthDayCell
             key={cell.dayKey}
@@ -769,7 +773,7 @@ function MonthViewInner({
             calendarTimezone={gridConfig.timeZone}
           />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 
@@ -782,7 +786,7 @@ function MonthViewInner({
       onDragCancel={() => setActiveDrag(null)}
     >
       <motion.div
-        variants={calendarShellVariants}
+        variants={calendarShellMotion}
         initial="hidden"
         animate="show"
         className={cn(
@@ -793,10 +797,8 @@ function MonthViewInner({
       >
         {shellIsFiOs ? (
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-            <div className="flex min-h-0 min-w-0 flex-1 justify-center px-1 sm:px-2">
-              <div className="flex min-h-0 w-[min(100%,92vw)] max-w-[min(100%,1400px)] min-w-0 flex-1 flex-col">
-                {monthMain}
-              </div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col px-1 sm:px-2">
+              <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col">{monthMain}</div>
             </div>
 
             {fiOsPanelsOpen && fiOsDrawerDismiss ? (

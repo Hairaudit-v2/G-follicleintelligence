@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { rescheduleCalendarAppointmentRequest } from "@/lib/calendar/appointmentsApiClient";
+import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
 import {
   calendarAppointmentsSyncKey,
   useCalendarAppointmentsStore,
@@ -113,6 +114,11 @@ export function useCalendarAppointments(
       calendarTimezone: data.calendarTimezone,
       bookings: mergedBookings,
       bookingDisplay: mergedDisplay,
+    });
+    logCalendarClientPerf("calendar-hydrate", {
+      bookingCount: mergedBookings.length,
+      displayCount: Object.keys(mergedDisplay).length,
+      syncKeyTail: syncKey.slice(-64),
     });
   }, [
     bookingsHydrationFp,

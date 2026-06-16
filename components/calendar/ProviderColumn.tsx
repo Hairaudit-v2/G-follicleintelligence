@@ -1,7 +1,6 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
-import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
 
 import { AppointmentCardFromBooking } from "@/components/calendar/AppointmentCard";
@@ -341,6 +340,11 @@ export type ProviderColumnProps = {
   onEmptySlotContextMenu?: (info: { dayKey: string; columnId: string; localStart: string; clientX: number; clientY: number }) => void;
   bodyHeightPx?: number;
   minWidthPx?: number;
+  /**
+   * When true (desktop week/day grid), columns share the row with `minmax(0,1fr)`-style flex behavior
+   * instead of a fixed minimum width that forces horizontal scrolling.
+   */
+  fillAvailableWidth?: boolean;
   className?: string;
 };
 
@@ -372,6 +376,7 @@ export function ProviderColumn({
   onEmptySlotContextMenu,
   bodyHeightPx: bodyHeightPxProp,
   minWidthPx = CALENDAR_COLUMN_MIN_WIDTH_PX,
+  fillAvailableWidth = false,
   className,
 }: ProviderColumnProps) {
   const bodyHeightPx = bodyHeightPxProp ?? calendarGridBodyHeightPx();
@@ -440,11 +445,19 @@ export function ProviderColumn({
         "flex flex-col border-[#1e2937]/80 transition-colors",
         stacked
           ? "min-w-full w-full flex-none border-b border-l-0 last:border-b-0"
-          : "min-w-[var(--col-min)] flex-1 border-l first:border-l-0",
+          : fillAvailableWidth
+            ? "min-w-0 flex-1 border-l first:border-l-0"
+            : "min-w-[var(--col-min)] flex-1 border-l first:border-l-0",
         highlighted && "bg-sky-950/20 ring-1 ring-inset ring-sky-400/25",
         className
       )}
-      style={{ "--col-min": stacked ? "100%" : `${minWidthPx}px` } as React.CSSProperties}
+      style={
+        stacked
+          ? ({ "--col-min": "100%" } as React.CSSProperties)
+          : fillAvailableWidth
+            ? undefined
+            : ({ "--col-min": `${minWidthPx}px` } as React.CSSProperties)
+      }
     >
       <ProviderColumnHeader
         name={name}
@@ -482,41 +495,37 @@ export function ProviderColumn({
         ) : null}
 
         <div className="relative z-[2]" style={{ height: bodyHeightPx }}>
-          <AnimatePresence initial={false}>
-            {appointments.map((booking) => {
-                const layout = overlapLayouts.get(booking.id);
-                if (!layout || !visibleIds.has(booking.id)) return null;
-                const d = bookingDisplay[booking.id];
-                const isPendingSave = Boolean(pendingAppointmentIds?.has(booking.id));
-                return (
-                  <AppointmentCardFromBooking
-                    key={booking.id}
-                    booking={booking}
-                    display={{
-                      anchorLabel: d?.anchorLabel,
-                      durationMin: d?.durationMin,
-                      providerName: name,
-                      roomName: d?.roomLabel ?? booking.location,
-                      procedureCatalogName: d?.procedureCatalogName,
-                      procedureCatalogHex: d?.procedureCatalogHex,
-                      suggestedPrice: d?.suggestedPrice,
-                    }}
-                    layout={layout}
-                    draggable={draggable}
-                    resizable={resizable}
-                    touchFriendly={touchFriendly}
-                    animateEntry
-                    isPendingSave={isPendingSave}
-                    isHighlighted={highlightedBookingId === booking.id}
-                    calendarTimezone={gridConfig.timeZone}
-                    onResizeEnd={
-                      onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined
-                    }
-                    onClick={onSelectAppointment ? () => onSelectAppointment(booking) : undefined}
-                  />
-                );
-              })}
-          </AnimatePresence>
+          {appointments.map((booking) => {
+            const layout = overlapLayouts.get(booking.id);
+            if (!layout || !visibleIds.has(booking.id)) return null;
+            const d = bookingDisplay[booking.id];
+            const isPendingSave = Boolean(pendingAppointmentIds?.has(booking.id));
+            return (
+              <AppointmentCardFromBooking
+                key={booking.id}
+                booking={booking}
+                display={{
+                  anchorLabel: d?.anchorLabel,
+                  durationMin: d?.durationMin,
+                  providerName: name,
+                  roomName: d?.roomLabel ?? booking.location,
+                  procedureCatalogName: d?.procedureCatalogName,
+                  procedureCatalogHex: d?.procedureCatalogHex,
+                  suggestedPrice: d?.suggestedPrice,
+                }}
+                layout={layout}
+                draggable={draggable}
+                resizable={resizable}
+                touchFriendly={touchFriendly}
+                animateEntry={false}
+                isPendingSave={isPendingSave}
+                isHighlighted={highlightedBookingId === booking.id}
+                calendarTimezone={gridConfig.timeZone}
+                onResizeEnd={onResizeAppointment ? (endIso) => onResizeAppointment(booking, endIso) : undefined}
+                onClick={onSelectAppointment ? () => onSelectAppointment(booking) : undefined}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
