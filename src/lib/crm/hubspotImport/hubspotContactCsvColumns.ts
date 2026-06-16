@@ -21,6 +21,8 @@ export const HUBSPOT_CONTACT_CSV_HEADERS = [
   "Associated Deal",
   "Associated Company",
   "Associated Deal IDs",
+  // Non-Surgical: optional HubSpot custom property — preserved when present
+  "Non-Surgical",
 ] as const;
 
 export type HubspotContactCsvHeader = (typeof HUBSPOT_CONTACT_CSV_HEADERS)[number];
@@ -44,6 +46,8 @@ export type HubspotContactParsedRow = {
   associatedDeal: string | null;
   associatedCompany: string | null;
   associatedDealIds: string | null;
+  /** HubSpot custom property: Non-Surgical interest flag or value. Null when column absent. */
+  nonSurgical: string | null;
 };
 
 export const HEADER_TO_KEY: Record<string, keyof Omit<HubspotContactParsedRow, "rowIndex">> = {
@@ -64,4 +68,5 @@ export const HEADER_TO_KEY: Record<string, keyof Omit<HubspotContactParsedRow, "
   "associated deal": "associatedDeal",
   "associated company": "associatedCompany",
   "associated deal ids": "associatedDealIds",
+  "non-surgical": "nonSurgical",
 };

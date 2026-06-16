@@ -115,6 +115,7 @@ export async function loadPatientTimelineSources(
     .select("id, status, metadata, created_at, foundation_patient_id")
     .eq("tenant_id", tid)
     .eq("foundation_patient_id", pid)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (ce) throw new Error(ce.message);
 

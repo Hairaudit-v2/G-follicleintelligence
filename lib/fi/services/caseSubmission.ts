@@ -48,6 +48,7 @@ export async function getCaseSubmissionState(
     .select("id, status")
     .eq("id", fiCaseId)
     .eq("tenant_id", tenantId)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (!caseRow) {
@@ -124,7 +125,8 @@ export async function submitCaseIfReady(
     })
     .eq("id", fiCaseId)
     .eq("tenant_id", tenantId)
-    .eq("status", "draft");
+    .eq("status", "draft")
+    .is("deleted_at", null);
 
   if (error) {
     throw new Error(error.message);
@@ -135,6 +137,7 @@ export async function submitCaseIfReady(
     .select("status")
     .eq("id", fiCaseId)
     .eq("tenant_id", tenantId)
+    .is("deleted_at", null)
     .single();
 
   return {

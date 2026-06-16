@@ -8,6 +8,7 @@ import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { SurgeryReadinessBoardCard, SurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
+import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import {
   SURGERY_READINESS_ISSUE_LABEL,
@@ -114,6 +115,9 @@ function SurgeryCard({ tenantId, card }: { tenantId: string; card: SurgeryReadin
         </div>
       </dl>
       <FinancialSurgeryPipelineInline tenantId={tenantId} caseId={card.caseId} status={card.financialPipeline} variant="dark" />
+      <div className="mt-1.5">
+        <FinancialPaymentPathwayBadge summary={card.financialPipeline.paymentPathway} variant="dark" />
+      </div>
       {displayIssues.length ? (
         <ul className="mt-2 space-y-1">
           {displayIssues.map((it) => (

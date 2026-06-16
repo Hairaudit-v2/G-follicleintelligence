@@ -97,6 +97,7 @@ export async function loadCasesIndexForTenant(tenantId: string, client?: Supabas
       "id, status, metadata, external_id, foundation_patient_id, patient_id, treatment_type, planning_notes, created_at, updated_at"
     )
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("updated_at", { ascending: false })
     .limit(500);
   if (error) throw new Error(error.message);
@@ -172,6 +173,7 @@ export async function loadCasesIndexRowsForIds(
       "id, status, metadata, external_id, foundation_patient_id, patient_id, treatment_type, planning_notes, created_at, updated_at"
     )
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .in("id", ids);
   if (error) throw new Error(error.message);
 
@@ -243,6 +245,7 @@ export async function loadCaseAdminDetail(
     )
     .eq("tenant_id", tid)
     .eq("id", cid)
+    .is("deleted_at", null)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!c) return null;

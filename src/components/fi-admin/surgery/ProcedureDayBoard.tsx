@@ -8,6 +8,7 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { ProcedureDayBoardPayload, ProcedureDayScheduleCard } from "@/src/lib/surgery/procedureDayBoardLoader.server";
 import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
+import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import { SURGERY_READINESS_ISSUE_LABEL, type SurgeryReadinessIssueSeverity } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
@@ -115,6 +116,9 @@ function ScheduleCard({ c, tenantId }: { c: ProcedureDayScheduleCard; tenantId: 
         </div>
       </dl>
       <FinancialSurgeryPipelineInline tenantId={tenantId} caseId={c.caseId} status={c.financialPipeline} variant="dark" />
+      <div className="mt-1.5">
+        <FinancialPaymentPathwayBadge summary={c.financialPipeline.paymentPathway} variant="dark" />
+      </div>
       {displayIssues.length ? (
         <ul className="mt-2 space-y-1">
           {displayIssues.map((it) => (

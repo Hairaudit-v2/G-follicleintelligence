@@ -169,6 +169,7 @@ async function assertCaseBelongsToTenant(
     .select("id")
     .eq("tenant_id", tenantId.trim())
     .eq("id", caseId.trim())
+    .is("deleted_at", null)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("caseId must belong to the tenant.");

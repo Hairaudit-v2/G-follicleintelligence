@@ -279,6 +279,7 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
       patient_id: b.patient_id,
       booking_status: b.booking_status,
       financial_os_status: b.financial_os_status ?? null,
+      start_at: b.start_at,
     })),
   });
 

@@ -181,6 +181,7 @@ async function countPatientsNeedingFollowUp(tenantId: string, todayYmd: string):
     .select("foundation_patient_id")
     .eq("tenant_id", tid)
     .in("id", caseIds)
+    .is("deleted_at", null)
     .not("foundation_patient_id", "is", null);
 
   if (ce) {
@@ -236,6 +237,7 @@ async function loadActiveJourneys(tenantId: string, limit: number): Promise<Pati
     .not("foundation_patient_id", "is", null)
     .not("status", "eq", "complete")
     .not("status", "eq", "failed")
+    .is("deleted_at", null)
     .order("updated_at", { ascending: false })
     .limit(40);
   if (error) throw new Error(error.message);

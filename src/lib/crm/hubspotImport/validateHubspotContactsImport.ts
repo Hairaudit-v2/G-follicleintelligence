@@ -20,6 +20,17 @@ export type HubspotContactRowValidation = {
   mappedLeadStatusKey: string | null;
   journeyUnmapped: boolean;
   leadStatusUnmapped: boolean;
+  /**
+   * True when the phone number appears to be Excel-mangled scientific notation
+   * (e.g. "6.14123E+10") or is otherwise unparseable. The corrupted value is
+   * NOT stored as a contact phone and NOT used for deduplication.
+   */
+  phoneCorrupted: boolean;
+  /**
+   * Normalised digit-only phone string for deduplication purposes.
+   * Null when: phone absent, corrupted (scientific notation), placeholder, or < 8 digits.
+   */
+  effectivePhoneDigits: string | null;
 };
 
 export type HubspotContactsDryRunReport = {
@@ -32,13 +43,60 @@ export type HubspotContactsDryRunReport = {
   duplicateEmailsInFile: string[];
   duplicatePhonesInFile: string[];
   passed: boolean;
+  /** Rows that have a blocking issue — will be skipped on commit. */
+  rowsBlockedCount: number;
+  /** Rows with no blocking issues — eligible for import. */
+  rowsImportableCount: number;
+  /** Rows whose phone was quarantined (scientific notation / placeholder); phone is ignored, row may still import. */
+  quarantinedPhoneCount: number;
 };
 
+// ---------------------------------------------------------------------------
+// Phone helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * True when the raw phone string looks like Excel scientific-notation mangling.
+ * Excel converts large integers (phone numbers without leading +) to e.g.:
+ *   "6.14123456789E+10"  →  should be "61412345678" (Australian mobile)
+ *   "4.155551234E+9"     →  should be "4155551234"
+ */
+function isScientificNotationPhone(phone: string | null | undefined): boolean {
+  if (!phone?.trim()) return false;
+  return /^\d+(\.\d+)?[eE][+\-]\d+$/.test(phone.trim());
+}
+
+/**
+ * Known-bad placeholder digit strings: all-same digit, sequential ascending/descending,
+ * or classic North American test numbers.
+ */
+const PLACEHOLDER_PHONE_RE =
+  /^(\d)\1{6,}$|^0{6,}$|^1234567890$|^0123456789$|^9876543210$|^12345678$|^87654321$/;
+
+function isPlaceholderPhone(digits: string): boolean {
+  return PLACEHOLDER_PHONE_RE.test(digits);
+}
+
+/**
+ * Normalise phone to digit-only string for deduplication.
+ * Returns null for: empty, scientific notation, < 8 digits after stripping.
+ */
 function digitsOnly(phone: string | null | undefined): string | null {
   if (!phone?.trim()) return null;
+  // Guard: do not attempt to extract digits from mangled scientific-notation values.
+  if (isScientificNotationPhone(phone)) return null;
   const d = phone.replace(/\D/g, "");
   return d.length >= 8 ? d : null;
 }
+
+/** True when a name field appears to contain an email address. */
+function hasEmailPattern(s: string | null | undefined): boolean {
+  return /.+@.+\..+/.test((s ?? "").trim());
+}
+
+// ---------------------------------------------------------------------------
+// Date helpers
+// ---------------------------------------------------------------------------
 
 function parseOptionalDate(raw: string | null): { ok: boolean; invalid: boolean } {
   if (raw == null || !String(raw).trim()) return { ok: true, invalid: false };
@@ -48,9 +106,17 @@ function parseOptionalDate(raw: string | null): { ok: boolean; invalid: boolean 
   return { ok: true, invalid: false };
 }
 
+// ---------------------------------------------------------------------------
+// String helpers
+// ---------------------------------------------------------------------------
+
 function lc(s: string | null | undefined): string {
   return (s ?? "").trim().toLowerCase();
 }
+
+// ---------------------------------------------------------------------------
+// Classification helpers (unchanged from original)
+// ---------------------------------------------------------------------------
 
 /** HubSpot lifecycle values that still indicate sales/lead tracking alongside a patient journey. */
 function hubspotLifecycleIsLeadPipeline(lifecycleStage: string | null | undefined): boolean {
@@ -66,7 +132,6 @@ function hubspotMarketingLeadContactType(contactType: string | null | undefined)
   return /\bmarketing\s*lead\b/i.test((contactType ?? "").trim());
 }
 
-/** Rule 1 — Stage of Journey phrases that indicate an active or historical patient relationship. */
 function journeyIndicatesPatient(stageOfJourney: string | null | undefined): boolean {
   const j = lc(stageOfJourney);
   if (!j) return false;
@@ -91,10 +156,6 @@ function lifecycleIndicatesPatient(lifecycleStage: string | null | undefined): b
   return /\bcustomer\b/.test(t) || /\bpatient\b/.test(t);
 }
 
-/**
- * Rule 4 — Associated deal text sometimes includes HubSpot won labels; this export often only has deal names.
- * Treat obvious closed-won / completion language as surgery completed when a deal row is present.
- */
 function associatedDealIndicatesSurgeryCompleted(associatedDeal: string | null | undefined): boolean {
   const d = (associatedDeal ?? "").trim();
   if (!d) return false;
@@ -104,10 +165,6 @@ function associatedDealIndicatesSurgeryCompleted(associatedDeal: string | null |
   );
 }
 
-/**
- * Rule 5 — Consult completed plus commercial acceptance (quote / deposit / contract), using journey + lead status text
- * and mapped pipeline slugs where helpful.
- */
 function hasCompletedConsultAndQuoteAccepted(row: HubspotContactParsedRow): boolean {
   const journeySlug = mapStageOfJourneyToPipelineSlug(row.stageOfJourney).slug;
   const leadKey = mapLeadStatusToKey(row.leadStatus).key;
@@ -133,9 +190,6 @@ function hasCompletedConsultAndQuoteAccepted(row: HubspotContactParsedRow): bool
   return false;
 }
 
-/**
- * Strong patient signals: post-sale / explicit patient identity / won deal / consult+quote — overrides lead lifecycle for `patient`.
- */
 function hasStrongPatientSignal(row: HubspotContactParsedRow): boolean {
   const j = lc(row.stageOfJourney);
   if (j.includes("surgery done")) return true;
@@ -152,7 +206,6 @@ function hasStrongPatientSignal(row: HubspotContactParsedRow): boolean {
   return false;
 }
 
-/** Any rule 1–5 patient signal (journey includes Surgery Booked, lifecycle, contact type, deal, consult+quote). */
 function hasHubspotPatientSignal(row: HubspotContactParsedRow): boolean {
   if (journeyIndicatesPatient(row.stageOfJourney)) return true;
   if (lifecycleIndicatesPatient(row.lifecycleStage)) return true;
@@ -165,11 +218,6 @@ function hasHubspotPatientSignal(row: HubspotContactParsedRow): boolean {
   return false;
 }
 
-/**
- * Classifies a HubSpot contact CSV row for Stage 1 import.
- * - `mixed_patient_lead`: patient journey or deal context while HubSpot lifecycle still looks like a lead/opportunity.
- * - `patient`: definitive patient / customer context, or strong journey (e.g. Surgery Done) even if lifecycle lags.
- */
 export function classifyHubspotContactRow(row: HubspotContactParsedRow): HubspotImportClassification {
   if (!hasHubspotPatientSignal(row)) return "lead_only";
   const leadFraming =
@@ -177,6 +225,10 @@ export function classifyHubspotContactRow(row: HubspotContactParsedRow): Hubspot
   if (leadFraming && !hasStrongPatientSignal(row)) return "mixed_patient_lead";
   return "patient";
 }
+
+// ---------------------------------------------------------------------------
+// Field-presence helpers
+// ---------------------------------------------------------------------------
 
 function missingName(row: HubspotContactParsedRow): boolean {
   return !(row.firstName?.trim() || row.lastName?.trim());
@@ -190,19 +242,27 @@ function missingPhone(row: HubspotContactParsedRow): boolean {
   return !row.phoneNumber?.trim();
 }
 
+// ---------------------------------------------------------------------------
+// Main validator
+// ---------------------------------------------------------------------------
+
 export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): HubspotContactsDryRunReport {
   const generatedAt = new Date().toISOString();
   const recordIdCounts = new Map<string, number>();
   const emailKeyCounts = new Map<string, number>();
   const phoneKeyCounts = new Map<string, number>();
 
+  // First pass: compute deduplication keys.
+  // Scientific-notation phones produce digitsOnly() == null and are excluded from phone dedup.
   for (const row of rows) {
     const rid = row.recordId?.trim();
     if (rid) recordIdCounts.set(rid, (recordIdCounts.get(rid) ?? 0) + 1);
     const em = normalizeEmail(row.email);
     if (em) emailKeyCounts.set(em, (emailKeyCounts.get(em) ?? 0) + 1);
     const ph = digitsOnly(row.phoneNumber);
-    if (ph) phoneKeyCounts.set(ph, (phoneKeyCounts.get(ph) ?? 0) + 1);
+    if (ph && !isPlaceholderPhone(ph)) {
+      phoneKeyCounts.set(ph, (phoneKeyCounts.get(ph) ?? 0) + 1);
+    }
   }
 
   const duplicateRecordIdsInFile = Array.from(recordIdCounts.entries())
@@ -221,27 +281,56 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
     const issues: HubspotContactRowIssue[] = [];
     const rid = row.recordId?.trim() ?? null;
 
+    // --- Record ID ---
     if (!rid) {
       issues.push({ code: "missing_record_id", message: "Record ID is required.", blocking: true });
     } else if ((recordIdCounts.get(rid) ?? 0) > 1) {
       issues.push({
         code: "duplicate_record_id",
-        message: `Duplicate Record ID in file: ${rid}`,
+        message: "Duplicate Record ID in file: " + rid,
         blocking: true,
       });
     }
 
+    // --- Email ---
     const em = normalizeEmail(row.email);
     if (em && (emailKeyCounts.get(em) ?? 0) > 1) {
       issues.push({
         code: "duplicate_email",
-        message: `Duplicate email in file: ${em}`,
+        message: "Duplicate email in file: " + em,
         blocking: true,
       });
     }
 
-    const phKey = digitsOnly(row.phoneNumber);
-    if (phKey && (phoneKeyCounts.get(phKey) ?? 0) > 1) {
+    // --- Phone: scientific-notation detection ---
+    const phoneCorrupted = isScientificNotationPhone(row.phoneNumber);
+    if (phoneCorrupted) {
+      issues.push({
+        code: "scientific_notation_phone",
+        message:
+          "Phone number appears to be Excel scientific-notation mangled (e.g. 6.14E+10). " +
+          "The raw value has been quarantined and will not be stored or used for deduplication. " +
+          "Verify the correct number and re-upload if needed.",
+        blocking: false,
+      });
+    }
+
+    // --- Phone: compute effective digits (null when corrupted) ---
+    const effectivePhoneDigits = phoneCorrupted ? null : digitsOnly(row.phoneNumber);
+
+    // --- Phone: placeholder detection ---
+    if (!phoneCorrupted && effectivePhoneDigits && isPlaceholderPhone(effectivePhoneDigits)) {
+      issues.push({
+        code: "placeholder_phone",
+        message:
+          "Phone number looks like a placeholder (e.g. all-same digit, sequential). " +
+          "It will not be used for deduplication.",
+        blocking: false,
+      });
+    }
+
+    // --- Phone: in-file duplicate (only for valid, non-placeholder phones) ---
+    if (effectivePhoneDigits && !isPlaceholderPhone(effectivePhoneDigits) && (phoneKeyCounts.get(effectivePhoneDigits) ?? 0) > 1) {
       issues.push({
         code: "duplicate_phone",
         message: "Duplicate normalised phone number in file.",
@@ -249,6 +338,7 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
       });
     }
 
+    // --- Name ---
     if (missingName(row)) {
       issues.push({
         code: "missing_name",
@@ -256,13 +346,45 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
         blocking: false,
       });
     }
+
+    // --- Email in name field ---
+    if (hasEmailPattern(row.firstName)) {
+      issues.push({
+        code: "email_in_first_name",
+        message:
+          "First Name field appears to contain an email address (" +
+          (row.firstName ?? "") +
+          "). This may be a paste error.",
+        blocking: false,
+      });
+    }
+    if (hasEmailPattern(row.lastName)) {
+      issues.push({
+        code: "email_in_last_name",
+        message:
+          "Last Name field appears to contain an email address (" +
+          (row.lastName ?? "") +
+          "). This may be a paste error.",
+        blocking: false,
+      });
+    }
+
+    // --- Contact-method completeness ---
     if (missingEmail(row)) {
       issues.push({ code: "missing_email", message: "Missing email.", blocking: false });
     }
     if (missingPhone(row)) {
       issues.push({ code: "missing_phone", message: "Missing phone number.", blocking: false });
     }
+    if (missingEmail(row) && missingPhone(row)) {
+      issues.push({
+        code: "no_contact_method",
+        message: "No email and no phone number. Cannot contact or identify this person.",
+        blocking: true,
+      });
+    }
 
+    // --- Dates ---
     const cd = parseOptionalDate(row.createDate);
     if (cd.invalid) {
       issues.push({ code: "invalid_create_date", message: "Create Date is not parseable.", blocking: false });
@@ -284,19 +406,30 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
       });
     }
 
+    // --- Stage of Journey / Lead Status ---
     const journey = mapStageOfJourneyToPipelineSlug(row.stageOfJourney);
     const leadMap = mapLeadStatusToKey(row.leadStatus);
+
     if (journey.unmapped && row.stageOfJourney?.trim()) {
       issues.push({
         code: "unmapped_stage_of_journey",
-        message: `Unmapped Stage of Journey: ${row.stageOfJourney.trim()}`,
+        message: "Unmapped Stage of Journey: " + row.stageOfJourney.trim(),
         blocking: false,
       });
     }
-    if (leadMap.unmapped && row.leadStatus?.trim()) {
+
+    // Missing Lead Status (empty field)
+    if (!row.leadStatus?.trim()) {
+      issues.push({
+        code: "missing_lead_status",
+        message: "Lead Status is empty. The row will be imported with no mapped status key.",
+        blocking: false,
+      });
+    } else if (leadMap.unmapped) {
+      // Non-empty but unrecognised value
       issues.push({
         code: "unmapped_lead_status",
-        message: `Unmapped Lead Status: ${row.leadStatus.trim()}`,
+        message: "Unmapped Lead Status: " + row.leadStatus.trim(),
         blocking: false,
       });
     }
@@ -312,15 +445,34 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
       mappedLeadStatusKey: leadMap.key,
       journeyUnmapped: Boolean(row.stageOfJourney?.trim() && journey.unmapped),
       leadStatusUnmapped: Boolean(row.leadStatus?.trim() && leadMap.unmapped),
+      phoneCorrupted,
+      effectivePhoneDigits: effectivePhoneDigits && !isPlaceholderPhone(effectivePhoneDigits) ? effectivePhoneDigits : null,
     });
   }
 
   let blockingCount = 0;
   let warningCount = 0;
+  let rowsBlockedCount = 0;
+  let rowsImportableCount = 0;
+  let quarantinedPhoneCount = 0;
+
   for (const rr of rowResults) {
+    let rowBlocking = false;
     for (const i of rr.issues) {
-      if (i.blocking) blockingCount++;
-      else warningCount++;
+      if (i.blocking) {
+        blockingCount++;
+        rowBlocking = true;
+      } else {
+        warningCount++;
+      }
+    }
+    if (rowBlocking) {
+      rowsBlockedCount++;
+    } else {
+      rowsImportableCount++;
+    }
+    if (rr.phoneCorrupted) {
+      quarantinedPhoneCount++;
     }
   }
 
@@ -336,6 +488,9 @@ export function validateHubspotContactsRows(rows: HubspotContactParsedRow[]): Hu
     duplicateEmailsInFile,
     duplicatePhonesInFile,
     passed,
+    rowsBlockedCount,
+    rowsImportableCount,
+    quarantinedPhoneCount,
   };
 }
 

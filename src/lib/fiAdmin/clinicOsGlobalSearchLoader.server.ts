@@ -67,6 +67,7 @@ async function enrichCaseRows(
     .from("fi_cases")
     .select("id, external_id")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .in("id", caseIds);
   if (eErr) throw new Error(eErr.message);
   const extByCase = new Map<string, string | null>();

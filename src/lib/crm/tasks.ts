@@ -92,6 +92,7 @@ async function assertOptionalPatientCaseForLead(
       .from("fi_cases")
       .select("tenant_id")
       .eq("id", caseId)
+      .is("deleted_at", null)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!data || String((data as { tenant_id: string }).tenant_id) !== tenantId) {

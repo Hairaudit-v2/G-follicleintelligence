@@ -116,7 +116,7 @@ export async function loadFiHomeDashboardPayload(
     loadTenantConfigurationOverview(tid),
     supabase.from("fi_persons").select("*", { count: "exact", head: true }).eq("tenant_id", tid),
     supabase.from("fi_patients").select("*", { count: "exact", head: true }).eq("tenant_id", tid),
-    supabase.from("fi_cases").select("*", { count: "exact", head: true }).eq("tenant_id", tid),
+    supabase.from("fi_cases").select("*", { count: "exact", head: true }).eq("tenant_id", tid).is("deleted_at", null),
   ]);
 
   if (tenantRes.error) throw new Error(tenantRes.error.message);

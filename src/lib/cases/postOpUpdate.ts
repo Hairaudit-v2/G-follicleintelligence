@@ -53,7 +53,7 @@ export async function upsertPostOpTrackingForCase(params: UpsertPostOpTrackingPa
   const cid = assertNonEmptyUuid(params.caseId, "caseId");
   const p = params.patch;
 
-  const { data: c, error: ce } = await supabase.from("fi_cases").select("id").eq("tenant_id", tid).eq("id", cid).maybeSingle();
+  const { data: c, error: ce } = await supabase.from("fi_cases").select("id").eq("tenant_id", tid).eq("id", cid).is("deleted_at", null).maybeSingle();
   if (ce) throw new Error(ce.message);
   if (!c) throw new Error("Case not found for tenant.");
 
@@ -136,7 +136,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
   const cid = assertNonEmptyUuid(params.caseId, "caseId");
   const p = params.patch;
 
-  const { data: c, error: ce } = await supabase.from("fi_cases").select("id").eq("tenant_id", tid).eq("id", cid).maybeSingle();
+  const { data: c, error: ce } = await supabase.from("fi_cases").select("id").eq("tenant_id", tid).eq("id", cid).is("deleted_at", null).maybeSingle();
   if (ce) throw new Error(ce.message);
   if (!c) throw new Error("Case not found for tenant.");
 

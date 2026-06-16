@@ -318,6 +318,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
         patient_id: b.patient_id,
         booking_status: b.booking_status,
         financial_os_status: b.financial_os_status ?? null,
+        start_at: b.start_at,
       })),
     }),
   ]);

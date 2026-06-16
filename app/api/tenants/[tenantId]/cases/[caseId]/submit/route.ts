@@ -40,6 +40,7 @@ export async function POST(
       .eq("id", caseId)
       .eq("tenant_id", tenantId)
       .eq("status", "draft")
+      .is("deleted_at", null)
       .select("id, status")
       .single();
 
@@ -52,6 +53,7 @@ export async function POST(
         .select("status")
         .eq("id", caseId)
         .eq("tenant_id", tenantId)
+        .is("deleted_at", null)
         .single();
       if (!existing)
         return NextResponse.json({ ok: false, error: "Patient not found." }, { status: 404 });

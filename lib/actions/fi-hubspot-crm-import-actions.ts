@@ -86,6 +86,7 @@ export async function hubspotCrmImportUploadCsvAction(
           associated_deal: r.associatedDeal,
           associated_company: r.associatedCompany,
           associated_deal_ids: r.associatedDealIds,
+          non_surgical: r.nonSurgical,
         }));
         const { error: sErr } = await supabase.from("stg_hubspot_contacts_imports").insert(payload);
         if (sErr) throw new Error(sErr.message);

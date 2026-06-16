@@ -237,6 +237,7 @@ export async function loadFoundationOsDashboard(tenantId: string): Promise<Found
         .from("fi_cases")
         .select("foundation_patient_id")
         .eq("tenant_id", tid)
+        .is("deleted_at", null)
         .in("id", slice);
       if (error) {
         audit_scan_ok = false;

@@ -267,6 +267,7 @@ export async function loadPatientProfile(
     .select("id, status, metadata, created_at, foundation_patient_id")
     .eq("tenant_id", tid)
     .eq("foundation_patient_id", foundationPatientId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (ce) throw new Error(ce.message);
 

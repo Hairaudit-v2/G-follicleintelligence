@@ -31,6 +31,7 @@ import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/PatientTwinNavLink";
 import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
 import { CaseRevenuePaymentsCard } from "@/src/components/fi-admin/revenue/CaseRevenuePaymentsCard";
+import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
@@ -218,6 +219,9 @@ export function CaseDetailPageView({
                 variant="light"
                 compact={false}
               />
+              <div className="mt-2">
+                <FinancialPaymentPathwayBadge summary={caseFinancialPipeline.paymentPathway} variant="light" />
+              </div>
             </div>
           </div>
           <div className="mt-6">

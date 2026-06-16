@@ -4,6 +4,8 @@
  *
  * Required: FI_BASE_URL, FI_SMOKE_TENANT_ID (UUID)
  * Optional secrets: FI_ADMIN_API_KEY, FI_TIMELY_WEBHOOK_SECRET, FI_REMINDER_CRON_SECRET, CRON_SECRET, FI_LEGACY_FI_API_SECRET
+ * Optional: FI_SMOKE_OTHER_TENANT_ID (a second tenant UUID, used only to confirm
+ *   unauthenticated cross-tenant API access is denied — never reads tenant data)
  *
  * Never prints secret values.
  */
@@ -146,6 +148,58 @@ async function main(): Promise<void> {
       body: JSON.stringify({ probe: randomUUID() }),
     });
     assertNotSuccessWithSecret("F Timely discovery wrong secret", status);
+  }
+
+  // H — /fi-admin/system without a session must not render the platform admin shell
+  {
+    const { status } = await fetchStatus("/fi-admin/system");
+    if (status === 200) {
+      fail("H fi-admin/system without session", "unexpected 200 (should redirect/401/403 unauthenticated)");
+    }
+    if (![302, 303, 307, 401, 403].includes(status)) {
+      fail("H fi-admin/system without session", `expected redirect or 401/403, got ${status}`);
+    }
+    pass("H fi-admin/system without session", `status ${status}`);
+  }
+
+  // I — Tenant clinic dashboard without a session must not render
+  {
+    const { status } = await fetchStatus(`/fi-admin/${tid}/financial/dashboard`);
+    if (status === 200) {
+      fail("I tenant dashboard without session", "unexpected 200 (should redirect/401/403 unauthenticated)");
+    }
+    if (![302, 303, 307, 401, 403].includes(status)) {
+      fail("I tenant dashboard without session", `expected redirect or 401/403, got ${status}`);
+    }
+    pass("I tenant dashboard without session", `status ${status}`);
+  }
+
+  // J — Cross-tenant case API access must be denied (no session => 401/403, never tenant data)
+  if (process.env.FI_SMOKE_OTHER_TENANT_ID?.trim()) {
+    const otherTid = process.env.FI_SMOKE_OTHER_TENANT_ID.trim();
+    const { status } = await fetchStatus(`/api/tenants/${otherTid}/cases`);
+    if (status === 200) {
+      fail("J cross-tenant cases list without session", "unexpected 200");
+    }
+    if (![401, 403].includes(status)) {
+      fail("J cross-tenant cases list without session", `expected 401 or 403, got ${status}`);
+    }
+    pass("J cross-tenant cases list without session", `status ${status}`);
+  } else {
+    skip("J cross-tenant cases list", "FI_SMOKE_OTHER_TENANT_ID not set — set to a second tenant UUID to exercise RLS denial at the API layer");
+  }
+
+  // K — Staff PIN login rejects invalid PIN (does not create a session, no real PIN used)
+  {
+    const { status, text } = await fetchStatus("/api/fi-staff-pin/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tenantId: tid, staffId: randomUUID(), pin: "000000" }),
+    });
+    if (status === 200 && /"ok"\s*:\s*true/.test(text)) {
+      fail("K staff PIN login with bogus staff/PIN", "unexpected ok:true for a random staffId/PIN");
+    }
+    pass("K staff PIN login with bogus staff/PIN", `status ${status}`);
   }
 
   // G — Optional positive checks (never mutate production data)

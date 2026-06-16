@@ -1179,6 +1179,7 @@ export async function upsertClinicalNoteForFormField(
       .select("id, foundation_patient_id")
       .eq("tenant_id", tid)
       .eq("id", caseId)
+      .is("deleted_at", null)
       .maybeSingle();
     if (ce) throw new Error(ce.message);
     if (!cs) throw new Error("Case not found.");

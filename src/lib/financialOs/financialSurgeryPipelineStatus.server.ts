@@ -18,6 +18,7 @@ import {
   buildFinancialSurgeryPipelineStatus,
   type FinancialSurgeryPipelineStatus,
 } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import type { FiPaymentPathwayRow } from "@/src/lib/financialOs/financialPaymentPathwayCore";
 
 export type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 
@@ -75,6 +76,61 @@ async function loadInstallmentRowsForInvoices(
   });
 }
 
+async function loadPaymentPathwayRowsForContext(
+  supabase: SupabaseClient,
+  tenantId: string,
+  args: { caseIds: string[]; invoiceIds: string[]; bookingIds: string[] }
+): Promise<{ byCaseId: Map<string, FiPaymentPathwayRow[]>; byInvoiceId: Map<string, FiPaymentPathwayRow[]>; byBookingId: Map<string, FiPaymentPathwayRow[]> }> {
+  const byCaseId = new Map<string, FiPaymentPathwayRow[]>();
+  const byInvoiceId = new Map<string, FiPaymentPathwayRow[]>();
+  const byBookingId = new Map<string, FiPaymentPathwayRow[]>();
+
+  const caseIds = uniqueStrings(args.caseIds);
+  const invoiceIds = uniqueStrings(args.invoiceIds);
+  const bookingIds = uniqueStrings(args.bookingIds);
+  if (!caseIds.length && !invoiceIds.length && !bookingIds.length) {
+    return { byCaseId, byInvoiceId, byBookingId };
+  }
+
+  const orClauses: string[] = [];
+  if (caseIds.length) orClauses.push(`case_id.in.(${caseIds.join(",")})`);
+  if (invoiceIds.length) orClauses.push(`invoice_id.in.(${invoiceIds.join(",")})`);
+  if (bookingIds.length) orClauses.push(`booking_id.in.(${bookingIds.join(",")})`);
+
+  const { data, error } = await supabase
+    .from("fi_payment_pathways")
+    .select("id, pathway_type, status, provider, provider_reference, expected_settlement_date, actual_settlement_date, expected_amount_cents, settled_amount_cents, currency_code, case_id, invoice_id, booking_id, created_at, updated_at")
+    .eq("tenant_id", tenantId.trim())
+    .or(orClauses.join(","))
+    .neq("status", "cancelled");
+  if (error) throw new Error(error.message);
+
+  for (const raw of (data ?? []) as Array<Record<string, unknown>>) {
+    const row: FiPaymentPathwayRow = {
+      id: String(raw.id),
+      pathway_type: raw.pathway_type as FiPaymentPathwayRow["pathway_type"],
+      status: raw.status as FiPaymentPathwayRow["status"],
+      provider: raw.provider ? String(raw.provider) : null,
+      provider_reference: raw.provider_reference ? String(raw.provider_reference) : null,
+      expected_settlement_date: raw.expected_settlement_date ? String(raw.expected_settlement_date).slice(0, 10) : null,
+      actual_settlement_date: raw.actual_settlement_date ? String(raw.actual_settlement_date).slice(0, 10) : null,
+      expected_amount_cents: raw.expected_amount_cents != null ? Number(raw.expected_amount_cents) : null,
+      settled_amount_cents: raw.settled_amount_cents != null ? Number(raw.settled_amount_cents) : null,
+      currency_code: raw.currency_code ? String(raw.currency_code) : "AUD",
+      created_at: String(raw.created_at ?? ""),
+      updated_at: String(raw.updated_at ?? ""),
+    };
+    const cid = raw.case_id ? String(raw.case_id) : null;
+    const iid = raw.invoice_id ? String(raw.invoice_id) : null;
+    const bid = raw.booking_id ? String(raw.booking_id) : null;
+    if (cid) byCaseId.set(cid, [...(byCaseId.get(cid) ?? []), row]);
+    if (iid) byInvoiceId.set(iid, [...(byInvoiceId.get(iid) ?? []), row]);
+    if (bid) byBookingId.set(bid, [...(byBookingId.get(bid) ?? []), row]);
+  }
+
+  return { byCaseId, byInvoiceId, byBookingId };
+}
+
 async function loadFailedPaymentsForInvoices(
   supabase: SupabaseClient,
   tenantId: string,
@@ -112,6 +168,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
       patient_id: string | null;
       booking_status: string;
       financial_os_status?: string | null;
+      start_at?: string | null;
     }>;
   }
 ): Promise<Map<string, FinancialSurgeryPipelineStatus>> {
@@ -174,23 +231,41 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
 
     const failedSince = new Date();
     failedSince.setUTCDate(failedSince.getUTCDate() - 60);
-    const [installmentPlans, failedPayments] = await Promise.all([
+    const [installmentPlans, failedPayments, pathwaysByContext] = await Promise.all([
       loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
       loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
+      loadPaymentPathwayRowsForContext(supabase, tid, {
+        caseIds,
+        invoiceIds,
+        bookingIds: bookings.map((b) => b.id),
+      }),
     ]);
 
     for (const b of bookings) {
+      const cid = b.case_id?.trim() || null;
+      const ctxInvoiceIds = allInvoices
+        .filter((i) => (cid ? i.case_id?.trim() === cid : i.patient_id?.trim() === b.patient_id?.trim() && !i.case_id))
+        .map((i) => i.id);
+      const pathwayRows = [
+        ...(cid ? pathwaysByContext.byCaseId.get(cid) ?? [] : []),
+        ...(pathwaysByContext.byBookingId.get(b.id) ?? []),
+        ...ctxInvoiceIds.flatMap((iid) => pathwaysByContext.byInvoiceId.get(iid) ?? []),
+      ];
+      const dedupedPathwayRows = Array.from(new Map(pathwayRows.map((r) => [r.id, r])).values());
+
       const st = buildFinancialSurgeryPipelineStatus({
         todayYmd,
         calendarTimezone,
         booking_status: b.booking_status,
         financial_os_status: b.financial_os_status ?? null,
-        case_id: b.case_id?.trim() || null,
+        case_id: cid,
         patient_id: b.patient_id?.trim() || null,
         invoices: allInvoices,
         paymentRequests,
         payments: failedPayments,
         installmentPlans,
+        paymentPathways: dedupedPathwayRows,
+        surgeryDateYmd: b.start_at ? String(b.start_at).slice(0, 10) : null,
       });
       out.set(b.id, st);
     }
@@ -231,10 +306,22 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
     const invoiceIds = readiness.invoices.map((i) => i.id);
     const failedSince = new Date();
     failedSince.setUTCDate(failedSince.getUTCDate() - 60);
-    const [installmentPlans, failedPayments] = await Promise.all([
+    const [installmentPlans, failedPayments, pathwaysByContext] = await Promise.all([
       loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
       loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
+      loadPaymentPathwayRowsForContext(supabase, tid, {
+        caseIds: [cid],
+        invoiceIds,
+        bookingIds: surgeryBookings.map((b) => b.id),
+      }),
     ]);
+
+    const pathwayRows = [
+      ...(pathwaysByContext.byCaseId.get(cid) ?? []),
+      ...invoiceIds.flatMap((iid) => pathwaysByContext.byInvoiceId.get(iid) ?? []),
+      ...surgeryBookings.flatMap((b) => pathwaysByContext.byBookingId.get(b.id) ?? []),
+    ];
+    const dedupedPathwayRows = Array.from(new Map(pathwayRows.map((r) => [r.id, r])).values());
 
     return buildFinancialSurgeryPipelineStatus({
       todayYmd,
@@ -247,6 +334,8 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
       paymentRequests: readiness.paymentRequests,
       payments: failedPayments,
       installmentPlans,
+      paymentPathways: dedupedPathwayRows,
+      surgeryDateYmd: primary?.start_at ? String(primary.start_at).slice(0, 10) : null,
     });
   } catch {
     return emptyUnavailable();

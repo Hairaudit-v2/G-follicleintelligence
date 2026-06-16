@@ -103,6 +103,7 @@ export async function loadCrmLeadConversionState(
       .select("id, status")
       .eq("tenant_id", tid)
       .eq("id", lead.case_id)
+      .is("deleted_at", null)
       .maybeSingle();
     if (cErr) throw new Error(cErr.message);
     if (c?.id) {

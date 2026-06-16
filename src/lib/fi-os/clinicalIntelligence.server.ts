@@ -52,6 +52,7 @@ export async function loadTenantClinicalIntelligenceSummary(
       .eq("tenant_id", tid)
       .not("status", "eq", "complete")
       .not("status", "eq", "failed")
+      .is("deleted_at", null)
       .limit(400),
   ]);
 

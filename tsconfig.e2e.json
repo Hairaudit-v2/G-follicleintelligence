@@ -1,0 +1,21 @@
+{
+  // Typecheck-only config for the Playwright e2e suite.
+  //
+  // The main tsconfig.json deliberately excludes e2e/** and
+  // playwright.config.ts so that `npm run typecheck` stays clean even when
+  // @playwright/test is not installed locally (see e2e/README.md). This
+  // config re-includes those files so they can be typechecked on their own
+  // *once* dependencies are installed in a clean environment.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // Playwright + config run under Node, not the Next.js bundler runtime.
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["node"]
+  },
+  // Override the parent's exclude (which lists "e2e") so these files are
+  // actually picked up here; keep node_modules excluded.
+  "include": ["e2e/**/*.ts", "playwright.config.ts"],
+  "exclude": ["node_modules"]
+}

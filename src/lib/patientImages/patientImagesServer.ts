@@ -154,6 +154,7 @@ async function assertOptionalCaseForPatient(
     .select("id, tenant_id, foundation_patient_id")
     .eq("tenant_id", tenantId)
     .eq("id", caseId)
+    .is("deleted_at", null)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data || String((data as { foundation_patient_id: string | null }).foundation_patient_id) !== patientId) {

@@ -46,6 +46,7 @@ async function assertCaseBelongsToPatient(
     .select("id, foundation_patient_id")
     .eq("tenant_id", tenantId.trim())
     .eq("id", caseId.trim())
+    .is("deleted_at", null)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Case not found.");

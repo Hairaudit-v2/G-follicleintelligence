@@ -68,6 +68,46 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         </dl>
       </section>
 
+      <section>
+        <h2 className="text-sm font-semibold text-slate-900">Payment pathways</h2>
+        <p className="mt-1 max-w-2xl text-xs text-slate-600">
+          Settlement intent recorded on <code className="rounded bg-slate-100 px-1">fi_payment_pathways</code> — see{" "}
+          <code className="rounded bg-slate-100 px-1">Payment Pathways</code> for detail and management.
+        </p>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">By type</dt>
+            <dd className="mt-1 space-y-0.5 text-[11px] text-slate-700">
+              {Object.entries(metrics.paymentPathways.countsByType).map(([type, count]) => (
+                <div key={type} className="flex justify-between gap-2">
+                  <span>{type}</span>
+                  <span className="font-mono">{count}</span>
+                </div>
+              ))}
+            </dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">By status</dt>
+            <dd className="mt-1 space-y-0.5 text-[11px] text-slate-700">
+              {Object.entries(metrics.paymentPathways.countsByStatus)
+                .filter(([, count]) => count > 0)
+                .map(([status, count]) => (
+                  <div key={status} className="flex justify-between gap-2">
+                    <span>{status}</span>
+                    <span className="font-mono">{count}</span>
+                  </div>
+                ))}
+            </dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Expected settlement (next 30 days)</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.paymentPathways.expectedSettlementNext30DaysCount}</dd>
+            <dt className="mt-2 text-xs text-slate-500">Pathway attention</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.paymentPathways.attentionCount}</dd>
+          </div>
+        </dl>
+      </section>
+
       <section className="rounded border border-slate-200 bg-slate-50/80 p-4 text-xs text-slate-700">
         <h2 className="text-sm font-semibold text-slate-900">Automation cron</h2>
         <p className="mt-2">

@@ -81,6 +81,7 @@ async function loadPatientIdsWithActiveCases(supabase: SupabaseClient, tenantId:
     .from("fi_cases")
     .select("foundation_patient_id, status")
     .eq("tenant_id", tenantId)
+    .is("deleted_at", null)
     .not("foundation_patient_id", "is", null);
   if (error) throw new Error(error.message);
   const out = new Set<string>();
@@ -405,6 +406,7 @@ export async function loadPatientDirectoryPage(
       .from("fi_cases")
       .select("foundation_patient_id, status")
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .in("foundation_patient_id", patientIds),
     supabase.from("fi_crm_leads").select("id, patient_id, metadata").eq("tenant_id", tid).in("patient_id", patientIds),
     supabase

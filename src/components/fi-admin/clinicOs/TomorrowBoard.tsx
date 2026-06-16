@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { TomorrowBoardPayload } from "@/src/lib/clinicOs/tomorrowBoardLoader.server";
@@ -153,12 +154,17 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                           </div>
                         </div>
                         {r.financialPipeline ? (
-                          <FinancialSurgeryPipelineInline
-                            tenantId={data.tenantId}
-                            caseId={r.caseId}
-                            status={r.financialPipeline}
-                            variant="dark"
-                          />
+                          <>
+                            <FinancialSurgeryPipelineInline
+                              tenantId={data.tenantId}
+                              caseId={r.caseId}
+                              status={r.financialPipeline}
+                              variant="dark"
+                            />
+                            <div className="mt-1.5">
+                              <FinancialPaymentPathwayBadge summary={r.financialPipeline.paymentPathway} variant="dark" />
+                            </div>
+                          </>
                         ) : null}
                       </div>
                     </li>
@@ -222,6 +228,9 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                         variant="dark"
                         compact
                       />
+                      <div className="mt-1.5">
+                        <FinancialPaymentPathwayBadge summary={row.financialPipeline.paymentPathway} variant="dark" />
+                      </div>
                     </div>
                   ) : (
                     <p className="text-[0.65rem] leading-snug text-slate-500">{FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY}</p>

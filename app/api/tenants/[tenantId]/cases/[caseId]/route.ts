@@ -28,6 +28,7 @@ export async function GET(
       .select("id, external_id, status, partner_id, created_at")
       .eq("id", caseId)
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .single();
 
     if (caseErr || !caseRow)

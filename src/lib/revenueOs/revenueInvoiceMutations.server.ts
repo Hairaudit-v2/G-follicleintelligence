@@ -231,6 +231,7 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
     .select("id, tenant_id, patient_id, clinic_id, lead_id")
     .eq("tenant_id", tid)
     .eq("id", caseId)
+    .is("deleted_at", null)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!c) throw new Error("Case not found.");
@@ -318,6 +319,7 @@ export async function createBalanceInvoiceFromSurgeryCase(args: {
     .select("id, tenant_id, patient_id, clinic_id, lead_id")
     .eq("tenant_id", tid)
     .eq("id", caseId)
+    .is("deleted_at", null)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!c) throw new Error("Case not found.");

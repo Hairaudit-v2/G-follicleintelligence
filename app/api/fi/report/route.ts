@@ -65,6 +65,7 @@ export async function GET(req: Request) {
         .select("id")
         .eq("id", case_id)
         .eq("tenant_id", tenant_id)
+        .is("deleted_at", null)
         .single();
       if (!caseRow)
         return NextResponse.json({ ok: false, error: "Case not found." }, { status: 404 });
@@ -82,6 +83,7 @@ export async function GET(req: Request) {
         .select("id")
         .eq("id", case_id)
         .eq("tenant_id", tenant_id)
+        .is("deleted_at", null)
         .single();
       if (!caseRow)
         return NextResponse.json({ ok: false, error: "Case not found." }, { status: 404 });

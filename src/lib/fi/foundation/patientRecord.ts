@@ -196,6 +196,7 @@ export async function enrichCasesWithExternalAndNames(
       .from("fi_cases")
       .select("id, external_id")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .in("id", slice);
     if (error) throw new Error(error.message);
     for (const row of data ?? []) {

@@ -41,3 +41,10 @@ docs/timely-import/input/ServiceSales.csv
 # Supabase CLI local link state (do not commit)
 supabase/.temp/
 supabase/.branches/
+
+# Playwright e2e artifacts (do not commit)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.playwright/

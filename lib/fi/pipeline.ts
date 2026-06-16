@@ -77,7 +77,7 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
         } else {
           return {
             ok: false,
-            error: `Case already has ${activeOrComplete.status} job. Wait for completion or use existing jobId.`,
+            error: "Case already has " + activeOrComplete.status + " job. Wait for completion or use existing jobId.",
           };
         }
       }
@@ -119,6 +119,7 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
       .select("id, partner_id")
       .eq("id", caseId)
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .single();
     if (!caseRow) return { ok: false, error: "Case not found." };
 
@@ -153,6 +154,9 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
     await updateStage("blood_extract");
     const bloodResult = await runBloodExtract(ctx, { uploads }, dryRun);
     if (!bloodResult.ok) throw new Error(bloodResult.error);
+    if (bloodResult.warning) {
+      console.warn("[pipeline:blood_extract] caseId=" + caseId + " -- " + bloodResult.warning);
+    }
 
     await updateStage("image_extract");
     const imageResult = await runImageExtract(
@@ -161,6 +165,9 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
       dryRun
     );
     if (!imageResult.ok) throw new Error(imageResult.error);
+    if (imageResult.warning) {
+      console.warn("[pipeline:image_extract] caseId=" + caseId + " -- " + imageResult.warning);
+    }
 
     await updateStage("androgen_age_model");
     const androgenResult = await runAndrogenAgeModel(
@@ -228,7 +235,7 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
     return {
       ok: true,
       jobId,
-      storagePath: `[DRY RUN] ${pdfResult.data.storagePath}`,
+      storagePath: "[DRY RUN] " + pdfResult.data.storagePath,
     };
   } catch (e: unknown) {
     const errMsg = e instanceof Error ? e.message : String(e);

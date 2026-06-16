@@ -27,7 +27,7 @@ async function assertConsultationInTenant(tenantId: string, consultationId: stri
 
 async function assertCaseInTenant(tenantId: string, caseId: string): Promise<void> {
   const supabase = supabaseAdmin();
-  const { data, error } = await supabase.from("fi_cases").select("id").eq("tenant_id", tenantId).eq("id", caseId).maybeSingle();
+  const { data, error } = await supabase.from("fi_cases").select("id").eq("tenant_id", tenantId).eq("id", caseId).is("deleted_at", null).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Case not found for this tenant.");
 }

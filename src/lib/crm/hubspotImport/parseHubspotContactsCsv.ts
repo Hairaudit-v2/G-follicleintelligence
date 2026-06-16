@@ -23,7 +23,7 @@ export function parseHubspotContactsCsv(content: string): ParseHubspotContactsCs
     return {
       headers,
       rows: [],
-      error: `Unrecognised headers: ${unknown.slice(0, 5).join(", ")}${unknown.length > 5 ? "…" : ""}`,
+      error: "Unrecognised headers: " + unknown.slice(0, 5).join(", ") + (unknown.length > 5 ? "..." : ""),
     };
   }
 
@@ -49,6 +49,7 @@ export function parseHubspotContactsCsv(content: string): ParseHubspotContactsCs
       associatedDeal: null,
       associatedCompany: null,
       associatedDealIds: null,
+      nonSurgical: null,
     };
     for (let c = 0; c < headers.length; c++) {
       const key = headerKeys[c];

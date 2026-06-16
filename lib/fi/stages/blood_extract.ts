@@ -1,11 +1,25 @@
 /**
- * blood_extract: reads uploads, populates fi_signals_blood.
+ * blood_extract: reads blood-panel uploads and populates fi_signals_blood.
  * Deterministic, idempotent (replace semantics).
+ *
+ * STATUS: NOT IMPLEMENTED
+ * -----------------------
+ * Real PDF/CSV extraction logic has not been built yet. This stage returns
+ * an empty marker set and does NOT write any rows to fi_signals_blood.
+ *
+ * Downstream stages (androgen_age_model, report_compose) handle an empty
+ * marker array by omitting the hormonal_androgen scorecard section -- this
+ * is an honest "no blood data analysed" result rather than fake placeholder
+ * data that could be mistaken for a real clinical signal.
+ *
+ * When extraction is implemented, remove the early-return guard below and
+ * replace it with actual parsing logic. The output type and DB schema are
+ * already correct and require no changes.
  */
 import type { StageContext, StageResult } from "./types";
 
-const BLOOD_TYPES = ["blood_pdf", "blood_csv"] as const;
-type BloodUploadType = (typeof BLOOD_TYPES)[number];
+export const BLOOD_UPLOAD_TYPES = ["blood_pdf", "blood_csv"] as const;
+type BloodUploadType = (typeof BLOOD_UPLOAD_TYPES)[number];
 
 export type BloodExtractInput = {
   uploads: Array<{
@@ -30,48 +44,27 @@ export type BloodExtractOutput = {
   confidence: Record<string, number | string>;
 };
 
-const BUCKET = process.env.FI_STORAGE_BUCKET_INTAKES || "fi-intakes";
-
 export async function runBloodExtract(
-  ctx: StageContext,
+  _ctx: StageContext,
   input: BloodExtractInput,
-  dryRun?: boolean
+  _dryRun?: boolean
 ): Promise<StageResult<BloodExtractOutput>> {
-  const { tenantId, caseId, supabase } = ctx;
-
   const bloodUploads = input.uploads.filter((u) =>
-    BLOOD_TYPES.includes(u.type as BloodUploadType)
+    BLOOD_UPLOAD_TYPES.includes(u.type as BloodUploadType)
   );
-  const markers: BloodMarker[] = [];
-
-  for (const u of bloodUploads) {
-    const { data } = await supabase.storage.from(BUCKET).download(u.storage_path);
-    if (data) {
-      // TODO: run actual PDF/CSV extraction; for now stub
-      markers.push({ name: "placeholder", value: null, unit: "" });
-    }
-  }
 
   const output: BloodExtractOutput = {
-    markers,
-    confidence: { overall: markers.length > 0 ? "stub" : "none" },
+    markers: [],
+    confidence: { status: "not_implemented" },
   };
 
-  if (!dryRun) {
-    await supabase
-      .from("fi_signals_blood")
-      .delete()
-      .eq("case_id", caseId)
-      .eq("tenant_id", tenantId);
-    if (output.markers.length > 0) {
-      await supabase.from("fi_signals_blood").insert({
-        tenant_id: tenantId,
-        case_id: caseId,
-        payload: { markers: output.markers },
-        confidence: output.confidence,
-      });
-    }
-  }
+  const warning =
+    bloodUploads.length > 0
+      ? "Blood signal extraction is not yet implemented. " +
+        String(bloodUploads.length) +
+        " blood upload(s) were present but no markers were extracted. " +
+        "No data was written to fi_signals_blood."
+      : undefined;
 
-  return { ok: true, data: output };
+  return { ok: true, data: output, warning };
 }

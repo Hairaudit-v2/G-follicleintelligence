@@ -6,6 +6,12 @@
 import { addDaysToCalendarDate } from "@/src/lib/calendar/calendarTimezone";
 import type { FiInvoiceRow, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  buildPaymentPathwayAttentionSummary,
+  resolveActivePaymentPathway,
+  type FiPaymentPathwayRow,
+  type PaymentPathwayAttentionSummary,
+} from "@/src/lib/financialOs/financialPaymentPathwayCore";
 
 export const FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY = "Financial status unavailable" as const;
 
@@ -31,6 +37,8 @@ export type FinancialSurgeryPipelineStatus = {
   latest_payment_request_status: string | null;
   /** Short label for chips, e.g. "Paid in full", "Payment attention". */
   summary_label: string;
+  /** FinancialOS Phase 2: active payment pathway summary for this context (independent of invoice state). */
+  paymentPathway: PaymentPathwayAttentionSummary;
 };
 
 function ymd(s: string | null | undefined): string | null {
@@ -92,6 +100,10 @@ export type BuildFinancialSurgeryPipelineStatusInput = {
     next_payment_date: string | null;
     remaining_balance: number;
   }>;
+  /** FinancialOS Phase 2: payment pathway rows for this context (invoice/booking/case scoped). Defaults to none. */
+  paymentPathways?: FiPaymentPathwayRow[];
+  /** Surgery date for this context (YYYY-MM-DD), used by pathway attention horizon rules. */
+  surgeryDateYmd?: string | null;
 };
 
 function foldInvoiceStates(
@@ -124,16 +136,26 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     paymentRequests,
     payments,
     installmentPlans,
+    paymentPathways = [],
+    surgeryDateYmd = null,
   } = input;
 
   const fos = financial_os_status?.trim() || null;
   const ctxInvoices = invoices.filter((inv) => isSurgeryRevenueKind(inv) && invoiceMatchesBookingContext(inv, case_id, patient_id));
 
+  const activePathway = resolveActivePaymentPathway(paymentPathways);
+  const paymentPathway = buildPaymentPathwayAttentionSummary({
+    todayYmd,
+    surgeryDateYmd,
+    pathway: activePathway,
+  });
+
   const hasExplicitSignal =
     Boolean(fos) ||
     ctxInvoices.length > 0 ||
     paymentRequests.some((pr) => ctxInvoices.some((i) => i.id === pr.invoice_id)) ||
-    installmentPlans.some((p) => ctxInvoices.some((i) => i.id === p.invoice_id));
+    installmentPlans.some((p) => ctxInvoices.some((i) => i.id === p.invoice_id)) ||
+    paymentPathway.hasActivePathway;
 
   const horizonYmd = addDaysToCalendarDate(todayYmd, 14, calendarTimezone);
 
@@ -156,6 +178,7 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
       payment_attention_required: false,
       latest_payment_request_status: null,
       summary_label: FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY,
+      paymentPathway,
     };
   }
 
@@ -212,7 +235,8 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     balance_due_within_14_days ||
     balance_overdue ||
     failed_payment_in_last_60_days ||
-    installment_overdue;
+    installment_overdue ||
+    paymentPathway.pathway_attention_required;
 
   const dueCandidates: string[] = [];
   for (const inv of ctxInvoices) {
@@ -264,5 +288,6 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     payment_attention_required,
     latest_payment_request_status,
     summary_label,
+    paymentPathway,
   };
 }

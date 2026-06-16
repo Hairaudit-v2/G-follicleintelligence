@@ -128,7 +128,7 @@ export async function loadPatientSlideOverPayload(
         .eq("tenant_id", tid)
         .eq("patient_id", pid)
         .maybeSingle(),
-      supabase.from("fi_cases").select("status").eq("tenant_id", tid).eq("foundation_patient_id", pid),
+      supabase.from("fi_cases").select("status").eq("tenant_id", tid).eq("foundation_patient_id", pid).is("deleted_at", null),
       supabase.from("fi_bookings").select("*").eq("tenant_id", tid).eq("patient_id", pid),
       loadPersonCrmActivityForLeads(supabase, tid, pid, personLeadHistory, 20),
       loadConsultationsForPatient(tid, pid, personId),

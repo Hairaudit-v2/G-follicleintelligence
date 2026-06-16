@@ -26,6 +26,7 @@ export async function updateCaseProfile(params: UpdateCaseProfileParams, client?
     .select("id, metadata")
     .eq("tenant_id", tid)
     .eq("id", cid)
+    .is("deleted_at", null)
     .maybeSingle();
   if (re) throw new Error(re.message);
   if (!existing) throw new Error("Case not found.");

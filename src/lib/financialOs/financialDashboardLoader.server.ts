@@ -4,6 +4,10 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import {
+  loadFinancialPaymentPathwayDashboardCounts,
+  type FinancialPaymentPathwayDashboardCounts,
+} from "@/src/lib/financialOs/financialPaymentPathways.server";
 
 export type FinancialOsDashboardMetrics = {
   outstandingRevenueCents: number;
@@ -14,6 +18,8 @@ export type FinancialOsDashboardMetrics = {
   depositConversionRate: number | null;
   monthlyRevenueForecastCents: number | null;
   currency: string;
+  /** FinancialOS Phase 2: payment pathway counts and settlement risk. */
+  paymentPathways: FinancialPaymentPathwayDashboardCounts;
 };
 
 function sumBalances(rows: FiInvoiceRow[]): { cents: number; currency: string } {
@@ -121,6 +127,8 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
   const monthlyRevenueForecastCents =
     totals.length > 0 ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length) : null;
 
+  const paymentPathways = await loadFinancialPaymentPathwayDashboardCounts(tid);
+
   return {
     outstandingRevenueCents: outstandingRevenueCents,
     outstandingInvoiceCount: invoices.filter((r) => isInvoiceOpenForCollection(r.status) && invoiceBalanceDueCents(r) > 0).length,
@@ -130,5 +138,6 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
     depositConversionRate,
     monthlyRevenueForecastCents,
     currency,
+    paymentPathways,
   };
 }

@@ -24,6 +24,8 @@ export type StagingRowDb = {
   associated_deal: string | null;
   associated_company: string | null;
   associated_deal_ids: string | null;
+  /** Preserved from HubSpot Non-Surgical custom property; null when column absent. */
+  non_surgical: string | null;
 };
 
 export function stagingDbRowToParsed(row: StagingRowDb): HubspotContactParsedRow {
@@ -46,6 +48,7 @@ export function stagingDbRowToParsed(row: StagingRowDb): HubspotContactParsedRow
     associatedDeal: row.associated_deal,
     associatedCompany: row.associated_company,
     associatedDealIds: row.associated_deal_ids,
+    nonSurgical: row.non_surgical ?? null,
   };
 }
 
@@ -109,7 +112,12 @@ export async function loadAllStagingRowsForBatch(tenantId: string, batchId: stri
   const tid = tenantId.trim();
   const bid = batchId.trim();
 
-  const { data: b, error: be } = await supabase.from("fi_import_batches").select("id").eq("tenant_id", tid).eq("id", bid).maybeSingle();
+  const { data: b, error: be } = await supabase
+    .from("fi_import_batches")
+    .select("id")
+    .eq("tenant_id", tid)
+    .eq("id", bid)
+    .maybeSingle();
   if (be) throw new Error(be.message);
   if (!b) throw new Error("Import batch not found.");
 

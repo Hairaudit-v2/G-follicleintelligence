@@ -52,6 +52,8 @@ function buildHubspotPersonMetadata(params: {
       mapped_pipeline_slug: validation.mappedPipelineSlug,
       mapped_lead_status_key: validation.mappedLeadStatusKey,
       import_classification: validation.classification,
+      // Non-Surgical custom property: preserved when present in export
+      non_surgical: row.nonSurgical?.trim() ?? null,
     },
   };
   if (emailNorm && !isPlaceholderEmail(emailNorm)) {
@@ -63,8 +65,14 @@ function buildHubspotPersonMetadata(params: {
   if (display) {
     base.display_name = display;
   }
-  if (row.phoneNumber?.trim()) {
+  if (!validation.phoneCorrupted && row.phoneNumber?.trim()) {
+    // Only store phone when it is not Excel-mangled scientific notation.
     base.phone = row.phoneNumber.trim();
+  } else if (validation.phoneCorrupted && row.phoneNumber?.trim()) {
+    // Preserve the raw corrupted value in the hubspot audit block for manual recovery.
+    const hub = base.hubspot as Record<string, unknown>;
+    hub.phone_number_quarantined = row.phoneNumber.trim();
+    hub.phone_number_quarantine_reason = "scientific_notation_mangled";
   }
   return base;
 }
@@ -99,7 +107,7 @@ function leadSummary(row: HubspotContactParsedRow, recordId: string): string {
   if (display) return display.slice(0, 500);
   const em = row.email?.trim();
   if (em) return em.slice(0, 500);
-  return `HubSpot contact ${recordId}`.slice(0, 500);
+  return ("HubSpot contact " + recordId).slice(0, 500);
 }
 
 async function deletePersonCascade(supabase: SupabaseClient, tenantId: string, personId: string): Promise<void> {
@@ -150,7 +158,7 @@ export async function commitHubspotImportStage1Rows(params: {
     }
     if (await hubspotRecordIdExists(tenantId, recordId, supabase)) {
       skipped++;
-      errors.push(`Row ${row.rowIndex}: skipped — HubSpot Record ID already imported.`);
+      errors.push("Row " + String(row.rowIndex) + ": skipped -- HubSpot Record ID already imported.");
       continue;
     }
 
@@ -267,7 +275,7 @@ export async function commitHubspotImportStage1Rows(params: {
       imported++;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      errors.push(`Row ${row.rowIndex}: ${msg}`);
+      errors.push("Row " + String(row.rowIndex) + ": " + msg);
       if (personId) {
         try {
           if (leadId) {

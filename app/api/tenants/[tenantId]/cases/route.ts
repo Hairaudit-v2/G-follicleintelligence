@@ -31,6 +31,7 @@ export async function GET(
       .from("fi_cases")
       .select("id, external_id, status, partner_id, created_at")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false });
 
     if (status)

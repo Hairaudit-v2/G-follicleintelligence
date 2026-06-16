@@ -131,6 +131,7 @@ export async function markCrmQuoteAcceptedForTenant(
       .select("foundation_patient_id, patient_id")
       .eq("tenant_id", tid)
       .eq("id", caseId)
+      .is("deleted_at", null)
       .maybeSingle();
     if (!ke && kase) {
       const fp = (kase as { foundation_patient_id?: string | null }).foundation_patient_id;
