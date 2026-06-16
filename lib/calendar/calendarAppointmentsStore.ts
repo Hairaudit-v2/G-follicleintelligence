@@ -153,13 +153,13 @@ export const useCalendarAppointmentsStore = create<CalendarAppointmentsState>((s
   getBooking: (id) => get().bookings.find((b) => b.id === id),
 }));
 
-/** Build a stable key when server range / view changes. */
+/** Build a stable key when server range / view changes (includes demo sample flag — it changes merged rows). */
 export function calendarAppointmentsSyncKey(data: {
   tenantId: string;
   rangeStartIso: string;
   rangeEndIso: string;
   calendarTimezone: string;
-  query: { view: string; dateAnchor: string };
+  query: { view: string; dateAnchor: string; sampleMode?: boolean };
 }): string {
   return [
     data.tenantId,
@@ -168,5 +168,6 @@ export function calendarAppointmentsSyncKey(data: {
     data.rangeEndIso,
     data.query.view,
     data.query.dateAnchor,
+    data.query.sampleMode ? "sample:1" : "sample:0",
   ].join("|");
 }

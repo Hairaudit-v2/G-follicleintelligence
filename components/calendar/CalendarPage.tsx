@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Phone, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import { CalendarRightPanel } from "@/components/calendar/CalendarRightPanel";
@@ -31,6 +31,7 @@ import {
 } from "@/src/lib/calendar/calendarQuickCreateTemplates";
 import { useAppointmentSlideOverOptional } from "@/src/components/fi/appointments/AppointmentSlideOver";
 import { useCalendarAppointments } from "@/hooks/useCalendarAppointments";
+import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
 import { cn } from "@/lib/utils";
 import { FiOsCalendarQuickFilters } from "@/src/components/fi-admin/calendar/FiOsCalendarQuickFilters";
 import { FiOsCalendarTodayCommandStrip } from "@/src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip";
@@ -88,10 +89,27 @@ export function CalendarPage({
 
   const sampleMode = Boolean(useSampleData || data.query.sampleMode);
 
+  const openBookingDrawer = useCallback((b: FiBookingRow) => {
+    setDrawer(b);
+  }, []);
+
   const { bookings, bookingDisplay, buckets, rescheduleBooking, refresh, pendingIds, upsertBooking } = useCalendarAppointments(
     data,
     { useSampleData: sampleMode }
   );
+
+  const renderCountRef = useRef(0);
+  renderCountRef.current += 1;
+  useEffect(() => {
+    logCalendarClientPerf("calendar-page", {
+      renderCount: renderCountRef.current,
+      view: data.query.view,
+      dateAnchor: data.query.dateAnchor,
+      rangeStartIso: data.rangeStartIso,
+      rangeEndIso: data.rangeEndIso,
+      bookingCount: bookings.length,
+    });
+  }, [bookings.length, data.query.dateAnchor, data.query.view, data.rangeEndIso, data.rangeStartIso]);
 
   const slotPrefillLocal = useMemo(() => `${data.query.dateAnchor.trim()}T09:00`, [data.query.dateAnchor]);
 
@@ -207,7 +225,7 @@ export function CalendarPage({
         bookingDisplay={bookingDisplay}
         calendarTimezone={data.calendarTimezone}
         addAppointmentHref={`${base}/appointments`}
-        onSelectBooking={(b) => setDrawer(b)}
+        onSelectBooking={openBookingDrawer}
         draggableWaitlist={data.canMutateBookings}
         disableMobileOverlay={isFiOsWorkspace}
         className={cn(
@@ -305,7 +323,11 @@ export function CalendarPage({
       ) : null}
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <AnimatePresence mode="wait">
+        {/*
+          AnimatePresence `mode="wait"` forces the outgoing Month/Week view to fully unmount before the next mounts,
+          which made Month ↔ Week toggles feel "stuck" while exit animations ran. `sync` keeps navigation responsive.
+        */}
+        <AnimatePresence mode="sync">
           {isMonthView ? (
             <motion.div key="month" className="flex min-h-0 flex-1 flex-col" {...viewMotion}>
               <MonthView
@@ -318,7 +340,7 @@ export function CalendarPage({
                 staffIdByUserId={staffIdByUserId}
                 gridConfig={data.gridConfig}
                 canMutateBookings={data.canMutateBookings}
-                onSelectBooking={(b) => setDrawer(b)}
+                onSelectBooking={openBookingDrawer}
                 onRescheduleBooking={rescheduleBooking}
                 pendingAppointmentIds={pendingIds}
                 tenantId={data.tenantId}
@@ -345,7 +367,7 @@ export function CalendarPage({
                 canMutateBookings={data.canMutateBookings}
                 bookings={bookings}
                 highlightedColumnId={highlightedColumnId}
-                onSelectBooking={(b) => setDrawer(b)}
+                onSelectBooking={openBookingDrawer}
                 onRescheduleBooking={rescheduleBooking}
                 pendingAppointmentIds={pendingIds}
                 shortcuts={{

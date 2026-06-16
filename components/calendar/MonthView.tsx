@@ -16,7 +16,7 @@ import {
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import {
   AppointmentCard,
@@ -64,6 +64,7 @@ import type {
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -76,6 +77,9 @@ export const MONTH_WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "
 export const MONTH_GRID_WEEKS = 6;
 
 export const MONTH_MAX_VISIBLE_APPOINTMENTS = 3;
+
+/** Stable empty reference so month cells do not receive a fresh `[]` each render (memo props churn). */
+const EMPTY_DAY_BOOKINGS: FiBookingRow[] = [];
 
 const PROVIDER_DOT_COLORS = [
   "bg-sky-400",
@@ -207,15 +211,24 @@ export function bucketBookingsForMonthCells(
   for (const cell of cells) {
     map.set(cell.dayKey, []);
   }
+  if (cells.length === 0) return map;
+
+  /** Chronological scan lets us `break` once `cell.startMs >= booking end` (cheaper than 42 × N for long ranges). */
+  const sortedCells = [...cells].sort((a, b) => a.startMs - b.startMs);
+  const gridStart = sortedCells[0]!.startMs;
+  const gridEnd = sortedCells[sortedCells.length - 1]!.endMs;
 
   for (const booking of bookings) {
     const s = parseIsoUtcMs(booking.start_at);
     const e = parseIsoUtcMs(booking.end_at);
     if (s == null || e == null) continue;
+    if (e <= gridStart || s >= gridEnd) continue;
 
-    for (const cell of cells) {
+    for (const cell of sortedCells) {
+      if (cell.endMs <= s) continue;
+      if (cell.startMs >= e) break;
       if (s < cell.endMs && e > cell.startMs) {
-        map.get(cell.dayKey)?.push(booking);
+        map.get(cell.dayKey)!.push(booking);
       }
     }
   }
@@ -290,7 +303,7 @@ function summarizeProvidersForDay(
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function MonthAppointmentPill({
+const MonthAppointmentPill = memo(function MonthAppointmentPill({
   booking,
   label,
   draggable,
@@ -360,9 +373,9 @@ function MonthAppointmentPill({
       </span>
     </button>
   );
-}
+});
 
-function MonthDayCell({
+const MonthDayCell = memo(function MonthDayCell({
   cell,
   dayBookings,
   bookingDisplay,
@@ -496,7 +509,7 @@ function MonthDayCell({
       </div>
     </motion.div>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Month view
@@ -542,6 +555,17 @@ function MonthViewInner({
     () => formatMonthTitle(monthAnchor, gridConfig.timeZone),
     [monthAnchor, gridConfig.timeZone]
   );
+
+  const renderCountRef = useRef(0);
+  renderCountRef.current += 1;
+  useEffect(() => {
+    logCalendarClientPerf("month-view", {
+      renderCount: renderCountRef.current,
+      monthAnchor,
+      bookingCount: bookings.length,
+      cellCount: cells.length,
+    });
+  }, [bookings.length, cells.length, monthAnchor]);
 
   const monthStats = useMemo(() => {
     let total = 0;
@@ -732,7 +756,7 @@ function MonthViewInner({
           <MonthDayCell
             key={cell.dayKey}
             cell={cell}
-            dayBookings={buckets.get(cell.dayKey) ?? []}
+            dayBookings={buckets.get(cell.dayKey) ?? EMPTY_DAY_BOOKINGS}
             bookingDisplay={bookingDisplay}
             resourceColumns={resourceColumns}
             staffIdByUserId={staffIdByUserId}

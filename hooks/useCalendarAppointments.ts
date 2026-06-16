@@ -9,6 +9,10 @@ import {
   useCalendarAppointmentsStore,
   type CalendarReschedulePatch,
 } from "@/lib/calendar/calendarAppointmentsStore";
+import {
+  calendarBookingsHydrationFingerprint,
+  calendarBookingDisplayHydrationFingerprint,
+} from "@/src/lib/calendar/calendarHydrationFingerprint";
 import { mapCalendarAppointmentToBookingRow } from "@/src/lib/bookings/appointmentDto";
 import {
   isSampleBookingId,
@@ -62,7 +66,8 @@ export type UseCalendarAppointmentsResult = {
 /**
  * Client calendar data layer — Zustand store with optimistic drag-and-drop reschedule.
  *
- * - Hydrates from server {@link OperationalCalendarPageData} on range/view changes
+ * - Hydrates from server {@link OperationalCalendarPageData} when the visible booking payload changes
+ *   (fingerprinted) or the calendar range key changes — avoids Zustand re-hydration storms on unrelated re-renders.
  * - Optional sample appointments via `useSampleData` or `?sample=1`
  * - Optimistic patch on drag; rolls back on server failure
  */
@@ -71,7 +76,13 @@ export function useCalendarAppointments(
   options: UseCalendarAppointmentsOptions = {}
 ): UseCalendarAppointmentsResult {
   const router = useRouter();
-  const syncKey = calendarAppointmentsSyncKey(data);
+  const syncKey = [
+    calendarAppointmentsSyncKey(data),
+    options.useSampleData ? "clientSample:1" : "clientSample:0",
+  ].join("|");
+
+  const bookingsHydrationFp = calendarBookingsHydrationFingerprint(data.bookings);
+  const displayHydrationFp = calendarBookingDisplayHydrationFingerprint(data.bookingDisplay);
 
   const bookings = useCalendarAppointmentsStore((s) => s.bookings);
   const bookingDisplay = useCalendarAppointmentsStore((s) => s.bookingDisplay);
@@ -83,6 +94,10 @@ export function useCalendarAppointments(
   const upsertBooking = useCalendarAppointmentsStore((s) => s.upsertBooking);
   const storeSyncKey = useCalendarAppointmentsStore((s) => s.syncKey);
 
+  /**
+   * Hydrate when the logical server payload changes (fingerprints), not when RSC re-instantiates
+   * the same `data.bookings` / `data.bookingDisplay` object identities — see calendarHydrationFingerprint tests.
+   */
   useEffect(() => {
     const useSamples = Boolean(options.useSampleData || data.query.sampleMode);
     const mergedBookings = useSamples
@@ -100,11 +115,11 @@ export function useCalendarAppointments(
       bookingDisplay: mergedDisplay,
     });
   }, [
-    data.bookingDisplay,
-    data.bookings,
+    bookingsHydrationFp,
     data.calendarTimezone,
     data.query.dateAnchor,
     data.tenantId,
+    displayHydrationFp,
     hydrate,
     data.query.sampleMode,
     options.useSampleData,

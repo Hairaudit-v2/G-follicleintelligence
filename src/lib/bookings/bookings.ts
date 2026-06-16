@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { FI_BOOKINGS_CALENDAR_OVERLAP_SELECT } from "@/src/lib/bookings/calendarBookingOverlapSelect";
 import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
 import type { FiCrmLeadRow } from "@/src/lib/crm/types";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
@@ -292,6 +293,8 @@ export type LoadBookingsForOperatorViewParams = {
   /** Filter by `fi_staff` id (includes legacy rows linked via `fi_staff.fi_user_id`). */
   assignedStaffId?: string | null;
   clinicId?: string | null;
+  /** Filter by `fi_clinic_rooms.id` (calendar room column / deep links). */
+  roomId?: string | null;
   /** When false, rows with `booking_status = cancelled` are omitted. */
   includeCancelled?: boolean;
   limit?: number;
@@ -340,6 +343,9 @@ export async function loadBookingsForOperatorView(
   if (params.clinicId?.trim()) {
     q = q.eq("clinic_id", params.clinicId.trim());
   }
+  if (params.roomId?.trim()) {
+    q = q.eq("room_id", params.roomId.trim());
+  }
   if (!params.includeCancelled) {
     q = q.neq("booking_status", "cancelled");
   }
@@ -349,9 +355,6 @@ export async function loadBookingsForOperatorView(
   if (error) throw new Error(error.message);
   return sortBookingsByStartAt(((data ?? []) as Record<string, unknown>[]).map(mapBookingRow));
 }
-
-const CALENDAR_BOOKING_SELECT =
-  "id, tenant_id, lead_id, person_id, patient_id, case_id, clinic_id, room_id, room_required, assigned_staff_id, assigned_user_id, booking_type, booking_status, title, description, start_at, end_at, timezone, location, metadata, cancelled_at, cancelled_by_user_id, cancellation_reason";
 
 function mapCalendarBookingRow(row: Record<string, unknown>): FiBookingRow {
   const meta = row.metadata;
@@ -407,7 +410,7 @@ export async function loadBookingsForCalendarOverlap(
 
   let q = supabase
     .from("fi_bookings")
-    .select(CALENDAR_BOOKING_SELECT)
+    .select(FI_BOOKINGS_CALENDAR_OVERLAP_SELECT)
     .eq("tenant_id", tid)
     .lt("start_at", params.rangeEndIso.trim())
     .gt("end_at", params.rangeStartIso.trim());
@@ -435,6 +438,9 @@ export async function loadBookingsForCalendarOverlap(
   }
   if (params.clinicId?.trim()) {
     q = q.eq("clinic_id", params.clinicId.trim());
+  }
+  if (params.roomId?.trim()) {
+    q = q.eq("room_id", params.roomId.trim());
   }
   if (!params.includeCancelled) {
     q = q.neq("booking_status", "cancelled");
