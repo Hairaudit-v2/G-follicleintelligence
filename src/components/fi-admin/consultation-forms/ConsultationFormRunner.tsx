@@ -277,11 +277,16 @@ export function ConsultationFormRunner({
         return;
       }
       setStatus("locked");
-      router.push(base);
+      await router.refresh();
+      if (typeof document !== "undefined") {
+        requestAnimationFrame(() => {
+          document.getElementById("consultation-guided-handoffs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
     } finally {
       setBusyComplete(false);
     }
-  }, [base, cid, initialInstance.id, router, showCompleteConsultationCta, tid]);
+  }, [cid, initialInstance.id, router, showCompleteConsultationCta, tid]);
 
   const onSubmit = useCallback(async () => {
     if (!canEdit) return;
@@ -453,16 +458,18 @@ export function ConsultationFormRunner({
             </p>
           </FiCard>
           {canShowHandoffs && persistedCompletion ? (
-            <ConsultationHandoffPanel
-              tenantId={tid}
-              consultationId={cid}
-              formInstanceId={initialInstance.id}
-              summary={persistedCompletion}
-              leadId={leadId}
-              patientId={patientId}
-              caseId={caseId}
-              handoffInitial={handoffState}
-            />
+            <div id="consultation-guided-handoffs" className="scroll-mt-4">
+              <ConsultationHandoffPanel
+                tenantId={tid}
+                consultationId={cid}
+                formInstanceId={initialInstance.id}
+                summary={persistedCompletion}
+                leadId={leadId}
+                patientId={patientId}
+                caseId={caseId}
+                handoffInitial={handoffState}
+              />
+            </div>
           ) : null}
           <details className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
             <summary className="cursor-pointer select-none text-sm font-semibold text-slate-900">

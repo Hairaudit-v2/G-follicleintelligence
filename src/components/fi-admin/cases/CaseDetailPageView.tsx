@@ -7,6 +7,7 @@ import type { UniversalCaseRecordResult } from "@/src/lib/fi/foundation/caseReco
 import { CaseClinicalIntelligencePanel } from "@/src/components/fi-admin/cases/CaseClinicalIntelligencePanel";
 import { CaseOutcomeIntelligencePanel } from "@/src/components/fi-admin/cases/CaseOutcomeIntelligencePanel";
 import { CaseAppointmentsCard } from "./CaseAppointmentsCard";
+import { CaseCrmQuotesPipelineCard } from "./CaseCrmQuotesPipelineCard";
 import { CaseDetailBackLink } from "./CaseDetailBackLink";
 import { CaseDetailSection } from "./CaseDetailSection";
 import { CaseDetailSectionNav } from "./CaseDetailSectionNav";
@@ -31,6 +32,7 @@ import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/Patien
 import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
 import { CaseRevenuePaymentsCard } from "@/src/components/fi-admin/revenue/CaseRevenuePaymentsCard";
 import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
+import type { CaseCrmQuoteRow } from "@/src/lib/crm/crmQuoteLoaders.server";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import type { CaseOutcomeIntelligenceView } from "@/src/lib/fi-os/outcomeIntelligence.server";
@@ -63,6 +65,7 @@ export function CaseDetailPageView({
   canMutatePaymentRecords = false,
   outcomeIntelligence,
   casePaymentReadiness,
+  caseCrmQuotes = [],
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
@@ -85,6 +88,7 @@ export function CaseDetailPageView({
   canMutatePaymentRecords?: boolean;
   outcomeIntelligence: CaseOutcomeIntelligenceView;
   casePaymentReadiness: CasePaymentReadiness;
+  caseCrmQuotes?: CaseCrmQuoteRow[];
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
   /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
@@ -173,6 +177,17 @@ export function CaseDetailPageView({
 
         <CaseDetailSection id={CASE_DETAIL_SECTION_IDS.readiness}>
           <CaseReadinessSummaryCard report={readiness} />
+          <div className="mt-6">
+            <CaseCrmQuotesPipelineCard
+              tenantId={tenantId}
+              caseId={detail.id}
+              patientFoundationId={twinFoundationPatientId}
+              leadId={prefillLeadId}
+              personId={prefillPersonId}
+              clinicId={prefillClinicId}
+              quotes={caseCrmQuotes}
+            />
+          </div>
           <div className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
             <PaymentRecordPanel
               tenantId={tenantId}

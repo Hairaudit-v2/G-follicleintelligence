@@ -42,9 +42,9 @@ export function ConsultationOsHubRoutingActions({
     },
     {
       title: "Create RevenueOS quote",
-      body: "Payments and invoices — create from stored consultation quote data when finance access is enabled.",
-      href: `/fi-admin/${tid}/payments`,
-      cta: "Open RevenueOS",
+      body: "Invoices use consultation quote fields and CRM quote drafts. Open the case workspace for payments, or the guided form for Create quote draft.",
+      href: kase ? `/fi-admin/${tid}/cases/${kase}` : `${base}/forms`,
+      cta: kase ? "Open case (payments)" : "Open consultation form",
     },
     {
       title: "Send to HairAudit",

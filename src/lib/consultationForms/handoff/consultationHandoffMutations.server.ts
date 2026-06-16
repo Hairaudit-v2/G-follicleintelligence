@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { upsertSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningUpdate";
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
+import { parseMoneyStringToCentsAud } from "@/src/lib/revenueOs/quoteAmountParse";
 import { createCrmTask } from "@/src/lib/crm/tasks";
 import { createPathologyRequest } from "@/src/lib/pathology/pathologyRequestMutations.server";
 
@@ -180,6 +181,10 @@ export async function createConsultationQuoteDraftFromSummary(
     },
   ];
 
+  const pricePanel = String(consultation.quote_data?.price_quoted ?? "").trim();
+  const priceCents = parseMoneyStringToCentsAud(pricePanel);
+  const subtotalAud = priceCents != null && priceCents > 0 ? priceCents / 100 : null;
+
   const metadata = {
     ...handoffIdempotencyMetadata(fid, "consultation_quote_draft"),
     outcomeType: summary.outcomeType,
@@ -189,6 +194,7 @@ export async function createConsultationQuoteDraftFromSummary(
     recommended_treatments: summary.recommendedTreatments,
     quote_title: title,
     quote_notes: notes,
+    price_quoted_hint: pricePanel || null,
   };
 
   const { data: ins, error: ie } = await supabase
@@ -200,6 +206,8 @@ export async function createConsultationQuoteDraftFromSummary(
       consultation_id: cid,
       status: "draft",
       line_items_snapshot: lineItems,
+      subtotal_amount: subtotalAud,
+      total_amount: subtotalAud,
       metadata,
     })
     .select("id")

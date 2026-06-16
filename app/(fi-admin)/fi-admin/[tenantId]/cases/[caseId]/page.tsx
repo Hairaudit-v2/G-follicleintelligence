@@ -24,6 +24,7 @@ import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezo
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 import { loadPaymentRecordsForCases } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { buildCaseOutcomeIntelligenceView, loadCaseOutcomeMeasurements, loadCaseOutcomeProtocols } from "@/src/lib/fi-os/outcomeIntelligence.server";
+import { loadCrmQuotesForCase } from "@/src/lib/crm/crmQuoteLoaders.server";
 
 export const metadata = {
   title: "Patient",
@@ -111,7 +112,7 @@ export default async function CaseDetailRoutePage({
   const foundationOk = foundationRecord && foundationRecord.ok ? foundationRecord : null;
 
   const linkedFiPatientId = detail.patient?.foundation_patient_id ?? null;
-  const [caseAppointmentBookings, services, calendarSettings, assignees, scope, bookingSession, payMap, payCap] =
+  const [caseAppointmentBookings, services, calendarSettings, assignees, scope, bookingSession, payMap, payCap, caseCrmQuotes] =
     await Promise.all([
     loadCaseAppointmentBookingsForShell(tenantId, caseId, linkedFiPatientId),
     loadFiServicesForTenant(tenantId.trim()),
@@ -121,6 +122,7 @@ export default async function CaseDetailRoutePage({
     getBookingsOperatorSessionIfAllowed(tenantId.trim()),
     loadPaymentRecordsForCases(tenantId.trim(), [caseId.trim()]),
     getPaymentRecordMutationCapability(tenantId.trim()),
+    loadCrmQuotesForCase(tenantId.trim(), caseId.trim()),
   ]);
   const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
   const initialPaymentRecords = payMap.get(caseId.trim()) ?? [];
@@ -147,6 +149,7 @@ export default async function CaseDetailRoutePage({
       canMutatePaymentRecords={payCap.canMutate}
       outcomeIntelligence={outcomeIntelligence}
       casePaymentReadiness={casePaymentReadiness}
+      caseCrmQuotes={caseCrmQuotes}
     />
   );
 

@@ -63,7 +63,7 @@ export default async function TenantPaymentsInboxPage({
 
   const baseHref = `/fi-admin/${tid}/payments`;
 
-  function RowList(props: { rows: typeof snap.overdue }) {
+  function RowList(props: { rows: typeof snap.overdue; tenantId: string }) {
     if (!props.rows.length) {
       return (
         <p className="text-xs text-slate-500" aria-live="polite">
@@ -71,6 +71,7 @@ export default async function TenantPaymentsInboxPage({
         </p>
       );
     }
+    const tid = props.tenantId.trim();
     return (
       <ul className="divide-y divide-slate-100 rounded border border-slate-200 text-xs">
         {props.rows.map((r) => (
@@ -83,6 +84,26 @@ export default async function TenantPaymentsInboxPage({
                 {r.patient_label ? ` · ${r.patient_label}` : ""}
               </p>
               {r.due_date ? <p className="text-slate-500">Due {r.due_date}</p> : null}
+              <p className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-sky-800">
+                {r.case_id ? (
+                  <Link href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`} className="underline">
+                    Case
+                  </Link>
+                ) : null}
+                {r.patient_id ? (
+                  <Link href={`/fi-admin/${tid}/patients/${encodeURIComponent(r.patient_id)}`} className="underline">
+                    Patient
+                  </Link>
+                ) : null}
+                {r.consultation_id ? (
+                  <Link href={`/fi-admin/${tid}/consultations/${encodeURIComponent(r.consultation_id)}`} className="underline">
+                    Consultation
+                  </Link>
+                ) : null}
+                <Link href={`/fi-admin/${tid}/settings/payments`} className="underline">
+                  Revenue settings
+                </Link>
+              </p>
             </div>
             <div className="text-right font-semibold text-slate-900">{formatMoney(r.balance_due_cents, r.currency)}</div>
           </li>
@@ -165,19 +186,19 @@ export default async function TenantPaymentsInboxPage({
         <section>
           <h2 className="text-sm font-semibold text-slate-900">Overdue invoices</h2>
           <div className="mt-2">
-            <RowList rows={snap.overdue} />
+            <RowList rows={snap.overdue} tenantId={tid} />
           </div>
         </section>
         <section>
           <h2 className="text-sm font-semibold text-slate-900">Unpaid issued invoices</h2>
           <div className="mt-2">
-            <RowList rows={snap.unpaidIssued} />
+            <RowList rows={snap.unpaidIssued} tenantId={tid} />
           </div>
         </section>
         <section>
           <h2 className="text-sm font-semibold text-slate-900">Partially paid invoices</h2>
           <div className="mt-2">
-            <RowList rows={snap.partiallyPaid} />
+            <RowList rows={snap.partiallyPaid} tenantId={tid} />
           </div>
         </section>
         <section>

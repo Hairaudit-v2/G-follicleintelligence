@@ -12,7 +12,7 @@ import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenue
 import { computeNextInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceMath";
 import type { FiInvoiceKind, FiInvoiceRow, FiInvoiceStatus, FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { parseMoneyStringToCentsAud } from "@/src/lib/revenueOs/quoteAmountParse";
+import { resolveConsultationQuoteInvoiceAmountCents } from "@/src/lib/revenueOs/consultationInvoiceAmountResolve";
 
 function assertUuid(id: string, label: string): string {
   const v = id?.trim();
@@ -70,15 +70,26 @@ export async function createInvoiceFromConsultationQuote(args: {
 }): Promise<FiInvoiceRow> {
   const tid = assertUuid(args.tenantId, "tenantId");
   const cid = assertUuid(args.consultationId, "consultationId");
+  const supabase = supabaseAdmin();
   const consultation = await loadConsultationForTenant(tid, cid);
   if (!consultation) throw new Error("Consultation not found.");
+
+  const { data: quoteRows } = await supabase
+    .from("fi_crm_quotes")
+    .select("line_items_snapshot, metadata, subtotal_amount, total_amount")
+    .eq("tenant_id", tid)
+    .eq("consultation_id", cid)
+    .order("updated_at", { ascending: false })
+    .limit(8);
 
   const parsed =
     args.amountCentsOverride != null && Number.isFinite(args.amountCentsOverride)
       ? Math.max(0, Math.floor(args.amountCentsOverride))
-      : parseMoneyStringToCentsAud(String(consultation.quote_data?.price_quoted ?? ""));
+      : resolveConsultationQuoteInvoiceAmountCents(consultation, quoteRows ?? []);
   if (parsed == null || parsed <= 0) {
-    throw new Error("Could not derive a quote amount in cents — enter an amount or fix Price quoted on the consultation.");
+    throw new Error(
+      "Could not derive a quote amount in cents — enter an amount on the action, set Price quoted on the consultation, or include an amount in the CRM quote draft."
+    );
   }
 
   const tax = Math.max(0, Math.floor(args.taxCents ?? 0));
@@ -88,7 +99,6 @@ export async function createInvoiceFromConsultationQuote(args: {
   const status: FiInvoiceStatus = issue ? "issued" : "draft";
   const now = new Date().toISOString();
 
-  const supabase = supabaseAdmin();
   const insert = {
     tenant_id: tid,
     clinic_id: null,
