@@ -6,7 +6,10 @@ import {
   pickLatestInRoomInstanceForTemplateSlug,
   recommendConsultationPathwayKey,
 } from "./consultationPathwayLauncherModel";
-import { HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG } from "@/src/lib/consultationForms/consultationFormConstants";
+import {
+  HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
+  HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
+} from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormInstanceWithTemplate } from "@/src/lib/consultationForms/consultationFormTypes";
 import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes";
 
@@ -148,4 +151,85 @@ test("buildConsultationPathwayLauncherViewModel marks HT submitted when instance
   assert.equal(ht.progress, "submitted");
   assert.equal(ht.instanceId, "i1");
   assert.ok(ht.href?.includes("/fi-admin/tenant-a/consultations/consult-a/forms"));
+});
+
+test("buildConsultationPathwayLauncherViewModel HLI card shows in_progress when HLI instance is draft", () => {
+  const hli: ConsultationFormInstanceWithTemplate = {
+    id: "hli-1",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "v-hli",
+    channel: "in_room",
+    status: "draft",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: null,
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-02T00:00:00Z",
+    template: {
+      id: "tpl-hli",
+      slug: HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
+      name: "HLI",
+      treatment_program: "hli",
+    },
+    template_version: { id: "v-hli", version: 1, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "medical_hair_loss" }),
+    instances: [hli],
+  });
+
+  const hliCard = vm.cards.find((c) => c.pathKey === "hair_loss_hli");
+  assert.ok(hliCard);
+  assert.equal(hliCard.progress, "in_progress");
+  assert.equal(hliCard.instanceId, "hli-1");
+  assert.ok(hliCard.href?.endsWith("/forms/hair-loss-treatment"));
+});
+
+test("buildConsultationPathwayLauncherViewModel HT card uses template version 3 instance the same as v2 for progress", () => {
+  const htV3: ConsultationFormInstanceWithTemplate = {
+    id: "ht-v3",
+    tenant_id: "t1",
+    consultation_id: "c1",
+    template_version_id: "ver-3",
+    channel: "in_room",
+    status: "draft",
+    values: {},
+    computed: {},
+    started_at: "2020-01-01T00:00:00Z",
+    submitted_at: null,
+    submitted_by_user_id: null,
+    completed_at: null,
+    completed_by_user_id: null,
+    completion_summary: {},
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2020-01-02T00:00:00Z",
+    template: {
+      id: "tpl-ht",
+      slug: HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
+      name: "HT",
+      treatment_program: "ht",
+    },
+    template_version: { id: "ver-3", version: 3, status: "published", schema: { sections: [] } },
+  };
+
+  const vm = buildConsultationPathwayLauncherViewModel({
+    tenantId: "tenant-a",
+    consultationId: "consult-a",
+    row: baseRow({ consultation_type: "scalp_hair_transplant" }),
+    instances: [htV3],
+  });
+
+  const ht = vm.cards.find((c) => c.pathKey === "hair_transplant");
+  assert.ok(ht);
+  assert.equal(ht.progress, "in_progress");
+  assert.equal(ht.instanceId, "ht-v3");
 });
