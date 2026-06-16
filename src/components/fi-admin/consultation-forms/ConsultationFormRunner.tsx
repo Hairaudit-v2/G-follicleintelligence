@@ -15,7 +15,6 @@ import { ConsultationCompletionSummaryCard } from "@/src/components/fi-admin/con
 import { ConsultationHandoffPanel } from "@/src/components/fi-admin/consultation-forms/ConsultationHandoffPanel";
 import { ConsultationFormFieldRenderer } from "@/src/components/fi-admin/consultation-forms/ConsultationFormFieldRenderer";
 import { ConsultationFormSectionNav } from "@/src/components/fi-admin/consultation-forms/ConsultationFormSectionNav";
-import { ConsultationPostCompleteRouting } from "@/src/components/fi-admin/consultation-forms/ConsultationPostCompleteRouting";
 import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
@@ -278,11 +277,11 @@ export function ConsultationFormRunner({
         return;
       }
       setStatus("locked");
-      router.refresh();
+      router.push(base);
     } finally {
       setBusyComplete(false);
     }
-  }, [cid, initialInstance.id, router, showCompleteConsultationCta, tid]);
+  }, [base, cid, initialInstance.id, router, showCompleteConsultationCta, tid]);
 
   const onSubmit = useCallback(async () => {
     if (!canEdit) return;
@@ -382,7 +381,7 @@ export function ConsultationFormRunner({
               href={base}
               className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
             >
-              Back to consultation workspace
+              Back to consultation hub
             </Link>
           }
           primaryAction={
@@ -443,13 +442,16 @@ export function ConsultationFormRunner({
 
       {workflowPhase === "complete" ? (
         <div className="space-y-6">
-          <ConsultationPostCompleteRouting
-            tenantId={tid}
-            consultationId={cid}
-            caseId={caseId}
-            leadId={leadId}
-            patientId={patientId}
-          />
+          <FiCard className="space-y-3 p-4 sm:p-5">
+            <h3 className={fiOsLightFormSurfaceClassNames.panelCaption}>Pathway complete</h3>
+            <p className={`text-sm ${fiOsLightFormSurfaceClassNames.body}`}>
+              The consultation intelligence summary and routing tiles are on the{" "}
+              <Link href={base} className="font-semibold text-sky-700 underline">
+                consultation hub
+              </Link>
+              .
+            </p>
+          </FiCard>
           {canShowHandoffs && persistedCompletion ? (
             <ConsultationHandoffPanel
               tenantId={tid}

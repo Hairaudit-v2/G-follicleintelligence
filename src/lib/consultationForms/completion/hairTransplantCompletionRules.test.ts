@@ -174,4 +174,27 @@ describe("buildHairTransplantCompletionSummary", () => {
     assert.equal(s.riskFlags.includes("diabetes"), true);
     assert.equal(s.riskFlags.filter((x) => x === "smoking").length, 1);
   });
+
+  it("visual assessment: empty Norwood and junk selected_zones do not break completion", () => {
+    assert.doesNotThrow(() =>
+      buildHairTransplantCompletionSummary(
+        baseInput({
+          duration_band: "1_3y",
+          norwood_classification: "",
+          selected_zones: ["not-a-zone", 123, null, "crown"] as unknown[],
+          structured_clinical_note: { mode: "clinical_note", note: "Stable." },
+        })
+      )
+    );
+    const s = buildHairTransplantCompletionSummary(
+      baseInput({
+        duration_band: "1_3y",
+        norwood_classification: "",
+        selected_zones: ["bogus"],
+        structured_clinical_note: { mode: "clinical_note", note: "Stable." },
+      })
+    );
+    assert.ok(!s.diagnosisImpression.includes("Norwood"));
+    assert.match(s.diagnosisImpression, /1–3 years|1-3 years/i);
+  });
 });

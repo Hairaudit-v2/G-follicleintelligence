@@ -7,19 +7,15 @@ import {
   SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
 } from "@/src/lib/consultationForms/consultationFormConstants";
 import type { ConsultationFormInstanceWithTemplate } from "@/src/lib/consultationForms/consultationFormTypes";
+import type { ConsultationPathwayLauncherPathKey } from "@/src/lib/consultations/consultationPathwayKeys";
+import { PATHWAY_FORM_RELATIVE_HREF } from "@/src/lib/consultations/consultationPathwayRouting";
 import {
   getConsultationTypeDefinition,
   type ConsultationTypeId,
 } from "@/src/lib/consultations/consultationTypeConfig";
 import type { ConsultationRow } from "@/src/lib/consultations/consultationTypes";
 
-export type ConsultationPathwayLauncherPathKey =
-  | "hair_transplant"
-  | "hair_loss_hli"
-  | "female_hair_loss"
-  | "repair"
-  | "follow_up_review"
-  | "scalp_pathology";
+export type { ConsultationPathwayLauncherPathKey } from "@/src/lib/consultations/consultationPathwayKeys";
 
 export type ConsultationPathwayProgressLabel = "not_started" | "in_progress" | "submitted";
 
@@ -273,7 +269,7 @@ export function buildConsultationPathwayLauncherViewModel(input: {
       purpose: "Structured surgical candidacy, donor / recipient planning, and consent-ready documentation.",
       whenToUse: "Primary visit for FUE/FUT, hairline design, graft planning, or transplant candidacy.",
       availability: "active",
-      href: `${base}/forms`,
+      href: `${base}${PATHWAY_FORM_RELATIVE_HREF.hair_transplant}`,
       templateSlug: HAIR_TRANSPLANT_CONSULTATION_TEMPLATE_SLUG,
       progress: htProgress,
       instanceId: htInst?.id ?? null,
@@ -285,7 +281,7 @@ export function buildConsultationPathwayLauncherViewModel(input: {
       purpose: "Medical hair-loss workup, lifestyle and treatment pathways, and longevity-oriented planning.",
       whenToUse: "Shedding, diffuse thinning, stabilisation, medications, labs, or non-surgical treatment planning.",
       availability: "active",
-      href: `${base}/forms/hair-loss-treatment`,
+      href: `${base}${PATHWAY_FORM_RELATIVE_HREF.hair_loss_hli}`,
       templateSlug: HAIR_LOSS_TREATMENT_CONSULTATION_TEMPLATE_SLUG,
       progress: hliProgress,
       instanceId: hliInst?.id ?? null,
@@ -299,7 +295,7 @@ export function buildConsultationPathwayLauncherViewModel(input: {
       whenToUse:
         "Female-pattern thinning, postpartum or hormonal shifts, shedding, part widening, traction concerns, or Ludwig / Sinclair–oriented visits.",
       availability: "active",
-      href: `${base}/forms/female-hair-loss`,
+      href: `${base}${PATHWAY_FORM_RELATIVE_HREF.female_hair_loss}`,
       templateSlug: FEMALE_HAIR_LOSS_CONSULTATION_TEMPLATE_SLUG,
       progress: femaleProgress,
       instanceId: femaleInst?.id ?? null,
@@ -312,7 +308,7 @@ export function buildConsultationPathwayLauncherViewModel(input: {
         "Dedicated prior-surgery audit: donor damage, hairline design, scarring, growth failure, and realistic corrective options — aligned with HairAudit + SurgeryOS (no quote builder).",
       whenToUse: "Revision after poor outcome, scar issues, unnatural hairline, suspected overharvesting, or corrective planning.",
       availability: "active",
-      href: `${base}/forms/repair`,
+      href: `${base}${PATHWAY_FORM_RELATIVE_HREF.repair}`,
       templateSlug: HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
       progress: repairProgress,
       instanceId: repairInst?.id ?? null,
@@ -325,7 +321,7 @@ export function buildConsultationPathwayLauncherViewModel(input: {
         "Longitudinal capture for Patient Twin, HairAudit progression, HLI treatment response, and AnalyticsOS — interval reviews, not primary intake (no quote or surgical planning fields).",
       whenToUse: "Scheduled review, post-treatment or post-surgery check-in, PRP/exosome review, medication review, or annual progress visit.",
       availability: "active",
-      href: `${base}/forms/follow-up`,
+      href: `${base}${PATHWAY_FORM_RELATIVE_HREF.follow_up_review}`,
       templateSlug: FOLLOW_UP_REVIEW_CONSULTATION_TEMPLATE_SLUG,
       progress: followUpProgress,
       instanceId: followUpInst?.id ?? null,
@@ -339,7 +335,7 @@ export function buildConsultationPathwayLauncherViewModel(input: {
       whenToUse:
         "Itching, scaling, erythema, pustules, suspected scarring alopecia, alopecia areata, discoid lupus, psoriasis, dermatitis, infection, or biopsy-led workup.",
       availability: "active",
-      href: `${base}/forms/pathology`,
+      href: `${base}${PATHWAY_FORM_RELATIVE_HREF.scalp_pathology}`,
       templateSlug: SCALP_PATHOLOGY_CONSULTATION_TEMPLATE_SLUG,
       progress: scalpPathologyProgress,
       instanceId: scalpPathologyInst?.id ?? null,

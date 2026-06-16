@@ -1,7 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE } from "@/src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel";
+import {
+  CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE,
+  normalizePatternClassificationString,
+} from "@/src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import type { ConsultationFormOption } from "@/src/lib/consultationForms/consultationFormTypes";
 
@@ -22,7 +25,8 @@ export function LudwigVisualAssessmentField({
   options: ConsultationFormOption[];
   disabled: boolean;
 }) {
-  const str = typeof value === "string" ? value : "";
+  const str = normalizePatternClassificationString(value);
+  const hasLegacyUnknown = Boolean(str && !options.some((o) => o.value === str));
 
   const commonLabel = (
     <label className={fiOsLightFormSurfaceClassNames.label}>
@@ -56,29 +60,45 @@ export function LudwigVisualAssessmentField({
           <img
             src={`${CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE}/ludwig-scale.svg`}
             alt="Ludwig pattern reference diagram"
-            className="mx-auto w-full max-w-xl rounded-md border border-slate-100 bg-white"
+            className="mx-auto max-h-[min(36vh,280px)] w-full max-w-xl rounded-md border border-slate-100 bg-white object-contain"
           />
-          <div className="mt-3 flex flex-wrap justify-center gap-2">
-            {options.map((o) => {
-              const active = str === o.value;
-              return (
+          <div className="-mx-1 mt-3 overflow-x-auto px-1 pb-1">
+            <div className="flex min-w-min flex-wrap justify-center gap-2">
+              {hasLegacyUnknown ? (
                 <button
-                  key={o.value}
                   type="button"
                   disabled={disabled}
-                  onClick={() => onChange(o.value)}
+                  onClick={() => onChange(str)}
                   className={cn(
-                    "min-h-[40px] min-w-[120px] rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
-                    active
-                      ? "border-violet-600 bg-violet-50 text-violet-950 ring-1 ring-violet-500/30"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                    "min-h-[44px] shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950",
                     disabled && "cursor-not-allowed opacity-60"
                   )}
+                  title="Value from an older form version; tap to keep or pick a standard stage below."
                 >
-                  {o.label}
+                  Legacy: <span className="font-mono">{str}</span>
                 </button>
-              );
-            })}
+              ) : null}
+              {options.map((o) => {
+                const active = str === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onChange(normalizePatternClassificationString(o.value))}
+                    className={cn(
+                      "min-h-[44px] min-w-[44px] shrink-0 rounded-lg border px-3 py-2 text-sm font-medium transition-colors sm:min-w-[120px]",
+                      active
+                        ? "border-violet-600 bg-violet-50 text-violet-950 ring-1 ring-violet-500/30"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                      disabled && "cursor-not-allowed opacity-60"
+                    )}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -89,9 +109,14 @@ export function LudwigVisualAssessmentField({
           className={cn(fiOsLightFormSurfaceClassNames.controlInset, "max-w-lg")}
           value={str}
           disabled={disabled}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(normalizePatternClassificationString(e.target.value))}
         >
           <option value="">— Select —</option>
+          {hasLegacyUnknown ? (
+            <option value={str}>
+              (Legacy) {str}
+            </option>
+          ) : null}
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}

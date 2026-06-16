@@ -7,6 +7,7 @@ import { consultationTypeForBookingType } from "./consultationBookingLink";
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { syncConsultationMedicalHairLossToPatientClinicalDetails } from "@/src/lib/patients/clinicalDetailsConsultationSync";
 import { syncPostConsultReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
+import { assertStaffClinicallyAvailableForAssignment } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import { assertFiStaffBelongsToTenant } from "@/src/lib/staff/staff.server";
 import {
   CONSULTATION_EDITABLE_STATUSES,
@@ -130,6 +131,22 @@ export async function createConsultationDraft(
   if (input.booking_id?.trim()) {
     await assertBookingInTenant(tid, input.booking_id);
     insertRow.booking_id = input.booking_id.trim();
+  }
+
+  if (input.consultant_name !== undefined) {
+    insertRow.consultant_name = input.consultant_name;
+  }
+
+  if (input.consultant_staff_id?.trim()) {
+    const staffId = input.consultant_staff_id.trim();
+    await assertStaffClinicallyAvailableForAssignment(tid, staffId);
+    insertRow.consultant_staff_id = staffId;
+  }
+
+  if (input.consultation_date !== undefined) {
+    insertRow.consultation_date = normalizeDateInput(
+      input.consultation_date === "" || input.consultation_date === null ? null : input.consultation_date
+    );
   }
 
   const supabase = supabaseAdmin();

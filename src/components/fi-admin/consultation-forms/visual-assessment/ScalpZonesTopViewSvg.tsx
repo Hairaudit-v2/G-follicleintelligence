@@ -72,7 +72,7 @@ export function ScalpZonesTopViewSvg({
   return (
     <svg
       viewBox="0 0 400 420"
-      className="h-auto w-full max-w-md select-none"
+      className="h-auto w-full max-w-md touch-manipulation select-none"
       role="img"
       aria-label="Scalp zones — top-down schematic"
     >

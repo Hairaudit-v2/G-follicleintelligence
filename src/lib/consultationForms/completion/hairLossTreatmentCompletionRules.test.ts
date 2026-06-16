@@ -157,6 +157,19 @@ describe("buildHairLossTreatmentCompletionSummary", () => {
     assert.equal(s.outcomeType, "undecided");
     assert.equal(s.recommendedTreatments.length, 0);
   });
+
+  it("visual assessment: empty Norwood/Ludwig and malformed selected_zones do not break completion", () => {
+    const s = buildHairLossTreatmentCompletionSummary(
+      baseInput(
+        minimalValidValues({
+          norwood_classification: "",
+          ludwig_classification: "",
+          selected_zones: ["nope", "frontal", 99] as unknown[],
+        })
+      )
+    );
+    assert.ok(s.diagnosisImpression.length > 0);
+  });
 });
 
 describe("buildConsultationCompletionSummary dispatch", () => {

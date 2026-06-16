@@ -85,6 +85,19 @@ describe("buildFemaleHairLossCompletionSummary", () => {
     assert.equal(s.surgicalSuitability, "not_assessed");
   });
 
+  it("visual assessment: empty ludwig and noisy selected_zones still build snapshot", () => {
+    const s = buildFemaleHairLossCompletionSummary(
+      baseInput(
+        minimalFemaleValues({
+          ludwig_classification: "",
+          selected_zones: [123, "donor_safe_zone"] as unknown[],
+        })
+      )
+    );
+    assert.ok(s.femaleHairLossCompletionSnapshot);
+    assert.match(s.femaleHairLossCompletionSnapshot.femaleScaleSummary, /Sinclair/i);
+  });
+
   it("wrong template slug returns sparse summary", () => {
     const s = buildFemaleHairLossCompletionSummary({
       ...baseInput(minimalFemaleValues()),

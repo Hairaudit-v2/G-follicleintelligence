@@ -1,13 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
-import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import { ConsultationOsEditPage } from "@/src/components/fi-admin/consultations/ConsultationOsEditPage";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadConsultationForTenant, loadConsultationWorkspaceDisplay } from "@/src/lib/consultations/consultationLoaders.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
-import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
-import { loadPaymentRecordsForConsultationId } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { loadLatestConsultationChecklistForPatientWorkspace } from "@/src/lib/patientTwin/patientTwinConsultationChecklist.server";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { loadConsultationFormInstances } from "@/src/lib/consultationForms/consultationFormLoad.server";
@@ -35,24 +31,18 @@ export default async function ConsultationOsEditRoutePage({
 
   const tid = tenantId.trim();
   const cid = consultationId.trim();
-  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap, formInstances] =
-    await Promise.all([
-      getCrmShellNavAllowed(tid),
-      loadConsultationWorkspaceDisplay(tid, row),
-      loadClinicalStaffPickerOptions(tid),
-      loadTenantOperationalCalendarSettings(tid),
-      loadPaymentRecordsForConsultationId(tid, cid),
-      getPaymentRecordMutationCapability(tid),
-      loadConsultationFormInstances(tid, cid),
-    ]);
+  const [showCrmNav, initialWorkspaceDisplay, clinicalStaffOptions, formInstances] = await Promise.all([
+    getCrmShellNavAllowed(tid),
+    loadConsultationWorkspaceDisplay(tid, row),
+    loadClinicalStaffPickerOptions(tid),
+    loadConsultationFormInstances(tid, cid),
+  ]);
   const pathwayLauncher = buildConsultationPathwayLauncherViewModel({
     tenantId: tid,
     consultationId: cid,
     row,
     instances: formInstances,
   });
-  const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
-
   const patientIdForChecklist = row.patient_id?.trim() ?? null;
   const initialConsultationChecklistPreview =
     patientIdForChecklist != null
@@ -67,9 +57,6 @@ export default async function ConsultationOsEditRoutePage({
       initialWorkspaceDisplay={initialWorkspaceDisplay}
       showCrmNav={showCrmNav}
       clinicalStaffOptions={clinicalStaffOptions}
-      operationalTodayYmd={operationalTodayYmd}
-      initialPaymentRecords={initialPaymentRecords}
-      canMutatePaymentRecords={payCap.canMutate}
       initialConsultationChecklistPreview={initialConsultationChecklistPreview}
       pathwayLauncher={pathwayLauncher}
     />

@@ -88,22 +88,35 @@ function PathwayCard({ card }: { card: ConsultationPathwayCardView }) {
   );
 }
 
-export function ConsultationPathwayLauncher({ model }: { model: ConsultationPathwayLauncherViewModel }) {
+const DEFAULT_PATHWAY_TITLE = "Pathway selection";
+const DEFAULT_PATHWAY_DESCRIPTION =
+  "Structured guided pathways for this visit. Clinical capture happens inside each form — pick a card to continue or switch pathways.";
+
+export function ConsultationPathwayLauncher({
+  model,
+  sectionTitle = DEFAULT_PATHWAY_TITLE,
+  sectionDescription = DEFAULT_PATHWAY_DESCRIPTION,
+  cardClassName,
+}: {
+  model: ConsultationPathwayLauncherViewModel;
+  /** Override section title (e.g. post-completion “review another pathway”). */
+  sectionTitle?: string;
+  sectionDescription?: string;
+  /** Extra classes on outer card (e.g. hero emphasis on hub). */
+  cardClassName?: string;
+}) {
   return (
     <div id="consultation-pathway-launcher">
-      <FiCard className="space-y-4">
-        <FiSection
-          title="ConsultationOS v2 - pathway launcher"
-          description="Adaptive guided pathways for this consultation. Pick the intake that matches the patient intent; each pathway keeps its own saved instance for this visit."
-          headingId="consultation-pathway-launcher-heading"
-        >
+      <FiCard className={`space-y-4 ${cardClassName ?? ""}`.trim()}>
+        <FiSection title={sectionTitle} description={sectionDescription} headingId="consultation-pathway-launcher-heading">
           <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Direct links are unchanged - you can still open{" "}
+            Direct links:{" "}
             <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms</code>,{" "}
             <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/hair-loss-treatment</code>,{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/female-hair-loss</code>, or{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/pathology</code> from
-            bookmarks or deep links.
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/female-hair-loss</code>,{" "}
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/repair</code>,{" "}
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/follow-up</code>,{" "}
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">/forms/pathology</code>.
           </p>
           {model.recommendedHint?.trim() ? (
             <div

@@ -103,6 +103,11 @@ export const consultationCreateDraftBodySchema = z
     lead_id: optionalUuid.optional(),
     /** Optional calendar booking link (`fi_bookings.id`). */
     booking_id: optionalUuid.optional(),
+    consultant_name: z.string().nullable().optional(),
+    consultant_staff_id: optionalUuid.optional(),
+    consultation_date: z
+      .union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.literal(""), z.null()])
+      .optional(),
   })
   .strict();
 

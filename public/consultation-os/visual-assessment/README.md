@@ -11,3 +11,5 @@ Filenames are referenced from `consultationVisualAssessmentModel.ts` (`CONSULTAT
 | `head-wireframe.svg` | Optional repair wireframe reference |
 
 Interactive picking uses the in-app SVG schematic (`ScalpZonesTopViewSvg`) plus structured JSON values.
+
+Product / rollout notes: `docs/architecture/consultation-os-visual-assessment-v1.md`.

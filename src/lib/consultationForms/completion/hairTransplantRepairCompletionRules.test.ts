@@ -52,4 +52,19 @@ describe("hairTransplantRepairCompletionRules", () => {
     assert.ok(s.repairConsultationCompletionSnapshot?.followUpUrgencyLabel.length);
     assert.ok(s.riskFlags.includes("growth_failure_suspected"));
   });
+
+  it("visual assessment: invalid repair_visual_annotations does not break completion", () => {
+    assert.doesNotThrow(() =>
+      buildHairTransplantRepairCompletionSummary({
+        consultationId: "c-rep",
+        formInstanceId: "f-rep",
+        templateSlug: HAIR_TRANSPLANT_REPAIR_CONSULTATION_TEMPLATE_SLUG,
+        values: baseValues({
+          repair_visual_annotations: ["not", "an", "object"] as unknown,
+          selected_zones: "also-not-array" as unknown,
+        }),
+        completedAt: "2026-06-16T12:00:00.000Z",
+      })
+    );
+  });
 });

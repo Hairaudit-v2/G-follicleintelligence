@@ -56,13 +56,13 @@ export function RepairWireframeVisualAssessmentField({
     else cur.add(activeTag);
     if (cur.size === 0) delete next[zone];
     else next[zone] = Array.from(cur);
-    onChange(next);
+    onChange(parseRepairVisualAnnotations(next));
   };
 
   const clearZone = (zone: ConsultationScalpZoneId) => {
     const next = cloneAnnotations(annotations);
     delete next[zone];
-    onChange(next);
+    onChange(parseRepairVisualAnnotations(next));
   };
 
   const legend = (
@@ -89,36 +89,38 @@ export function RepairWireframeVisualAssessmentField({
           1) Choose an issue tag. 2) Tap scalp zones on the wireframe to add/remove that tag for the zone. Optional
           reference:
         </p>
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          {CONSULTATION_REPAIR_ANNOTATION_TAGS.map((t) => {
-            const on = activeTag === t;
-            return (
-              <button
-                key={t}
-                type="button"
-                disabled={disabled}
-                onClick={() => setActiveTag(t)}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium",
-                  on
-                    ? "border-rose-600 bg-rose-50 text-rose-950"
-                    : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white",
-                  disabled && "cursor-not-allowed opacity-60"
-                )}
-              >
-                {repairTagLabel(t)}
-              </button>
-            );
-          })}
+        <div className="-mx-1 mb-3 overflow-x-auto px-1 pb-1">
+          <div className="flex min-w-min flex-wrap gap-2">
+            {CONSULTATION_REPAIR_ANNOTATION_TAGS.map((t) => {
+              const on = activeTag === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => setActiveTag(t)}
+                  className={cn(
+                    "min-h-[44px] shrink-0 rounded-full border px-3 py-2 text-xs font-medium",
+                    on
+                      ? "border-rose-600 bg-rose-50 text-rose-950"
+                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white",
+                    disabled && "cursor-not-allowed opacity-60"
+                  )}
+                >
+                  {repairTagLabel(t)}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,240px)] xl:items-start">
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE}/head-wireframe.svg`}
               alt="Head wireframe reference"
-              className="mx-auto mb-2 hidden max-h-36 w-full max-w-xs rounded border border-slate-100 object-contain md:block"
+              className="mx-auto mb-2 max-h-32 w-full max-w-xs rounded border border-slate-100 object-contain md:max-h-36"
             />
             <ScalpZonesTopViewSvg
               mode="repair"
@@ -159,13 +161,13 @@ export function RepairWireframeVisualAssessmentField({
             </ul>
           </div>
         </div>
-      </div>
 
-      <div className="space-y-1">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Raw JSON (read-only)</span>
-        <pre className="max-h-28 overflow-auto rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-800">
-          {JSON.stringify(annotations, null, 2)}
-        </pre>
+        <div className="space-y-1 border-t border-slate-100 pt-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Raw JSON (read-only)</span>
+          <pre className="max-h-28 overflow-auto rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-800">
+            {JSON.stringify(annotations, null, 2)}
+          </pre>
+        </div>
       </div>
     </div>
   );

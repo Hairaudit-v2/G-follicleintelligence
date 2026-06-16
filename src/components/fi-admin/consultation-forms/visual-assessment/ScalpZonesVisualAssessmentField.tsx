@@ -33,7 +33,7 @@ export function ScalpZonesVisualAssessmentField({
     const next = new Set(selectedSet);
     if (next.has(zone)) next.delete(zone);
     else next.add(zone);
-    onChange(Array.from(next));
+    onChange(parseSelectedZones(Array.from(next)));
   };
 
   const legend = (
@@ -55,25 +55,27 @@ export function ScalpZonesVisualAssessmentField({
         {desc}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
         <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
           <p className={cn("text-xs", fiOsLightFormSurfaceClassNames.helper)}>
-            Click regions on the schematic to toggle involvement. Optional reference still:
+            Tap regions on the schematic to toggle involvement (44px+ touch targets). Optional reference:
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${CONSULTATION_VISUAL_ASSESSMENT_PUBLIC_BASE}/scalp-zones-top.svg`}
             alt="Scalp zone reference (replaceable asset)"
-            className="mx-auto hidden max-h-40 w-full max-w-xs rounded border border-slate-100 object-contain sm:block"
+            className="mx-auto max-h-36 w-full max-w-xs rounded border border-slate-100 object-contain"
           />
-          <ScalpZonesTopViewSvg
-            mode="multi"
-            selectedZones={selected}
-            onToggleZone={toggle}
-            repairAnnotations={{}}
-            activeRepairTag={null}
-            disabled={disabled}
-          />
+          <div className="mx-auto w-full max-w-md">
+            <ScalpZonesTopViewSvg
+              mode="multi"
+              selectedZones={selected}
+              onToggleZone={toggle}
+              repairAnnotations={{}}
+              activeRepairTag={null}
+              disabled={disabled}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">

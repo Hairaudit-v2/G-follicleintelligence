@@ -1,6 +1,6 @@
 "use client";
 
-import { ConsultationOsWorkspace } from "@/src/components/fi-admin/consultations/ConsultationOsWorkspace";
+import { ConsultationOsPathwayCreateWizard } from "@/src/components/fi-admin/consultations/ConsultationOsPathwayCreateWizard";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 
 export function ConsultationOsCreatePage({
@@ -15,9 +15,8 @@ export function ConsultationOsCreatePage({
   operationalTodayYmd: string;
 }) {
   return (
-    <ConsultationOsWorkspace
+    <ConsultationOsPathwayCreateWizard
       tenantId={tenantId}
-      mode="create"
       showCrmNav={showCrmNav}
       clinicalStaffOptions={clinicalStaffOptions}
       operationalTodayYmd={operationalTodayYmd}

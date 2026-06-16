@@ -21,6 +21,7 @@ Consultation-form–related test entry points (non-exhaustive; see `package.json
 - `src/lib/consultationForms/completion/hairLossTreatmentCompletionRules.test.ts`
 - `src/lib/consultationForms/hairTransplantConsultationV2.workflow.test.ts` (includes **v2.1 schema** assertions)
 - `src/lib/consultationForms/consultationOsV2Checkpoint.test.ts` (cross-cutting v2 checkpoint)
+- `src/lib/consultationForms/visualAssessment/consultationVisualAssessmentModel.test.ts` (Visual Assessment parsers)
 - `src/lib/consultationForms/templates/hairTransplantRepairConsultationTemplate.test.ts`
 - `src/lib/consultationForms/completion/hairTransplantRepairCompletionRules.test.ts`
 - `src/lib/consultationForms/handoff/consultationHandoffPure.test.ts`
@@ -41,6 +42,10 @@ Consultation-form–related test entry points (non-exhaustive; see `package.json
 | **Post-completion routing** | **Only** when workflow is **complete** (`locked`): `ConsultationPostCompleteRouting` + hand-offs; not shown during draft or submitted review. | `ConsultationFormRunner.tsx` (`workflowPhase === "complete"`) |
 | **HT completion UI** | **Clinical decision snapshot** (six sections), not the dense legacy grid. | `ConsultationCompletionSummaryCard.tsx` (HT slug branch) |
 | **Canonical HT note** | `structured_clinical_note` + `AiGeneratedClinicalNoteField` on handoff section (HT + `clinical_summary_handoff`). | `ConsultationFormFieldRenderer.tsx`, `AiGeneratedClinicalNoteField.tsx` |
+
+## Visual Assessment Engine v1
+
+Image-backed Norwood / Ludwig / scalp-zone / repair annotation fields ship as **new `ConsultationFormFieldType` values** only on **newly published** template JSON from this repo. Instances pinned to older `template_version_id` rows keep legacy `select` / `multi_select` controls. See **[Visual Assessment Engine v1](consultation-os-visual-assessment-v1.md)** for field ids, asset paths (`/consultation-os/visual-assessment/`), and tenant publish notes.
 
 ## Manual smoke (staging / local)
 
