@@ -11,7 +11,6 @@ import {
   type FinanceApplicationsDashboardCounts,
   type FinanceProviderAnalytics,
 } from "@/src/lib/financialOs/financialFinanceApplicationsCore";
-import type { FinanceProviderRecord } from "@/src/lib/financialOs/financialFinanceProviders.server";
 import { loadFinanceProviders } from "@/src/lib/financialOs/financialFinanceProviders.server";
 
 export type FinanceApplicationDocumentRecord = {
@@ -138,7 +137,7 @@ async function enrichApplications(
   if (pe) throw new Error(pe.message);
   const pathwayTypes = new Map((pathways ?? []).map((p) => [String((p as { id: string }).id), String((p as { pathway_type?: unknown }).pathway_type ?? "")]));
 
-  let docsByApp = new Map<string, FinanceApplicationDocumentRecord[]>();
+  const docsByApp = new Map<string, FinanceApplicationDocumentRecord[]>();
   if (includeDocuments) {
     const appIds = rows.map((r) => r.id);
     const { data: docs, error: de } = await supabase
