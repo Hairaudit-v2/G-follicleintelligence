@@ -53,18 +53,42 @@ function mockRequest(
   });
 }
 
-describe("hairaudit classifier auth", () => {
-  const envBackup = { ...process.env };
+const ENV_KEYS = [
+  "NODE_ENV",
+  "HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN",
+  "HAIRAUDIT_IMAGE_CLASSIFIER_MODE",
+  "SUPABASE_SERVICE_ROLE_KEY",
+] as const;
 
+type EnvKey = (typeof ENV_KEYS)[number];
+
+let savedEnv: Partial<Record<EnvKey, string | undefined>>;
+
+function saveEnv(): void {
+  savedEnv = {};
+  for (const key of ENV_KEYS) {
+    savedEnv[key] = process.env[key];
+  }
+}
+
+function restoreEnv(): void {
+  for (const key of ENV_KEYS) {
+    const value = savedEnv[key];
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+}
+
+describe("hairaudit classifier auth", () => {
   beforeEach(() => {
-    process.env = { ...envBackup };
+    saveEnv();
     process.env.NODE_ENV = "test";
     process.env.HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN = VALID_TOKEN;
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key-should-not-auth";
   });
 
   afterEach(() => {
-    process.env = { ...envBackup };
+    restoreEnv();
   });
 
   it("getHairauditClassifierToken excludes service role fallback", () => {
@@ -155,10 +179,12 @@ describe("hairaudit image classify request parsing", () => {
 });
 
 describe("hairaudit image classify service", () => {
-  const envBackup = { ...process.env };
+  beforeEach(() => {
+    saveEnv();
+  });
 
   afterEach(() => {
-    process.env = { ...envBackup };
+    restoreEnv();
   });
 
   it("returns provider_not_ready when live mode and classifier unavailable", async () => {
@@ -233,17 +259,15 @@ describe("hairaudit image classify service", () => {
 });
 
 describe("hairaudit image classify route", () => {
-  const envBackup = { ...process.env };
-
   beforeEach(() => {
-    process.env = { ...envBackup };
+    saveEnv();
     process.env.NODE_ENV = "test";
     process.env.HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN = VALID_TOKEN;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
   });
 
   afterEach(() => {
-    process.env = { ...envBackup };
+    restoreEnv();
   });
 
   it("missing token → 401", async () => {
