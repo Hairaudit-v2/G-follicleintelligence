@@ -143,6 +143,71 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         </dl>
       </section>
 
+      <section>
+        <h2 className="text-sm font-semibold text-slate-900">Financing applications</h2>
+        <p className="mt-1 max-w-2xl text-xs text-slate-600">
+          Provider-ready financing workflow — see{" "}
+          <Link href={`/fi-admin/${tid}/financial/finance-applications`} className="text-sky-700 hover:underline">
+            Finance Applications
+          </Link>{" "}
+          and{" "}
+          <Link href={`/fi-admin/${tid}/financial/providers`} className="text-sky-700 hover:underline">
+            Providers
+          </Link>
+          .
+        </p>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Applications submitted</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financeApplications.submittedCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Applications approved</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financeApplications.approvedCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Pending documents</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financeApplications.pendingDocsCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Settlement pending</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financeApplications.settlementPendingCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Average approval time</dt>
+            <dd className="text-sm font-semibold text-slate-900">
+              {metrics.financeApplications.averageApprovalDays != null
+                ? `${metrics.financeApplications.averageApprovalDays} days`
+                : "—"}
+            </dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Applications requiring attention</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financeApplications.attentionCount}</dd>
+          </div>
+        </dl>
+        {metrics.financeApplications.mostUsedProvider ? (
+          <p className="mt-3 text-xs text-slate-600">
+            Most used provider:{" "}
+            <span className="font-semibold text-slate-800">{metrics.financeApplications.mostUsedProvider.providerName}</span> (
+            {metrics.financeApplications.mostUsedProvider.count} applications)
+          </p>
+        ) : null}
+        {metrics.financeApplications.providerConversionRates.length ? (
+          <div className="mt-3 rounded border border-slate-200 bg-white p-3">
+            <p className="text-xs font-semibold text-slate-700">Provider conversion rates</p>
+            <ul className="mt-2 space-y-1 text-[11px] text-slate-700">
+              {metrics.financeApplications.providerConversionRates.slice(0, 5).map((p) => (
+                <li key={p.providerId} className="flex justify-between gap-2">
+                  <span>{p.providerName}</span>
+                  <span className="font-mono">{p.conversionRate != null ? `${(p.conversionRate * 100).toFixed(1)}%` : "—"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </section>
+
       <section className="rounded border border-slate-200 bg-slate-50/80 p-4 text-xs text-slate-700">
         <h2 className="text-sm font-semibold text-slate-900">Automation cron</h2>
         <p className="mt-2">

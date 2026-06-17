@@ -282,6 +282,8 @@ export function resolveFiOsPrimarySidebarItems(
         { id: "financial-payments", featureKey: "settings", label: "Payments", href: hrefFor(b, "financial/payments") },
         { id: "financial-payment-requests", featureKey: "settings", label: "Payment requests", href: hrefFor(b, "financial/payment-requests") },
         { id: "financial-installments", featureKey: "settings", label: "Installments", href: hrefFor(b, "financial/installments") },
+        { id: "financial-providers", featureKey: "settings", label: "Providers", href: hrefFor(b, "financial/providers") },
+        { id: "financial-finance-applications", featureKey: "settings", label: "Finance Applications", href: hrefFor(b, "financial/finance-applications") },
         { id: "financial-deposit-rules", featureKey: "settings", label: "Deposit rules", href: hrefFor(b, "financial/deposit-rules") },
       ],
     },

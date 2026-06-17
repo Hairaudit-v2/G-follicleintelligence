@@ -113,7 +113,8 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
     actionCentre.followUpsDue +
     actionCentre.surgeryReadinessAlerts +
     actionCentre.surgeryFinancialPaymentAttention +
-    actionCentre.financialPathwayTasksAttention;
+    actionCentre.financialPathwayTasksAttention +
+    actionCentre.financeApplicationsAttention;
   const meta = FI_DASHBOARD_WIDGET_LABELS.attention_centre;
 
   return (
@@ -181,6 +182,14 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             count={actionCentre.financialPathwayTasksAttention}
             icon={<ClipboardList className="h-4 w-4" />}
             severity={actionCentre.financialPathwayTasksAttention > 0 ? "warning" : "normal"}
+          />
+          <ActionRow
+            href={`${base}/financial/finance-applications`}
+            label="Finance applications requiring attention"
+            detail="Financing applications breaching document, approval, or settlement SLAs."
+            count={actionCentre.financeApplicationsAttention}
+            icon={<Banknote className="h-4 w-4" />}
+            severity={actionCentre.financeApplicationsAttention > 0 ? "warning" : "normal"}
           />
         </div>
       )}

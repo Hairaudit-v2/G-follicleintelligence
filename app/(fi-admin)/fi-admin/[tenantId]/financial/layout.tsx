@@ -11,6 +11,8 @@ const NAV = [
   { href: "installments", label: "Installments" },
   { href: "payment-pathways", label: "Payment Pathways" },
   { href: "pathway-inbox", label: "Pathway inbox" },
+  { href: "providers", label: "Providers" },
+  { href: "finance-applications", label: "Finance Applications" },
   { href: "deposit-rules", label: "Deposit rules" },
 ] as const;
 

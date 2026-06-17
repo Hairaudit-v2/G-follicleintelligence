@@ -10,6 +10,8 @@ import {
 } from "@/src/lib/financialOs/financialPaymentPathways.server";
 import type { PathwayInboxDashboardCounts } from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
 import { loadPaymentPathwayInboxDashboardCounts } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
+import type { FinanceApplicationsDashboardCounts } from "@/src/lib/financialOs/financialFinanceApplicationsCore";
+import { loadFinanceApplicationsDashboardCounts } from "@/src/lib/financialOs/financialFinanceApplications.server";
 
 export type FinancialOsDashboardMetrics = {
   outstandingRevenueCents: number;
@@ -24,6 +26,8 @@ export type FinancialOsDashboardMetrics = {
   paymentPathways: FinancialPaymentPathwayDashboardCounts;
   /** FinancialOS Phase 2C: operational pathway inbox task counts. */
   pathwayInbox: PathwayInboxDashboardCounts;
+  /** FinancialOS Phase 3: financing application workflow counts and provider analytics. */
+  financeApplications: FinanceApplicationsDashboardCounts;
 };
 
 function sumBalances(rows: FiInvoiceRow[]): { cents: number; currency: string } {
@@ -133,6 +137,7 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
 
   const paymentPathways = await loadFinancialPaymentPathwayDashboardCounts(tid);
   const pathwayInbox = await loadPaymentPathwayInboxDashboardCounts(tid);
+  const financeApplications = await loadFinanceApplicationsDashboardCounts(tid);
 
   return {
     outstandingRevenueCents: outstandingRevenueCents,
@@ -145,5 +150,6 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
     currency,
     paymentPathways,
     pathwayInbox,
+    financeApplications,
   };
 }

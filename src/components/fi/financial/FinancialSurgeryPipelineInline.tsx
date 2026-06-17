@@ -69,6 +69,11 @@ export function FinancialSurgeryPipelineInline(props: {
             {status.task_attention_required ? (
               <span className={variant === "dark" ? "text-amber-300" : "text-amber-800"}>{AWAITING_FINANCIAL_WORKFLOW_COPY}</span>
             ) : null}
+            {status.financeApplicationAttention.finance_attention_labels.map((label) => (
+              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-800"}>
+                {label}
+              </span>
+            ))}
             <Link href={`${base}/invoices`} className={linkCls}>
               Invoices
             </Link>
@@ -77,6 +82,9 @@ export function FinancialSurgeryPipelineInline(props: {
             </Link>
             <Link href={`${base}/pathway-inbox`} className={linkCls}>
               Pathway inbox
+            </Link>
+            <Link href={`${base}/finance-applications`} className={linkCls}>
+              Finance apps
             </Link>
             {caseId ? (
               <Link href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`} className={linkCls}>

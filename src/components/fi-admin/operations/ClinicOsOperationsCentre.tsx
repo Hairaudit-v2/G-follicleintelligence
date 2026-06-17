@@ -346,6 +346,40 @@ export function ClinicOsOperationsCentre(props: {
               </span>
             </Link>
           </DashboardCard>
+
+          <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-finance-applications-heading">
+            <SectionHeader
+              id="ops-finance-applications-heading"
+              kicker="FinancialOS"
+              title="Finance applications requiring attention"
+              description="Document, approval, and settlement SLAs for medical finance applications — no live provider APIs in Phase 3."
+              className="mb-4"
+            />
+            <Link
+              href={`${base}/financial/finance-applications`}
+              className={cn(
+                "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
+                data.actionCentre.financeApplicationsAttention > 0
+                  ? "border-amber-500/25 bg-amber-500/[0.07] hover:border-amber-400/40 hover:bg-amber-500/12"
+                  : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
+              )}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-100">Financing workflow</p>
+                <p className="mt-0.5 text-xs text-slate-500">Applications pending docs, approval, or settlement follow-up.</p>
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
+                  data.actionCentre.financeApplicationsAttention > 0
+                    ? "bg-amber-500/15 text-amber-100"
+                    : "bg-white/[0.04] text-slate-500",
+                )}
+              >
+                {data.actionCentre.financeApplicationsAttention}
+              </span>
+            </Link>
+          </DashboardCard>
         </div>
 
         <OperationsCrmPipelineSnapshot base={base} showCrmNav={showCrmNav} data={data} />
