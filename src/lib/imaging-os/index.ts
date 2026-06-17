@@ -17,6 +17,7 @@ export * from "./measurement";
 export * from "./surgical";
 export * from "./quality";
 export * from "./qualityRules";
+export * from "./summary";
 export * from "./types";
 
 export { buildFiOsPatientImageIngestionRequest } from "./adapters/fiOsPatientImageAdapter";
@@ -32,6 +33,11 @@ export { evaluateHairAuditVisualComparison } from "./adapters/hairAuditCompariso
 export type { HairAuditComparisonImageInput } from "./adapters/hairAuditComparisonAdapter";
 export { buildHairAuditMeasurementStubs } from "./adapters/hairAuditMeasurementAdapter";
 export type { HairAuditMeasurementInput } from "./adapters/hairAuditMeasurementAdapter";
+export { buildHairAuditImagingSummary } from "./adapters/hairAuditSummaryAdapter";
+export type {
+  HairAuditImagingSummaryContract,
+  HairAuditSummaryAdapterInput,
+} from "./adapters/hairAuditSummaryAdapter";
 
 import type { ClassifyImageCategoryStubInput } from "./classification";
 import { classifyImageCategoryStub } from "./classification";
