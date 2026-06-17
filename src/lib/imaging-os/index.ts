@@ -17,6 +17,7 @@ export { buildFiOsPatientImageIngestionRequest } from "./adapters/fiOsPatientIma
 export type { FiOsPatientImageAdapterInput } from "./adapters/fiOsPatientImageAdapter";
 export { buildHliImageIngestionRequest } from "./adapters/hliImageAdapter";
 export type { HliImageAdapterInput } from "./adapters/hliImageAdapter";
+export { evaluateHairAuditCaseImageProtocol } from "./adapters/hairAuditCaseProtocolAdapter";
 
 import type { ClassifyImageCategoryStubInput } from "./classification";
 import { classifyImageCategoryStub } from "./classification";
