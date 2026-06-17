@@ -211,7 +211,7 @@ describe("hairaudit image classify service", () => {
     assert.strictEqual(outcome.ok, true);
     if (!outcome.ok) return;
 
-    assert.strictEqual(outcome.result.canonical_photo_category, "patient_current_front");
+    assert.strictEqual(outcome.result.canonical_photo_category, "front");
     assert.strictEqual(outcome.result.category, "patient_current_front");
     assert.strictEqual(outcome.result.quality_status, "not_evaluated");
     assert.strictEqual(outcome.result.protocol_status, "not_evaluated");
@@ -236,7 +236,7 @@ describe("hairaudit image classify service", () => {
     if (!parsed.ok) return;
 
     const stub = buildStubClassificationResponse(parsed.data);
-    assert.strictEqual(stub.canonical_photo_category, "preop_donor_rear");
+    assert.strictEqual(stub.canonical_photo_category, "donor");
     assert.strictEqual(stub.category, "preop_donor_rear");
   });
 
@@ -318,7 +318,8 @@ describe("hairaudit image classify route", () => {
     assert.strictEqual(res.status, 200);
     const json = (await res.json()) as Record<string, unknown>;
     assert.strictEqual(isSafeClassificationResponseBody(json), true);
-    assert.strictEqual(json.canonical_photo_category, "patient_current_front");
+    assert.strictEqual(json.canonical_photo_category, "front");
+    assert.strictEqual(json.category, "patient_current_front");
     assert.strictEqual(json.classifier_version, "fi-os-stub-v1");
     assert.ok(!("signedUrl" in json));
     assert.ok(!("storage_path" in json));

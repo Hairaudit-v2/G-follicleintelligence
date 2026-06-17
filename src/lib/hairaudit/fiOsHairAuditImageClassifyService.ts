@@ -13,6 +13,11 @@ import {
 } from "./classifyClinicalHairImageFromModelUrl";
 import { isValidHairauditImageContentType } from "./hairauditImageClassifyContract";
 import { resolveHairauditClassifierMode } from "@/src/lib/security/hairauditClassifierAuth";
+import {
+  runImagingOsIngestionPipeline,
+  stubConfidenceFromSeed,
+  type ImagingOsImageIngestionRequest,
+} from "@/src/lib/imaging-os";
 
 export const HAIRAUDIT_CLASSIFIER_SOURCE_SYSTEM = "hairaudit" as const;
 
@@ -78,23 +83,42 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 /** Deterministic stub confidence in [0.5, 0.7]. */
 export function stubConfidenceForIdempotencyKey(idempotencyKey: string): number {
-  let hash = 0;
-  for (let i = 0; i < idempotencyKey.length; i++) {
-    hash = (hash * 31 + idempotencyKey.charCodeAt(i)) >>> 0;
-  }
-  return 0.5 + (hash % 21) / 100;
+  return stubConfidenceFromSeed(idempotencyKey);
+}
+
+/** Map HairAudit classify request to universal ImagingOS ingestion request. */
+export function buildHairAuditIngestionRequest(
+  input: HairAuditImageClassifyRequest
+): ImagingOsImageIngestionRequest {
+  return {
+    source_system: "hairaudit",
+    upload_surface: "audit_upload",
+    case_id: input.source_case_id,
+    external_image_id: input.source_upload_id,
+    ...(input.storage_bucket ? { storage_bucket: input.storage_bucket } : {}),
+    ...(input.storage_path ? { storage_path: input.storage_path } : {}),
+    ...(input.image_content_type ? { content_type: input.image_content_type } : {}),
+    ...(input.image_size_bytes != null ? { size_bytes: input.image_size_bytes } : {}),
+    external_category: input.canonical_photo_category,
+    metadata: {
+      idempotency_key: input.idempotency_key,
+      ...(input.legacy_upload_type ? { legacy_upload_type: input.legacy_upload_type } : {}),
+    },
+  };
 }
 
 export function buildStubClassificationResponse(
   input: HairAuditImageClassifyRequest
 ): HairAuditImageClassifyResponse {
-  const canonical = input.canonical_photo_category;
+  const externalCategory = input.canonical_photo_category;
+  const pipeline = runImagingOsIngestionPipeline(buildHairAuditIngestionRequest(input));
+
   return {
-    category: canonical,
-    canonical_photo_category: canonical,
-    confidence: stubConfidenceForIdempotencyKey(input.idempotency_key),
-    quality_status: "not_evaluated",
-    protocol_status: "not_evaluated",
+    category: externalCategory,
+    canonical_photo_category: pipeline.classification.canonical_photo_category,
+    confidence: pipeline.classification.confidence,
+    quality_status: pipeline.quality.quality_status,
+    protocol_status: pipeline.protocol.protocol_status,
     classifier_version: STUB_CLASSIFIER_VERSION,
     notes: "Stub classification only",
   };
