@@ -19,6 +19,7 @@ export * from "./quality";
 export * from "./qualityRules";
 export * from "./summary";
 export * from "./aiVision";
+export * from "./liveAi";
 export * from "./types";
 
 export { buildFiOsPatientImageIngestionRequest } from "./adapters/fiOsPatientImageAdapter";
@@ -41,6 +42,8 @@ export type {
 } from "./adapters/hairAuditSummaryAdapter";
 export { buildHairAuditAiVisionReadiness } from "./adapters/hairAuditAiVisionAdapter";
 export type { HairAuditAiVisionReadinessInput } from "./adapters/hairAuditAiVisionAdapter";
+export { runHairAuditAiTask } from "./adapters/hairAuditLiveAiAdapter";
+export type { RunHairAuditAiTaskInput } from "./adapters/hairAuditLiveAiAdapter";
 
 import type { ClassifyImageCategoryStubInput } from "./classification";
 import { classifyImageCategoryStub } from "./classification";
