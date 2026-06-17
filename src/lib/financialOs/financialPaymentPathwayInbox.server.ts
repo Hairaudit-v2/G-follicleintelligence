@@ -1,13 +1,12 @@
 import "server-only";
 
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { personMetadataDisplayLabel } from "@/src/lib/crm/crmLeadListDisplay";
 import type { FiPaymentPathwayType } from "@/src/lib/financialOs/financialPaymentPathwayCore";
 import type { FinancialPaymentPathwayRecord } from "@/src/lib/financialOs/financialPaymentPathways.server";
 import {
   aggregatePathwayInboxDashboardCounts,
   computeTaskEscalationPriority,
-  filterUnresolvedOpenPathwayTasks,
-  isUnresolvedOpenPathwayTaskStatus,
   mapPathwayTypeToTaskType,
   OPEN_PATHWAY_TASK_STATUSES,
   type FiPaymentPathwayTaskPriority,
