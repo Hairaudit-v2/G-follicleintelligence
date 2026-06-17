@@ -7,6 +7,7 @@ import {
   type FiPaymentPathwayStatus,
   type FiPaymentPathwayType,
 } from "@/src/lib/financialOs/financialPaymentPathwayCore";
+import type { FiPaymentPathwaySource } from "@/src/lib/financialOs/publicPaymentPathwaySelectionCore";
 
 export type FinancialPaymentPathwayRecord = FiPaymentPathwayRow & {
   tenant_id: string;
@@ -15,6 +16,8 @@ export type FinancialPaymentPathwayRecord = FiPaymentPathwayRow & {
   invoice_id: string | null;
   booking_id: string | null;
   selected_at: string | null;
+  source: FiPaymentPathwaySource;
+  source_payment_request_id: string | null;
   metadata: Record<string, unknown>;
 };
 
@@ -36,6 +39,8 @@ function mapRow(raw: Record<string, unknown>): FinancialPaymentPathwayRecord {
     currency_code: raw.currency_code ? String(raw.currency_code) : "AUD",
     expected_amount_cents: raw.expected_amount_cents != null ? Number(raw.expected_amount_cents) : null,
     settled_amount_cents: raw.settled_amount_cents != null ? Number(raw.settled_amount_cents) : null,
+    source: (raw.source as FiPaymentPathwaySource) ?? "staff",
+    source_payment_request_id: raw.source_payment_request_id ? String(raw.source_payment_request_id) : null,
     metadata: (raw.metadata as Record<string, unknown>) ?? {},
     created_at: String(raw.created_at ?? ""),
     updated_at: String(raw.updated_at ?? ""),
@@ -43,7 +48,7 @@ function mapRow(raw: Record<string, unknown>): FinancialPaymentPathwayRecord {
 }
 
 const SELECT_COLUMNS =
-  "id, tenant_id, patient_id, case_id, invoice_id, booking_id, pathway_type, status, provider, provider_reference, selected_at, expected_settlement_date, actual_settlement_date, currency_code, expected_amount_cents, settled_amount_cents, metadata, created_at, updated_at";
+  "id, tenant_id, patient_id, case_id, invoice_id, booking_id, pathway_type, status, provider, provider_reference, selected_at, expected_settlement_date, actual_settlement_date, currency_code, expected_amount_cents, settled_amount_cents, source, source_payment_request_id, metadata, created_at, updated_at";
 
 export async function loadPaymentPathwaysForCase(tenantId: string, caseId: string): Promise<FinancialPaymentPathwayRecord[]> {
   const supabase = supabaseAdmin();
@@ -107,6 +112,8 @@ export async function createPaymentPathway(args: {
   currencyCode?: string | null;
   expectedAmountCents?: number | null;
   metadata?: Record<string, unknown>;
+  source?: FiPaymentPathwaySource;
+  sourcePaymentRequestId?: string | null;
 }): Promise<FinancialPaymentPathwayRecord> {
   const tid = args.tenantId.trim();
   const supabase = supabaseAdmin();
@@ -126,6 +133,8 @@ export async function createPaymentPathway(args: {
       currency_code: args.currencyCode?.trim() || "AUD",
       expected_amount_cents: args.expectedAmountCents ?? null,
       metadata: args.metadata ?? {},
+      source: args.source ?? "staff",
+      source_payment_request_id: args.sourcePaymentRequestId?.trim() || null,
     })
     .select(SELECT_COLUMNS)
     .single();
@@ -180,6 +189,56 @@ export async function updatePaymentPathwayStatus(args: {
   return mapRow(data as Record<string, unknown>);
 }
 
+export async function updatePaymentPathwaySelection(args: {
+  tenantId: string;
+  pathwayId: string;
+  pathwayType: FiPaymentPathwayType;
+  status: FiPaymentPathwayStatus;
+  source?: FiPaymentPathwaySource;
+  sourcePaymentRequestId?: string | null;
+  currencyCode?: string | null;
+  expectedAmountCents?: number | null;
+  metadataPatch?: Record<string, unknown>;
+}): Promise<FinancialPaymentPathwayRecord> {
+  const tid = args.tenantId.trim();
+  const supabase = supabaseAdmin();
+
+  const update: Record<string, unknown> = {
+    pathway_type: args.pathwayType,
+    status: args.status,
+    selected_at: new Date().toISOString(),
+  };
+  if (args.source !== undefined) update.source = args.source;
+  if (args.sourcePaymentRequestId !== undefined) {
+    update.source_payment_request_id = args.sourcePaymentRequestId?.trim() || null;
+  }
+  if (args.currencyCode !== undefined) update.currency_code = args.currencyCode?.trim() || "AUD";
+  if (args.expectedAmountCents !== undefined) update.expected_amount_cents = args.expectedAmountCents;
+
+  if (args.metadataPatch && Object.keys(args.metadataPatch).length > 0) {
+    const { data: existing, error: fetchErr } = await supabase
+      .from("fi_payment_pathways")
+      .select("metadata")
+      .eq("tenant_id", tid)
+      .eq("id", args.pathwayId.trim())
+      .maybeSingle();
+    if (fetchErr) throw new Error(fetchErr.message);
+    const currentMeta = ((existing as { metadata?: Record<string, unknown> } | null)?.metadata ?? {}) as Record<string, unknown>;
+    update.metadata = { ...currentMeta, ...args.metadataPatch };
+  }
+
+  const { data, error } = await supabase
+    .from("fi_payment_pathways")
+    .update(update)
+    .eq("tenant_id", tid)
+    .eq("id", args.pathwayId.trim())
+    .select(SELECT_COLUMNS)
+    .single();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Payment pathway not found.");
+  return mapRow(data as Record<string, unknown>);
+}
+
 export async function resolveActivePaymentPathwayForInvoice(
   tenantId: string,
   invoiceId: string
@@ -201,6 +260,8 @@ export type FinancialPaymentPathwayDashboardCounts = {
   countsByStatus: Record<FiPaymentPathwayStatus, number>;
   expectedSettlementNext30DaysCount: number;
   attentionCount: number;
+  /** Phase 2B: pathways selected by patients via public payment link in the last 30 days. */
+  patientSelectedLast30DaysCount: number;
 };
 
 const PATHWAY_TYPES: FiPaymentPathwayType[] = [
@@ -245,8 +306,16 @@ export async function loadFinancialPaymentPathwayDashboardCounts(tenantId: strin
 
   let expectedSettlementNext30DaysCount = 0;
   let attentionCount = 0;
+  let patientSelectedLast30DaysCount = 0;
+
+  const patientWindowStart = new Date(today);
+  patientWindowStart.setUTCDate(patientWindowStart.getUTCDate() - 30);
+  const patientWindowIso = patientWindowStart.toISOString();
 
   for (const row of rows) {
+    if (row.source === "patient_public_token" && row.selected_at && row.selected_at >= patientWindowIso) {
+      patientSelectedLast30DaysCount += 1;
+    }
     countsByType[row.pathway_type] = (countsByType[row.pathway_type] ?? 0) + 1;
     countsByStatus[row.status] = (countsByStatus[row.status] ?? 0) + 1;
 
@@ -263,5 +332,5 @@ export async function loadFinancialPaymentPathwayDashboardCounts(tenantId: strin
     }
   }
 
-  return { countsByType, countsByStatus, expectedSettlementNext30DaysCount, attentionCount };
+  return { countsByType, countsByStatus, expectedSettlementNext30DaysCount, attentionCount, patientSelectedLast30DaysCount };
 }

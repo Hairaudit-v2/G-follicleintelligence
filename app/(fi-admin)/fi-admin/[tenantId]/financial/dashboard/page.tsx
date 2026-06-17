@@ -100,6 +100,11 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
             </dd>
           </div>
           <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Patient-selected (30d)</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.paymentPathways.patientSelectedLast30DaysCount}</dd>
+            <dd className="text-[11px] text-slate-500">Pathways chosen via secure pay link.</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
             <dt className="text-xs text-slate-500">Expected settlement (next 30 days)</dt>
             <dd className="text-sm font-semibold text-slate-900">{metrics.paymentPathways.expectedSettlementNext30DaysCount}</dd>
             <dt className="mt-2 text-xs text-slate-500">Pathway attention</dt>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { PublicPaymentPathwaySelector } from "@/src/components/fi/public-payments/PublicPaymentPathwaySelector";
+import { loadPublicPaymentPathwaySelectionByToken } from "@/src/lib/financialOs/publicPaymentPathwaySelection.server";
 import { loadPublicPaymentRequestView } from "@/src/lib/revenueOs/publicPaymentRequestLoaders.server";
 
 export const metadata: Metadata = {
@@ -18,7 +20,10 @@ function formatMoney(cents: number, currency: string): string {
 export default async function PublicPayPage({ params }: { params: Promise<{ paymentRequestToken: string }> }) {
   const { paymentRequestToken } = await params;
   const raw = paymentRequestToken?.trim() ?? "";
-  const view = await loadPublicPaymentRequestView(raw);
+  const [view, pathwaySelection] = await Promise.all([
+    loadPublicPaymentRequestView(raw),
+    loadPublicPaymentPathwaySelectionByToken(raw),
+  ]);
 
   if (!view.ok) {
     return (
@@ -61,7 +66,7 @@ export default async function PublicPayPage({ params }: { params: Promise<{ paym
             Online card payment is not enabled for this clinic. Please contact the clinic to complete payment.
           </p>
         ) : null}
-        {state === "payable" && checkoutUrl ? (
+        {state === "payable" && checkoutUrl && !(pathwaySelection.ok && pathwaySelection.eligible) ? (
           <div className="pt-2">
             <a
               href={checkoutUrl}
@@ -73,6 +78,18 @@ export default async function PublicPayPage({ params }: { params: Promise<{ paym
           </div>
         ) : null}
       </section>
+
+      {pathwaySelection.ok && pathwaySelection.eligible ? (
+        <PublicPaymentPathwaySelector
+          publicToken={pathwaySelection.publicToken}
+          options={pathwaySelection.options}
+          initialSelectedPathwayType={pathwaySelection.selectedPathwayType}
+          initialCheckoutUrl={pathwaySelection.checkoutUrl}
+          initialShowCheckout={pathwaySelection.showCheckoutForSelection}
+          initialConfirmationMessage={pathwaySelection.confirmationMessage}
+          isDepositPaymentRequest={pathwaySelection.isDepositPaymentRequest}
+        />
+      ) : null}
 
       <p className="mt-8 text-center text-xs text-slate-500">
         Questions? Reply to the clinic message that contained this link, or use the contact details they provided.

@@ -12,6 +12,7 @@ export type FinancialPaymentPathwayTimelineRow = {
   id: string;
   pathway_type: string;
   status: string;
+  source: string | null;
   provider: string | null;
   expected_settlement_date: string | null;
   actual_settlement_date: string | null;
@@ -38,6 +39,17 @@ const STATUS_OPTIONS = [
   "settled",
   "cancelled",
 ] as const;
+
+const SOURCE_LABELS: Record<string, string> = {
+  staff: "Staff",
+  patient_public_token: "Patient (pay link)",
+  system: "System",
+};
+
+function sourceLabel(source: string | null): string {
+  if (!source) return "Staff";
+  return SOURCE_LABELS[source] ?? source;
+}
 
 function fmtMoney(cents: number | null, currency: string | null): string {
   if (cents == null) return "—";
@@ -93,6 +105,7 @@ export function FinancialPaymentPathwayTimeline(props: {
             <tr>
               <th className="px-2 py-2">Type</th>
               <th className="px-2 py-2">Status</th>
+              <th className="px-2 py-2">Source</th>
               <th className="px-2 py-2">Provider</th>
               <th className="px-2 py-2">Expected settlement</th>
               <th className="px-2 py-2">Expected amount</th>
@@ -109,6 +122,7 @@ export function FinancialPaymentPathwayTimeline(props: {
                 <tr key={p.id}>
                   <td className="px-2 py-2">{pathwayTypeLabel(p.pathway_type)}</td>
                   <td className="px-2 py-2">{pathwayStatusLabel(p.status)}</td>
+                  <td className="px-2 py-2">{sourceLabel(p.source)}</td>
                   <td className="px-2 py-2">{p.provider ?? "—"}</td>
                   <td className="px-2 py-2">{p.expected_settlement_date ?? "—"}</td>
                   <td className="px-2 py-2 font-mono">{fmtMoney(p.expected_amount_cents, p.currency_code)}</td>
