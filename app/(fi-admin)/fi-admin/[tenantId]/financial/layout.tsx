@@ -14,6 +14,7 @@ const NAV = [
   { href: "providers", label: "Providers" },
   { href: "finance-applications", label: "Finance Applications" },
   { href: "super-release", label: "Super Release" },
+  { href: "international-transfers", label: "International Transfers" },
   { href: "deposit-rules", label: "Deposit rules" },
 ] as const;
 

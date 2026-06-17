@@ -115,7 +115,8 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
     actionCentre.surgeryFinancialPaymentAttention +
     actionCentre.financialPathwayTasksAttention +
     actionCentre.financeApplicationsAttention +
-    actionCentre.superReleaseApplicationsAttention;
+    actionCentre.superReleaseApplicationsAttention +
+    actionCentre.internationalTransferApplicationsAttention;
   const meta = FI_DASHBOARD_WIDGET_LABELS.attention_centre;
 
   return (
@@ -199,6 +200,14 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             count={actionCentre.superReleaseApplicationsAttention}
             icon={<Banknote className="h-4 w-4" />}
             severity={actionCentre.superReleaseApplicationsAttention > 0 ? "warning" : "normal"}
+          />
+          <ActionRow
+            href={`${base}/financial/international-transfers`}
+            label="International transfer SLA breaches"
+            detail="Cross-border transfer workflows breaching instructions, proof, reconciliation, or settlement SLAs."
+            count={actionCentre.internationalTransferApplicationsAttention}
+            icon={<Banknote className="h-4 w-4" />}
+            severity={actionCentre.internationalTransferApplicationsAttention > 0 ? "warning" : "normal"}
           />
         </div>
       )}

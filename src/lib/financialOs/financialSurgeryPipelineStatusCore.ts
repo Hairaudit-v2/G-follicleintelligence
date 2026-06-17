@@ -27,6 +27,11 @@ import {
   type FiSuperReleaseApplicationRow,
   type SuperReleaseAttentionSummary,
 } from "@/src/lib/financialOs/financialSuperReleaseCore";
+import {
+  buildInternationalTransferAttentionSummary,
+  type FiInternationalTransferApplicationRow,
+  type InternationalTransferAttentionSummary,
+} from "@/src/lib/financialOs/financialInternationalTransferCore";
 
 export const AWAITING_FINANCIAL_WORKFLOW_COPY = "Awaiting financial workflow completion" as const;
 
@@ -64,6 +69,8 @@ export type FinancialSurgeryPipelineStatus = {
   financeApplicationAttention: FinanceApplicationAttentionSummary;
   /** FinancialOS Phase 3B: unresolved super release application attention for this booking context. */
   superReleaseApplicationAttention: SuperReleaseAttentionSummary;
+  /** FinancialOS Phase 3C: unresolved international transfer application attention for this booking context. */
+  internationalTransferApplicationAttention: InternationalTransferAttentionSummary;
 };
 
 function ymd(s: string | null | undefined): string | null {
@@ -133,6 +140,8 @@ export type BuildFinancialSurgeryPipelineStatusInput = {
   financeApplication?: FiFinanceApplicationRow | null;
   /** FinancialOS Phase 3B: active unresolved super release application for this context. */
   superReleaseApplication?: FiSuperReleaseApplicationRow | null;
+  /** FinancialOS Phase 3C: active unresolved international transfer application for this context. */
+  internationalTransferApplication?: FiInternationalTransferApplicationRow | null;
   /** Surgery date for this context (YYYY-MM-DD), used by pathway attention horizon rules. */
   surgeryDateYmd?: string | null;
 };
@@ -171,6 +180,7 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     pathwayTasks = [],
     financeApplication = null,
     superReleaseApplication = null,
+    internationalTransferApplication = null,
     surgeryDateYmd = null,
   } = input;
 
@@ -194,6 +204,12 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     application: superReleaseApplication,
     surgeryDateYmd,
   });
+  const internationalTransferApplicationAttention = buildInternationalTransferAttentionSummary({
+    todayYmd,
+    application: internationalTransferApplication,
+    surgeryDateYmd,
+    surgeryPipelineLabels: true,
+  });
 
   const hasExplicitSignal =
     Boolean(fos) ||
@@ -203,7 +219,8 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     paymentPathway.hasActivePathway ||
     pathwayTaskAttention.task_attention_required ||
     financeApplicationAttention.finance_attention_required ||
-    superReleaseApplicationAttention.super_release_attention_required;
+    superReleaseApplicationAttention.super_release_attention_required ||
+    internationalTransferApplicationAttention.international_transfer_attention_required;
 
   const horizonYmd = addDaysToCalendarDate(todayYmd, 14, calendarTimezone);
 
@@ -231,6 +248,7 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
       pathwayTaskAttention,
       financeApplicationAttention,
       superReleaseApplicationAttention,
+      internationalTransferApplicationAttention,
     };
   }
 
@@ -285,6 +303,8 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
   const task_attention_required = pathwayTaskAttention.task_attention_required;
   const finance_attention_required = financeApplicationAttention.finance_attention_required;
   const super_release_attention_required = superReleaseApplicationAttention.super_release_attention_required;
+  const international_transfer_attention_required =
+    internationalTransferApplicationAttention.international_transfer_attention_required;
 
   const payment_attention_required =
     deposit_pending_for_confirmed_surgery ||
@@ -295,7 +315,8 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     paymentPathway.pathway_attention_required ||
     task_attention_required ||
     finance_attention_required ||
-    super_release_attention_required;
+    super_release_attention_required ||
+    international_transfer_attention_required;
 
   const dueCandidates: string[] = [];
   for (const inv of ctxInvoices) {
@@ -311,7 +332,7 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
   const next_payment_due_date = dueCandidates.length ? dueCandidates.sort()[0]! : null;
 
   let summary_label = "Review finances";
-  if (task_attention_required || finance_attention_required || super_release_attention_required) {
+  if (task_attention_required || finance_attention_required || super_release_attention_required || international_transfer_attention_required) {
     summary_label = AWAITING_FINANCIAL_WORKFLOW_COPY;
   } else if (fos === "paid_in_full" && balance_due_cents <= 0 && !depositPendingFromInvoices) {
     summary_label = "Paid in full";
@@ -354,5 +375,6 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     pathwayTaskAttention,
     financeApplicationAttention,
     superReleaseApplicationAttention,
+    internationalTransferApplicationAttention,
   };
 }

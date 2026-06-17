@@ -79,6 +79,11 @@ export function FinancialSurgeryPipelineInline(props: {
                 {label}
               </span>
             ))}
+            {status.internationalTransferApplicationAttention.international_transfer_attention_labels.map((label) => (
+              <span key={label} className={variant === "dark" ? "text-orange-300" : "text-orange-800"}>
+                {label}
+              </span>
+            ))}
             <Link href={`${base}/invoices`} className={linkCls}>
               Invoices
             </Link>
@@ -93,6 +98,9 @@ export function FinancialSurgeryPipelineInline(props: {
             </Link>
             <Link href={`${base}/super-release`} className={linkCls}>
               Super release
+            </Link>
+            <Link href={`${base}/international-transfers`} className={linkCls}>
+              Intl transfers
             </Link>
             {caseId ? (
               <Link href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`} className={linkCls}>

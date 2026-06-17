@@ -24,6 +24,7 @@ import { loadSurgeryFinancialPaymentAttentionCount } from "@/src/lib/financialOs
 import { loadPaymentPathwayAttentionCount } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 import { loadFinanceApplicationAttentionCount } from "@/src/lib/financialOs/financialFinanceApplications.server";
 import { loadSuperReleaseAttentionCount } from "@/src/lib/financialOs/financialSuperRelease.server";
+import { loadInternationalTransferAttentionCount } from "@/src/lib/financialOs/financialInternationalTransfer.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
   bookingAgendaBucket,
@@ -183,6 +184,8 @@ const actionCentreSchema = z.object({
   financeApplicationsAttention: z.number().int().nonnegative(),
   /** FinancialOS Phase 3B: super release applications breaching SLA attention rules. */
   superReleaseApplicationsAttention: z.number().int().nonnegative(),
+  /** FinancialOS Phase 3C: international transfer applications breaching SLA attention rules. */
+  internationalTransferApplicationsAttention: z.number().int().nonnegative(),
 });
 
 export type TenantActionCentre = z.infer<typeof actionCentreSchema>;
@@ -594,7 +597,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
   const horizonIso = addHours(now, 14 * 24).toISOString();
   const nowIso = now.toISOString();
 
-  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes, surgeryFinancialPaymentAttention, financialPathwayTasksAttention, financeApplicationsAttention, superReleaseApplicationsAttention] = await Promise.all([
+  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes, surgeryFinancialPaymentAttention, financialPathwayTasksAttention, financeApplicationsAttention, superReleaseApplicationsAttention, internationalTransferApplicationsAttention] = await Promise.all([
     supabase
       .from("fi_crm_leads")
       .select("id", { count: "exact", head: true })
@@ -626,6 +629,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
     loadPaymentPathwayAttentionCount(tid),
     loadFinanceApplicationAttentionCount(tid),
     loadSuperReleaseAttentionCount(tid),
+    loadInternationalTransferAttentionCount(tid),
   ]);
 
   if (openLeadsRes.error) throw new Error(openLeadsRes.error.message);
@@ -642,6 +646,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
     financialPathwayTasksAttention,
     financeApplicationsAttention,
     superReleaseApplicationsAttention,
+    internationalTransferApplicationsAttention,
   });
 }
 

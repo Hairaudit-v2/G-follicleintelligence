@@ -414,6 +414,40 @@ export function ClinicOsOperationsCentre(props: {
               </span>
             </Link>
           </DashboardCard>
+
+          <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-international-transfer-heading">
+            <SectionHeader
+              id="ops-international-transfer-heading"
+              kicker="FinancialOS"
+              title="International Transfers Requiring Attention"
+              description="Instructions, proof, reconciliation, settlement, and FX variance SLAs for international transfer applications — no live Wise/bank/SWIFT APIs in Phase 3C."
+              className="mb-4"
+            />
+            <Link
+              href={`${base}/financial/international-transfers`}
+              className={cn(
+                "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
+                data.actionCentre.internationalTransferApplicationsAttention > 0
+                  ? "border-amber-500/25 bg-amber-500/[0.07] hover:border-amber-400/40 hover:bg-amber-500/12"
+                  : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
+              )}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-100">International transfer workflow</p>
+                <p className="mt-0.5 text-xs text-slate-500">Applications pending instructions, proof, reconciliation, or settlement.</p>
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
+                  data.actionCentre.internationalTransferApplicationsAttention > 0
+                    ? "bg-amber-500/15 text-amber-100"
+                    : "bg-white/[0.04] text-slate-500",
+                )}
+              >
+                {data.actionCentre.internationalTransferApplicationsAttention}
+              </span>
+            </Link>
+          </DashboardCard>
         </div>
 
         <OperationsCrmPipelineSnapshot base={base} showCrmNav={showCrmNav} data={data} />

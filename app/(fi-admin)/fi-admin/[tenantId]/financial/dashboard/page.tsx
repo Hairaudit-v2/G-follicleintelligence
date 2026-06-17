@@ -251,6 +251,63 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         </dl>
       </section>
 
+      <section>
+        <h2 className="text-sm font-semibold text-slate-900">International transfer applications</h2>
+        <p className="mt-1 max-w-2xl text-xs text-slate-600">
+          Cross-border bank transfer workflow for overseas patients — see{" "}
+          <Link href={`/fi-admin/${tid}/financial/international-transfers`} className="text-sky-700 hover:underline">
+            International Transfers
+          </Link>
+          .
+        </p>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Open applications</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.internationalTransfer.openCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Awaiting transfer</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.internationalTransfer.awaitingTransferCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Proof received</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.internationalTransfer.proofReceivedCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Settlement pending</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.internationalTransfer.settlementPendingCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Variance review</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.internationalTransfer.varianceReviewCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Settled this month</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.internationalTransfer.settledThisMonthCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Average settlement days</dt>
+            <dd className="text-sm font-semibold text-slate-900">
+              {metrics.internationalTransfer.averageSettlementDays != null
+                ? `${metrics.internationalTransfer.averageSettlementDays} days`
+                : "—"}
+            </dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Total settlement variance</dt>
+            <dd className="text-sm font-semibold text-slate-900">
+              {metrics.internationalTransfer.totalSettlementVarianceCents !== 0
+                ? `$${(metrics.internationalTransfer.totalSettlementVarianceCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+                : "—"}
+            </dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Applications requiring attention</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.internationalTransfer.attentionCount}</dd>
+          </div>
+        </dl>
+      </section>
+
       <section className="rounded border border-slate-200 bg-slate-50/80 p-4 text-xs text-slate-700">
         <h2 className="text-sm font-semibold text-slate-900">Automation cron</h2>
         <p className="mt-2">
