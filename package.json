@@ -17,6 +17,7 @@
     "test:e2e:headed": "playwright test --headed",
     "replay:intelligence-event-logs": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/replay-intelligence-event-logs.ts",
     "test:unit": "node scripts/run-unit-tests.mjs",
+    "test:upload-phase3f": "tsx --test tests/hairauditImageClassifyEndpoint.test.ts",
     "calendar:perf-smoke": "cross-env NODE_ENV=development node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/calendar-loader-perf-smoke.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -10,3 +10,27 @@
     }
   ]
 }
+{
+  "crons": [
+    {
+      "path": "/api/cron/financial-os/automation?job=deposit_overdue",
+      "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/financial-os/automation?job=balance_due_reminders",
+      "schedule": "15 22 * * *"
+    },
+    {
+      "path": "/api/cron/financial-os/automation?job=failed_payment_recovery",
+      "schedule": "30 22 * * *"
+    },
+    {
+      "path": "/api/cron/financial-os/pathway-task-escalation",
+      "schedule": "45 22 * * *"
+    },
+    {
+      "path": "/api/cron/financial-os/clearance-snapshots?horizonDays=14",
+      "schedule": "0 23 * * *"
+    }
+  ]
+}

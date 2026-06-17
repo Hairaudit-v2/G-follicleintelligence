@@ -15,7 +15,9 @@ import { loadFinanceApplicationsDashboardCounts } from "@/src/lib/financialOs/fi
 import type { SuperReleaseDashboardCounts } from "@/src/lib/financialOs/financialSuperReleaseCore";
 import { loadSuperReleaseDashboardCounts } from "@/src/lib/financialOs/financialSuperRelease.server";
 import type { InternationalTransferDashboardCounts } from "@/src/lib/financialOs/financialInternationalTransferCore";
+import type { FinancialClearanceDashboardMetrics } from "@/src/lib/financialOs/financialClearanceCore";
 import { loadInternationalTransferDashboardCounts } from "@/src/lib/financialOs/financialInternationalTransfer.server";
+import { loadFinancialClearanceDashboardMetrics } from "@/src/lib/financialOs/financialClearance.server";
 
 export type FinancialOsDashboardMetrics = {
   outstandingRevenueCents: number;
@@ -36,6 +38,8 @@ export type FinancialOsDashboardMetrics = {
   superRelease: SuperReleaseDashboardCounts;
   /** FinancialOS Phase 3C: international transfer workflow counts and analytics. */
   internationalTransfer: InternationalTransferDashboardCounts;
+  /** FinancialOS Phase 4: unified clearance metrics for upcoming surgeries (14-day window). */
+  financialClearance: FinancialClearanceDashboardMetrics;
 };
 
 function sumBalances(rows: FiInvoiceRow[]): { cents: number; currency: string } {
@@ -145,10 +149,11 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
 
   const paymentPathways = await loadFinancialPaymentPathwayDashboardCounts(tid);
   const pathwayInbox = await loadPaymentPathwayInboxDashboardCounts(tid);
-  const [financeApplications, superRelease, internationalTransfer] = await Promise.all([
+  const [financeApplications, superRelease, internationalTransfer, financialClearance] = await Promise.all([
     loadFinanceApplicationsDashboardCounts(tid),
     loadSuperReleaseDashboardCounts(tid),
     loadInternationalTransferDashboardCounts(tid),
+    loadFinancialClearanceDashboardMetrics(tid),
   ]);
 
   return {
@@ -165,5 +170,6 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
     financeApplications,
     superRelease,
     internationalTransfer,
+    financialClearance,
   };
 }

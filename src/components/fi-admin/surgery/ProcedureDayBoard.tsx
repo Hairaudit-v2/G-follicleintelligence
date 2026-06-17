@@ -9,6 +9,7 @@ import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezo
 import type { ProcedureDayBoardPayload, ProcedureDayScheduleCard } from "@/src/lib/surgery/procedureDayBoardLoader.server";
 import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
+import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import { SURGERY_READINESS_ISSUE_LABEL, type SurgeryReadinessIssueSeverity } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
@@ -116,6 +117,13 @@ function ScheduleCard({ c, tenantId }: { c: ProcedureDayScheduleCard; tenantId: 
         </div>
       </dl>
       <FinancialSurgeryPipelineInline tenantId={tenantId} caseId={c.caseId} status={c.financialPipeline} variant="dark" />
+      <FinancialClearancePanel
+        tenantId={tenantId}
+        clearance={c.financialClearance}
+        currency={c.financialPipeline.currency}
+        variant="dark"
+        compact
+      />
       <div className="mt-1.5">
         <FinancialPaymentPathwayBadge summary={c.financialPipeline.paymentPathway} variant="dark" />
       </div>

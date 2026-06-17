@@ -116,7 +116,8 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
     actionCentre.financialPathwayTasksAttention +
     actionCentre.financeApplicationsAttention +
     actionCentre.superReleaseApplicationsAttention +
-    actionCentre.internationalTransferApplicationsAttention;
+    actionCentre.internationalTransferApplicationsAttention +
+    actionCentre.financialClearanceAttention;
   const meta = FI_DASHBOARD_WIDGET_LABELS.attention_centre;
 
   return (
@@ -208,6 +209,14 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             count={actionCentre.internationalTransferApplicationsAttention}
             icon={<Banknote className="h-4 w-4" />}
             severity={actionCentre.internationalTransferApplicationsAttention > 0 ? "warning" : "normal"}
+          />
+          <ActionRow
+            href={`${base}/financial/dashboard`}
+            label="Financial clearance issues before surgery"
+            detail="Upcoming procedures in the 14-day window where the unified clearance engine requires staff follow-up."
+            count={actionCentre.financialClearanceAttention}
+            icon={<Banknote className="h-4 w-4" />}
+            severity={actionCentre.financialClearanceAttention > 0 ? "critical" : "normal"}
           />
         </div>
       )}

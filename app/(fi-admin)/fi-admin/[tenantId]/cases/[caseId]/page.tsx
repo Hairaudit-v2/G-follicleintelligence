@@ -26,6 +26,7 @@ import { loadPaymentRecordsForCases } from "@/src/lib/payments/paymentRecordLoad
 import { buildCaseOutcomeIntelligenceView, loadCaseOutcomeMeasurements, loadCaseOutcomeProtocols } from "@/src/lib/fi-os/outcomeIntelligence.server";
 import { loadCrmQuotesForCase } from "@/src/lib/crm/crmQuoteLoaders.server";
 import { loadCaseFinancialOsSurgeryPipelineSummary } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
+import { buildFinancialClearanceFromPipelineStatus } from "@/src/lib/financialOs/financialClearanceCore";
 
 export const metadata = {
   title: "Patient",
@@ -138,6 +139,14 @@ export default async function CaseDetailRoutePage({
 
   const linkedSurgery = pickPrimaryLinkedSurgeryBookingYmd(caseAppointmentBookings, calendarSettings.calendarTimezone);
 
+  const caseFinancialClearance = buildFinancialClearanceFromPipelineStatus({
+    todayYmd: operationalTodayYmd,
+    calendarTimezone: calendarSettings.calendarTimezone,
+    booking_status: null,
+    surgeryDateYmd: linkedSurgery.ymd,
+    pipeline: caseFinancialPipeline,
+  });
+
   const pageView = (
     <CaseDetailPageView
       tenantId={tenantId}
@@ -159,6 +168,7 @@ export default async function CaseDetailRoutePage({
       outcomeIntelligence={outcomeIntelligence}
       casePaymentReadiness={casePaymentReadiness}
       caseFinancialPipeline={caseFinancialPipeline}
+      caseFinancialClearance={caseFinancialClearance}
       caseCrmQuotes={caseCrmQuotes}
     />
   );

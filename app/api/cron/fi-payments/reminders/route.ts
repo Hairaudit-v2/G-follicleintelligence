@@ -1,11 +1,11 @@
 /**
  * POST or GET /api/cron/fi-payments/reminders
- * Authorisation: Bearer `FI_PAYMENTS_CRON_SECRET` or `CRON_SECRET`, or header `x-fi-payments-secret` (timing-safe).
+ * Authorisation: Bearer `CRON_SECRET`, `FINANCIAL_OS_CRON_SECRET`, or `FI_PAYMENTS_CRON_SECRET` (timing-safe).
  * Query: `dryRun=1` | `dry_run=1`, optional `date=YYYY-MM-DD` (defaults to UTC today), optional `tenantId` (UUID), optional `limit` (default 200, max 500).
  */
 import { NextRequest, NextResponse } from "next/server";
 
-import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
+import { validateCronAuth } from "@/src/lib/security/validateCronAuth";
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { runFiPaymentRemindersCronOnce, runFiPaymentRemindersCronOnceForTenant } from "@/src/lib/revenueOs/fiPaymentRemindersCron.server";
 
@@ -20,12 +20,9 @@ export async function GET(req: NextRequest) {
 }
 
 async function handle(req: NextRequest) {
-  const auth = assertCronAuthorized(
-    req,
-    [process.env.FI_PAYMENTS_CRON_SECRET ?? "", process.env.CRON_SECRET ?? ""],
-    { alternateTimingSafeHeaderName: "x-fi-payments-secret" }
-  );
-  if (auth) return auth;
+  if (!validateCronAuth(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const url = new URL(req.url);
   const dryRun = url.searchParams.get("dryRun") === "1" || url.searchParams.get("dry_run") === "1";

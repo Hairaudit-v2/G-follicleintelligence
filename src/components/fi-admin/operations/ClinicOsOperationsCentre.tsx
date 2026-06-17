@@ -448,6 +448,42 @@ export function ClinicOsOperationsCentre(props: {
               </span>
             </Link>
           </DashboardCard>
+
+          <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-financial-clearance-heading">
+            <SectionHeader
+              id="ops-financial-clearance-heading"
+              kicker="FinancialOS"
+              title="Financial Clearance Attention"
+              description="Unified clearance engine for the 14-day surgery window — advisory visibility only; does not block SurgeryOS workflows."
+              className="mb-4"
+            />
+            <Link
+              href={`${base}/financial/dashboard`}
+              className={cn(
+                "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
+                data.actionCentre.financialClearanceAttention > 0
+                  ? "border-rose-500/25 bg-rose-500/[0.07] hover:border-rose-400/40 hover:bg-rose-500/12"
+                  : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
+              )}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-100">Clearance attention (surgery dates)</p>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Bookings where deposits, pathways, balances, installments, or workflow SLAs need resolution before procedure day.
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
+                  data.actionCentre.financialClearanceAttention > 0
+                    ? "bg-rose-500/15 text-rose-100"
+                    : "bg-white/[0.04] text-slate-500",
+                )}
+              >
+                {data.actionCentre.financialClearanceAttention}
+              </span>
+            </Link>
+          </DashboardCard>
         </div>
 
         <OperationsCrmPipelineSnapshot base={base} showCrmNav={showCrmNav} data={data} />

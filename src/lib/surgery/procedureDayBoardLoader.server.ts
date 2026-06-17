@@ -15,6 +15,7 @@ import { procedureStatusLabel } from "@/src/lib/cases/procedureDayLabels";
 import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstants";
 import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import { buildFinancialClearanceMapFromPipeline, type FinancialClearanceResult } from "@/src/lib/financialOs/financialClearance.server";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { paymentRecordNeedsCollection, surgeryDepositBoardLabel, SURGERY_DEPOSIT_BOARD_COPY } from "@/src/lib/payments/paymentRecordModel";
@@ -157,6 +158,7 @@ export type ProcedureDayScheduleCard = {
   readinessBucket: CaseWorklistRow["readinessBucket"] | null;
   surgeryDepositBadge: string | null;
   financialPipeline: FinancialSurgeryPipelineStatus;
+  financialClearance: FinancialClearanceResult;
   issues: ReturnType<typeof buildTodayProcedureReadinessIssues>;
   preOp: PreOpChecklistFlags;
   procedureProgress: {
@@ -264,6 +266,18 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
       })),
     }),
   ]);
+  const financialClearanceByBooking = buildFinancialClearanceMapFromPipeline(
+    surgeryBookings.map((b) => ({
+      id: b.id,
+      case_id: b.case_id,
+      patient_id: b.patient_id,
+      booking_status: b.booking_status,
+      financial_os_status: b.financial_os_status ?? null,
+      start_at: b.start_at,
+    })),
+    financialByBooking,
+    { todayYmd, calendarTimezone: tz }
+  );
 
   const phases: ReturnType<typeof deriveSurgeryDayPipelinePhase>[] = [];
   const flagRows: { highRisk: boolean; unassignedTeam: boolean; missingRoom: boolean }[] = [];
@@ -411,6 +425,7 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
       readinessBucket: work?.readinessBucket ?? null,
       surgeryDepositBadge,
       financialPipeline: financialByBooking.get(b.id)!,
+      financialClearance: financialClearanceByBooking.get(b.id)!,
       issues,
       preOp,
       procedureProgress: {

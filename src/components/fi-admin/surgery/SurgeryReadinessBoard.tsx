@@ -9,6 +9,7 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import type { SurgeryReadinessBoardCard, SurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
+import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import {
   SURGERY_READINESS_ISSUE_LABEL,
@@ -115,6 +116,13 @@ function SurgeryCard({ tenantId, card }: { tenantId: string; card: SurgeryReadin
         </div>
       </dl>
       <FinancialSurgeryPipelineInline tenantId={tenantId} caseId={card.caseId} status={card.financialPipeline} variant="dark" />
+      <FinancialClearancePanel
+        tenantId={tenantId}
+        clearance={card.financialClearance}
+        currency={card.financialPipeline.currency}
+        variant="dark"
+        compact
+      />
       <div className="mt-1.5">
         <FinancialPaymentPathwayBadge summary={card.financialPipeline.paymentPathway} variant="dark" />
       </div>

@@ -6,7 +6,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 
-import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
+import { validateCronAuth } from "@/src/lib/security/validateCronAuth";
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { runFinancialOsAutomationJob } from "@/src/lib/financialOs/fiFinancialAutomationCron.server";
 
@@ -21,12 +21,9 @@ export async function GET(req: NextRequest) {
 }
 
 async function handle(req: NextRequest) {
-  const auth = assertCronAuthorized(req, [
-    process.env.FINANCIAL_OS_CRON_SECRET ?? "",
-    process.env.FI_PAYMENTS_CRON_SECRET ?? "",
-    process.env.CRON_SECRET ?? "",
-  ]);
-  if (auth) return auth;
+  if (!validateCronAuth(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const url = new URL(req.url);
   const jobRaw = url.searchParams.get("job")?.trim() || "deposit_overdue";

@@ -308,6 +308,45 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         </dl>
       </section>
 
+      <section>
+        <h2 className="text-sm font-semibold text-slate-900">Financial clearance (Phase 4)</h2>
+        <p className="mt-1 max-w-2xl text-xs text-slate-600">
+          Unified advisory clearance for surgery bookings in the next 14 days — aggregates invoices, pathways, finance, super release, international
+          transfer, installments, and deposit state. Does not block SurgeryOS or change payment recording.
+        </p>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Financially cleared</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financialClearance.financiallyClearedSurgeries}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Attention required</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financialClearance.attentionRequired}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Pathway pending</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financialClearance.pathwayPending}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Deposit ready</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financialClearance.depositReady}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Paid in full</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financialClearance.paidInFull}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Not ready</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.financialClearance.notReady}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Clearance rate (14d)</dt>
+            <dd className="text-sm font-semibold text-slate-900">{pct(metrics.financialClearance.clearanceRateNext14Days)}</dd>
+            <dd className="text-[11px] text-slate-500">{metrics.financialClearance.totalUpcomingSurgeries} upcoming surgeries</dd>
+          </div>
+        </dl>
+      </section>
+
       <section className="rounded border border-slate-200 bg-slate-50/80 p-4 text-xs text-slate-700">
         <h2 className="text-sm font-semibold text-slate-900">Automation cron</h2>
         <p className="mt-2">
@@ -317,6 +356,13 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
           <code className="rounded bg-white px-1">payment_escalation_alerts</code>) with Bearer <code className="rounded bg-white px-1">CRON_SECRET</code> or{" "}
           <code className="rounded bg-white px-1">FINANCIAL_OS_CRON_SECRET</code>. Supports <code className="rounded bg-white px-1">dry_run=1</code>,{" "}
           <code className="rounded bg-white px-1">tenantId</code>, and <code className="rounded bg-white px-1">date=YYYY-MM-DD</code>.
+        </p>
+        <p className="mt-2">
+          Optional Phase 4 snapshot cron:{" "}
+          <code className="rounded bg-white px-1">POST /api/cron/financial-os/clearance-snapshots</code> with the same Bearer secrets. Supports{" "}
+          <code className="rounded bg-white px-1">dry_run=1</code>, <code className="rounded bg-white px-1">tenantId</code>,{" "}
+          <code className="rounded bg-white px-1">date=YYYY-MM-DD</code>, <code className="rounded bg-white px-1">horizonDays</code>, and{" "}
+          <code className="rounded bg-white px-1">limit</code>.
         </p>
         <p className="mt-2 text-slate-600">
           Balance reminders reuse invoice <code className="rounded bg-white px-1">automation_hints</code> offsets (same semantics as{" "}

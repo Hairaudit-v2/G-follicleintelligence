@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
+import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { TomorrowBoardPayload } from "@/src/lib/clinicOs/tomorrowBoardLoader.server";
@@ -161,6 +162,15 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                               status={r.financialPipeline}
                               variant="dark"
                             />
+                            {r.financialClearance ? (
+                              <FinancialClearancePanel
+                                tenantId={data.tenantId}
+                                clearance={r.financialClearance}
+                                currency={r.financialPipeline.currency}
+                                variant="dark"
+                                compact
+                              />
+                            ) : null}
                             <div className="mt-1.5">
                               <FinancialPaymentPathwayBadge summary={r.financialPipeline.paymentPathway} variant="dark" />
                             </div>
@@ -228,6 +238,15 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                         variant="dark"
                         compact
                       />
+                      {row.financialClearance ? (
+                        <FinancialClearancePanel
+                          tenantId={data.tenantId}
+                          clearance={row.financialClearance}
+                          currency={row.financialPipeline.currency}
+                          variant="dark"
+                          compact
+                        />
+                      ) : null}
                       <div className="mt-1.5">
                         <FinancialPaymentPathwayBadge summary={row.financialPipeline.paymentPathway} variant="dark" />
                       </div>

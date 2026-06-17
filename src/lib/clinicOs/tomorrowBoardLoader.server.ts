@@ -28,6 +28,7 @@ import {
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import { buildFinancialClearanceMapFromPipeline, type FinancialClearanceResult } from "@/src/lib/financialOs/financialClearance.server";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import {
   loadLatestPaymentRecordsByBookingIds,
@@ -131,6 +132,7 @@ export type TomorrowScheduleRow = {
   href: string;
   /** FinancialOS + revenue snapshot for surgery rows only. */
   financialPipeline: FinancialSurgeryPipelineStatus | null;
+  financialClearance: FinancialClearanceResult | null;
   caseId: string | null;
 };
 
@@ -150,6 +152,7 @@ export type TomorrowStaffPrep = {
 /** Surgery readiness rows on the Tomorrow board include FinancialOS pipeline chips (loader merge only). */
 export type TomorrowSurgeryReadinessBoardRow = TomorrowSurgeryReadinessDerived & {
   financialPipeline: FinancialSurgeryPipelineStatus | null;
+  financialClearance: FinancialClearanceResult | null;
 };
 
 export type TomorrowBoardPayload = {
@@ -283,9 +286,23 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     })),
   });
 
+  const financialClearanceByBooking = buildFinancialClearanceMapFromPipeline(
+    surgeryBookings.map((b) => ({
+      id: b.id,
+      case_id: b.case_id,
+      patient_id: b.patient_id,
+      booking_status: b.booking_status,
+      financial_os_status: b.financial_os_status ?? null,
+      start_at: b.start_at,
+    })),
+    financialByBooking,
+    { todayYmd: window.todayYmd, calendarTimezone: window.calendarTimezone }
+  );
+
   const surgeryReadinessWithFinancial: TomorrowSurgeryReadinessBoardRow[] = surgeryReadiness.map((row) => ({
     ...row,
     financialPipeline: financialByBooking.get(row.bookingId) ?? null,
+    financialClearance: financialClearanceByBooking.get(row.bookingId) ?? null,
   }));
 
   let assignedBookings = 0;
@@ -355,6 +372,7 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
       reminderAttention: reminderJobsNeedAttention(jobs),
       href: `${baseHref}/appointments/${encodeURIComponent(b.id)}`,
       financialPipeline: isSurgery ? financialByBooking.get(b.id) ?? null : null,
+      financialClearance: isSurgery ? financialClearanceByBooking.get(b.id) ?? null : null,
       caseId: b.case_id?.trim() || null,
     };
   });

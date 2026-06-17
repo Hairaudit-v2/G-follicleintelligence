@@ -32,8 +32,10 @@ import { PatientTwinNavLink } from "@/src/components/fi-admin/patientTwin/Patien
 import { CasePrescriptionsSection } from "@/src/components/fi-admin/prescribing/CasePrescriptionsSection";
 import { CaseRevenuePaymentsCard } from "@/src/components/fi-admin/revenue/CaseRevenuePaymentsCard";
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
+import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
 import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
+import type { FinancialClearanceResult } from "@/src/lib/financialOs/financialClearanceCore";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import type { CaseCrmQuoteRow } from "@/src/lib/crm/crmQuoteLoaders.server";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
@@ -69,6 +71,7 @@ export function CaseDetailPageView({
   outcomeIntelligence,
   casePaymentReadiness,
   caseFinancialPipeline,
+  caseFinancialClearance,
   caseCrmQuotes = [],
 }: {
   tenantId: string;
@@ -93,6 +96,7 @@ export function CaseDetailPageView({
   outcomeIntelligence: CaseOutcomeIntelligenceView;
   casePaymentReadiness: CasePaymentReadiness;
   caseFinancialPipeline: FinancialSurgeryPipelineStatus;
+  caseFinancialClearance: FinancialClearanceResult;
   caseCrmQuotes?: CaseCrmQuoteRow[];
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
@@ -219,6 +223,14 @@ export function CaseDetailPageView({
                 variant="light"
                 compact={false}
               />
+              <div className="mt-3">
+                <FinancialClearancePanel
+                  tenantId={tenantId}
+                  clearance={caseFinancialClearance}
+                  currency={caseFinancialPipeline.currency}
+                  variant="light"
+                />
+              </div>
               <div className="mt-2">
                 <FinancialPaymentPathwayBadge summary={caseFinancialPipeline.paymentPathway} variant="light" />
               </div>

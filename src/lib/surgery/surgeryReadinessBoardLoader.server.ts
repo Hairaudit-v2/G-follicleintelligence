@@ -17,6 +17,7 @@ import { caseProcedureDayDetailHref } from "@/src/lib/cases/caseDetailNavConstan
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadFinancialSurgeryPipelineStatusByBookings } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import { buildFinancialClearanceMapFromPipeline, type FinancialClearanceResult } from "@/src/lib/financialOs/financialClearance.server";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
@@ -61,6 +62,8 @@ export type SurgeryReadinessBoardCard = {
   surgeryDepositLabel: string;
   /** FinancialOS + revenue pipeline snapshot (Phase 1B). */
   financialPipeline: FinancialSurgeryPipelineStatus;
+  /** FinancialOS Phase 4: unified clearance engine snapshot (advisory). */
+  financialClearance: FinancialClearanceResult;
   hrefs: {
     case: string | null;
     patient: string | null;
@@ -322,6 +325,18 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
       })),
     }),
   ]);
+  const financialClearanceByBooking = buildFinancialClearanceMapFromPipeline(
+    surgeryBookings.map((b) => ({
+      id: b.id,
+      case_id: b.case_id,
+      patient_id: b.patient_id,
+      booking_status: b.booking_status,
+      financial_os_status: b.financial_os_status ?? null,
+      start_at: b.start_at,
+    })),
+    financialByBooking,
+    { todayYmd: window.todayYmd, calendarTimezone: window.calendarTimezone }
+  );
   let depositTracked = 0;
   let depositPending = 0;
 
@@ -423,6 +438,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
       primaryColumn: primary,
       surgeryDepositLabel: SURGERY_DEPOSIT_BOARD_COPY[depKey],
       financialPipeline: financialByBooking.get(b.id)!,
+      financialClearance: financialClearanceByBooking.get(b.id)!,
       hrefs: {
         case: caseId ? caseProcedureDayDetailHref(tid, caseId) : null,
         patient: patientHref,
