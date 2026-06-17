@@ -7,6 +7,7 @@ import {
   type FiPaymentPathwayStatus,
   type FiPaymentPathwayType,
 } from "@/src/lib/financialOs/financialPaymentPathwayCore";
+import { createPaymentPathwayTaskForPathway } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 import type { FiPaymentPathwaySource } from "@/src/lib/financialOs/publicPaymentPathwaySelectionCore";
 
 export type FinancialPaymentPathwayRecord = FiPaymentPathwayRow & {
@@ -139,7 +140,13 @@ export async function createPaymentPathway(args: {
     .select(SELECT_COLUMNS)
     .single();
   if (error) throw new Error(error.message);
-  return mapRow(data as Record<string, unknown>);
+  const pathway = mapRow(data as Record<string, unknown>);
+  try {
+    await createPaymentPathwayTaskForPathway(pathway);
+  } catch {
+    // Task auto-creation is best-effort; pathway creation must not fail.
+  }
+  return pathway;
 }
 
 export async function updatePaymentPathwayStatus(args: {

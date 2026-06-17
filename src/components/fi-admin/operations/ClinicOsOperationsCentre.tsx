@@ -312,6 +312,40 @@ export function ClinicOsOperationsCentre(props: {
               </Link>
             </div>
           </DashboardCard>
+
+          <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-pathway-tasks-heading">
+            <SectionHeader
+              id="ops-pathway-tasks-heading"
+              kicker="FinancialOS"
+              title="Financial pathway tasks requiring attention"
+              description="Open operational inbox tasks for non-standard payment pathways — medical finance, super release, transfers, installments, and manual settlement."
+              className="mb-4"
+            />
+            <Link
+              href={`${base}/financial/pathway-inbox`}
+              className={cn(
+                "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
+                data.actionCentre.financialPathwayTasksAttention > 0
+                  ? "border-amber-500/25 bg-amber-500/[0.07] hover:border-amber-400/40 hover:bg-amber-500/12"
+                  : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
+              )}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-100">Pathway workflow tasks</p>
+                <p className="mt-0.5 text-xs text-slate-500">Staff inbox for pathway review before financial clearance.</p>
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
+                  data.actionCentre.financialPathwayTasksAttention > 0
+                    ? "bg-amber-500/15 text-amber-100"
+                    : "bg-white/[0.04] text-slate-500",
+                )}
+              >
+                {data.actionCentre.financialPathwayTasksAttention}
+              </span>
+            </Link>
+          </DashboardCard>
         </div>
 
         <OperationsCrmPipelineSnapshot base={base} showCrmNav={showCrmNav} data={data} />

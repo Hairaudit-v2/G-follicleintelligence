@@ -112,7 +112,8 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
     actionCentre.consultationsAwaitingCompletion +
     actionCentre.followUpsDue +
     actionCentre.surgeryReadinessAlerts +
-    actionCentre.surgeryFinancialPaymentAttention;
+    actionCentre.surgeryFinancialPaymentAttention +
+    actionCentre.financialPathwayTasksAttention;
   const meta = FI_DASHBOARD_WIDGET_LABELS.attention_centre;
 
   return (
@@ -172,6 +173,14 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             count={actionCentre.surgeryFinancialPaymentAttention}
             icon={<Banknote className="h-4 w-4" />}
             severity={actionCentre.surgeryFinancialPaymentAttention > 0 ? "warning" : "normal"}
+          />
+          <ActionRow
+            href={`${base}/financial/pathway-inbox`}
+            label="Financial pathway tasks"
+            detail="Open operational inbox tasks for non-standard payment pathways."
+            count={actionCentre.financialPathwayTasksAttention}
+            icon={<ClipboardList className="h-4 w-4" />}
+            severity={actionCentre.financialPathwayTasksAttention > 0 ? "warning" : "normal"}
           />
         </div>
       )}

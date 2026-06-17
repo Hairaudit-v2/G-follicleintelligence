@@ -21,6 +21,7 @@ import { loadPaymentSummaryForOperations } from "@/src/lib/payments/paymentRecor
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { loadRevenueCollectionsDashboardKpis } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import { loadSurgeryFinancialPaymentAttentionCount } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
+import { loadPaymentPathwayAttentionCount } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 import { loadOperationalDashboardReminderJobs } from "@/src/lib/reminders/reminderJobs.server";
 import {
   bookingAgendaBucket,
@@ -174,6 +175,8 @@ const actionCentreSchema = z.object({
   surgeryReadinessAlerts: z.number().int().nonnegative(),
   /** Surgery bookings in the same 14-day window where FinancialOS / revenue signals need follow-up before procedure day. */
   surgeryFinancialPaymentAttention: z.number().int().nonnegative(),
+  /** FinancialOS Phase 2C: open payment pathway inbox tasks requiring staff workflow. */
+  financialPathwayTasksAttention: z.number().int().nonnegative(),
 });
 
 export type TenantActionCentre = z.infer<typeof actionCentreSchema>;
@@ -585,7 +588,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
   const horizonIso = addHours(now, 14 * 24).toISOString();
   const nowIso = now.toISOString();
 
-  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes, surgeryFinancialPaymentAttention] = await Promise.all([
+  const [openLeadsRes, consultRes, followUpRes, surgeryReadyRes, surgeryFinancialPaymentAttention, financialPathwayTasksAttention] = await Promise.all([
     supabase
       .from("fi_crm_leads")
       .select("id", { count: "exact", head: true })
@@ -614,6 +617,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
       .lt("start_at", horizonIso)
       .is("case_id", null),
     loadSurgeryFinancialPaymentAttentionCount(tid, now),
+    loadPaymentPathwayAttentionCount(tid),
   ]);
 
   if (openLeadsRes.error) throw new Error(openLeadsRes.error.message);
@@ -627,6 +631,7 @@ async function loadActionCentreCounts(tenantId: string, now: Date): Promise<Tena
     followUpsDue: followUpRes.count ?? 0,
     surgeryReadinessAlerts: surgeryReadyRes.count ?? 0,
     surgeryFinancialPaymentAttention,
+    financialPathwayTasksAttention,
   });
 }
 

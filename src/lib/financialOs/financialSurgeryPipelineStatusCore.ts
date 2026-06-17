@@ -12,6 +12,13 @@ import {
   type FiPaymentPathwayRow,
   type PaymentPathwayAttentionSummary,
 } from "@/src/lib/financialOs/financialPaymentPathwayCore";
+import {
+  buildPathwayTaskAttentionSummary,
+  type FiPaymentPathwayTaskRow,
+  type PathwayTaskAttentionSummary,
+} from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
+
+export const AWAITING_FINANCIAL_WORKFLOW_COPY = "Awaiting financial workflow completion" as const;
 
 export const FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY = "Financial status unavailable" as const;
 
@@ -34,11 +41,15 @@ export type FinancialSurgeryPipelineStatus = {
   installment_overdue: boolean;
   installment_active: boolean;
   payment_attention_required: boolean;
+  /** FinancialOS Phase 2C: unresolved open pathway inbox tasks need staff workflow before clearance. */
+  task_attention_required: boolean;
   latest_payment_request_status: string | null;
   /** Short label for chips, e.g. "Paid in full", "Payment attention". */
   summary_label: string;
   /** FinancialOS Phase 2: active payment pathway summary for this context (independent of invoice state). */
   paymentPathway: PaymentPathwayAttentionSummary;
+  /** FinancialOS Phase 2C: operational inbox task attention for this booking context. */
+  pathwayTaskAttention: PathwayTaskAttentionSummary;
 };
 
 function ymd(s: string | null | undefined): string | null {
@@ -102,6 +113,8 @@ export type BuildFinancialSurgeryPipelineStatusInput = {
   }>;
   /** FinancialOS Phase 2: payment pathway rows for this context (invoice/booking/case scoped). Defaults to none. */
   paymentPathways?: FiPaymentPathwayRow[];
+  /** FinancialOS Phase 2C: unresolved open pathway inbox tasks for this booking. */
+  pathwayTasks?: FiPaymentPathwayTaskRow[];
   /** Surgery date for this context (YYYY-MM-DD), used by pathway attention horizon rules. */
   surgeryDateYmd?: string | null;
 };
@@ -137,6 +150,7 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     payments,
     installmentPlans,
     paymentPathways = [],
+    pathwayTasks = [],
     surgeryDateYmd = null,
   } = input;
 
@@ -149,13 +163,15 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     surgeryDateYmd,
     pathway: activePathway,
   });
+  const pathwayTaskAttention = buildPathwayTaskAttentionSummary(pathwayTasks);
 
   const hasExplicitSignal =
     Boolean(fos) ||
     ctxInvoices.length > 0 ||
     paymentRequests.some((pr) => ctxInvoices.some((i) => i.id === pr.invoice_id)) ||
     installmentPlans.some((p) => ctxInvoices.some((i) => i.id === p.invoice_id)) ||
-    paymentPathway.hasActivePathway;
+    paymentPathway.hasActivePathway ||
+    pathwayTaskAttention.task_attention_required;
 
   const horizonYmd = addDaysToCalendarDate(todayYmd, 14, calendarTimezone);
 
@@ -176,9 +192,11 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
       installment_overdue: false,
       installment_active: false,
       payment_attention_required: false,
+      task_attention_required: false,
       latest_payment_request_status: null,
       summary_label: FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY,
       paymentPathway,
+      pathwayTaskAttention,
     };
   }
 
@@ -230,13 +248,16 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
   const deposit_pending_for_confirmed_surgery =
     bookingSt === "confirmed" && (depositPendingFromInvoices || fos === "deposit_pending");
 
+  const task_attention_required = pathwayTaskAttention.task_attention_required;
+
   const payment_attention_required =
     deposit_pending_for_confirmed_surgery ||
     balance_due_within_14_days ||
     balance_overdue ||
     failed_payment_in_last_60_days ||
     installment_overdue ||
-    paymentPathway.pathway_attention_required;
+    paymentPathway.pathway_attention_required ||
+    task_attention_required;
 
   const dueCandidates: string[] = [];
   for (const inv of ctxInvoices) {
@@ -252,7 +273,9 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
   const next_payment_due_date = dueCandidates.length ? dueCandidates.sort()[0]! : null;
 
   let summary_label = "Review finances";
-  if (fos === "paid_in_full" && balance_due_cents <= 0 && !depositPendingFromInvoices) {
+  if (task_attention_required) {
+    summary_label = AWAITING_FINANCIAL_WORKFLOW_COPY;
+  } else if (fos === "paid_in_full" && balance_due_cents <= 0 && !depositPendingFromInvoices) {
     summary_label = "Paid in full";
   } else if (payment_attention_required) {
     summary_label = "Payment attention required";
@@ -286,8 +309,10 @@ export function buildFinancialSurgeryPipelineStatus(input: BuildFinancialSurgery
     installment_overdue,
     installment_active,
     payment_attention_required,
+    task_attention_required,
     latest_payment_request_status,
     summary_label,
     paymentPathway,
+    pathwayTaskAttention,
   };
 }

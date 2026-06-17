@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY,
+  AWAITING_FINANCIAL_WORKFLOW_COPY,
   type FinancialSurgeryPipelineStatus,
 } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 
@@ -65,11 +66,17 @@ export function FinancialSurgeryPipelineInline(props: {
         </span>
         {!muted ? (
           <span className="flex flex-wrap gap-x-3 text-[0.62rem] font-medium">
+            {status.task_attention_required ? (
+              <span className={variant === "dark" ? "text-amber-300" : "text-amber-800"}>{AWAITING_FINANCIAL_WORKFLOW_COPY}</span>
+            ) : null}
             <Link href={`${base}/invoices`} className={linkCls}>
               Invoices
             </Link>
             <Link href={`${base}/payment-requests`} className={linkCls}>
               Payment requests
+            </Link>
+            <Link href={`${base}/pathway-inbox`} className={linkCls}>
+              Pathway inbox
             </Link>
             {caseId ? (
               <Link href={`/fi-admin/${tenantId}/cases/${encodeURIComponent(caseId)}`} className={linkCls}>

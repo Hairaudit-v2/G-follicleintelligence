@@ -8,6 +8,8 @@ import {
   loadFinancialPaymentPathwayDashboardCounts,
   type FinancialPaymentPathwayDashboardCounts,
 } from "@/src/lib/financialOs/financialPaymentPathways.server";
+import type { PathwayInboxDashboardCounts } from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
+import { loadPaymentPathwayInboxDashboardCounts } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 
 export type FinancialOsDashboardMetrics = {
   outstandingRevenueCents: number;
@@ -20,6 +22,8 @@ export type FinancialOsDashboardMetrics = {
   currency: string;
   /** FinancialOS Phase 2: payment pathway counts and settlement risk. */
   paymentPathways: FinancialPaymentPathwayDashboardCounts;
+  /** FinancialOS Phase 2C: operational pathway inbox task counts. */
+  pathwayInbox: PathwayInboxDashboardCounts;
 };
 
 function sumBalances(rows: FiInvoiceRow[]): { cents: number; currency: string } {
@@ -128,6 +132,7 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
     totals.length > 0 ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length) : null;
 
   const paymentPathways = await loadFinancialPaymentPathwayDashboardCounts(tid);
+  const pathwayInbox = await loadPaymentPathwayInboxDashboardCounts(tid);
 
   return {
     outstandingRevenueCents: outstandingRevenueCents,
@@ -139,5 +144,6 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
     monthlyRevenueForecastCents,
     currency,
     paymentPathways,
+    pathwayInbox,
   };
 }

@@ -19,6 +19,7 @@ import {
   type FinancialSurgeryPipelineStatus,
 } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 import type { FiPaymentPathwayRow } from "@/src/lib/financialOs/financialPaymentPathwayCore";
+import { loadUnresolvedPathwayTasksForBookings } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 
 export type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 
@@ -231,7 +232,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
 
     const failedSince = new Date();
     failedSince.setUTCDate(failedSince.getUTCDate() - 60);
-    const [installmentPlans, failedPayments, pathwaysByContext] = await Promise.all([
+    const [installmentPlans, failedPayments, pathwaysByContext, tasksByBooking] = await Promise.all([
       loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
       loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
       loadPaymentPathwayRowsForContext(supabase, tid, {
@@ -239,6 +240,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
         invoiceIds,
         bookingIds: bookings.map((b) => b.id),
       }),
+      loadUnresolvedPathwayTasksForBookings(tid, bookings.map((b) => b.id)),
     ]);
 
     for (const b of bookings) {
@@ -265,6 +267,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
         payments: failedPayments,
         installmentPlans,
         paymentPathways: dedupedPathwayRows,
+        pathwayTasks: tasksByBooking.get(b.id) ?? [],
         surgeryDateYmd: b.start_at ? String(b.start_at).slice(0, 10) : null,
       });
       out.set(b.id, st);
@@ -306,7 +309,7 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
     const invoiceIds = readiness.invoices.map((i) => i.id);
     const failedSince = new Date();
     failedSince.setUTCDate(failedSince.getUTCDate() - 60);
-    const [installmentPlans, failedPayments, pathwaysByContext] = await Promise.all([
+    const [installmentPlans, failedPayments, pathwaysByContext, tasksByBooking] = await Promise.all([
       loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
       loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
       loadPaymentPathwayRowsForContext(supabase, tid, {
@@ -314,6 +317,7 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
         invoiceIds,
         bookingIds: surgeryBookings.map((b) => b.id),
       }),
+      loadUnresolvedPathwayTasksForBookings(tid, surgeryBookings.map((b) => b.id)),
     ]);
 
     const pathwayRows = [
@@ -335,6 +339,7 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
       payments: failedPayments,
       installmentPlans,
       paymentPathways: dedupedPathwayRows,
+      pathwayTasks: primary ? tasksByBooking.get(primary.id) ?? [] : [],
       surgeryDateYmd: primary?.start_at ? String(primary.start_at).slice(0, 10) : null,
     });
   } catch {

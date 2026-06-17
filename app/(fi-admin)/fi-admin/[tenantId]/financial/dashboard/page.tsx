@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FinancialOsDashboardDepositForm } from "@/src/components/fi/financial/FinancialOsDashboardDepositForm";
@@ -109,6 +110,35 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
             <dd className="text-sm font-semibold text-slate-900">{metrics.paymentPathways.expectedSettlementNext30DaysCount}</dd>
             <dt className="mt-2 text-xs text-slate-500">Pathway attention</dt>
             <dd className="text-sm font-semibold text-slate-900">{metrics.paymentPathways.attentionCount}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section>
+        <h2 className="text-sm font-semibold text-slate-900">Pathway operations inbox</h2>
+        <p className="mt-1 max-w-2xl text-xs text-slate-600">
+          Open operational tasks for non-standard payment pathways — see{" "}
+          <Link href={`/fi-admin/${tid}/financial/pathway-inbox`} className="text-sky-700 hover:underline">
+            Pathway inbox
+          </Link>
+          .
+        </p>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Open pathway tasks</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.pathwayInbox.openCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Urgent pathway tasks</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.pathwayInbox.urgentCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Waiting patient tasks</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.pathwayInbox.waitingPatientCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Overdue tasks</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.pathwayInbox.overdueCount}</dd>
           </div>
         </dl>
       </section>
