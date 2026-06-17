@@ -12,6 +12,8 @@ export * from "./pipeline";
 export * from "./progression";
 export * from "./protocol";
 export * from "./outcomes";
+export * from "./comparison";
+export * from "./measurement";
 export * from "./surgical";
 export * from "./quality";
 export * from "./qualityRules";
@@ -26,6 +28,10 @@ export { evaluateHairAuditSurgicalOutcomeReadiness } from "./adapters/hairAuditS
 export type { HairAuditSurgicalOutcomeImageInput } from "./adapters/hairAuditSurgicalOutcomeAdapter";
 export { evaluateHairAuditOutcomeMeasurement } from "./adapters/hairAuditOutcomeMeasurementAdapter";
 export type { HairAuditOutcomeMeasurementImageInput } from "./adapters/hairAuditOutcomeMeasurementAdapter";
+export { evaluateHairAuditVisualComparison } from "./adapters/hairAuditComparisonAdapter";
+export type { HairAuditComparisonImageInput } from "./adapters/hairAuditComparisonAdapter";
+export { buildHairAuditMeasurementStubs } from "./adapters/hairAuditMeasurementAdapter";
+export type { HairAuditMeasurementInput } from "./adapters/hairAuditMeasurementAdapter";
 
 import type { ClassifyImageCategoryStubInput } from "./classification";
 import { classifyImageCategoryStub } from "./classification";
