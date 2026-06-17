@@ -28,6 +28,7 @@
     "test:imaging-os-im8": "tsx --test tests/imagingOsPhaseIm8.test.ts",
     "test:imaging-os-im9": "tsx --test tests/imagingOsPhaseIm9.test.ts",
     "test:imaging-os-im10": "tsx --test tests/imagingOsPhaseIm10.test.ts",
+    "test:imaging-os-im11": "tsx --test tests/imagingOsPhaseIm11.test.ts",
     "calendar:perf-smoke": "cross-env NODE_ENV=development node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/calendar-loader-perf-smoke.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
