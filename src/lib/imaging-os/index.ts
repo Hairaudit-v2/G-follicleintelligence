@@ -11,6 +11,7 @@ export * from "./intake";
 export * from "./pipeline";
 export * from "./progression";
 export * from "./protocol";
+export * from "./outcomes";
 export * from "./surgical";
 export * from "./quality";
 export * from "./qualityRules";
@@ -23,6 +24,8 @@ export type { HliImageAdapterInput } from "./adapters/hliImageAdapter";
 export { evaluateHairAuditCaseImageProtocol } from "./adapters/hairAuditCaseProtocolAdapter";
 export { evaluateHairAuditSurgicalOutcomeReadiness } from "./adapters/hairAuditSurgicalOutcomeAdapter";
 export type { HairAuditSurgicalOutcomeImageInput } from "./adapters/hairAuditSurgicalOutcomeAdapter";
+export { evaluateHairAuditOutcomeMeasurement } from "./adapters/hairAuditOutcomeMeasurementAdapter";
+export type { HairAuditOutcomeMeasurementImageInput } from "./adapters/hairAuditOutcomeMeasurementAdapter";
 
 import type { ClassifyImageCategoryStubInput } from "./classification";
 import { classifyImageCategoryStub } from "./classification";
