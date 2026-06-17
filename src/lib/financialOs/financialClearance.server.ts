@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import { loadCaseAppointmentBookingsForShell } from "@/src/lib/cases/caseAppointmentShellLoader.server";
 import { loadBookingsForOperatorView } from "@/src/lib/bookings/bookings";
 import {
   buildFinancialClearanceFromPipelineStatus,
@@ -16,6 +17,7 @@ import {
   loadCaseFinancialOsSurgeryPipelineSummary,
 } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import { loadCasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import {
   computeSurgeryReadinessBoardWindow,
   isActiveSurgeryBookingStatus,
@@ -204,11 +206,16 @@ export async function resolveFinancialClearanceForCase(
   }
 
   try {
+    const [readiness, caseAppointmentBookings] = await Promise.all([
+      loadCasePaymentReadiness(tid, input.caseId),
+      loadCaseAppointmentBookingsForShell(tid, input.caseId, input.patientId),
+    ]);
     const pipeline = await loadCaseFinancialOsSurgeryPipelineSummary(tid, {
       caseId: input.caseId,
-      patientId: input.patientId,
       todayYmd,
       calendarTimezone,
+      readiness,
+      caseAppointmentBookings,
     });
     return buildFinancialClearanceFromPipelineStatus({
       todayYmd,

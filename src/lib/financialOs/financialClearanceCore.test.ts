@@ -515,7 +515,7 @@ describe("financialClearanceCore", () => {
   it("unresolved pathway task → attention_required", () => {
     const task: FiPaymentPathwayTaskRow = {
       id: "task-1",
-      task_type: "pathway_review",
+      task_type: "finance_review",
       status: "open",
       priority: "normal",
       assigned_to: null,

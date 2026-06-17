@@ -7,11 +7,7 @@
     {
       "path": "/api/cron/iiohr-hr-perth-staff-sync",
       "schedule": "0 * * * *"
-    }
-  ]
-}
-{
-  "crons": [
+    },
     {
       "path": "/api/cron/financial-os/automation?job=deposit_overdue",
       "schedule": "0 22 * * *"
