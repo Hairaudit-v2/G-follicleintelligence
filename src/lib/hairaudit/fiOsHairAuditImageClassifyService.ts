@@ -117,7 +117,7 @@ export function buildStubClassificationResponse(
     category: externalCategory,
     canonical_photo_category: pipeline.classification.canonical_photo_category,
     confidence: pipeline.classification.confidence,
-    quality_status: pipeline.quality.quality_status,
+    quality_status: "not_evaluated",
     protocol_status: pipeline.protocol.protocol_status,
     classifier_version: STUB_CLASSIFIER_VERSION,
     notes: "Stub classification only",

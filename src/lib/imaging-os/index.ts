@@ -9,8 +9,10 @@ export * from "./categories";
 export * from "./classification";
 export * from "./intake";
 export * from "./pipeline";
+export * from "./progression";
 export * from "./protocol";
 export * from "./quality";
+export * from "./qualityRules";
 export * from "./types";
 
 export { buildFiOsPatientImageIngestionRequest } from "./adapters/fiOsPatientImageAdapter";

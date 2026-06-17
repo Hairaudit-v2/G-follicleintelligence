@@ -11,8 +11,13 @@ import { normalizeImageIngestionRequest } from "./intake";
 import { evaluateImageProtocolStub } from "./protocol";
 import type { ImageProtocolEvaluation, ImagingOsProtocolEvaluationResult, ImagingOsProtocolType } from "./protocol";
 import { evaluateImageProtocolCompleteness } from "./protocol";
-import { evaluateImageQualityStub } from "./quality";
-import type { ImageQualityResult } from "./quality";
+import {
+  evaluateImageQualityFromMetadata,
+  evaluateImageQualityStub,
+  hasMetadataForQualityEvaluation,
+  isImagingOsMetadataQualityResult,
+} from "./quality";
+import type { ImagingOsPipelineQualityResult } from "./quality";
 
 export const IMAGING_OS_INGESTION_PIPELINE_VERSION = "imaging-os-ingestion-v1" as const;
 
@@ -27,14 +32,54 @@ export type ImagingOsIngestionPipelineOptions = {
 
 export type ImagingOsIngestionPipelineResult = {
   intake: ImagingOsNormalizedImageIntake;
-  quality: ImageQualityResult;
+  quality: ImagingOsPipelineQualityResult;
   protocol: ImageProtocolEvaluation;
   /** Present when `options.protocol` is set (IM-3). */
   protocol_completeness?: ImagingOsProtocolEvaluationResult;
   classification: ImageClassificationResult;
   pipeline_version: typeof IMAGING_OS_INGESTION_PIPELINE_VERSION;
   status: ImagingOsIngestionPipelineStatus;
+  /** Non-fatal pipeline warnings (e.g. sub-clinical image quality). */
+  warnings?: string[];
 };
+
+const CLINICAL_QUALITY_WARNING =
+  "Image quality is not clinically usable for downstream intelligence." as const;
+
+function evaluateQualityForIntake(intake: ImagingOsNormalizedImageIntake): ImagingOsPipelineQualityResult {
+  if (
+    !hasMetadataForQualityEvaluation({
+      width: intake.width,
+      height: intake.height,
+      size_bytes: intake.size_bytes,
+      content_type: intake.content_type,
+      metadata: intake.metadata,
+    })
+  ) {
+    return evaluateImageQualityStub({
+      content_type: intake.content_type,
+      file_size_bytes: intake.size_bytes,
+    });
+  }
+
+  return evaluateImageQualityFromMetadata({
+    width: intake.width,
+    height: intake.height,
+    size_bytes: intake.size_bytes,
+    content_type: intake.content_type,
+    canonical_category: intake.canonical_photo_category,
+    source_system: intake.source_system,
+    upload_surface: intake.upload_surface,
+    metadata: intake.metadata,
+  });
+}
+
+function buildPipelineWarnings(quality: ImagingOsPipelineQualityResult): string[] | undefined {
+  if (isImagingOsMetadataQualityResult(quality) && !quality.is_clinically_usable) {
+    return [CLINICAL_QUALITY_WARNING];
+  }
+  return undefined;
+}
 
 function readClassificationSeed(request: ImagingOsImageIngestionRequest): string | undefined {
   const idempotencyKey = request.metadata?.idempotency_key;
@@ -89,27 +134,42 @@ export function runImagingOsIngestionPipeline(
     : undefined;
 
   if (!intake.is_processable) {
+    const quality = evaluateQualityForIntake(intake);
+    const warnings = buildPipelineWarnings(quality);
     return {
       intake,
-      quality: evaluateImageQualityStub(),
+      quality,
       protocol: evaluateImageProtocolStub(),
       ...(protocolCompleteness ? { protocol_completeness: protocolCompleteness } : {}),
       classification,
       pipeline_version: IMAGING_OS_INGESTION_PIPELINE_VERSION,
       status: "not_processable",
+      ...(warnings ? { warnings } : {}),
     };
   }
 
+  const quality = evaluateQualityForIntake(intake);
+  const warnings = buildPipelineWarnings(quality);
+
   return {
     intake,
-    quality: evaluateImageQualityStub({
-      content_type: intake.content_type,
-      file_size_bytes: intake.size_bytes,
-    }),
+    quality,
     protocol: evaluateImageProtocolStub(),
     ...(protocolCompleteness ? { protocol_completeness: protocolCompleteness } : {}),
     classification,
     pipeline_version: IMAGING_OS_INGESTION_PIPELINE_VERSION,
     status: "dry_run",
+    ...(warnings ? { warnings } : {}),
   };
 }
+
+/**
+ * Case-level longitudinal progression helpers (Phase IM-5).
+ * Single-image ingestion does not run progression automatically — use these at case/batch scope.
+ */
+export {
+  buildProgressionImageFromIntake,
+  evaluateLongitudinalProgressionReadiness,
+  recommendProgressionAssessmentForWorkflow,
+  runImagingOsCaseProgressionEvaluation,
+} from "./progression";
