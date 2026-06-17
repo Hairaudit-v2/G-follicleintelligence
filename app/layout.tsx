@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { FiPortalChromeGate } from "@/components/layout/FiPortalChromeGate";
@@ -57,6 +58,7 @@ export default function RootLayout({
         <JsonLd data={getRootStructuredData(SITE_URL)} />
         <FiPortalChromeGate>{children}</FiPortalChromeGate>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
