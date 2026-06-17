@@ -12,6 +12,8 @@ import type { PathwayInboxDashboardCounts } from "@/src/lib/financialOs/financia
 import { loadPaymentPathwayInboxDashboardCounts } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 import type { FinanceApplicationsDashboardCounts } from "@/src/lib/financialOs/financialFinanceApplicationsCore";
 import { loadFinanceApplicationsDashboardCounts } from "@/src/lib/financialOs/financialFinanceApplications.server";
+import type { SuperReleaseDashboardCounts } from "@/src/lib/financialOs/financialSuperReleaseCore";
+import { loadSuperReleaseDashboardCounts } from "@/src/lib/financialOs/financialSuperRelease.server";
 
 export type FinancialOsDashboardMetrics = {
   outstandingRevenueCents: number;
@@ -28,6 +30,8 @@ export type FinancialOsDashboardMetrics = {
   pathwayInbox: PathwayInboxDashboardCounts;
   /** FinancialOS Phase 3: financing application workflow counts and provider analytics. */
   financeApplications: FinanceApplicationsDashboardCounts;
+  /** FinancialOS Phase 3B: super release workflow counts and analytics. */
+  superRelease: SuperReleaseDashboardCounts;
 };
 
 function sumBalances(rows: FiInvoiceRow[]): { cents: number; currency: string } {
@@ -137,7 +141,10 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
 
   const paymentPathways = await loadFinancialPaymentPathwayDashboardCounts(tid);
   const pathwayInbox = await loadPaymentPathwayInboxDashboardCounts(tid);
-  const financeApplications = await loadFinanceApplicationsDashboardCounts(tid);
+  const [financeApplications, superRelease] = await Promise.all([
+    loadFinanceApplicationsDashboardCounts(tid),
+    loadSuperReleaseDashboardCounts(tid),
+  ]);
 
   return {
     outstandingRevenueCents: outstandingRevenueCents,
@@ -151,5 +158,6 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
     paymentPathways,
     pathwayInbox,
     financeApplications,
+    superRelease,
   };
 }

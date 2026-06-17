@@ -27,6 +27,12 @@ import {
   type FinanceApplicationRecord,
 } from "@/src/lib/financialOs/financialFinanceApplications.server";
 import type { FiFinanceApplicationRow } from "@/src/lib/financialOs/financialFinanceApplicationsCore";
+import {
+  loadUnresolvedSuperReleaseApplicationsForBookings,
+  loadUnresolvedSuperReleaseApplicationsForPathways,
+  type SuperReleaseApplicationRecord,
+} from "@/src/lib/financialOs/financialSuperRelease.server";
+import type { FiSuperReleaseApplicationRow } from "@/src/lib/financialOs/financialSuperReleaseCore";
 
 export type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
 
@@ -155,6 +161,22 @@ function toFinanceApplicationRow(app: FinanceApplicationRecord): FiFinanceApplic
   };
 }
 
+function toSuperReleaseApplicationRow(app: SuperReleaseApplicationRecord): FiSuperReleaseApplicationRow {
+  return {
+    id: app.id,
+    application_status: app.application_status,
+    submitted_at: app.submitted_at,
+    approved_at: app.approved_at,
+    funds_released_at: app.funds_released_at,
+    expected_release_date: app.expected_release_date,
+    created_at: app.created_at,
+    updated_at: app.updated_at,
+    payment_pathway_id: app.payment_pathway_id,
+    booking_id: app.booking_id,
+    provider_name: app.provider_name,
+  };
+}
+
 function pickFinanceApplicationForContext(args: {
   bookingId: string;
   activePathwayId: string | null;
@@ -166,6 +188,21 @@ function pickFinanceApplicationForContext(args: {
   if (args.activePathwayId) {
     const pathwayApp = args.byPathway.get(args.activePathwayId);
     if (pathwayApp) return toFinanceApplicationRow(pathwayApp);
+  }
+  return null;
+}
+
+function pickSuperReleaseApplicationForContext(args: {
+  bookingId: string;
+  activePathwayId: string | null;
+  byBooking: Map<string, SuperReleaseApplicationRecord[]>;
+  byPathway: Map<string, SuperReleaseApplicationRecord>;
+}): FiSuperReleaseApplicationRow | null {
+  const bookingApps = args.byBooking.get(args.bookingId) ?? [];
+  if (bookingApps.length) return toSuperReleaseApplicationRow(bookingApps[0]!);
+  if (args.activePathwayId) {
+    const pathwayApp = args.byPathway.get(args.activePathwayId);
+    if (pathwayApp) return toSuperReleaseApplicationRow(pathwayApp);
   }
   return null;
 }
@@ -270,7 +307,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
 
     const failedSince = new Date();
     failedSince.setUTCDate(failedSince.getUTCDate() - 60);
-    const [installmentPlans, failedPayments, pathwaysByContext, tasksByBooking, financeAppsByBooking] = await Promise.all([
+    const [installmentPlans, failedPayments, pathwaysByContext, tasksByBooking, financeAppsByBooking, superReleaseAppsByBooking] = await Promise.all([
       loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
       loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
       loadPaymentPathwayRowsForContext(supabase, tid, {
@@ -280,6 +317,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
       }),
       loadUnresolvedPathwayTasksForBookings(tid, bookings.map((b) => b.id)),
       loadUnresolvedFinanceApplicationsForBookings(tid, bookings.map((b) => b.id)),
+      loadUnresolvedSuperReleaseApplicationsForBookings(tid, bookings.map((b) => b.id)),
     ]);
 
     const pathwayIdSet = new Set<string>();
@@ -291,6 +329,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
       for (const row of rows) pathwayIdSet.add(row.id);
     }
     const financeAppsByPathway = await loadUnresolvedFinanceApplicationsForPathways(tid, Array.from(pathwayIdSet));
+    const superReleaseAppsByPathway = await loadUnresolvedSuperReleaseApplicationsForPathways(tid, Array.from(pathwayIdSet));
 
     for (const b of bookings) {
       const cid = b.case_id?.trim() || null;
@@ -310,6 +349,12 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
         byBooking: financeAppsByBooking,
         byPathway: financeAppsByPathway,
       });
+      const superReleaseApplication = pickSuperReleaseApplicationForContext({
+        bookingId: b.id,
+        activePathwayId: activePathway?.id ?? null,
+        byBooking: superReleaseAppsByBooking,
+        byPathway: superReleaseAppsByPathway,
+      });
 
       const st = buildFinancialSurgeryPipelineStatus({
         todayYmd,
@@ -325,6 +370,7 @@ export async function loadFinancialSurgeryPipelineStatusByBookings(
         paymentPathways: dedupedPathwayRows,
         pathwayTasks: tasksByBooking.get(b.id) ?? [],
         financeApplication,
+        superReleaseApplication,
         surgeryDateYmd: b.start_at ? String(b.start_at).slice(0, 10) : null,
       });
       out.set(b.id, st);
@@ -366,7 +412,7 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
     const invoiceIds = readiness.invoices.map((i) => i.id);
     const failedSince = new Date();
     failedSince.setUTCDate(failedSince.getUTCDate() - 60);
-    const [installmentPlans, failedPayments, pathwaysByContext, tasksByBooking, financeAppsByBooking] = await Promise.all([
+    const [installmentPlans, failedPayments, pathwaysByContext, tasksByBooking, financeAppsByBooking, superReleaseAppsByBooking] = await Promise.all([
       loadInstallmentRowsForInvoices(supabase, tid, invoiceIds),
       loadFailedPaymentsForInvoices(supabase, tid, invoiceIds, failedSince.toISOString()),
       loadPaymentPathwayRowsForContext(supabase, tid, {
@@ -376,6 +422,7 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
       }),
       loadUnresolvedPathwayTasksForBookings(tid, surgeryBookings.map((b) => b.id)),
       loadUnresolvedFinanceApplicationsForBookings(tid, surgeryBookings.map((b) => b.id)),
+      loadUnresolvedSuperReleaseApplicationsForBookings(tid, surgeryBookings.map((b) => b.id)),
     ]);
 
     const pathwayRows = [
@@ -385,6 +432,10 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
     ];
     const dedupedPathwayRows = Array.from(new Map(pathwayRows.map((r) => [r.id, r])).values());
     const financeAppsByPathway = await loadUnresolvedFinanceApplicationsForPathways(
+      tid,
+      dedupedPathwayRows.map((r) => r.id)
+    );
+    const superReleaseAppsByPathway = await loadUnresolvedSuperReleaseApplicationsForPathways(
       tid,
       dedupedPathwayRows.map((r) => r.id)
     );
@@ -398,6 +449,16 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
         })
       : activePathway && financeAppsByPathway.get(activePathway.id)
         ? toFinanceApplicationRow(financeAppsByPathway.get(activePathway.id)!)
+        : null;
+    const superReleaseApplication = primary
+      ? pickSuperReleaseApplicationForContext({
+          bookingId: primary.id,
+          activePathwayId: activePathway?.id ?? null,
+          byBooking: superReleaseAppsByBooking,
+          byPathway: superReleaseAppsByPathway,
+        })
+      : activePathway && superReleaseAppsByPathway.get(activePathway.id)
+        ? toSuperReleaseApplicationRow(superReleaseAppsByPathway.get(activePathway.id)!)
         : null;
 
     return buildFinancialSurgeryPipelineStatus({
@@ -414,6 +475,7 @@ export async function loadCaseFinancialOsSurgeryPipelineSummary(
       paymentPathways: dedupedPathwayRows,
       pathwayTasks: primary ? tasksByBooking.get(primary.id) ?? [] : [],
       financeApplication,
+      superReleaseApplication,
       surgeryDateYmd: primary?.start_at ? String(primary.start_at).slice(0, 10) : null,
     });
   } catch {

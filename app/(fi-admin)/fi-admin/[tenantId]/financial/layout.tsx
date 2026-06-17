@@ -13,6 +13,7 @@ const NAV = [
   { href: "pathway-inbox", label: "Pathway inbox" },
   { href: "providers", label: "Providers" },
   { href: "finance-applications", label: "Finance Applications" },
+  { href: "super-release", label: "Super Release" },
   { href: "deposit-rules", label: "Deposit rules" },
 ] as const;
 

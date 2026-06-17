@@ -208,6 +208,49 @@ export default async function FinancialOsDashboardPage({ params }: { params: Pro
         ) : null}
       </section>
 
+      <section>
+        <h2 className="text-sm font-semibold text-slate-900">Super release applications</h2>
+        <p className="mt-1 max-w-2xl text-xs text-slate-600">
+          Medically justified superannuation release workflow — see{" "}
+          <Link href={`/fi-admin/${tid}/financial/super-release`} className="text-sky-700 hover:underline">
+            Super Release
+          </Link>
+          .
+        </p>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Open applications</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.superRelease.openCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Clinical letters pending</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.superRelease.clinicalLettersPendingCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Awaiting documents</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.superRelease.awaitingDocumentsCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Submitted applications</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.superRelease.submittedCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Funds release pending</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.superRelease.fundsReleasePendingCount}</dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Average approval time</dt>
+            <dd className="text-sm font-semibold text-slate-900">
+              {metrics.superRelease.averageApprovalDays != null ? `${metrics.superRelease.averageApprovalDays} days` : "—"}
+            </dd>
+          </div>
+          <div className="rounded border border-slate-200 bg-white p-3">
+            <dt className="text-xs text-slate-500">Applications requiring attention</dt>
+            <dd className="text-sm font-semibold text-slate-900">{metrics.superRelease.attentionCount}</dd>
+          </div>
+        </dl>
+      </section>
+
       <section className="rounded border border-slate-200 bg-slate-50/80 p-4 text-xs text-slate-700">
         <h2 className="text-sm font-semibold text-slate-900">Automation cron</h2>
         <p className="mt-2">

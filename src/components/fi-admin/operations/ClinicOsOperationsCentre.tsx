@@ -380,6 +380,40 @@ export function ClinicOsOperationsCentre(props: {
               </span>
             </Link>
           </DashboardCard>
+
+          <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="ops-super-release-heading">
+            <SectionHeader
+              id="ops-super-release-heading"
+              kicker="FinancialOS"
+              title="Super Release Applications Requiring Attention"
+              description="Eligibility, documents, clinical letters, approval, and funds release SLAs for super release applications — no live provider APIs in Phase 3B."
+              className="mb-4"
+            />
+            <Link
+              href={`${base}/financial/super-release`}
+              className={cn(
+                "flex items-center justify-between gap-3 rounded-xl border px-4 py-4 transition",
+                data.actionCentre.superReleaseApplicationsAttention > 0
+                  ? "border-amber-500/25 bg-amber-500/[0.07] hover:border-amber-400/40 hover:bg-amber-500/12"
+                  : "border-white/[0.08] bg-white/[0.03] hover:border-cyan-500/30 hover:bg-cyan-500/[0.06]",
+              )}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-100">Super release workflow</p>
+                <p className="mt-0.5 text-xs text-slate-500">Applications pending eligibility, docs, clinical letters, or funds release.</p>
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-lg px-3 py-1.5 font-mono text-lg font-semibold tabular-nums",
+                  data.actionCentre.superReleaseApplicationsAttention > 0
+                    ? "bg-amber-500/15 text-amber-100"
+                    : "bg-white/[0.04] text-slate-500",
+                )}
+              >
+                {data.actionCentre.superReleaseApplicationsAttention}
+              </span>
+            </Link>
+          </DashboardCard>
         </div>
 
         <OperationsCrmPipelineSnapshot base={base} showCrmNav={showCrmNav} data={data} />

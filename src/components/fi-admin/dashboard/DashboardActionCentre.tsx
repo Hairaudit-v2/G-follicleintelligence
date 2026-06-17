@@ -114,7 +114,8 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
     actionCentre.surgeryReadinessAlerts +
     actionCentre.surgeryFinancialPaymentAttention +
     actionCentre.financialPathwayTasksAttention +
-    actionCentre.financeApplicationsAttention;
+    actionCentre.financeApplicationsAttention +
+    actionCentre.superReleaseApplicationsAttention;
   const meta = FI_DASHBOARD_WIDGET_LABELS.attention_centre;
 
   return (
@@ -190,6 +191,14 @@ export function DashboardActionCentre(props: { base: string; actionCentre: Tenan
             count={actionCentre.financeApplicationsAttention}
             icon={<Banknote className="h-4 w-4" />}
             severity={actionCentre.financeApplicationsAttention > 0 ? "warning" : "normal"}
+          />
+          <ActionRow
+            href={`${base}/financial/super-release`}
+            label="Super release applications requiring attention"
+            detail="Super release workflows breaching eligibility, document, clinical letter, or funds release SLAs."
+            count={actionCentre.superReleaseApplicationsAttention}
+            icon={<Banknote className="h-4 w-4" />}
+            severity={actionCentre.superReleaseApplicationsAttention > 0 ? "warning" : "normal"}
           />
         </div>
       )}
