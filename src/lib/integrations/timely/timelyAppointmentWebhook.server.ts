@@ -2,7 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { shallowMergeMetadata } from "@/src/lib/fi/foundation/internal";
 import type { CreateBookingParams } from "@/src/lib/bookings/bookings";
+import { isBookingCancelled } from "@/src/lib/bookings/bookingPolicy";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { isConsultationLikeBookingType } from "@/src/lib/consultations/consultationBookingLink";
 import type { z } from "zod";
 import type { timelyAppointmentWebhookSchema } from "./timelyWebhookSchemas";
 import {
@@ -16,10 +18,10 @@ import { TimelyWebhookHttpError } from "./timelyWebhookHttp.server";
 async function defaultLoadBooking(
   tenantId: string,
   bookingId: string,
-  supabase: SupabaseClient
+  client?: SupabaseClient
 ): Promise<FiBookingRow | null> {
   const { loadBookingForTenant } = await import("@/src/lib/bookings/server");
-  return loadBookingForTenant(tenantId, bookingId, supabase);
+  return loadBookingForTenant(tenantId, bookingId, client);
 }
 const SOURCE = "timely";
 const ENTITY_BOOKING = "booking";
@@ -275,14 +277,20 @@ function bookingFieldsUnchanged(
   );
 }
 
+export type TimelyConsultationAction = "created" | "existing" | "skipped";
+
+export type ProcessTimelyAppointmentWebhookSuccess = {
+  ok: true;
+  booking_id: string;
+  action: "created" | "updated";
+  lifecycle_event: TimelyAppointmentLifecycleEvent;
+  unchanged?: boolean;
+  consultation_id: string | null;
+  consultation_action: TimelyConsultationAction;
+};
+
 export type ProcessTimelyAppointmentWebhookResult =
-  | {
-      ok: true;
-      booking_id: string;
-      action: "created" | "updated";
-      lifecycle_event: TimelyAppointmentLifecycleEvent;
-      unchanged?: boolean;
-    }
+  | ProcessTimelyAppointmentWebhookSuccess
   | { ok: false; status: number; message: string };
 
 export type TimelyAppointmentWebhookPorts = {
@@ -297,6 +305,11 @@ export type TimelyAppointmentWebhookPorts = {
     client?: SupabaseClient
   ) => Promise<{ id: string; full_name: string }[]>;
   syncBookingReminders: (booking: FiBookingRow, client?: SupabaseClient) => Promise<void>;
+  createConsultationFromBooking: (
+    tenantId: string,
+    bookingId: string,
+    client?: SupabaseClient
+  ) => Promise<{ consultation: { id: string }; created: boolean }>;
 };
 
 function getDefaultAppointmentPorts(): TimelyAppointmentWebhookPorts {
@@ -318,6 +331,46 @@ function getDefaultAppointmentPorts(): TimelyAppointmentWebhookPorts {
       const { syncBookingReminderJobs } = await import("@/src/lib/reminders/reminderEnqueue.server");
       await syncBookingReminderJobs(booking, client);
     },
+    createConsultationFromBooking: async (tenantId, bookingId) => {
+      const { createConsultationFromBooking } = await import("@/src/lib/consultations/consultationMutations.server");
+      return createConsultationFromBooking(tenantId, bookingId);
+    },
+  };
+}
+
+function shouldSkipConsultationWorkspaceForBooking(
+  booking: Pick<FiBookingRow, "booking_type" | "booking_status" | "cancelled_at">
+): boolean {
+  if (!isConsultationLikeBookingType(booking.booking_type)) return true;
+  if (isBookingCancelled(booking)) return true;
+  if (booking.booking_status.trim() === "no_show") return true;
+  return false;
+}
+
+async function attachConsultationWorkspaceToTimelyAppointmentResult(
+  supabase: SupabaseClient,
+  tenantId: string,
+  result: Omit<ProcessTimelyAppointmentWebhookSuccess, "consultation_id" | "consultation_action">,
+  ports: TimelyAppointmentWebhookPorts
+): Promise<ProcessTimelyAppointmentWebhookSuccess> {
+  const booking = await ports.loadBooking(tenantId, result.booking_id, supabase);
+  if (!booking || shouldSkipConsultationWorkspaceForBooking(booking)) {
+    return {
+      ...result,
+      consultation_id: null,
+      consultation_action: "skipped",
+    };
+  }
+
+  const { consultation, created } = await ports.createConsultationFromBooking(
+    tenantId,
+    result.booking_id,
+    supabase
+  );
+  return {
+    ...result,
+    consultation_id: consultation.id,
+    consultation_action: created ? "created" : "existing",
   };
 }
 
@@ -492,7 +545,9 @@ export async function processTimelyAppointmentWebhook(
     const extAppt = payload.external_appointment_id.trim();
     const existingId = await loadExistingBookingMapping(supabase, tid, extAppt);
     if (existingId) {
-      return syncExistingTimelyBooking(supabase, tid, existingId, payload, extAppt, mergedPorts);
+      const synced = await syncExistingTimelyBooking(supabase, tid, existingId, payload, extAppt, mergedPorts);
+      if (!synced.ok) return synced;
+      return attachConsultationWorkspaceToTimelyAppointmentResult(supabase, tid, synced, mergedPorts);
     }
 
     const lifecycleEvent = resolveLifecycleEvent(payload, false);
@@ -562,7 +617,6 @@ export async function processTimelyAppointmentWebhook(
           assignedStaffId: staffId,
           assignedUserId: null,
           bookingType,
-          bookingStatus: initialStatus === "cancelled" ? "scheduled" : initialStatus,
           title: titleBase,
           description: payload.notes?.trim() || null,
           startAt,
@@ -602,18 +656,25 @@ export async function processTimelyAppointmentWebhook(
     await insertBookingMapping(supabase, tid, extAppt, booking.id);
 
     if (initialStatus === "cancelled" || initialStatus === "completed" || initialStatus === "no_show") {
-      return syncExistingTimelyBooking(supabase, tid, booking.id, payload, extAppt, mergedPorts);
+      const synced = await syncExistingTimelyBooking(supabase, tid, booking.id, payload, extAppt, mergedPorts);
+      if (!synced.ok) return synced;
+      return attachConsultationWorkspaceToTimelyAppointmentResult(supabase, tid, synced, mergedPorts);
     }
 
     const verify = await loadExistingBookingMapping(supabase, tid, extAppt);
     const finalId = verify ?? booking.id;
 
-    return {
-      ok: true,
-      booking_id: finalId,
-      action: "created",
-      lifecycle_event: lifecycleEvent,
-    };
+    return attachConsultationWorkspaceToTimelyAppointmentResult(
+      supabase,
+      tid,
+      {
+        ok: true,
+        booking_id: finalId,
+        action: "created",
+        lifecycle_event: lifecycleEvent,
+      },
+      mergedPorts
+    );
   } catch (e) {
     if (e instanceof TimelyWebhookHttpError) {
       return { ok: false, status: e.status, message: e.message };

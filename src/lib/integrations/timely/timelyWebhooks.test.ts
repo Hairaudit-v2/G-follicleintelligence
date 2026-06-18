@@ -232,7 +232,12 @@ function bookingRow(id: string): FiBookingRow {
   };
 }
 
-function makeAppointmentMockSupabase(mode: "no_patient" | "create" | "existing", existingRow?: FiBookingRow): SupabaseClient {
+function makeAppointmentMockSupabase(
+  mode: "no_patient" | "create" | "existing",
+  existingRow?: FiBookingRow,
+  opts?: { serviceBookingType?: string }
+): SupabaseClient {
+  const serviceBookingType = opts?.serviceBookingType ?? "consultation";
   let insertedBookingId: string | null = null;
   const existingBooking = existingRow ?? bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
 
@@ -292,7 +297,7 @@ function makeAppointmentMockSupabase(mode: "no_patient" | "create" | "existing",
   const services = {
     eq: () => ({
       eq: async () => ({
-        data: [{ booking_type: "consultation", name: "Consultation" }],
+        data: [{ booking_type: serviceBookingType, name: "Consultation" }],
         error: null,
       }),
     }),
@@ -376,6 +381,10 @@ describe("Timely appointment webhook (mocked data path)", () => {
       updateBooking: async () => existing,
       loadBooking: async () => existing,
       syncBookingReminders: async () => {},
+      createConsultationFromBooking: async () => ({
+        consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
+        created: true,
+      }),
       ...overrides,
     };
   }
@@ -494,5 +503,214 @@ describe("Timely appointment webhook (mocked data path)", () => {
     if (!r.ok) return;
     assert.equal(r.unchanged, true);
     assert.equal(updated, 0);
+  });
+});
+
+describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", () => {
+  const CONSULTATION_ID = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+  const payloadBase = timelyAppointmentWebhookSchema.parse({
+    external_appointment_id: "appt-consult-1",
+    external_patient_id: "patient-ext-1",
+    start_time: "2026-06-10T12:00:00.000Z",
+    end_time: "2026-06-10T13:00:00.000Z",
+    service_name: "Consultation",
+  });
+
+  function bookingRowForPayload(id: string, overrides: Partial<FiBookingRow> = {}): FiBookingRow {
+    return {
+      ...bookingRow(id),
+      start_at: payloadBase.start_time,
+      end_at: payloadBase.end_time,
+      booking_type: "consultation",
+      booking_status: "scheduled",
+      metadata: {
+        source_system: "timely",
+        external_appointment_id: payloadBase.external_appointment_id,
+        external_patient_id: payloadBase.external_patient_id,
+      },
+      ...overrides,
+    };
+  }
+
+  function consultationPorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+    const existing = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    return {
+      loadActiveStaffForTenant: async () => [],
+      createBooking: async () => existing,
+      updateBooking: async () => existing,
+      loadBooking: async () => existing,
+      syncBookingReminders: async () => {},
+      createConsultationFromBooking: async () => ({
+        consultation: { id: CONSULTATION_ID },
+        created: true,
+      }),
+      ...overrides,
+    };
+  }
+
+  it("creates ConsultationOS workspace for consultation booking", async () => {
+    let consultationCreates = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create"),
+      consultationPorts({
+        createBooking: async () => row,
+        loadBooking: async () => row,
+        createConsultationFromBooking: async () => {
+          consultationCreates += 1;
+          return { consultation: { id: CONSULTATION_ID }, created: true };
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.consultation_id, CONSULTATION_ID);
+    assert.equal(r.consultation_action, "created");
+    assert.equal(consultationCreates, 1);
+  });
+
+  it("does not duplicate consultation on replay", async () => {
+    let consultationCreates = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const ports = consultationPorts({
+      loadBooking: async () => row,
+      createConsultationFromBooking: async () => {
+        consultationCreates += 1;
+        return consultationCreates === 1
+          ? { consultation: { id: CONSULTATION_ID }, created: true }
+          : { consultation: { id: CONSULTATION_ID }, created: false };
+      },
+    });
+    const supabase = makeAppointmentMockSupabase("existing", row);
+    const a = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    const b = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    assert.equal(a.ok, true);
+    assert.equal(b.ok, true);
+    if (!a.ok || !b.ok) return;
+    assert.equal(a.consultation_action, "created");
+    assert.equal(b.consultation_action, "existing");
+    assert.equal(a.consultation_id, CONSULTATION_ID);
+    assert.equal(b.consultation_id, CONSULTATION_ID);
+    assert.equal(consultationCreates, 2);
+  });
+
+  it("creates missing consultation when updated consultation booking has none", async () => {
+    let consultationCreates = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const rescheduled = timelyAppointmentWebhookSchema.parse({
+      ...payloadBase,
+      start_time: "2026-06-10T14:00:00.000Z",
+      end_time: "2026-06-10T15:00:00.000Z",
+      event_type: "appointment_rescheduled",
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      rescheduled,
+      makeAppointmentMockSupabase("existing", row),
+      consultationPorts({
+        loadBooking: async () => row,
+        updateBooking: async () => ({
+          ...row,
+          start_at: rescheduled.start_time,
+          end_at: rescheduled.end_time,
+        }),
+        createConsultationFromBooking: async () => {
+          consultationCreates += 1;
+          return { consultation: { id: CONSULTATION_ID }, created: true };
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.action, "updated");
+    assert.equal(r.consultation_id, CONSULTATION_ID);
+    assert.equal(r.consultation_action, "created");
+    assert.equal(consultationCreates, 1);
+  });
+
+  it("skips consultation workspace for cancelled consultation booking", async () => {
+    let consultationCreates = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      booking_status: "cancelled",
+      cancelled_at: "2026-06-09T10:00:00.000Z",
+    });
+    const cancelled = timelyAppointmentWebhookSchema.parse({
+      ...payloadBase,
+      status: "Cancelled",
+      event_type: "appointment_cancelled",
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      cancelled,
+      makeAppointmentMockSupabase("existing", row),
+      consultationPorts({
+        loadBooking: async () => row,
+        createConsultationFromBooking: async () => {
+          consultationCreates += 1;
+          return { consultation: { id: CONSULTATION_ID }, created: true };
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.consultation_id, null);
+    assert.equal(r.consultation_action, "skipped");
+    assert.equal(consultationCreates, 0);
+  });
+
+  it("skips consultation workspace for no_show consultation booking", async () => {
+    let consultationCreates = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      booking_status: "no_show",
+    });
+    const noShow = timelyAppointmentWebhookSchema.parse({
+      ...payloadBase,
+      status: "No Show",
+      event_type: "appointment_no_show",
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      noShow,
+      makeAppointmentMockSupabase("existing", row),
+      consultationPorts({
+        loadBooking: async () => row,
+        createConsultationFromBooking: async () => {
+          consultationCreates += 1;
+          return { consultation: { id: CONSULTATION_ID }, created: true };
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.consultation_id, null);
+    assert.equal(r.consultation_action, "skipped");
+    assert.equal(consultationCreates, 0);
+  });
+
+  it("skips consultation workspace for non-consultation booking", async () => {
+    let consultationCreates = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      booking_type: "prp",
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create", row, { serviceBookingType: "prp" }),
+      consultationPorts({
+        createBooking: async () => row,
+        loadBooking: async () => row,
+        createConsultationFromBooking: async () => {
+          consultationCreates += 1;
+          return { consultation: { id: CONSULTATION_ID }, created: true };
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.consultation_id, null);
+    assert.equal(r.consultation_action, "skipped");
+    assert.equal(consultationCreates, 0);
   });
 });
