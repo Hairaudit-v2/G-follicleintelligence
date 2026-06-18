@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import {
+  FinancialOsSubPageHeader,
+  FinancialOsTable,
+  FinancialOsTh,
+  financialOsClasses,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
+import { FinancialOsRecordStatusBadge } from "@/src/components/fi-admin/financial-os/FinancialOsRecordStatusBadge";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadFinancialOsInvoices } from "@/src/lib/financialOs/financialListLoaders.server";
 import { invoiceBalanceDueCents } from "@/src/lib/revenueOs/revenueInvoiceModel";
@@ -26,44 +33,51 @@ export default async function FinancialOsInvoicesPage({ params }: { params: Prom
   const rows = await loadFinancialOsInvoices(tid, 400);
 
   return (
-    <div>
-      <h2 className="text-sm font-semibold text-slate-900">Invoices</h2>
-      <p className="mt-1 text-xs text-slate-600">Latest RevenueOS invoices for this tenant (read-only).</p>
-      <div className="mt-4 overflow-x-auto rounded border border-slate-200">
-        <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-          <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-600">
-            <tr>
-              <th className="px-2 py-2">Kind</th>
-              <th className="px-2 py-2">Status</th>
-              <th className="px-2 py-2">Total</th>
-              <th className="px-2 py-2">Balance</th>
-              <th className="px-2 py-2">Links</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 bg-white">
-            {rows.map((r) => (
-              <tr key={r.id}>
-                <td className="px-2 py-2 font-mono text-[11px]">{r.invoice_kind}</td>
-                <td className="px-2 py-2">{r.status}</td>
-                <td className="px-2 py-2">{fmtMoney(r.total_cents, r.currency)}</td>
-                <td className="px-2 py-2">{fmtMoney(invoiceBalanceDueCents(r), r.currency)}</td>
-                <td className="px-2 py-2">
-                  {r.case_id ? (
-                    <Link className="text-sky-800 underline" href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}>
-                      Case
-                    </Link>
-                  ) : null}{" "}
-                  {r.consultation_id ? (
-                    <Link className="text-sky-800 underline" href={`/fi-admin/${tid}/consultations/${encodeURIComponent(r.consultation_id)}`}>
-                      Consult
-                    </Link>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className={financialOsClasses.pageSection}>
+      <FinancialOsSubPageHeader
+        kicker="Revenue"
+        title="Invoices"
+        description="Latest RevenueOS invoices for this tenant (read-only)."
+      />
+      <FinancialOsTable
+        isEmpty={rows.length === 0}
+        emptyMessage="No invoices found."
+        head={
+          <>
+            <FinancialOsTh>Kind</FinancialOsTh>
+            <FinancialOsTh>Status</FinancialOsTh>
+            <FinancialOsTh>Total</FinancialOsTh>
+            <FinancialOsTh>Balance</FinancialOsTh>
+            <FinancialOsTh>Links</FinancialOsTh>
+          </>
+        }
+      >
+        {rows.map((r) => (
+          <tr key={r.id} className={financialOsClasses.tableRow}>
+            <td className={financialOsClasses.tableCellMono}>{r.invoice_kind}</td>
+            <td className={financialOsClasses.tableCell}>
+              <FinancialOsRecordStatusBadge status={r.status} />
+            </td>
+            <td className={financialOsClasses.tableCell}>{fmtMoney(r.total_cents, r.currency)}</td>
+            <td className={financialOsClasses.tableCell}>{fmtMoney(invoiceBalanceDueCents(r), r.currency)}</td>
+            <td className={financialOsClasses.tableCell}>
+              {r.case_id ? (
+                <Link className={financialOsClasses.inlineLink} href={`/fi-admin/${tid}/cases/${encodeURIComponent(r.case_id)}`}>
+                  Case
+                </Link>
+              ) : null}{" "}
+              {r.consultation_id ? (
+                <Link
+                  className={financialOsClasses.inlineLink}
+                  href={`/fi-admin/${tid}/consultations/${encodeURIComponent(r.consultation_id)}`}
+                >
+                  Consult
+                </Link>
+              ) : null}
+            </td>
+          </tr>
+        ))}
+      </FinancialOsTable>
     </div>
   );
 }

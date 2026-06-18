@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { FinancialProviderForm } from "@/src/components/fi/financial/FinancialProviderForm";
 import { FinancialProviderTable } from "@/src/components/fi/financial/FinancialProviderTable";
+import { FinancialOsSubPageHeader, financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadFinanceProviders } from "@/src/lib/financialOs/financialFinanceProviders.server";
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
@@ -25,14 +26,17 @@ export default async function FinancialOsProvidersPage({ params }: { params: Pro
   ]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-sm font-semibold text-slate-900">Financing providers</h2>
-        <p className="mt-1 max-w-2xl text-xs text-slate-600">
-          Manage external financing providers before live API integration. Global catalog entries are seeded inactive except{" "}
-          <strong>Custom Provider</strong>. Tenant-specific providers can be added below.
-        </p>
-      </div>
+    <div className={financialOsClasses.pageSection}>
+      <FinancialOsSubPageHeader
+        kicker="Finance"
+        title="Financing providers"
+        description={
+          <>
+            Manage external financing providers before live API integration. Global catalog entries are seeded inactive except{" "}
+            <strong className="font-semibold text-slate-200">Custom Provider</strong>. Tenant-specific providers can be added below.
+          </>
+        }
+      />
       <FinancialProviderForm tenantId={tid} canMutate={canMutate} />
       <FinancialProviderTable tenantId={tid} rows={providers} canMutate={canMutate} />
     </div>

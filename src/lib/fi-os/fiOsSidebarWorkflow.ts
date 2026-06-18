@@ -43,6 +43,7 @@ export const FI_OS_SIDEBAR_ITEM_DEFAULT_GROUP: Record<string, FiOsWorkflowGroupI
   "patient-twin": "INTELLIGENCE",
   auditos: "INTELLIGENCE",
   "payments-inbox": "INTELLIGENCE",
+  "financial-os": "INTELLIGENCE",
   analytics: "INTELLIGENCE",
   academyos: "TEAM",
   staff: "TEAM",
@@ -62,7 +63,7 @@ const GROUP_MEMBER_ORDER: Record<FiOsWorkflowGroupId, readonly string[]> = {
   TODAY: ["calendar", "operations-centre", "reception-board", "tomorrow-board"],
   PATIENT_JOURNEY: ["crm", "follow-up-queue", "consultations", "patients", "cases"],
   CLINICAL: ["doctor-workspace", "prescriptions", "pathology-nav", "patient-twin"],
-  INTELLIGENCE: ["patient-twin", "auditos", "payments-inbox", "analytics"],
+  INTELLIGENCE: ["patient-twin", "auditos", "payments-inbox", "financial-os", "analytics"],
   TEAM: ["academyos", "staff"],
   SYSTEM: ["settings"],
 };

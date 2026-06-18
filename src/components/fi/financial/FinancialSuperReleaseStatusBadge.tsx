@@ -1,7 +1,26 @@
 import { cn } from "@/lib/utils";
+import {
+  financialOsStatusBadgeBase,
+  financialOsStatusBadgeTones,
+} from "@/src/components/fi-admin/financial-os/financialOsStatusBadgeStyles";
 import type { FiSuperReleaseApplicationStatus } from "@/src/lib/financialOs/financialSuperReleaseCore";
 
-const STATUS_TONE: Record<FiSuperReleaseApplicationStatus, string> = {
+const STATUS_TONE_DARK: Record<FiSuperReleaseApplicationStatus, string> = {
+  draft: financialOsStatusBadgeTones.neutral,
+  eligibility_review: financialOsStatusBadgeTones.violet,
+  documents_pending: financialOsStatusBadgeTones.pending,
+  clinical_letter_required: financialOsStatusBadgeTones.purple,
+  ready_for_submission: financialOsStatusBadgeTones.info,
+  submitted: financialOsStatusBadgeTones.info,
+  under_review: financialOsStatusBadgeTones.review,
+  approved: financialOsStatusBadgeTones.success,
+  rejected: financialOsStatusBadgeTones.danger,
+  release_pending: financialOsStatusBadgeTones.warning,
+  funds_released: financialOsStatusBadgeTones.success,
+  cancelled: financialOsStatusBadgeTones.cancelled,
+};
+
+const STATUS_TONE_LIGHT: Record<FiSuperReleaseApplicationStatus, string> = {
   draft: "bg-slate-100 text-slate-700",
   eligibility_review: "bg-violet-50 text-violet-900",
   documents_pending: "bg-amber-50 text-amber-900",
@@ -19,15 +38,17 @@ const STATUS_TONE: Record<FiSuperReleaseApplicationStatus, string> = {
 export function FinancialSuperReleaseStatusBadge(props: {
   status: FiSuperReleaseApplicationStatus;
   className?: string;
+  variant?: "dark" | "light";
 }) {
+  const { variant = "dark" } = props;
+  const tone = variant === "dark" ? STATUS_TONE_DARK[props.status] : STATUS_TONE_LIGHT[props.status];
+  const base =
+    variant === "dark"
+      ? financialOsStatusBadgeBase
+      : "inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
+
   return (
-    <span
-      className={cn(
-        "inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-        STATUS_TONE[props.status],
-        props.className
-      )}
-    >
+    <span className={cn(base, tone, props.className)}>
       {props.status.replace(/_/g, " ")}
     </span>
   );

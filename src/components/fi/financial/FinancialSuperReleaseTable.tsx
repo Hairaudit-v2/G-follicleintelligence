@@ -3,6 +3,17 @@
 import { Fragment, useMemo, useState, useTransition } from "react";
 
 import { createSuperReleaseApplicationAction } from "@/lib/actions/financial-os-super-release-actions";
+import { FinancialOsPillFilterBar } from "@/src/components/fi-admin/financial-os/FinancialOsPillFilterBar";
+import {
+  FinancialOsFeedbackText,
+  FinancialOsFormPanel,
+  FinancialOsTable,
+  FinancialOsTh,
+  financialOsActionFeedback,
+  financialOsFilteredEmptyMessage,
+  financialOsClasses,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialSuperReleaseClinicalLetterPanel } from "@/src/components/fi/financial/FinancialSuperReleaseClinicalLetterPanel";
 import { FinancialSuperReleaseDocuments } from "@/src/components/fi/financial/FinancialSuperReleaseDocuments";
 import { FinancialSuperReleaseStatusBadge } from "@/src/components/fi/financial/FinancialSuperReleaseStatusBadge";
@@ -13,6 +24,22 @@ function fmtMoney(cents: number | null): string {
   if (cents == null) return "—";
   return `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 }
+
+const SUPER_RELEASE_STATUS_FILTER_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "draft", label: "Draft" },
+  { value: "eligibility_review", label: "Eligibility review" },
+  { value: "documents_pending", label: "Documents pending" },
+  { value: "clinical_letter_required", label: "Clinical letter required" },
+  { value: "ready_for_submission", label: "Ready for submission" },
+  { value: "submitted", label: "Submitted" },
+  { value: "under_review", label: "Under review" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "release_pending", label: "Release pending" },
+  { value: "funds_released", label: "Funds released" },
+  { value: "cancelled", label: "Cancelled" },
+] as const;
 
 export function FinancialSuperReleaseTable(props: {
   tenantId: string;
@@ -25,7 +52,7 @@ export function FinancialSuperReleaseTable(props: {
   const [pathwayId, setPathwayId] = useState("");
   const [providerName, setProviderName] = useState("");
   const [requestedCents, setRequestedCents] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
   const [pending, start] = useTransition();
 
   const superReleasePathways = useMemo(
@@ -40,9 +67,9 @@ export function FinancialSuperReleaseTable(props: {
 
   function createApplication(e: React.FormEvent) {
     e.preventDefault();
-    setMsg(null);
+    setFeedback(null);
     if (!pathwayId) {
-      setMsg("Select a super_release payment pathway.");
+      setFeedback({ message: "Select a super_release payment pathway.", tone: "warning" });
       return;
     }
     const cents = requestedCents.trim() ? Number(requestedCents) : null;
@@ -56,145 +83,125 @@ export function FinancialSuperReleaseTable(props: {
         provider_name: providerName.trim() || null,
         requested_amount_cents: cents,
       });
-      setMsg(res.ok ? "Super release application created." : res.error);
+      setFeedback(financialOsActionFeedback(res, "Super release application created."));
     });
   }
 
   return (
     <div className="space-y-4">
       {props.canMutate ? (
-        <form onSubmit={createApplication} className="rounded border border-slate-200 bg-white p-4">
-          <h3 className="text-sm font-semibold text-slate-900">New super release application</h3>
-          <p className="mt-1 text-xs text-slate-600">
-            Linked to a <code className="rounded bg-slate-100 px-1">super_release</code> payment pathway. Provider-neutral workflow — no live API integration.
+        <FinancialOsFormPanel title="New super release application">
+          <p className={financialOsClasses.formHint}>
+            Linked to a <code className={financialOsClasses.code}>super_release</code> payment pathway. Provider-neutral
+            workflow — no live API integration.
           </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="block text-xs text-slate-600">
-              Payment pathway
-              <select
-                value={pathwayId}
-                onChange={(e) => setPathwayId(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-                required
-              >
-                <option value="">Select pathway…</option>
-                {superReleasePathways.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.id.slice(0, 8)}… · {p.status}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-xs text-slate-600">
-              Provider name (optional)
-              <input
-                value={providerName}
-                onChange={(e) => setProviderName(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-                placeholder="e.g. AustralianSuper"
-              />
-            </label>
-            <label className="block text-xs text-slate-600">
-              Requested amount (cents)
-              <input
-                value={requestedCents}
-                onChange={(e) => setRequestedCents(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-                inputMode="numeric"
-              />
-            </label>
-          </div>
-          <button
-            type="submit"
-            disabled={pending}
-            className="mt-3 rounded bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
-          >
-            {pending ? "Creating…" : "Create application"}
-          </button>
-          {msg ? <p className="mt-2 text-xs text-slate-600">{msg}</p> : null}
-        </form>
+          <form onSubmit={createApplication}>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <label className={financialOsClasses.formLabel}>
+                Payment pathway
+                <select
+                  value={pathwayId}
+                  onChange={(e) => setPathwayId(e.target.value)}
+                  className={financialOsClasses.select}
+                  required
+                >
+                  <option value="">Select pathway…</option>
+                  {superReleasePathways.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.id.slice(0, 8)}… · {p.status}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={financialOsClasses.formLabel}>
+                Provider name (optional)
+                <input
+                  value={providerName}
+                  onChange={(e) => setProviderName(e.target.value)}
+                  className={financialOsClasses.input}
+                  placeholder="e.g. AustralianSuper"
+                />
+              </label>
+              <label className={financialOsClasses.formLabel}>
+                Requested amount (cents)
+                <input
+                  value={requestedCents}
+                  onChange={(e) => setRequestedCents(e.target.value)}
+                  className={financialOsClasses.input}
+                  inputMode="numeric"
+                />
+              </label>
+            </div>
+            <button type="submit" disabled={pending} className={`mt-3 ${financialOsClasses.primaryButton}`}>
+              {pending ? "Creating…" : "Create application"}
+            </button>
+            {feedback ? <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} className="mt-2" /> : null}
+          </form>
+        </FinancialOsFormPanel>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="text-xs text-slate-600">
-          Filter status
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="ml-2 rounded border border-slate-200 px-2 py-1 text-sm"
-          >
-            <option value="all">All</option>
-            {[
-              "draft",
-              "eligibility_review",
-              "documents_pending",
-              "clinical_letter_required",
-              "ready_for_submission",
-              "submitted",
-              "under_review",
-              "approved",
-              "rejected",
-              "release_pending",
-              "funds_released",
-              "cancelled",
-            ].map((s) => (
-              <option key={s} value={s}>
-                {s.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <FinancialOsPillFilterBar
+        label="Filter status"
+        value={statusFilter}
+        options={SUPER_RELEASE_STATUS_FILTER_OPTIONS}
+        onChange={setStatusFilter}
+        ariaLabel="Super release application status filter"
+      />
 
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-        <table className="min-w-full text-xs">
-          <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
-            <tr>
-              <th className="px-3 py-2 font-medium">Provider</th>
-              <th className="px-3 py-2 font-medium">Status</th>
-              <th className="px-3 py-2 font-medium">Requested</th>
-              <th className="px-3 py-2 font-medium">Approved</th>
-              <th className="px-3 py-2 font-medium">Expected release</th>
-              <th className="px-3 py-2 font-medium">Updated</th>
-              <th className="px-3 py-2 font-medium" />
+      <FinancialOsTable
+        isEmpty={filtered.length === 0}
+        emptyMessage={financialOsFilteredEmptyMessage(
+          props.rows.length > 0,
+          "No super release applications yet.",
+          "No super release applications match this status filter.",
+        )}
+        emptyHint={
+          props.rows.length > 0 && filtered.length === 0 ? "Try clearing the status filter to see all applications." : undefined
+        }
+        head={
+          <>
+            <FinancialOsTh>Provider</FinancialOsTh>
+            <FinancialOsTh>Status</FinancialOsTh>
+            <FinancialOsTh>Requested</FinancialOsTh>
+            <FinancialOsTh>Approved</FinancialOsTh>
+            <FinancialOsTh>Expected release</FinancialOsTh>
+            <FinancialOsTh>Updated</FinancialOsTh>
+            <FinancialOsTh />
+          </>
+        }
+      >
+        {filtered.map((row) => (
+          <Fragment key={row.id}>
+            <tr className={financialOsClasses.tableRow}>
+              <td className={financialOsClasses.tableCellStrong}>{row.provider_name ?? "—"}</td>
+              <td className={financialOsClasses.tableCell}>
+                <FinancialSuperReleaseStatusBadge status={row.application_status} />
+              </td>
+              <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.requested_amount_cents)}</td>
+              <td className={financialOsClasses.tableCellMono}>{fmtMoney(row.approved_amount_cents)}</td>
+              <td className={financialOsClasses.tableCellMono}>{row.expected_release_date ?? "—"}</td>
+              <td className={financialOsClasses.tableCell}>{row.updated_at.slice(0, 10)}</td>
+              <td className={financialOsClasses.tableCell}>
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(expandedId === row.id ? null : row.id)}
+                  className={financialOsClasses.textButton}
+                >
+                  {expandedId === row.id ? "Hide" : "Details"}
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {filtered.map((row) => (
-              <Fragment key={row.id}>
-                <tr className="border-b border-slate-100">
-                  <td className="px-3 py-2 font-medium text-slate-900">{row.provider_name ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    <FinancialSuperReleaseStatusBadge status={row.application_status} />
-                  </td>
-                  <td className="px-3 py-2 font-mono text-slate-700">{fmtMoney(row.requested_amount_cents)}</td>
-                  <td className="px-3 py-2 font-mono text-slate-700">{fmtMoney(row.approved_amount_cents)}</td>
-                  <td className="px-3 py-2 font-mono text-slate-700">{row.expected_release_date ?? "—"}</td>
-                  <td className="px-3 py-2 text-slate-600">{row.updated_at.slice(0, 10)}</td>
-                  <td className="px-3 py-2">
-                    <button
-                      type="button"
-                      onClick={() => setExpandedId(expandedId === row.id ? null : row.id)}
-                      className="text-sky-700 hover:underline"
-                    >
-                      {expandedId === row.id ? "Hide" : "Details"}
-                    </button>
-                  </td>
-                </tr>
-                {expandedId === row.id ? (
-                  <tr>
-                    <td colSpan={7} className="space-y-3 px-3 py-3">
-                      <FinancialSuperReleaseDocuments tenantId={props.tenantId} application={row} canMutate={props.canMutate} />
-                      <FinancialSuperReleaseClinicalLetterPanel tenantId={props.tenantId} application={row} canMutate={props.canMutate} />
-                    </td>
-                  </tr>
-                ) : null}
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
-        {!filtered.length ? <p className="px-3 py-4 text-xs text-slate-500">No super release applications yet.</p> : null}
-      </div>
+            {expandedId === row.id ? (
+              <tr>
+                <td colSpan={7} className={`space-y-3 ${financialOsClasses.tableCell}`}>
+                  <FinancialSuperReleaseDocuments tenantId={props.tenantId} application={row} canMutate={props.canMutate} />
+                  <FinancialSuperReleaseClinicalLetterPanel tenantId={props.tenantId} application={row} canMutate={props.canMutate} />
+                </td>
+              </tr>
+            ) : null}
+          </Fragment>
+        ))}
+      </FinancialOsTable>
     </div>
   );
 }

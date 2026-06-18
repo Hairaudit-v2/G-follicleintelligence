@@ -6,6 +6,7 @@ import {
   createClinicalLetterRecordAction,
   updateClinicalLetterStatusAction,
 } from "@/lib/actions/financial-os-super-release-actions";
+import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import type { SuperReleaseApplicationRecord } from "@/src/lib/financialOs/financialSuperRelease.server";
 
 const LETTER_STATUSES = ["draft", "review_required", "approved", "issued"] as const;
@@ -16,42 +17,37 @@ export function FinancialSuperReleaseClinicalLetterPanel(props: {
   canMutate: boolean;
 }) {
   const { application, canMutate } = props;
-  const [msg, setMsg] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
   const [pending, start] = useTransition();
 
   function createLetter() {
-    setMsg(null);
+    setFeedback(null);
     start(async () => {
       const res = await createClinicalLetterRecordAction(props.tenantId, {
         application_id: application.id,
         letter_status: "draft",
       });
-      setMsg(res.ok ? "Clinical letter record created." : res.error);
+      setFeedback(financialOsActionFeedback(res, "Clinical letter record created."));
     });
   }
 
   function updateLetterStatus(letterId: string, letterStatus: (typeof LETTER_STATUSES)[number]) {
-    setMsg(null);
+    setFeedback(null);
     start(async () => {
       const res = await updateClinicalLetterStatusAction(props.tenantId, {
         letter_id: letterId,
         letter_status: letterStatus,
       });
-      setMsg(res.ok ? "Clinical letter updated." : res.error);
+      setFeedback(financialOsActionFeedback(res, "Clinical letter updated."));
     });
   }
 
   return (
-    <div className="space-y-3 rounded border border-purple-200 bg-purple-50/40 p-4">
+    <div className={`space-y-3 ${financialOsClasses.formPanel}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h4 className="text-xs font-semibold uppercase tracking-wide text-purple-900">Clinical letters</h4>
+        <h4 className={financialOsClasses.formTitle}>Clinical letters</h4>
         {canMutate ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={createLetter}
-            className="rounded bg-purple-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-800 disabled:opacity-50"
-          >
+          <button type="button" disabled={pending} onClick={createLetter} className={financialOsClasses.primaryButton}>
             New letter
           </button>
         ) : null}
@@ -59,15 +55,17 @@ export function FinancialSuperReleaseClinicalLetterPanel(props: {
 
       <ul className="space-y-2">
         {(application.clinical_letters ?? []).map((letter) => (
-          <li key={letter.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-purple-100 bg-white px-3 py-2 text-xs">
-            <span className="font-medium text-slate-800">{letter.letter_status.replace(/_/g, " ")}</span>
-            <span className="text-slate-600">{letter.issued_at ? `Issued ${letter.issued_at.slice(0, 10)}` : "Not issued"}</span>
+          <li key={letter.id} className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}>
+            <span className="font-medium text-slate-100">{letter.letter_status.replace(/_/g, " ")}</span>
+            <span className={financialOsClasses.bodyTextXs}>
+              {letter.issued_at ? `Issued ${letter.issued_at.slice(0, 10)}` : "Not issued"}
+            </span>
             {canMutate ? (
               <select
                 defaultValue={letter.letter_status}
                 disabled={pending}
                 onChange={(e) => updateLetterStatus(letter.id, e.target.value as (typeof LETTER_STATUSES)[number])}
-                className="rounded border border-slate-200 px-2 py-1"
+                className={financialOsClasses.inlineSelect}
               >
                 {LETTER_STATUSES.map((s) => (
                   <option key={s} value={s}>
@@ -79,11 +77,11 @@ export function FinancialSuperReleaseClinicalLetterPanel(props: {
           </li>
         ))}
         {!application.clinical_letters?.length ? (
-          <li className="text-xs text-slate-500">No clinical letters tracked yet.</li>
+          <li className={financialOsClasses.mutedMeta}>No clinical letters tracked yet.</li>
         ) : null}
       </ul>
 
-      {msg ? <p className="text-xs text-slate-600">{msg}</p> : null}
+      <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} />
     </div>
   );
 }

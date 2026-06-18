@@ -15,6 +15,7 @@ function formatMoney(cents: number, currency = "AUD"): string {
   }
 }
 
+/** Financial clearance summary for case detail and surgery/clinic boards. Use `variant="dark"` on FI OS dark surfaces; `variant="light"` only on light case-detail panels. FinancialOS command-centre pages do not render this component. */
 export function FinancialClearancePanel(props: {
   tenantId: string;
   clearance: FinancialClearanceResult;

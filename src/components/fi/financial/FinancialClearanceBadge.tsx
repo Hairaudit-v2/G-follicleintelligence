@@ -17,13 +17,13 @@ const STATUS_TONE: Record<FinancialClearanceState, string> = {
 };
 
 const STATUS_TONE_DARK: Record<FinancialClearanceState, string> = {
-  unavailable: "border-white/[0.08] bg-white/[0.03] text-slate-500",
-  not_ready: "border-slate-500/30 bg-slate-500/10 text-slate-300",
-  deposit_ready: "border-sky-500/30 bg-sky-500/10 text-sky-100",
-  pathway_pending: "border-indigo-500/30 bg-indigo-500/10 text-indigo-100",
-  attention_required: "border-rose-500/40 bg-rose-500/10 text-rose-100",
-  financially_cleared: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
-  paid_in_full: "border-emerald-500/40 bg-emerald-500/15 text-emerald-100",
+  unavailable: "border-white/[0.12] bg-white/[0.04] text-slate-400",
+  not_ready: "border-slate-500/35 bg-slate-500/12 text-slate-200",
+  deposit_ready: "border-sky-500/35 bg-sky-500/12 text-sky-100",
+  pathway_pending: "border-indigo-500/35 bg-indigo-500/12 text-indigo-100",
+  attention_required: "border-rose-500/45 bg-rose-500/14 text-rose-100",
+  financially_cleared: "border-emerald-500/35 bg-emerald-500/14 text-emerald-100",
+  paid_in_full: "border-emerald-500/45 bg-emerald-500/18 text-emerald-100",
 };
 
 export function FinancialClearanceBadge(props: {

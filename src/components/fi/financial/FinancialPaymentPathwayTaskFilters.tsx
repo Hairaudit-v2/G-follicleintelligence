@@ -1,5 +1,7 @@
 "use client";
 
+import { FinancialOsPillFilterBar } from "@/src/components/fi-admin/financial-os/FinancialOsPillFilterBar";
+import { financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import type { PaymentPathwayInboxRow } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
 import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 
@@ -10,6 +12,24 @@ export type PathwayInboxFilterState = {
   pathway_type: string;
 };
 
+const STATUS_FILTER_OPTIONS = [
+  { value: "all", label: "All open" },
+  { value: "open", label: "Open" },
+  { value: "in_progress", label: "In progress" },
+  { value: "waiting_patient", label: "Waiting patient" },
+  { value: "waiting_provider", label: "Waiting provider" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
+] as const;
+
+const PRIORITY_FILTER_OPTIONS = [
+  { value: "all", label: "All priorities" },
+  { value: "low", label: "Low" },
+  { value: "normal", label: "Normal" },
+  { value: "high", label: "High" },
+  { value: "urgent", label: "Urgent" },
+] as const;
+
 export function FinancialPaymentPathwayTaskFilters(props: {
   filters: PathwayInboxFilterState;
   users: CrmShellUserPickerOption[];
@@ -18,66 +38,72 @@ export function FinancialPaymentPathwayTaskFilters(props: {
   const { filters, users, onChange } = props;
 
   return (
-    <div className="flex flex-wrap gap-3">
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-slate-500">Status</span>
-        <select
-          className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm"
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <FinancialOsPillFilterBar
+          label="Status"
           value={filters.status}
-          onChange={(e) => onChange({ ...filters, status: e.target.value })}
-        >
-          <option value="all">All open statuses</option>
-          <option value="open">Open</option>
-          <option value="in_progress">In progress</option>
-          <option value="waiting_patient">Waiting patient</option>
-          <option value="waiting_provider">Waiting provider</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </label>
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-slate-500">Priority</span>
-        <select
-          className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm"
+          options={STATUS_FILTER_OPTIONS}
+          onChange={(status) => onChange({ ...filters, status })}
+          ariaLabel="Pathway task status filter"
+        />
+        <FinancialOsPillFilterBar
+          label="Priority"
           value={filters.priority}
-          onChange={(e) => onChange({ ...filters, priority: e.target.value })}
-        >
-          <option value="all">All</option>
-          <option value="low">Low</option>
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
-        </select>
-      </label>
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-slate-500">Assigned to</span>
-        <select
-          className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm"
-          value={filters.assigned_to}
-          onChange={(e) => onChange({ ...filters, assigned_to: e.target.value })}
-        >
-          <option value="all">Anyone</option>
-          <option value="unassigned">Unassigned</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>{u.email ?? u.id}</option>
-          ))}
-        </select>
-      </label>
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-slate-500">Pathway type</span>
-        <select
-          className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm"
-          value={filters.pathway_type}
-          onChange={(e) => onChange({ ...filters, pathway_type: e.target.value })}
-        >
-          <option value="all">All</option>
-          <option value="medical_finance">Medical finance</option>
-          <option value="super_release">Super release</option>
-          <option value="international_transfer">International transfer</option>
-          <option value="installment_plan">Installment plan</option>
-          <option value="manual">Manual</option>
-        </select>
-      </label>
+          options={PRIORITY_FILTER_OPTIONS}
+          onChange={(priority) => onChange({ ...filters, priority })}
+          ariaLabel="Pathway task priority filter"
+        />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex min-w-0 flex-col gap-1">
+          <span className={financialOsClasses.formLabel}>Assigned to</span>
+          <select
+            className={financialOsClasses.inlineSelect}
+            value={filters.assigned_to}
+            onChange={(e) => onChange({ ...filters, assigned_to: e.target.value })}
+          >
+            <option value="all" className={financialOsClasses.selectOption}>
+              Anyone
+            </option>
+            <option value="unassigned" className={financialOsClasses.selectOption}>
+              Unassigned
+            </option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id} className={financialOsClasses.selectOption}>
+                {u.email ?? u.id}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex min-w-0 flex-col gap-1">
+          <span className={financialOsClasses.formLabel}>Pathway type</span>
+          <select
+            className={financialOsClasses.inlineSelect}
+            value={filters.pathway_type}
+            onChange={(e) => onChange({ ...filters, pathway_type: e.target.value })}
+          >
+            <option value="all" className={financialOsClasses.selectOption}>
+              All types
+            </option>
+            <option value="medical_finance" className={financialOsClasses.selectOption}>
+              Medical finance
+            </option>
+            <option value="super_release" className={financialOsClasses.selectOption}>
+              Super release
+            </option>
+            <option value="international_transfer" className={financialOsClasses.selectOption}>
+              International transfer
+            </option>
+            <option value="installment_plan" className={financialOsClasses.selectOption}>
+              Installment plan
+            </option>
+            <option value="manual" className={financialOsClasses.selectOption}>
+              Manual
+            </option>
+          </select>
+        </label>
+      </div>
     </div>
   );
 }

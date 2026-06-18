@@ -7,6 +7,7 @@ import {
   updateFinanceApplicationDocumentAction,
   updateFinanceApplicationStatusAction,
 } from "@/lib/actions/financial-os-finance-actions";
+import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialFinanceApplicationStatusBadge } from "@/src/components/fi/financial/FinancialFinanceApplicationStatusBadge";
 import type { FinanceApplicationRecord } from "@/src/lib/financialOs/financialFinanceApplications.server";
 
@@ -46,49 +47,49 @@ export function FinancialFinanceApplicationDocuments(props: {
 }) {
   const { application, canMutate } = props;
   const [docType, setDocType] = useState<(typeof DOCUMENT_TYPES)[number]>("id_verification");
-  const [msg, setMsg] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
   const [pending, start] = useTransition();
 
   function addDocument() {
-    setMsg(null);
+    setFeedback(null);
     start(async () => {
       const res = await addFinanceApplicationDocumentAction(props.tenantId, {
         application_id: application.id,
         document_type: docType,
         status: "pending",
       });
-      setMsg(res.ok ? "Document row added." : res.error);
+      setFeedback(financialOsActionFeedback(res, "Document row added."));
     });
   }
 
   function updateDocStatus(documentId: string, status: (typeof DOCUMENT_STATUSES)[number]) {
-    setMsg(null);
+    setFeedback(null);
     start(async () => {
       const res = await updateFinanceApplicationDocumentAction(props.tenantId, {
         document_id: documentId,
         status,
       });
-      setMsg(res.ok ? "Document updated." : res.error);
+      setFeedback(financialOsActionFeedback(res, "Document updated."));
     });
   }
 
   function updateStatus(status: (typeof APPLICATION_STATUSES)[number]) {
-    setMsg(null);
+    setFeedback(null);
     start(async () => {
       const res = await updateFinanceApplicationStatusAction(props.tenantId, {
         application_id: application.id,
         status,
       });
-      setMsg(res.ok ? "Application status updated." : res.error);
+      setFeedback(financialOsActionFeedback(res, "Application status updated."));
     });
   }
 
   return (
-    <div className="space-y-4 rounded border border-slate-200 bg-slate-50/60 p-4">
+    <div className={`space-y-4 ${financialOsClasses.formPanel}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold text-slate-900">{application.provider_name ?? "Finance application"}</p>
-          <p className="text-xs text-slate-600">
+          <p className={financialOsClasses.formTitle}>{application.provider_name ?? "Finance application"}</p>
+          <p className={financialOsClasses.bodyTextXs}>
             Ref {application.application_reference ?? "—"} · Requested {fmtMoney(application.requested_amount_cents)} · Approved{" "}
             {fmtMoney(application.approved_amount_cents)}
           </p>
@@ -98,13 +99,13 @@ export function FinancialFinanceApplicationDocuments(props: {
 
       {canMutate ? (
         <div className="flex flex-wrap items-end gap-2">
-          <label className="text-xs text-slate-600">
+          <label className={financialOsClasses.formLabel}>
             Application status
             <select
               defaultValue={application.application_status}
               onChange={(e) => updateStatus(e.target.value as (typeof APPLICATION_STATUSES)[number])}
               disabled={pending}
-              className="mt-1 block rounded border border-slate-200 px-2 py-1 text-sm"
+              className={financialOsClasses.select}
             >
               {APPLICATION_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -117,18 +118,18 @@ export function FinancialFinanceApplicationDocuments(props: {
       ) : null}
 
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Documents</h4>
+        <h4 className={financialOsClasses.metricLabel}>Documents</h4>
         <ul className="mt-2 space-y-2">
           {(application.documents ?? []).map((doc) => (
-            <li key={doc.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-slate-200 bg-white px-3 py-2 text-xs">
-              <span className="font-medium text-slate-800">{doc.document_type.replace(/_/g, " ")}</span>
-              <span className="text-slate-600">{doc.status}</span>
+            <li key={doc.id} className={`flex flex-wrap items-center justify-between gap-2 text-xs ${financialOsClasses.subPanel}`}>
+              <span className="font-medium text-slate-100">{doc.document_type.replace(/_/g, " ")}</span>
+              <span className={financialOsClasses.bodyTextXs}>{doc.status}</span>
               {canMutate ? (
                 <select
                   defaultValue={doc.status}
                   disabled={pending}
                   onChange={(e) => updateDocStatus(doc.id, e.target.value as (typeof DOCUMENT_STATUSES)[number])}
-                  className="rounded border border-slate-200 px-2 py-1"
+                  className={financialOsClasses.inlineSelect}
                 >
                   {DOCUMENT_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -139,18 +140,18 @@ export function FinancialFinanceApplicationDocuments(props: {
               ) : null}
             </li>
           ))}
-          {!application.documents?.length ? <li className="text-xs text-slate-500">No documents tracked yet.</li> : null}
+          {!application.documents?.length ? <li className={financialOsClasses.mutedMeta}>No documents tracked yet.</li> : null}
         </ul>
       </div>
 
       {canMutate ? (
-        <div className="flex flex-wrap items-end gap-2 border-t border-slate-200 pt-3">
-          <label className="text-xs text-slate-600">
+        <div className="flex flex-wrap items-end gap-2 border-t border-white/[0.06] pt-3">
+          <label className={financialOsClasses.formLabel}>
             Add document
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value as (typeof DOCUMENT_TYPES)[number])}
-              className="mt-1 block rounded border border-slate-200 px-2 py-1 text-sm"
+              className={financialOsClasses.select}
             >
               {DOCUMENT_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -159,18 +160,13 @@ export function FinancialFinanceApplicationDocuments(props: {
               ))}
             </select>
           </label>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={addDocument}
-            className="rounded bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
-          >
+          <button type="button" disabled={pending} onClick={addDocument} className={financialOsClasses.primaryButton}>
             Add document
           </button>
         </div>
       ) : null}
 
-      {msg ? <p className="text-xs text-slate-600">{msg}</p> : null}
+      <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} />
     </div>
   );
 }

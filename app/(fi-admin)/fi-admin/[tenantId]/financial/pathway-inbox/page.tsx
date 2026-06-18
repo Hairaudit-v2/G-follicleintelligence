@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { FinancialPaymentPathwayInboxTable } from "@/src/components/fi/financial/FinancialPaymentPathwayInboxTable";
+import { FinancialOsSubPageHeader, financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { loadCrmShellUserPickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadPaymentPathwayInbox } from "@/src/lib/financialOs/financialPaymentPathwayInbox.server";
@@ -27,16 +28,18 @@ export default async function FinancialOsPathwayInboxPage({ params }: { params: 
   ]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-sm font-semibold text-slate-900">Payment pathway operations inbox</h2>
-        <p className="mt-1 max-w-2xl text-xs text-slate-600">
-          Staff workflow queue for non-standard payment pathways (
-          <code className="rounded bg-slate-100 px-1">fi_payment_pathway_tasks</code>). Tasks are auto-created when
-          patients or staff select medical finance, super release, international transfer, installment plan, or manual
-          pathways — not for pay-in-full or deposit/balance.
-        </p>
-      </div>
+    <div className={financialOsClasses.pageSection}>
+      <FinancialOsSubPageHeader
+        kicker="Operations"
+        title="Payment pathway operations inbox"
+        description={
+          <>
+            Staff workflow queue for non-standard payment pathways (
+            <code className={financialOsClasses.code}>fi_payment_pathway_tasks</code>). Tasks are auto-created when patients or staff select medical
+            finance, super release, international transfer, installment plan, or manual pathways — not for pay-in-full or deposit/balance.
+          </>
+        }
+      />
       <FinancialPaymentPathwayInboxTable tenantId={tid} rows={rows} users={users} canMutate={canMutate} />
     </div>
   );

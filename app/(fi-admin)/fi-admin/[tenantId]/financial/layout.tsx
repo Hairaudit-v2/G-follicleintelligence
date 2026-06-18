@@ -1,22 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { FinancialOsModuleSwitcher } from "@/src/components/fi-admin/financial-os/FinancialOsModuleSwitcher";
+import { financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
-
-const NAV = [
-  { href: "dashboard", label: "Dashboard" },
-  { href: "invoices", label: "Invoices" },
-  { href: "payments", label: "Payments" },
-  { href: "payment-requests", label: "Payment requests" },
-  { href: "installments", label: "Installments" },
-  { href: "payment-pathways", label: "Payment Pathways" },
-  { href: "pathway-inbox", label: "Pathway inbox" },
-  { href: "providers", label: "Providers" },
-  { href: "finance-applications", label: "Finance Applications" },
-  { href: "super-release", label: "Super Release" },
-  { href: "international-transfers", label: "International Transfers" },
-  { href: "deposit-rules", label: "Deposit rules" },
-] as const;
 
 export default async function FinancialOsLayout({
   children,
@@ -32,24 +18,19 @@ export default async function FinancialOsLayout({
   const base = `/fi-admin/${tid}/financial`;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
-      <header className="border-b border-slate-200 pb-4">
-        <h1 className="text-lg font-semibold text-slate-900">FinancialOS</h1>
-        <p className="mt-1 max-w-3xl text-sm text-slate-600">
-          Revenue, deposits, installments, and payment automation. Operational booking status is unchanged; financial lifecycle is tracked on{" "}
-          <code className="rounded bg-slate-100 px-1">fi_bookings.financial_os_status</code> when linked via consultation.
-        </p>
-        <nav className="mt-4 flex flex-wrap gap-2" aria-label="FinancialOS sections">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={`${base}/${item.href}`}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-800 hover:border-sky-300 hover:text-sky-900"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+    <div className={financialOsClasses.pageShell}>
+      <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">FinancialOS · Command centre</p>
+          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Revenue & settlement</h1>
+          <p className="mt-1 max-w-3xl text-sm text-slate-500">
+            Revenue, deposits, installments, and payment automation. Operational booking status is unchanged; financial lifecycle is tracked on{" "}
+            <code className={financialOsClasses.code}>fi_bookings.financial_os_status</code> when linked via consultation.
+          </p>
+        </div>
+        <div className="w-full shrink-0 sm:max-w-none lg:w-auto lg:min-w-[15rem]">
+          <FinancialOsModuleSwitcher base={base} />
+        </div>
       </header>
       {children}
     </div>

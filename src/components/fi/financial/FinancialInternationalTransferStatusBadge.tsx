@@ -1,7 +1,25 @@
 import { cn } from "@/lib/utils";
+import {
+  financialOsStatusBadgeBase,
+  financialOsStatusBadgeTones,
+} from "@/src/components/fi-admin/financial-os/financialOsStatusBadgeStyles";
 import type { FiInternationalTransferStatus } from "@/src/lib/financialOs/financialInternationalTransferCore";
 
-const STATUS_TONE: Record<FiInternationalTransferStatus, string> = {
+const STATUS_TONE_DARK: Record<FiInternationalTransferStatus, string> = {
+  instructions_required: financialOsStatusBadgeTones.violet,
+  instructions_sent: financialOsStatusBadgeTones.info,
+  awaiting_transfer: financialOsStatusBadgeTones.pending,
+  proof_received: financialOsStatusBadgeTones.review,
+  under_reconciliation: financialOsStatusBadgeTones.purple,
+  settlement_pending: financialOsStatusBadgeTones.warning,
+  partially_settled: financialOsStatusBadgeTones.warning,
+  settled: financialOsStatusBadgeTones.success,
+  variance_review: financialOsStatusBadgeTones.danger,
+  rejected: financialOsStatusBadgeTones.danger,
+  cancelled: financialOsStatusBadgeTones.cancelled,
+};
+
+const STATUS_TONE_LIGHT: Record<FiInternationalTransferStatus, string> = {
   instructions_required: "bg-violet-50 text-violet-900",
   instructions_sent: "bg-sky-50 text-sky-900",
   awaiting_transfer: "bg-amber-50 text-amber-900",
@@ -18,15 +36,17 @@ const STATUS_TONE: Record<FiInternationalTransferStatus, string> = {
 export function FinancialInternationalTransferStatusBadge(props: {
   status: FiInternationalTransferStatus;
   className?: string;
+  variant?: "dark" | "light";
 }) {
+  const { variant = "dark" } = props;
+  const tone = variant === "dark" ? STATUS_TONE_DARK[props.status] : STATUS_TONE_LIGHT[props.status];
+  const base =
+    variant === "dark"
+      ? financialOsStatusBadgeBase
+      : "inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
+
   return (
-    <span
-      className={cn(
-        "inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-        STATUS_TONE[props.status],
-        props.className
-      )}
-    >
+    <span className={cn(base, tone, props.className)}>
       {props.status.replace(/_/g, " ")}
     </span>
   );

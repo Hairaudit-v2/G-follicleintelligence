@@ -3,6 +3,17 @@
 import { Fragment, useMemo, useState, useTransition } from "react";
 
 import { createInternationalTransferApplicationAction } from "@/lib/actions/financial-os-international-transfer-actions";
+import { FinancialOsPillFilterBar } from "@/src/components/fi-admin/financial-os/FinancialOsPillFilterBar";
+import {
+  FinancialOsFeedbackText,
+  FinancialOsFormPanel,
+  FinancialOsTable,
+  FinancialOsTh,
+  financialOsActionFeedback,
+  financialOsFilteredEmptyMessage,
+  financialOsClasses,
+  type FinancialOsFeedback,
+} from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { FinancialInternationalTransferProofs } from "@/src/components/fi/financial/FinancialInternationalTransferProofs";
 import { FinancialInternationalTransferSettlementPanel } from "@/src/components/fi/financial/FinancialInternationalTransferSettlementPanel";
 import { FinancialInternationalTransferStatusBadge } from "@/src/components/fi/financial/FinancialInternationalTransferStatusBadge";
@@ -12,17 +23,20 @@ import type { FinancialPaymentPathwayRecord } from "@/src/lib/financialOs/financ
 const TRANSFER_METHODS = ["bank_transfer", "wise", "swift", "paypal", "other"] as const;
 
 const STATUS_FILTER_OPTIONS = [
-  "instructions_required",
-  "instructions_sent",
-  "awaiting_transfer",
-  "proof_received",
-  "under_reconciliation",
-  "settlement_pending",
-  "partially_settled",
-  "settled",
-  "variance_review",
-  "rejected",
-  "cancelled",
+  { value: "all", label: "All" },
+  ...[
+    "instructions_required",
+    "instructions_sent",
+    "awaiting_transfer",
+    "proof_received",
+    "under_reconciliation",
+    "settlement_pending",
+    "partially_settled",
+    "settled",
+    "variance_review",
+    "rejected",
+    "cancelled",
+  ].map((value) => ({ value, label: value.replace(/_/g, " ") })),
 ] as const;
 
 function fmtMoney(cents: number | null, currency = "AUD"): string {
@@ -43,7 +57,7 @@ export function FinancialInternationalTransferTable(props: {
   const [sourceCountry, setSourceCountry] = useState("");
   const [sourceCurrency, setSourceCurrency] = useState("");
   const [expectedCents, setExpectedCents] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
   const [pending, start] = useTransition();
 
   const internationalPathways = useMemo(
@@ -58,9 +72,9 @@ export function FinancialInternationalTransferTable(props: {
 
   function createApplication(e: React.FormEvent) {
     e.preventDefault();
-    setMsg(null);
+    setFeedback(null);
     if (!pathwayId) {
-      setMsg("Select an international_transfer payment pathway.");
+      setFeedback({ message: "Select an international_transfer payment pathway.", tone: "warning" });
       return;
     }
     const cents = expectedCents.trim() ? Number(expectedCents) : null;
@@ -76,173 +90,164 @@ export function FinancialInternationalTransferTable(props: {
         source_currency_code: sourceCurrency.trim() || null,
         expected_settlement_amount_cents: cents,
       });
-      setMsg(res.ok ? "International transfer application created." : res.error);
+      setFeedback(financialOsActionFeedback(res, "International transfer application created."));
     });
   }
 
   return (
     <div className="space-y-4">
       {props.canMutate ? (
-        <form onSubmit={createApplication} className="rounded border border-slate-200 bg-white p-4">
-          <h3 className="text-sm font-semibold text-slate-900">New international transfer application</h3>
-          <p className="mt-1 text-xs text-slate-600">
-            Linked to an <code className="rounded bg-slate-100 px-1">international_transfer</code> payment pathway. Provider-neutral workflow — no live Wise/bank/SWIFT APIs.
+        <FinancialOsFormPanel title="New international transfer application">
+          <p className={financialOsClasses.formHint}>
+            Linked to an <code className={financialOsClasses.code}>international_transfer</code> payment pathway.
+            Provider-neutral workflow — no live Wise/bank/SWIFT APIs.
           </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="block text-xs text-slate-600">
-              Payment pathway
-              <select
-                value={pathwayId}
-                onChange={(e) => setPathwayId(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-                required
-              >
-                <option value="">Select pathway…</option>
-                {internationalPathways.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.id.slice(0, 8)}… · {p.status}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-xs text-slate-600">
-              Transfer method
-              <select
-                value={transferMethod}
-                onChange={(e) => setTransferMethod(e.target.value as (typeof TRANSFER_METHODS)[number])}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-              >
-                {TRANSFER_METHODS.map((m) => (
-                  <option key={m} value={m}>
-                    {m.replace(/_/g, " ")}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-xs text-slate-600">
-              Source country
-              <input
-                value={sourceCountry}
-                onChange={(e) => setSourceCountry(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-                placeholder="GB"
-              />
-            </label>
-            <label className="block text-xs text-slate-600">
-              Source currency
-              <input
-                value={sourceCurrency}
-                onChange={(e) => setSourceCurrency(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-                placeholder="GBP"
-              />
-            </label>
-            <label className="block text-xs text-slate-600">
-              Expected settlement (cents)
-              <input
-                value={expectedCents}
-                onChange={(e) => setExpectedCents(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1.5 text-sm"
-                inputMode="numeric"
-              />
-            </label>
-          </div>
-          <button
-            type="submit"
-            disabled={pending}
-            className="mt-3 rounded bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
-          >
-            {pending ? "Creating…" : "Create application"}
-          </button>
-          {msg ? <p className="mt-2 text-xs text-slate-600">{msg}</p> : null}
-        </form>
+          <form onSubmit={createApplication}>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <label className={financialOsClasses.formLabel}>
+                Payment pathway
+                <select
+                  value={pathwayId}
+                  onChange={(e) => setPathwayId(e.target.value)}
+                  className={financialOsClasses.select}
+                  required
+                >
+                  <option value="">Select pathway…</option>
+                  {internationalPathways.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.id.slice(0, 8)}… · {p.status}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={financialOsClasses.formLabel}>
+                Transfer method
+                <select
+                  value={transferMethod}
+                  onChange={(e) => setTransferMethod(e.target.value as (typeof TRANSFER_METHODS)[number])}
+                  className={financialOsClasses.select}
+                >
+                  {TRANSFER_METHODS.map((m) => (
+                    <option key={m} value={m}>
+                      {m.replace(/_/g, " ")}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={financialOsClasses.formLabel}>
+                Source country
+                <input
+                  value={sourceCountry}
+                  onChange={(e) => setSourceCountry(e.target.value)}
+                  className={financialOsClasses.input}
+                  placeholder="GB"
+                />
+              </label>
+              <label className={financialOsClasses.formLabel}>
+                Source currency
+                <input
+                  value={sourceCurrency}
+                  onChange={(e) => setSourceCurrency(e.target.value)}
+                  className={financialOsClasses.input}
+                  placeholder="GBP"
+                />
+              </label>
+              <label className={financialOsClasses.formLabel}>
+                Expected settlement (cents)
+                <input
+                  value={expectedCents}
+                  onChange={(e) => setExpectedCents(e.target.value)}
+                  className={financialOsClasses.input}
+                  inputMode="numeric"
+                />
+              </label>
+            </div>
+            <button type="submit" disabled={pending} className={`mt-3 ${financialOsClasses.primaryButton}`}>
+              {pending ? "Creating…" : "Create application"}
+            </button>
+            {feedback ? <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} className="mt-2" /> : null}
+          </form>
+        </FinancialOsFormPanel>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="text-xs text-slate-600">
-          Filter status
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="ml-2 rounded border border-slate-200 px-2 py-1 text-sm"
-          >
-            <option value="all">All</option>
-            {STATUS_FILTER_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <FinancialOsPillFilterBar
+        label="Filter status"
+        value={statusFilter}
+        options={STATUS_FILTER_OPTIONS}
+        onChange={setStatusFilter}
+        ariaLabel="International transfer status filter"
+      />
 
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-        <table className="min-w-full text-xs">
-          <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
-            <tr>
-              <th className="px-3 py-2 font-medium">Method</th>
-              <th className="px-3 py-2 font-medium">Route</th>
-              <th className="px-3 py-2 font-medium">Status</th>
-              <th className="px-3 py-2 font-medium">Expected</th>
-              <th className="px-3 py-2 font-medium">Received</th>
-              <th className="px-3 py-2 font-medium">Settlement date</th>
-              <th className="px-3 py-2 font-medium">Updated</th>
-              <th className="px-3 py-2 font-medium" />
+      <FinancialOsTable
+        isEmpty={filtered.length === 0}
+        emptyMessage={financialOsFilteredEmptyMessage(
+          props.rows.length > 0,
+          "No international transfer applications yet.",
+          "No international transfer applications match this status filter.",
+        )}
+        emptyHint={
+          props.rows.length > 0 && filtered.length === 0 ? "Try clearing the status filter to see all applications." : undefined
+        }
+        head={
+          <>
+            <FinancialOsTh>Method</FinancialOsTh>
+            <FinancialOsTh>Route</FinancialOsTh>
+            <FinancialOsTh>Status</FinancialOsTh>
+            <FinancialOsTh>Expected</FinancialOsTh>
+            <FinancialOsTh>Received</FinancialOsTh>
+            <FinancialOsTh>Settlement date</FinancialOsTh>
+            <FinancialOsTh>Updated</FinancialOsTh>
+            <FinancialOsTh />
+          </>
+        }
+      >
+        {filtered.map((row) => (
+          <Fragment key={row.id}>
+            <tr className={financialOsClasses.tableRow}>
+              <td className={financialOsClasses.tableCellStrong}>{row.transfer_method.replace(/_/g, " ")}</td>
+              <td className={financialOsClasses.tableCell}>
+                {row.source_country_code ?? "—"} / {row.source_currency_code ?? "—"} → {row.settlement_currency_code}
+              </td>
+              <td className={financialOsClasses.tableCell}>
+                <FinancialInternationalTransferStatusBadge status={row.transfer_status} />
+              </td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(row.expected_settlement_amount_cents, row.settlement_currency_code)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>
+                {fmtMoney(row.received_amount_cents, row.settlement_currency_code)}
+              </td>
+              <td className={financialOsClasses.tableCellMono}>{row.expected_settlement_date ?? "—"}</td>
+              <td className={financialOsClasses.tableCell}>{row.updated_at.slice(0, 10)}</td>
+              <td className={financialOsClasses.tableCell}>
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(expandedId === row.id ? null : row.id)}
+                  className={financialOsClasses.textButton}
+                >
+                  {expandedId === row.id ? "Hide" : "Details"}
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {filtered.map((row) => (
-              <Fragment key={row.id}>
-                <tr className="border-b border-slate-100">
-                  <td className="px-3 py-2 font-medium text-slate-900">{row.transfer_method.replace(/_/g, " ")}</td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {row.source_country_code ?? "—"} / {row.source_currency_code ?? "—"} → {row.settlement_currency_code}
-                  </td>
-                  <td className="px-3 py-2">
-                    <FinancialInternationalTransferStatusBadge status={row.transfer_status} />
-                  </td>
-                  <td className="px-3 py-2 font-mono text-slate-700">
-                    {fmtMoney(row.expected_settlement_amount_cents, row.settlement_currency_code)}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-slate-700">
-                    {fmtMoney(row.received_amount_cents, row.settlement_currency_code)}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-slate-700">{row.expected_settlement_date ?? "—"}</td>
-                  <td className="px-3 py-2 text-slate-600">{row.updated_at.slice(0, 10)}</td>
-                  <td className="px-3 py-2">
-                    <button
-                      type="button"
-                      onClick={() => setExpandedId(expandedId === row.id ? null : row.id)}
-                      className="text-sky-700 hover:underline"
-                    >
-                      {expandedId === row.id ? "Hide" : "Details"}
-                    </button>
-                  </td>
-                </tr>
-                {expandedId === row.id ? (
-                  <tr>
-                    <td colSpan={8} className="space-y-3 px-3 py-3">
-                      <FinancialInternationalTransferSettlementPanel
-                        tenantId={props.tenantId}
-                        application={row}
-                        canMutate={props.canMutate}
-                      />
-                      <FinancialInternationalTransferProofs
-                        tenantId={props.tenantId}
-                        application={row}
-                        canMutate={props.canMutate}
-                      />
-                    </td>
-                  </tr>
-                ) : null}
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
-        {!filtered.length ? (
-          <p className="px-3 py-4 text-xs text-slate-500">No international transfer applications yet.</p>
-        ) : null}
-      </div>
+            {expandedId === row.id ? (
+              <tr>
+                <td colSpan={8} className={`space-y-3 ${financialOsClasses.tableCell}`}>
+                  <FinancialInternationalTransferSettlementPanel
+                    tenantId={props.tenantId}
+                    application={row}
+                    canMutate={props.canMutate}
+                  />
+                  <FinancialInternationalTransferProofs
+                    tenantId={props.tenantId}
+                    application={row}
+                    canMutate={props.canMutate}
+                  />
+                </td>
+              </tr>
+            ) : null}
+          </Fragment>
+        ))}
+      </FinancialOsTable>
     </div>
   );
 }

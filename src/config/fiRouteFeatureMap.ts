@@ -36,6 +36,7 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "operations" || f.startsWith("operations/"), feature: "dashboard" },
   { test: (f) => f === "reception-os" || f.startsWith("reception-os/"), feature: "dashboard" },
   { test: (f) => f === "reception" || f.startsWith("reception/"), feature: "dashboard" },
+  { test: (f) => f === "surgery-os" || f.startsWith("surgery-os/"), feature: "surgery_pipeline" },
   { test: (f) => f === "system-status" || f.startsWith("system-status/"), feature: "settings" },
   { test: (f) => f === "configuration" || f.startsWith("configuration/"), feature: "settings" },
   { test: (f) => f === "settings" || f.startsWith("settings/"), feature: "settings" },

@@ -208,6 +208,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     items: [
       { id: "surgeryos", label: "SurgeryOS", path: "cases", permissionHint: {} },
       {
+        id: "surgery-os",
+        label: "Command centre",
+        path: "surgery-os",
+        permissionHint: {},
+        description: "Live surgical command centre — theatre board, readiness, timeline, team, and alerts.",
+      },
+      {
         id: "surgery-readiness-board",
         label: "Readiness board",
         path: "surgery-readiness",
@@ -414,6 +421,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "consultation-conversion") return "consultation-conversion-board";
   if (first === "prescriptions") return "prescriptions";
   if (first === "cases") return "surgeryos";
+  if (first === "surgery-os") return "surgery-os";
   if (first === "surgery-readiness") return "surgery-readiness-board";
   if (first === "procedure-day") return "procedure-day-board";
   if (first === "crm") return "leadflow";

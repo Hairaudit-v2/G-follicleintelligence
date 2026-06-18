@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { FinancialFinanceApplicationTable } from "@/src/components/fi/financial/FinancialFinanceApplicationTable";
+import { FinancialOsSubPageHeader, financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadFinanceApplications } from "@/src/lib/financialOs/financialFinanceApplications.server";
 import { loadFinanceProviders } from "@/src/lib/financialOs/financialFinanceProviders.server";
@@ -28,14 +29,17 @@ export default async function FinancialOsFinanceApplicationsPage({ params }: { p
   ]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-sm font-semibold text-slate-900">Finance applications</h2>
-        <p className="mt-1 max-w-2xl text-xs text-slate-600">
-          Track financing applications linked to <code className="rounded bg-slate-100 px-1">medical_finance</code> payment pathways — document
-          collection, approval workflow, and settlement tracking without live provider APIs.
-        </p>
-      </div>
+    <div className={financialOsClasses.pageSection}>
+      <FinancialOsSubPageHeader
+        kicker="Finance"
+        title="Finance applications"
+        description={
+          <>
+            Track financing applications linked to <code className={financialOsClasses.code}>medical_finance</code> payment pathways — document collection,
+            approval workflow, and settlement tracking without live provider APIs.
+          </>
+        }
+      />
       <FinancialFinanceApplicationTable
         tenantId={tid}
         rows={applications}

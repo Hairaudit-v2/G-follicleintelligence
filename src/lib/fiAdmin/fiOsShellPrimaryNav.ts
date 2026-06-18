@@ -130,6 +130,14 @@ export function resolveFiOsPrimarySidebarItems(
       disabled: false,
     },
     {
+      id: "surgery-os",
+      featureKey: "surgery_pipeline",
+      label: "SurgeryOS",
+      shortLabel: "SurgOS",
+      href: hrefFor(b, "surgery-os"),
+      disabled: false,
+    },
+    {
       id: "reception-board",
       featureKey: "dashboard",
       label: "Reception board",
@@ -208,6 +216,12 @@ export function resolveFiOsPrimarySidebarItems(
         : [
             { id: "cases-worklist", featureKey: "cases", label: "Case worklist", href: hrefFor(b, "cases") },
             {
+              id: "surgery-os-command-centre",
+              featureKey: "surgery_pipeline",
+              label: "SurgeryOS",
+              href: hrefFor(b, "surgery-os"),
+            },
+            {
               id: "surgery-readiness-board",
               featureKey: "cases",
               label: "Readiness board",
@@ -284,18 +298,6 @@ export function resolveFiOsPrimarySidebarItems(
       shortLabel: "Fin",
       href: hrefFor(b, "financial/dashboard"),
       disabled: false,
-      subItems: [
-        { id: "financial-dashboard", featureKey: "settings", label: "Financial dashboard", href: hrefFor(b, "financial/dashboard") },
-        { id: "financial-invoices", featureKey: "settings", label: "Invoices", href: hrefFor(b, "financial/invoices") },
-        { id: "financial-payments", featureKey: "settings", label: "Payments", href: hrefFor(b, "financial/payments") },
-        { id: "financial-payment-requests", featureKey: "settings", label: "Payment requests", href: hrefFor(b, "financial/payment-requests") },
-        { id: "financial-installments", featureKey: "settings", label: "Installments", href: hrefFor(b, "financial/installments") },
-        { id: "financial-providers", featureKey: "settings", label: "Providers", href: hrefFor(b, "financial/providers") },
-        { id: "financial-finance-applications", featureKey: "settings", label: "Finance Applications", href: hrefFor(b, "financial/finance-applications") },
-        { id: "financial-super-release", featureKey: "settings", label: "Super Release", href: hrefFor(b, "financial/super-release") },
-        { id: "financial-international-transfers", featureKey: "settings", label: "International Transfers", href: hrefFor(b, "financial/international-transfers") },
-        { id: "financial-deposit-rules", featureKey: "settings", label: "Deposit rules", href: hrefFor(b, "financial/deposit-rules") },
-      ],
     },
     {
       id: "analytics",
@@ -381,6 +383,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "operations") return "operations-centre";
     if (firstEarly === "reception-os") return "reception-os";
+    if (firstEarly === "surgery-os") return "surgery-os";
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
     if (firstEarly === "payments") return "payments-inbox";
@@ -394,6 +397,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "leadflow") return "crm";
   if (legacy === "operations-centre") return "operations-centre";
   if (legacy === "reception-os") return "reception-os";
+  if (legacy === "surgery-os") return "surgery-os";
   if (legacy === "reception-board") return "reception-board";
   if (legacy === "tomorrow-board") return "tomorrow-board";
   if (legacy === "surgeryos" || legacy === "surgery-readiness-board" || legacy === "procedure-day-board") return "cases";

@@ -1,3 +1,8 @@
+import {
+  financialOsStatusBadgeBase,
+  financialOsStatusBadgeTones,
+  resolveFinancialOsRecordStatusTone,
+} from "@/src/components/fi-admin/financial-os/financialOsStatusBadgeStyles";
 import type { FiPaymentPathwayTaskPriority, FiPaymentPathwayTaskStatus } from "@/src/lib/financialOs/financialPaymentPathwayInboxCore";
 
 const STATUS_LABELS: Record<FiPaymentPathwayTaskStatus, string> = {
@@ -33,15 +38,17 @@ export function FinancialPaymentPathwayTaskBadge(props: {
   priority: string;
   variant?: "dark" | "light";
 }) {
-  const { status, priority, variant = "light" } = props;
+  const { status, priority, variant = "dark" } = props;
   const isUrgent = priority === "urgent";
   const isHigh = priority === "high";
+  const statusTone = resolveFinancialOsRecordStatusTone(status);
 
-  const toneDark = isUrgent
-    ? "border-rose-500/40 bg-rose-500/10 text-rose-100"
-    : isHigh
-      ? "border-amber-500/40 bg-amber-500/10 text-amber-100"
-      : "border-white/[0.08] bg-white/[0.03] text-slate-300";
+  const toneDark =
+    isUrgent || isHigh
+      ? isUrgent
+        ? financialOsStatusBadgeTones.danger
+        : financialOsStatusBadgeTones.warning
+      : financialOsStatusBadgeTones[statusTone];
 
   const toneLight = isUrgent
     ? "border-rose-200 bg-rose-50 text-rose-900"
@@ -50,9 +57,10 @@ export function FinancialPaymentPathwayTaskBadge(props: {
       : "border-slate-200 bg-slate-50 text-slate-700";
 
   const tone = variant === "dark" ? toneDark : toneLight;
+  const base = variant === "dark" ? financialOsStatusBadgeBase : "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide";
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${tone}`}>
+    <span className={`${base} ${tone}`}>
       <span>{pathwayTaskStatusLabel(status)}</span>
       {priority !== "normal" ? <span className="opacity-80">· {pathwayTaskPriorityLabel(priority)}</span> : null}
     </span>
