@@ -68,6 +68,7 @@ export async function loadTimelyZapierIntegrationSetup(tenantId: string): Promis
     .eq("tenant_id", tid)
     .eq("source_system", TIMELY)
     .eq("entity_type", ENTITY_BOOKING)
+    .not("internal_id", "is", null)
     .order("created_at", { ascending: false })
     .limit(1);
   if (eLast) throw new Error(eLast.message);
@@ -99,6 +100,7 @@ export async function loadTimelyZapierIntegrationSetup(tenantId: string): Promis
     .eq("tenant_id", tid)
     .eq("source_system", TIMELY)
     .eq("entity_type", ENTITY_BOOKING)
+    .not("internal_id", "is", null)
     .order("created_at", { ascending: false })
     .limit(20);
   if (eRecent) throw new Error(eRecent.message);

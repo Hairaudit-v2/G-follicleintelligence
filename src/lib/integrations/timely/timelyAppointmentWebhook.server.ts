@@ -42,14 +42,20 @@ async function assertTenantExists(supabase: SupabaseClient, tenantId: string): P
   if (!data) throw new TimelyWebhookHttpError(404, "Tenant not found.");
 }
 
-async function loadExistingBookingMapping(
+type BookingMappingRow = { id: string; internal_id: string | null };
+
+/**
+ * Read the external→internal booking mapping row. `internal_id === null` means the mapping is
+ * claimed but the booking row is still being created (or a prior worker crashed mid-create).
+ */
+async function loadBookingMappingRow(
   supabase: SupabaseClient,
   tenantId: string,
   externalAppointmentId: string
-): Promise<string | null> {
+): Promise<BookingMappingRow | null> {
   const { data, error } = await supabase
     .from("fi_external_entity_mappings")
-    .select("internal_id")
+    .select("id, internal_id")
     .eq("tenant_id", tenantId.trim())
     .eq("source_system", SOURCE)
     .eq("entity_type", ENTITY_BOOKING)
@@ -57,7 +63,11 @@ async function loadExistingBookingMapping(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  return String((data as { internal_id: string }).internal_id);
+  const row = data as { id: string; internal_id: string | null };
+  return {
+    id: String(row.id),
+    internal_id: row.internal_id == null ? null : String(row.internal_id),
+  };
 }
 
 async function resolveDefaultClinicId(supabase: SupabaseClient, tenantId: string): Promise<string> {
@@ -154,22 +164,70 @@ async function loadPatientForTimelyExternalId(
   return { patient_id: String(p.id), person_id: String(p.person_id) };
 }
 
-async function insertBookingMapping(
+/**
+ * Atomically claim the booking mapping via INSERT ... ON CONFLICT DO NOTHING (guarded by the
+ * unique constraint on tenant_id+source_system+entity_type+external_id). Returns the new mapping id
+ * when this worker won the claim, or `null` when another delivery already owns it.
+ *
+ * The claim row carries `internal_id = null` until the booking is created and backfilled. This is
+ * what makes booking creation safe against duplicate/parallel Zapier delivery: only the worker that
+ * owns the claim creates the booking.
+ */
+async function claimBookingMapping(
   supabase: SupabaseClient,
   tenantId: string,
-  externalAppointmentId: string,
+  externalAppointmentId: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("fi_external_entity_mappings")
+    .upsert(
+      {
+        tenant_id: tenantId.trim(),
+        source_system: SOURCE,
+        entity_type: ENTITY_BOOKING,
+        external_id: externalAppointmentId.trim(),
+        internal_id: null,
+      },
+      { onConflict: "tenant_id,source_system,entity_type,external_id", ignoreDuplicates: true }
+    )
+    .select("id");
+  if (error) throw new Error(error.message);
+  const rows = (data ?? []) as { id: string }[];
+  if (rows.length === 0) return null;
+  return String(rows[0].id);
+}
+
+/** Backfill the claimed mapping with the created booking id. */
+async function setBookingMappingInternalId(
+  supabase: SupabaseClient,
+  tenantId: string,
+  mappingId: string,
   bookingId: string
 ): Promise<void> {
-  const { error } = await supabase.from("fi_external_entity_mappings").insert({
-    tenant_id: tenantId.trim(),
-    source_system: SOURCE,
-    entity_type: ENTITY_BOOKING,
-    external_id: externalAppointmentId.trim(),
-    internal_id: bookingId.trim(),
-  });
-  if (error?.code === "23505") {
-    return;
-  }
+  const { error } = await supabase
+    .from("fi_external_entity_mappings")
+    .update({ internal_id: bookingId.trim() })
+    .eq("tenant_id", tenantId.trim())
+    .eq("id", mappingId.trim());
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Release an unfulfilled claim (internal_id still null) so a later retry can re-claim and create
+ * the booking. Only deletes rows that are still unfulfilled, so a concurrently-created booking is
+ * never detached. No booking exists for an unfulfilled claim, so this cannot orphan one.
+ */
+async function releaseBookingMappingClaim(
+  supabase: SupabaseClient,
+  tenantId: string,
+  mappingId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("fi_external_entity_mappings")
+    .delete()
+    .eq("tenant_id", tenantId.trim())
+    .eq("id", mappingId.trim())
+    .is("internal_id", null);
   if (error) throw new Error(error.message);
 }
 
@@ -306,8 +364,21 @@ type ProcessTimelyAppointmentWebhookCoreSuccess = Omit<
   "consultation_id" | "consultation_action" | "crm_stage_action" | "crm_stage_slug"
 >;
 
+/**
+ * A duplicate/parallel delivery we safely ignored without re-running booking/CRM/consultation side
+ * effects. Maps to HTTP 200 so Zapier does not retry into a duplicate write. `booking_id` is the
+ * already-mapped booking when known, or null while another worker is still creating it.
+ */
+export type ProcessTimelyAppointmentWebhookNoop = {
+  ok: true;
+  duplicate: true;
+  reason: "already_processing" | "duplicate_ignored";
+  booking_id: string | null;
+};
+
 export type ProcessTimelyAppointmentWebhookResult =
   | ProcessTimelyAppointmentWebhookSuccess
+  | ProcessTimelyAppointmentWebhookNoop
   | { ok: false; status: number; message: string };
 
 export type TimelyAppointmentWebhookPorts = {
@@ -580,7 +651,7 @@ async function syncExistingTimelyBooking(
   payload: TimelyAppointmentPayload,
   externalAppointmentId: string,
   ports: TimelyAppointmentWebhookPorts
-): Promise<ProcessTimelyAppointmentWebhookResult | ProcessTimelyAppointmentWebhookCoreSuccess> {
+): Promise<{ ok: false; status: number; message: string } | ProcessTimelyAppointmentWebhookCoreSuccess> {
   const existing = await ports.loadBooking(tenantId, bookingId, supabase);
   if (!existing) {
     return { ok: false, status: 404, message: "Mapped booking not found." };
@@ -764,11 +835,23 @@ export async function processTimelyAppointmentWebhook(
     await assertTenantExists(supabase, tid);
 
     const extAppt = payload.external_appointment_id.trim();
-    const existingId = await loadExistingBookingMapping(supabase, tid, extAppt);
-    if (existingId) {
-      const synced = await syncExistingTimelyBooking(supabase, tid, existingId, payload, extAppt, mergedPorts);
+    const existingMapping = await loadBookingMappingRow(supabase, tid, extAppt);
+    if (existingMapping?.internal_id) {
+      const synced = await syncExistingTimelyBooking(
+        supabase,
+        tid,
+        existingMapping.internal_id,
+        payload,
+        extAppt,
+        mergedPorts
+      );
       if (!synced.ok) return synced;
       return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
+    }
+    if (existingMapping) {
+      // Claim exists but booking not yet created → another delivery owns the in-flight create.
+      // Safe no-op so a parallel/retried delivery cannot produce a second booking.
+      return { ok: true, duplicate: true, reason: "already_processing", booking_id: null };
     }
 
     const lifecycleEvent = resolveLifecycleEvent(payload, false);
@@ -859,29 +942,50 @@ export async function processTimelyAppointmentWebhook(
       );
     };
 
-    let booking;
-    try {
-      booking = await tryCreate(assignedStaffId);
-    } catch (e) {
-      if (assignedStaffId && isStaffRetryableError(e)) {
-        try {
-          booking = await tryCreate(null);
-          assignedStaffId = null;
-        } catch (e2) {
-          if (isModelRequiresStaffError(e2)) {
-            return { ok: false, status: 422, message: "Staff not found or ambiguous" };
-          }
-          throw e2;
-        }
-      } else {
-        if (isModelRequiresStaffError(e)) {
-          return { ok: false, status: 422, message: "Staff not found or ambiguous" };
-        }
-        throw e;
+    // Atomically claim the booking mapping BEFORE creating the booking. Only the worker that owns
+    // the claim creates a booking, so duplicate/parallel deliveries cannot produce a second one.
+    const mappingId = await claimBookingMapping(supabase, tid, extAppt);
+    if (!mappingId) {
+      // Lost the claim race to a concurrent delivery. Act on the winner's result if available.
+      const reread = await loadBookingMappingRow(supabase, tid, extAppt);
+      if (reread?.internal_id) {
+        const synced = await syncExistingTimelyBooking(
+          supabase,
+          tid,
+          reread.internal_id,
+          payload,
+          extAppt,
+          mergedPorts
+        );
+        if (!synced.ok) return synced;
+        return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
       }
+      return { ok: true, duplicate: true, reason: "already_processing", booking_id: null };
     }
 
-    await insertBookingMapping(supabase, tid, extAppt, booking.id);
+    // We own the claim. Any exit without a created booking must release it so a retry can repair
+    // (no booking exists yet, so releasing cannot orphan one).
+    let booking;
+    try {
+      try {
+        booking = await tryCreate(assignedStaffId);
+      } catch (e) {
+        if (assignedStaffId && isStaffRetryableError(e)) {
+          booking = await tryCreate(null);
+          assignedStaffId = null;
+        } else {
+          throw e;
+        }
+      }
+    } catch (e) {
+      await releaseBookingMappingClaim(supabase, tid, mappingId);
+      if (isModelRequiresStaffError(e)) {
+        return { ok: false, status: 422, message: "Staff not found or ambiguous" };
+      }
+      throw e;
+    }
+
+    await setBookingMappingInternalId(supabase, tid, mappingId, booking.id);
 
     if (initialStatus === "cancelled" || initialStatus === "completed" || initialStatus === "no_show") {
       const synced = await syncExistingTimelyBooking(supabase, tid, booking.id, payload, extAppt, mergedPorts);
@@ -889,15 +993,12 @@ export async function processTimelyAppointmentWebhook(
       return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
     }
 
-    const verify = await loadExistingBookingMapping(supabase, tid, extAppt);
-    const finalId = verify ?? booking.id;
-
     return finalizeTimelyAppointmentWebhookResult(
       supabase,
       tid,
       {
         ok: true,
-        booking_id: finalId,
+        booking_id: booking.id,
         action: "created",
         lifecycle_event: lifecycleEvent,
         lead_id: leadAttach.lead_id,

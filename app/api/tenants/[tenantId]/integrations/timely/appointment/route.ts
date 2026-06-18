@@ -25,7 +25,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
     const body = await req.json().catch(() => ({}));
     const payload = timelyAppointmentWebhookSchema.parse(body);
 
-    const audited = await withTimelyWebhookAudit({
+    const audited = await withTimelyWebhookAudit<Record<string, unknown>>({
       tenantId,
       route: TIMELY_WEBHOOK_ROUTES.appointment,
       payload,
@@ -34,6 +34,16 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
         const result = await processTimelyAppointmentWebhook(tenantId, payload);
         if (!result.ok) {
           return { ok: false, message: result.message, status: result.status };
+        }
+        if ("duplicate" in result) {
+          return {
+            ok: true,
+            value: {
+              duplicate: true,
+              reason: result.reason,
+              booking_id: result.booking_id,
+            },
+          };
         }
         return {
           ok: true,
@@ -58,6 +68,14 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
         { success: false, error: audited.message, event_id: audited.event_id ?? undefined },
         { status: audited.status }
       );
+    }
+
+    if ("duplicate" in audited) {
+      return NextResponse.json({
+        success: true,
+        duplicate: true,
+        event_id: audited.event_id,
+      });
     }
 
     return NextResponse.json({

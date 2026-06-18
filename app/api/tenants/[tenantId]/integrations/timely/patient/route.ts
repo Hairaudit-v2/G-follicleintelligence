@@ -51,6 +51,14 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
       );
     }
 
+    if ("duplicate" in audited) {
+      return NextResponse.json({
+        success: true,
+        duplicate: true,
+        event_id: audited.event_id,
+      });
+    }
+
     return NextResponse.json({
       success: true,
       event_id: audited.event_id,
