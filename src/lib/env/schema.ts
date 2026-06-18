@@ -19,7 +19,6 @@ export const clientEnvKeys = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "NEXT_PUBLIC_SITE_URL",
-  "NEXT_PUBLIC_APP_URL",
   "NEXT_PUBLIC_FI_CALENDAR_PERF",
 ] as const;
 
@@ -30,7 +29,6 @@ export const clientEnvSchema = z
     NEXT_PUBLIC_SUPABASE_URL: optionalHttpUrl,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString,
     NEXT_PUBLIC_SITE_URL: optionalHttpUrl,
-    NEXT_PUBLIC_APP_URL: optionalHttpUrl,
     NEXT_PUBLIC_FI_CALENDAR_PERF: optionalString,
   })
   .superRefine((data, ctx) => {
@@ -295,7 +293,6 @@ export function pickClientEnvInput(env: NodeJS.ProcessEnv): Record<ClientEnvKey,
     NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SITE_URL: env.NEXT_PUBLIC_SITE_URL,
-    NEXT_PUBLIC_APP_URL: env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_FI_CALENDAR_PERF: env.NEXT_PUBLIC_FI_CALENDAR_PERF,
   };
 }

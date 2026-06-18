@@ -168,7 +168,11 @@ async function main(): Promise<void> {
     return v && (v.classification === "patient" || v.classification === "mixed_patient_lead");
   }).length;
 
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const baseUrl = (
+    process.env.FI_BASE_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    "http://localhost:3000"
+  ).replace(/\/$/, "");
 
   if (dryRun) {
     const rowIndexRange =

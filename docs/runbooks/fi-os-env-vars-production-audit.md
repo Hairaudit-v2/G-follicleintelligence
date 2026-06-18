@@ -24,9 +24,18 @@
 | `NEXT_PUBLIC_SUPABASE_URL` | required | `lib/supabase/client.ts`, `lib/supabaseAdmin.ts`, most `app/api/**`, FI admin pages | All OS modules using DB | Yes | Yes | Supabase project → Settings → API | `https://xxxx.supabase.co` | Yes | None (trim checks only) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | required | `lib/supabase/client.ts`, `src/lib/crm/crmGate.ts`, `lib/actions/fi-os-auth-actions.ts`, `src/lib/fiOs/fiOsAuthDisplay.server.ts` | Auth session (browser + Bearer resolution) | Yes | Yes | Supabase → API (anon public) | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` (short public) | Yes | None |
 | `SUPABASE_SERVICE_ROLE_KEY` | required | `lib/supabaseAdmin.ts`, all server routes using admin client | Server-side data access (bypasses RLS) | Yes | Yes | Supabase → API (**service_role**, secret) | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` (long secret) | Yes | None |
-| `NEXT_PUBLIC_SITE_URL` | optional | `src/lib/fiOs/fiOsPublicOrigin.server.ts`, `lib/actions/fi-tenant-admin-actions.ts`, `lib/actions/fi-os-auth-actions.ts` | Password reset / origin fallback when `Host` headers missing | Dev as needed | Recommended | Your canonical public URL | `https://app.example.com` | Yes (commented) | None |
-| `NEXT_PUBLIC_APP_URL` | optional (scripts) | `scripts/hubspot-import-next-500.ts`, `scripts/hubspot-commit-latest-dry-run-batch.ts` | HubSpot import scripts calling the app | For those scripts | N/A unless scripts run in CI | Same as deploy URL | `https://app.example.com` | **No** | None |
+| `NEXT_PUBLIC_SITE_URL` | optional | `src/lib/fiOs/fiOsPublicOrigin.server.ts`, `lib/actions/fi-tenant-admin-actions.ts`, `lib/actions/fi-os-auth-actions.ts` | **Canonical public / auth URL** — password reset links and origin fallback when `Host` headers missing; script fallback when `FI_BASE_URL` unset | Dev as needed | Recommended | Your canonical public URL | `https://app.example.com` | Yes | None |
 | `NODE_ENV` | required (framework) | Many gates (`production` vs dev) | Security boundaries (portal gate, webhook fail-closed, error sanitisation) | Auto | Auto | Node / Vercel | `production` | N/A | N/A |
+
+### Deploy URL model
+
+| Variable | Role | Read by code? |
+|----------|------|---------------|
+| `FI_BASE_URL` | Deployed app **site root** (no `/fi-admin` suffix) for scripts, HubSpot import verification links, smoke/replay/verify scripts, and HR cron self-HTTP | Yes |
+| `NEXT_PUBLIC_SITE_URL` | **Canonical public / auth URL** — password-reset and redirect fallbacks; second choice for script deploy links when `FI_BASE_URL` unset | Yes |
+| `NEXT_PUBLIC_APP_URL` | Legacy duplicate of deploy URL | **No — removed/deprecated** (delete from `.env.local` / Vercel if still set) |
+
+HubSpot import scripts resolve admin links as: `FI_BASE_URL` → `NEXT_PUBLIC_SITE_URL` → `http://localhost:3000`.
 
 ---
 
@@ -107,7 +116,7 @@
 | `IIOHR_HR_PERTH_STAFF_FEED_URL` | optional* | `src/lib/hr/loadEvolvedPerthHrStaffSnapshot.server.ts` | HR JSON feed fetch | If running HR import/cron | Yes if automation | IIOHR / internal feed URL | `https://hr-feed.example/staff.json` | **No** | URL trim |
 | `IIOHR_HR_PERTH_STAFF_FEED_KEY` | optional | same | Bearer for feed GET | If feed requires auth | If feed requires auth | Shared secret with feed host | `feed_key_xxxx` | **No** | None |
 | `IIOHR_HR_SYNC_SECRET` | optional* | `src/lib/staffImport/iiohrHrStaffSyncPost.server.ts`, `src/lib/hr/iiohrFiStaffSyncPush.ts`, health actions | `x-iiohr-sync-secret` on `POST .../integrations/iiohr-hr/staff-sync` | If testing POST | **Yes** if endpoint exposed | Generate random | `iiohr_sync_xxxx` | **No** | Compared to header |
-| `FI_BASE_URL` | optional* | `src/lib/hr/iiohrFiStaffSyncPush.ts`, tests, replay scripts | Outbound HR client posts back to FI | Cron worker host | **Yes** for HR cron self-POST | Public deploy URL | `https://app.example.com` | **No** | None |
+| `FI_BASE_URL` | optional* | `src/lib/hr/iiohrFiStaffSyncPush.ts`, `scripts/hubspot-import-next-500.ts`, `scripts/hubspot-commit-latest-dry-run-batch.ts`, `scripts/fi-production-smoke-test.ts`, `scripts/replay-test.ts`, `scripts/verify-fi-event-ingestion.ts`, tests | **Deployed app root** — HR self-POST, HubSpot verification links, smoke/replay/self-HTTP | Cron worker host; HubSpot scripts | **Yes** when HR cron or script deploy links needed | Public deploy URL (site root) | `https://app.example.com` | Yes | None |
 | `EVOLVED_PERTH_TENANT_ID` | optional* | `src/lib/hr/runScheduledIiohrHrStaffSync.server.ts`, scripts | Target tenant UUID for Perth automation | If automation | Yes if HR cron | DB `fi_tenants.id` | UUID | **No** | UUID zod in cron |
 | `ALLOW_EMPTY_HR_SYNC` | optional | `src/lib/hr/runScheduledIiohrHrStaffSync.server.ts`, `src/lib/actions/fi-hr-sync-health-actions.ts` | Allow empty feed no-op | Staging | Rarely prod | Ops | `true` | **No** | `=== "true"` |
 | `STAFF_SYNC_STALE_WARNING_HOURS` | optional | `src/lib/hr/iiohrHrStaffSyncHealth.ts` | Health thresholds | Optional | Optional | Ops | `48` | **No** | Parsed int |
@@ -161,7 +170,6 @@ The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (
 
 - `CRON_SECRET`, `EVOLVED_PERTH_TENANT_ID`, `FI_BASE_URL`, `IIOHR_HR_SYNC_SECRET`, `IIOHR_HR_PERTH_STAFF_FEED_URL`, `IIOHR_HR_PERTH_STAFF_FEED_KEY`, `ALLOW_EMPTY_HR_SYNC`
 - `FI_STORAGE_BUCKET_INTAKES`
-- `NEXT_PUBLIC_APP_URL`
 - `OPENAI_PATHOLOGY_INTERPRETATION_MODEL`
 - `FI_REMINDERS_LIVE_DELIVERY`, `FI_REMINDER_TEST_EMAIL`, `FI_REMINDERS_TEST_SEND`
 - `STAFF_SYNC_STALE_WARNING_HOURS`, `STAFF_SYNC_ALERT_EMAIL`
@@ -169,6 +177,8 @@ The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (
 - `FI_HUBSPOT_IMPORT_TENANT_ID`, `FI_IMPORT_ADMIN_KEY`, `FI_EVOLVED_*` provisioning trio
 - `FI_LEGACY_FI_API_*`, `FI_ALLOW_INSECURE_API`, `FI_ALLOW_ADMIN_KEY_QUERY`
 - `FI_ENABLE_PUBLIC_COPY_CHECK` — when `true`/`1`/`yes`, allows unauthenticated `POST /api/fi/copy-check` in **production** (default off; avoid unless behind edge controls)
+
+**Removed:** `NEXT_PUBLIC_APP_URL` — no longer read; use `FI_BASE_URL` (preferred) or `NEXT_PUBLIC_SITE_URL` for script deploy links. Application template now documents **91** variables (see [`.env.example`](../../.env.example)).
 
 ---
 
@@ -212,7 +222,7 @@ The following were added in Patch PR 4 to [`.env.example`](../../.env.example) (
 | Zapier / webhook secrets | Timely bearer + IIOHR header |
 | Cron secrets | `FI_REMINDER_CRON_SECRET`, `CRON_SECRET` |
 | Admin API keys | `FI_ADMIN_API_KEY`, script keys |
-| Site URL / app URL | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL` |
+| Site URL / deploy root | `NEXT_PUBLIC_SITE_URL` (canonical public/auth), `FI_BASE_URL` (scripts, HubSpot links, smoke/replay/self-HTTP). `NEXT_PUBLIC_APP_URL` removed |
 | Tenant bootstrap | Provisioning / HubSpot script vars |
 | Staff feed / HR sync | HR table |
 | Central env validation | `validateFiServerEnv` / `pnpm run check:env` ([`src/lib/env/fiEnv.server.ts`](../../src/lib/env/fiEnv.server.ts)) |

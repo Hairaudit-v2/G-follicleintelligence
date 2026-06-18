@@ -1,7 +1,7 @@
 # Environment architecture
 
 **Scope:** Follicle Intelligence OS (Next.js 14 App Router on Vercel + Supabase).  
-**Template:** [`.env.example`](../../.env.example) at repo root (92 application variables; framework vars like `NODE_ENV` and `NEXT_RUNTIME` are excluded).  
+**Template:** [`.env.example`](../../.env.example) at repo root (91 application variables; framework vars like `NODE_ENV` and `NEXT_RUNTIME` are excluded).  
 **Validation:** Zod schemas in [`src/lib/env/`](../../src/lib/env/) — startup via [`instrumentation.ts`](../../instrumentation.ts), CI via `pnpm run check:env`.
 
 ---
@@ -27,6 +27,16 @@ import { env } from "@/src/env/server";
 
 Never import `@/src/env/server` from a `"use client"` file — the `server-only` package fails the build.
 
+### Deploy URL variables
+
+| Variable | Role |
+|----------|------|
+| `FI_BASE_URL` | **Scripts and server self-calls** — site root for HubSpot import admin links, HR cron self-POST, smoke/replay/verify scripts. Must not include `/fi-admin`. |
+| `NEXT_PUBLIC_SITE_URL` | **Canonical public / auth URL** — password-reset links, auth redirect fallbacks, and script fallback when `FI_BASE_URL` is unset. |
+| `NEXT_PUBLIC_APP_URL` | **Removed** — was redundant with `FI_BASE_URL` / `NEXT_PUBLIC_SITE_URL`. Delete from `.env.local` if still present. |
+
+HubSpot import scripts resolve deploy links as: `FI_BASE_URL` → `NEXT_PUBLIC_SITE_URL` → `http://localhost:3000`.
+
 ---
 
 ## Variable inventory by section
@@ -35,7 +45,7 @@ See [`.env.example`](../../.env.example) for the authoritative list with inline 
 
 | Section | Count | Notes |
 |---------|------:|-------|
-| App | 5 | Public URLs, `FI_BASE_URL`, bundle analyzer |
+| App | 4 | Public site URL, `FI_BASE_URL`, `BASE_URL`, bundle analyzer |
 | Supabase | 5 | Public URL/anon + server service role, storage bucket |
 | Authentication | 2 | Legacy FI API Bearer gate |
 | Stripe | 7 | RevenueOS payments |
@@ -156,6 +166,7 @@ Use a **separate Supabase project** or restricted keys when possible. Mirror pro
 Beyond required vars, production deployments typically configure:
 
 - `NEXT_PUBLIC_SITE_URL` — canonical origin for auth redirects
+- `FI_BASE_URL` — site root for HR self-POST, smoke scripts, and HubSpot import admin links
 - `CRON_SECRET` — Vercel Cron Bearer (≥16 chars)
 - `FI_ADMIN_API_KEY` — operator break-glass (≥20 chars)
 - `FI_TIMELY_WEBHOOK_SECRET` — if Timely/Zapier is live
@@ -202,8 +213,7 @@ Only `NEXT_PUBLIC_*` variables are embedded in the browser bundle. **Never** pre
 |----------|--------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Public project endpoint |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public JWT — **RLS must enforce all access** |
-| `NEXT_PUBLIC_SITE_URL` | Public canonical URL |
-| `NEXT_PUBLIC_APP_URL` | Public app URL for scripts |
+| `NEXT_PUBLIC_SITE_URL` | Public canonical URL for auth and browser-visible origin |
 | `NEXT_PUBLIC_FI_CALENDAR_PERF` | Dev perf flag only |
 
 The anon key is intentionally public in Supabase architecture; treat RLS policies as the real security boundary.

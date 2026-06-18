@@ -1,4 +1,5 @@
-import { assertFiServerEnv } from "../src/lib/env/fiEnv.server";
+/** Scripts run outside Next.js — import schema directly (not server.ts, which uses `server-only`). */
+import { assertValidEnv } from "../src/lib/env/schema";
 
-assertFiServerEnv();
+assertValidEnv();
 console.log("FI OS environment validation passed.");

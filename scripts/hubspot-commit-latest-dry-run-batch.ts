@@ -76,7 +76,11 @@ function parseArgs(argv: string[]): { fromCsv: string | null } {
 loadRepoEnvFiles();
 
 const MAX_ROWS = 100;
-const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const baseUrl = (
+  process.env.FI_BASE_URL ??
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  "http://localhost:3000"
+).replace(/\/$/, "");
 
 type BatchRow = {
   id: string;
