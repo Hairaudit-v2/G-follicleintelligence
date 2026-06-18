@@ -147,6 +147,7 @@ function minimalCommandCentrePayload(overrides: Record<string, unknown> = {}) {
     pilotReview: { visible: true, periodDays: 14, report: null },
     ownerValue: { visible: true, dashboard: null },
     demoMode: { active: false, maskAmounts: false, usingSampleData: false, canToggle: true },
+    moduleHealth: { coreBoardLoaded: true, unavailableModules: [] },
     ...overrides,
   };
 }

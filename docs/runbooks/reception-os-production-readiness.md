@@ -21,6 +21,7 @@ Apply in order on the target Supabase project **before** clinic pilot:
 | `20260919120001_fi_reception_tasks.sql` | Phase 2 task inbox + audit |
 | `20260919120002_fi_reception_communication_phase4.sql` | Communication templates + audit `communication_sent` |
 | `20260919120003_fi_reception_phase5_delivery_closeout.sql` | Delivery tracking + daily closeout tables |
+| `20260919120004_fi_reception_phase7_pilot_metrics.sql` | Usage events + pilot feedback (Phase 7 metrics) |
 
 **Verify**
 

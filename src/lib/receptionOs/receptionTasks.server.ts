@@ -15,6 +15,7 @@ import {
 import type { ReceptionTaskRow } from "@/src/lib/receptionOs/receptionTasks.types";
 import type { ReceptionOsSeverity } from "@/src/lib/receptionOs/receptionOsBoardModel";
 import type { ReceptionOsActionAlert } from "@/src/lib/receptionOs/receptionOsBoardModel.types";
+import { isMissingDatabaseRelationError } from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 
 function mapRow(raw: Record<string, unknown>): ReceptionTaskRow {
   return {
@@ -89,7 +90,10 @@ export async function loadReceptionTasksForTenant(tenantId: string, limit = 120)
     .eq("tenant_id", tid)
     .order("updated_at", { ascending: false })
     .limit(limit);
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (isMissingDatabaseRelationError(error)) return [];
+    throw new Error(error.message);
+  }
   return (data ?? []).map((r) => {
     const row = mapRow(r as Record<string, unknown>);
     assertReceptionOsTenantRowScope(tid, row.tenant_id, "fi_reception_tasks");

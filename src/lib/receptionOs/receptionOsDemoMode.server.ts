@@ -44,5 +44,10 @@ export function applyReceptionOsDemoModeForPayload(
       : defaultReceptionOsDemoModeState(demoState.canToggle),
   };
   if (!demoState.active) return withDemoField;
-  return applyReceptionOsDemoMode(withDemoField, demoState);
+  try {
+    return applyReceptionOsDemoMode(withDemoField, demoState);
+  } catch (error) {
+    console.error("[applyReceptionOsDemoModeForPayload]", error instanceof Error ? error.message : "unknown error");
+    return withDemoField;
+  }
 }

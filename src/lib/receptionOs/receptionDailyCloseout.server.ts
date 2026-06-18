@@ -16,7 +16,13 @@ import { receptionCloseoutCloseDayAllowed } from "@/src/lib/receptionOs/receptio
 
 type ReceptionCloseoutCommandCentreInput = Omit<
   ReceptionOsCommandCentrePayload,
-  "endOfDayCloseout" | "systemStatus" | "pilotMetrics" | "pilotReview" | "ownerValue" | "demoMode"
+  | "endOfDayCloseout"
+  | "systemStatus"
+  | "pilotMetrics"
+  | "pilotReview"
+  | "ownerValue"
+  | "demoMode"
+  | "moduleHealth"
 >;
 
 async function resolveTenantDefaultClinicId(tenantId: string): Promise<string | null> {
@@ -98,23 +104,40 @@ export async function loadReceptionCloseoutSnapshotForCommandCentre(
   now: Date = new Date(),
 ): Promise<ReceptionCloseoutSnapshot> {
   const tenantId = payload.tenantId;
-  const [failedCommunications, clinicId] = await Promise.all([
-    loadFailedReceptionCommunicationsForOperationalDay(tenantId, payload.operationalDay),
-    resolveTenantDefaultClinicId(tenantId),
-  ]);
+  let failedCommunications: Awaited<ReturnType<typeof loadFailedReceptionCommunicationsForOperationalDay>> = [];
+  let clinicId: string | null = null;
+  let tomorrowFirstPatient: Awaited<ReturnType<typeof loadTomorrowFirstPatientReadiness>> = null;
+  let existingCloseout: Awaited<ReturnType<typeof loadExistingCloseout>> = null;
 
-  const tomorrowFirstPatient = await loadTomorrowFirstPatientReadiness(
-    tenantId,
-    payload.operationalDay.calendarTimezone,
-    now,
-    `/fi-admin/${tenantId}`,
-  );
+  try {
+    [failedCommunications, clinicId] = await Promise.all([
+      loadFailedReceptionCommunicationsForOperationalDay(tenantId, payload.operationalDay),
+      resolveTenantDefaultClinicId(tenantId),
+    ]);
+  } catch (error) {
+    console.error("[loadReceptionCloseoutSnapshotForCommandCentre:deliveries]", error);
+  }
 
-  const existingCloseout = await loadExistingCloseout(
-    tenantId,
-    payload.operationalDay.todayYmd,
-    clinicId,
-  );
+  try {
+    tomorrowFirstPatient = await loadTomorrowFirstPatientReadiness(
+      tenantId,
+      payload.operationalDay.calendarTimezone,
+      now,
+      `/fi-admin/${tenantId}`,
+    );
+  } catch (error) {
+    console.error("[loadReceptionCloseoutSnapshotForCommandCentre:tomorrow]", error);
+  }
+
+  try {
+    existingCloseout = await loadExistingCloseout(
+      tenantId,
+      payload.operationalDay.todayYmd,
+      clinicId,
+    );
+  } catch (error) {
+    console.error("[loadReceptionCloseoutSnapshotForCommandCentre:existing]", error);
+  }
 
   return buildReceptionCloseoutSnapshot({
     board: payload,

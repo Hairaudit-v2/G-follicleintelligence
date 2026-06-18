@@ -140,6 +140,10 @@ describe("receptionOs smoke payload validation", () => {
         usingSampleData: false,
         canToggle: false,
       },
+      moduleHealth: {
+        coreBoardLoaded: true,
+        unavailableModules: [],
+      },
     });
 
     assert.equal(parsed.systemStatus.dryRunEnabled, true);

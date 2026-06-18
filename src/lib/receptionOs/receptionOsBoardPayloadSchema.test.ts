@@ -258,6 +258,10 @@ const samplePayload = {
     usingSampleData: false,
     canToggle: false,
   },
+  moduleHealth: {
+    coreBoardLoaded: true,
+    unavailableModules: [],
+  },
 } as const;
 
 describe("receptionOsBoardPayloadSchema", () => {
@@ -288,6 +292,7 @@ describe("receptionOsBoardPayloadSchema", () => {
       pilotReview: _pr,
       ownerValue: _ov,
       demoMode: _dm,
+      moduleHealth: _mh,
       ...v1
     } = samplePayload;
     const parsed = parseReceptionOsBoardPayload(v1);

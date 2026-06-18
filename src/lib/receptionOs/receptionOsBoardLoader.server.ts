@@ -43,6 +43,11 @@ import {
   createReceptionOsIntelligenceContext,
   deriveReceptionOsIntelligenceHints,
 } from "@/src/lib/receptionOs/receptionOsIntelligenceBridge";
+import {
+  emptyConsultationConversionBoardPayload,
+  emptySurgeryReadinessBoardPayload,
+  normalizeLoaderErrorMessage,
+} from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 import type { PaymentRecordRow, PaymentStatus } from "@/src/lib/payments/paymentRecordModel";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 
@@ -59,6 +64,15 @@ export type {
 const COMMUNICATION_LIMIT = 40;
 const DEPOSIT_LIMIT = 50;
 const NEW_LEAD_LIMIT = 40;
+
+async function loadBoardSectionSafe<T>(scope: string, loader: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await loader();
+  } catch (error) {
+    console.error(`[loadReceptionOsBoardPayload:${scope}]`, normalizeLoaderErrorMessage(error));
+    return fallback;
+  }
+}
 
 const communicationEventSchema = receptionOsBoardPayloadSchema.shape.communicationTimeline.element;
 const surgeryItemSchema = receptionOsBoardPayloadSchema.shape.upcomingSurgeries.element;
@@ -338,7 +352,11 @@ async function loadOutstandingDeposits(tenantId: string, todayYmd: string, base:
     .in("status", ["pending", "partially_paid", "overdue"])
     .order("due_date", { ascending: true, nullsFirst: false })
     .limit(DEPOSIT_LIMIT);
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (error.message.includes("does not exist")) return [];
+    console.error("[loadOutstandingDeposits]", error.message);
+    return [];
+  }
 
   const rows = (data ?? []).map((r) => r as Record<string, unknown>);
   const outstanding = rows.filter((raw) => {
@@ -603,17 +621,25 @@ export async function loadReceptionOsBoardPayload(tenantId: string, now: Date = 
 
   const operational = await loadTenantOperationalDashboard(tid, { includeReceptionBoard: true });
   const todayYmd = operational.operationalDay.todayYmd;
+  const tz = operational.operationalDay.calendarTimezone;
 
   const [conversionPayload, surgeryPayload, communications, newLeads, deposits, missingForms] = await Promise.all([
-    loadConsultationConversionBoardPayload(tid, now),
-    loadSurgeryReadinessBoardPayload(tid, now),
-    loadRecentCommunications(tid, base),
-    loadNewLeadPipelineCards(tid, base),
-    loadOutstandingDeposits(tid, todayYmd, base),
-    loadMissingFormsAlerts(tid, base),
+    loadBoardSectionSafe(
+      "conversion",
+      () => loadConsultationConversionBoardPayload(tid, now),
+      emptyConsultationConversionBoardPayload(tz, todayYmd),
+    ),
+    loadBoardSectionSafe(
+      "surgery",
+      () => loadSurgeryReadinessBoardPayload(tid, now),
+      emptySurgeryReadinessBoardPayload(tz, todayYmd),
+    ),
+    loadBoardSectionSafe("communications", () => loadRecentCommunications(tid, base), []),
+    loadBoardSectionSafe("pipeline_leads", () => loadNewLeadPipelineCards(tid, base), []),
+    loadBoardSectionSafe("deposits", () => loadOutstandingDeposits(tid, todayYmd, base), []),
+    loadBoardSectionSafe("missing_forms", () => loadMissingFormsAlerts(tid, base), []),
   ]);
 
-  const tz = operational.operationalDay.calendarTimezone;
   const bookingIds = operational.receptionBoard.cards.map((c) => c.id);
   const caseByBooking = await loadBookingCaseIds(tid, bookingIds);
   const todaysPatients = operational.receptionBoard.cards

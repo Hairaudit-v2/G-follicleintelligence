@@ -13,6 +13,10 @@ import {
   type ReceptionPilotMetricsPayload,
 } from "@/src/lib/receptionOs/receptionPilotMetricsModel";
 import type { ReceptionUsageEventKind } from "@/src/lib/receptionOs/receptionUsageEventModel";
+import {
+  isMissingDatabaseRelationError,
+  missingTableMessage,
+} from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 
 export async function loadReceptionPilotMetricsForCommandCentre(
   payload: ReceptionOsCommandCentrePayload,
@@ -55,10 +59,22 @@ export async function loadReceptionPilotMetricsForCommandCentre(
     loadReceptionPilotFeedbackForPeriod(tid, localStartIso, localEndIso),
   ]);
 
-  if (eventsRes.error) throw new Error(eventsRes.error.message);
-  if (tasksRes.error) throw new Error(tasksRes.error.message);
-  if (deliveriesRes.error) throw new Error(deliveriesRes.error.message);
-  if (closeoutsRes.error) throw new Error(closeoutsRes.error.message);
+  if (eventsRes.error) {
+    if (isMissingDatabaseRelationError(eventsRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    throw new Error(eventsRes.error.message);
+  }
+  if (tasksRes.error) {
+    if (isMissingDatabaseRelationError(tasksRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    throw new Error(tasksRes.error.message);
+  }
+  if (deliveriesRes.error) {
+    if (isMissingDatabaseRelationError(deliveriesRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    throw new Error(deliveriesRes.error.message);
+  }
+  if (closeoutsRes.error) {
+    if (isMissingDatabaseRelationError(closeoutsRes.error)) return emptyReceptionPilotMetricsPayload(true);
+    throw new Error(closeoutsRes.error.message);
+  }
 
   const tasks = tasksRes.data ?? [];
   const resolvedStatuses = new Set(["resolved", "dismissed"]);

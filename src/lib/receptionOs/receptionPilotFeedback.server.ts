@@ -9,6 +9,7 @@ import {
   type ReceptionPilotFeedbackKind,
   type ReceptionPilotFeedbackRow,
 } from "@/src/lib/receptionOs/receptionPilotFeedbackModel";
+import { isMissingDatabaseRelationError } from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 
 export async function insertReceptionPilotFeedback(opts: {
   tenantId: string;
@@ -58,7 +59,10 @@ export async function loadReceptionPilotFeedbackForPeriod(
     .order("created_at", { ascending: false })
     .limit(500);
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (isMissingDatabaseRelationError(error)) return [];
+    throw new Error(error.message);
+  }
   return (data ?? []).map((raw) => serializeReceptionPilotFeedbackRow(raw as Record<string, unknown>));
 }
 

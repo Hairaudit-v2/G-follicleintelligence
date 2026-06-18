@@ -37,6 +37,7 @@ import { ReceptionOsPilotManagerWidget } from "@/src/components/fi-admin/recepti
 import { ReceptionOsPilotReviewPanel } from "@/src/components/fi-admin/reception-os/widgets/ReceptionOsPilotReviewPanel";
 import { ReceptionOsOwnerValueDashboardWidget } from "@/src/components/fi-admin/reception-os/widgets/ReceptionOsOwnerValueDashboard";
 import { ReceptionOsDemoBanner } from "@/src/components/fi-admin/reception-os/ReceptionOsDemoBanner";
+import { ReceptionOsModuleHealthPanel } from "@/src/components/fi-admin/reception-os/ReceptionOsModuleHealthPanel";
 import {
   useReceptionOsDashboardViewTracking,
 } from "@/src/components/fi-admin/reception-os/useReceptionOsUsageTracking";
@@ -149,6 +150,8 @@ export function ReceptionOsDashboard({ data: initialData }: { data: ReceptionOsC
           ) : null}
         </div>
       </header>
+
+      {data.moduleHealth ? <ReceptionOsModuleHealthPanel health={data.moduleHealth} /> : null}
 
       {data.demoMode.active ? <ReceptionOsDemoBanner demoMode={data.demoMode} /> : null}
 

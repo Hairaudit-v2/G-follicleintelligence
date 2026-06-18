@@ -437,6 +437,28 @@ const demoModeSchema = z.object({
   canToggle: z.boolean(),
 });
 
+const moduleHealthSchema = z.object({
+  coreBoardLoaded: z.boolean(),
+  unavailableModules: z.array(
+    z.object({
+      module: z.enum([
+        "board_sections",
+        "tasks",
+        "revenue_activity",
+        "closeout",
+        "system_status",
+        "pilot_metrics",
+        "pilot_review",
+        "owner_value",
+        "demo_mode",
+        "export",
+      ]),
+      label: z.string(),
+      message: z.string(),
+    }),
+  ),
+});
+
 export const receptionOsBoardPayloadSchema = z.object({
   tenantId: z.string().uuid(),
   tenantName: z.string(),
@@ -491,6 +513,7 @@ export const receptionOsCommandCentrePayloadSchema = receptionOsBoardPayloadSche
   pilotReview: pilotReviewSchema,
   ownerValue: ownerValueSchema,
   demoMode: demoModeSchema,
+  moduleHealth: moduleHealthSchema,
 });
 
 export const receptionOsApiResponseSchema = z.object({

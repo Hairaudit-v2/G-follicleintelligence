@@ -23,6 +23,10 @@ import {
   type ReceptionPilotReviewPayload,
 } from "@/src/lib/receptionOs/receptionPilotReviewModel";
 import type { ReceptionOwnerValuePayload } from "@/src/lib/receptionOs/receptionOwnerValueModel";
+import {
+  isMissingDatabaseRelationError,
+  missingTableMessage,
+} from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 import type { ReceptionUsageEventKind } from "@/src/lib/receptionOs/receptionUsageEventModel";
 
 function subtractDays(isoEnd: string, days: number): string {
@@ -86,10 +90,22 @@ export async function loadReceptionPhase8PayloadForCommandCentre(
     loadReceptionPilotFeedbackForPeriod(tid, periodStart, periodEnd),
   ]);
 
-  if (eventsRes.error) throw new Error(eventsRes.error.message);
-  if (tasksRes.error) throw new Error(tasksRes.error.message);
-  if (deliveriesRes.error) throw new Error(deliveriesRes.error.message);
-  if (closeoutsRes.error) throw new Error(closeoutsRes.error.message);
+  if (eventsRes.error) {
+    if (isMissingDatabaseRelationError(eventsRes.error)) throw new Error(missingTableMessage("fi_reception_usage_events"));
+    throw new Error(eventsRes.error.message);
+  }
+  if (tasksRes.error) {
+    if (isMissingDatabaseRelationError(tasksRes.error)) throw new Error(missingTableMessage("fi_reception_tasks"));
+    throw new Error(tasksRes.error.message);
+  }
+  if (deliveriesRes.error) {
+    if (isMissingDatabaseRelationError(deliveriesRes.error)) throw new Error(missingTableMessage("fi_reception_communication_deliveries"));
+    throw new Error(deliveriesRes.error.message);
+  }
+  if (closeoutsRes.error) {
+    if (isMissingDatabaseRelationError(closeoutsRes.error)) throw new Error(missingTableMessage("fi_reception_daily_closeouts"));
+    throw new Error(closeoutsRes.error.message);
+  }
 
   const tasks = tasksRes.data ?? [];
   const resolvedStatuses = new Set(["resolved", "dismissed"]);

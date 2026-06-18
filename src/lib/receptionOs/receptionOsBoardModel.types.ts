@@ -198,6 +198,8 @@ export type ReceptionOsCommandCentrePayload = ReceptionOsBoardPayload & {
   ownerValue: import("@/src/lib/receptionOs/receptionOwnerValueModel").ReceptionOwnerValuePayload;
   /** Phase 8 — demo mode state for external demonstrations. */
   demoMode: import("@/src/lib/receptionOs/receptionOsDemoModeModel").ReceptionOsDemoModeState;
+  /** Phase 8 — optional module availability for resilient production rendering. */
+  moduleHealth: import("@/src/lib/receptionOs/receptionOsModuleHealthModel").ReceptionOsModuleHealth;
 };
 
 export const RECEPTION_OS_PIPELINE_COLUMN_IDS = [

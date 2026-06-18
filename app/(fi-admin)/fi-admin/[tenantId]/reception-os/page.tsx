@@ -49,7 +49,18 @@ export default async function FiAdminReceptionOsPage({
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
     if (msg === "Tenant not found") notFound();
-    throw e;
+    console.error("[FiAdminReceptionOsPage]", msg || "load failed");
+    return (
+      <div className="p-4 sm:p-6">
+        <InfoNotice variant="danger" title="ReceptionOS could not load">
+          <p className="text-sm">
+            The command centre failed to load. Check production Supabase migrations and Vercel function logs for the
+            server error digest.
+          </p>
+          {msg ? <p className="mt-2 text-xs text-slate-500">{msg}</p> : null}
+        </InfoNotice>
+      </div>
+    );
   }
 
   return (

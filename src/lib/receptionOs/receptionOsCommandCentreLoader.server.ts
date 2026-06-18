@@ -28,6 +28,19 @@ import {
   applyReceptionOsDemoModeForPayload,
   resolveReceptionOsDemoModeForViewer,
 } from "@/src/lib/receptionOs/receptionOsDemoMode.server";
+import {
+  createEmptyReceptionOsModuleHealth,
+  markReceptionOsModuleUnavailable,
+  type ReceptionOsModuleHealth,
+} from "@/src/lib/receptionOs/receptionOsModuleHealthModel";
+import {
+  buildFallbackReceptionOsSystemStatus,
+  emptyReceptionCloseoutSnapshot,
+  emptyRevenueIntelligenceForBoard,
+  isMissingDatabaseRelationError,
+  missingTableMessage,
+  normalizeLoaderErrorMessage,
+} from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 
 function mapConversionColumnsForRevenue(
   payload: Awaited<ReturnType<typeof loadConsultationConversionBoardPayload>>,
@@ -78,8 +91,18 @@ async function loadTodayRevenueActivityCounts(
       .lt("created_at", localEndIso),
   ]);
 
-  if (paymentsRes.error) throw new Error(paymentsRes.error.message);
-  if (bookingsRes.error) throw new Error(bookingsRes.error.message);
+  if (paymentsRes.error) {
+    if (isMissingDatabaseRelationError(paymentsRes.error)) {
+      return { depositsCollectedToday: 0, surgeryBookingsCreatedToday: 0 };
+    }
+    throw new Error(paymentsRes.error.message);
+  }
+  if (bookingsRes.error) {
+    if (isMissingDatabaseRelationError(bookingsRes.error)) {
+      return { depositsCollectedToday: 0, surgeryBookingsCreatedToday: 0 };
+    }
+    throw new Error(bookingsRes.error.message);
+  }
 
   const surgeryBookingsCreatedToday = (bookingsRes.data ?? []).filter((raw) => {
     const type = String((raw as { booking_type?: string }).booking_type ?? "").trim().toLowerCase();
@@ -92,9 +115,24 @@ async function loadTodayRevenueActivityCounts(
   };
 }
 
+function logModuleFailure(scope: string, error: unknown): void {
+  console.error(`[${scope}]`, normalizeLoaderErrorMessage(error));
+}
+
+function noteModuleFailure(
+  health: ReceptionOsModuleHealth,
+  module: Parameters<typeof markReceptionOsModuleUnavailable>[1],
+  error: unknown,
+  fallbackMessage: string,
+): ReceptionOsModuleHealth {
+  const message = isMissingDatabaseRelationError(error) ? fallbackMessage : normalizeLoaderErrorMessage(error);
+  logModuleFailure(module, error);
+  return markReceptionOsModuleUnavailable(health, module, message);
+}
+
 /**
  * Phase 2 command centre loader — composes V1 board payload + tasks + daily brief.
- * Phase 3 adds revenue intelligence without modifying {@link loadReceptionOsBoardPayload}.
+ * Optional Phase 3–8 modules degrade safely when migrations or queries fail.
  */
 export type LoadReceptionOsCommandCentreOptions = {
   demoModeRequested?: boolean;
@@ -105,12 +143,24 @@ export async function loadReceptionOsCommandCentrePayload(
   now: Date = new Date(),
   options: LoadReceptionOsCommandCentreOptions = {},
 ): Promise<ReceptionOsCommandCentrePayload> {
-  const [board, openTasks, conversionPayload] = await Promise.all([
-    loadReceptionOsBoardPayload(tenantId, now),
-    loadOpenReceptionTasksForTenant(tenantId),
-    loadConsultationConversionBoardPayload(tenantId, now),
-  ]);
+  let moduleHealth = createEmptyReceptionOsModuleHealth(false);
 
+  const board = await loadReceptionOsBoardPayload(tenantId, now);
+  moduleHealth = { ...moduleHealth, coreBoardLoaded: true };
+
+  let openTasks: Awaited<ReturnType<typeof loadOpenReceptionTasksForTenant>> = [];
+  try {
+    openTasks = await loadOpenReceptionTasksForTenant(tenantId);
+  } catch (error) {
+    moduleHealth = noteModuleFailure(
+      moduleHealth,
+      "tasks",
+      error,
+      missingTableMessage("fi_reception_tasks"),
+    );
+  }
+
+  const serializedTasks = serializeReceptionTaskRows(openTasks);
   const dailyBrief = buildReceptionOsDailyBrief(board, openTasks);
   const localHour = Number(
     new Intl.DateTimeFormat("en-GB", {
@@ -120,75 +170,174 @@ export async function loadReceptionOsCommandCentrePayload(
     }).format(now),
   );
 
-  const todayActivity = await loadTodayRevenueActivityCounts(tenantId, board.operationalDay);
+  let conversionPayload: Awaited<ReturnType<typeof loadConsultationConversionBoardPayload>>;
+  try {
+    conversionPayload = await loadConsultationConversionBoardPayload(tenantId, now);
+  } catch (error) {
+    logModuleFailure("loadConsultationConversionBoardPayload", error);
+    conversionPayload = {
+      window: {
+        calendarTimezone: board.operationalDay.calendarTimezone,
+        todayYmd: board.operationalDay.todayYmd,
+        ymdPast90: board.operationalDay.todayYmd,
+        ymdFuture30: board.operationalDay.todayYmd,
+        rangeStartIso: board.operationalDay.localStartIso,
+        rangeEndIso: board.operationalDay.localEndIso,
+      },
+      columns: {
+        consultation_booked: [],
+        consultation_completed: [],
+        quote_drafted: [],
+        quote_sent: [],
+        quote_accepted: [],
+        surgery_booked: [],
+        lost: [],
+      },
+      kpis: {
+        consultationsBookedNext30Days: 0,
+        consultationsCompletedLast30Days: 0,
+        quotesSent: 0,
+        quotesAccepted: 0,
+        surgeryBookedFromConsults: 0,
+        conversionRateQuoteToSurgery: null,
+        conversionRateLabel: "—",
+      },
+    };
+  }
 
-  const revenueIntelligence = buildReceptionOsRevenueIntelligence({
-    board,
-    conversionColumns: mapConversionColumnsForRevenue(conversionPayload),
-    depositsCollectedToday: todayActivity.depositsCollectedToday,
-    surgeryBookingsCreatedToday: todayActivity.surgeryBookingsCreatedToday,
-  });
+  let revenueIntelligence = emptyRevenueIntelligenceForBoard(board);
+  try {
+    const todayActivity = await loadTodayRevenueActivityCounts(tenantId, board.operationalDay);
+    revenueIntelligence = buildReceptionOsRevenueIntelligence({
+      board,
+      conversionColumns: mapConversionColumnsForRevenue(conversionPayload),
+      depositsCollectedToday: todayActivity.depositsCollectedToday,
+      surgeryBookingsCreatedToday: todayActivity.surgeryBookingsCreatedToday,
+    });
+  } catch (error) {
+    moduleHealth = noteModuleFailure(
+      moduleHealth,
+      "revenue_activity",
+      error,
+      "Revenue activity counters unavailable.",
+    );
+  }
 
   const partialPayload = {
     ...board,
     dailyBrief,
-    receptionTasks: serializeReceptionTaskRows(openTasks),
+    receptionTasks: serializedTasks,
     suggestedOperatingMode: inferDefaultOperatingMode(Number.isFinite(localHour) ? localHour : 12),
     ...revenueIntelligence,
   };
 
-  const endOfDayCloseout = await loadReceptionCloseoutSnapshotForCommandCentre(partialPayload, now);
+  let endOfDayCloseout = emptyReceptionCloseoutSnapshot({
+    board,
+    tasks: serializedTasks,
+    viewerRole: board.viewer.role,
+  });
+  try {
+    endOfDayCloseout = await loadReceptionCloseoutSnapshotForCommandCentre(partialPayload, now);
+  } catch (error) {
+    moduleHealth = noteModuleFailure(
+      moduleHealth,
+      "closeout",
+      error,
+      missingTableMessage("fi_reception_daily_closeouts"),
+    );
+  }
+
   const withCloseout = { ...partialPayload, endOfDayCloseout };
-  const systemStatus = buildReceptionOsSystemStatusFromPayload(withCloseout);
+
+  let systemStatus = buildFallbackReceptionOsSystemStatus(board.loadedAt);
+  try {
+    systemStatus = buildReceptionOsSystemStatusFromPayload(withCloseout);
+  } catch (error) {
+    moduleHealth = noteModuleFailure(
+      moduleHealth,
+      "system_status",
+      error,
+      "System status unavailable.",
+    );
+  }
+
   const phase8Visible = receptionPilotReviewVisible(board.viewer.role);
-  const phase8Placeholders = {
-    pilotMetrics: emptyReceptionPilotMetricsPayload(phase8Visible),
-    pilotReview: emptyReceptionPilotReviewPayload(phase8Visible),
-    ownerValue: emptyReceptionOwnerValuePayload(phase8Visible),
-    demoMode: resolveReceptionOsDemoModeForViewer({
-      viewerRole: board.viewer.role,
-      demoRequested: options.demoModeRequested,
-    }),
-  };
+  const demoState = resolveReceptionOsDemoModeForViewer({
+    viewerRole: board.viewer.role,
+    demoRequested: options.demoModeRequested,
+  });
+
+  let pilotMetrics = emptyReceptionPilotMetricsPayload(phase8Visible);
+  let pilotReview = emptyReceptionPilotReviewPayload(phase8Visible);
+  let ownerValue = emptyReceptionOwnerValuePayload(phase8Visible);
+
   const payloadShell: ReceptionOsCommandCentrePayload = {
     ...withCloseout,
     systemStatus,
-    ...phase8Placeholders,
+    pilotMetrics,
+    pilotReview,
+    ownerValue,
+    demoMode: demoState,
+    moduleHealth,
   };
 
-  let pilotMetrics = phase8Placeholders.pilotMetrics;
   try {
     pilotMetrics = await loadReceptionPilotMetricsForCommandCentre(payloadShell, board.viewer.role);
-  } catch (e) {
-    console.error("[loadReceptionPilotMetricsForCommandCentre]", e instanceof Error ? e.message : "unknown error");
+  } catch (error) {
+    moduleHealth = noteModuleFailure(
+      moduleHealth,
+      "pilot_metrics",
+      error,
+      missingTableMessage("fi_reception_usage_events"),
+    );
   }
 
-  let pilotReview = phase8Placeholders.pilotReview;
-  let ownerValue = phase8Placeholders.ownerValue;
   const composedForPhase8: ReceptionOsCommandCentrePayload = {
     ...payloadShell,
     pilotMetrics,
+    moduleHealth,
   };
 
   try {
     const phase8 = await loadReceptionPhase8PayloadForCommandCentre(composedForPhase8, board.viewer.role);
     pilotReview = phase8.pilotReview;
     ownerValue = phase8.ownerValue;
-  } catch (e) {
-    console.error("[loadReceptionPhase8PayloadForCommandCentre]", e instanceof Error ? e.message : "unknown error");
+  } catch (error) {
+    moduleHealth = noteModuleFailure(
+      moduleHealth,
+      "pilot_review",
+      error,
+      "Pilot review reporting unavailable.",
+    );
+    moduleHealth = markReceptionOsModuleUnavailable(
+      moduleHealth,
+      "owner_value",
+      normalizeLoaderErrorMessage(error),
+    );
   }
 
-  const withPhase8: ReceptionOsCommandCentrePayload = {
+  let finalPayload: ReceptionOsCommandCentrePayload = {
     ...composedForPhase8,
     pilotReview,
     ownerValue,
+    moduleHealth,
   };
 
-  return applyReceptionOsDemoModeForPayload(
-    withPhase8,
-    resolveReceptionOsDemoModeForViewer({
-      viewerRole: board.viewer.role,
-      demoRequested: options.demoModeRequested,
-    }),
-  );
+  try {
+    finalPayload = applyReceptionOsDemoModeForPayload(finalPayload, demoState);
+  } catch (error) {
+    moduleHealth = noteModuleFailure(
+      moduleHealth,
+      "demo_mode",
+      error,
+      "Demo mode sanitisation unavailable.",
+    );
+    finalPayload = {
+      ...finalPayload,
+      demoMode: demoState,
+      moduleHealth,
+    };
+  }
+
+  return { ...finalPayload, moduleHealth };
 }
