@@ -11,6 +11,10 @@ import type { CalendarViewMode } from "./calendarQuery";
 /** Tailwind classes using theme tokens from `tailwind.config` / `:root` (no raw hex). */
 const BOOKING_TYPE_EVENT_CLASSES: Record<BookingType, string> = {
   consultation: "border-primary/50 bg-primary/15 text-primary-foreground",
+  hair_transplant_consultation: "border-primary/50 bg-primary/15 text-primary-foreground",
+  trichology: "border-primary/50 bg-primary/15 text-primary-foreground",
+  beard_transplant_consultation: "border-primary/50 bg-primary/15 text-primary-foreground",
+  eyebrow_transplant_consultation: "border-primary/50 bg-primary/15 text-primary-foreground",
   prp: "border-secondary/45 bg-secondary/35 text-secondary-foreground",
   prf: "border-muted-foreground/30 bg-muted text-muted-foreground",
   mesotherapy: "border-accent/40 bg-accent text-accent-foreground",

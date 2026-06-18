@@ -312,6 +312,10 @@ export const fiProcedureAccentClassNames: Record<FiProcedureFamily, string> = {
 /** Map canonical booking types to procedure families. */
 export const bookingTypeProcedureFamily: Record<BookingType, FiProcedureFamily> = {
   consultation: "pre_surgery_consult",
+  hair_transplant_consultation: "pre_surgery_consult",
+  trichology: "pre_surgery_consult",
+  beard_transplant_consultation: "pre_surgery_consult",
+  eyebrow_transplant_consultation: "pre_surgery_consult",
   surgery: "full_transplant",
   prp: "prp_session",
   prf: "prp_session",

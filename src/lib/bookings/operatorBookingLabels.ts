@@ -6,6 +6,10 @@ import { BOOKING_STATUSES, BOOKING_TYPES, isAllowedBookingStatus, isAllowedBooki
 
 const TYPE_LABELS: Record<string, string> = {
   consultation: "Consultation",
+  hair_transplant_consultation: "Hair transplant consultation",
+  trichology: "Trichology",
+  beard_transplant_consultation: "Beard transplant consultation",
+  eyebrow_transplant_consultation: "Eyebrow transplant consultation",
   prp: "PRP",
   prf: "PRF",
   mesotherapy: "Mesotherapy",

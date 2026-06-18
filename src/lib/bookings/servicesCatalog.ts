@@ -11,6 +11,10 @@ import type { BookingType } from "./bookingPolicy";
 /** Last-resort minutes per canonical `booking_type` when no `fi_services` row exists. */
 export const FALLBACK_PROCEDURE_DURATION_MINUTES: Record<BookingType, number> = {
   consultation: 45,
+  hair_transplant_consultation: 60,
+  trichology: 60,
+  beard_transplant_consultation: 45,
+  eyebrow_transplant_consultation: 45,
   prp: 60,
   prf: 60,
   mesotherapy: 45,
