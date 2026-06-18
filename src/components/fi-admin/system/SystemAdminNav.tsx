@@ -15,6 +15,7 @@ const LINKS: { href: string; label: string }[] = [
   { href: "/fi-admin/system/academy", label: "Academy" },
   { href: "/fi-admin/system/services", label: "Services" },
   { href: "/fi-admin/system/medication-catalogue", label: "Medication catalogue" },
+  { href: "/fi-admin/system/integrations", label: "Integrations" },
   { href: "/fi-admin/system/audit-logs", label: "Audit logs" },
   { href: "/fi-admin/system/intelligence-event-logs", label: "Intelligence logs" },
   { href: "/fi-admin/system/intelligence-event-logs/replay", label: "Intelligence replay runs" },
