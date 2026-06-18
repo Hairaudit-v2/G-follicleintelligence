@@ -14,6 +14,13 @@ import {
   type TimelyAppointmentLifecycleEvent,
 } from "./timelyAppointmentLifecycle";
 import { TimelyWebhookHttpError } from "./timelyWebhookHttp.server";
+import {
+  resolveTimelyBookingLead,
+  type TimelyLeadResolutionMeta,
+  type TimelyLeadResolutionStatus,
+} from "./resolveTimelyBookingLead.server";
+
+export type TimelyLeadResolution = TimelyLeadResolutionStatus | "skipped";
 
 async function defaultLoadBooking(
   tenantId: string,
@@ -285,6 +292,8 @@ export type ProcessTimelyAppointmentWebhookSuccess = {
   action: "created" | "updated";
   lifecycle_event: TimelyAppointmentLifecycleEvent;
   unchanged?: boolean;
+  lead_id: string | null;
+  lead_resolution: TimelyLeadResolution;
   consultation_id: string | null;
   consultation_action: TimelyConsultationAction;
 };
@@ -396,6 +405,86 @@ async function patchTimelyBookingMetadataOnly(
   if (error) throw new Error(error.message);
 }
 
+type TimelyBookingLeadAttach = {
+  lead_id: string | null;
+  lead_resolution: TimelyLeadResolution;
+  metadata: Record<string, unknown>;
+};
+
+function mergeTimelyLeadResolutionMetadata(
+  metadata: Record<string, unknown>,
+  resolution: TimelyLeadResolutionMeta | null
+): Record<string, unknown> {
+  if (!resolution) return metadata;
+  return shallowMergeMetadata(metadata, { timely_lead_resolution: resolution });
+}
+
+async function resolveTimelyBookingLeadAttach(
+  supabase: SupabaseClient,
+  tenantId: string,
+  input: {
+    existingLeadId: string | null | undefined;
+    personId: string | null | undefined;
+    patientId: string | null | undefined;
+    metadata: Record<string, unknown>;
+  }
+): Promise<TimelyBookingLeadAttach> {
+  if (input.existingLeadId?.trim()) {
+    return {
+      lead_id: input.existingLeadId.trim(),
+      lead_resolution: "skipped",
+      metadata: input.metadata,
+    };
+  }
+  if (!input.personId?.trim()) {
+    return {
+      lead_id: null,
+      lead_resolution: "skipped",
+      metadata: input.metadata,
+    };
+  }
+
+  const resolved = await resolveTimelyBookingLead(supabase, {
+    tenant_id: tenantId,
+    patient_id: input.patientId,
+    person_id: input.personId,
+  });
+
+  return {
+    lead_id: resolved.lead_id,
+    lead_resolution: resolved.timely_lead_resolution.status,
+    metadata: mergeTimelyLeadResolutionMetadata(input.metadata, resolved.timely_lead_resolution),
+  };
+}
+
+async function patchTimelyBookingLeadAndMetadata(
+  supabase: SupabaseClient,
+  tenantId: string,
+  bookingId: string,
+  leadId: string | null,
+  metadata: Record<string, unknown>
+): Promise<void> {
+  const patch: Record<string, unknown> = {
+    metadata,
+    updated_at: new Date().toISOString(),
+  };
+  if (leadId?.trim()) patch.lead_id = leadId.trim();
+
+  const { error } = await supabase
+    .from("fi_bookings")
+    .update(patch)
+    .eq("tenant_id", tenantId.trim())
+    .eq("id", bookingId.trim());
+  if (error) throw new Error(error.message);
+}
+
+function resolvedLeadIdForResponse(
+  existingLeadId: string | null | undefined,
+  attach: TimelyBookingLeadAttach
+): string | null {
+  return existingLeadId?.trim() || attach.lead_id;
+}
+
 async function applyTimelyCancellation(
   supabase: SupabaseClient,
   tenantId: string,
@@ -446,7 +535,19 @@ async function syncExistingTimelyBooking(
 
   const startAt = new Date(payload.start_time.trim()).toISOString();
   const endAt = new Date(payload.end_time.trim()).toISOString();
-  const metadata = buildTimelyBookingMetadata(payload, externalAppointmentId, existing.metadata as Record<string, unknown>);
+  const baseMetadata = buildTimelyBookingMetadata(
+    payload,
+    externalAppointmentId,
+    existing.metadata as Record<string, unknown>
+  );
+  const leadAttach = await resolveTimelyBookingLeadAttach(supabase, tenantId, {
+    existingLeadId: existing.lead_id,
+    personId: existing.person_id,
+    patientId: existing.patient_id,
+    metadata: baseMetadata,
+  });
+  const metadata = leadAttach.metadata;
+  const responseLeadId = resolvedLeadIdForResponse(existing.lead_id, leadAttach);
   const targetStatus = resolveTargetBookingStatus(lifecycleEvent, payload, existing);
   const nextAssignedStaffId =
     payload.staff_name !== undefined ? staffPick.staffId : (existing.assigned_staff_id?.trim() || null);
@@ -463,13 +564,33 @@ async function syncExistingTimelyBooking(
     cancelled_at: cancelledAt,
   };
 
+  const shouldAttachLead = !existing.lead_id?.trim() && Boolean(leadAttach.lead_id);
+  const existingResolution = (existing.metadata as Record<string, unknown>).timely_lead_resolution as
+    | { status?: string }
+    | undefined;
+  const nextResolution = metadata.timely_lead_resolution as { status?: string } | undefined;
+  const shouldPatchLeadResolutionMeta =
+    leadAttach.lead_resolution !== "skipped" &&
+    (!existingResolution || existingResolution.status !== nextResolution?.status);
+
   if (bookingFieldsUnchanged(existing, nextSnapshot)) {
+    if (shouldAttachLead || shouldPatchLeadResolutionMeta) {
+      await patchTimelyBookingLeadAndMetadata(
+        supabase,
+        tenantId,
+        bookingId,
+        shouldAttachLead ? leadAttach.lead_id : null,
+        metadata
+      );
+    }
     return {
       ok: true,
       booking_id: bookingId,
       action: "updated",
       lifecycle_event: lifecycleEvent,
-      unchanged: true,
+      unchanged: !(shouldAttachLead || shouldPatchLeadResolutionMeta),
+      lead_id: responseLeadId,
+      lead_resolution: leadAttach.lead_resolution,
     };
   }
 
@@ -477,22 +598,39 @@ async function syncExistingTimelyBooking(
 
   if (lifecycleEvent === "appointment_cancelled" || targetStatus === "cancelled") {
     await applyTimelyCancellation(supabase, tenantId, bookingId, existing, metadata, ports);
+    if (shouldAttachLead) {
+      await patchTimelyBookingLeadAndMetadata(supabase, tenantId, bookingId, leadAttach.lead_id, metadata);
+    }
     return {
       ok: true,
       booking_id: bookingId,
       action: "updated",
       lifecycle_event: lifecycleEvent,
+      lead_id: responseLeadId,
+      lead_resolution: leadAttach.lead_resolution,
     };
   }
 
   if (isCancelled) {
-    await patchTimelyBookingMetadataOnly(supabase, tenantId, bookingId, metadata);
+    if (shouldAttachLead || shouldPatchLeadResolutionMeta) {
+      await patchTimelyBookingLeadAndMetadata(
+        supabase,
+        tenantId,
+        bookingId,
+        shouldAttachLead ? leadAttach.lead_id : null,
+        metadata
+      );
+    } else {
+      await patchTimelyBookingMetadataOnly(supabase, tenantId, bookingId, metadata);
+    }
     return {
       ok: true,
       booking_id: bookingId,
       action: "updated",
       lifecycle_event: lifecycleEvent,
       unchanged: true,
+      lead_id: responseLeadId,
+      lead_resolution: leadAttach.lead_resolution,
     };
   }
 
@@ -501,12 +639,24 @@ async function syncExistingTimelyBooking(
       const { completeBooking } = await import("@/src/lib/bookings/server");
       await completeBooking({ tenantId, bookingId }, supabase);
     }
-    await patchTimelyBookingMetadataOnly(supabase, tenantId, bookingId, metadata);
+    if (shouldAttachLead || shouldPatchLeadResolutionMeta) {
+      await patchTimelyBookingLeadAndMetadata(
+        supabase,
+        tenantId,
+        bookingId,
+        shouldAttachLead ? leadAttach.lead_id : null,
+        metadata
+      );
+    } else {
+      await patchTimelyBookingMetadataOnly(supabase, tenantId, bookingId, metadata);
+    }
     return {
       ok: true,
       booking_id: bookingId,
       action: "updated",
       lifecycle_event: lifecycleEvent,
+      lead_id: responseLeadId,
+      lead_resolution: leadAttach.lead_resolution,
     };
   }
 
@@ -519,6 +669,7 @@ async function syncExistingTimelyBooking(
       assignedStaffId: nextAssignedStaffId,
       bookingStatus: targetStatus,
       metadata,
+      ...(shouldAttachLead ? { leadId: leadAttach.lead_id } : {}),
     },
     supabase
   );
@@ -528,6 +679,8 @@ async function syncExistingTimelyBooking(
     booking_id: bookingId,
     action: "updated",
     lifecycle_event: lifecycleEvent,
+    lead_id: responseLeadId,
+    lead_resolution: leadAttach.lead_resolution,
   };
 }
 
@@ -602,7 +755,14 @@ export async function processTimelyAppointmentWebhook(
 
     const startAt = new Date(payload.start_time.trim()).toISOString();
     const endAt = new Date(payload.end_time.trim()).toISOString();
-    const metadata = buildTimelyBookingMetadata(payload, extAppt);
+    const baseMetadata = buildTimelyBookingMetadata(payload, extAppt);
+    const leadAttach = await resolveTimelyBookingLeadAttach(supabase, tid, {
+      existingLeadId: null,
+      personId: patient.person_id,
+      patientId: patient.patient_id,
+      metadata: baseMetadata,
+    });
+    const metadata = leadAttach.metadata;
     const mappedStatus = mapTimelyStatusToBookingStatus(payload.status ?? null);
     const initialStatus = mappedStatus ?? "scheduled";
 
@@ -612,7 +772,7 @@ export async function processTimelyAppointmentWebhook(
       return mergedPorts.createBooking(
         {
           tenantId: tid,
-          leadId: null,
+          leadId: leadAttach.lead_id,
           personId: patient.person_id,
           patientId: patient.patient_id,
           caseId: null,
@@ -677,6 +837,8 @@ export async function processTimelyAppointmentWebhook(
         booking_id: finalId,
         action: "created",
         lifecycle_event: lifecycleEvent,
+        lead_id: leadAttach.lead_id,
+        lead_resolution: leadAttach.lead_resolution,
       },
       mergedPorts
     );

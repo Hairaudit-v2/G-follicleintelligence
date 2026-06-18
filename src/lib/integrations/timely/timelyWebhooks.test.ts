@@ -7,9 +7,14 @@ import { extractTimelyDiscoveryEventType, stableStringifyForWebhookHash } from "
 import { timelyAppointmentWebhookSchema, timelyPatientWebhookSchema } from "./timelyWebhookSchemas";
 import { processTimelyAppointmentWebhook, resolveTimelyStaffIdByName } from "./timelyAppointmentWebhook.server";
 import { processTimelyPatientWebhook } from "./timelyPatientWebhook.server";
+import { resolveTimelyBookingLead } from "./resolveTimelyBookingLead.server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
+const PERSON_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const PATIENT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const LEAD_ID = "ffffffff-ffff-4fff-8fff-ffffffffffff";
+const LEAD_ID_2 = "99999999-9999-4999-8999-999999999999";
 const SECRET = "test-timely-webhook-secret-32chars!";
 
 function reqWithAuth(token: string | null): Request {
@@ -235,9 +240,10 @@ function bookingRow(id: string): FiBookingRow {
 function makeAppointmentMockSupabase(
   mode: "no_patient" | "create" | "existing",
   existingRow?: FiBookingRow,
-  opts?: { serviceBookingType?: string }
+  opts?: { serviceBookingType?: string; crmLeads?: { id: string; status: string; updated_at?: string }[] }
 ): SupabaseClient {
   const serviceBookingType = opts?.serviceBookingType ?? "consultation";
+  const crmLeads = opts?.crmLeads ?? [];
   let insertedBookingId: string | null = null;
   const existingBooking = existingRow ?? bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
 
@@ -325,6 +331,22 @@ function makeAppointmentMockSupabase(
     }),
   };
 
+  const crmLeadsSelect = {
+    eq: () => ({
+      eq: () => ({
+        order: async () => ({
+          data: crmLeads.map((lead) => ({
+            id: lead.id,
+            status: lead.status,
+            updated_at: lead.updated_at ?? "2026-06-01T00:00:00.000Z",
+            created_at: "2026-01-01T00:00:00.000Z",
+          })),
+          error: null,
+        }),
+      }),
+    }),
+  };
+
   const from = (table: string) => {
     if (table === "fi_tenants") return tenantOk;
     if (table === "fi_external_entity_mappings") {
@@ -346,6 +368,7 @@ function makeAppointmentMockSupabase(
         update: () => bookingUpdate,
       };
     }
+    if (table === "fi_crm_leads") return { select: () => crmLeadsSelect };
     throw new Error(`unexpected table ${table}`);
   };
 
@@ -360,7 +383,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
     end_time: "2026-06-10T13:00:00.000Z",
   });
 
-  function bookingRowForPayload(id: string): FiBookingRow {
+  function bookingRowForPayload(id: string, overrides: Partial<FiBookingRow> = {}): FiBookingRow {
     return {
       ...bookingRow(id),
       start_at: payloadBase.start_time,
@@ -370,6 +393,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
         external_appointment_id: payloadBase.external_appointment_id,
         external_patient_id: payloadBase.external_patient_id,
       },
+      ...overrides,
     };
   }
 
@@ -485,7 +509,14 @@ describe("Timely appointment webhook (mocked data path)", () => {
 
   it("returns unchanged when existing booking fields match", async () => {
     let updated = 0;
-    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      metadata: {
+        source_system: "timely",
+        external_appointment_id: payloadBase.external_appointment_id,
+        external_patient_id: payloadBase.external_patient_id,
+        timely_lead_resolution: { status: "none", checked_at: "2026-06-01T00:00:00.000Z" },
+      },
+    });
     const r = await processTimelyAppointmentWebhook(
       TENANT,
       payloadBase,
@@ -712,5 +743,259 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
     assert.equal(r.consultation_id, null);
     assert.equal(r.consultation_action, "skipped");
     assert.equal(consultationCreates, 0);
+  });
+});
+
+describe("resolveTimelyBookingLead", () => {
+  function crmSupabase(leads: { id: string; status: string }[]): SupabaseClient {
+    return makeAppointmentMockSupabase("create", undefined, { crmLeads: leads });
+  }
+
+  it("returns matched for a single active lead", async () => {
+    const r = await resolveTimelyBookingLead(crmSupabase([{ id: LEAD_ID, status: "open" }]), {
+      tenant_id: TENANT,
+      patient_id: PATIENT_ID,
+      person_id: PERSON_ID,
+    });
+    assert.equal(r.lead_id, LEAD_ID);
+    assert.equal(r.timely_lead_resolution.status, "matched");
+    assert.match(r.timely_lead_resolution.checked_at, /^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it("returns none when no active CRM lead exists", async () => {
+    const r = await resolveTimelyBookingLead(crmSupabase([]), {
+      tenant_id: TENANT,
+      patient_id: PATIENT_ID,
+      person_id: PERSON_ID,
+    });
+    assert.equal(r.lead_id, null);
+    assert.equal(r.timely_lead_resolution.status, "none");
+  });
+
+  it("returns ambiguous when multiple active CRM leads exist", async () => {
+    const r = await resolveTimelyBookingLead(
+      crmSupabase([
+        { id: LEAD_ID, status: "open" },
+        { id: LEAD_ID_2, status: "open" },
+      ]),
+      {
+        tenant_id: TENANT,
+        patient_id: PATIENT_ID,
+        person_id: PERSON_ID,
+      }
+    );
+    assert.equal(r.lead_id, null);
+    assert.equal(r.timely_lead_resolution.status, "ambiguous");
+  });
+
+  it("ignores terminal CRM lead statuses", async () => {
+    const r = await resolveTimelyBookingLead(
+      crmSupabase([
+        { id: LEAD_ID, status: "converted" },
+        { id: LEAD_ID_2, status: "lost" },
+      ]),
+      {
+        tenant_id: TENANT,
+        patient_id: PATIENT_ID,
+        person_id: PERSON_ID,
+      }
+    );
+    assert.equal(r.lead_id, null);
+    assert.equal(r.timely_lead_resolution.status, "none");
+  });
+});
+
+describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
+  const payloadBase = timelyAppointmentWebhookSchema.parse({
+    external_appointment_id: "appt-lead-1",
+    external_patient_id: "patient-ext-1",
+    start_time: "2026-06-10T12:00:00.000Z",
+    end_time: "2026-06-10T13:00:00.000Z",
+    service_name: "Consultation",
+  });
+
+  function bookingRowForPayload(id: string, overrides: Partial<FiBookingRow> = {}): FiBookingRow {
+    return {
+      ...bookingRow(id),
+      start_at: payloadBase.start_time,
+      end_at: payloadBase.end_time,
+      person_id: PERSON_ID,
+      patient_id: PATIENT_ID,
+      metadata: {
+        source_system: "timely",
+        external_appointment_id: payloadBase.external_appointment_id,
+        external_patient_id: payloadBase.external_patient_id,
+      },
+      ...overrides,
+    };
+  }
+
+  function leadPorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+    const existing = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    return {
+      loadActiveStaffForTenant: async () => [],
+      createBooking: async () => existing,
+      updateBooking: async () => existing,
+      loadBooking: async () => existing,
+      syncBookingReminders: async () => {},
+      createConsultationFromBooking: async () => ({
+        consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
+        created: true,
+      }),
+      ...overrides,
+    };
+  }
+
+  it("links booking to a single active CRM lead on create", async () => {
+    let capturedLeadId: string | null | undefined;
+    let capturedMetadata: Record<string, unknown> | undefined;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create", row, {
+        crmLeads: [{ id: LEAD_ID, status: "open" }],
+      }),
+      leadPorts({
+        createBooking: async (params) => {
+          capturedLeadId = params.leadId;
+          capturedMetadata = params.metadata ?? undefined;
+          return { ...row, lead_id: params.leadId ?? null, metadata: params.metadata ?? {} };
+        },
+        loadBooking: async () => row,
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.lead_id, LEAD_ID);
+    assert.equal(r.lead_resolution, "matched");
+    assert.equal(capturedLeadId, LEAD_ID);
+    assert.equal((capturedMetadata?.timely_lead_resolution as { status?: string })?.status, "matched");
+  });
+
+  it("does not overwrite an existing booking lead_id on update", async () => {
+    const existingLead = "88888888-8888-4888-8888-888888888888";
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { lead_id: existingLead });
+    let updatedLeadId: string | null | undefined = "unset";
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("existing", row, {
+        crmLeads: [{ id: LEAD_ID, status: "open" }],
+      }),
+      leadPorts({
+        loadBooking: async () => row,
+        updateBooking: async (params) => {
+          updatedLeadId = params.leadId;
+          return row;
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.lead_id, existingLead);
+    assert.equal(r.lead_resolution, "skipped");
+    assert.equal(updatedLeadId, "unset");
+  });
+
+  it("returns ambiguous when multiple active CRM leads exist", async () => {
+    let capturedLeadId: string | null | undefined = "unset";
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create", row, {
+        crmLeads: [
+          { id: LEAD_ID, status: "open" },
+          { id: LEAD_ID_2, status: "open" },
+        ],
+      }),
+      leadPorts({
+        createBooking: async (params) => {
+          capturedLeadId = params.leadId;
+          return { ...row, metadata: params.metadata ?? {} };
+        },
+        loadBooking: async () => row,
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.lead_id, null);
+    assert.equal(r.lead_resolution, "ambiguous");
+    assert.equal(capturedLeadId, null);
+  });
+
+  it("returns none when no CRM lead exists", async () => {
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create", row, { crmLeads: [] }),
+      leadPorts({
+        createBooking: async (params) => ({ ...row, metadata: params.metadata ?? {} }),
+        loadBooking: async () => row,
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.lead_id, null);
+    assert.equal(r.lead_resolution, "none");
+  });
+
+  it("attaches missing lead_id on update path", async () => {
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { lead_id: null });
+    let patchedLeadId: string | null | undefined;
+    let patchedMetadata: Record<string, unknown> | undefined;
+    const supabase = makeAppointmentMockSupabase("existing", row, {
+      crmLeads: [{ id: LEAD_ID, status: "open" }],
+    });
+    const originalFrom = supabase.from.bind(supabase);
+    supabase.from = ((table: string) => {
+      if (table !== "fi_bookings") return originalFrom(table);
+      return {
+        select: () => originalFrom("fi_bookings").select(),
+        update: (patch: Record<string, unknown>) => ({
+          eq: () => ({
+            eq: async () => {
+              if (patch.lead_id !== undefined) patchedLeadId = patch.lead_id as string | null;
+              if (patch.metadata !== undefined) patchedMetadata = patch.metadata as Record<string, unknown>;
+              return { error: null };
+            },
+          }),
+        }),
+      };
+    }) as typeof supabase.from;
+
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      supabase,
+      leadPorts({ loadBooking: async () => row })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.lead_id, LEAD_ID);
+    assert.equal(r.lead_resolution, "matched");
+    assert.equal(patchedLeadId, LEAD_ID);
+    assert.equal((patchedMetadata?.timely_lead_resolution as { status?: string })?.status, "matched");
+  });
+
+  it("skips lead resolution safely when person is missing", async () => {
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      person_id: null,
+      patient_id: null,
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("existing", row, {
+        crmLeads: [{ id: LEAD_ID, status: "open" }],
+      }),
+      leadPorts({ loadBooking: async () => row })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.lead_id, null);
+    assert.equal(r.lead_resolution, "skipped");
   });
 });

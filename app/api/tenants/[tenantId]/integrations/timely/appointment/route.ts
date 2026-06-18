@@ -41,6 +41,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
             booking_id: result.booking_id,
             action: result.action,
             lifecycle_event: result.lifecycle_event,
+            lead_id: result.lead_id,
+            lead_resolution: result.lead_resolution,
             consultation_id: result.consultation_id,
             consultation_action: result.consultation_action,
             ...(result.unchanged ? { unchanged: true } : {}),
