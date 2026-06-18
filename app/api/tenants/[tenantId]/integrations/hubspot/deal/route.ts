@@ -1,7 +1,7 @@
 /**
  * POST /api/tenants/[tenantId]/integrations/hubspot/deal
- * HubSpot Timeline Sync (Phase 1): append a deal activity to fi_patient_timeline.
- * Read-only against patient/person/lead records — never overwrites them.
+ * HubSpot Deal Sync: upsert fi_revenue_pipeline intelligence + append fi_patient_timeline.
+ * Read-only against patient/person/lead/quote records — never overwrites them.
  */
 import { NextResponse } from "next/server";
 import { ZodError, z } from "zod";

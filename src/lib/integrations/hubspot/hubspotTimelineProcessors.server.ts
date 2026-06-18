@@ -9,11 +9,13 @@ import {
   type HubspotIdentityInput,
   type HubspotMatchStrategy,
 } from "./resolveHubspotContactIdentity.server";
+import { buildHubspotDealTimelineTitle, parseHubspotDealAmount } from "./hubspotDealStageMap";
 import type {
   HubspotContactWebhookPayload,
   HubspotDealWebhookPayload,
   HubspotEmailEventWebhookPayload,
 } from "./hubspotTimelineSchemas";
+import { upsertRevenuePipelineFromHubspotDeal } from "./upsertRevenuePipelineFromHubspotDeal.server";
 
 export type HubspotTimelineOutcome = {
   /** Whether the HubSpot identity resolved to an FI person/patient/lead. */
@@ -27,8 +29,14 @@ export type HubspotTimelineOutcome = {
   matched_by: HubspotMatchStrategy | null;
 };
 
+export type HubspotDealTimelineOutcome = HubspotTimelineOutcome & {
+  revenue_pipeline_id: string | null;
+  revenue_pipeline_created: boolean;
+  mapped_stage: string | null;
+};
+
 export type HubspotTimelineProcessResult =
-  | { ok: true; value: HubspotTimelineOutcome }
+  | { ok: true; value: HubspotTimelineOutcome | HubspotDealTimelineOutcome }
   | { ok: false; status: number; message: string };
 
 function toIsoTimestamp(raw: string | undefined | null): string {
@@ -114,12 +122,13 @@ async function runTimelineSync(
 
 function identityFromPayload(p: {
   hubspot_contact_id?: string;
+  contact_id?: string;
   email?: string;
   hubspot_deal_id?: string;
   crm_lead_id?: string;
 }): HubspotIdentityInput {
   return {
-    hubspotContactId: p.hubspot_contact_id ?? null,
+    hubspotContactId: p.hubspot_contact_id ?? p.contact_id ?? null,
     email: p.email ?? null,
     hubspotDealId: p.hubspot_deal_id ?? null,
     crmLeadId: p.crm_lead_id ?? null,
@@ -177,13 +186,87 @@ export async function processHubspotDealWebhook(
   const eventType = payload.event_type?.trim() || "deal_activity";
   const eventTimestamp = toIsoTimestamp(payload.occurred_at);
   const dealId = payload.hubspot_deal_id.trim();
+  const stageRaw = payload.stage?.trim() || payload.deal_stage?.trim() || null;
+  const expectedRevenue = parseHubspotDealAmount(payload.amount);
 
-  return runTimelineSync(supabase, tid, identityFromPayload(payload), {
+  if (!hasAnyIdentity(identityFromPayload(payload))) {
+    return {
+      ok: false,
+      status: 422,
+      message: "No HubSpot identity provided (hubspot_contact_id, email, hubspot_deal_id, or crm_lead_id required).",
+    };
+  }
+
+  const identity = await resolveHubspotContactIdentity(supabase, tid, identityFromPayload(payload));
+
+  const revenue = await upsertRevenuePipelineFromHubspotDeal(supabase, {
+    tenantId: tid,
+    hubspotDealId: dealId,
+    patientId: identity?.patient_id ?? null,
+    crmLeadId: identity?.crm_lead_id ?? null,
+    stageRaw,
+    amountRaw: payload.amount,
+    depositAmountRaw: payload.deposit_amount,
+    procedureType: payload.procedure_type,
+    closeDateRaw: payload.close_date,
+    hubspotPayload: payload as Record<string, unknown>,
+  });
+
+  const timelineTitle =
+    payload.title?.trim() ||
+    buildHubspotDealTimelineTitle(revenue.mapped_stage, expectedRevenue) ||
+    payload.deal_name?.trim() ||
+    `Deal ${eventType}`;
+
+  if (!identity) {
+    return {
+      ok: true,
+      value: {
+        matched: false,
+        inserted: false,
+        timeline_id: null,
+        patient_id: null,
+        person_id: null,
+        crm_lead_id: null,
+        matched_by: null,
+        revenue_pipeline_id: revenue.id,
+        revenue_pipeline_created: revenue.created,
+        mapped_stage: revenue.mapped_stage,
+      },
+    };
+  }
+
+  const appended = await appendPatientTimelineEvent(supabase, {
+    tenantId: tid,
+    patientId: identity.patient_id,
+    personId: identity.person_id,
+    crmLeadId: identity.crm_lead_id,
+    source: HUBSPOT_TIMELINE_SOURCE,
     eventType,
     eventTimestamp,
-    title: payload.title?.trim() || payload.deal_name?.trim() || `Deal ${eventType}`,
+    title: timelineTitle,
     description: payload.description?.trim() || null,
-    dedupeKey: `deal:${dealId}:${eventType}:${payload.deal_stage?.trim() || ""}:${eventTimestamp}`,
-    metadata: { hubspot: payload },
+    dedupeKey: `deal:${dealId}:${eventType}:${stageRaw || ""}:${eventTimestamp}`,
+    metadata: {
+      hubspot: payload,
+      revenue_pipeline_id: revenue.id,
+      mapped_stage: revenue.mapped_stage,
+    },
   });
+
+  return {
+    ok: true,
+    value: {
+      matched: true,
+      inserted: appended.inserted,
+      timeline_id: appended.id,
+      patient_id: identity.patient_id,
+      person_id: identity.person_id,
+      crm_lead_id: identity.crm_lead_id,
+      matched_by: identity.matchedBy,
+      revenue_pipeline_id: revenue.id,
+      revenue_pipeline_created: revenue.created,
+      mapped_stage: revenue.mapped_stage,
+    },
+  };
 }

@@ -50,9 +50,16 @@ export const hubspotDealWebhookSchema = z
     ...activityFields,
     /** HubSpot deal id — maps to fi_crm_lead_source_ids(source_system='hubspot_deal'). */
     hubspot_deal_id: z.string().trim().min(1).max(120),
+    /** Zapier alias for hubspot_contact_id. */
+    contact_id: z.string().trim().min(1).max(120).optional(),
+    /** Zapier alias for deal_stage. */
+    stage: z.string().trim().max(200).optional(),
     deal_stage: z.string().trim().max(200).optional(),
     deal_name: z.string().trim().max(500).optional(),
     amount: z.union([z.string(), z.number()]).optional(),
+    deposit_amount: z.union([z.string(), z.number()]).optional(),
+    procedure_type: z.string().trim().max(200).optional(),
+    close_date: z.string().trim().max(40).optional(),
   })
   .passthrough();
 
