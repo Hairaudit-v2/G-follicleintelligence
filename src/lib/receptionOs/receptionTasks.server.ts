@@ -62,8 +62,8 @@ function anchorsFromAlert(alert: ReceptionOsActionAlert): Partial<ReceptionTaskR
     lead: null,
     consultation: null,
   };
-  let payment_id: string | null = extractUuidFromAlertRef(alert.id, "deposit-");
-  let booking_id: string | null = extractUuidFromAlertRef(alert.id, "surgery-");
+  const payment_id: string | null = extractUuidFromAlertRef(alert.id, "deposit-");
+  const booking_id: string | null = extractUuidFromAlertRef(alert.id, "surgery-");
   let consultation_id: string | null = extractUuidFromAlertRef(alert.id, "followup-");
   if (alert.id.startsWith("form-")) {
     consultation_id = consultation_id ?? null;

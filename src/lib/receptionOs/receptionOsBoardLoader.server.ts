@@ -5,7 +5,7 @@ import { leadTitleFromRow } from "@/src/lib/crm/crmLeadListDisplay";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { loadConsultationConversionBoardPayload } from "@/src/lib/consultations/consultationConversionBoardLoader.server";
 import type { ConsultationConversionBoardColumnId } from "@/src/lib/consultations/consultationConversionBoardModel";
-import { loadTenantOperationalDashboard, type ReceptionBoardCard, type TenantOperationalDay } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import { loadTenantOperationalDashboard, type ReceptionBoardCard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { loadSurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import type { SurgeryReadinessBoardCard } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import {
@@ -42,7 +42,6 @@ import { resolvePaymentLinksForPaymentRecords } from "@/src/lib/receptionOs/rece
 import {
   createReceptionOsIntelligenceContext,
   deriveReceptionOsIntelligenceHints,
-  type ReceptionOsIntelligenceContext,
 } from "@/src/lib/receptionOs/receptionOsIntelligenceBridge";
 import type { PaymentRecordRow, PaymentStatus } from "@/src/lib/payments/paymentRecordModel";
 import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
@@ -281,7 +280,6 @@ async function loadNewLeadPipelineCards(tenantId: string, base: string): Promise
 function buildPipelineFromConversion(
   conversionPayload: Awaited<ReturnType<typeof loadConsultationConversionBoardPayload>>,
   newLeads: ReceptionOsPipelineCard[],
-  base: string,
 ): ReceptionOsBoardPayload["consultationPipeline"] {
   const columns = emptyPipelineColumns();
   columns.new_lead = newLeads;
@@ -623,7 +621,7 @@ export async function loadReceptionOsBoardPayload(tenantId: string, now: Date = 
     .sort((a, b) => a.startAt.localeCompare(b.startAt))
     .map((c) => mapReceptionCardToPatient(c, base, tz, caseByBooking.get(c.id) ?? null));
 
-  const consultationPipeline = buildPipelineFromConversion(conversionPayload, newLeads, base);
+  const consultationPipeline = buildPipelineFromConversion(conversionPayload, newLeads);
 
   const allSurgeryCards = [
     ...surgeryPayload.columns.ready,
