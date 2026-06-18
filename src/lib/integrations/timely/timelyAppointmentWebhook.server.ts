@@ -19,6 +19,7 @@ import {
   type TimelyLeadResolutionMeta,
   type TimelyLeadResolutionStatus,
 } from "./resolveTimelyBookingLead.server";
+import type { CrmStageAutoAdvanceAction } from "@/src/lib/crm/crmStageAutoAdvancePolicy";
 
 export type TimelyLeadResolution = TimelyLeadResolutionStatus | "skipped";
 
@@ -296,11 +297,13 @@ export type ProcessTimelyAppointmentWebhookSuccess = {
   lead_resolution: TimelyLeadResolution;
   consultation_id: string | null;
   consultation_action: TimelyConsultationAction;
+  crm_stage_action: CrmStageAutoAdvanceAction;
+  crm_stage_slug: string | null;
 };
 
 type ProcessTimelyAppointmentWebhookCoreSuccess = Omit<
   ProcessTimelyAppointmentWebhookSuccess,
-  "consultation_id" | "consultation_action"
+  "consultation_id" | "consultation_action" | "crm_stage_action" | "crm_stage_slug"
 >;
 
 export type ProcessTimelyAppointmentWebhookResult =
@@ -324,6 +327,14 @@ export type TimelyAppointmentWebhookPorts = {
     bookingId: string,
     client?: SupabaseClient
   ) => Promise<{ consultation: { id: string }; created: boolean }>;
+  advanceCrmLeadOnTimelyConsultationBooking: (
+    input: {
+      tenantId: string;
+      leadId: string | null | undefined;
+      booking: Pick<FiBookingRow, "booking_type" | "booking_status" | "cancelled_at">;
+    },
+    client?: SupabaseClient
+  ) => Promise<{ action: CrmStageAutoAdvanceAction; stageSlug: string | null }>;
 };
 
 function getDefaultAppointmentPorts(): TimelyAppointmentWebhookPorts {
@@ -349,6 +360,12 @@ function getDefaultAppointmentPorts(): TimelyAppointmentWebhookPorts {
       const { createConsultationFromBooking } = await import("@/src/lib/consultations/consultationMutations.server");
       return createConsultationFromBooking(tenantId, bookingId);
     },
+    advanceCrmLeadOnTimelyConsultationBooking: async (input, client) => {
+      const { advanceCrmLeadOnTimelyConsultationBooking } = await import(
+        "./advanceCrmLeadOnTimelyConsultationBooking.server"
+      );
+      return advanceCrmLeadOnTimelyConsultationBooking(input, client);
+    },
   };
 }
 
@@ -366,7 +383,7 @@ async function attachConsultationWorkspaceToTimelyAppointmentResult(
   tenantId: string,
   result: ProcessTimelyAppointmentWebhookCoreSuccess,
   ports: TimelyAppointmentWebhookPorts
-): Promise<ProcessTimelyAppointmentWebhookSuccess> {
+): Promise<Omit<ProcessTimelyAppointmentWebhookSuccess, "crm_stage_action" | "crm_stage_slug">> {
   const booking = await ports.loadBooking(tenantId, result.booking_id, supabase);
   if (!booking || shouldSkipConsultationWorkspaceForBooking(booking)) {
     return {
@@ -386,6 +403,52 @@ async function attachConsultationWorkspaceToTimelyAppointmentResult(
     consultation_id: consultation.id,
     consultation_action: created ? "created" : "existing",
   };
+}
+
+async function attachCrmStageAdvanceToTimelyAppointmentResult(
+  supabase: SupabaseClient,
+  tenantId: string,
+  result: Omit<ProcessTimelyAppointmentWebhookSuccess, "crm_stage_action" | "crm_stage_slug">,
+  ports: TimelyAppointmentWebhookPorts
+): Promise<ProcessTimelyAppointmentWebhookSuccess> {
+  const booking = await ports.loadBooking(tenantId, result.booking_id, supabase);
+  if (!booking) {
+    return {
+      ...result,
+      crm_stage_action: "skipped",
+      crm_stage_slug: null,
+    };
+  }
+
+  const crm = await ports.advanceCrmLeadOnTimelyConsultationBooking(
+    {
+      tenantId,
+      leadId: result.lead_id,
+      booking,
+    },
+    supabase
+  );
+
+  return {
+    ...result,
+    crm_stage_action: crm.action,
+    crm_stage_slug: crm.stageSlug,
+  };
+}
+
+async function finalizeTimelyAppointmentWebhookResult(
+  supabase: SupabaseClient,
+  tenantId: string,
+  result: ProcessTimelyAppointmentWebhookCoreSuccess,
+  ports: TimelyAppointmentWebhookPorts
+): Promise<ProcessTimelyAppointmentWebhookSuccess> {
+  const withConsultation = await attachConsultationWorkspaceToTimelyAppointmentResult(
+    supabase,
+    tenantId,
+    result,
+    ports
+  );
+  return attachCrmStageAdvanceToTimelyAppointmentResult(supabase, tenantId, withConsultation, ports);
 }
 
 async function patchTimelyBookingMetadataOnly(
@@ -705,7 +768,7 @@ export async function processTimelyAppointmentWebhook(
     if (existingId) {
       const synced = await syncExistingTimelyBooking(supabase, tid, existingId, payload, extAppt, mergedPorts);
       if (!synced.ok) return synced;
-      return attachConsultationWorkspaceToTimelyAppointmentResult(supabase, tid, synced, mergedPorts);
+      return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
     }
 
     const lifecycleEvent = resolveLifecycleEvent(payload, false);
@@ -823,13 +886,13 @@ export async function processTimelyAppointmentWebhook(
     if (initialStatus === "cancelled" || initialStatus === "completed" || initialStatus === "no_show") {
       const synced = await syncExistingTimelyBooking(supabase, tid, booking.id, payload, extAppt, mergedPorts);
       if (!synced.ok) return synced;
-      return attachConsultationWorkspaceToTimelyAppointmentResult(supabase, tid, synced, mergedPorts);
+      return finalizeTimelyAppointmentWebhookResult(supabase, tid, synced, mergedPorts);
     }
 
     const verify = await loadExistingBookingMapping(supabase, tid, extAppt);
     const finalId = verify ?? booking.id;
 
-    return attachConsultationWorkspaceToTimelyAppointmentResult(
+    return finalizeTimelyAppointmentWebhookResult(
       supabase,
       tid,
       {

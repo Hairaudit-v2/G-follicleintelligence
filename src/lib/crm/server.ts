@@ -29,6 +29,11 @@ export {
 } from "./stageHistory";
 export { moveCrmLeadToStage, type MoveCrmLeadToStageParams, type MoveCrmLeadToStageResult } from "./stageMovement";
 export {
+  advanceCrmLeadStageIfEarlier,
+  type AdvanceCrmLeadStageIfEarlierParams,
+  type AdvanceCrmLeadStageIfEarlierResult,
+} from "./advanceCrmLeadStageIfEarlier.server";
+export {
   completeCrmTask,
   createCrmTask,
   loadCrmTaskForLead,

@@ -45,6 +45,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
             lead_resolution: result.lead_resolution,
             consultation_id: result.consultation_id,
             consultation_action: result.consultation_action,
+            crm_stage_action: result.crm_stage_action,
+            crm_stage_slug: result.crm_stage_slug,
             ...(result.unchanged ? { unchanged: true } : {}),
           },
         };

@@ -367,5 +367,7 @@ export async function completeConsultationDraft(
   const loaded = await loadConsultationForTenant(tid, cid);
   if (!loaded) throw new Error("Could not load consultation after completion.");
   await syncPostConsultReminderJobs(loaded, supabase);
+  const { advanceCrmLeadOnConsultationComplete } = await import("./advanceCrmLeadOnConsultationComplete.server");
+  await advanceCrmLeadOnConsultationComplete(tid, loaded, supabase);
   return loaded;
 }

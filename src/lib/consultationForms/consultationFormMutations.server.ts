@@ -1396,5 +1396,13 @@ export async function completeConsultationFormInstance(
     }
   }
 
+  const reloadedConsultation = await loadConsultationForTenant(tid, cid);
+  if (reloadedConsultation) {
+    const { advanceCrmLeadOnConsultationComplete } = await import(
+      "@/src/lib/consultations/advanceCrmLeadOnConsultationComplete.server"
+    );
+    await advanceCrmLeadOnConsultationComplete(tid, reloadedConsultation, supabase);
+  }
+
   return { instance: loadedInst, summary };
 }

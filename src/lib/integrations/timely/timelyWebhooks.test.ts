@@ -409,6 +409,7 @@ describe("Timely appointment webhook (mocked data path)", () => {
         consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
         created: true,
       }),
+      advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
       ...overrides,
     };
   }
@@ -575,6 +576,7 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
         consultation: { id: CONSULTATION_ID },
         created: true,
       }),
+      advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
       ...overrides,
     };
   }
@@ -842,6 +844,7 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
         consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
         created: true,
       }),
+      advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
       ...overrides,
     };
   }
@@ -997,5 +1000,187 @@ describe("Timely appointment webhook — CRM lead resolution (Phase C)", () => {
     if (!r.ok) return;
     assert.equal(r.lead_id, null);
     assert.equal(r.lead_resolution, "skipped");
+  });
+});
+
+describe("Timely appointment webhook — CRM stage advance (Phase D)", () => {
+  const payloadBase = timelyAppointmentWebhookSchema.parse({
+    external_appointment_id: "appt-crm-stage-1",
+    external_patient_id: "patient-ext-1",
+    start_time: "2026-06-10T12:00:00.000Z",
+    end_time: "2026-06-10T13:00:00.000Z",
+    service_name: "Consultation",
+  });
+
+  function bookingRowForPayload(id: string, overrides: Partial<FiBookingRow> = {}): FiBookingRow {
+    return {
+      ...bookingRow(id),
+      start_at: payloadBase.start_time,
+      end_at: payloadBase.end_time,
+      person_id: PERSON_ID,
+      patient_id: PATIENT_ID,
+      lead_id: LEAD_ID,
+      booking_type: "consultation",
+      booking_status: "scheduled",
+      metadata: {
+        source_system: "timely",
+        external_appointment_id: payloadBase.external_appointment_id,
+        external_patient_id: payloadBase.external_patient_id,
+      },
+      ...overrides,
+    };
+  }
+
+  function crmStagePorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    return {
+      loadActiveStaffForTenant: async () => [],
+      createBooking: async () => row,
+      updateBooking: async () => row,
+      loadBooking: async () => row,
+      syncBookingReminders: async () => {},
+      createConsultationFromBooking: async () => ({
+        consultation: { id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee" },
+        created: true,
+      }),
+      advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+        action: "advanced" as const,
+        stageSlug: "consult_scheduled",
+      }),
+      ...overrides,
+    };
+  }
+
+  it("moves linked lead to consult_scheduled on consultation booking", async () => {
+    let crmCalls = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create", row, { crmLeads: [{ id: LEAD_ID, status: "open" }] }),
+      crmStagePorts({
+        createBooking: async (params) => {
+          return { ...row, lead_id: params.leadId ?? LEAD_ID };
+        },
+        loadBooking: async () => ({ ...row, lead_id: LEAD_ID }),
+        advanceCrmLeadOnTimelyConsultationBooking: async (input) => {
+          crmCalls += 1;
+          assert.equal(input.leadId, LEAD_ID);
+          assert.equal(input.booking.booking_type, "consultation");
+          return { action: "advanced", stageSlug: "consult_scheduled" };
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.crm_stage_action, "advanced");
+    assert.equal(r.crm_stage_slug, "consult_scheduled");
+    assert.equal(crmCalls, 1);
+  });
+
+  it("replay does not duplicate CRM stage history (unchanged on second call)", async () => {
+    let crmCalls = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const ports = crmStagePorts({
+      loadBooking: async () => row,
+      advanceCrmLeadOnTimelyConsultationBooking: async () => {
+        crmCalls += 1;
+        return crmCalls === 1
+          ? { action: "advanced", stageSlug: "consult_scheduled" }
+          : { action: "unchanged", stageSlug: "consult_scheduled" };
+      },
+    });
+    const supabase = makeAppointmentMockSupabase("existing", row);
+    const a = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    const b = await processTimelyAppointmentWebhook(TENANT, payloadBase, supabase, ports);
+    assert.equal(a.ok, true);
+    assert.equal(b.ok, true);
+    if (!a.ok || !b.ok) return;
+    assert.equal(a.crm_stage_action, "advanced");
+    assert.equal(b.crm_stage_action, "unchanged");
+    assert.equal(crmCalls, 2);
+  });
+
+  it("skips CRM stage advance for non-consultation booking", async () => {
+    let crmCalls = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { booking_type: "prp" });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create", row, { serviceBookingType: "prp" }),
+      crmStagePorts({
+        loadBooking: async () => row,
+        createBooking: async () => row,
+        advanceCrmLeadOnTimelyConsultationBooking: async () => {
+          crmCalls += 1;
+          return { action: "skipped", stageSlug: null };
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.crm_stage_action, "skipped");
+    assert.equal(r.crm_stage_slug, null);
+    assert.equal(crmCalls, 1);
+  });
+
+  it("skips CRM stage advance for cancelled consultation booking", async () => {
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", {
+      booking_status: "cancelled",
+      cancelled_at: "2026-06-09T10:00:00.000Z",
+    });
+    const cancelled = timelyAppointmentWebhookSchema.parse({
+      ...payloadBase,
+      status: "Cancelled",
+      event_type: "appointment_cancelled",
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      cancelled,
+      makeAppointmentMockSupabase("existing", row),
+      crmStagePorts({
+        loadBooking: async () => row,
+        advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped", stageSlug: null }),
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.crm_stage_action, "skipped");
+  });
+
+  it("skips CRM stage advance for no_show consultation booking", async () => {
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd", { booking_status: "no_show" });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("existing", row),
+      crmStagePorts({
+        loadBooking: async () => row,
+        advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped", stageSlug: null }),
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.crm_stage_action, "skipped");
+  });
+
+  it("does not downgrade when lead is already at a later stage", async () => {
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("existing", row),
+      crmStagePorts({
+        loadBooking: async () => row,
+        advanceCrmLeadOnTimelyConsultationBooking: async () => ({
+          action: "unchanged",
+          stageSlug: "consult_scheduled",
+        }),
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.crm_stage_action, "unchanged");
+    assert.equal(r.crm_stage_slug, "consult_scheduled");
   });
 });
