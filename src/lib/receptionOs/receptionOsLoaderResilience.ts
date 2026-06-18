@@ -165,7 +165,7 @@ export function emptyRevenueIntelligenceForBoard(board: ReceptionOsBoardPayload)
 
 export function emptyConsultationPipelineFromBoard() {
   const columns = {} as ReceptionOsBoardPayload["consultationPipeline"]["columns"];
-  for (const [key, count] of Object.entries(emptyPipelineCounts())) {
+  for (const [key] of Object.entries(emptyPipelineCounts())) {
     columns[key as keyof typeof columns] = [];
   }
   return { columns, counts: emptyPipelineCounts() };

@@ -13,10 +13,7 @@ import {
   type ReceptionPilotMetricsPayload,
 } from "@/src/lib/receptionOs/receptionPilotMetricsModel";
 import type { ReceptionUsageEventKind } from "@/src/lib/receptionOs/receptionUsageEventModel";
-import {
-  isMissingDatabaseRelationError,
-  missingTableMessage,
-} from "@/src/lib/receptionOs/receptionOsLoaderResilience";
+import { isMissingDatabaseRelationError } from "@/src/lib/receptionOs/receptionOsLoaderResilience";
 
 export async function loadReceptionPilotMetricsForCommandCentre(
   payload: ReceptionOsCommandCentrePayload,
