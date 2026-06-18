@@ -104,6 +104,19 @@ async function sendReminderSms(params: {
   return { provider: "twilio", externalId: payload.sid?.trim() || null };
 }
 
+/** Shared Twilio SMS send used by reminders and ReceptionOS live delivery. */
+export async function sendTwilioSmsViaReminderConfig(params: {
+  cfg?: ReminderDeliveryConfig;
+  to: string;
+  body: string;
+}): Promise<ReminderSendResult> {
+  const cfg = params.cfg ?? loadReminderDeliveryConfig();
+  if (!isDeliveryChannelConfigured(cfg, "sms")) {
+    throw new Error("SMS delivery is not configured (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER).");
+  }
+  return sendReminderSms({ cfg, to: params.to.trim(), body: params.body.trim() });
+}
+
 /** Sends a rendered reminder via Resend (email) or Twilio (SMS). */
 export async function sendReminderDelivery(params: ReminderSendParams): Promise<ReminderSendResult> {
   const cfg = params.cfg ?? loadReminderDeliveryConfig();

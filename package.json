@@ -13,6 +13,8 @@
     "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
     "check:env": "tsx scripts/check-fi-env.ts",
     "smoke:prod": "tsx scripts/fi-production-smoke-test.ts",
+    "smoke:reception-os": "tsx scripts/reception-os-smoke-test.ts",
+    "validate:reception-os": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/reception-os-pilot-validation.ts",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "replay:intelligence-event-logs": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/replay-intelligence-event-logs.ts",

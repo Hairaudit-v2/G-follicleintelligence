@@ -86,6 +86,15 @@ export function ClinicOsOperationsCentre(props: {
             Tomorrow board
           </Link>
           <Link
+            href={`${base}/reception-os`}
+            className={cn(
+              fiOsChromeClasses.toolbarControlSurface,
+              "inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cyan-100/95",
+            )}
+          >
+            ReceptionOS
+          </Link>
+          <Link
             href={`${base}/reception`}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,

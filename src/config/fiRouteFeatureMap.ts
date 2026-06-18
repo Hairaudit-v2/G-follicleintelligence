@@ -34,6 +34,7 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "bookings" || f.startsWith("bookings/"), feature: "calendar" },
   { test: (f) => f === "tomorrow" || f.startsWith("tomorrow/"), feature: "calendar" },
   { test: (f) => f === "operations" || f.startsWith("operations/"), feature: "dashboard" },
+  { test: (f) => f === "reception-os" || f.startsWith("reception-os/"), feature: "dashboard" },
   { test: (f) => f === "reception" || f.startsWith("reception/"), feature: "dashboard" },
   { test: (f) => f === "system-status" || f.startsWith("system-status/"), feature: "settings" },
   { test: (f) => f === "configuration" || f.startsWith("configuration/"), feature: "settings" },

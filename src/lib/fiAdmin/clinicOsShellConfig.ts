@@ -95,6 +95,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         description: "ClinicOS operations centre — schedule, flow, and CRM snapshot.",
       },
       {
+        id: "reception-os",
+        label: "ReceptionOS",
+        path: "reception-os",
+        permissionHint: {},
+        description: "Front-desk command centre — patients, communications, pipeline, deposits, and alerts.",
+      },
+      {
         id: "reception-board",
         label: "Reception",
         path: "reception",
@@ -386,6 +393,7 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   const first = sub.split("/")[0] ?? "";
 
   if (first === "operations") return "operations-centre";
+  if (first === "reception-os") return "reception-os";
   if (first === "reception") return "reception-board";
   if (first === "tomorrow") return "tomorrow-board";
 

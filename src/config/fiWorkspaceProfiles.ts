@@ -61,7 +61,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   director: {
     key: "director",
     label: "Director",
-    description: "Business performance, conversion, revenue, and clinic health at a glance.",
+    description: "Business performance, conversion, revenue, clinic health, and full ReceptionOS visibility.",
     primaryFocus: "Business performance, conversion, revenue, clinic health, outcome intelligence.",
     defaultDashboardWidgets: [
       "clinic_metrics",
@@ -90,7 +90,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   clinic_manager: {
     key: "clinic_manager",
     label: "Clinic manager",
-    description: "Day-to-day clinic operations, staffing, and patient flow.",
+    description: "Day-to-day clinic operations, staffing, patient flow, and full ReceptionOS oversight.",
     primaryFocus: "Operational excellence, scheduling, team coordination, patient experience.",
     defaultDashboardWidgets: [
       "operational_workspace",
@@ -195,7 +195,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   consultant: {
     key: "consultant",
     label: "Consultant",
-    description: "Leads, consultations, quotes, and bookings.",
+    description: "Leads, consultations, quotes, bookings, and ReceptionOS pipeline follow-ups.",
     primaryFocus: "Leads, consults, quotes, bookings.",
     defaultDashboardWidgets: [
       "my_workspace",
@@ -219,7 +219,7 @@ export const FI_WORKSPACE_PROFILES: Record<FiWorkspaceProfileKey, FiWorkspacePro
   reception: {
     key: "reception",
     label: "Reception",
-    description: "Front desk, calendar, arrivals, and light CRM triage.",
+    description: "Front desk, calendar, arrivals, and ReceptionOS command centre (patients, comms, alerts, surgery awareness).",
     primaryFocus: "Bookings, front desk, calendar, patient flow.",
     defaultDashboardWidgets: [
       "operational_workspace",

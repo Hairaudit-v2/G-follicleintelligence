@@ -122,6 +122,14 @@ export function resolveFiOsPrimarySidebarItems(
       disabled: false,
     },
     {
+      id: "reception-os",
+      featureKey: "dashboard",
+      label: "ReceptionOS",
+      shortLabel: "RecOS",
+      href: hrefFor(b, "reception-os"),
+      disabled: false,
+    },
+    {
       id: "reception-board",
       featureKey: "dashboard",
       label: "Reception board",
@@ -372,6 +380,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     const firstEarly = restEarly.split("/")[0] ?? "";
     if (firstEarly === "doctor") return "doctor-workspace";
     if (firstEarly === "operations") return "operations-centre";
+    if (firstEarly === "reception-os") return "reception-os";
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
     if (firstEarly === "payments") return "payments-inbox";
@@ -384,6 +393,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
   if (legacy === "services" || legacy === "configuration") return "settings";
   if (legacy === "leadflow") return "crm";
   if (legacy === "operations-centre") return "operations-centre";
+  if (legacy === "reception-os") return "reception-os";
   if (legacy === "reception-board") return "reception-board";
   if (legacy === "tomorrow-board") return "tomorrow-board";
   if (legacy === "surgeryos" || legacy === "surgery-readiness-board" || legacy === "procedure-day-board") return "cases";
