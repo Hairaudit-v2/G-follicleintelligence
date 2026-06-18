@@ -97,6 +97,10 @@ export const serverEnvSchema = z.object({
   FI_IMPORT_ADMIN_KEY: optionalString,
   FI_MACHINE_INGEST_MASTER_KEY: optionalString,
   FI_TIMELY_WEBHOOK_SECRET: optionalString,
+  TIMELY_API_KEY: optionalString,
+  TIMELY_API_BASE_URL: optionalHttpUrl,
+  FI_TIMELY_SYNC_CRON_SECRET: optionalString,
+  FI_HUBSPOT_WEBHOOK_SECRET: optionalString,
   IIOHR_HR_SYNC_SECRET: optionalString,
   FI_ALLOW_INSECURE_API: optionalString,
   FI_ALLOW_ADMIN_KEY_QUERY: optionalString,
@@ -260,6 +264,8 @@ export function collectCrossEnvValidationIssues(
     minSecretIssue("CRON_SECRET", g("CRON_SECRET"), 16),
     minSecretIssue("FI_HR_SYNC_CRON_SECRET", g("FI_HR_SYNC_CRON_SECRET"), 16),
     minSecretIssue("FI_TIMELY_WEBHOOK_SECRET", g("FI_TIMELY_WEBHOOK_SECRET"), 16),
+    minSecretIssue("FI_TIMELY_SYNC_CRON_SECRET", g("FI_TIMELY_SYNC_CRON_SECRET"), 16),
+    minSecretIssue("FI_HUBSPOT_WEBHOOK_SECRET", g("FI_HUBSPOT_WEBHOOK_SECRET"), 16),
     minSecretIssue("IIOHR_HR_SYNC_SECRET", g("IIOHR_HR_SYNC_SECRET"), 16),
   ]) {
     if (issue) issues.push(issue);
