@@ -42,7 +42,6 @@ export function getServerEnv(runtimeEnv: NodeJS.ProcessEnv = process.env): Serve
 
 /** Re-parse combined env (tests, scripts). */
 export function getEnv(runtimeEnv: NodeJS.ProcessEnv = process.env) {
-  const skip = shouldSkipEnvValidation(runtimeEnv);
   return {
     ...getClientEnv(runtimeEnv),
     ...getServerEnv(runtimeEnv),

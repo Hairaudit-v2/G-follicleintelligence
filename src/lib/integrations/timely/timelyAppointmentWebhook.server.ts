@@ -289,6 +289,11 @@ export type ProcessTimelyAppointmentWebhookSuccess = {
   consultation_action: TimelyConsultationAction;
 };
 
+type ProcessTimelyAppointmentWebhookCoreSuccess = Omit<
+  ProcessTimelyAppointmentWebhookSuccess,
+  "consultation_id" | "consultation_action"
+>;
+
 export type ProcessTimelyAppointmentWebhookResult =
   | ProcessTimelyAppointmentWebhookSuccess
   | { ok: false; status: number; message: string };
@@ -350,7 +355,7 @@ function shouldSkipConsultationWorkspaceForBooking(
 async function attachConsultationWorkspaceToTimelyAppointmentResult(
   supabase: SupabaseClient,
   tenantId: string,
-  result: Omit<ProcessTimelyAppointmentWebhookSuccess, "consultation_id" | "consultation_action">,
+  result: ProcessTimelyAppointmentWebhookCoreSuccess,
   ports: TimelyAppointmentWebhookPorts
 ): Promise<ProcessTimelyAppointmentWebhookSuccess> {
   const booking = await ports.loadBooking(tenantId, result.booking_id, supabase);
@@ -423,7 +428,7 @@ async function syncExistingTimelyBooking(
   payload: TimelyAppointmentPayload,
   externalAppointmentId: string,
   ports: TimelyAppointmentWebhookPorts
-): Promise<ProcessTimelyAppointmentWebhookResult> {
+): Promise<ProcessTimelyAppointmentWebhookResult | ProcessTimelyAppointmentWebhookCoreSuccess> {
   const existing = await ports.loadBooking(tenantId, bookingId, supabase);
   if (!existing) {
     return { ok: false, status: 404, message: "Mapped booking not found." };
