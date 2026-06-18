@@ -285,6 +285,7 @@ Do **not** use this on production runtime — only during artifact build steps.
 | [`fi-os-env-vars-production-audit.md`](fi-os-env-vars-production-audit.md) | Per-variable module map |
 | [`fi-os-machine-ingest-hmac-runbook.md`](fi-os-machine-ingest-hmac-runbook.md) | `FI_MACHINE_INGEST_MASTER_KEY` |
 | [`resend-and-transactional-email.md`](resend-and-transactional-email.md) | Resend configuration |
+| [`timely-direct-api-probe.md`](timely-direct-api-probe.md) | Timely direct API access validation (`TIMELY_API_KEY`, `TIMELY_API_BASE_URL`) |
 | [`fi-os-stage7-revenue-payments.md`](fi-os-stage7-revenue-payments.md) | Stripe / RevenueOS |
 | [`iiohr-hr-perth-staff-sync-cron.md`](../iiohr-hr-perth-staff-sync-cron.md) | HR automation |
 | [`fi-os-production-release-checklist.md`](fi-os-production-release-checklist.md) | Full release gate |
