@@ -46,6 +46,18 @@ describe("validateFiServerEnv", () => {
     if (!r.ok) assert.ok(r.errors.includes("FI_ALLOW_ADMIN_KEY_QUERY"));
   });
 
+  it("production FI_ENABLE_DEV_ADMIN_ACCESS=true fails", () => {
+    const r = validateFiServerEnv({ ...validProdBase(), FI_ENABLE_DEV_ADMIN_ACCESS: "true" });
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.ok(r.errors.includes("FI_ENABLE_DEV_ADMIN_ACCESS"));
+  });
+
+  it("production SKIP_ENV_VALIDATION=true fails", () => {
+    const r = validateFiServerEnv({ ...validProdBase(), SKIP_ENV_VALIDATION: "1" });
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.ok(r.errors.includes("SKIP_ENV_VALIDATION"));
+  });
+
   it("FI_ADMIN_API_KEY too short fails", () => {
     const r = validateFiServerEnv({
       ...validProdBase(),
