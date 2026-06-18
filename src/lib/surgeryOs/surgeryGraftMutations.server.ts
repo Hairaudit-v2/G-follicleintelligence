@@ -7,7 +7,6 @@ import {
   type SurgeryOsProcedureEventKind,
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel";
 import {
-  applyGraftTypeDelta,
   assertGraftCountSessionLock,
   assertGraftReconciliationGate,
   buildGraftTotalsFromSession,

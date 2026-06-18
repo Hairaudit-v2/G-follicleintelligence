@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { createFinanceProviderAction } from "@/lib/actions/financial-os-finance-actions";
-import { FinancialOsFeedbackText, FinancialOsFormPanel, financialOsActionFeedback, financialOsClasses, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import { FinancialOsFeedbackText, FinancialOsFormPanel, financialOsClasses, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
 
 const PROVIDER_TYPES = [
   { value: "medical_financing", label: "Medical financing" },

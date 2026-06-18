@@ -78,12 +78,13 @@ export function SurgeryOsLiveActions({
   const canBooking = surgeryOsActionAllowed(ctx, "create_from_booking");
 
   const anyAction = canPhase || canEvent || canNote || canTeam || canBooking;
-  if (!anyAction) return null;
 
   const [modal, setModal] = useState<ModalKind>(null);
   const [surgeryId, setSurgeryId] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  if (!anyAction) return null;
 
   const selectedSurgery = surgeries.find((s) => s.id === surgeryId) ?? surgeries[0] ?? null;
   const effectiveSurgeryId = selectedSurgery?.id ?? "";

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { startConsultationQuoteDepositPaymentRequestAction } from "@/lib/actions/financial-os-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import { financialOsClasses, FinancialOsFeedbackText, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
 
 export function FinancialOsDashboardDepositForm(props: { tenantId: string; canMutate: boolean }) {
   const [invoiceId, setInvoiceId] = useState("");

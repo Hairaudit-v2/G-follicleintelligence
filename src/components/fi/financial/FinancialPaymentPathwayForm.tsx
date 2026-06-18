@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { createPaymentPathwayAction } from "@/lib/actions/financial-os-payment-pathway-actions";
-import { financialOsClasses, FinancialOsFeedbackText, financialOsActionFeedback, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
+import { financialOsClasses, FinancialOsFeedbackText, type FinancialOsFeedback } from "@/src/components/fi-admin/financial-os/financialOsUi";
 
 const PATHWAY_TYPE_OPTIONS = [
   { value: "pay_in_full", label: "Pay in full" },

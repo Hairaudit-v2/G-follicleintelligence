@@ -68,12 +68,13 @@ export function SurgeryOsGraftActions({
   );
 
   const allowedActions = GRAFT_ACTIONS.filter((a) => surgeryOsGraftActionAllowed(ctx, a.action));
-  if (!allowedActions.length || surgeries.length === 0) return null;
 
   const [surgeryId, setSurgeryId] = useState(surgeries[0]?.id ?? "");
   const [modal, setModal] = useState<GraftModalKind>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  if (!allowedActions.length || surgeries.length === 0) return null;
 
   const effectiveSurgeryId = surgeryId || surgeries[0]?.id || "";
   const selectedGraft = graftSummary.find((g) => g.surgeryId === effectiveSurgeryId);

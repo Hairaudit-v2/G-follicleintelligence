@@ -17,7 +17,6 @@ import {
   shouldBlockSurgeryPhaseForGraftReconciliation,
   validateGraftCorrection,
   validateGraftCountUpdate,
-  computeGraftCompositionTotal,
   computeTrayHairTotal,
   deriveTrayReviewStatuses,
   requiresLargeCorrectionNote,
