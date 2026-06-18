@@ -727,7 +727,22 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
   };
 
   const { data, error } = await supabase.from("fi_bookings").insert(insertRow).select("*").single();
-  if (error) throw new Error(error.message);
+  if (error) {
+    // DB-level exclusion constraints (fi_bookings_no_room_overlap /
+    // fi_bookings_no_staff_overlap) are the race-safe backstop for the
+    // pre-insert availability check. A lost TOCTOU race surfaces here as
+    // SQLSTATE 23P01 — map it to the same conflict error a 409 route expects.
+    if (error.code === "23P01") {
+      const isStaff = /no_staff_overlap/.test(error.message ?? "");
+      throw new AppointmentConflictError(
+        isStaff
+          ? "This staff member already has an overlapping booking."
+          : "This room already has an overlapping booking.",
+        null
+      );
+    }
+    throw new Error(error.message);
+  }
   const row = mapBookingRow(data as Record<string, unknown>);
 
   if (extras.length > 0) {
