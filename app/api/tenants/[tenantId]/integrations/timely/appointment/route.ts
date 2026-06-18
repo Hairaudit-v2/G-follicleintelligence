@@ -1,14 +1,16 @@
 /**
  * POST /api/tenants/[tenantId]/integrations/timely/appointment
- * Zapier → FI OS booking (Timely appointment id → fi_external_entity_mappings + fi_bookings).
+ * Zapier → FI OS booking lifecycle sync (Timely appointment id → fi_bookings).
  */
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { z } from "zod";
 
 import { assertTimelyWebhookAuthorized, TimelyWebhookAuthError } from "@/src/lib/integrations/timely/timelyWebhookAuth.server";
-import { timelyAppointmentWebhookSchema } from "@/src/lib/integrations/timely/timelyWebhookSchemas";
 import { processTimelyAppointmentWebhook } from "@/src/lib/integrations/timely/timelyAppointmentWebhook.server";
+import { extractTimelyAppointmentEventType } from "@/src/lib/integrations/timely/timelyAppointmentLifecycle";
+import { timelyAppointmentWebhookSchema } from "@/src/lib/integrations/timely/timelyWebhookSchemas";
+import { TIMELY_WEBHOOK_ROUTES, withTimelyWebhookAudit } from "@/src/lib/integrations/timely/timelyWebhookAudit.server";
 
 export const dynamic = "force-dynamic";
 
@@ -23,18 +25,40 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
     const body = await req.json().catch(() => ({}));
     const payload = timelyAppointmentWebhookSchema.parse(body);
 
-    const result = await processTimelyAppointmentWebhook(tenantId, payload);
-    if (!result.ok) {
-      return NextResponse.json({ success: false, error: result.message }, { status: result.status });
+    const audited = await withTimelyWebhookAudit({
+      tenantId,
+      route: TIMELY_WEBHOOK_ROUTES.appointment,
+      payload,
+      eventType: extractTimelyAppointmentEventType(payload) ?? undefined,
+      handler: async () => {
+        const result = await processTimelyAppointmentWebhook(tenantId, payload);
+        if (!result.ok) {
+          return { ok: false, message: result.message, status: result.status };
+        }
+        return {
+          ok: true,
+          value: {
+            booking_id: result.booking_id,
+            action: result.action,
+            lifecycle_event: result.lifecycle_event,
+            ...(result.unchanged ? { unchanged: true } : {}),
+          },
+        };
+      },
+    });
+
+    if (!audited.ok) {
+      return NextResponse.json(
+        { success: false, error: audited.message, event_id: audited.event_id ?? undefined },
+        { status: audited.status }
+      );
     }
 
-    const bodyOut: { success: true; booking_id: string; duplicate?: boolean } = {
+    return NextResponse.json({
       success: true,
-      booking_id: result.booking_id,
-    };
-    if (result.duplicate) bodyOut.duplicate = true;
-
-    return NextResponse.json(bodyOut);
+      event_id: audited.event_id,
+      ...audited.value,
+    });
   } catch (e) {
     if (e instanceof TimelyWebhookAuthError) {
       return NextResponse.json({ success: false, error: e.message }, { status: e.status });

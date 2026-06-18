@@ -24,5 +24,9 @@ export const timelyAppointmentWebhookSchema = z
     end_time: z.string().min(1, "end_time is required."),
     notes: z.string().max(8000).optional(),
     status: z.string().max(120).optional(),
+    /** Explicit lifecycle event (also accepts Zapier aliases via event/event_type/type). */
+    event_type: z.string().max(120).optional(),
+    event: z.string().max(120).optional(),
+    type: z.string().max(120).optional(),
   })
   .strict();

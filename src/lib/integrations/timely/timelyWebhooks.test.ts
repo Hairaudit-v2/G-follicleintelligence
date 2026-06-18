@@ -232,8 +232,9 @@ function bookingRow(id: string): FiBookingRow {
   };
 }
 
-function makeAppointmentMockSupabase(mode: "no_patient" | "create" | "duplicate"): SupabaseClient {
+function makeAppointmentMockSupabase(mode: "no_patient" | "create" | "existing", existingRow?: FiBookingRow): SupabaseClient {
   let insertedBookingId: string | null = null;
+  const existingBooking = existingRow ?? bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
 
   const mappingSelect = {
     eq: () => ({
@@ -241,8 +242,8 @@ function makeAppointmentMockSupabase(mode: "no_patient" | "create" | "duplicate"
         eq: () => ({
           eq: () => ({
             maybeSingle: async () => {
-              if (mode === "duplicate") {
-                return { data: { internal_id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd" }, error: null };
+              if (mode === "existing") {
+                return { data: { internal_id: existingBooking.id }, error: null };
               }
               if (mode === "create" && insertedBookingId) {
                 return { data: { internal_id: insertedBookingId }, error: null };
@@ -305,6 +306,20 @@ function makeAppointmentMockSupabase(mode: "no_patient" | "create" | "duplicate"
     }),
   };
 
+  const bookingSelect = {
+    eq: () => ({
+      eq: () => ({
+        maybeSingle: async () => ({ data: existingBooking, error: null }),
+      }),
+    }),
+  };
+
+  const bookingUpdate = {
+    eq: () => ({
+      eq: async () => ({ error: null }),
+    }),
+  };
+
   const from = (table: string) => {
     if (table === "fi_tenants") return tenantOk;
     if (table === "fi_external_entity_mappings") {
@@ -320,6 +335,12 @@ function makeAppointmentMockSupabase(mode: "no_patient" | "create" | "duplicate"
     if (table === "fi_patients") return { select: () => patientRow };
     if (table === "fi_clinics") return { select: () => clinics };
     if (table === "fi_services") return { select: () => services };
+    if (table === "fi_bookings") {
+      return {
+        select: () => bookingSelect,
+        update: () => bookingUpdate,
+      };
+    }
     throw new Error(`unexpected table ${table}`);
   };
 
@@ -334,11 +355,38 @@ describe("Timely appointment webhook (mocked data path)", () => {
     end_time: "2026-06-10T13:00:00.000Z",
   });
 
-  it("returns 404 when patient mapping missing", async () => {
-    const r = await processTimelyAppointmentWebhook(TENANT, payloadBase, makeAppointmentMockSupabase("no_patient"), {
+  function bookingRowForPayload(id: string): FiBookingRow {
+    return {
+      ...bookingRow(id),
+      start_at: payloadBase.start_time,
+      end_at: payloadBase.end_time,
+      metadata: {
+        source_system: "timely",
+        external_appointment_id: payloadBase.external_appointment_id,
+        external_patient_id: payloadBase.external_patient_id,
+      },
+    };
+  }
+
+  function appointmentPorts(overrides: Partial<Parameters<typeof processTimelyAppointmentWebhook>[3]> = {}) {
+    const existing = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    return {
       loadActiveStaffForTenant: async () => [],
-      createBooking: async () => bookingRow("x"),
-    });
+      createBooking: async () => existing,
+      updateBooking: async () => existing,
+      loadBooking: async () => existing,
+      syncBookingReminders: async () => {},
+      ...overrides,
+    };
+  }
+
+  it("returns 404 when patient mapping missing", async () => {
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("no_patient"),
+      appointmentPorts()
+    );
     assert.equal(r.ok, false);
     if (r.ok) return;
     assert.equal(r.status, 404);
@@ -347,32 +395,104 @@ describe("Timely appointment webhook (mocked data path)", () => {
 
   it("creates booking and returns id", async () => {
     let created = 0;
-    const r = await processTimelyAppointmentWebhook(TENANT, payloadBase, makeAppointmentMockSupabase("create"), {
-      loadActiveStaffForTenant: async () => [],
-      createBooking: async () => {
-        created += 1;
-        return bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-      },
-    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("create"),
+      appointmentPorts({
+        createBooking: async () => {
+          created += 1;
+          return bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+        },
+      })
+    );
     assert.equal(r.ok, true);
     if (!r.ok) return;
     assert.equal(r.booking_id, "dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    assert.equal(r.action, "created");
     assert.equal(created, 1);
   });
 
-  it("is idempotent when mapping already exists", async () => {
+  it("updates existing booking when mapping already exists", async () => {
     let created = 0;
-    const r = await processTimelyAppointmentWebhook(TENANT, payloadBase, makeAppointmentMockSupabase("duplicate"), {
-      loadActiveStaffForTenant: async () => [],
-      createBooking: async () => {
-        created += 1;
-        return bookingRow("new-booking");
-      },
+    let updated = 0;
+    const rescheduled = timelyAppointmentWebhookSchema.parse({
+      ...payloadBase,
+      start_time: "2026-06-10T14:00:00.000Z",
+      end_time: "2026-06-10T15:00:00.000Z",
+      event_type: "appointment_rescheduled",
     });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      rescheduled,
+      makeAppointmentMockSupabase("existing"),
+      appointmentPorts({
+        createBooking: async () => {
+          created += 1;
+          return bookingRow("new-booking");
+        },
+        updateBooking: async (params) => {
+          updated += 1;
+          assert.equal(params.startAt, "2026-06-10T14:00:00.000Z");
+          assert.equal(params.endAt, "2026-06-10T15:00:00.000Z");
+          return bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+        },
+      })
+    );
     assert.equal(r.ok, true);
     if (!r.ok) return;
-    assert.equal(r.duplicate, true);
+    assert.equal(r.action, "updated");
+    assert.equal(r.lifecycle_event, "appointment_rescheduled");
     assert.equal(r.booking_id, "dddddddd-dddd-4ddd-8ddd-dddddddddddd");
     assert.equal(created, 0);
+    assert.equal(updated, 1);
+  });
+
+  it("applies cancellation idempotently for existing booking", async () => {
+    let updated = 0;
+    const cancelled = timelyAppointmentWebhookSchema.parse({
+      ...payloadBase,
+      status: "Cancelled",
+      event_type: "appointment_cancelled",
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      cancelled,
+      makeAppointmentMockSupabase("existing"),
+      appointmentPorts({
+        createBooking: async () => bookingRow("new-booking"),
+        updateBooking: async () => {
+          updated += 1;
+          return bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.action, "updated");
+    assert.equal(r.lifecycle_event, "appointment_cancelled");
+    assert.equal(updated, 0);
+  });
+
+  it("returns unchanged when existing booking fields match", async () => {
+    let updated = 0;
+    const row = bookingRowForPayload("dddddddd-dddd-4ddd-8ddd-dddddddddddd");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payloadBase,
+      makeAppointmentMockSupabase("existing", row),
+      appointmentPorts({
+        loadBooking: async () => row,
+        createBooking: async () => bookingRow("new-booking"),
+        updateBooking: async () => {
+          updated += 1;
+          return row;
+        },
+      })
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.unchanged, true);
+    assert.equal(updated, 0);
   });
 });

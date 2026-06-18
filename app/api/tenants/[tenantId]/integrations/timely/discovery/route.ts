@@ -8,7 +8,8 @@ import { z } from "zod";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertTimelyWebhookAuthorized, TimelyWebhookAuthError } from "@/src/lib/integrations/timely/timelyWebhookAuth.server";
-import { insertTimelyZapierDiscoveryWebhookEvent } from "@/src/lib/integrations/timely/timelyWebhookEvents.server";
+import { extractTimelyDiscoveryEventType } from "@/src/lib/integrations/timely/timelyWebhookEvents.server";
+import { TIMELY_WEBHOOK_ROUTES, withTimelyWebhookAudit } from "@/src/lib/integrations/timely/timelyWebhookAudit.server";
 
 export const dynamic = "force-dynamic";
 
@@ -33,15 +34,29 @@ export async function POST(req: Request, ctx: { params: Promise<{ tenantId: stri
       return NextResponse.json({ success: false, error: "Expected a JSON body." }, { status: 400 });
     }
 
-    const inserted = await insertTimelyZapierDiscoveryWebhookEvent({ tenantId, payload: body, supabase });
-    if (!inserted.ok) {
-      return NextResponse.json({ success: false, error: inserted.message }, { status: inserted.status });
+    const audited = await withTimelyWebhookAudit({
+      tenantId,
+      route: TIMELY_WEBHOOK_ROUTES.discovery,
+      payload: body,
+      eventType: extractTimelyDiscoveryEventType(body),
+      supabase,
+      handler: async () => ({
+        ok: true as const,
+        value: { message: "Timely Zapier payload received" },
+      }),
+    });
+
+    if (!audited.ok) {
+      return NextResponse.json(
+        { success: false, error: audited.message, event_id: audited.event_id ?? undefined },
+        { status: audited.status }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      event_id: inserted.id,
-      message: "Timely Zapier payload received",
+      event_id: audited.event_id,
+      message: audited.value.message,
     });
   } catch (e) {
     if (e instanceof TimelyWebhookAuthError) {
