@@ -63,6 +63,10 @@ export const EVOLVED_PERTH_ELIGIBILITY_PROFILES: Record<Exclude<EligibilityProfi
 
 const BOOKING_TYPE_PROFILE: Partial<Record<string, EligibilityProfileId>> = {
   consultation: "consult",
+  hair_transplant_consultation: "consult",
+  trichology: "consult",
+  beard_transplant_consultation: "consult",
+  eyebrow_transplant_consultation: "consult",
   follow_up: "consult",
   review: "consult",
   prp: "regenerative",

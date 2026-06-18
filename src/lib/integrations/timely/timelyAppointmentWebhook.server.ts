@@ -13,6 +13,7 @@ import {
   mapTimelyStatusToBookingStatus,
   type TimelyAppointmentLifecycleEvent,
 } from "./timelyAppointmentLifecycle";
+import { deriveTimelyServiceBookingType } from "./timelyServiceBookingType";
 import { TimelyWebhookHttpError } from "./timelyWebhookHttp.server";
 import {
   resolveTimelyBookingLead,
@@ -100,17 +101,22 @@ async function resolveServiceBookingType(
 
   const { data, error } = await supabase
     .from("fi_services")
-    .select("booking_type, name")
+    .select("booking_type, name, category")
     .eq("tenant_id", tenantId.trim())
     .eq("is_active", true);
   if (error) throw new Error(error.message);
-  const rows = (data ?? []) as { booking_type: string; name: string }[];
+  const rows = (data ?? []) as { booking_type: string | null; name: string; category: string | null }[];
   const lower = name.toLowerCase();
   const match = rows.find((r) => r.name.trim().toLowerCase() === lower);
   if (!match) {
     throw new TimelyWebhookHttpError(422, `Service not found for name: ${name}`);
   }
-  return String(match.booking_type).trim();
+  try {
+    return deriveTimelyServiceBookingType(match);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Cannot derive booking_type for service.";
+    throw new TimelyWebhookHttpError(422, msg);
+  }
 }
 
 /**

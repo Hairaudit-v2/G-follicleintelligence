@@ -241,9 +241,16 @@ function bookingRow(id: string): FiBookingRow {
 function makeAppointmentMockSupabase(
   mode: "no_patient" | "create" | "existing",
   existingRow?: FiBookingRow,
-  opts?: { serviceBookingType?: string; crmLeads?: { id: string; status: string; updated_at?: string }[] }
+  opts?: {
+    serviceBookingType?: string | null;
+    serviceName?: string;
+    serviceCategory?: string;
+    crmLeads?: { id: string; status: string; updated_at?: string }[];
+  }
 ): SupabaseClient {
-  const serviceBookingType = opts?.serviceBookingType ?? "consultation";
+  const serviceName = opts?.serviceName ?? "Consultation";
+  const serviceCategory = opts?.serviceCategory ?? "Consultation";
+  const serviceBookingType = opts?.serviceBookingType !== undefined ? opts.serviceBookingType : "consultation";
   const crmLeads = opts?.crmLeads ?? [];
   let insertedBookingId: string | null = null;
   let claimed = false;
@@ -305,7 +312,7 @@ function makeAppointmentMockSupabase(
   const services = {
     eq: () => ({
       eq: async () => ({
-        data: [{ booking_type: serviceBookingType, name: "Consultation" }],
+        data: [{ booking_type: serviceBookingType, name: serviceName, category: serviceCategory }],
         error: null,
       }),
     }),
@@ -774,6 +781,113 @@ describe("Timely appointment webhook — ConsultationOS workspace (Phase B)", ()
     assert.equal(r.consultation_id, null);
     assert.equal(r.consultation_action, "skipped");
     assert.equal(consultationCreates, 0);
+  });
+});
+
+describe("Timely appointment webhook — booking_type derivation from service", () => {
+  const CONSULTATION_ID = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+
+  const hairTransplantPayload = timelyAppointmentWebhookSchema.parse({
+    external_appointment_id: "test_appt_real_001",
+    external_patient_id: "patient-ext-1",
+    service_name: "Hair Transplant Consultation",
+    staff_name: "Dr Test",
+    start_time: "2026-06-18T09:00:00Z",
+    end_time: "2026-06-18T09:30:00Z",
+    status: "booked",
+  });
+
+  function portsForBookingTypeCapture(expectedBookingType: string) {
+    let capturedBookingType: string | null = null;
+    const row = {
+      ...bookingRow("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
+      start_at: hairTransplantPayload.start_time,
+      end_at: hairTransplantPayload.end_time,
+      booking_type: expectedBookingType,
+      booking_status: "scheduled",
+      metadata: {
+        source_system: "timely",
+        external_appointment_id: hairTransplantPayload.external_appointment_id,
+        external_patient_id: hairTransplantPayload.external_patient_id,
+        service_name: hairTransplantPayload.service_name,
+      },
+    };
+
+    return {
+      capturedBookingType: () => capturedBookingType,
+      ports: {
+        loadActiveStaffForTenant: async () => [],
+        createBooking: async (params: { bookingType: string }) => {
+          capturedBookingType = params.bookingType;
+          return row;
+        },
+        updateBooking: async () => row,
+        loadBooking: async () => row,
+        syncBookingReminders: async () => {},
+        createConsultationFromBooking: async () => ({
+          consultation: { id: CONSULTATION_ID },
+          created: true,
+        }),
+        advanceCrmLeadOnTimelyConsultationBooking: async () => ({ action: "skipped" as const, stageSlug: null }),
+      },
+    };
+  }
+
+  it("derives hair_transplant_consultation when fi_services.booking_type is null", async () => {
+    const { capturedBookingType, ports } = portsForBookingTypeCapture("hair_transplant_consultation");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      hairTransplantPayload,
+      makeAppointmentMockSupabase("create", undefined, {
+        serviceBookingType: null,
+        serviceName: "Hair Transplant Consultation",
+        serviceCategory: "Consultation",
+      }),
+      ports
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok || "duplicate" in r) return;
+    assert.equal(capturedBookingType(), "hair_transplant_consultation");
+    assert.equal(r.consultation_id, CONSULTATION_ID);
+    assert.equal(r.consultation_action, "created");
+  });
+
+  it("prefers explicit fi_services.booking_type over name derivation", async () => {
+    const { capturedBookingType, ports } = portsForBookingTypeCapture("consultation");
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      hairTransplantPayload,
+      makeAppointmentMockSupabase("create", undefined, {
+        serviceBookingType: "consultation",
+        serviceName: "Hair Transplant Consultation",
+        serviceCategory: "Consultation",
+      }),
+      ports
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok || "duplicate" in r) return;
+    assert.equal(capturedBookingType(), "consultation");
+  });
+
+  it("returns 422 when service exists but booking_type cannot be derived", async () => {
+    const payload = timelyAppointmentWebhookSchema.parse({
+      ...hairTransplantPayload,
+      service_name: "Mystery Treatment",
+    });
+    const r = await processTimelyAppointmentWebhook(
+      TENANT,
+      payload,
+      makeAppointmentMockSupabase("create", undefined, {
+        serviceBookingType: null,
+        serviceName: "Mystery Treatment",
+        serviceCategory: "Treatment",
+      }),
+      portsForBookingTypeCapture("prp").ports
+    );
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.equal(r.status, 422);
+    assert.match(r.message, /Cannot derive booking_type/);
   });
 });
 

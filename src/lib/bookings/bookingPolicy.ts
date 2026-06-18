@@ -6,6 +6,10 @@ import type { FiBookingRow } from "./types";
 
 export const BOOKING_TYPES = [
   "consultation",
+  "hair_transplant_consultation",
+  "trichology",
+  "beard_transplant_consultation",
+  "eyebrow_transplant_consultation",
   "prp",
   "prf",
   "mesotherapy",
