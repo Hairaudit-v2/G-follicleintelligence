@@ -117,7 +117,7 @@ export function FiMarketingPlatformProgressSection() {
         <SectionHeading id={`${c.id}-heading`} eyebrow={c.eyebrow} title={c.headline} description={c.description} />
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {SNAPSHOT_METRICS.map((metric, index) => (
+          {SNAPSHOT_METRICS.map((metric) => (
             <GlassCard
               key={metric.label}
               className="border-white/[0.07] !p-5 sm:!p-6"
