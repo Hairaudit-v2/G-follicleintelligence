@@ -138,10 +138,12 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "financial-os",
     name: "FinancialOS",
-    completionPercent: 74,
-    stage: "Deposits · installments · finance apps",
-    description: "Payment pathways, deposit rules, finance applications, and revenue dashboards wired to case flow.",
-    status: "Active Development",
+    completionPercent: 88,
+    stage: "Phase 5 · executive finance intelligence",
+    description:
+      "Master ledger, surgery profitability, revenue attribution, accounts receivable, and executive forecasting — plus payment pathways, finance applications, and the FI admin financial command centre.",
+    status: "Pilot Ready",
+    learnMoreHref: "/platform/progress#progress-financial-os",
   },
   {
     id: "surgery-os",
@@ -225,7 +227,7 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
     tag: "financial-os",
     title: "FinancialOS enterprise intelligence layer shipped",
     summary:
-      "Added master financial ledger, surgery profitability, revenue attribution, accounts receivable, and executive finance forecasting across FI OS.",
+      "Added master financial ledger, surgery profitability, revenue attribution, accounts receivable, and executive finance forecasting across FI OS — with command centre pulse metrics, AR work queue, cost models, and case-level economics cards.",
     modules: ["FinancialOS"],
   },
   {

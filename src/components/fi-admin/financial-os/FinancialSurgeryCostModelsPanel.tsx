@@ -202,7 +202,7 @@ export function FinancialSurgeryCostModelForm(props: { tenantId: string; canMuta
           <button type="submit" disabled={pending} className={financialOsClasses.primaryButton}>
             {pending ? "Saving…" : "Create & activate"}
           </button>
-          <FinancialOsFeedbackText feedback={feedback} />
+          <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} />
         </div>
       </form>
     </FinancialOsFormPanel>
@@ -240,7 +240,7 @@ export function FinancialSurgeryCostModelHistory(props: {
 
   return (
     <div className="space-y-4">
-      {feedback ? <FinancialOsFeedbackText feedback={feedback} /> : null}
+      {feedback ? <FinancialOsFeedbackText message={feedback.message} tone={feedback.tone} /> : null}
       {props.groups.length === 0 ? (
         <p className={financialOsClasses.mutedMeta}>No cost models yet. Create one above to enable profitability snapshots.</p>
       ) : null}

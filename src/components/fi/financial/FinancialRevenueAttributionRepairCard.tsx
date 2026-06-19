@@ -153,7 +153,7 @@ export function FinancialRevenueAttributionRepairCard(props: {
           </div>
         ) : null}
 
-        <FinancialOsFeedbackText feedback={feedback} className="mt-2" />
+        <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} className="mt-2" />
       </div>
     </div>
   );

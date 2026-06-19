@@ -176,7 +176,7 @@ export function FinancialSurgeryEconomicsCard(props: {
 
       {feedback ? (
         <div className="mt-2">
-          <FinancialOsFeedbackText feedback={feedback} />
+          <FinancialOsFeedbackText message={feedback?.message ?? null} tone={feedback?.tone} />
         </div>
       ) : null}
 
