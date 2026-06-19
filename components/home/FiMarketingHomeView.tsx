@@ -17,6 +17,7 @@ import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthor
 import { FiMarketingComparisonSection } from "@/components/home/FiMarketingComparisonSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
+import { FiMarketingPlatformProgressSection } from "@/components/home/FiMarketingPlatformProgressSection";
 import { PartnersInvestorsStrip } from "@/components/marketing/PartnersInvestorsStrip";
 
 const GlobalHairIntelligenceSectionClient = dynamic(
@@ -367,6 +368,8 @@ export function FiMarketingHomeView() {
           <EcosystemArchitectureSection modules={c.onePlatform.modules} caption={c.onePlatform.architectureCaption} />
         </FadeIn>
       </Section>
+
+      <FiMarketingPlatformProgressSection />
 
       <FiMarketingProductShowcaseSection section={c.productShowcase} />
 

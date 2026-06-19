@@ -24,6 +24,7 @@ export type FooterNavLink = { label: string; href: string };
 /** Public footer — primary OS story routes */
 export const FOOTER_PLATFORM: FooterNavLink[] = [
   { label: "Platform", href: "/platform" },
+  { label: "Platform progress", href: "/platform/progress" },
   { label: "Surgeons", href: "/surgeons" },
   { label: "Clinic owners", href: "/clinic-owners" },
   { label: "Enterprise", href: "/enterprise" },
