@@ -7,13 +7,16 @@ export const ENTERPRISE_DEMO_CODE_NAME = "TITAN";
 
 export const ENTERPRISE_DEMO_OPERATING_MODE = "enterprise_simulation";
 
-export const ENTERPRISE_DEMO_VERSION = "phase_1d";
+export const ENTERPRISE_DEMO_VERSION = "phase_1e";
 
 export const ENTERPRISE_DEMO_CASE_KEY_METADATA = "demo_case_key";
 export const ENTERPRISE_DEMO_BOOKING_KEY_METADATA = "demo_booking_key";
 export const ENTERPRISE_DEMO_SURGERY_KEY_METADATA = "demo_surgery_key";
 export const ENTERPRISE_DEMO_GRAFT_SESSION_KEY_METADATA = "demo_graft_session_key";
 export const ENTERPRISE_DEMO_GRAFT_EVENT_KEY_METADATA = "demo_graft_event_key";
+export const ENTERPRISE_DEMO_IMAGE_KEY_METADATA = "demo_image_key";
+export const ENTERPRISE_DEMO_AUDIT_KEY_METADATA = "demo_audit_key";
+export const ENTERPRISE_DEMO_PROTOCOL_SESSION_KEY_METADATA = "demo_protocol_session_key";
 
 export const ENTERPRISE_DEMO_PURPOSE = "enterprise_franchise_sales";
 

@@ -48,6 +48,16 @@ Mode: enterprise_simulation
 - Links consultations to cases where schema allows
 - No dashboard work yet
 
+## Phase 1E
+
+- Synthetic ImagingOS + AuditOS demo data for 96 surgery cases (metadata-only image paths; no real files required)
+- Idempotent `fi_patient_images` via `demo_image_key`, `fi_imaging_protocol_sessions` via case + `titan_surgery_outcome` template, `fi_patient_outcome_measurements` via `demo_audit_key`
+- Standard protocol slots: front, left, right, top, crown, donor, immediate_post_op, graft_tray, 3_month, 6_month, 12_month
+- Clinic imaging completion profiles: Sydney excellent, London complete with quality flags, Bangkok missing follow-up, Dubai graft-tray mismatch
+- Outcome metrics: graft survival estimate, density change, donor recovery, hairline design, patient satisfaction, audit status
+- Demo-only metadata flags (`enterprise_demo_image`, `enterprise_demo_audit`, `enterprise_demo_protocol_session`)
+- No dashboard work yet
+
 ## Clinics
 
 - London Central Institute
@@ -72,6 +82,5 @@ npm run seed:enterprise-demo
 
 ## Future Phases
 
-Phase 1D: surgeries and graft intelligence  
-Phase 1E: global command centre dashboard  
-Phase 1F: operational anomalies and franchise risk engine
+Phase 1F: global command centre dashboard  
+Phase 1G: operational anomalies and franchise risk engine

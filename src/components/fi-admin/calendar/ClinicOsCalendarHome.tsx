@@ -7,9 +7,10 @@ import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard"
 import { FiSection } from "@/src/components/fi-design/FiSection";
 import { FiStatusBadge } from "@/src/components/fi-design/FiStatusBadge";
 import type { ClinicOsCalendarLiveBookingDTO, ClinicOsCalendarReadOnlyPayload } from "@/src/lib/fiAdmin/clinicOsCalendarTypes";
+import { displayCalendarTimezoneSubtitle, formatTimeRangeInTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { cn } from "@/lib/utils";
 
-/** Calendar body starts at 8:00; last slot ends at 6:00pm (18:00). Preview uses local wall clock; live uses UTC (see Stage 2A). */
+/** Calendar body starts at 8:00; last slot ends at 6:00pm (18:00). Preview and live grids use clinic-local wall clock. */
 const DAY_START_HOUR = 8;
 const DAY_END_HOUR = 18;
 const HOUR_COUNT = DAY_END_HOUR - DAY_START_HOUR;
@@ -107,22 +108,14 @@ const PLACEHOLDER_APPOINTMENTS: PlaceholderAppointment[] = [
   },
 ];
 
-const HOUR_ROWS = Array.from({ length: HOUR_COUNT }, (_, i) => DAY_START_HOUR + i);
-
 function formatHourLabel(h: number): string {
   const d = new Date();
   d.setHours(h, 0, 0, 0);
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(d);
 }
 
-/** Hour labels aligned with UTC grid (live bookings). */
-function formatHourLabelUtc(h: number): string {
-  const d = new Date(Date.UTC(2000, 0, 1, h, 0, 0, 0));
-  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", timeZone: "UTC" }).format(d);
-}
-
-function formatClockFromDayStartLocal(startMin: number): string {
-  const total = DAY_START_HOUR * 60 + startMin;
+function formatClockFromDayStartLocal(startMin: number, dayStartHour = DAY_START_HOUR): string {
+  const total = dayStartHour * 60 + startMin;
   const h = Math.floor(total / 60);
   const m = total % 60;
   const d = new Date();
@@ -130,18 +123,9 @@ function formatClockFromDayStartLocal(startMin: number): string {
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(d);
 }
 
-function formatTimeRangeLocal(startMin: number, durationMin: number): string {
+function formatTimeRangeLocal(startMin: number, durationMin: number, dayStartHour = DAY_START_HOUR): string {
   const endMin = startMin + durationMin;
-  return `${formatClockFromDayStartLocal(startMin)} – ${formatClockFromDayStartLocal(endMin)}`;
-}
-
-function formatUtcTimeRange(isoStart: string, isoEnd: string): string {
-  const opts: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "UTC",
-  };
-  return `${new Date(isoStart).toLocaleTimeString(undefined, opts)} – ${new Date(isoEnd).toLocaleTimeString(undefined, opts)} UTC`;
+  return `${formatClockFromDayStartLocal(startMin, dayStartHour)} – ${formatClockFromDayStartLocal(endMin, dayStartHour)}`;
 }
 
 function PreviewAppointmentBlock({ appt }: { appt: PlaceholderAppointment }) {
@@ -168,15 +152,25 @@ function PreviewAppointmentBlock({ appt }: { appt: PlaceholderAppointment }) {
   );
 }
 
-function LiveBookingBlock({ appt }: { appt: ClinicOsCalendarLiveBookingDTO }) {
-  const topPct = (appt.startMin / TOTAL_MINUTES) * 100;
-  const heightPct = (appt.durationMin / TOTAL_MINUTES) * 100;
+function LiveBookingBlock({
+  appt,
+  totalMinutes,
+  calendarTimezone,
+}: {
+  appt: ClinicOsCalendarLiveBookingDTO;
+  totalMinutes: number;
+  calendarTimezone: string;
+}) {
+  const topPct = (appt.startMin / totalMinutes) * 100;
+  const heightPct = (appt.durationMin / totalMinutes) * 100;
 
   const inner = (
     <>
       <p className="text-[11px] font-semibold leading-tight tracking-tight">{appt.title}</p>
       <p className="mt-0.5 truncate text-[10px] font-medium text-slate-700/95">{appt.patientName}</p>
-      <p className="mt-0.5 text-[10px] tabular-nums text-slate-600">{formatUtcTimeRange(appt.startTime, appt.endTime)}</p>
+      <p className="mt-0.5 text-[10px] tabular-nums text-slate-600">
+        {formatTimeRangeInTimezone(appt.startTime, appt.endTime, calendarTimezone)}
+      </p>
       <p className="mt-0.5 truncate text-[9px] text-slate-600">{appt.appointmentType}</p>
       {appt.staffName ? (
         <p className="mt-0.5 truncate text-[9px] text-slate-600">Staff: {appt.staffName}</p>
@@ -238,13 +232,18 @@ type ClinicOsCalendarHomeProps = {
 };
 
 /**
- * Clinic OS calendar landing: Stage 1J layout; Stage 2A adds read-only live bookings for today (UTC)
- * when rows exist, otherwise preview placeholders only.
+ * Clinic OS calendar landing: Stage 1J layout; Stage 2A adds read-only live bookings for today's
+ * clinic-local day when rows exist, otherwise preview placeholders only.
  */
 export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }: ClinicOsCalendarHomeProps) {
   const base = `/fi-admin/${tenantId.trim()}`;
   const hasLive = calendarReadOnly.liveBookings.length > 0;
-  const formatHour = hasLive ? formatHourLabelUtc : formatHourLabel;
+  const dayStartHour = hasLive ? calendarReadOnly.dayStartHour : DAY_START_HOUR;
+  const dayEndHour = hasLive ? calendarReadOnly.dayEndHour : DAY_END_HOUR;
+  const hourCount = Math.max(1, dayEndHour - dayStartHour);
+  const totalMinutes = hourCount * 60;
+  const gridBodyPx = hourCount * HOUR_ROW_PX;
+  const hourRows = Array.from({ length: hourCount }, (_, i) => dayStartHour + i);
 
   return (
     <div className="space-y-4">
@@ -292,8 +291,11 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
 
           {hasLive ? (
             <p className="mb-3 text-xs leading-snug text-slate-600">
-              Day window matches FI booking calendar conventions: <span className="font-medium">UTC {calendarReadOnly.dayUtcYmd}</span>{" "}
-              (8:00–18:00 UTC on the grid). Drag-and-drop and in-grid creation are disabled.
+              Clinic day{" "}
+              <span className="font-medium">
+                {calendarReadOnly.dayYmd} ({displayCalendarTimezoneSubtitle(calendarReadOnly.calendarTimezone)})
+              </span>
+              , grid {dayStartHour}:00–{dayEndHour}:00. Drag-and-drop and in-grid creation are disabled.
             </p>
           ) : null}
 
@@ -326,19 +328,19 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
                 className="grid border-b border-slate-200 bg-white"
                 style={{
                   gridTemplateColumns: `3.5rem repeat(${RESOURCE_COLUMNS.length}, minmax(6.5rem, 1fr))`,
-                  minHeight: GRID_BODY_PX,
+                  minHeight: gridBodyPx,
                 }}
                 role="list"
                 aria-label={hasLive ? "Read-only multi-column schedule for today" : "Sample multi-column schedule for layout preview"}
               >
                 <div className="relative border-r border-slate-200">
-                  {HOUR_ROWS.map((h) => (
+                  {hourRows.map((h) => (
                     <div
                       key={h}
                       className="border-b border-slate-100 pr-1.5 pt-0.5 text-right text-[11px] font-medium tabular-nums text-slate-500 last:border-b-0"
                       style={{ height: HOUR_ROW_PX }}
                     >
-                      {formatHour(h)}
+                      {formatHourLabel(h)}
                     </div>
                   ))}
                 </div>
@@ -347,18 +349,25 @@ export function ClinicOsCalendarHome({ tenantId, showCrmNav, calendarReadOnly }:
                   <div
                     key={col.id}
                     className="relative border-r border-slate-100 bg-slate-50/20 last:border-r-0"
-                    style={{ minHeight: GRID_BODY_PX }}
+                    style={{ minHeight: gridBodyPx }}
                   >
                     <div className="pointer-events-none absolute inset-0 flex flex-col">
-                      {HOUR_ROWS.map((h) => (
+                      {hourRows.map((h) => (
                         <div key={h} className="shrink-0 border-b border-slate-100/90" style={{ height: HOUR_ROW_PX }} />
                       ))}
                     </div>
-                    <div className="relative z-[1]" style={{ height: GRID_BODY_PX }}>
+                    <div className="relative z-[1]" style={{ height: gridBodyPx }}>
                       {hasLive
                         ? calendarReadOnly.liveBookings
                             .filter((a) => a.column === col.id)
-                            .map((appt) => <LiveBookingBlock key={appt.id} appt={appt} />)
+                            .map((appt) => (
+                              <LiveBookingBlock
+                                key={appt.id}
+                                appt={appt}
+                                totalMinutes={totalMinutes}
+                                calendarTimezone={calendarReadOnly.calendarTimezone}
+                              />
+                            ))
                         : PLACEHOLDER_APPOINTMENTS.filter((a) => a.column === col.id).map((appt) => (
                             <PreviewAppointmentBlock key={appt.id} appt={appt} />
                           ))}

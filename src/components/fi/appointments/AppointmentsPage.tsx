@@ -71,6 +71,7 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
           query={query}
           clinicalStaffOptions={operator.clinicalStaffOptions}
           clinics={operator.clinics}
+          calendarTimezone={operator.calendarTimezone}
         />
       ) : null}
 

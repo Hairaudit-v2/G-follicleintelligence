@@ -6,8 +6,9 @@ import { Phone } from "lucide-react";
 import { QuickCallInBookingModal } from "@/src/components/fi/appointments/QuickCallInBookingModal";
 import { QUICK_CALL_IN_DEFAULT_TIMEZONE } from "@/src/lib/calendar/quickCallInConstants";
 
-export function TenantHomeQuickCallIn(props: { tenantId: string }) {
-  const { tenantId } = props;
+export function TenantHomeQuickCallIn(props: { tenantId: string; calendarTimezone?: string | null }) {
+  const { tenantId, calendarTimezone } = props;
+  const tz = calendarTimezone?.trim() || QUICK_CALL_IN_DEFAULT_TIMEZONE;
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,7 +21,7 @@ export function TenantHomeQuickCallIn(props: { tenantId: string }) {
         <Phone className="h-4 w-4 shrink-0" aria-hidden />
         New call-in booking
       </button>
-      <QuickCallInBookingModal tenantId={tenantId} open={open} onClose={() => setOpen(false)} calendarTimezone={QUICK_CALL_IN_DEFAULT_TIMEZONE} />
+      <QuickCallInBookingModal tenantId={tenantId} open={open} onClose={() => setOpen(false)} calendarTimezone={tz} />
     </>
   );
 }

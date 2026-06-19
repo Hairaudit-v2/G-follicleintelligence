@@ -214,7 +214,9 @@ export function FiOsControlCentreHome(props: {
           ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {data.canQuickCallIn ? <TenantHomeQuickCallIn tenantId={data.tenantId} /> : null}
+          {data.canQuickCallIn ? (
+            <TenantHomeQuickCallIn tenantId={data.tenantId} calendarTimezone={data.operationalDay.calendarTimezone} />
+          ) : null}
           {showCalendarShortcut ? (
             <Link
               href={`${base}/calendar`}

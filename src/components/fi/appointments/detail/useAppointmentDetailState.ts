@@ -43,14 +43,16 @@ export function useAppointmentDetailState(
 
   const [payload, setPayload] = useState(initialPayload);
   const booking = payload.booking;
+  const calendarTimezone = payload.calendarTimezone;
   const leadId = booking.lead_id?.trim() || null;
 
   useEffect(() => {
     setPayload(initialPayload);
     const b = initialPayload.booking;
+    const tz = initialPayload.calendarTimezone;
     setDescription(b.description ?? "");
-    setStartLocal(toDatetimeLocalValue(b.start_at));
-    setEndLocal(toDatetimeLocalValue(b.end_at));
+    setStartLocal(toDatetimeLocalValue(b.start_at, tz));
+    setEndLocal(toDatetimeLocalValue(b.end_at, tz));
     setBookingStatus(b.booking_status);
     setGraftCountEstimate(initialPayload.procedure.graft_count_estimate ?? "");
     setDonorArea(initialPayload.procedure.donor_area ?? "");
@@ -76,8 +78,8 @@ export function useAppointmentDetailState(
   const [procedureErr, setProcedureErr] = useState<string | null>(null);
 
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
-  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(booking.start_at));
-  const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(booking.end_at));
+  const [startLocal, setStartLocal] = useState(toDatetimeLocalValue(booking.start_at, calendarTimezone));
+  const [endLocal, setEndLocal] = useState(toDatetimeLocalValue(booking.end_at, calendarTimezone));
   const [bookingStatus, setBookingStatus] = useState(booking.booking_status);
   const [rescheduleBusy, setRescheduleBusy] = useState(false);
   const [rescheduleErr, setRescheduleErr] = useState<string | null>(null);
@@ -147,9 +149,10 @@ export function useAppointmentDetailState(
       postOpTracking: prev.postOpTracking,
     }));
     const b = r.data.booking;
+    const tz = r.data.calendarTimezone;
     setDescription(b.description ?? "");
-    setStartLocal(toDatetimeLocalValue(b.start_at));
-    setEndLocal(toDatetimeLocalValue(b.end_at));
+    setStartLocal(toDatetimeLocalValue(b.start_at, tz));
+    setEndLocal(toDatetimeLocalValue(b.end_at, tz));
     setBookingStatus(b.booking_status);
     setGraftCountEstimate(r.data.procedure.graft_count_estimate ?? "");
     setDonorArea(r.data.procedure.donor_area ?? "");
@@ -237,8 +240,8 @@ export function useAppointmentDetailState(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!canMutate) return;
-      const startIso = fromDatetimeLocalValue(startLocal);
-      const endIso = fromDatetimeLocalValue(endLocal);
+      const startIso = fromDatetimeLocalValue(startLocal, calendarTimezone);
+      const endIso = fromDatetimeLocalValue(endLocal, calendarTimezone);
       if (!startIso || !endIso) {
         setRescheduleErr("Start and end times are required.");
         return;
@@ -272,7 +275,7 @@ export function useAppointmentDetailState(
         setRescheduleBusy(false);
       }
     },
-    [canMutate, startLocal, endLocal, bookingStatus, booking, tenantId, router]
+    [canMutate, startLocal, endLocal, bookingStatus, booking, tenantId, router, calendarTimezone]
   );
 
   const onComplete = useCallback(async () => {

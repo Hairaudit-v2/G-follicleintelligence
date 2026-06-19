@@ -16,13 +16,16 @@ export function AppointmentFiltersBar({
   query,
   clinicalStaffOptions,
   clinics,
+  calendarTimezone,
 }: {
   tenantId: string;
   tab: AppointmentsTab;
   query: ParsedAppointmentsQuery;
   clinicalStaffOptions: ClinicalStaffPickerOption[];
   clinics: CrmShellClinicOption[];
+  calendarTimezone?: string | null;
 }) {
+  const tz = calendarTimezone?.trim() || null;
   const action = buildAppointmentsHref(tenantId, { tab });
 
   return (
@@ -42,7 +45,7 @@ export function AppointmentFiltersBar({
               <input
                 name="start"
                 type="datetime-local"
-                defaultValue={toDatetimeLocalValue(query.operator.startIso)}
+                defaultValue={toDatetimeLocalValue(query.operator.startIso, tz)}
                 className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
               />
             </label>
@@ -51,7 +54,7 @@ export function AppointmentFiltersBar({
               <input
                 name="end"
                 type="datetime-local"
-                defaultValue={toDatetimeLocalValue(query.operator.endIso)}
+                defaultValue={toDatetimeLocalValue(query.operator.endIso, tz)}
                 className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
               />
             </label>

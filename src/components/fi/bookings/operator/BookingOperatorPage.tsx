@@ -85,7 +85,13 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
         </p>
       ) : null}
 
-      <BookingFiltersBar tenantId={tenantId} query={query} clinicalStaffOptions={clinicalStaffOptions} clinics={clinics} />
+      <BookingFiltersBar
+        tenantId={tenantId}
+        query={query}
+        clinicalStaffOptions={clinicalStaffOptions}
+        clinics={clinics}
+        calendarTimezone={calendarTimezone}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_minmax(16rem,22rem)]">
         <BookingOperatorTable

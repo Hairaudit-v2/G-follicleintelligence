@@ -12,6 +12,7 @@ import {
 import { seedEnterpriseDemoStaffHierarchy } from "./enterpriseDemoStaffSeed.server";
 import { seedEnterpriseDemoPatientsAndConsultations } from "./enterpriseDemoPatientsSeed.server";
 import { seedEnterpriseDemoSurgeries } from "./enterpriseDemoSurgeriesSeed.server";
+import { seedEnterpriseDemoImagingAndAudit } from "./enterpriseDemoImagingAuditSeed.server";
 
 export type EnterpriseDemoSeedResult = {
   ok: boolean;
@@ -41,6 +42,12 @@ export type EnterpriseDemoSeedResult = {
   existingGraftSessions: number;
   createdGraftEvents: number;
   existingGraftEvents: number;
+  createdImages: number;
+  existingImages: number;
+  createdProtocolSessions: number;
+  existingProtocolSessions: number;
+  createdOutcomeAudits: number;
+  existingOutcomeAudits: number;
   linkedConsultations: number;
   createdDemoUsers: number;
   warnings: string[];
@@ -295,6 +302,12 @@ export async function seedEnterpriseDemoTenant(
       existingGraftSessions: 0,
       createdGraftEvents: 0,
       existingGraftEvents: 0,
+      createdImages: 0,
+      existingImages: 0,
+      createdProtocolSessions: 0,
+      existingProtocolSessions: 0,
+      createdOutcomeAudits: 0,
+      existingOutcomeAudits: 0,
       linkedConsultations: 0,
       createdDemoUsers: 0,
       warnings: [guard.reason],
@@ -334,6 +347,12 @@ export async function seedEnterpriseDemoTenant(
         existingGraftSessions: 0,
         createdGraftEvents: 0,
         existingGraftEvents: 0,
+        createdImages: 0,
+        existingImages: 0,
+        createdProtocolSessions: 0,
+        existingProtocolSessions: 0,
+        createdOutcomeAudits: 0,
+        existingOutcomeAudits: 0,
         linkedConsultations: 0,
         createdDemoUsers: 0,
         warnings: [tenantResult.reason],
@@ -356,6 +375,12 @@ export async function seedEnterpriseDemoTenant(
 
     const surgeriesResult = await seedEnterpriseDemoSurgeries(supabase, tenantResult.tenantId);
     warnings.push(...surgeriesResult.warnings);
+
+    const imagingAuditResult = await seedEnterpriseDemoImagingAndAudit(
+      supabase,
+      tenantResult.tenantId
+    );
+    warnings.push(...imagingAuditResult.warnings);
 
     return {
       ok: true,
@@ -385,6 +410,12 @@ export async function seedEnterpriseDemoTenant(
       existingGraftSessions: surgeriesResult.existingGraftSessions,
       createdGraftEvents: surgeriesResult.createdGraftEvents,
       existingGraftEvents: surgeriesResult.existingGraftEvents,
+      createdImages: imagingAuditResult.createdImages,
+      existingImages: imagingAuditResult.existingImages,
+      createdProtocolSessions: imagingAuditResult.createdProtocolSessions,
+      existingProtocolSessions: imagingAuditResult.existingProtocolSessions,
+      createdOutcomeAudits: imagingAuditResult.createdOutcomeAudits,
+      existingOutcomeAudits: imagingAuditResult.existingOutcomeAudits,
       linkedConsultations: surgeriesResult.linkedConsultations,
       createdDemoUsers: surgeriesResult.createdDemoUsers,
       warnings,
@@ -418,6 +449,12 @@ export async function seedEnterpriseDemoTenant(
       existingGraftSessions: 0,
       createdGraftEvents: 0,
       existingGraftEvents: 0,
+      createdImages: 0,
+      existingImages: 0,
+      createdProtocolSessions: 0,
+      existingProtocolSessions: 0,
+      createdOutcomeAudits: 0,
+      existingOutcomeAudits: 0,
       linkedConsultations: 0,
       createdDemoUsers: 0,
       warnings: [message],

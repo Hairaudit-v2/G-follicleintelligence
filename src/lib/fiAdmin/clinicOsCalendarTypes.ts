@@ -14,7 +14,7 @@ export type ClinicOsCalendarLiveBookingDTO = {
   status: string | null;
   /** No dedicated booking detail route today — left null so cards stay non-navigating. */
   href: string | null;
-  /** Minutes from 8:00 UTC within the visible grid (clamped). */
+  /** Minutes from business-day start on the clinic-local grid (clamped). */
   startMin: number;
   durationMin: number;
   column: ClinicOsCalendarColumnId;
@@ -22,8 +22,14 @@ export type ClinicOsCalendarLiveBookingDTO = {
 
 export type ClinicOsCalendarReadOnlyPayload = {
   tenantId: string;
-  /** UTC `YYYY-MM-DD` used for the overlap query (matches booking calendar conventions). */
-  dayUtcYmd: string;
+  /** IANA timezone for the day window and grid placement. */
+  calendarTimezone: string;
+  /** Clinic-local `YYYY-MM-DD` used for the overlap query. */
+  dayYmd: string;
+  /** Clinic-local business grid start hour (wall clock). */
+  dayStartHour: number;
+  /** Clinic-local business grid end hour (exclusive). */
+  dayEndHour: number;
   liveBookings: ClinicOsCalendarLiveBookingDTO[];
   listTruncated: boolean;
 };

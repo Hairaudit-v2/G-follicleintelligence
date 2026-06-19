@@ -2,18 +2,20 @@ import "server-only";
 
 import { loadCalendarBookings, loadCalendarResources } from "@/src/lib/bookings/calendarLoader";
 import type { ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
-import { utcCalendarDateStringFromDate } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
+import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezone";
+import { clinicOsGridPlacementForBooking } from "@/src/lib/fiAdmin/clinicOsCalendarGrid";
+import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
 import type { ClinicOsCalendarColumnId, ClinicOsCalendarLiveBookingDTO, ClinicOsCalendarReadOnlyPayload } from "./clinicOsCalendarTypes";
 import { anchorLabelForBookingRow } from "@/src/lib/bookings/bookingDisplayContext";
 import { loadBookingDisplayContextMaps } from "@/src/lib/bookings/bookingDisplayContext.server";
 
-function todayUtcDayQuery(now: Date): ParsedCalendarQuery {
+function todayClinicDayQuery(now: Date, calendarTimezone: string): ParsedCalendarQuery {
   return {
     view: "day",
-    dateAnchor: utcCalendarDateStringFromDate(now),
-    calendarTimezone: "UTC",
+    dateAnchor: calendarDateStringFromInstant(now, calendarTimezone),
+    calendarTimezone,
     status: null,
     bookingType: null,
     assignedUserId: null,
@@ -61,7 +63,7 @@ function mapBookingToGridColumn(row: FiBookingRow): ClinicOsCalendarColumnId {
 }
 
 /**
- * Read-only bookings for the Clinic OS calendar day view: today's UTC window via
+ * Read-only bookings for the Clinic OS calendar day view: today's clinic-local window via
  * {@link loadCalendarBookings} / {@link loadBookingsForCalendarOverlap} — no mutations.
  */
 export async function loadClinicOsCalendarTodayReadOnly(
@@ -69,7 +71,10 @@ export async function loadClinicOsCalendarTodayReadOnly(
   now: Date = new Date()
 ): Promise<ClinicOsCalendarReadOnlyPayload> {
   const tid = tenantId.trim();
-  const query = todayUtcDayQuery(now);
+  const { calendarTimezone, gridConfig } = await loadTenantOperationalCalendarSettings(tid);
+  const query = todayClinicDayQuery(now, calendarTimezone);
+  const dayStartHour = gridConfig.dayStartHourUtc;
+  const dayEndHour = gridConfig.dayEndHourUtc;
 
   const [{ bookings, listTruncated }, resources] = await Promise.all([
     loadCalendarBookings(tid, query),
@@ -78,25 +83,18 @@ export async function loadClinicOsCalendarTodayReadOnly(
 
   const displayMaps = await loadBookingDisplayContextMaps(tid, bookings);
 
-  /** Must match `ClinicOsCalendarHome` grid (8:00–18:00 UTC when live data is shown). */
-  const dayStartHourUtc = 8;
-
   const liveBookings: ClinicOsCalendarLiveBookingDTO[] = [];
 
   for (const row of bookings) {
-    const startMs = Date.parse(row.start_at);
-    const endMs = Date.parse(row.end_at);
-    const dur = Number.isFinite(startMs) && Number.isFinite(endMs) ? Math.max(1, Math.round((endMs - startMs) / 60000)) : 30;
-
-    const start = new Date(row.start_at);
-    const startMin = start.getUTCHours() * 60 + start.getUTCMinutes() - dayStartHourUtc * 60;
-    const endMin = startMin + dur;
-    const gridLast = 10 * 60;
-    if (endMin <= 0 || startMin >= gridLast) continue;
-
-    const visStart = Math.max(0, startMin);
-    const visEnd = Math.min(gridLast, endMin);
-    const displayDurationMin = Math.max(15, visEnd - visStart);
+    const placement = clinicOsGridPlacementForBooking(
+      row.start_at,
+      row.end_at,
+      query.dateAnchor,
+      dayStartHour,
+      dayEndHour,
+      calendarTimezone
+    );
+    if (!placement) continue;
 
     liveBookings.push({
       id: row.id,
@@ -109,15 +107,18 @@ export async function loadClinicOsCalendarTodayReadOnly(
       roomName: roomLabel(resources.clinics, row),
       status: row.booking_status?.trim() || null,
       href: null,
-      startMin: visStart,
-      durationMin: displayDurationMin,
+      startMin: placement.startMin,
+      durationMin: placement.durationMin,
       column: mapBookingToGridColumn(row),
     });
   }
 
   return {
     tenantId: tid,
-    dayUtcYmd: query.dateAnchor,
+    calendarTimezone,
+    dayYmd: query.dateAnchor,
+    dayStartHour,
+    dayEndHour,
     liveBookings,
     listTruncated,
   };
