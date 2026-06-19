@@ -14,6 +14,36 @@ import type { FiCalendarWorkspaceDisplayTheme } from "@/src/components/fi-admin/
 
 export type CalendarToolbarFilterOption = { value: string; label: string };
 
+/** Portaled Radix menus render on document.body — outside `.fi-cal-workspace-root` CSS vars. */
+function portaledMenuStyles(
+  variant: "default" | "fiOs",
+  displayTheme: FiCalendarWorkspaceDisplayTheme
+): { content: string; item: string; itemActive: string } {
+  if (variant === "fiOs") {
+    if (displayTheme === "light") {
+      return {
+        content: "border border-slate-200 bg-white text-slate-900 shadow-lg",
+        item:
+          "text-slate-900 focus:bg-slate-100 focus:text-slate-900 data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900",
+        itemActive: "bg-cyan-500/15 font-semibold text-cyan-900",
+      };
+    }
+    return {
+      content: "border border-slate-700 bg-[#0f172a] text-white shadow-lg",
+      item:
+        "text-slate-100 focus:bg-slate-800 focus:text-white data-[highlighted]:bg-slate-800 data-[highlighted]:text-white",
+      itemActive: "bg-cyan-500/15 font-semibold text-cyan-100",
+    };
+  }
+
+  return {
+    content: "border border-[#1e2937] bg-[#0f172a] text-slate-100 shadow-lg",
+    item:
+      "text-slate-200 focus:bg-slate-800 focus:text-white data-[highlighted]:bg-slate-800 data-[highlighted]:text-white",
+    itemActive: "bg-sky-500/20 font-semibold text-sky-100",
+  };
+}
+
 export function CalendarToolbarFilterSelect({
   value,
   options,
@@ -38,26 +68,11 @@ export function CalendarToolbarFilterSelect({
   const isFiOs = variant === "fiOs";
   const selected = options.find((o) => o.value === value);
   const label = selected?.label ?? placeholder;
+  const menuStyles = portaledMenuStyles(variant, displayTheme);
 
   const triggerShell = isFiOs
     ? "border-[color:var(--fi-cal-ws-controls-inset-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-controls-inset-bg,rgb(6_13_24/0.9))] text-[var(--fi-cal-ws-text,#e2e8f0)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
     : "border-[#1e2937] bg-[#0b1220] text-slate-200 shadow-sm shadow-black/20";
-
-  const menuShell = isFiOs
-    ? "border-[color:var(--fi-cal-ws-controls-inset-border,#e2e8f0)] bg-[var(--fi-cal-ws-controls-inset-bg,#ffffff)] text-[var(--fi-cal-ws-text,#0f172a)]"
-    : "border-[#1e2937] bg-[#0f172a] text-slate-100";
-
-  const itemActive = isFiOs
-    ? displayTheme === "light"
-      ? "bg-cyan-500/15 font-semibold text-cyan-900"
-      : "bg-cyan-500/15 font-semibold text-cyan-100"
-    : "bg-sky-500/20 font-semibold text-sky-100";
-
-  const itemIdle = isFiOs
-    ? displayTheme === "light"
-      ? "text-[var(--fi-cal-ws-text,#0f172a)] focus:bg-slate-100 focus:text-[var(--fi-cal-ws-text,#0f172a)]"
-      : "text-[var(--fi-cal-ws-text,#f1f5f9)] focus:bg-white/[0.08] focus:text-[var(--fi-cal-ws-text,#f1f5f9)]"
-    : "text-slate-200 focus:bg-slate-800 focus:text-white";
 
   return (
     <DropdownMenu modal={false}>
@@ -73,9 +88,12 @@ export function CalendarToolbarFilterSelect({
         <span className={cn("truncate", maxWidthClass)}>{label}</span>
         <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className={cn("z-[200] max-h-[min(20rem,70dvh)] overflow-y-auto shadow-lg", menuShell)}>
+      <DropdownMenuContent
+        align="end"
+        className={cn("z-[200] max-h-[min(20rem,70dvh)] overflow-y-auto p-1", menuStyles.content)}
+      >
         <DropdownMenuItem
-          className={cn("cursor-pointer", !value ? itemActive : itemIdle)}
+          className={cn("cursor-pointer", !value ? menuStyles.itemActive : menuStyles.item)}
           onSelect={() => onValueChange("")}
         >
           {placeholder}
@@ -83,7 +101,7 @@ export function CalendarToolbarFilterSelect({
         {options.map((o) => (
           <DropdownMenuItem
             key={o.value}
-            className={cn("cursor-pointer", value === o.value ? itemActive : itemIdle)}
+            className={cn("cursor-pointer", value === o.value ? menuStyles.itemActive : menuStyles.item)}
             onSelect={() => onValueChange(o.value)}
           >
             {o.label}

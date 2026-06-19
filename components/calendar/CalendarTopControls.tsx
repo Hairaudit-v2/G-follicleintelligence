@@ -223,7 +223,8 @@ export function CalendarTopControls({
           onValueChange={(staffId) =>
             navigate({
               staffId: staffId ? staffId : null,
-              assignedUserId: undefined,
+              /** Clear legacy assignee param so server normalization cannot override toolbar selection. */
+              assignedUserId: null,
             })
           }
         />
