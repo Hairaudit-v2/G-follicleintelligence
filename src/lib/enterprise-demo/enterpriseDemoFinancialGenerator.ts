@@ -258,7 +258,7 @@ function resolveConsultationQuoteLifecycle(
   if (profile === "quote_expiry_leakage") {
     if (spec.consultationStatus === "quoted" && hash % 3 !== 0) {
       return {
-        status: "issued",
+        status: "awaiting_payment",
         lifecycle: "quote_expired",
         amountPaidCents: 0,
         totalCents,
@@ -294,7 +294,7 @@ function resolveConsultationQuoteLifecycle(
 
   if (spec.consultationStatus === "accepted") {
     return {
-      status: hash % 4 === 0 ? "partially_paid" : "issued",
+      status: hash % 4 === 0 ? "partially_paid" : "awaiting_payment",
       lifecycle: hash % 4 === 0 ? "partial" : "quote_open",
       amountPaidCents: hash % 4 === 0 ? Math.floor(totalCents * 0.2) : 0,
       totalCents,
@@ -307,7 +307,7 @@ function resolveConsultationQuoteLifecycle(
   if (spec.consultationStatus === "quoted") {
     const overdue = hash % 5 === 0 && profile !== "clean_reconciliation";
     return {
-      status: overdue ? "overdue" : "issued",
+      status: overdue ? "overdue" : "awaiting_payment",
       lifecycle: overdue ? "overdue" : "quote_open",
       amountPaidCents: 0,
       totalCents,
@@ -473,7 +473,7 @@ function resolveSurgeryFinancials(
       depositLifecycle: refunded ? "refunded" : "paid",
       balanceLifecycle: refunded ? "refunded" : writtenOff ? "written_off" : hash % 4 === 0 ? "partial" : "paid",
       adjustment: refunded
-        ? { amountCents: Math.floor(procedureCents * 0.08), status: "issued" as FiInvoiceStatus }
+        ? { amountCents: Math.floor(procedureCents * 0.08), status: "awaiting_payment" }
         : null,
       refundPayment: refunded,
       writtenOff,
@@ -503,7 +503,7 @@ function resolveSurgeryFinancials(
   const partial = hash % 6 === 0;
   return {
     depositStatus: partial ? "partially_paid" : "paid",
-    balanceStatus: surgery.surgeryStatus === "scheduled" ? "issued" : partial ? "partially_paid" : "paid",
+    balanceStatus: surgery.surgeryStatus === "scheduled" ? "awaiting_payment" : partial ? "partially_paid" : "paid",
     depositPaidCents: partial ? Math.floor(depositCents * 0.6) : depositCents,
     balancePaidCents: partial ? Math.floor(balanceCents * 0.4) : balanceCents,
     depositLifecycle: partial ? "partial" : "paid",
