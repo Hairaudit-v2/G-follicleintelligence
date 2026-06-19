@@ -7,7 +7,7 @@ export const ENTERPRISE_DEMO_CODE_NAME = "TITAN";
 
 export const ENTERPRISE_DEMO_OPERATING_MODE = "enterprise_simulation";
 
-export const ENTERPRISE_DEMO_VERSION = "phase_1a";
+export const ENTERPRISE_DEMO_VERSION = "phase_1b";
 
 export const ENTERPRISE_DEMO_PURPOSE = "enterprise_franchise_sales";
 

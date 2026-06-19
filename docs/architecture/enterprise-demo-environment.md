@@ -20,6 +20,15 @@ Mode: enterprise_simulation
 - Add safety guards
 - Avoid dashboard work until Phase 1B
 
+## Phase 1B
+
+- Enterprise staff hierarchy generator (5 global leaders + 7 roles × 8 clinics = 61 staff)
+- Idempotent `fi_staff` seed with `staff_metadata.enterprise_demo_staff` markers
+- Hierarchy links via `staff_metadata.reports_to_staff_id` and `reports_to_demo_key`
+- Structured roles via global `fi_staff_position_types` codes
+- Clinic assignment via `working_hours._profile.primary_clinic_id`
+- No dashboard work yet
+
 ## Clinics
 
 - London Central Institute
@@ -44,7 +53,6 @@ npm run seed:enterprise-demo
 
 ## Future Phases
 
-Phase 1B: staff hierarchy  
 Phase 1C: synthetic patients and consultations  
 Phase 1D: surgeries and graft intelligence  
 Phase 1E: global command centre dashboard  

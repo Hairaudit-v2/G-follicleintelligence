@@ -9,6 +9,7 @@ import {
   ENTERPRISE_DEMO_TENANT_SLUG,
   isEnterpriseDemoTenantMetadata,
 } from "./enterpriseDemoConstants";
+import { seedEnterpriseDemoStaffHierarchy } from "./enterpriseDemoStaffSeed.server";
 
 export type EnterpriseDemoSeedResult = {
   ok: boolean;
@@ -17,6 +18,9 @@ export type EnterpriseDemoSeedResult = {
   createdTenant: boolean;
   createdClinics: number;
   existingClinics: number;
+  createdStaff: number;
+  existingStaff: number;
+  updatedStaffLinks: number;
   warnings: string[];
 };
 
@@ -117,6 +121,28 @@ async function findOrCreateDemoTenant(
   if (settingsErr) throw new Error(settingsErr.message);
 
   return { ok: true, tenantId, createdTenant: true };
+}
+
+async function bumpDemoTenantVersionMetadata(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<void> {
+  const metadata = await loadTenantSettingsMetadata(supabase, tenantId);
+  if (!metadata || !isEnterpriseDemoTenantMetadata(metadata)) return;
+
+  const nextMetadata = {
+    ...metadata,
+    ...buildEnterpriseDemoTenantMetadata(),
+  };
+
+  const { error } = await supabase
+    .from("fi_tenant_settings")
+    .update({
+      metadata: nextMetadata,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("tenant_id", tenantId);
+  if (error) throw new Error(error.message);
 }
 
 async function seedDemoClinics(
@@ -226,6 +252,9 @@ export async function seedEnterpriseDemoTenant(
       createdTenant: false,
       createdClinics: 0,
       existingClinics: 0,
+      createdStaff: 0,
+      existingStaff: 0,
+      updatedStaffLinks: 0,
       warnings: [guard.reason],
     };
   }
@@ -242,12 +271,20 @@ export async function seedEnterpriseDemoTenant(
         createdTenant: false,
         createdClinics: 0,
         existingClinics: 0,
+        createdStaff: 0,
+        existingStaff: 0,
+        updatedStaffLinks: 0,
         warnings: [tenantResult.reason],
       };
     }
 
+    await bumpDemoTenantVersionMetadata(supabase, tenantResult.tenantId);
+
     const clinicResult = await seedDemoClinics(supabase, tenantResult.tenantId);
     warnings.push(...clinicResult.warnings);
+
+    const staffResult = await seedEnterpriseDemoStaffHierarchy(supabase, tenantResult.tenantId);
+    warnings.push(...staffResult.warnings);
 
     return {
       ok: true,
@@ -256,6 +293,9 @@ export async function seedEnterpriseDemoTenant(
       createdTenant: tenantResult.createdTenant,
       createdClinics: clinicResult.createdClinics,
       existingClinics: clinicResult.existingClinics,
+      createdStaff: staffResult.createdStaff,
+      existingStaff: staffResult.existingStaff,
+      updatedStaffLinks: staffResult.updatedStaffLinks,
       warnings,
     };
   } catch (e) {
@@ -266,6 +306,9 @@ export async function seedEnterpriseDemoTenant(
       createdTenant: false,
       createdClinics: 0,
       existingClinics: 0,
+      createdStaff: 0,
+      existingStaff: 0,
+      updatedStaffLinks: 0,
       warnings: [message],
     };
   }
