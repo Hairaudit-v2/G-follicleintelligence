@@ -454,7 +454,8 @@ describe("ImagingOS IM-8 — IM-1 through IM-7 compatibility", () => {
   });
 
   it("IM-7 outcome measurement still works", () => {
-    const evidence: ImagingOsOutcomeEvidence[] = ["baseline", "month_6", "month_12"].flatMap(
+    const timepoints: ImagingOsTimepoint[] = ["baseline", "month_6", "month_12"];
+    const evidence: ImagingOsOutcomeEvidence[] = timepoints.flatMap(
       (timepoint) =>
         GROWTH_CATEGORIES.flatMap((category) => [
           {

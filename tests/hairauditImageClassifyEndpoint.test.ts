@@ -79,10 +79,15 @@ function restoreEnv(): void {
   }
 }
 
+/** `NODE_ENV` is read-only in `@types/node`; use a narrow cast for test isolation. */
+function setTestNodeEnv(value: string): void {
+  (process.env as { NODE_ENV?: string }).NODE_ENV = value;
+}
+
 describe("hairaudit classifier auth", () => {
   beforeEach(() => {
     saveEnv();
-    process.env.NODE_ENV = "test";
+    setTestNodeEnv("test");
     process.env.HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN = VALID_TOKEN;
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key-should-not-auth";
   });
@@ -261,7 +266,7 @@ describe("hairaudit image classify service", () => {
 describe("hairaudit image classify route", () => {
   beforeEach(() => {
     saveEnv();
-    process.env.NODE_ENV = "test";
+    setTestNodeEnv("test");
     process.env.HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN = VALID_TOKEN;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
   });
