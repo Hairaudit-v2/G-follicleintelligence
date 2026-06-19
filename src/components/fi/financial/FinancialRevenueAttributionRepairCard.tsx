@@ -28,7 +28,7 @@ export function FinancialRevenueAttributionRepairCard(props: {
   const [campaignName, setCampaignName] = useState(override?.campaign_name ?? "");
   const [campaignId, setCampaignId] = useState(override?.campaign_id ?? "");
   const [consultantId, setConsultantId] = useState(override?.consultant_fi_user_id ?? "");
-  const [feedback, setFeedback] = useState<FinancialOsFeedback>(null);
+  const [feedback, setFeedback] = useState<FinancialOsFeedback | null>(null);
   const [pending, startTransition] = useTransition();
 
   const panelCls =
