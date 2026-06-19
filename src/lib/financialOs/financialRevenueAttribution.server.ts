@@ -129,7 +129,7 @@ async function loadAttributionContextForAnchors(args: {
   const supabase = args.client ?? supabaseAdmin();
 
   let leadId = args.leadId?.trim() || null;
-  let caseId = args.caseId?.trim() || null;
+  const caseId = args.caseId?.trim() || null;
   let consultationId = args.consultationId?.trim() || null;
   let patientId = args.patientId?.trim() || null;
 

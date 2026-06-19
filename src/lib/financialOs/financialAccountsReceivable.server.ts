@@ -431,7 +431,7 @@ export async function assignArCaseOwner(
   tenantId: string,
   arCaseId: string,
   assignedFiUserId: string | null,
-  actorFiUserId?: string | null,
+  _actorFiUserId?: string | null,
 ): Promise<FiAccountsReceivableCaseRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();
@@ -454,7 +454,7 @@ export async function setArCaseNextAction(
   tenantId: string,
   arCaseId: string,
   nextActionAt: string | null,
-  actorFiUserId?: string | null,
+  _actorFiUserId?: string | null,
 ): Promise<FiAccountsReceivableCaseRow> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const id = assertNonEmptyUuid(arCaseId, "arCaseId").trim();

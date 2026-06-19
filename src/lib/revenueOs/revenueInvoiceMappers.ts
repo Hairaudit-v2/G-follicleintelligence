@@ -1,4 +1,4 @@
-import type { FiGatewayPaymentStatus, FiInvoiceItemRow, FiInvoiceKind, FiInvoiceRow, FiInvoiceStatus, FiPaymentRequestRow, FiPaymentRequestStatus } from "./revenueInvoiceModel";
+import type { FiGatewayPaymentStatus, FiInvoiceItemRow, FiInvoiceKind, FiInvoiceRow, FiPaymentRequestRow, FiPaymentRequestStatus } from "./revenueInvoiceModel";
 import { invoiceBalanceDueCents, normalizeInvoiceStatusValue } from "./revenueInvoiceModel";
 
 function jsonObject(raw: unknown): Record<string, unknown> {

@@ -279,7 +279,7 @@ async function loadScheduledSurgeriesForForecast(
   client?: SupabaseClient,
 ) {
   const supabase = client ?? supabaseAdmin();
-  let q = supabase
+  const q = supabase
     .from("fi_surgeries")
     .select("id, case_id, scheduled_date, tenant_id")
     .eq("tenant_id", tenantId)
@@ -297,7 +297,7 @@ async function loadScheduledSurgeriesForForecast(
   const caseIds = [...new Set(surgeries.map((s) => s.case_id).filter(Boolean))] as string[];
   if (!caseIds.length) return [];
 
-  let invQ = supabase
+  const invQ = supabase
     .from("fi_invoices")
     .select("case_id, total_cents, remaining_balance_cents, clinic_id, invoice_kind")
     .eq("tenant_id", tenantId)
