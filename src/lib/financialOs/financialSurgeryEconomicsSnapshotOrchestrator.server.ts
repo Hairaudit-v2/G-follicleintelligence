@@ -107,7 +107,7 @@ async function loadSnapshotCaseContext(
   const supabase = client ?? supabaseAdmin();
 
   const [paymentReadiness, surgeryPlan, procedureDay, liveSurgery, caseRow] = await Promise.all([
-    loadCasePaymentReadiness(tid, cid, supabase),
+    loadCasePaymentReadiness(tid, cid),
     loadSurgeryPlanForCase(tid, cid, supabase),
     loadProcedureDayForCase(tid, cid, supabase),
     loadLiveSurgeryForCase(tid, cid, supabase),
