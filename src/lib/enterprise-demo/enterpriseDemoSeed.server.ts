@@ -11,6 +11,7 @@ import {
 } from "./enterpriseDemoConstants";
 import { seedEnterpriseDemoStaffHierarchy } from "./enterpriseDemoStaffSeed.server";
 import { seedEnterpriseDemoPatientsAndConsultations } from "./enterpriseDemoPatientsSeed.server";
+import { seedEnterpriseDemoSurgeries } from "./enterpriseDemoSurgeriesSeed.server";
 
 export type EnterpriseDemoSeedResult = {
   ok: boolean;
@@ -28,6 +29,20 @@ export type EnterpriseDemoSeedResult = {
   existingConsultations: number;
   createdClinicalDetails: number;
   existingClinicalDetails: number;
+  createdCases: number;
+  existingCases: number;
+  createdBookings: number;
+  existingBookings: number;
+  createdSurgeries: number;
+  existingSurgeries: number;
+  createdTeamAssignments: number;
+  existingTeamAssignments: number;
+  createdGraftSessions: number;
+  existingGraftSessions: number;
+  createdGraftEvents: number;
+  existingGraftEvents: number;
+  linkedConsultations: number;
+  createdDemoUsers: number;
   warnings: string[];
 };
 
@@ -268,6 +283,20 @@ export async function seedEnterpriseDemoTenant(
       existingConsultations: 0,
       createdClinicalDetails: 0,
       existingClinicalDetails: 0,
+      createdCases: 0,
+      existingCases: 0,
+      createdBookings: 0,
+      existingBookings: 0,
+      createdSurgeries: 0,
+      existingSurgeries: 0,
+      createdTeamAssignments: 0,
+      existingTeamAssignments: 0,
+      createdGraftSessions: 0,
+      existingGraftSessions: 0,
+      createdGraftEvents: 0,
+      existingGraftEvents: 0,
+      linkedConsultations: 0,
+      createdDemoUsers: 0,
       warnings: [guard.reason],
     };
   }
@@ -293,6 +322,20 @@ export async function seedEnterpriseDemoTenant(
         existingConsultations: 0,
         createdClinicalDetails: 0,
         existingClinicalDetails: 0,
+        createdCases: 0,
+        existingCases: 0,
+        createdBookings: 0,
+        existingBookings: 0,
+        createdSurgeries: 0,
+        existingSurgeries: 0,
+        createdTeamAssignments: 0,
+        existingTeamAssignments: 0,
+        createdGraftSessions: 0,
+        existingGraftSessions: 0,
+        createdGraftEvents: 0,
+        existingGraftEvents: 0,
+        linkedConsultations: 0,
+        createdDemoUsers: 0,
         warnings: [tenantResult.reason],
       };
     }
@@ -311,6 +354,9 @@ export async function seedEnterpriseDemoTenant(
     );
     warnings.push(...patientsResult.warnings);
 
+    const surgeriesResult = await seedEnterpriseDemoSurgeries(supabase, tenantResult.tenantId);
+    warnings.push(...surgeriesResult.warnings);
+
     return {
       ok: true,
       tenantSlug: ENTERPRISE_DEMO_TENANT_SLUG,
@@ -327,6 +373,20 @@ export async function seedEnterpriseDemoTenant(
       existingConsultations: patientsResult.existingConsultations,
       createdClinicalDetails: patientsResult.createdClinicalDetails,
       existingClinicalDetails: patientsResult.existingClinicalDetails,
+      createdCases: surgeriesResult.createdCases,
+      existingCases: surgeriesResult.existingCases,
+      createdBookings: surgeriesResult.createdBookings,
+      existingBookings: surgeriesResult.existingBookings,
+      createdSurgeries: surgeriesResult.createdSurgeries,
+      existingSurgeries: surgeriesResult.existingSurgeries,
+      createdTeamAssignments: surgeriesResult.createdTeamAssignments,
+      existingTeamAssignments: surgeriesResult.existingTeamAssignments,
+      createdGraftSessions: surgeriesResult.createdGraftSessions,
+      existingGraftSessions: surgeriesResult.existingGraftSessions,
+      createdGraftEvents: surgeriesResult.createdGraftEvents,
+      existingGraftEvents: surgeriesResult.existingGraftEvents,
+      linkedConsultations: surgeriesResult.linkedConsultations,
+      createdDemoUsers: surgeriesResult.createdDemoUsers,
       warnings,
     };
   } catch (e) {
@@ -346,6 +406,20 @@ export async function seedEnterpriseDemoTenant(
       existingConsultations: 0,
       createdClinicalDetails: 0,
       existingClinicalDetails: 0,
+      createdCases: 0,
+      existingCases: 0,
+      createdBookings: 0,
+      existingBookings: 0,
+      createdSurgeries: 0,
+      existingSurgeries: 0,
+      createdTeamAssignments: 0,
+      existingTeamAssignments: 0,
+      createdGraftSessions: 0,
+      existingGraftSessions: 0,
+      createdGraftEvents: 0,
+      existingGraftEvents: 0,
+      linkedConsultations: 0,
+      createdDemoUsers: 0,
       warnings: [message],
     };
   }

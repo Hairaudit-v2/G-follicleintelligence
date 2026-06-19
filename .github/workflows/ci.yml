@@ -34,6 +34,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Typecheck e2e
+        run: npm run typecheck:e2e
+
       - name: Unit tests
         run: npm run test:unit
 

@@ -36,37 +36,51 @@ test.describe("unauthenticated access — fails closed", () => {
     const status = response!.status();
     const finalUrl = page.url();
 
-    // Either a server-side redirect (3xx, followed automatically by
-    // Playwright's page.goto -> finalUrl no longer /fi-admin/system) or a
-    // direct 401/403 is acceptable. A 200 with the admin shell rendered is
-    // the regression this test exists to catch.
-    const redirectedAway = !finalUrl.includes("/fi-admin/system");
-    const failedClosed = redirectedAway || status === 401 || status === 403;
+    // Next.js server redirects often surface as a 200 navigation response in
+    // Playwright while the final URL is the login page — assert on URL/content,
+    // not raw status alone.
+    const stillOnProtectedShell = finalUrl.includes("/fi-admin/system");
+    const onLoginSurface =
+      /\/follicle-intelligence\/login/.test(finalUrl) ||
+      (await page.getByRole("button", { name: /sign in to os/i }).count()) > 0;
+    const failedClosed =
+      !stillOnProtectedShell || onLoginSurface || status === 401 || status === 403;
 
     expect(
       failedClosed,
-      `expected redirect or 401/403 for unauthenticated /fi-admin/system, got status ${status} at ${finalUrl}`,
+      `expected redirect to login or 401/403 for unauthenticated /fi-admin/system, got status ${status} at ${finalUrl}`,
     ).toBe(true);
-    expect(status, "should never return 200 for the platform admin shell without a session").not.toBe(200);
+    expect(
+      stillOnProtectedShell,
+      `admin shell must not render without a session (landed at ${finalUrl})`,
+    ).toBe(false);
   });
 
   test("tenant clinic dashboard is not reachable without a session", async ({ page }) => {
     const tenantId = e2eTenantId();
-    const response = await page.goto(`/fi-admin/${tenantId}/financial/dashboard`, {
+    const protectedPath = `/fi-admin/${tenantId}/financial/dashboard`;
+    const response = await page.goto(protectedPath, {
       waitUntil: "domcontentloaded",
     });
     expect(response, "expected a response").toBeTruthy();
 
     const status = response!.status();
     const finalUrl = page.url();
-    const redirectedAway = !finalUrl.includes(`/fi-admin/${tenantId}/financial/dashboard`);
-    const failedClosed = redirectedAway || status === 401 || status === 403;
+    const stillOnProtectedDashboard = finalUrl.includes(protectedPath);
+    const onLoginSurface =
+      /\/follicle-intelligence\/login/.test(finalUrl) ||
+      (await page.getByRole("button", { name: /sign in to os/i }).count()) > 0;
+    const failedClosed =
+      !stillOnProtectedDashboard || onLoginSurface || status === 401 || status === 403;
 
     expect(
       failedClosed,
-      `expected redirect or 401/403 for unauthenticated tenant dashboard, got status ${status} at ${finalUrl}`,
+      `expected redirect to login or 401/403 for unauthenticated tenant dashboard, got status ${status} at ${finalUrl}`,
     ).toBe(true);
-    expect(status, "should never return 200 for a tenant dashboard without a session").not.toBe(200);
+    expect(
+      stillOnProtectedDashboard,
+      `tenant dashboard must not render without a session (landed at ${finalUrl})`,
+    ).toBe(false);
   });
 
   test("protected tenant API route (cases list) fails closed without a session", async ({

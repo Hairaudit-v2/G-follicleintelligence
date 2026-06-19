@@ -94,14 +94,16 @@ const server = spawn("npm", ["run", "start", "--", "-p", String(port)], {
 });
 
 let serverExited = false;
+let shuttingDown = false;
 server.on("exit", (code) => {
   serverExited = true;
-  if (code && code !== 0) {
+  if (!shuttingDown && code && code !== 0) {
     console.error(`next start exited with code ${code}`);
   }
 });
 
 const shutdown = () => {
+  shuttingDown = true;
   if (!serverExited && server.pid) {
     if (process.platform === "win32") {
       spawnSync("taskkill", ["/pid", String(server.pid), "/f", "/t"], { stdio: "ignore" });

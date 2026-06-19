@@ -38,6 +38,16 @@ Mode: enterprise_simulation
 - Consultant linkage via Phase 1B `demo_staff_key` when staff rows exist
 - No dashboard work yet
 
+## Phase 1D
+
+- Synthetic surgery + graft intelligence generator (12 per clinic = 96 total)
+- Idempotent `fi_cases` / `fi_bookings` / `fi_surgeries` seed via `demo_case_key`, `demo_booking_key`, `demo_surgery_key`
+- Graft sessions and count events (`count_update`, `tray_count`, `tray_confirmed`, `graft_reconciliation`) with `client_submission_id` idempotency
+- Theatre team via `fi_surgery_team_assignments` (surgeon, nurse, technician) with demo `fi_users` linked to staff
+- Clinic performance variation and intentional anomalies (London transection, Bangkok reconciliation gaps, Dubai graft-vs-quote, Sydney benchmark)
+- Links consultations to cases where schema allows
+- No dashboard work yet
+
 ## Clinics
 
 - London Central Institute
