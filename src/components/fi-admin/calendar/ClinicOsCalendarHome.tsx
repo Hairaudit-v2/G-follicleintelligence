@@ -16,7 +16,6 @@ const DAY_END_HOUR = 18;
 const HOUR_COUNT = DAY_END_HOUR - DAY_START_HOUR;
 const TOTAL_MINUTES = HOUR_COUNT * 60;
 const HOUR_ROW_PX = 44;
-const GRID_BODY_PX = HOUR_COUNT * HOUR_ROW_PX;
 
 const RESOURCE_COLUMNS = [
   { id: "doctor", label: "Doctor" },

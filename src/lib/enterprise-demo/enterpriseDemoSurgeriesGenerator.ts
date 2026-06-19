@@ -281,7 +281,7 @@ function transectionRateForProfile(
 function discardGraftsForProfile(
   profile: EnterpriseDemoClinicPerformanceProfile,
   extracted: number,
-  key: string
+  _key: string
 ): number {
   if (profile === "benchmark") return Math.max(8, Math.round(extracted * 0.02));
   if (profile === "elevated_transection") return Math.max(45, Math.round(extracted * 0.09));

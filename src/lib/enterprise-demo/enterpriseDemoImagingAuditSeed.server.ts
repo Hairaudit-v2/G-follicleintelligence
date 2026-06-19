@@ -334,8 +334,8 @@ export async function seedEnterpriseDemoImagingAndAudit(
   const caseRows = await loadCaseRows(supabase, tenantId);
   const surgeryRows = await loadSurgeryRows(supabase, tenantId);
   const consultationRows = await loadConsultationRows(supabase, tenantId);
-  let imageRows = await loadDemoImageRows(supabase, tenantId);
-  let outcomeRows = await loadDemoOutcomeRows(supabase, tenantId);
+  const imageRows = await loadDemoImageRows(supabase, tenantId);
+  const outcomeRows = await loadDemoOutcomeRows(supabase, tenantId);
   const now = new Date().toISOString();
 
   for (const bundle of bundles) {
