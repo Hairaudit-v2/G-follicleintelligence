@@ -22,6 +22,7 @@ import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/feature
 import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGuard.server";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
+import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
 import {
   canAccessTenantReminderSettings,
   canManageTenantAdminUsersRoute,
@@ -60,7 +61,17 @@ export default async function TenantAdminLayout({
   const base = `/fi-admin/${tenantId}`;
   const pathname = headers().get("x-pathname") ?? "";
   const isStaffPinLogin = pathname.includes("/staff-pin-login");
+  const isCommandCentrePresentation = isGlobalCommandCentrePresentationPath(pathname);
   const pinSession = isStaffPinLogin ? null : await getStaffPinClinicSessionIfValid(tenantId);
+
+  if (isCommandCentrePresentation) {
+    if (pinSession) {
+      await assertFiTenantExists(tenantId);
+    } else {
+      await assertFiTenantPortalAccess(tenantId);
+    }
+    return <div className="min-h-[100dvh] bg-[#03060d]">{children}</div>;
+  }
 
   if (isStaffPinLogin) {
     await assertFiTenantExists(tenantId);

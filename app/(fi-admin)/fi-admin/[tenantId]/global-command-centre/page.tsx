@@ -4,9 +4,11 @@ import { notFound, redirect } from "next/navigation";
 import { GlobalCommandCentreDashboard } from "@/src/components/fi-admin/enterprise-demo/GlobalCommandCentreDashboard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { ENTERPRISE_DEMO_TENANT_SLUG } from "@/src/lib/enterprise-demo/enterpriseDemoConstants";
-import { loadGlobalCommandCentrePayload } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentreLoader.server";
+import {
+  assertGlobalCommandCentrePage,
+  resolveGlobalCommandCentrePage,
+} from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePage.server";
 import { resolveEnterpriseDemoTenant } from "@/src/lib/enterprise-demo/enterpriseDemoTenantAccess.server";
-import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { isNonEmptyUuid } from "@/src/lib/crm/validation";
 
 export const metadata = {
@@ -18,11 +20,14 @@ export const dynamic = "force-dynamic";
 
 export default async function FiAdminGlobalCommandCentrePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tenantId: string }>;
+  searchParams: Promise<{ presentation?: string }>;
 }) {
   noStore();
   const { tenantId } = await params;
+  const sp = await searchParams;
   const key = tenantId?.trim();
   if (!key) notFound();
 
@@ -33,15 +38,17 @@ export default async function FiAdminGlobalCommandCentrePage({
   if (key === ENTERPRISE_DEMO_TENANT_SLUG) {
     const resolved = await resolveEnterpriseDemoTenant(key);
     if (!resolved) notFound();
-    redirect(`/fi-admin/${resolved.tenantId}/global-command-centre`);
+    const presentationSuffix = sp.presentation === "true" ? "/presentation" : "";
+    redirect(`/fi-admin/${resolved.tenantId}/global-command-centre${presentationSuffix}`);
   }
 
-  await assertFiTenantPortalAccessUnlessStaffPinSession(key);
+  if (sp.presentation === "true") {
+    redirect(`/fi-admin/${key}/global-command-centre/presentation`);
+  }
 
-  const demoTenant = await resolveEnterpriseDemoTenant(key);
-  if (!demoTenant) notFound();
+  const result = await resolveGlobalCommandCentrePage(key);
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+  if (!result.ok && result.kind === "misconfigured") {
     return (
       <InfoNotice variant="danger" title="Server misconfigured">
         <p className="text-sm">Supabase environment variables are missing. Check deployment configuration.</p>
@@ -49,13 +56,7 @@ export default async function FiAdminGlobalCommandCentrePage({
     );
   }
 
-  let data: Awaited<ReturnType<typeof loadGlobalCommandCentrePayload>>;
-  try {
-    data = await loadGlobalCommandCentrePayload(key, new Date());
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "";
-    if (msg === "Tenant not found") notFound();
-    console.error("[FiAdminGlobalCommandCentrePage]", msg || "load failed");
+  if (!result.ok && result.kind === "load_failed") {
     return (
       <div className="p-4 sm:p-6">
         <InfoNotice variant="danger" title="Global Command Centre could not load">
@@ -63,15 +64,20 @@ export default async function FiAdminGlobalCommandCentrePage({
             The TITAN global command centre failed to load. Ensure the enterprise demo tenant is seeded and Supabase
             migrations are applied.
           </p>
-          {msg ? <p className="mt-2 text-xs text-slate-500">{msg}</p> : null}
+          {result.message ? <p className="mt-2 text-xs text-slate-500">{result.message}</p> : null}
         </InfoNotice>
       </div>
     );
   }
 
+  assertGlobalCommandCentrePage(result);
+  if (!result.ok) notFound();
+
+  const presentationHref = `/fi-admin/${result.tenantKey}/global-command-centre/presentation`;
+
   return (
     <div className="p-4 sm:p-6">
-      <GlobalCommandCentreDashboard data={data} />
+      <GlobalCommandCentreDashboard data={result.data} presentationHref={presentationHref} />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Activity, AlertTriangle, Building2, Camera, DollarSign, Globe2, Scissors, Shield } from "lucide-react";
+import Link from "next/link";
+import { Activity, AlertTriangle, Building2, Camera, DollarSign, Globe2, MonitorPlay, Scissors, Shield } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -15,6 +16,7 @@ import type { GlobalCommandCentrePayload } from "@/src/lib/enterprise-demo/enter
 
 type GlobalCommandCentreDashboardProps = {
   data: GlobalCommandCentrePayload;
+  presentationHref?: string;
 };
 
 function KpiTile({
@@ -53,7 +55,7 @@ function SnapshotMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function GlobalCommandCentreDashboard({ data }: GlobalCommandCentreDashboardProps) {
+export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalCommandCentreDashboardProps) {
   const { networkKpis, clinicRiskRows, alerts, surgicalSnapshot, outcomeSnapshot } = data;
 
   return (
@@ -71,6 +73,15 @@ export function GlobalCommandCentreDashboard({ data }: GlobalCommandCentreDashbo
         <div className="flex flex-wrap items-center gap-2">
           <span className={globalCommandCentreClasses.badge}>Phase 1G</span>
           <span className={globalCommandCentreClasses.badge}>Demo tenant · {data.tenantSlug}</span>
+          {presentationHref ? (
+            <Link
+              href={presentationHref}
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-950/30 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100 transition hover:border-amber-300/50"
+            >
+              <MonitorPlay className="h-3 w-3" aria-hidden />
+              Presentation mode
+            </Link>
+          ) : null}
         </div>
       </header>
 
