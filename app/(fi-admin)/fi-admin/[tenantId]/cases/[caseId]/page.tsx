@@ -181,7 +181,7 @@ export default async function CaseDetailRoutePage({
     .filter((o) => o.staff_role === "consultant")
     .map((o) => ({ value: o.fi_user_id, label: o.label }));
 
-  let caseAccountsReceivable = await loadCaseAccountsReceivableSummary(tenantId.trim(), caseId.trim());
+  const caseAccountsReceivable = await loadCaseAccountsReceivableSummary(tenantId.trim(), caseId.trim());
 
   const pageView = (
     <CaseDetailPageView

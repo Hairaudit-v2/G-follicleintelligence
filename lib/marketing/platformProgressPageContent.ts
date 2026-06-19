@@ -220,6 +220,15 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
   {
+    id: "2026-06-19-financial-os-enterprise-intelligence",
+    date: "2026-06-19",
+    tag: "financial-os",
+    title: "FinancialOS enterprise intelligence layer shipped",
+    summary:
+      "Added master financial ledger, surgery profitability, revenue attribution, accounts receivable, and executive finance forecasting across FI OS.",
+    modules: ["FinancialOS"],
+  },
+  {
     id: "2026-06-19-surgery-graft-safety",
     date: "2026-06-19",
     tag: "surgery-os",
