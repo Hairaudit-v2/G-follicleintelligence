@@ -13,6 +13,7 @@ import { seedEnterpriseDemoStaffHierarchy } from "./enterpriseDemoStaffSeed.serv
 import { seedEnterpriseDemoPatientsAndConsultations } from "./enterpriseDemoPatientsSeed.server";
 import { seedEnterpriseDemoSurgeries } from "./enterpriseDemoSurgeriesSeed.server";
 import { seedEnterpriseDemoImagingAndAudit } from "./enterpriseDemoImagingAuditSeed.server";
+import { seedEnterpriseDemoFinancialOs } from "./enterpriseDemoFinancialSeed.server";
 
 export type EnterpriseDemoSeedResult = {
   ok: boolean;
@@ -48,6 +49,16 @@ export type EnterpriseDemoSeedResult = {
   existingProtocolSessions: number;
   createdOutcomeAudits: number;
   existingOutcomeAudits: number;
+  createdInvoices: number;
+  existingInvoices: number;
+  createdInvoiceItems: number;
+  createdPaymentRequests: number;
+  existingPaymentRequests: number;
+  createdPayments: number;
+  existingPayments: number;
+  updatedCaseFranchiseRisk: number;
+  existingCaseFranchiseRisk: number;
+  updatedBookingFinancialStatus: number;
   linkedConsultations: number;
   createdDemoUsers: number;
   warnings: string[];
@@ -308,6 +319,16 @@ export async function seedEnterpriseDemoTenant(
       existingProtocolSessions: 0,
       createdOutcomeAudits: 0,
       existingOutcomeAudits: 0,
+      createdInvoices: 0,
+      existingInvoices: 0,
+      createdInvoiceItems: 0,
+      createdPaymentRequests: 0,
+      existingPaymentRequests: 0,
+      createdPayments: 0,
+      existingPayments: 0,
+      updatedCaseFranchiseRisk: 0,
+      existingCaseFranchiseRisk: 0,
+      updatedBookingFinancialStatus: 0,
       linkedConsultations: 0,
       createdDemoUsers: 0,
       warnings: [guard.reason],
@@ -353,6 +374,16 @@ export async function seedEnterpriseDemoTenant(
         existingProtocolSessions: 0,
         createdOutcomeAudits: 0,
         existingOutcomeAudits: 0,
+        createdInvoices: 0,
+        existingInvoices: 0,
+        createdInvoiceItems: 0,
+        createdPaymentRequests: 0,
+        existingPaymentRequests: 0,
+        createdPayments: 0,
+        existingPayments: 0,
+        updatedCaseFranchiseRisk: 0,
+        existingCaseFranchiseRisk: 0,
+        updatedBookingFinancialStatus: 0,
         linkedConsultations: 0,
         createdDemoUsers: 0,
         warnings: [tenantResult.reason],
@@ -381,6 +412,9 @@ export async function seedEnterpriseDemoTenant(
       tenantResult.tenantId
     );
     warnings.push(...imagingAuditResult.warnings);
+
+    const financialResult = await seedEnterpriseDemoFinancialOs(supabase, tenantResult.tenantId);
+    warnings.push(...financialResult.warnings);
 
     return {
       ok: true,
@@ -416,6 +450,16 @@ export async function seedEnterpriseDemoTenant(
       existingProtocolSessions: imagingAuditResult.existingProtocolSessions,
       createdOutcomeAudits: imagingAuditResult.createdOutcomeAudits,
       existingOutcomeAudits: imagingAuditResult.existingOutcomeAudits,
+      createdInvoices: financialResult.createdInvoices,
+      existingInvoices: financialResult.existingInvoices,
+      createdInvoiceItems: financialResult.createdInvoiceItems,
+      createdPaymentRequests: financialResult.createdPaymentRequests,
+      existingPaymentRequests: financialResult.existingPaymentRequests,
+      createdPayments: financialResult.createdPayments,
+      existingPayments: financialResult.existingPayments,
+      updatedCaseFranchiseRisk: financialResult.updatedCaseFranchiseRisk,
+      existingCaseFranchiseRisk: financialResult.existingCaseFranchiseRisk,
+      updatedBookingFinancialStatus: financialResult.updatedBookingFinancialStatus,
       linkedConsultations: surgeriesResult.linkedConsultations,
       createdDemoUsers: surgeriesResult.createdDemoUsers,
       warnings,
@@ -455,6 +499,16 @@ export async function seedEnterpriseDemoTenant(
       existingProtocolSessions: 0,
       createdOutcomeAudits: 0,
       existingOutcomeAudits: 0,
+      createdInvoices: 0,
+      existingInvoices: 0,
+      createdInvoiceItems: 0,
+      createdPaymentRequests: 0,
+      existingPaymentRequests: 0,
+      createdPayments: 0,
+      existingPayments: 0,
+      updatedCaseFranchiseRisk: 0,
+      existingCaseFranchiseRisk: 0,
+      updatedBookingFinancialStatus: 0,
       linkedConsultations: 0,
       createdDemoUsers: 0,
       warnings: [message],

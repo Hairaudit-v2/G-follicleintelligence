@@ -58,6 +58,19 @@ Mode: enterprise_simulation
 - Demo-only metadata flags (`enterprise_demo_image`, `enterprise_demo_audit`, `enterprise_demo_protocol_session`)
 - No dashboard work yet
 
+## Phase 1F
+
+- Synthetic FinancialOS + franchise-risk demo data for 240 consultation quotes and 96 surgery financial bundles
+- Idempotent `fi_invoices` via `demo_invoice_key`, `fi_payment_requests` / `fi_payments` via `demo_payment_key`, franchise-risk snapshots on `fi_cases` via `demo_financial_risk_key`
+- Invoice kinds: `consultation_quote`, `surgery_deposit`, `surgery_balance`, `adjustment`
+- Financial lifecycle states: deposit, balance, paid, overdue, partial, refunded, written_off, quote_expired (metadata-backed where schema lacks enum)
+- Clinic financial profiles: Sydney clean reconciliation, Dubai graft/invoice variance, Bangkok overdue collection gaps, London refund/adjustment heavy, Athens quote expiry leakage
+- Franchise-risk metadata: `revenue_variance_flag`, `inventory_to_graft_variance_flag`, `payment_reconciliation_status`, `franchise_risk_score`, `risk_reason_codes`
+- Demo-only payment provider (`demo`); no real Stripe objects
+- Links invoices/payments to demo patients, consultations, cases, and bookings where schema allows
+- Updates `fi_bookings.financial_os_status` for surgery bundles
+- No dashboard work yet
+
 ## Clinics
 
 - London Central Institute
@@ -82,5 +95,5 @@ npm run seed:enterprise-demo
 
 ## Future Phases
 
-Phase 1F: global command centre dashboard  
-Phase 1G: operational anomalies and franchise risk engine
+Phase 1G: global command centre dashboard  
+Phase 1H: operational anomalies and franchise risk engine
