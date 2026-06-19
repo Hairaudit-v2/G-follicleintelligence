@@ -8,6 +8,7 @@ import { loadSurgeryPlanForCase } from "@/src/lib/cases/surgeryPlanningLoaders";
 import {
   assessSurgeryProfitabilitySnapshotReadiness,
   mapProfitabilitySnapshotRow,
+  type FiSurgeryProfitabilitySnapshotRow,
   type SurgeryCompletionContext,
   type SurgeryProfitabilitySnapshotReadiness,
 } from "@/src/lib/financialOs/financialSurgeryEconomicsCore";
@@ -20,7 +21,6 @@ import {
   resolveProcedureType,
   resolveTreatmentAddonsFromChecklist,
   surgeryInvoicesFromReadiness,
-  type FiSurgeryProfitabilitySnapshotRow,
 } from "@/src/lib/financialOs/financialSurgeryEconomics.server";
 import { triggerRevenueAttributionOnSurgerySnapshot } from "@/src/lib/financialOs/financialRevenueAttribution.server";
 import { loadCasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
