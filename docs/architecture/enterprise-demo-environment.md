@@ -93,7 +93,23 @@ Production seeding requires explicit environment approval via `ALLOW_ENTERPRISE_
 npm run seed:enterprise-demo
 ```
 
-## Future Phases
+## Phase 1G
 
-Phase 1G: global command centre dashboard  
-Phase 1H: operational anomalies and franchise risk engine
+- Global Command Centre dashboard at `/fi-admin/{tenantId}/global-command-centre`
+- Friendly slug entry `/fi-admin/ihrg-global/global-command-centre`
+- Read-only aggregation across Phases 1A–1F (KPIs, clinic risk matrix, alerts, surgical/outcome snapshots)
+
+## Phase 1H
+
+- Presentation mode at `/fi-admin/{tenantId}/global-command-centre/presentation`
+- Friendly slug entry `/fi-admin/ihrg-global/global-command-centre/presentation`
+- Executive story sections, operator pain callouts, chrome-less layout for screen-share demos
+
+## Phase 1I
+
+- Demo-readiness validation: `npm run validate:titan-global-command-centre`
+- Empty-state handling on dashboard panels when seed data is partial
+- Demo runbook: `docs/runbooks/titan-global-command-centre-demo.md`
+- No major new features — QA and operational hardening only
+
+## Future Phases

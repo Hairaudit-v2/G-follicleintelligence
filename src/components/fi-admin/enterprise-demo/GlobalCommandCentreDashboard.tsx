@@ -147,41 +147,51 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
             <h2 className={globalCommandCentreClasses.panelTitle}>Clinic risk matrix</h2>
           </div>
           <div className={globalCommandCentreClasses.panelBody}>
-            <div className="overflow-x-auto">
-              <table className={globalCommandCentreClasses.table}>
-                <thead>
-                  <tr>
-                    <th className={globalCommandCentreClasses.th}>Clinic</th>
-                    <th className={globalCommandCentreClasses.th}>Risk</th>
-                    <th className={globalCommandCentreClasses.th}>Revenue</th>
-                    <th className={globalCommandCentreClasses.th}>Imaging</th>
-                    <th className={globalCommandCentreClasses.th}>Surgical quality</th>
-                    <th className={globalCommandCentreClasses.th}>Staff / training</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clinicRiskRows.map((row) => (
-                    <tr key={row.clinicId}>
-                      <td className={globalCommandCentreClasses.td}>
-                        <div className="font-medium text-slate-100">{row.clinicName}</div>
-                        <div className="text-[10px] text-slate-500">
-                          {row.city}, {row.country}
-                        </div>
-                      </td>
-                      <td className={globalCommandCentreClasses.td}>
-                        <span className={globalCommandCentreClasses.riskPill(row.riskScore)}>{row.riskScore}</span>
-                      </td>
-                      <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.revenueStatus}</td>
-                      <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.imagingCompliance}</td>
-                      <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.surgicalQualityStatus}</td>
-                      <td className={cn(globalCommandCentreClasses.td, "text-slate-500 italic")}>
-                        {row.staffTrainingStatus}
-                      </td>
+            {clinicRiskRows.length === 0 ? (
+              <div className={globalCommandCentreClasses.emptyPanel}>
+                <p className={globalCommandCentreClasses.emptyPanelTitle}>No clinic risk rows yet</p>
+                <p className="mt-2">
+                  Run <code className="text-slate-400">npm run seed:enterprise-demo</code> to populate the IHRG
+                  franchise network before demoing the command centre.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className={globalCommandCentreClasses.table}>
+                  <thead>
+                    <tr>
+                      <th className={globalCommandCentreClasses.th}>Clinic</th>
+                      <th className={globalCommandCentreClasses.th}>Risk</th>
+                      <th className={globalCommandCentreClasses.th}>Revenue</th>
+                      <th className={globalCommandCentreClasses.th}>Imaging</th>
+                      <th className={globalCommandCentreClasses.th}>Surgical quality</th>
+                      <th className={globalCommandCentreClasses.th}>Staff / training</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {clinicRiskRows.map((row) => (
+                      <tr key={row.clinicId}>
+                        <td className={globalCommandCentreClasses.td}>
+                          <div className="font-medium text-slate-100">{row.clinicName}</div>
+                          <div className="text-[10px] text-slate-500">
+                            {row.city}, {row.country}
+                          </div>
+                        </td>
+                        <td className={globalCommandCentreClasses.td}>
+                          <span className={globalCommandCentreClasses.riskPill(row.riskScore)}>{row.riskScore}</span>
+                        </td>
+                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.revenueStatus}</td>
+                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.imagingCompliance}</td>
+                        <td className={cn(globalCommandCentreClasses.td, "text-slate-400")}>{row.surgicalQualityStatus}</td>
+                        <td className={cn(globalCommandCentreClasses.td, "text-slate-500 italic")}>
+                          {row.staffTrainingStatus}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </section>
 
@@ -190,21 +200,31 @@ export function GlobalCommandCentreDashboard({ data, presentationHref }: GlobalC
             <p className={globalCommandCentreClasses.panelKicker}>Live feed</p>
             <h2 className={globalCommandCentreClasses.panelTitle}>Network alerts</h2>
           </div>
-          <div className={cn(globalCommandCentreClasses.panelBody, "space-y-3")}>
-            {alerts.map((alert) => (
-              <article key={alert.id} className={globalCommandCentreClasses.alertItem(alert.severity)}>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      {alert.clinicName} · {alert.domain}
-                    </p>
-                    <h3 className="mt-0.5 text-sm font-semibold text-slate-100">{alert.title}</h3>
+          <div className={cn(globalCommandCentreClasses.panelBody, alerts.length > 0 ? "space-y-3" : "")}>
+            {alerts.length === 0 ? (
+              <div className={globalCommandCentreClasses.emptyPanel}>
+                <p className={globalCommandCentreClasses.emptyPanelTitle}>No network alerts to display</p>
+                <p className="mt-2">
+                  Alerts appear when seeded clinic slugs match the curated TITAN anomaly feed. Re-run the enterprise demo
+                  seed if this panel is empty after seeding.
+                </p>
+              </div>
+            ) : (
+              alerts.map((alert) => (
+                <article key={alert.id} className={globalCommandCentreClasses.alertItem(alert.severity)}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                        {alert.clinicName} · {alert.domain}
+                      </p>
+                      <h3 className="mt-0.5 text-sm font-semibold text-slate-100">{alert.title}</h3>
+                    </div>
+                    <span className="shrink-0 text-[10px] text-slate-500">{formatAlertTimestamp(alert.occurredAt)}</span>
                   </div>
-                  <span className="shrink-0 text-[10px] text-slate-500">{formatAlertTimestamp(alert.occurredAt)}</span>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-slate-400">{alert.summary}</p>
-              </article>
-            ))}
+                  <p className="mt-2 text-xs leading-relaxed text-slate-400">{alert.summary}</p>
+                </article>
+              ))
+            )}
           </div>
         </section>
       </div>

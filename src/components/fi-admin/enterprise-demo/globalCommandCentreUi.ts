@@ -48,6 +48,9 @@ export const globalCommandCentreClasses = {
   metricValue: "mt-1 text-base font-semibold tabular-nums text-slate-100",
   readOnlyBanner:
     "rounded-lg border border-amber-400/20 bg-amber-950/20 px-3 py-2 text-xs text-amber-100/90",
+  emptyPanel:
+    "rounded-lg border border-dashed border-white/10 bg-[#060912]/40 px-4 py-8 text-center text-xs leading-relaxed text-slate-500",
+  emptyPanelTitle: "text-sm font-medium text-slate-400",
 };
 
 export function formatCommandCentreMoney(cents: number, currency: string): string {
