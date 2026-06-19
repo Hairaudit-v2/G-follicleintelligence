@@ -71,23 +71,26 @@ function saveEnv(): void {
   }
 }
 
-function restoreEnv(): void {
-  for (const key of ENV_KEYS) {
-    const value = savedEnv[key];
-    if (value === undefined) delete process.env[key];
-    else process.env[key] = value;
+function setEnvVar(key: EnvKey, value: string | undefined): void {
+  if (key === "NODE_ENV") {
+    if (value === undefined) delete (process.env as { NODE_ENV?: string }).NODE_ENV;
+    else (process.env as { NODE_ENV?: string }).NODE_ENV = value;
+    return;
   }
+  if (value === undefined) delete process.env[key];
+  else process.env[key] = value;
 }
 
-/** `NODE_ENV` is read-only in `@types/node`; use a narrow cast for test isolation. */
-function setTestNodeEnv(value: string): void {
-  (process.env as { NODE_ENV?: string }).NODE_ENV = value;
+function restoreEnv(): void {
+  for (const key of ENV_KEYS) {
+    setEnvVar(key, savedEnv[key]);
+  }
 }
 
 describe("hairaudit classifier auth", () => {
   beforeEach(() => {
     saveEnv();
-    setTestNodeEnv("test");
+    setEnvVar("NODE_ENV", "test");
     process.env.HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN = VALID_TOKEN;
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key-should-not-auth";
   });
@@ -266,7 +269,7 @@ describe("hairaudit image classify service", () => {
 describe("hairaudit image classify route", () => {
   beforeEach(() => {
     saveEnv();
-    setTestNodeEnv("test");
+    setEnvVar("NODE_ENV", "test");
     process.env.HAIRAUDIT_IMAGE_CLASSIFIER_TOKEN = VALID_TOKEN;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
   });

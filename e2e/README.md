@@ -49,6 +49,21 @@ on an unintercepted network, not on the TLS-intercepted machine.
 
 ## Running
 
+**Security only (FI-LAUNCH-035)** — against an already-running production server:
+
+```
+npm run build && npm run start
+FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e:security
+```
+
+**One command** (build → start → security suite → shutdown):
+
+```
+npm run test:e2e:security:production
+```
+
+Full suite (all e2e specs):
+
 ```
 FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e
 FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e:headed
