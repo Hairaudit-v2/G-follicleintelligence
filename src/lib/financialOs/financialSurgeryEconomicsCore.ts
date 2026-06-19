@@ -109,6 +109,8 @@ export type SurgeryEconomicsValidationResult =
   | { ok: true }
   | { ok: false; message: string };
 
+type FiniteNonNegativeIntResult = { ok: false; message: string } | { ok: true; value: number };
+
 export type FiSurgeryProfitabilitySnapshotRow = {
   id?: string;
   tenant_id: string;
@@ -138,7 +140,7 @@ export type FiSurgeryProfitabilitySnapshotRow = {
 
 export const FI_SURGERY_PROFITABILITY_SNAPSHOT_IMMUTABLE = true as const;
 
-function finiteNonNegativeInt(n: unknown, label: string): SurgeryEconomicsValidationResult | { ok: true; value: number } {
+function finiteNonNegativeInt(n: unknown, label: string): FiniteNonNegativeIntResult {
   if (!Number.isFinite(n)) return { ok: false, message: `${label} must be a finite number.` };
   const v = Math.floor(Number(n));
   if (v < 0) return { ok: false, message: `${label} cannot be negative.` };
