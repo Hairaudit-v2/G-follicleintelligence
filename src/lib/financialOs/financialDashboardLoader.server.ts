@@ -3,7 +3,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import {
   loadFinancialPaymentPathwayDashboardCounts,
   type FinancialPaymentPathwayDashboardCounts,
@@ -64,7 +64,7 @@ export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise
     .from("fi_invoices")
     .select("*")
     .eq("tenant_id", tid)
-    .in("status", ["issued", "partially_paid", "overdue"])
+    .in("status", openCollectionStatusFilter())
     .order("updated_at", { ascending: false })
     .limit(2000);
   if (ie) throw new Error(ie.message);

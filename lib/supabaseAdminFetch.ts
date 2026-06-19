@@ -39,8 +39,11 @@ export async function supabaseAdminFetchWithRetry(input: RequestInfo | URL, init
     /HEADERS_OVERFLOW|UND_ERR_HEADERS_OVERFLOW/i.test(detail) || /Headers Overflow/i.test(detail)
       ? " Try: NODE_OPTIONS=--max-http-header-size=262144 (Windows / undici)."
       : "";
+  const tlsHint = /UNABLE_TO_VERIFY|CERT|SELF_SIGNED|LEAF_SIGNATURE/i.test(detail)
+    ? " TLS interception detected — run scripts via `node scripts/run-with-system-ca.mjs` or set NODE_OPTIONS=--use-system-ca (Node 22+). See e2e/README.md TLS note."
+    : "";
   throw new Error(
-    `Supabase fetch failed after 6 attempts (${detail}). Check NEXT_PUBLIC_SUPABASE_URL, network/VPN/firewall, and that the Supabase project is not paused.${overflowHint}`,
+    `Supabase fetch failed after 6 attempts (${detail}). Check NEXT_PUBLIC_SUPABASE_URL, network/VPN/firewall, and that the Supabase project is not paused.${overflowHint}${tlsHint}`,
     {
       cause: last,
     }

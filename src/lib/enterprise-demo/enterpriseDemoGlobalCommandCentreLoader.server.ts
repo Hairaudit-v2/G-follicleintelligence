@@ -187,21 +187,20 @@ export async function loadGlobalCommandCentrePayload(
 
   const { data: protocolRaw, error: protocolErr } = await supabase
     .from("fi_imaging_protocol_sessions")
-    .select("progress, metadata, case_id")
+    .select("progress, case_id")
     .eq("tenant_id", tid)
     .limit(5000);
   if (protocolErr) throw new Error(protocolErr.message);
 
   const protocolRows: GlobalCommandCentreRawProtocolRow[] = [];
   for (const row of protocolRaw ?? []) {
-    const raw = row as { progress: unknown; metadata: unknown; case_id: string | null };
-    const demo = nestedDemoRecord(raw.progress) ?? nestedDemoRecord(raw.metadata);
+    const raw = row as { progress: unknown; case_id: string | null };
+    const demo = nestedDemoRecord(raw.progress);
     if (!demo?.enterprise_demo_protocol_session && !demo?.demo_protocol_session_key) continue;
 
     protocolRows.push({
       clinicSlug:
         metadataString(demo, "demo_clinic_slug") ??
-        metadataString(asRecord(raw.metadata), "demo_clinic_slug") ??
         (raw.case_id ? (caseClinicSlugById.get(String(raw.case_id)) ?? null) : null),
       protocolCompletionStatus: metadataString(demo, "protocol_completion_status"),
       missingSlots: metadataStringArray(demo, "missing_slots"),

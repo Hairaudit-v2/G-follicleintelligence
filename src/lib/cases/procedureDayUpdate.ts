@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { assertProcedureDayTeamAssignments } from "@/src/lib/staff/assertStaffClinicallyAvailable.server";
 import type { ProcedureDayUpsertPatch } from "./procedureDayTypes";
+import { maybeTriggerSurgeryProfitabilitySnapshot } from "@/src/lib/financialOs/financialSurgeryEconomicsSnapshotOrchestrator.server";
 
 export type UpsertProcedureDayParams = {
   tenantId: string;
@@ -124,6 +125,7 @@ export async function upsertProcedureDayForCase(params: UpsertProcedureDayParams
       .eq("tenant_id", tid)
       .eq("case_id", cid);
     if (ue) throw new Error(ue.message);
+    await maybeTriggerProcedureDaySnapshot(tid, cid, p);
     return;
   }
 
@@ -160,4 +162,30 @@ export async function upsertProcedureDayForCase(params: UpsertProcedureDayParams
 
   const { error: ie } = await supabase.from("fi_case_procedures").insert(insertPayload);
   if (ie) throw new Error(ie.message);
+  await maybeTriggerProcedureDaySnapshot(tid, cid, p);
+}
+
+function shouldAutoSnapshotFromProcedurePatch(patch: ProcedureDayUpsertPatch): boolean {
+  if (patch.procedure_status === "completed") return true;
+  if (patch.grafts_implanted != null && patch.grafts_implanted > 0) return true;
+  return false;
+}
+
+async function maybeTriggerProcedureDaySnapshot(tenantId: string, caseId: string, patch: ProcedureDayUpsertPatch): Promise<void> {
+  if (!shouldAutoSnapshotFromProcedurePatch(patch)) return;
+  try {
+    await maybeTriggerSurgeryProfitabilitySnapshot({
+      tenantId,
+      caseId,
+      trigger: {
+        source: patch.procedure_status === "completed" ? "procedure_completed" : "final_graft_count",
+        metadata: {
+          procedure_status: patch.procedure_status ?? null,
+          grafts_implanted: patch.grafts_implanted ?? null,
+        },
+      },
+    });
+  } catch {
+    /* best-effort */
+  }
 }

@@ -386,10 +386,11 @@ async function seedInvoice(
     now: string;
   }
 ): Promise<{ created: boolean; invoiceId: string | null; itemCreated: boolean }> {
+  const invoiceNumber = invoiceNumberForKey(invoice.demoInvoiceKey);
   const existing = findInvoiceByDemoKey(context.existingInvoices, invoice.demoInvoiceKey);
   if (existing) {
     if (!isEnterpriseDemoInvoiceMetadata(existing.metadata)) {
-      return { created: false, invoiceId: null, itemCreated: false };
+      return { created: false, invoiceId: existing.id, itemCreated: false };
     }
     return { created: false, invoiceId: existing.id, itemCreated: false };
   }
@@ -411,7 +412,7 @@ async function seedInvoice(
       currency: invoice.currency,
       due_date: invoice.dueDate,
       issued_at: invoice.issuedAt,
-      invoice_number: invoiceNumberForKey(invoice.demoInvoiceKey),
+      invoice_number: invoiceNumber,
       title: invoice.title,
       metadata: buildInvoiceMetadata(invoice),
       automation_hints: { enterprise_demo: true },
@@ -420,7 +421,26 @@ async function seedInvoice(
     })
     .select("id")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (/uq_fi_invoices_tenant_number|duplicate key value violates unique constraint/i.test(error.message)) {
+      const { data: existingByNumber, error: findErr } = await supabase
+        .from("fi_invoices")
+        .select("id, metadata")
+        .eq("tenant_id", tenantId)
+        .eq("invoice_number", invoiceNumber)
+        .maybeSingle();
+      if (findErr) throw new Error(findErr.message);
+      if (existingByNumber?.id) {
+        const invoiceId = String((existingByNumber as { id: string }).id);
+        context.existingInvoices.push({
+          id: invoiceId,
+          metadata: (existingByNumber as { metadata: unknown }).metadata as Record<string, unknown> | null,
+        });
+        return { created: false, invoiceId, itemCreated: false };
+      }
+    }
+    throw new Error(error.message);
+  }
 
   const invoiceId = String((data as { id: string }).id);
   context.existingInvoices.push({

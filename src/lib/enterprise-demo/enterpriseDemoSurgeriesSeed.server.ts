@@ -113,13 +113,6 @@ function demoConsultationKeyFromStructured(data: unknown): string | null {
   return metadataKey(data, ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA);
 }
 
-function dobForGender(gender: string, patientKey: string): string {
-  const year = gender === "female" ? 1988 : 1985;
-  const month = ((patientKey.length % 10) + 1).toString().padStart(2, "0");
-  const day = ((patientKey.charCodeAt(0) % 25) + 1).toString().padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 async function loadClinicIdBySlug(
   supabase: SupabaseClient,
   tenantId: string
@@ -365,6 +358,8 @@ function buildCaseMetadata(spec: EnterpriseDemoSurgerySpec): Record<string, unkn
     demo_clinic_slug: spec.clinicSlug,
     demo_consultation_key: spec.demoConsultationKey,
     enterprise_demo: true,
+    display_name: spec.displayName,
+    email: spec.email,
     procedure_type: spec.procedureType,
     graft_target: spec.graftTarget,
     quoted_graft_estimate: spec.quotedGraftEstimate,
@@ -522,12 +517,6 @@ export async function seedEnterpriseDemoSurgeries(
         .insert({
           tenant_id: tenantId,
           external_id: spec.demoCaseKey,
-          full_name: spec.displayName,
-          email: spec.email,
-          dob: dobForGender(spec.gender, spec.demoPatientKey),
-          sex: spec.gender === "female" ? "female" : "male",
-          primary_concern: `Surgery case - ${spec.procedureType}`,
-          country: spec.clinicSlug,
           clinic_id: clinicId,
           foundation_patient_id: patient.id,
           status: spec.surgeryStatus === "completed" ? "complete" : "processing",
@@ -573,7 +562,6 @@ export async function seedEnterpriseDemoSurgeries(
       bookingId = existingBooking.id;
     } else {
       const bookingMetadata = buildBookingMetadata(spec, surgeonFiUserId);
-      const surgeonStaffId = surgeonStaff?.id ?? null;
       const { data: insertedBooking, error: bookingErr } = await supabase
         .from("fi_bookings")
         .insert({
@@ -582,7 +570,6 @@ export async function seedEnterpriseDemoSurgeries(
           patient_id: patient.id,
           case_id: caseId,
           clinic_id: clinicId,
-          assigned_staff_id: surgeonStaffId,
           assigned_user_id: surgeonFiUserId,
           booking_type: "surgery",
           booking_status: bookingStatusForSurgery(spec),

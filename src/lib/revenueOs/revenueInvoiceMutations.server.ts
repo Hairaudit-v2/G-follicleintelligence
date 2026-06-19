@@ -14,11 +14,43 @@ import type { FiInvoiceKind, FiInvoiceRow, FiInvoiceStatus, FiPaymentRequestRow 
 import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { resolveConsultationQuoteInvoiceSource } from "@/src/lib/revenueOs/consultationInvoiceAmountResolve";
 import { syncFinancialOsAfterInvoiceSettlement } from "@/src/lib/financialOs/financialOsPaymentSync.server";
+import { syncAccountsReceivableOnInvoiceChange } from "@/src/lib/financialOs/financialAccountsReceivable.server";
+import { maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement } from "@/src/lib/financialOs/financialSurgeryEconomicsInvoiceHook.server";
+import {
+  triggerRevenueAttributionOnInvoicePaid,
+  triggerRevenueAttributionOnPaymentReceived,
+} from "@/src/lib/financialOs/financialRevenueAttribution.server";
+import {
+  buildInvoiceLifecyclePatch,
+  depositDueDateFromRule,
+  resolveInvoiceSentAtPatch,
+} from "@/src/lib/financialOs/financialInvoiceLifecycle.server";
+import {
+  appendInvoiceCreatedLedgerEntry,
+  appendPaymentReceivedLedgerEntry,
+} from "@/src/lib/financialOs/financialTransactionLedger.server";
+import {
+  recordGatewayPaymentReconciliationFailure,
+  reconcileGatewayPaymentAmounts,
+} from "@/src/lib/financialOs/financialPaymentReconciliation.server";
+import { assertInvoiceTransitionAllowed } from "@/src/lib/financialOs/financialInvoiceTransitionCore";
 
 function assertUuid(id: string, label: string): string {
   const v = id?.trim();
   if (!v) throw new Error(`${label} is required.`);
   return v;
+}
+
+async function syncArAfterInvoiceChangeBestEffort(tenantId: string, invoice: FiInvoiceRow, todayYmd?: string | null): Promise<void> {
+  try {
+    await syncAccountsReceivableOnInvoiceChange({
+      tenantId,
+      invoice,
+      todayYmd: todayYmd?.trim() || new Date().toISOString().slice(0, 10),
+    });
+  } catch {
+    /* FinancialOS AR best-effort */
+  }
 }
 
 async function loadInvoiceForTenant(tenantId: string, invoiceId: string): Promise<FiInvoiceRow | null> {
@@ -43,16 +75,23 @@ async function patchInvoiceAfterPayment(
   const supabase = supabaseAdmin();
   const row = await loadInvoiceForTenant(tenantId, invoiceId);
   if (!row) throw new Error("Invoice not found.");
-  const baseStatus: FiInvoiceStatus = row.status === "draft" ? "issued" : row.status;
-  const nextStatus = computeNextInvoiceStatus({ ...row, amount_paid_cents: nextPaid, status: baseStatus }, todayYmd);
+  const ymd = todayYmd ?? new Date().toISOString().slice(0, 10);
+  const baseStatus: FiInvoiceStatus = row.status === "draft" ? "awaiting_payment" : row.status;
+  const nextStatus = computeNextInvoiceStatus({ ...row, amount_paid_cents: nextPaid, status: baseStatus }, ymd);
+  assertInvoiceTransitionAllowed(row.status, nextStatus, { paymentSettlement: true });
+  const lifecyclePatch = buildInvoiceLifecyclePatch(
+    { ...row, amount_paid_cents: nextPaid, status: baseStatus },
+    nextStatus,
+    ymd
+  );
   const patch: Record<string, unknown> = {
     amount_paid_cents: nextPaid,
-    status: nextStatus,
-    updated_at: new Date().toISOString(),
+    ...lifecyclePatch,
   };
   if (row.status === "draft" && !row.issued_at) {
     patch.issued_at = new Date().toISOString();
   }
+  patch.sent_at = resolveInvoiceSentAtPatch(row.sent_at, nextStatus, row.issued_at);
   const { data, error } = await supabase.from("fi_invoices").update(patch).eq("tenant_id", tenantId).eq("id", invoiceId).select("*").single();
   if (error) throw new Error(error.message);
   return mapInvoiceRow(data as Record<string, unknown>);
@@ -106,7 +145,7 @@ export async function createInvoiceFromConsultationQuote(args: {
   const currency = (args.currency ?? "AUD").trim().toUpperCase() || "AUD";
   const total = parsed + tax;
   const issue = args.issue !== false;
-  const status: FiInvoiceStatus = issue ? "issued" : "draft";
+  const status: FiInvoiceStatus = issue ? "awaiting_payment" : "draft";
   const now = new Date().toISOString();
 
   const insert = {
@@ -122,6 +161,8 @@ export async function createInvoiceFromConsultationQuote(args: {
     tax_cents: tax,
     total_cents: total,
     amount_paid_cents: 0,
+    remaining_balance_cents: total,
+    days_overdue: 0,
     currency,
     due_date: args.dueDateYmd?.trim() || null,
     issued_at: issue ? now : null,
@@ -163,10 +204,16 @@ export async function createInvoiceFromConsultationQuote(args: {
   });
   if (li) throw new Error(li.message);
 
+  await appendInvoiceCreatedLedgerEntry({ invoice, createdByFiUserId: args.createdByFiUserId?.trim() || null });
+
   return invoice;
 }
 
-async function loadActiveDepositRule(tenantId: string, clinicId: string | null) {
+async function loadActiveDepositRule(
+  tenantId: string,
+  clinicId: string | null,
+  procedureType?: string | null
+) {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_deposit_rules")
@@ -174,16 +221,20 @@ async function loadActiveDepositRule(tenantId: string, clinicId: string | null) 
     .eq("tenant_id", tenantId)
     .eq("is_active", true)
     .order("priority", { ascending: false })
-    .limit(10);
+    .limit(20);
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as Record<string, unknown>[];
   const clinic = clinicId?.trim() || null;
-  return (
-    rows.find((r) => r.clinic_id && clinic && String(r.clinic_id) === clinic) ??
-    rows.find((r) => !r.clinic_id) ??
-    rows[0] ??
-    null
-  );
+  const proc = procedureType?.trim() || null;
+
+  const matchesProcedure = (r: Record<string, unknown>) => {
+    const ruleProc = r.procedure_type != null ? String(r.procedure_type).trim() : "";
+    return !ruleProc || (proc != null && ruleProc.toLowerCase() === proc.toLowerCase());
+  };
+
+  const clinicSpecific = rows.filter((r) => r.clinic_id && clinic && String(r.clinic_id) === clinic && matchesProcedure(r));
+  const tenantWide = rows.filter((r) => !r.clinic_id && matchesProcedure(r));
+  return clinicSpecific[0] ?? tenantWide[0] ?? rows.find(matchesProcedure) ?? null;
 }
 
 function resolveDepositCentsFromRule(
@@ -205,8 +256,12 @@ function resolveDepositCentsFromRule(
     if (base == null || !Number.isFinite(base) || base <= 0) {
       throw new Error("procedure_fee_estimate_cents is required for percent deposit rules.");
     }
-    const bp = Number(rule.percent_bp ?? 0);
-    if (!Number.isFinite(bp) || bp < 0) throw new Error("Deposit rule percent_bp is invalid.");
+    const minPct = rule.minimum_deposit_percentage != null ? Number(rule.minimum_deposit_percentage) : null;
+    const bp =
+      minPct != null && Number.isFinite(minPct)
+        ? Math.min(10_000, Math.max(0, Math.floor(minPct * 100)))
+        : Number(rule.percent_bp ?? 0);
+    if (!Number.isFinite(bp) || bp < 0) throw new Error("Deposit rule percent is invalid.");
     return Math.floor((base * bp) / 10_000);
   }
   throw new Error("Deposit rule is manual_only — pass deposit_amount_cents explicitly.");
@@ -237,7 +292,21 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
   if (!c) throw new Error("Case not found.");
 
   const row = c as { patient_id: string | null; clinic_id: string | null; lead_id: string | null };
-  const rule = await loadActiveDepositRule(tid, args.clinicId?.trim() || row.clinic_id);
+
+  const { data: planRow } = await supabase
+    .from("fi_case_surgery_plans")
+    .select("planned_procedure_type")
+    .eq("tenant_id", tid)
+    .eq("case_id", caseId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const procedureType =
+    planRow && (planRow as { planned_procedure_type?: string | null }).planned_procedure_type
+      ? String((planRow as { planned_procedure_type: string }).planned_procedure_type)
+      : null;
+
+  const rule = await loadActiveDepositRule(tid, args.clinicId?.trim() || row.clinic_id, procedureType);
   const amount = resolveDepositCentsFromRule(rule, {
     explicitDepositCents: args.depositAmountCents ?? null,
     procedureFeeEstimateCents: args.procedureFeeEstimateCents ?? null,
@@ -246,6 +315,12 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
   const currency = (args.currency ?? "AUD").trim().toUpperCase() || "AUD";
   const total = amount + tax;
   const now = new Date().toISOString();
+  const issueYmd = now.slice(0, 10);
+  const dueFromRule = depositDueDateFromRule(
+    rule?.deposit_due_days != null ? Number(rule.deposit_due_days) : null,
+    issueYmd
+  );
+  const dueDate = args.dueDateYmd?.trim() || dueFromRule;
 
   const hints: Record<string, unknown> = {
     deposit_due_reminder_days: [14, 7, 3],
@@ -265,17 +340,25 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
       case_id: caseId,
       consultation_id: null,
       invoice_kind: "surgery_deposit",
-      status: "issued",
+      status: "awaiting_payment",
       amount_cents: amount,
       tax_cents: tax,
       total_cents: total,
       amount_paid_cents: 0,
+      remaining_balance_cents: total,
+      days_overdue: 0,
       currency,
-      due_date: args.dueDateYmd?.trim() || null,
+      due_date: dueDate,
       issued_at: now,
+      sent_at: now,
       title: "Surgery deposit",
       automation_hints: hints,
-      metadata: { source: "surgery_case_deposit", case_id: caseId, deposit_rule_id: rule?.id ?? null },
+      metadata: {
+        source: "surgery_case_deposit",
+        case_id: caseId,
+        deposit_rule_id: rule?.id ?? null,
+        procedure_type: procedureType,
+      },
       created_by_fi_user_id: args.createdByFiUserId?.trim() || null,
     })
     .select("*")
@@ -295,6 +378,8 @@ export async function createDepositInvoiceFromSurgeryCase(args: {
     metadata: {},
   });
   if (li) throw new Error(li.message);
+
+  await appendInvoiceCreatedLedgerEntry({ invoice, createdByFiUserId: args.createdByFiUserId?.trim() || null });
 
   return invoice;
 }
@@ -340,14 +425,17 @@ export async function createBalanceInvoiceFromSurgeryCase(args: {
       case_id: caseId,
       consultation_id: null,
       invoice_kind: "surgery_balance",
-      status: "issued",
+      status: "awaiting_payment",
       amount_cents: amount,
       tax_cents: tax,
       total_cents: total,
       amount_paid_cents: 0,
+      remaining_balance_cents: total,
+      days_overdue: 0,
       currency,
       due_date: args.dueDateYmd?.trim() || null,
       issued_at: now,
+      sent_at: now,
       title: "Surgery balance",
       automation_hints: {
         balance_due_reminder_days: [7, 3, 1],
@@ -373,6 +461,8 @@ export async function createBalanceInvoiceFromSurgeryCase(args: {
     metadata: {},
   });
   if (li) throw new Error(li.message);
+
+  await appendInvoiceCreatedLedgerEntry({ invoice, createdByFiUserId: args.createdByFiUserId?.trim() || null });
 
   return invoice;
 }
@@ -506,7 +596,47 @@ export async function createPaymentRequestForInvoice(args: {
     out = mapPaymentRequestRow(upd as Record<string, unknown>);
   }
 
+  if (send) {
+    await markInvoiceSentWhenPaymentRequestDispatched(tid, inv);
+  }
+
   return out;
+}
+
+async function markInvoiceSentWhenPaymentRequestDispatched(tenantId: string, inv: FiInvoiceRow): Promise<void> {
+  const supabase = supabaseAdmin();
+  const now = new Date().toISOString();
+  const ymd = now.slice(0, 10);
+
+  if (inv.status === "draft") {
+    assertInvoiceTransitionAllowed(inv.status, "sent");
+    const lifecyclePatch = buildInvoiceLifecyclePatch(inv, "sent", ymd);
+    await supabase
+      .from("fi_invoices")
+      .update({
+        status: "sent",
+        sent_at: now,
+        issued_at: inv.issued_at ?? now,
+        ...lifecyclePatch,
+      })
+      .eq("tenant_id", tenantId)
+      .eq("id", inv.id);
+    return;
+  }
+
+  if (inv.status === "sent") {
+    assertInvoiceTransitionAllowed(inv.status, "awaiting_payment");
+    const lifecyclePatch = buildInvoiceLifecyclePatch(inv, "awaiting_payment", ymd);
+    await supabase
+      .from("fi_invoices")
+      .update({
+        status: "awaiting_payment",
+        sent_at: inv.sent_at ?? now,
+        ...lifecyclePatch,
+      })
+      .eq("tenant_id", tenantId)
+      .eq("id", inv.id);
+  }
 }
 
 export async function updateInvoiceDueDateForTenant(args: {
@@ -521,22 +651,19 @@ export async function updateInvoiceDueDateForTenant(args: {
   const due = args.dueDateYmd?.trim() || null;
   if (due && !/^\d{4}-\d{2}-\d{2}$/.test(due)) throw new Error("due_date must be YYYY-MM-DD.");
   const todayYmd = new Date().toISOString().slice(0, 10);
-  const nextStatus = computeNextInvoiceStatus(
-    {
-      status: inv.status,
-      total_cents: inv.total_cents,
-      amount_paid_cents: inv.amount_paid_cents,
-      due_date: due,
-    },
-    todayYmd
-  );
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_invoices")
     .update({
       due_date: due,
-      status: nextStatus,
-      updated_at: new Date().toISOString(),
+      ...buildInvoiceLifecyclePatch(
+        { ...inv, due_date: due },
+        computeNextInvoiceStatus(
+          { status: inv.status, total_cents: inv.total_cents, amount_paid_cents: inv.amount_paid_cents, due_date: due },
+          todayYmd
+        ),
+        todayYmd
+      ),
     })
     .eq("tenant_id", tid)
     .eq("id", iid)
@@ -665,6 +792,38 @@ export async function markInvoiceManuallyPaid(args: {
 
   const nextPaid = inv.amount_paid_cents + bal;
   const updated = await patchInvoiceAfterPayment(tid, iid, nextPaid, args.todayYmd ?? null);
+  const paymentId = String((pay as { id: string }).id);
+
+  try {
+    const reconciliation = await reconcileGatewayPaymentAmounts({
+      tenantId: tid,
+      clinicId: inv.clinic_id,
+      invoiceId: iid,
+      provider: "manual",
+      expectedAmountCents: bal,
+      receivedAmountCents: bal,
+      currency: inv.currency,
+      paymentId,
+    });
+    if (reconciliation.ok && reconciliation.matched) {
+      await appendPaymentReceivedLedgerEntry({
+        invoice: updated,
+        paymentId,
+        amountCents: bal,
+        currency: inv.currency,
+        createdByFiUserId: args.recordedByFiUserId?.trim() || null,
+        paymentReconciliationId: reconciliation.reconciliation.id,
+      });
+      await triggerRevenueAttributionOnPaymentReceived({
+        tenantId: tid,
+        invoice: updated,
+        paymentId,
+        amountCents: bal,
+      });
+    }
+  } catch {
+    /* ledger/reconciliation best-effort */
+  }
 
   try {
     await appendCrmActivityEvent({
@@ -688,6 +847,13 @@ export async function markInvoiceManuallyPaid(args: {
 
   try {
     await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
+    await syncArAfterInvoiceChangeBestEffort(tid, updated, args.todayYmd ?? null);
+    await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({
+      tenantId: tid,
+      invoice: updated,
+      actorFiUserId: args.recordedByFiUserId,
+    });
+    await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: updated });
   } catch {
     /* FinancialOS best-effort */
   }
@@ -706,6 +872,7 @@ export async function cancelInvoice(args: {
   const inv = await loadInvoiceForTenant(tid, iid);
   if (!inv) throw new Error("Invoice not found.");
   if (inv.status === "paid" || inv.status === "refunded") throw new Error("Cannot cancel a paid or refunded invoice.");
+  assertInvoiceTransitionAllowed(inv.status, "cancelled");
   const { data, error } = await supabase
     .from("fi_invoices")
     .update({
@@ -732,6 +899,8 @@ export async function recordGatewayPaymentSuccess(args: {
   paymentIntentId?: string | null;
   paymentRequestId?: string | null;
   todayYmd?: string | null;
+  /** When set, used as expected reconciliation amount instead of payment-request / balance lookup. */
+  expectedAmountCents?: number | null;
 }): Promise<FiInvoiceRow> {
   const tid = assertUuid(args.tenantId, "tenantId");
   const iid = assertUuid(args.invoiceId, "invoiceId");
@@ -756,6 +925,9 @@ export async function recordGatewayPaymentSuccess(args: {
       if (!current) throw new Error("Invoice not found.");
       try {
         await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+        await syncArAfterInvoiceChangeBestEffort(tid, current, args.todayYmd ?? null);
+        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+        await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: current });
       } catch {
         /* FinancialOS best-effort */
       }
@@ -763,25 +935,65 @@ export async function recordGatewayPaymentSuccess(args: {
     }
   }
 
-  const { error: pe } = await supabase.from("fi_payments").insert({
-    tenant_id: tid,
-    clinic_id: inv.clinic_id,
-    patient_id: inv.patient_id,
-    lead_id: inv.lead_id,
-    case_id: inv.case_id,
-    consultation_id: inv.consultation_id,
-    invoice_id: iid,
-    payment_request_id: args.paymentRequestId?.trim() || null,
-    status: "succeeded",
-    amount_cents: payAmt,
-    tax_cents: 0,
-    total_cents: payAmt,
-    currency: args.currency.trim().toUpperCase(),
-    provider: providerNorm === "stripe" ? "stripe" : args.provider.trim(),
-    provider_ref: args.providerRef,
-    provider_payment_intent_id: intentId,
-    metadata: {},
+  let expectedAmount = args.expectedAmountCents != null ? Math.max(0, Math.floor(args.expectedAmountCents)) : payAmt;
+  const prId = args.paymentRequestId?.trim() || null;
+  if (prId) {
+    const { data: prRow } = await supabase
+      .from("fi_payment_requests")
+      .select("total_cents, amount_cents")
+      .eq("tenant_id", tid)
+      .eq("id", prId)
+      .maybeSingle();
+    if (prRow) {
+      const prAmt = Math.max(
+        0,
+        Number((prRow as { total_cents?: unknown }).total_cents ?? (prRow as { amount_cents?: unknown }).amount_cents ?? 0)
+      );
+      if (prAmt > 0) expectedAmount = prAmt;
+    }
+  } else {
+    expectedAmount = Math.min(expectedAmount, invoiceBalanceDueCents(inv));
+  }
+
+  const reconciliation = await reconcileGatewayPaymentAmounts({
+    tenantId: tid,
+    clinicId: inv.clinic_id,
+    invoiceId: iid,
+    provider: args.provider,
+    providerTransactionId: intentId ?? args.providerRef,
+    expectedAmountCents: expectedAmount,
+    receivedAmountCents: payAmt,
+    currency: args.currency,
+    paymentId: null,
   });
+
+  if (!reconciliation.ok || !reconciliation.matched) {
+    return inv;
+  }
+
+  const { data: payRow, error: pe } = await supabase
+    .from("fi_payments")
+    .insert({
+      tenant_id: tid,
+      clinic_id: inv.clinic_id,
+      patient_id: inv.patient_id,
+      lead_id: inv.lead_id,
+      case_id: inv.case_id,
+      consultation_id: inv.consultation_id,
+      invoice_id: iid,
+      payment_request_id: prId,
+      status: "succeeded",
+      amount_cents: payAmt,
+      tax_cents: 0,
+      total_cents: payAmt,
+      currency: args.currency.trim().toUpperCase(),
+      provider: providerNorm === "stripe" ? "stripe" : args.provider.trim(),
+      provider_ref: args.providerRef,
+      provider_payment_intent_id: intentId,
+      metadata: {},
+    })
+    .select("id")
+    .single();
   if (pe) {
     if (
       isFiStripeGatewayPaymentIntentDuplicateInsert(pe, {
@@ -793,6 +1005,9 @@ export async function recordGatewayPaymentSuccess(args: {
       if (!current) throw new Error("Invoice not found.");
       try {
         await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+        await syncArAfterInvoiceChangeBestEffort(tid, current, args.todayYmd ?? null);
+        await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({ tenantId: tid, invoice: current });
+        await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: current });
       } catch {
         /* FinancialOS best-effort */
       }
@@ -803,13 +1018,40 @@ export async function recordGatewayPaymentSuccess(args: {
 
   const nextPaid = inv.amount_paid_cents + payAmt;
   const updated = await patchInvoiceAfterPayment(tid, iid, nextPaid, args.todayYmd ?? null);
+  const paymentId = String((payRow as { id: string }).id);
 
-  if (args.paymentRequestId?.trim()) {
+  if (prId) {
     await supabase
       .from("fi_payment_requests")
       .update({ status: "paid", updated_at: new Date().toISOString() })
       .eq("tenant_id", tid)
-      .eq("id", args.paymentRequestId.trim());
+      .eq("id", prId);
+  }
+
+  try {
+    await supabase
+      .from("fi_payment_reconciliation")
+      .update({
+        payment_id: paymentId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("tenant_id", tid)
+      .eq("id", reconciliation.reconciliation.id);
+    await appendPaymentReceivedLedgerEntry({
+      invoice: updated,
+      paymentId,
+      amountCents: payAmt,
+      currency: args.currency,
+      paymentReconciliationId: reconciliation.reconciliation.id,
+    });
+    await triggerRevenueAttributionOnPaymentReceived({
+      tenantId: tid,
+      invoice: updated,
+      paymentId,
+      amountCents: payAmt,
+    });
+  } catch {
+    /* ledger/reconciliation best-effort */
   }
 
   try {
@@ -833,6 +1075,9 @@ export async function recordGatewayPaymentSuccess(args: {
 
   try {
     await syncFinancialOsAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
+    await syncArAfterInvoiceChangeBestEffort(tid, updated, args.todayYmd ?? null);
+    await maybeTriggerSurgeryProfitabilitySnapshotAfterInvoiceSettlement({ tenantId: tid, invoice: updated });
+    await triggerRevenueAttributionOnInvoicePaid({ tenantId: tid, invoice: updated });
   } catch {
     /* FinancialOS best-effort */
   }
@@ -882,6 +1127,17 @@ export async function recordGatewayPaymentFailure(args: {
     } catch {
       /* best-effort metadata */
     }
+  }
+
+  try {
+    await recordGatewayPaymentReconciliationFailure({
+      tenantId: tid,
+      invoiceId: args.invoiceId,
+      provider: args.provider,
+      failureReason: args.message,
+    });
+  } catch {
+    /* best-effort */
   }
 
   try {

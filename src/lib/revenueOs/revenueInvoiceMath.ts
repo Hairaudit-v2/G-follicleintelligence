@@ -1,26 +1,41 @@
 import type { FiInvoiceStatus } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import { invoiceBalanceDueCents, normalizeInvoiceStatusValue } from "@/src/lib/revenueOs/revenueInvoiceModel";
+
+function collectibleBaseStatus(status: FiInvoiceStatus): FiInvoiceStatus {
+  const normalized = normalizeInvoiceStatusValue(status);
+  if (normalized === "sent") return "awaiting_payment";
+  return normalized;
+}
 
 export function computeNextInvoiceStatus(
   row: {
-    status: FiInvoiceStatus;
+    status: FiInvoiceStatus | string;
     total_cents: number;
     amount_paid_cents: number;
     due_date: string | null;
   },
   todayYmd: string | null
 ): FiInvoiceStatus {
-  if (row.status === "cancelled" || row.status === "refunded" || row.status === "draft") return row.status;
+  const status = normalizeInvoiceStatusValue(String(row.status));
+  if (status === "cancelled" || status === "refunded" || status === "draft") return status;
   const bal = invoiceBalanceDueCents(row);
   if (bal <= 0 && row.total_cents > 0) return "paid";
   if (row.amount_paid_cents > 0 && bal > 0) return "partially_paid";
-  if (row.status === "issued" || row.status === "partially_paid" || row.status === "overdue") {
+  if (
+    status === "awaiting_payment" ||
+    status === "sent" ||
+    status === "partially_paid" ||
+    status === "overdue"
+  ) {
     const due = row.due_date?.trim();
     if (due && todayYmd && due < todayYmd && bal > 0) return "overdue";
-    if (row.status === "overdue" && due && todayYmd && due >= todayYmd) return "issued";
-    return row.status === "overdue" ? "overdue" : "issued";
+    if (status === "overdue" && due && todayYmd && due >= todayYmd) {
+      return collectibleBaseStatus(status);
+    }
+    if (status === "overdue") return "overdue";
+    return status === "sent" ? "sent" : "awaiting_payment";
   }
-  return row.status;
+  return status;
 }
 
 /** Invoice line + tax total (single-line invoices use this shape in tests). */

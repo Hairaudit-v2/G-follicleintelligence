@@ -81,6 +81,19 @@ Optional `FI_E2E_TENANT_ID` supplies a real tenant UUID for routes that need
 one; without it, tests fall back to a syntactically valid placeholder UUID
 (fine for "access denied" assertions, since no tenant data is read).
 
+## Node TLS on managed Windows (Supabase scripts / `npm run dev`)
+
+On some corporate networks, Node’s default CA store fails Supabase HTTPS with
+`UNABLE_TO_VERIFY_LEAF_SIGNATURE` while browsers and the Supabase MCP plugin
+still work.
+
+- **`npm run dev`** — runs Next with `node --use-system-ca`.
+- **`npm run check:env`**, **`npm run seed:enterprise-demo`**, **`npm run validate:titan-global-command-centre`** — run via `scripts/run-with-system-ca.mjs`, which uses `node --use-system-ca --import tsx` (the `tsx` CLI re-execs Node without the flag).
+- Do **not** set `NODE_OPTIONS=--use-system-ca` — Node rejects that flag in
+  `NODE_OPTIONS` on some builds. Clear it with `Remove-Item Env:NODE_OPTIONS`
+  (PowerShell) if present.
+- Alternative: point Node at your corporate root CA with `NODE_EXTRA_CA_CERTS`.
+
 ## Layout
 
 ```

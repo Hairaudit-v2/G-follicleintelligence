@@ -34,9 +34,16 @@ import { CaseRevenuePaymentsCard } from "@/src/components/fi-admin/revenue/CaseR
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
+import { FinancialSurgeryEconomicsCard } from "@/src/components/fi/financial/FinancialSurgeryEconomicsCard";
+import { FinancialCaseAccountsReceivableCard } from "@/src/components/fi/financial/FinancialCaseAccountsReceivableCard";
+import { FinancialRevenueAttributionRepairCard } from "@/src/components/fi/financial/FinancialRevenueAttributionRepairCard";
+import type { CaseAccountsReceivableSummary } from "@/src/lib/financialOs/financialAccountsReceivable.server";
+import type { FiRevenueAttributionManualOverrideRow } from "@/src/lib/financialOs/financialRevenueAttributionCore";
 import type { CasePaymentReadiness } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import type { FinancialClearanceResult } from "@/src/lib/financialOs/financialClearanceCore";
 import type { FinancialSurgeryPipelineStatus } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
+import type { SurgeryProfitabilitySnapshotReadiness } from "@/src/lib/financialOs/financialSurgeryEconomicsCore";
+import type { SurgeryEconomicsCaseSummary } from "@/src/lib/financialOs/financialSurgeryEconomics.server";
 import type { CaseCrmQuoteRow } from "@/src/lib/crm/crmQuoteLoaders.server";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
@@ -72,7 +79,13 @@ export function CaseDetailPageView({
   casePaymentReadiness,
   caseFinancialPipeline,
   caseFinancialClearance,
+  caseSurgeryEconomics,
+  caseSurgeryEconomicsReadiness,
+  caseSurgeryEconomicsSnapshotCount,
   caseCrmQuotes = [],
+  caseRevenueAttributionOverride = null,
+  caseRevenueAttributionConsultantOptions = [],
+  caseAccountsReceivable,
 }: {
   tenantId: string;
   detail: CaseAdminDetail;
@@ -97,7 +110,13 @@ export function CaseDetailPageView({
   casePaymentReadiness: CasePaymentReadiness;
   caseFinancialPipeline: FinancialSurgeryPipelineStatus;
   caseFinancialClearance: FinancialClearanceResult;
+  caseSurgeryEconomics: SurgeryEconomicsCaseSummary;
+  caseSurgeryEconomicsReadiness: SurgeryProfitabilitySnapshotReadiness;
+  caseSurgeryEconomicsSnapshotCount: number;
   caseCrmQuotes?: CaseCrmQuoteRow[];
+  caseRevenueAttributionOverride?: FiRevenueAttributionManualOverrideRow | null;
+  caseRevenueAttributionConsultantOptions?: Array<{ value: string; label: string }>;
+  caseAccountsReceivable: CaseAccountsReceivableSummary;
 }) {
   const patientId = detail.patient?.foundation_patient_id ?? detail.foundation_patient_id ?? detail.legacy_patient_id;
   /** Foundation patient UUID for Patient Twin (omit link when only legacy linkage without fi_patients row). */
@@ -233,6 +252,35 @@ export function CaseDetailPageView({
               </div>
               <div className="mt-2">
                 <FinancialPaymentPathwayBadge summary={caseFinancialPipeline.paymentPathway} variant="light" />
+              </div>
+              <div className="mt-3">
+                <FinancialSurgeryEconomicsCard
+                  tenantId={tenantId}
+                  caseId={detail.id}
+                  summary={caseSurgeryEconomics}
+                  readiness={caseSurgeryEconomicsReadiness}
+                  snapshotCount={caseSurgeryEconomicsSnapshotCount}
+                  canMutate={canMutatePaymentRecords}
+                  variant="light"
+                />
+              </div>
+              <div className="mt-3">
+                <FinancialCaseAccountsReceivableCard
+                  tenantId={tenantId}
+                  caseId={detail.id}
+                  summary={caseAccountsReceivable}
+                  variant="light"
+                />
+              </div>
+              <div className="mt-3">
+                <FinancialRevenueAttributionRepairCard
+                  tenantId={tenantId}
+                  caseId={detail.id}
+                  override={caseRevenueAttributionOverride}
+                  consultantOptions={caseRevenueAttributionConsultantOptions}
+                  canMutate={canMutatePaymentRecords}
+                  variant="light"
+                />
               </div>
             </div>
           </div>

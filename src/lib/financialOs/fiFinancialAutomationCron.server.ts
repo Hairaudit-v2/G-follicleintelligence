@@ -5,7 +5,8 @@ import { appendCrmActivityEvent } from "@/src/lib/crm/activity";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { isPostgresUniqueViolation } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import { upsertArCaseFromInvoice } from "@/src/lib/financialOs/financialAccountsReceivable.server";
+import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export type FiFinancialAutomationCronResult = {
   job: string;
@@ -53,7 +54,7 @@ export async function runFinancialOsDepositOverdueJob(opts: {
     .from("fi_invoices")
     .select("*")
     .in("invoice_kind", ["surgery_deposit", "consultation_quote", "surgery_balance"])
-    .in("status", ["issued", "partially_paid", "overdue"])
+    .in("status", openCollectionStatusFilter())
     .not("due_date", "is", null)
     .lt("due_date", runDate)
     .order("updated_at", { ascending: false })
@@ -97,6 +98,16 @@ export async function runFinancialOsDepositOverdueJob(opts: {
       } catch {
         /* optional */
       }
+      try {
+        await upsertArCaseFromInvoice({
+          tenantId: inv.tenant_id,
+          invoice: inv,
+          todayYmd: runDate,
+          trigger: inv.invoice_kind === "surgery_deposit" ? "deposit_deadline_missed" : "invoice_overdue",
+        });
+      } catch {
+        /* AR case best-effort */
+      }
     }
   }
   return { job: "deposit_overdue", examined, recorded, skippedDuplicate, dryRun: opts.dryRun };
@@ -114,7 +125,7 @@ export async function runFinancialOsBalanceDueRemindersJob(opts: {
   let q = supabase
     .from("fi_invoices")
     .select("*")
-    .in("status", ["issued", "partially_paid", "overdue"])
+    .in("status", openCollectionStatusFilter())
     .not("due_date", "is", null)
     .order("updated_at", { ascending: false })
     .limit(opts.limit);

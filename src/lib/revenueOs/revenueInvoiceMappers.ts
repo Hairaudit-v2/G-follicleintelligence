@@ -1,4 +1,5 @@
 import type { FiGatewayPaymentStatus, FiInvoiceItemRow, FiInvoiceKind, FiInvoiceRow, FiInvoiceStatus, FiPaymentRequestRow, FiPaymentRequestStatus } from "./revenueInvoiceModel";
+import { invoiceBalanceDueCents, normalizeInvoiceStatusValue } from "./revenueInvoiceModel";
 
 function jsonObject(raw: unknown): Record<string, unknown> {
   if (raw && typeof raw === "object" && !Array.isArray(raw)) return raw as Record<string, unknown>;
@@ -15,7 +16,7 @@ export function mapInvoiceRow(raw: Record<string, unknown>): FiInvoiceRow {
     case_id: raw.case_id != null ? String(raw.case_id) : null,
     consultation_id: raw.consultation_id != null ? String(raw.consultation_id) : null,
     invoice_kind: String(raw.invoice_kind) as FiInvoiceKind,
-    status: String(raw.status) as FiInvoiceStatus,
+    status: normalizeInvoiceStatusValue(String(raw.status)),
     amount_cents: Number(raw.amount_cents ?? 0),
     tax_cents: Number(raw.tax_cents ?? 0),
     total_cents: Number(raw.total_cents ?? 0),
@@ -23,6 +24,17 @@ export function mapInvoiceRow(raw: Record<string, unknown>): FiInvoiceRow {
     currency: String(raw.currency ?? "AUD").toUpperCase(),
     due_date: raw.due_date != null ? String(raw.due_date).slice(0, 10) : null,
     issued_at: raw.issued_at != null ? String(raw.issued_at) : null,
+    sent_at: raw.sent_at != null ? String(raw.sent_at) : null,
+    paid_at: raw.paid_at != null ? String(raw.paid_at) : null,
+    remaining_balance_cents:
+      raw.remaining_balance_cents != null
+        ? Number(raw.remaining_balance_cents)
+        : invoiceBalanceDueCents({
+            total_cents: Number(raw.total_cents ?? 0),
+            amount_paid_cents: Number(raw.amount_paid_cents ?? 0),
+          }),
+    days_overdue: Number(raw.days_overdue ?? 0),
+    last_reminder_sent_at: raw.last_reminder_sent_at != null ? String(raw.last_reminder_sent_at) : null,
     invoice_number: raw.invoice_number != null ? String(raw.invoice_number) : null,
     title: raw.title != null ? String(raw.title) : null,
     automation_hints: jsonObject(raw.automation_hints),

@@ -228,16 +228,18 @@ function liveStatusForSurgeryStatus(status: EnterpriseDemoSurgeryStatus): string
 
 function scheduledWindowForSurgery(
   consultationDate: string,
-  patientIndex: number,
+  clinicSurgeryIndex: number,
+  demoBookingKey: string,
   _timezone: string
 ): { scheduledDate: string; scheduledStartAt: string; scheduledEndAt: string } {
   const base = new Date(`${consultationDate}T10:00:00.000Z`);
-  const daysForward = 14 + patientIndex * 2;
+  // Two 6-hour theatre slots per day per lead surgeon; spread 12 clinic surgeries across days.
+  const dayOffset = Math.floor(clinicSurgeryIndex / 2) + (stableHash(demoBookingKey) % 2);
+  const daysForward = 14 + dayOffset;
   base.setUTCDate(base.getUTCDate() + daysForward);
   const scheduledDate = base.toISOString().slice(0, 10);
-  const hour = 8 + (patientIndex % 4);
   const start = new Date(base);
-  start.setUTCHours(hour, 30, 0, 0);
+  start.setUTCHours(clinicSurgeryIndex % 2 === 0 ? 8 : 14, 30, 0, 0);
   const end = new Date(start);
   end.setUTCHours(start.getUTCHours() + 6);
   return {
@@ -429,7 +431,8 @@ function buildGraftSessionSpec(
 
 function buildSurgerySpecFromPatient(
   patientSpec: EnterpriseDemoPatientConsultationSpec,
-  surgeryStatus: EnterpriseDemoSurgeryStatus
+  surgeryStatus: EnterpriseDemoSurgeryStatus,
+  clinicSurgeryIndex: number
 ): EnterpriseDemoSurgerySpec {
   const demoSurgeryKey = `${patientSpec.demoConsultationKey}-surgery`;
   const demoCaseKey = `${patientSpec.demoPatientKey}-case`;
@@ -440,7 +443,8 @@ function buildSurgerySpecFromPatient(
   const hairCountEstimate = Math.round(graftTarget * avgHairs);
   const scheduled = scheduledWindowForSurgery(
     patientSpec.consultationDate,
-    patientSpec.patientIndex,
+    clinicSurgeryIndex,
+    demoBookingKey,
     patientSpec.timezone
   );
 
@@ -547,7 +551,7 @@ export function buildEnterpriseDemoSurgerySpecs(
       const patientSpec = clinicPatients.find((p) => p.patientIndex === patientIndex);
       if (!patientSpec) continue;
       const surgeryStatus = SURGERY_STATUS_TEMPLATE[i];
-      specs.push(buildSurgerySpecFromPatient(patientSpec, surgeryStatus));
+      specs.push(buildSurgerySpecFromPatient(patientSpec, surgeryStatus, i));
     }
   }
 

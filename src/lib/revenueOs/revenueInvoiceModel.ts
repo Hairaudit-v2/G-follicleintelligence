@@ -11,7 +11,8 @@ export type FiInvoiceKind = (typeof FI_INVOICE_KINDS)[number];
 
 export const FI_INVOICE_STATUSES = [
   "draft",
-  "issued",
+  "sent",
+  "awaiting_payment",
   "partially_paid",
   "paid",
   "overdue",
@@ -19,6 +20,19 @@ export const FI_INVOICE_STATUSES = [
   "refunded",
 ] as const;
 export type FiInvoiceStatus = (typeof FI_INVOICE_STATUSES)[number];
+
+/** Statuses that represent an open balance eligible for collection (includes legacy `issued`). */
+export const FI_INVOICE_OPEN_COLLECTION_STATUSES = [
+  "sent",
+  "awaiting_payment",
+  "partially_paid",
+  "overdue",
+] as const;
+
+export function normalizeInvoiceStatusValue(status: string): FiInvoiceStatus {
+  if (status === "issued") return "awaiting_payment";
+  return status as FiInvoiceStatus;
+}
 
 export const FI_GATEWAY_PAYMENT_STATUSES = [
   "pending",
@@ -49,6 +63,11 @@ export type FiInvoiceRow = {
   currency: string;
   due_date: string | null;
   issued_at: string | null;
+  sent_at: string | null;
+  paid_at: string | null;
+  remaining_balance_cents: number;
+  days_overdue: number;
+  last_reminder_sent_at: string | null;
   invoice_number: string | null;
   title: string | null;
   automation_hints: Record<string, unknown>;
@@ -96,6 +115,16 @@ export function invoiceBalanceDueCents(row: Pick<FiInvoiceRow, "total_cents" | "
   return Math.max(0, row.total_cents - row.amount_paid_cents);
 }
 
-export function isInvoiceOpenForCollection(status: FiInvoiceStatus): boolean {
-  return status === "issued" || status === "partially_paid" || status === "overdue";
+export function isInvoiceOpenForCollection(status: FiInvoiceStatus | string): boolean {
+  const normalized = normalizeInvoiceStatusValue(String(status));
+  return (
+    normalized === "sent" ||
+    normalized === "awaiting_payment" ||
+    normalized === "partially_paid" ||
+    normalized === "overdue"
+  );
+}
+
+export function openCollectionStatusFilter(): string[] {
+  return ["sent", "awaiting_payment", "partially_paid", "overdue", "issued"];
 }

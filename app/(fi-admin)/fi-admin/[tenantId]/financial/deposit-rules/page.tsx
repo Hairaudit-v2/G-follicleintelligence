@@ -30,7 +30,7 @@ export default async function FinancialOsDepositRulesPage({ params }: { params: 
       <FinancialOsSubPageHeader
         kicker="Deposits"
         title="Deposit rules"
-        description="Active RevenueOS deposit configuration (read-only in FinancialOS Phase 1)."
+        description="Procedure-scoped deposit policy — percent, due days, slot release, cancellation fee, and transfer rules."
       />
       <FinancialOsTable
         isEmpty={rules.length === 0}
@@ -38,19 +38,29 @@ export default async function FinancialOsDepositRulesPage({ params }: { params: 
         head={
           <>
             <FinancialOsTh>Name</FinancialOsTh>
+            <FinancialOsTh>Procedure</FinancialOsTh>
             <FinancialOsTh>Kind</FinancialOsTh>
-            <FinancialOsTh>Priority</FinancialOsTh>
+            <FinancialOsTh>Min deposit %</FinancialOsTh>
+            <FinancialOsTh>Due days</FinancialOsTh>
+            <FinancialOsTh>Auto release</FinancialOsTh>
+            <FinancialOsTh>Cancel fee bp</FinancialOsTh>
+            <FinancialOsTh>Transfer</FinancialOsTh>
             <FinancialOsTh>Active</FinancialOsTh>
-            <FinancialOsTh>Percent bp</FinancialOsTh>
-            <FinancialOsTh>Fixed ¢</FinancialOsTh>
           </>
         }
       >
         {rules.map((r) => (
           <tr key={String(r.id)} className={financialOsClasses.tableRow}>
             <td className={financialOsClasses.tableCellStrong}>{String(r.name ?? "")}</td>
+            <td className={financialOsClasses.tableCellMono}>{r.procedure_type != null ? String(r.procedure_type) : "All"}</td>
             <td className={financialOsClasses.tableCellMono}>{String(r.rule_kind ?? "")}</td>
-            <td className={financialOsClasses.tableCell}>{String(r.priority ?? "")}</td>
+            <td className={financialOsClasses.tableCell}>
+              {r.minimum_deposit_percentage != null ? `${String(r.minimum_deposit_percentage)}%` : r.percent_bp != null ? `${Number(r.percent_bp) / 100}%` : "—"}
+            </td>
+            <td className={financialOsClasses.tableCell}>{r.deposit_due_days != null ? String(r.deposit_due_days) : "—"}</td>
+            <td className={financialOsClasses.tableCell}>{r.auto_release_slot ? "Yes" : "No"}</td>
+            <td className={financialOsClasses.tableCell}>{r.cancellation_fee_percentage != null ? String(r.cancellation_fee_percentage) : "—"}</td>
+            <td className={financialOsClasses.tableCell}>{r.allow_transfer === false ? "No" : "Yes"}</td>
             <td className={financialOsClasses.tableCell}>
               <span
                 className={`${financialOsStatusBadgeBase} ${r.is_active ? financialOsStatusBadgeTones.success : financialOsStatusBadgeTones.neutral}`}
@@ -58,8 +68,6 @@ export default async function FinancialOsDepositRulesPage({ params }: { params: 
                 {r.is_active ? "Active" : "Inactive"}
               </span>
             </td>
-            <td className={financialOsClasses.tableCell}>{r.percent_bp != null ? String(r.percent_bp) : "—"}</td>
-            <td className={financialOsClasses.tableCell}>{r.fixed_amount_cents != null ? String(r.fixed_amount_cents) : "—"}</td>
           </tr>
         ))}
       </FinancialOsTable>

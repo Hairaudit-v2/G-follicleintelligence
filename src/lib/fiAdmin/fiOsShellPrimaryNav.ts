@@ -296,7 +296,7 @@ export function resolveFiOsPrimarySidebarItems(
       featureKey: "settings",
       label: "FinancialOS",
       shortLabel: "Fin",
-      href: hrefFor(b, "financial/dashboard"),
+      href: hrefFor(b, "financial-os"),
       disabled: false,
     },
     {
@@ -387,6 +387,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "reception") return "reception-board";
     if (firstEarly === "tomorrow") return "tomorrow-board";
     if (firstEarly === "payments") return "payments-inbox";
+    if (firstEarly === "financial-os") return "financial-os";
     if (firstEarly === "financial") return "financial-os";
     if (firstEarly === "staff") return "staff";
   }
@@ -415,6 +416,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     const rest = npRaw.slice(nb.length).replace(/^\//, "");
     const first = rest.split("/")[0] ?? "";
     if (first === "payments") return "payments-inbox";
+    if (first === "financial-os") return "financial-os";
     if (first === "financial") return "financial-os";
     if (first === "system-status") return "calendar";
     if (first === "settings") return "settings";

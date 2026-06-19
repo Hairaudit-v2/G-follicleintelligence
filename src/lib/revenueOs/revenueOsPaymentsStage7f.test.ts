@@ -31,18 +31,18 @@ test("invoiceAmountPaidAfterAllocation", () => {
 });
 
 test("computeNextInvoiceStatus: partial and overdue transitions", () => {
-  const issued = computeNextInvoiceStatus(
-    { status: "issued", total_cents: 10000, amount_paid_cents: 3000, due_date: "2099-01-01" },
+  const awaiting = computeNextInvoiceStatus(
+    { status: "awaiting_payment", total_cents: 10000, amount_paid_cents: 3000, due_date: "2099-01-01" },
     "2026-06-12"
   );
-  assert.equal(issued, "partially_paid");
+  assert.equal(awaiting, "partially_paid");
   const overdue = computeNextInvoiceStatus(
-    { status: "issued", total_cents: 10000, amount_paid_cents: 0, due_date: "2020-01-01" },
+    { status: "awaiting_payment", total_cents: 10000, amount_paid_cents: 0, due_date: "2020-01-01" },
     "2026-06-12"
   );
   assert.equal(overdue, "overdue");
   const paid = computeNextInvoiceStatus(
-    { status: "issued", total_cents: 10000, amount_paid_cents: 10000, due_date: "2020-01-01" },
+    { status: "awaiting_payment", total_cents: 10000, amount_paid_cents: 10000, due_date: "2020-01-01" },
     "2026-06-12"
   );
   assert.equal(paid, "paid");
@@ -63,7 +63,7 @@ test("derivePublicPaymentPageState: manual vs payable", () => {
   const inv: Pick<FiInvoiceRow, "total_cents" | "amount_paid_cents" | "status"> = {
     total_cents: 10000,
     amount_paid_cents: 0,
-    status: "issued",
+    status: "awaiting_payment",
   };
   const pr = {
     id: "x",

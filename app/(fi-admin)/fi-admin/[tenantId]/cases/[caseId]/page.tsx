@@ -27,6 +27,13 @@ import { buildCaseOutcomeIntelligenceView, loadCaseOutcomeMeasurements, loadCase
 import { loadCrmQuotesForCase } from "@/src/lib/crm/crmQuoteLoaders.server";
 import { loadCaseFinancialOsSurgeryPipelineSummary } from "@/src/lib/financialOs/financialSurgeryPipelineStatus.server";
 import { buildFinancialClearanceFromPipelineStatus } from "@/src/lib/financialOs/financialClearanceCore";
+import {
+  loadCaseSurgeryEconomicsSummary,
+  loadLiveSurgeryForCase,
+} from "@/src/lib/financialOs/financialSurgeryEconomics.server";
+import { loadCaseSnapshotReadinessSummary } from "@/src/lib/financialOs/financialSurgeryEconomicsSnapshotOrchestrator.server";
+import { loadRevenueAttributionOverrideForCase } from "@/src/lib/financialOs/financialRevenueAttribution.server";
+import { loadCaseAccountsReceivableSummary } from "@/src/lib/financialOs/financialAccountsReceivable.server";
 
 export const metadata = {
   title: "Patient",
@@ -147,6 +154,35 @@ export default async function CaseDetailRoutePage({
     pipeline: caseFinancialPipeline,
   });
 
+  const liveSurgery = await loadLiveSurgeryForCase(tenantId.trim(), caseId.trim());
+  const surgeryEconomicsMeta = await loadCaseSnapshotReadinessSummary(tenantId.trim(), caseId.trim());
+  const caseSurgeryEconomics = await loadCaseSurgeryEconomicsSummary({
+    tenantId: tenantId.trim(),
+    caseId: caseId.trim(),
+    paymentReadiness: casePaymentReadiness,
+    surgeryPlan,
+    procedureDay,
+    surgeryId: liveSurgery?.surgery_id ?? null,
+    patientId: linkedFiPatientId,
+    liveGraftCount: liveSurgery?.target_grafts ?? null,
+    treatmentAddons: liveSurgery?.treatment_addons,
+    actualStartAt: liveSurgery?.actual_start_at ?? null,
+    actualEndAt: liveSurgery?.actual_end_at ?? null,
+  });
+
+  let caseRevenueAttributionOverride: Awaited<ReturnType<typeof loadRevenueAttributionOverrideForCase>> = null;
+  try {
+    caseRevenueAttributionOverride = await loadRevenueAttributionOverrideForCase(tenantId.trim(), caseId.trim());
+  } catch {
+    /* table may not exist until migration */
+  }
+
+  const caseRevenueAttributionConsultantOptions = teamUserOptions
+    .filter((o) => o.staff_role === "consultant")
+    .map((o) => ({ value: o.fi_user_id, label: o.label }));
+
+  let caseAccountsReceivable = await loadCaseAccountsReceivableSummary(tenantId.trim(), caseId.trim());
+
   const pageView = (
     <CaseDetailPageView
       tenantId={tenantId}
@@ -169,7 +205,13 @@ export default async function CaseDetailRoutePage({
       casePaymentReadiness={casePaymentReadiness}
       caseFinancialPipeline={caseFinancialPipeline}
       caseFinancialClearance={caseFinancialClearance}
+      caseSurgeryEconomics={caseSurgeryEconomics}
+      caseSurgeryEconomicsReadiness={surgeryEconomicsMeta.readiness}
+      caseSurgeryEconomicsSnapshotCount={surgeryEconomicsMeta.snapshot_count}
       caseCrmQuotes={caseCrmQuotes}
+      caseRevenueAttributionOverride={caseRevenueAttributionOverride}
+      caseRevenueAttributionConsultantOptions={caseRevenueAttributionConsultantOptions}
+      caseAccountsReceivable={caseAccountsReceivable}
     />
   );
 

@@ -6,7 +6,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { isPostgresUniqueViolation } from "@/src/lib/payments/stripeWebhookIdempotency";
 import { mapInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceKind } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export type FiPaymentRemindersCronResult = {
   examined: number;
@@ -47,7 +47,7 @@ export async function runFiPaymentRemindersCronOnce(opts: {
   const { data: rows, error } = await supabase
     .from("fi_invoices")
     .select("*")
-    .in("status", ["issued", "partially_paid", "overdue"])
+    .in("status", openCollectionStatusFilter())
     .not("due_date", "is", null)
     .order("updated_at", { ascending: false })
     .limit(opts.limit);
@@ -106,6 +106,13 @@ export async function runFiPaymentRemindersCronOnce(opts: {
         throw new Error(insErr.message);
       }
       recorded += 1;
+      if (!opts.dryRun) {
+        await supabase
+          .from("fi_invoices")
+          .update({ last_reminder_sent_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .eq("tenant_id", inv.tenant_id)
+          .eq("id", inv.id);
+      }
       try {
         await appendCrmActivityEvent({
           tenantId: inv.tenant_id,
@@ -143,7 +150,7 @@ export async function runFiPaymentRemindersCronOnceForTenant(
     .from("fi_invoices")
     .select("*")
     .eq("tenant_id", tid)
-    .in("status", ["issued", "partially_paid", "overdue"])
+    .in("status", openCollectionStatusFilter())
     .not("due_date", "is", null)
     .order("updated_at", { ascending: false })
     .limit(opts.limit);
@@ -196,6 +203,13 @@ export async function runFiPaymentRemindersCronOnceForTenant(
         throw new Error(insErr.message);
       }
       recorded += 1;
+      if (!opts.dryRun) {
+        await supabase
+          .from("fi_invoices")
+          .update({ last_reminder_sent_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .eq("tenant_id", inv.tenant_id)
+          .eq("id", inv.id);
+      }
       try {
         await appendCrmActivityEvent({
           tenantId: inv.tenant_id,

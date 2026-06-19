@@ -53,6 +53,7 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f === "audit" || f.startsWith("audit/"), feature: "audit" },
   { test: (f) => f === "academy" || f.startsWith("academy/"), feature: "academy" },
   { test: (f) => f === "payments" || f.startsWith("payments/"), feature: "settings" },
+  { test: (f) => f === "financial-os" || f.startsWith("financial-os/"), feature: "settings" },
   { test: (f) => f === "financial" || f.startsWith("financial/"), feature: "settings" },
   { test: (f) => f === "staff" || f.startsWith("staff/"), feature: "staff" },
   { test: (f) => f.startsWith("hr/"), feature: "staff" },

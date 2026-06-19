@@ -2,7 +2,7 @@
  * TITAN Phase 1I — Global Command Centre demo-readiness validation.
  *
  * Usage:
- *   node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/validateEnterpriseDemoGlobalCommandCentre.ts
+ *   npm run validate:titan-global-command-centre
  *
  * Optional env:
  *   TITAN_DEMO_TENANT_ID — tenant UUID (defaults to ihrg-global slug lookup)
@@ -10,10 +10,10 @@
  * Required env:
  *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
+import { createRequire } from "node:module";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { runGlobalCommandCentreDemoValidation } from "../src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentreValidation.server";
 import {
   TITAN_GLOBAL_COMMAND_CENTRE_ROUTES,
   buildTenantGlobalCommandCentreRoutes,
@@ -44,7 +44,14 @@ function loadRepoEnvFiles(): void {
 
 loadRepoEnvFiles();
 
+const require = createRequire(import.meta.url);
+require("./patch-server-only-for-scripts.cjs");
+
 async function main(): Promise<void> {
+  const { runGlobalCommandCentreDemoValidation } = await import(
+    "../src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentreValidation.server"
+  );
+
   const tenantKey = process.env.TITAN_DEMO_TENANT_ID?.trim() || "ihrg-global";
   console.log(`TITAN Global Command Centre validation → ${tenantKey}`);
   console.log("---");

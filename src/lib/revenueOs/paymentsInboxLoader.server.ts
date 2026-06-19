@@ -6,7 +6,7 @@ import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import { readCrmQuoteIdFromObjectMetadata } from "@/src/lib/revenueOs/paymentsInboxQuoteMetadata";
 
 export type PaymentsInboxFilters = {
@@ -134,7 +134,7 @@ export async function loadPaymentsInboxSnapshot(
       .from("fi_invoices")
       .select("*")
       .eq("tenant_id", tid)
-      .in("status", ["issued", "partially_paid", "overdue", "draft"])
+      .in("status", [...openCollectionStatusFilter(), "draft"])
       .order("due_date", { ascending: true, nullsFirst: false })
       .limit(400),
   ]);
@@ -268,9 +268,12 @@ export async function loadPaymentsInboxSnapshot(
       partiallyPaid.push(inv);
     }
 
-    if (inv.status === "overdue" || (pastDue && (inv.status === "issued" || inv.status === "partially_paid"))) {
+    if (
+      inv.status === "overdue" ||
+      (pastDue && (inv.status === "awaiting_payment" || inv.status === "sent" || inv.status === "partially_paid"))
+    ) {
       overdue.push(inv);
-    } else if (inv.status === "issued") {
+    } else if (inv.status === "awaiting_payment" || inv.status === "sent") {
       unpaidIssued.push(inv);
     }
   }

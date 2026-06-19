@@ -6,7 +6,7 @@ import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { mapInvoiceRow, mapPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceMappers";
 import type { FiInvoiceKind, FiInvoiceRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
 import type { FiPaymentRequestRow } from "@/src/lib/revenueOs/revenueInvoiceModel";
-import { invoiceBalanceDueCents, isInvoiceOpenForCollection } from "@/src/lib/revenueOs/revenueInvoiceModel";
+import { invoiceBalanceDueCents, isInvoiceOpenForCollection, openCollectionStatusFilter } from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export type PatientInvoiceSummary = {
   invoices: FiInvoiceRow[];
@@ -117,7 +117,7 @@ export async function loadUnpaidInvoicesDashboard(
     .from("fi_invoices")
     .select("*")
     .eq("tenant_id", tid)
-    .in("status", ["issued", "partially_paid", "overdue"])
+    .in("status", openCollectionStatusFilter())
     .order("due_date", { ascending: true, nullsFirst: false })
     .limit(limit);
   if (error) throw new Error(error.message);
@@ -149,7 +149,7 @@ export async function loadRevenueCollectionsDashboardKpis(
     .from("fi_invoices")
     .select("id, status, due_date, total_cents, amount_paid_cents")
     .eq("tenant_id", tid)
-    .in("status", ["issued", "partially_paid", "overdue"]);
+    .in("status", openCollectionStatusFilter());
   if (error) throw new Error(error.message);
   let unpaidIssuedInvoiceCount = 0;
   let overdueInvoiceCount = 0;

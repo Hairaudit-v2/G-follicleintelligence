@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { maybeTriggerSurgeryProfitabilitySnapshot } from "@/src/lib/financialOs/financialSurgeryEconomicsSnapshotOrchestrator.server";
 import {
   assertSurgeryOsTenantRowScope,
   type SurgeryOsProcedureEventKind,
@@ -1084,7 +1085,7 @@ export async function reconcileGrafts(input: {
     );
   }
 
-  return applyGraftMutation({
+  const result = await applyGraftMutation({
     tenantId: input.tenantId,
     surgeryId: input.surgeryId,
     actorFiUserId: input.actorFiUserId,
@@ -1097,6 +1098,25 @@ export async function reconcileGrafts(input: {
       note: input.note,
     },
   });
+
+  const caseId = surgery.case_id?.trim() || null;
+  if (caseId) {
+    try {
+      await maybeTriggerSurgeryProfitabilitySnapshot({
+        tenantId: input.tenantId,
+        caseId,
+        trigger: {
+          source: "final_graft_count",
+          actorFiUserId: input.actorFiUserId,
+          metadata: { surgery_id: surgery.id, graft_reconciliation: true },
+        },
+      });
+    } catch {
+      /* best-effort */
+    }
+  }
+
+  return result;
 }
 
 export function graftSessionToTotals(session: GraftSessionRow): ReturnType<typeof buildGraftTotalsFromSession> {
