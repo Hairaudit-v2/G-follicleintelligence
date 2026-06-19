@@ -1,6 +1,6 @@
 /**
  * Idempotent seed: International Hair Restoration Group (IHRG) enterprise demo tenant,
- * 8 global clinics, and franchise staff hierarchy.
+ * 8 global clinics, franchise staff hierarchy, and synthetic patients/consultations.
  *
  * Run (from repo root, with Supabase service role in env):
  *   npm run seed:enterprise-demo

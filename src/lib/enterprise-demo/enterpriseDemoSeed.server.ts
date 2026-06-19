@@ -10,6 +10,7 @@ import {
   isEnterpriseDemoTenantMetadata,
 } from "./enterpriseDemoConstants";
 import { seedEnterpriseDemoStaffHierarchy } from "./enterpriseDemoStaffSeed.server";
+import { seedEnterpriseDemoPatientsAndConsultations } from "./enterpriseDemoPatientsSeed.server";
 
 export type EnterpriseDemoSeedResult = {
   ok: boolean;
@@ -21,6 +22,12 @@ export type EnterpriseDemoSeedResult = {
   createdStaff: number;
   existingStaff: number;
   updatedStaffLinks: number;
+  createdPatients: number;
+  existingPatients: number;
+  createdConsultations: number;
+  existingConsultations: number;
+  createdClinicalDetails: number;
+  existingClinicalDetails: number;
   warnings: string[];
 };
 
@@ -255,6 +262,12 @@ export async function seedEnterpriseDemoTenant(
       createdStaff: 0,
       existingStaff: 0,
       updatedStaffLinks: 0,
+      createdPatients: 0,
+      existingPatients: 0,
+      createdConsultations: 0,
+      existingConsultations: 0,
+      createdClinicalDetails: 0,
+      existingClinicalDetails: 0,
       warnings: [guard.reason],
     };
   }
@@ -274,6 +287,12 @@ export async function seedEnterpriseDemoTenant(
         createdStaff: 0,
         existingStaff: 0,
         updatedStaffLinks: 0,
+        createdPatients: 0,
+        existingPatients: 0,
+        createdConsultations: 0,
+        existingConsultations: 0,
+        createdClinicalDetails: 0,
+        existingClinicalDetails: 0,
         warnings: [tenantResult.reason],
       };
     }
@@ -286,6 +305,12 @@ export async function seedEnterpriseDemoTenant(
     const staffResult = await seedEnterpriseDemoStaffHierarchy(supabase, tenantResult.tenantId);
     warnings.push(...staffResult.warnings);
 
+    const patientsResult = await seedEnterpriseDemoPatientsAndConsultations(
+      supabase,
+      tenantResult.tenantId
+    );
+    warnings.push(...patientsResult.warnings);
+
     return {
       ok: true,
       tenantSlug: ENTERPRISE_DEMO_TENANT_SLUG,
@@ -296,6 +321,12 @@ export async function seedEnterpriseDemoTenant(
       createdStaff: staffResult.createdStaff,
       existingStaff: staffResult.existingStaff,
       updatedStaffLinks: staffResult.updatedStaffLinks,
+      createdPatients: patientsResult.createdPatients,
+      existingPatients: patientsResult.existingPatients,
+      createdConsultations: patientsResult.createdConsultations,
+      existingConsultations: patientsResult.existingConsultations,
+      createdClinicalDetails: patientsResult.createdClinicalDetails,
+      existingClinicalDetails: patientsResult.existingClinicalDetails,
       warnings,
     };
   } catch (e) {
@@ -309,6 +340,12 @@ export async function seedEnterpriseDemoTenant(
       createdStaff: 0,
       existingStaff: 0,
       updatedStaffLinks: 0,
+      createdPatients: 0,
+      existingPatients: 0,
+      createdConsultations: 0,
+      existingConsultations: 0,
+      createdClinicalDetails: 0,
+      existingClinicalDetails: 0,
       warnings: [message],
     };
   }

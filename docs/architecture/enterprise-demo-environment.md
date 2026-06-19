@@ -29,6 +29,15 @@ Mode: enterprise_simulation
 - Clinic assignment via `working_hours._profile.primary_clinic_id`
 - No dashboard work yet
 
+## Phase 1C
+
+- Synthetic patient + consultation generator (30 per clinic = 240 total)
+- Idempotent `fi_persons` / `fi_patients` / `fi_consultations` seed via `demo_patient_key` and `demo_consultation_key`
+- Hair restoration metadata: age band, gender, Norwood/Ludwig/Savin, diagnosis, lead source, consultation status, quoted treatment/value, conversion outcome
+- `fi_patient_clinical_details` rows with Norwood/Ludwig scales
+- Consultant linkage via Phase 1B `demo_staff_key` when staff rows exist
+- No dashboard work yet
+
 ## Clinics
 
 - London Central Institute
@@ -53,7 +62,6 @@ npm run seed:enterprise-demo
 
 ## Future Phases
 
-Phase 1C: synthetic patients and consultations  
 Phase 1D: surgeries and graft intelligence  
 Phase 1E: global command centre dashboard  
 Phase 1F: operational anomalies and franchise risk engine
