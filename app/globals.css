@@ -284,6 +284,9 @@ body {
     --fi-cal-ws-controls-inset-bg: rgb(6 13 24 / 0.9);
     --fi-cal-ws-controls-inset-border: rgb(255 255 255 / 0.08);
     --fi-cal-ws-date-scheme: dark;
+    --fi-cal-ws-select-option-bg: #0f172a;
+    --fi-cal-ws-select-option-text: #f1f5f9;
+    --fi-cal-ws-select-option-text-muted: #94a3b8;
   }
 
   .fi-cal-workspace-root[data-fi-cal-display-theme="light"] {
@@ -308,5 +311,13 @@ body {
     --fi-cal-ws-controls-inset-bg: #ffffff;
     --fi-cal-ws-controls-inset-border: #e2e8f0;
     --fi-cal-ws-date-scheme: light;
+    --fi-cal-ws-select-option-bg: #ffffff;
+    --fi-cal-ws-select-option-text: #0f172a;
+    --fi-cal-ws-select-option-text-muted: #475569;
+  }
+
+  .fi-cal-workspace-root select option {
+    background-color: var(--fi-cal-ws-select-option-bg, #0f172a);
+    color: var(--fi-cal-ws-select-option-text, #f1f5f9);
   }
 }

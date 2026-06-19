@@ -13,11 +13,16 @@ import { buildCalendarNavigationHref } from "@/src/lib/calendar/calendarViewNavi
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import { staffOptionPrimaryLabel } from "@/src/lib/staff/staffAssigneeDisplay";
+import { CalendarToolbarFilterSelect } from "@/components/calendar/CalendarToolbarFilterSelect";
 import { CalendarTransitionLink } from "@/components/calendar/CalendarTransitionLink";
 import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
 import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { cn } from "@/lib/utils";
 import { useFiCalendarWorkspaceDisplayTheme } from "@/src/components/fi-admin/calendar/fiCalendarWorkspaceDisplayTheme";
+import {
+  calendarClinicFilterSelectValue,
+  calendarStaffFilterSelectValue,
+} from "@/src/lib/calendar/calendarToolbarFilters";
 
 const VIEW_OPTIONS: { id: CalendarViewMode; label: string }[] = [
   { id: "day", label: "Day" },
@@ -82,12 +87,11 @@ export function CalendarTopControls({
     pushCalendarHref(router, href);
   }
 
-  const selectedClinic =
-    clinics.find((c) => c.id === query.clinicId) ??
-    clinics.find((c) => /south perth/i.test(c.display_name)) ??
-    clinics[0];
-
   const isFiOs = variant === "fiOs";
+  const displayTheme = fiCalTheme?.theme ?? "dark";
+  const filterShell = isFiOs
+    ? "border-[color:var(--fi-cal-ws-controls-inset-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-controls-inset-bg,rgb(6_13_24/0.9))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    : "border-[#1e2937] bg-[#0b1220] shadow-sm shadow-black/20";
   const shell = isFiOs
     ? "border-b border-[color:var(--fi-cal-ws-strip-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-strip-bg,rgb(6_13_24/0.9))] px-3 py-3 backdrop-blur-xl sm:px-4"
     : "border-b border-[#1e2937] bg-[#0f172a] px-4 py-3";
@@ -112,10 +116,7 @@ export function CalendarTopControls({
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         {isFiOs && fiOsPanelControls ? (
           <div
-            className={cn(
-              "inline-flex items-center gap-0.5 rounded-xl p-0.5",
-              "border border-white/[0.08] bg-[#060d18]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            )}
+            className={cn("inline-flex items-center gap-0.5 rounded-xl border p-0.5", filterShell)}
             role="group"
             aria-label="Calendar drawers"
           >
@@ -208,60 +209,40 @@ export function CalendarTopControls({
           })}
         </div>
 
-        <label
-          className={
-            isFiOs
-              ? "inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#060d18]/90 px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-              : "inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-2.5 py-1.5 shadow-sm shadow-black/20"
+        <CalendarToolbarFilterSelect
+          variant={isFiOs ? "fiOs" : "default"}
+          displayTheme={displayTheme}
+          ariaLabel="Staff filter"
+          placeholder="All staff"
+          icon={Users}
+          value={calendarStaffFilterSelectValue(query.staffId)}
+          options={staffDirectory.map((a) => ({
+            value: a.id,
+            label: staffOptionPrimaryLabel(a),
+          }))}
+          onValueChange={(staffId) =>
+            navigate({
+              staffId: staffId ? staffId : null,
+              assignedUserId: undefined,
+            })
           }
-        >
-          <Users className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
-          <span className="sr-only">Staff filter</span>
-          <select
-            value={query.staffId ?? ""}
-            onChange={(e) =>
-              navigate({
-                staffId: e.target.value ? e.target.value : null,
-                assignedUserId: undefined,
-              })
-            }
-            className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-[var(--fi-cal-ws-text,#e2e8f0)] outline-none sm:max-w-[11rem] [color-scheme:var(--fi-cal-ws-date-scheme,dark)]"
-          >
-            <option value="">All staff</option>
-            {staffDirectory.map((a) => (
-              <option key={a.id} value={a.id}>
-                {staffOptionPrimaryLabel(a)}
-              </option>
-            ))}
-          </select>
-        </label>
+        />
 
-        <label
-          className={
-            isFiOs
-              ? "inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#060d18]/90 px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-              : "inline-flex items-center gap-2 rounded-xl border border-[#1e2937] bg-[#0b1220] px-2.5 py-1.5 shadow-sm shadow-black/20"
+        <CalendarToolbarFilterSelect
+          variant={isFiOs ? "fiOs" : "default"}
+          displayTheme={displayTheme}
+          ariaLabel="Location filter"
+          placeholder="All locations"
+          icon={MapPin}
+          maxWidthClass="max-w-[9rem] sm:max-w-[12rem]"
+          value={calendarClinicFilterSelectValue(query.clinicId)}
+          options={
+            clinics.length === 0
+              ? [{ value: "south-perth", label: "South Perth" }]
+              : clinics.map((c) => ({ value: c.id, label: c.display_name }))
           }
-        >
-          <MapPin className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
-          <span className="sr-only">Location</span>
-          <select
-            value={query.clinicId ?? selectedClinic?.id ?? ""}
-            onChange={(e) => navigate({ clinicId: e.target.value ? e.target.value : null })}
-            className="max-w-[9rem] border-0 bg-transparent py-0.5 text-sm font-medium text-[var(--fi-cal-ws-text,#e2e8f0)] outline-none sm:max-w-[12rem] [color-scheme:var(--fi-cal-ws-date-scheme,dark)]"
-          >
-            <option value="">All locations</option>
-            {clinics.length === 0 ? (
-              <option value="south-perth">South Perth</option>
-            ) : (
-              clinics.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.display_name}
-                </option>
-              ))
-            )}
-          </select>
-        </label>
+          onValueChange={(clinicId) => navigate({ clinicId: clinicId ? clinicId : null })}
+        />
 
         <span
           className={cn(
@@ -284,11 +265,7 @@ export function CalendarTopControls({
         </span>
 
         {isFiOs && fiCalTheme ? (
-          <div
-            className={cn(
-              "inline-flex items-center gap-0.5 rounded-xl p-0.5",
-              "border border-[color:var(--fi-cal-ws-controls-inset-border,rgba(255,255,255,0.08))] bg-[var(--fi-cal-ws-controls-inset-bg,rgb(6_13_24/0.9))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            )}
+          <div className={cn("inline-flex items-center gap-0.5 rounded-xl border p-0.5", filterShell)}
             role="group"
             aria-label="Calendar display theme"
           >
@@ -329,7 +306,7 @@ export function CalendarTopControls({
           className={cn(
             "hidden items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium transition sm:inline-flex",
             isFiOs
-              ? "border border-white/[0.08] bg-[#060d18]/90 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-cyan-500/20 hover:text-cyan-100"
+              ? cn("border text-slate-400 hover:border-cyan-500/20 hover:text-cyan-100", filterShell)
               : "border border-[#1e2937] bg-[#0b1220] text-slate-400 shadow-sm shadow-black/20 hover:border-slate-600 hover:text-slate-100"
           )}
           aria-label="Keyboard shortcuts"

@@ -298,7 +298,7 @@ function CalendarPageImpl({
       className={cn(
         "flex flex-col",
         isFiOsWorkspace
-          ? "fi-cal-workspace-root min-h-0 flex-1 overflow-hidden bg-[var(--fi-cal-ws-page-bg,#050a14)]"
+          ? "fi-cal-workspace-root min-h-0 flex-1 bg-[var(--fi-cal-ws-page-bg,#050a14)]"
           : "-mx-3 min-h-[calc(100dvh-8rem)] bg-[#0f172a] sm:-mx-4 lg:-mx-6"
       )}
       data-fi-cal-display-theme={isFiOsWorkspace ? calendarWorkspaceDisplayTheme : undefined}
@@ -352,7 +352,7 @@ function CalendarPageImpl({
         </p>
       ) : null}
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className={cn("flex min-h-0 flex-1 flex-col", isFiOsWorkspace && "overflow-hidden")}>
         {/* FI OS + prefers-reduced-motion: no AnimatePresence / motion wrappers — instant view swap. */}
         {instantCalendarViewTransition ? (
           isMonthView ? (
