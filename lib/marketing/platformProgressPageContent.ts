@@ -59,7 +59,7 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 30,
+    completionPercent: 55,
     description: "Healthcare workforce infrastructure, onboarding, compliance, and operational staff governance.",
   },
   {
@@ -317,7 +317,7 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 30,
+    completionPercent: 55,
     stage: "Identity · onboarding · tenant bootstrap",
     description:
       "Healthcare workforce infrastructure, onboarding, compliance, training readiness, and operational staff governance.",
