@@ -4,6 +4,7 @@ import { Fragment } from "react";
 import Link from "next/link";
 
 import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
+import { FiMarketingHealthcareStackSection } from "@/components/home/FiMarketingHealthcareStackSection";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -214,6 +215,8 @@ export function EcosystemArchitectureView() {
           <EcosystemLayerStack />
         </FadeIn>
       </Section>
+
+      <FiMarketingHealthcareStackSection />
 
       <Section
         id={c.connectedIntelligence.id}

@@ -32,13 +32,20 @@ export type PlatformProgressChangelogEntry = {
   modules: string[];
 };
 
+export type PlatformRecentRelease = {
+  id: string;
+  title: string;
+  module: string;
+  date: string;
+};
+
 export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   hero: {
     eyebrow: "Platform Progress",
     headline: "Engineering the complete hair restoration operating system",
     subtext:
       "Transparent delivery status across every Follicle Intelligence module — from infrastructure foundations through pilot-ready surfaces and production deployments.",
-    lastUpdated: "2026-06-21",
+    lastUpdated: "2026-06-22",
   },
 
   summary: {
@@ -56,7 +63,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 
   changelog: {
     eyebrow: "Engineering changelog",
-    headline: "What shipped recently",
+    headline: "Recent Infrastructure Milestones",
     intro: "Public record of platform delivery — migrations, surfaces, and integration contracts.",
   },
 
@@ -70,9 +77,9 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   homepage: {
     id: "platform-progress",
     eyebrow: "Platform progress",
-    headline: "Built as a living operating system",
+    headline: "Built as a living healthcare operating system",
     description:
-      "Follicle Intelligence is actively engineered and deployed module by module — with public delivery status across the full FI OS surface area.",
+      "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
     cta: { label: "View platform progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
@@ -85,11 +92,45 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 
 /** Featured modules surfaced on the public homepage highlight section. */
 export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
+  "foundation-os",
   "reception-os",
   "financial-os",
-  "consultation-os",
   "surgery-os",
 ] as const;
+
+/** Latest infrastructure deployments for internal FI Admin dashboard. */
+export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-21-workforce-onboarding-centre",
+    title: "WorkforceOS onboarding centre",
+    module: "WorkforceOS",
+    date: "2026-06-21",
+  },
+  {
+    id: "2026-06-19-financial-executive-engine",
+    title: "FinancialOS executive finance engine",
+    module: "FinancialOS",
+    date: "2026-06-19",
+  },
+  {
+    id: "2026-06-19-surgery-graft-intelligence",
+    title: "SurgeryOS graft intelligence",
+    module: "SurgeryOS",
+    date: "2026-06-19",
+  },
+  {
+    id: "2026-06-20-imaging-ai-execution",
+    title: "ImagingOS AI execution framework",
+    module: "ImagingOS",
+    date: "2026-06-20",
+  },
+  {
+    id: "2026-06-15-consultation-workflow-engine",
+    title: "ConsultationOS workflow engine",
+    module: "ConsultationOS",
+    date: "2026-06-15",
+  },
+];
 
 const DEPLOYABLE_STATUSES: PlatformProgressStatus[] = ["Live", "Production", "Pilot Ready"];
 
@@ -120,19 +161,29 @@ export function getFeaturedPlatformProgressModules(
 /** Manual module registry — edit completionPercent, stage, and status as delivery advances. */
 export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
+    id: "foundation-os",
+    name: "FoundationOS",
+    completionPercent: 96,
+    stage: "Patient Twin · identity spine",
+    description:
+      "Patient identity substrate, digital twin continuity, media timelines, and cross-module event spine for longitudinal intelligence.",
+    status: "Infrastructure Complete",
+    learnMoreHref: "/patient-twin",
+  },
+  {
     id: "reception-os",
     name: "ReceptionOS",
-    completionPercent: 82,
-    stage: "Phase 5 · delivery closeout",
+    completionPercent: 94,
+    stage: "Phase 5 · front-desk command centre",
     description: "Front-desk command centre — arrival board, task orchestration, outbound comms, and pilot metrics.",
-    status: "Pilot Ready",
+    status: "Production",
     learnMoreHref: "/fi-admin",
   },
   {
     id: "consultation-os",
     name: "ConsultationOS",
-    completionPercent: 88,
-    stage: "Forms engine · conversion pathways",
+    completionPercent: 89,
+    stage: "Workflow engine · conversion pathways",
     description: "Structured consultation forms, pathway launcher, quote acceptance, and conversion intelligence.",
     status: "Production",
   },
@@ -140,34 +191,34 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     id: "financial-os",
     name: "FinancialOS",
     completionPercent: 88,
-    stage: "Phase 5 · executive finance intelligence",
+    stage: "Executive finance intelligence",
     description:
-      "Master ledger, surgery profitability, revenue attribution, accounts receivable, and executive forecasting — plus payment pathways, finance applications, and the FI admin financial command centre.",
-    status: "Pilot Ready",
+      "Master ledger, surgery profitability, revenue attribution, accounts receivable, and executive forecasting — plus payment pathways and finance applications.",
+    status: "Production",
     learnMoreHref: "/platform/progress#progress-financial-os",
   },
   {
     id: "surgery-os",
     name: "SurgeryOS",
-    completionPercent: 71,
-    stage: "Phase 2 · graft intelligence",
-    description: "Procedure-day command centre, live capture, graft counting assistant, and clinical safety guardrails.",
-    status: "Active Development",
+    completionPercent: 92,
+    stage: "Graft intelligence · procedure-day command",
+    description: "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
+    status: "Production",
     learnMoreHref: "/platform/surgery-os",
   },
   {
     id: "imaging-os",
     name: "ImagingOS",
-    completionPercent: 76,
-    stage: "Guided capture · progression mapping",
-    description: "Template-driven photography sessions, slot progress, and surgical-domain progression assessments.",
+    completionPercent: 80,
+    stage: "Live AI execution framework",
+    description: "Template-driven photography sessions, slot progress, AI execution framework, and surgical-domain progression assessments.",
     status: "Pilot Ready",
     learnMoreHref: "/platform/imaging-os",
   },
   {
     id: "patient-os",
     name: "PatientOS",
-    completionPercent: 79,
+    completionPercent: 78,
     stage: "Records · timelines · Patient Twin",
     description: "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
     status: "Production",
@@ -176,61 +227,124 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "audit-os",
     name: "AuditOS",
-    completionPercent: 58,
-    stage: "Evidence · scoring · network review",
-    description: "Independent audit workflows, report surfaces, and HairAudit network integration contracts.",
-    status: "Active Development",
+    completionPercent: 86,
+    stage: "HairAudit · patient exposure layer",
+    description: "Independent audit workflows, HairAudit patient exposure layer, report surfaces, and network integration contracts.",
+    status: "Pilot Ready",
     learnMoreHref: "/audit-network",
   },
   {
     id: "academy-os",
     name: "AcademyOS",
-    completionPercent: 47,
+    completionPercent: 61,
     stage: "Competency · curriculum spine",
     description: "Training pathways, certification hooks, and institute-aligned competency tracking for clinical teams.",
     status: "Active Development",
     learnMoreHref: "/academy",
   },
   {
-    id: "workforce-os",
-    name: "WorkforceOS",
-    completionPercent: 22,
-    stage: "Infrastructure Planning",
-    description:
-      "End-to-end workforce intelligence for hair restoration clinics, including recruitment, onboarding, rostering, payroll readiness, SOP compliance, credentialing, training readiness, and clinical performance tracking.",
-    status: "Active Development",
-  },
-  {
     id: "analytics-os",
     name: "AnalyticsOS",
-    completionPercent: 63,
+    completionPercent: 57,
     stage: "Operational KPIs · funnel intelligence",
     description: "Conversion, productivity, and cohort analytics across reception, consultation, and financial surfaces.",
     status: "Active Development",
     learnMoreHref: "/platform/analytics-os",
   },
   {
-    id: "leadflow",
-    name: "LeadFlow",
-    completionPercent: 67,
-    stage: "Pipeline · tasks · acquisition",
-    description: "CRM control plane — enquiry capture, pipeline stages, ownership, and follow-up rhythm.",
-    status: "Pilot Ready",
-    learnMoreHref: "/platform/leadflow",
-  },
-  {
     id: "clinic-os",
     name: "ClinicOS",
-    completionPercent: 73,
+    completionPercent: 84,
     stage: "Operations centre · scheduling spine",
     description: "Calendars, services, appointment lifecycle, and day-to-day clinic rhythm for multi-site operators.",
     status: "Production",
     learnMoreHref: "/platform/clinic-os",
   },
+  {
+    id: "workforce-os",
+    name: "WorkforceOS",
+    completionPercent: 30,
+    stage: "Identity · onboarding · tenant bootstrap",
+    description:
+      "Healthcare workforce infrastructure, onboarding, compliance, training readiness, and operational staff governance.",
+    status: "Active Development",
+  },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-workforce-template-bootstrap",
+    date: "2026-06-22",
+    tag: "workforce-os",
+    title: "WorkforceOS onboarding template bootstrap seeding completed",
+    summary:
+      "Tenant-scoped onboarding template bootstrap seeding — default workforce onboarding pathways and compliance checklists wired into tenant bootstrap.",
+    modules: ["WorkforceOS"],
+  },
+  {
+    id: "2026-06-22-workforce-tenant-bootstrap",
+    date: "2026-06-22",
+    tag: "workforce-os",
+    title: "WorkforceOS tenant bootstrap architecture completed",
+    summary:
+      "Multi-tenant workforce bootstrap architecture — identity provisioning, onboarding centre wiring, and tenant-scoped HR module activation contracts.",
+    modules: ["WorkforceOS"],
+  },
+  {
+    id: "2026-06-21-workforce-onboarding-centre",
+    date: "2026-06-21",
+    tag: "workforce-os",
+    title: "WorkforceOS onboarding centre completed",
+    summary:
+      "Onboarding centre surfaces for workforce intake, compliance checkpoints, training readiness gates, and operational staff governance workflows.",
+    modules: ["WorkforceOS"],
+  },
+  {
+    id: "2026-06-21-workforce-identity-layer",
+    date: "2026-06-21",
+    tag: "workforce-os",
+    title: "WorkforceOS identity layer completed",
+    summary:
+      "Workforce identity layer — staff provisioning contracts, FI user linkage, role alignment, and tenant-scoped workforce identity spine.",
+    modules: ["WorkforceOS"],
+  },
+  {
+    id: "2026-06-20-hairaudit-patient-exposure",
+    date: "2026-06-20",
+    tag: "audit-os",
+    title: "HairAudit intelligence patient exposure layer completed",
+    summary:
+      "Patient exposure layer for HairAudit-aligned intelligence — governed audit packet surfacing and outcome verification hooks in AuditOS.",
+    modules: ["AuditOS"],
+  },
+  {
+    id: "2026-06-20-imaging-ai-execution",
+    date: "2026-06-20",
+    tag: "imaging-os",
+    title: "ImagingOS live AI execution framework completed",
+    summary:
+      "Live AI execution framework for guided imaging sessions — template-driven capture, slot progress, and surgical-domain progression assessments.",
+    modules: ["ImagingOS"],
+  },
+  {
+    id: "2026-06-19-surgery-graft-foundation",
+    date: "2026-06-19",
+    tag: "surgery-os",
+    title: "SurgeryOS graft intelligence operational foundation completed",
+    summary:
+      "Graft intelligence operational foundation — live graft totals, counting assistant UX, donor economics context, and procedure-day command centre integration.",
+    modules: ["SurgeryOS"],
+  },
+  {
+    id: "2026-06-19-financial-executive-intelligence",
+    date: "2026-06-19",
+    tag: "financial-os",
+    title: "FinancialOS executive finance intelligence completed",
+    summary:
+      "Executive finance intelligence layer — master ledger, surgery profitability, revenue attribution, accounts receivable, and forecasting across FI OS.",
+    modules: ["FinancialOS"],
+  },
   {
     id: "2026-06-21-project-nexus-phase-9b",
     date: "2026-06-21",
@@ -239,33 +353,6 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
     summary:
       "IIOHR ProductionAdapter implemented for signed FI OS Nexus provisioning, state reconciliation, rollback, dry-run safety, and audit logging.",
     modules: ["AcademyOS", "WorkforceOS"],
-  },
-  {
-    id: "2026-06-21-workforce-os-module",
-    date: "2026-06-21",
-    tag: "workforce-os",
-    title: "WorkforceOS added as a first-class platform module",
-    summary:
-      "Introduced WorkforceOS as the people infrastructure layer of Follicle Intelligence, connecting HR operations, onboarding, rostering, SOP compliance, credentialing, training readiness, and future clinical workforce performance intelligence.",
-    modules: ["WorkforceOS"],
-  },
-  {
-    id: "2026-06-19-financial-os-enterprise-intelligence",
-    date: "2026-06-19",
-    tag: "financial-os",
-    title: "FinancialOS enterprise intelligence layer shipped",
-    summary:
-      "Added master financial ledger, surgery profitability, revenue attribution, accounts receivable, and executive finance forecasting across FI OS — with command centre pulse metrics, AR work queue, cost models, and case-level economics cards.",
-    modules: ["FinancialOS"],
-  },
-  {
-    id: "2026-06-19-surgery-graft-safety",
-    date: "2026-06-19",
-    tag: "surgery-os",
-    title: "Graft counting assistant + clinical safety guardrails",
-    summary:
-      "Phase 2 graft intelligence surfaces: live graft totals, counting assistant UX, and clinical safety checks on the procedure-day command centre.",
-    modules: ["SurgeryOS"],
   },
   {
     id: "2026-06-19-surgery-live-capture",
@@ -286,45 +373,10 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
     modules: ["ReceptionOS"],
   },
   {
-    id: "2026-06-19-reception-comms",
-    date: "2026-06-19",
-    tag: "reception-os",
-    title: "Outbound communication provider layer",
-    summary:
-      "Phase 4 communication contracts — provider interface, dry-run/stub providers, and enqueue paths from reception tasks.",
-    modules: ["ReceptionOS"],
-  },
-  {
-    id: "2026-06-19-reception-tasks",
-    date: "2026-06-19",
-    tag: "reception-os",
-    title: "Reception task orchestration foundation",
-    summary:
-      "Task schema, persona widget defaults, and tenant-scoped board model for ReceptionOS operational personas.",
-    modules: ["ReceptionOS"],
-  },
-  {
-    id: "2026-06-18-imaging-progression",
-    date: "2026-06-18",
-    tag: "imaging-os",
-    title: "Progression assessment → surgical domain mapping",
-    summary: "ImagingOS phase IM6 — progression assessments mapped to surgical planning domains for case readiness.",
-    modules: ["ImagingOS", "SurgeryOS"],
-  },
-  {
-    id: "2026-06-17-financial-dashboard",
-    date: "2026-06-17",
-    tag: "financial-os",
-    title: "FinancialOS dashboard + module switcher",
-    summary:
-      "Unified financial dashboard with deposit rules, installments, and in-page module navigation across FinancialOS surfaces.",
-    modules: ["FinancialOS"],
-  },
-  {
-    id: "2026-06-15-consultation-forms",
+    id: "2026-06-15-consultation-workflow-engine",
     date: "2026-06-15",
     tag: "consultation-os",
-    title: "Consultation forms engine v2 pathways",
+    title: "ConsultationOS workflow engine",
     summary:
       "Hair loss treatment, female hair loss, pathology, repair, and follow-up templates with pathway launcher progress labels.",
     modules: ["ConsultationOS"],

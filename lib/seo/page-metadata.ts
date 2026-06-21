@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SITE_SEO_DESCRIPTION, SITE_SEO_TITLE } from "@/lib/structured-data";
+import { SITE_SEO_DESCRIPTION, SITE_SEO_KEYWORDS, SITE_SEO_TITLE } from "@/lib/structured-data";
 
 import { OG_IMAGE, SITE_NAME, SITE_URL } from "./constants";
 import { buildSiteVerificationMetadata } from "./site-verification";
@@ -12,6 +12,8 @@ export type PageMetadataInput = {
   path?: string;
   imageAlt?: string;
   robots?: Metadata["robots"];
+  /** Optional SEO keywords for discoverability and AI indexing. */
+  keywords?: string[];
 };
 
 function canonicalUrl(path: string): string {
@@ -23,13 +25,14 @@ function canonicalUrl(path: string): string {
  * Consistent title, description, canonical, Open Graph, and Twitter metadata for public pages.
  */
 export function buildPageMetadata(input: PageMetadataInput): Metadata {
-  const { title, description, path, imageAlt, robots } = input;
+  const { title, description, path, imageAlt, robots, keywords } = input;
   const imageAltText = imageAlt ?? OG_IMAGE.alt;
   const canonical = path ? canonicalUrl(path) : undefined;
 
   return {
     title,
     description,
+    ...(keywords?.length ? { keywords } : {}),
     ...(canonical && { alternates: { canonical } }),
     ...(robots && { robots }),
     openGraph: {
@@ -64,6 +67,7 @@ export function buildRootMetadata(): Metadata {
     metadataBase: new URL(SITE_URL),
     title: SITE_SEO_TITLE,
     description: SITE_SEO_DESCRIPTION,
+    keywords: [...SITE_SEO_KEYWORDS],
     applicationName: SITE_NAME,
     manifest: "/site.webmanifest",
     ...(verification && { verification }),

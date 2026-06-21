@@ -30,6 +30,10 @@ export const FI_DASHBOARD_WIDGET_KEYS = [
   "clinical_intelligence_summary",
   /** Stage 6 — structured outcome intelligence (tenant-safe; no cross-tenant patient data). */
   "outcome_intelligence_summary",
+  /** Platform maturity — FI OS module delivery progress (static registry). */
+  "platform_development_progress",
+  /** Platform maturity — latest infrastructure deployments (static registry). */
+  "recent_platform_releases",
 ] as const;
 
 export type FiDashboardWidgetKey = (typeof FI_DASHBOARD_WIDGET_KEYS)[number];
@@ -112,12 +116,22 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
     description:
       "Structured outcome checkpoints, imaging and audit references, and anonymisation-ready aggregates (no predictions).",
   },
+  platform_development_progress: {
+    title: "Platform Development Progress",
+    description: "Live FI OS module completion percentages and delivery status across the ecosystem.",
+  },
+  recent_platform_releases: {
+    title: "Recent Platform Releases",
+    description: "Latest infrastructure deployments across Follicle Intelligence modules.",
+  },
 } as const satisfies Record<FiDashboardWidgetKey, { title: string; description?: string }>;
 
 /** Default home stack order — keep `FiOsControlCentreHome` / Stage 3 default profile in sync when changing. */
 export const FI_DASHBOARD_HOME_WIDGET_ORDER: readonly FiDashboardWidgetKey[] = [
   "quick_actions",
   "clinic_metrics",
+  "platform_development_progress",
+  "recent_platform_releases",
   "operational_workspace",
   "surgery_pipeline",
   "my_workspace",

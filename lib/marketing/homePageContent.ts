@@ -138,12 +138,76 @@ export const HOME_PAGE_CONTENT = {
       "The category does not need another horizontal clinic tool. It needs an operating system that connects every layer of serious hair restoration.",
   },
 
+  globalHealthcareInfrastructure: {
+    id: "global-healthcare-infrastructure",
+    storyEyebrow: "Building global healthcare infrastructure",
+    headline: "Built as a living healthcare operating system",
+    subtext:
+      "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
+    gridCaption: "Twelve OS modules · live delivery status · single intelligence substrate",
+    cta: { label: "View full platform progress", href: "/platform/progress" as const },
+  },
+
+  healthcareInfrastructureStack: {
+    id: "healthcare-infrastructure-stack",
+    storyEyebrow: "Ecosystem architecture",
+    headline: "The Future Healthcare Infrastructure Stack",
+    subtext:
+      "Five infrastructure layers connect clinical operations, surgical intelligence, business systems, human infrastructure, and global intelligence — designed for multi-clinic deployment at enterprise scale.",
+    caption: "Five layers · connected OS modules · governed intelligence substrate",
+    secondaryCta: { label: "Explore ecosystem architecture", href: "/platform/ecosystem" as const },
+    layers: [
+      {
+        title: "Layer 1 — Clinical Operations",
+        modules: ["ReceptionOS", "ConsultationOS", "ClinicOS", "PatientOS"],
+      },
+      {
+        title: "Layer 2 — Surgical Intelligence",
+        modules: ["SurgeryOS", "ImagingOS", "AuditOS"],
+      },
+      {
+        title: "Layer 3 — Business Infrastructure",
+        modules: ["FinancialOS", "AnalyticsOS", "FoundationOS"],
+      },
+      {
+        title: "Layer 4 — Human Infrastructure",
+        modules: ["WorkforceOS", "AcademyOS"],
+      },
+      {
+        title: "Layer 5 — Global Intelligence Layer",
+        modules: ["HairAudit", "IIOHR", "Clinical accreditation systems"],
+      },
+    ] as const,
+  },
+
+  engineeringCredibility: {
+    id: "engineering-credibility",
+    storyEyebrow: "Engineering culture",
+    headline: "Built Like Infrastructure, Not Software",
+    subtext:
+      "Every module inside Follicle Intelligence is being developed as enterprise-grade healthcare infrastructure designed for global multi-clinic deployment.",
+    metrics: [
+      { label: "Total codebase modules", value: "12" },
+      { label: "Production infrastructure modules", value: "8" },
+      { label: "Multi-tenant systems active", value: "11" },
+      { label: "Operational workflows deployed", value: "40+" },
+      { label: "Database migrations completed", value: "100+" },
+      { label: "Internal tests passing", value: "240+" },
+    ] as const,
+    securityModel: [
+      "Tenant isolated architecture",
+      "Role based access control",
+      "Audit event tracking",
+      "Multi-clinic deployment ready",
+    ] as const,
+  },
+
   onePlatform: {
     id: "one-platform",
     storyEyebrow: "The operating system",
     headline: "One Platform. Every Layer Of Hair Restoration.",
     subtext:
-      "Eleven modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
+      "Twelve modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
     architectureCaption: "Four engines · connected OS modules · single intelligence substrate",
     secondaryCta: { label: "View Ecosystem Architecture", href: "/platform/ecosystem" as const },
     layers: [
@@ -189,7 +253,7 @@ export const HOME_PAGE_CONTENT = {
           {
             name: "WorkforceOS",
             description:
-              "End-to-end workforce intelligence for hair restoration clinics, including recruitment, onboarding, rostering, payroll readiness, SOP compliance, credentialing, training readiness, and clinical performance tracking.",
+              "Healthcare workforce infrastructure, onboarding, compliance, training readiness, and operational staff governance.",
           },
           {
             name: "AcademyOS",

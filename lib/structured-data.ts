@@ -13,11 +13,23 @@ export const SITE_SEO_TITLE =
   "Follicle Intelligence | The Operating System For The Future Of Hair Restoration";
 
 export const SITE_SEO_DESCRIPTION =
-  "Follicle Intelligence unifies lead flow, clinical operations, intelligence layers, surgical planning, independent audit, training, analytics, and global outcome datasets—enterprise infrastructure for modern hair restoration.";
+  "Follicle Intelligence is the healthcare operating system for hair restoration — twelve connected OS modules spanning clinical operations, surgical intelligence, workforce infrastructure, finance, and global clinical accreditation. Enterprise infrastructure for multi-clinic deployment.";
 
 /** Entity definition for AI assistants and knowledge graphs. */
 export const SITE_ENTITY_DEFINITION =
-  "Follicle Intelligence is an enterprise operating system for hair restoration clinics—connecting LeadFlow, ClinicOS, PatientOS, ConsultationOS, ImagingOS, SurgeryOS, AuditOS, AcademyOS, FinancialOS, and AnalyticsOS in one governed clinical intelligence platform.";
+  "Follicle Intelligence is an enterprise healthcare operating system for hair restoration clinics—connecting FoundationOS, ReceptionOS, ConsultationOS, ClinicOS, PatientOS, ImagingOS, SurgeryOS, AuditOS, WorkforceOS, AcademyOS, FinancialOS, and AnalyticsOS in one governed clinical intelligence platform.";
+
+/** Shared SEO keywords for platform maturity and discoverability. */
+export const SITE_SEO_KEYWORDS = [
+  "healthcare operating system",
+  "hair transplant clinic software",
+  "hair restoration operating system",
+  "healthcare workforce management",
+  "surgical intelligence platform",
+  "hair transplant clinic operating system",
+  "medical workforce compliance platform",
+  "clinical infrastructure software",
+] as const;
 
 export type FaqItem = { question: string; answer: string };
 
@@ -40,7 +52,7 @@ export const HOME_PAGE_FAQS: readonly FaqItem[] = [
   {
     question: "What modules are included in the Follicle Intelligence platform?",
     answer:
-      "LeadFlow, ConsultationOS, PatientOS, ImagingOS, SurgeryOS, AuditOS, WorkforceOS, AcademyOS, FinancialOS, AnalyticsOS, and ClinicOS—plus ecosystem integrations with HairAudit, the Hair Longevity Institute, and the International Institute of Hair Restoration.",
+      "FoundationOS, ReceptionOS, ConsultationOS, ClinicOS, PatientOS, ImagingOS, SurgeryOS, AuditOS, WorkforceOS, AcademyOS, FinancialOS, and AnalyticsOS—plus ecosystem integrations with HairAudit, the Hair Longevity Institute, and the International Institute of Hair Restoration.",
   },
   {
     question: "How do I request a demo or pricing?",

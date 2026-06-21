@@ -243,6 +243,20 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     items: [{ id: "academyos", label: "AcademyOS", path: "", permissionHint: {}, placeholder: true }],
   },
   {
+    id: "workforceos",
+    label: "WorkforceOS",
+    description: "Healthcare workforce infrastructure, onboarding, compliance, and staff governance.",
+    items: [
+      {
+        id: "workforceos",
+        label: "WorkforceOS",
+        path: "hr-os",
+        permissionHint: {},
+        description: "Onboarding centre, identity layer, compliance, and operational staff governance.",
+      },
+    ],
+  },
+  {
     id: "analyticsos",
     label: "AnalyticsOS",
     description: "Executive intelligence across modules (read-only composition).",

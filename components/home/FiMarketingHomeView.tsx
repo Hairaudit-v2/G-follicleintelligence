@@ -15,6 +15,9 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthoritySection";
 import { FiMarketingComparisonSection } from "@/components/home/FiMarketingComparisonSection";
+import { FiMarketingEngineeringCredibilitySection } from "@/components/home/FiMarketingEngineeringCredibilitySection";
+import { FiMarketingGlobalHealthcareSection } from "@/components/home/FiMarketingGlobalHealthcareSection";
+import { FiMarketingHealthcareStackSection } from "@/components/home/FiMarketingHealthcareStackSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 import { FiMarketingPlatformProgressSection } from "@/components/home/FiMarketingPlatformProgressSection";
@@ -379,6 +382,10 @@ export function FiMarketingHomeView() {
         </FadeIn>
       </Section>
 
+      <FiMarketingGlobalHealthcareSection />
+
+      <FiMarketingHealthcareStackSection />
+
       <FiMarketingPlatformProgressSection />
 
       <FiMarketingProductShowcaseSection section={c.productShowcase} />
@@ -566,6 +573,8 @@ export function FiMarketingHomeView() {
       </Section>
 
       <FiMarketingMoonshotSection section={c.moonshot} />
+
+      <FiMarketingEngineeringCredibilitySection />
 
       <Section
         id={c.founder.id}

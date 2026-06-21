@@ -322,11 +322,11 @@ export function resolveFiOsPrimarySidebarItems(
       ? [
           {
             id: "hr-os",
-            label: "HR OS",
-            shortLabel: "HR",
+            label: "WorkforceOS",
+            shortLabel: "Workforce",
             href: hrefFor(b, "hr-os"),
             disabled: false,
-            hint: "Workforce operations, staff readiness, and HR sync health.",
+            hint: "Healthcare workforce infrastructure, onboarding, compliance, and staff governance.",
           } satisfies FiOsPrimarySidebarItem,
         ]
       : []),

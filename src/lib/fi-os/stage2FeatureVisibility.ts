@@ -62,6 +62,9 @@ export function fiDashboardWidgetVisibleByFeatureAccess(
       return (
         on(access, "dashboard") && onAny(access, ["analytics", "audit", "cases", "patient_twin"])
       );
+    case "platform_development_progress":
+    case "recent_platform_releases":
+      return on(access, "dashboard");
     default:
       return true;
   }

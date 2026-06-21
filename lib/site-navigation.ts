@@ -37,6 +37,9 @@ export const FOOTER_PLATFORM: FooterNavLink[] = [
 
 /** Public footer — product modules (deep links) */
 export const FOOTER_MODULES: FooterNavLink[] = [
+  { label: "FoundationOS", href: "/patient-twin" },
+  { label: "ReceptionOS", href: "/platform/progress#progress-reception-os" },
+  { label: "WorkforceOS", href: "/platform/progress#progress-workforce-os" },
   { label: "SurgeryOS", href: "/platform/surgery-os" },
   { label: "PatientOS", href: "/platform/patient-os" },
   { label: "ImagingOS", href: "/platform/imaging-os" },

@@ -1,14 +1,14 @@
 # Follicle Intelligence
 
-> Follicle Intelligence is an enterprise operating system for hair restoration clinics—connecting acquisition, clinical operations, surgery, independent audit, workforce training, finance, and longitudinal outcome intelligence in one governed platform.
+> Follicle Intelligence is an enterprise healthcare operating system for hair restoration clinics—connecting FoundationOS, ReceptionOS, ConsultationOS, ClinicOS, PatientOS, ImagingOS, SurgeryOS, AuditOS, WorkforceOS, AcademyOS, FinancialOS, and AnalyticsOS in one governed platform.
 
 Canonical site: https://www.follicleintelligence.ai
 
 ## What we are
 
-- Category: Enterprise clinical / surgical operating system for hair restoration
+- Category: Enterprise healthcare operating system / clinical infrastructure for hair restoration
 - Audience: Surgeons, clinic owners, multi-site groups, training partners, institutional collaborators
-- Product: Follicle Intelligence Platform (FI OS) — modular OS modules on a shared Patient Twin intelligence substrate
+- Product: Follicle Intelligence Platform (FI OS) — twelve modular OS modules on a shared Patient Twin intelligence substrate
 
 ## Ecosystem (sister brands)
 
@@ -31,6 +31,9 @@ Canonical site: https://www.follicleintelligence.ai
 
 - Ecosystem architecture: https://www.follicleintelligence.ai/platform/ecosystem
 - Platform progress (public delivery status): https://www.follicleintelligence.ai/platform/progress
+- FoundationOS / Patient Twin: https://www.follicleintelligence.ai/patient-twin
+- ReceptionOS: https://www.follicleintelligence.ai/platform/progress#progress-reception-os
+- WorkforceOS: https://www.follicleintelligence.ai/platform/progress#progress-workforce-os
 - LeadFlow (acquisition & CRM): https://www.follicleintelligence.ai/platform/leadflow
 - ClinicOS (scheduling & operations): https://www.follicleintelligence.ai/platform/clinic-os
 - PatientOS (Patient Twin & records): https://www.follicleintelligence.ai/platform/patient-os

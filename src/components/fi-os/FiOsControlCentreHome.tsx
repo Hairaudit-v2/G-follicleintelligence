@@ -15,6 +15,8 @@ import { DashboardQuickActionsBar } from "@/src/components/fi-admin/dashboard/Da
 import { DashboardSurgeryPipeline } from "@/src/components/fi-admin/dashboard/DashboardSurgeryPipeline";
 import { DashboardClinicalIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardClinicalIntelligenceSummary";
 import { DashboardOutcomeIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardOutcomeIntelligenceSummary";
+import { DashboardPlatformDevelopmentProgress } from "@/src/components/fi-admin/dashboard/DashboardPlatformDevelopmentProgress";
+import { DashboardRecentPlatformReleases } from "@/src/components/fi-admin/dashboard/DashboardRecentPlatformReleases";
 import { DashboardStaffIntelligenceSummary } from "@/src/components/fi-admin/dashboard/DashboardStaffIntelligenceSummary";
 import { DashboardWidgetPlaceholder } from "@/src/components/fi-admin/dashboard/DashboardWidgetPlaceholder";
 import { TenantHomeQuickCallIn } from "@/src/components/fi-admin/TenantHomeQuickCallIn";
@@ -178,6 +180,10 @@ export function FiOsControlCentreHome(props: {
             summary={outcomeIntelligenceSummary ?? EMPTY_TENANT_OUTCOME_INTELLIGENCE_SUMMARY}
           />
         );
+      case "platform_development_progress":
+        return <DashboardPlatformDevelopmentProgress />;
+      case "recent_platform_releases":
+        return <DashboardRecentPlatformReleases />;
       case "analytics_summary":
       case "audit_summary":
       case "imaging_summary":

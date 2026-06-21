@@ -6,6 +6,7 @@ import {
   buildFAQPageSchema,
   HOME_PAGE_FAQS,
   SITE_SEO_DESCRIPTION,
+  SITE_SEO_KEYWORDS,
   SITE_SEO_TITLE,
 } from "@/lib/structured-data";
 
@@ -13,6 +14,7 @@ export const metadata = buildPageMetadata({
   title: SITE_SEO_TITLE,
   description: SITE_SEO_DESCRIPTION,
   path: "/",
+  keywords: [...SITE_SEO_KEYWORDS],
 });
 
 export default function HomePage() {
