@@ -10,7 +10,9 @@ import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNo
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffTwinIiohrComplianceCard } from "@/src/components/staff/staffComplianceReadOnly";
 import { StaffWorkforceIdentityPanel } from "@/src/components/fi/staff/StaffWorkforceIdentityPanel";
+import { StaffWorkforceReadinessCard } from "@/src/components/fi/staff/StaffWorkforceReadinessPanel";
 import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/workforce-os/workforceIdentitySummary";
+import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import { pickPayrollSourceDisplayFromRows } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { isStaffRoleNeedsReview } from "@/src/lib/staff/staffRolePolicy";
@@ -63,6 +65,19 @@ export default async function StaffTwinPage({
       metadata: row.metadata,
     }))
   );
+  const identityRows = sourceIds.map((row) => ({
+    source_system: row.source_system,
+    source_staff_id: row.source_staff_id,
+    metadata: row.metadata,
+  }));
+  const workforceReadiness = calculateWorkforceReadinessScore({
+    is_active: staff.is_active,
+    staff_role: staff.staff_role,
+    working_hours: staff.working_hours,
+    hr: hrNotification,
+    identityRows,
+    compliance: complianceSummary,
+  });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -172,6 +187,8 @@ export default async function StaffTwinPage({
       <DashboardCard className="p-6 sm:p-8">
         <StaffWorkforceIdentityPanel summary={identitySummary} variant="dark" />
       </DashboardCard>
+
+      <StaffWorkforceReadinessCard readiness={workforceReadiness} variant="dark" />
 
       <DashboardCard className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-[#F8FAFC]">External systems</h2>

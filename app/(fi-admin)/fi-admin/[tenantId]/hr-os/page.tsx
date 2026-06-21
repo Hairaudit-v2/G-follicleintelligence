@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
+import { buildTenantWorkforceReadinessOverview } from "@/src/lib/workforce-os/workforceReadinessTenantOverview.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 
 export const metadata = {
@@ -24,7 +25,10 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
   const tid = tenantId.trim();
   const base = `/fi-admin/${tid}/hr-os`;
   const staff = await loadAllStaffForTenant(tid);
-  const identityOverview = await buildTenantWorkforceIdentityOverview(tid, staff);
+  const [identityOverview, readinessOverview] = await Promise.all([
+    buildTenantWorkforceIdentityOverview(tid, staff),
+    buildTenantWorkforceReadinessOverview(tid, staff),
+  ]);
 
   return (
     <div className="relative z-[1] mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
@@ -82,6 +86,45 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
           <div>
             <dt className="text-slate-500">Fully linked (3 systems)</dt>
             <dd className="mt-1 font-semibold text-slate-100">{identityOverview.fullyLinkedCount}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-6">
+        <h2 className="text-sm font-semibold text-slate-100">Workforce readiness</h2>
+        <p className="mt-2 text-sm text-slate-400">
+          Tenant-wide readiness intelligence — 0–100 multi-factor scores across active staff.
+        </p>
+        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+          <div>
+            <dt className="text-slate-500">Total staff</dt>
+            <dd className="mt-1 font-semibold text-slate-100">{readinessOverview.totalStaff}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Average readiness</dt>
+            <dd className="mt-1 font-semibold text-slate-100">{readinessOverview.averageReadinessScore}%</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Staff fully ready</dt>
+            <dd className="mt-1 font-semibold text-emerald-300">
+              {readinessOverview.fullyReadyCount} / {readinessOverview.activeStaff}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Elite ready</dt>
+            <dd className="mt-1 font-semibold text-slate-100">{readinessOverview.eliteReadyCount}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Operational warnings</dt>
+            <dd className="mt-1 font-semibold text-amber-300">{readinessOverview.operationalWarningCount}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Staff restricted</dt>
+            <dd className="mt-1 font-semibold text-amber-200">{readinessOverview.restrictedCount}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Blocked staff</dt>
+            <dd className="mt-1 font-semibold text-rose-300">{readinessOverview.blockedCount}</dd>
           </div>
         </dl>
       </section>
