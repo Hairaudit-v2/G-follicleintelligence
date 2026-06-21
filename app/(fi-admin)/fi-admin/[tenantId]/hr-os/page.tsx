@@ -1,10 +1,12 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
+import { HrOsClinicalRosteringSection } from "@/src/components/fi/hr-os/HrOsClinicalRosteringSection";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
 import { buildTenantWorkforceReadinessOverview } from "@/src/lib/workforce-os/workforceReadinessTenantOverview.server";
+import { loadWorkforceRosterOverview } from "@/src/lib/workforce-os/workforceRostering.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 
 export const metadata = {
@@ -25,9 +27,10 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
   const tid = tenantId.trim();
   const base = `/fi-admin/${tid}/hr-os`;
   const staff = await loadAllStaffForTenant(tid);
-  const [identityOverview, readinessOverview] = await Promise.all([
+  const [identityOverview, readinessOverview, rosterOverview] = await Promise.all([
     buildTenantWorkforceIdentityOverview(tid, staff),
     buildTenantWorkforceReadinessOverview(tid, staff),
+    loadWorkforceRosterOverview(tid),
   ]);
 
   return (
@@ -128,6 +131,8 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
           </div>
         </dl>
       </section>
+
+      <HrOsClinicalRosteringSection overview={rosterOverview} />
 
       <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-6">
         <h2 className="text-sm font-semibold text-slate-100">Getting started</h2>

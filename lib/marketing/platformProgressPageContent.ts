@@ -59,7 +59,7 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 55,
+    completionPercent: 68,
     description: "Healthcare workforce infrastructure, onboarding, compliance, and operational staff governance.",
   },
   {
@@ -317,16 +317,25 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 55,
-    stage: "Identity · onboarding · tenant bootstrap",
+    completionPercent: 68,
+    stage: "Identity · readiness · clinical rostering",
     description:
-      "Healthcare workforce infrastructure, onboarding, compliance, training readiness, and operational staff governance.",
+      "Healthcare workforce infrastructure, onboarding, compliance, training readiness, clinical rostering, and operational staff governance.",
     status: "Active Development",
   },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-workforce-clinical-rostering",
+    date: "2026-06-22",
+    tag: "workforce-os",
+    title: "WorkforceOS Phase 2C clinical rostering foundation completed",
+    summary:
+      "Clinical rostering schema — shifts, availability blocks, staffing templates, event assignments with readiness snapshots, rostering engine, HR OS command centre, and Staff Twin roster panel.",
+    modules: ["WorkforceOS"],
+  },
   {
     id: "2026-06-22-workforce-template-bootstrap",
     date: "2026-06-22",

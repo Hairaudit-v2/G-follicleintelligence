@@ -11,6 +11,8 @@ import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSetting
 import { StaffTwinIiohrComplianceCard } from "@/src/components/staff/staffComplianceReadOnly";
 import { StaffWorkforceIdentityPanel } from "@/src/components/fi/staff/StaffWorkforceIdentityPanel";
 import { StaffWorkforceReadinessCard } from "@/src/components/fi/staff/StaffWorkforceReadinessPanel";
+import { StaffWorkforceRosterPanel } from "@/src/components/fi/staff/StaffWorkforceRosterPanel";
+import { loadStaffRosterProfile } from "@/src/lib/workforce-os/workforceRostering.server";
 import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/workforce-os/workforceIdentitySummary";
 import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
@@ -36,7 +38,10 @@ export default async function StaffTwinPage({
   const sid = staffId?.trim();
   if (!tid || !sid) notFound();
 
-  const data = await loadStaffTwinPage(tid, sid);
+  const [data, rosterProfile] = await Promise.all([
+    loadStaffTwinPage(tid, sid),
+    loadStaffRosterProfile(tid, sid),
+  ]);
   if (!data) notFound();
 
   const base = `/fi-admin/${tid}`;
@@ -189,6 +194,8 @@ export default async function StaffTwinPage({
       </DashboardCard>
 
       <StaffWorkforceReadinessCard readiness={workforceReadiness} variant="dark" />
+
+      <StaffWorkforceRosterPanel profile={rosterProfile} variant="dark" />
 
       <DashboardCard className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-[#F8FAFC]">External systems</h2>
