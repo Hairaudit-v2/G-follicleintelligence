@@ -8,17 +8,13 @@ import type { FiStaffSourceIdRow } from "@/src/lib/staff/staffSourceIdsNormalize
 import {
   normalizeFiStaffSourceMetadata,
   normalizeFiStaffSourceStaffId,
-  normalizeFiStaffSourceSystem,
   normalizeFiStaffSourceUrl,
 } from "@/src/lib/staff/staffSourceIdsNormalize";
 import {
   mergeWorkforceIdentityMetadata,
   sanitizeWorkforceIdentityMetadata,
 } from "@/src/lib/workforce-os/workforceIdentityMetadata";
-import {
-  canonicaliseWorkforceSourceSystem,
-  isWorkforceIdentitySourceSystem,
-} from "@/src/lib/workforce-os/workforceIdentitySources";
+import { canonicaliseWorkforceSourceSystem } from "@/src/lib/workforce-os/workforceIdentitySources";
 import {
   buildWorkforceIdentitySummaryFromSourceRows,
   type WorkforceIdentitySummary,
