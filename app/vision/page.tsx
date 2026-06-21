@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PartnersInvestorsStrip } from "@/components/marketing/PartnersInvestorsStrip";
@@ -6,37 +5,16 @@ import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { FadeIn } from "@/components/ui/fade-in";
 import { VisionShowcaseSection } from "@/components/vision/VisionShowcaseSection";
-import { PUBLIC_IMAGES } from "@/src/lib/brand/publicImages";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { cn } from "@/lib/utils";
 
-const OG_IMAGE = PUBLIC_IMAGES.appleTouchIcon;
-
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Vision | Follicle Intelligence",
   description:
     "Follicle Intelligence is building the connected intelligence infrastructure for the future of hair restoration medicine.",
-  openGraph: {
-    title: "Vision | Follicle Intelligence",
-    description:
-      "Follicle Intelligence is building the connected intelligence infrastructure for the future of hair restoration medicine.",
-    type: "website",
-    images: [
-      {
-        url: OG_IMAGE.src,
-        width: OG_IMAGE.width,
-        height: OG_IMAGE.height,
-        alt: "Follicle Intelligence — vision for hair restoration infrastructure",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Vision | Follicle Intelligence",
-    description:
-      "Follicle Intelligence is building the connected intelligence infrastructure for the future of hair restoration medicine.",
-    images: [OG_IMAGE.src],
-  },
-};
+  path: "/vision",
+  imageAlt: "Follicle Intelligence — vision for hair restoration infrastructure",
+});
 
 const ECOSYSTEM = [
   {

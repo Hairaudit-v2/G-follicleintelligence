@@ -1,18 +1,19 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Braces, CheckCircle2, FileSearch2, GaugeCircle, Sigma, Target } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Governance, Review Standards & IIOHR Alignment | Follicle Intelligence",
   description:
     "How FI structures evidence, weighting, confidence, benchmark context, and adjudication—so scores are reviewable, not black-box outputs. Standards alignment through IIOHR.",
-};
+  path: "/methodology",
+});
 
 function SectionIntro({
   eyebrow,

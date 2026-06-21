@@ -1,13 +1,12 @@
 import Link from "next/link";
 
-import type { Metadata } from "next";
-
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import {
   BarChart3,
   Eye,
@@ -19,11 +18,12 @@ import {
   Target,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "AI Hair Transplant Analysis: The Future of Surgical Evaluation | Follicle Intelligence",
   description:
     "How AI hair transplant analysis improves consistency, transparency, and outcomes. Density, donor management, graft survival, design logic. Structured surgical evaluation for clinics and institutions.",
-};
+  path: "/ai-hair-transplant-analysis",
+});
 
 export default function AIHairTransplantAnalysisPage() {
   return (

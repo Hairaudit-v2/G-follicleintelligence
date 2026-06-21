@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
@@ -6,13 +5,15 @@ import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { ClipboardList, Database, FileCheck, Server, Shield } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Security, Access & Data Handling | Follicle Intelligence",
   description:
     "Security principles, access control, data handling, and enterprise review for Follicle Intelligence. Evidence and attestations provided through procurement—no inflated compliance claims on this page.",
-};
+  path: "/security",
+});
 
 function SectionIntro({
   eyebrow,

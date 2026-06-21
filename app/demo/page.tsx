@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-
 import { FiMarketingPlaceholderPage } from "@/components/marketing/FiMarketingPlaceholderPage";
 import { MARKETING_PLACEHOLDER_COPY } from "@/lib/marketing/marketingPlaceholderContent";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 
 const c = MARKETING_PLACEHOLDER_COPY.demo;
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: c.title,
   description: c.description,
-};
+  path: "/demo",
+});
 
 export default function DemoPage() {
   return (

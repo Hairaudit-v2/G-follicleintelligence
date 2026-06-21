@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
 import { Archive, ArrowRight, Camera, Layers2, LineChart, MapPinned, Sparkles } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "ImagingOS: Clinical Imaging Infrastructure for Hair Restoration | Follicle Intelligence",
   description:
     "ImagingOS is clinical imaging infrastructure for hair restoration medicine—standardised photography, scalp mapping, image protocols, AI image classification, and longitudinal progression in one unified system, built for the Patient Twin™.",
-};
+  path: "/platform/imaging-os",
+});
 
 function SectionIntro({
   eyebrow,

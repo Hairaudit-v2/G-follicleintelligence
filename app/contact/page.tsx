@@ -1,19 +1,23 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { SITE_URL } from "@/lib/seo/constants";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { buildFAQPageSchema, CONTACT_PAGE_FAQS } from "@/lib/structured-data";
 import { Building2, Handshake, Mail, MessageSquare, ShieldCheck } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Contact: Demos, Partnership & Institutional Engagement | Follicle Intelligence",
   description:
     "Who should contact Follicle Intelligence, what happens next, and how to reach the team—demos, partnerships, institutional programs, security review, and standards-aligned conversations.",
-};
+  path: "/contact",
+});
 
 function SectionIntro({
   eyebrow,
@@ -123,6 +127,7 @@ const INTENT_PATHS = [
 export default function ContactPage() {
   return (
     <>
+      <JsonLd data={buildFAQPageSchema(`${SITE_URL}/contact`, CONTACT_PAGE_FAQS)} />
       <PageHero
         eyebrow="Contact"
         title="A clear next step—matched to how you work."

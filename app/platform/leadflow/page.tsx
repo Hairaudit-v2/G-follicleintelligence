@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -15,11 +15,12 @@ import {
   Zap,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "LeadFlow: Patient Acquisition & CRM for Hair Restoration Clinics | Follicle Intelligence",
   description:
     "LeadFlow is the patient acquisition and CRM engine for hair restoration clinics—capture website, Meta, Google Ads, and referral leads; automate follow-ups; manage pipeline; and measure conversion connected to the patient journey.",
-};
+  path: "/platform/leadflow",
+});
 
 function SectionIntro({
   eyebrow,

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
@@ -7,13 +6,15 @@ import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Code2, Database, Layers, RefreshCw, Settings, Webhook } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Integration: APIs, Events & Enterprise Deployment Patterns | Follicle Intelligence",
   description:
     "Technical integration for Follicle Intelligence: REST APIs, webhooks, tenant isolation, and deployment patterns for health systems, platforms, and partners—aligned to procurement and security review.",
-};
+  path: "/integration",
+});
 
 function SectionIntro({
   eyebrow,

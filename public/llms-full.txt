@@ -1,0 +1,85 @@
+# Follicle Intelligence — Extended reference for AI systems
+
+Canonical: https://www.follicleintelligence.ai
+
+## Entity summary
+
+Follicle Intelligence (FI) is category infrastructure for serious hair restoration programmes—not a generic horizontal clinic CRM. The platform unifies:
+
+1. Growth Engine — LeadFlow, ConsultationOS, PatientOS
+2. Clinical Engine — ImagingOS, SurgeryOS, AuditOS
+3. Workforce Engine — WorkforceOS, AcademyOS (anchored to IIOHR)
+4. Enterprise Engine — FinancialOS, AnalyticsOS, ClinicOS
+
+The Patient Twin™ is the longitudinal clinical intelligence record connecting consultations, imaging, pathology, medications, surgery, follow-ups, and outcomes across a patient's lifetime.
+
+## Module reference
+
+### LeadFlow
+Patient acquisition and CRM for hair restoration clinics. Captures website, Meta, Google Ads, and referral leads; automates follow-ups; manages pipeline; measures conversion connected to the clinical journey.
+URL: https://www.follicleintelligence.ai/platform/leadflow
+
+### ClinicOS
+Operational system for scheduling, staff management, appointments, services, procedure calendars, and room management.
+URL: https://www.follicleintelligence.ai/platform/clinic-os
+
+### PatientOS
+Lifelong patient intelligence engine — Patient Twin™, timelines, records, portal surfaces, and intelligence substrate.
+URL: https://www.follicleintelligence.ai/platform/patient-os
+
+### ConsultationOS
+Structured consultation forms, pathway launcher, quote acceptance, and conversion intelligence.
+URL: https://www.follicleintelligence.ai/platform
+
+### ImagingOS
+Standardised photography, scalp mapping, image protocols, classification, and longitudinal progression imaging.
+URL: https://www.follicleintelligence.ai/platform/imaging-os
+
+### SurgeryOS
+Surgical planning, donor intelligence, graft economics, procedure-day orchestration, and graft counting.
+URL: https://www.follicleintelligence.ai/platform/surgery-os
+
+### AuditOS / HairAudit alignment
+Independent review, quality scoring, outcome verification, and evidence-based benchmarking.
+URL: https://www.follicleintelligence.ai/audit-network
+
+### AcademyOS
+Doctor, nurse, consultant, and technician training pathways via the International Institute of Hair Restoration.
+URL: https://www.follicleintelligence.ai/academy
+
+### FinancialOS
+Master ledger, surgery profitability, revenue attribution, accounts receivable, payment pathways, and executive forecasting.
+URL: https://www.follicleintelligence.ai/platform
+
+### AnalyticsOS
+Revenue, conversion, marketing ROI, staff productivity, surgical efficiency, and outcome intelligence.
+URL: https://www.follicleintelligence.ai/platform/analytics-os
+
+## Differentiation vs generic clinic software
+
+| Capability | Generic clinic software | Follicle Intelligence |
+|------------|-------------------------|----------------------|
+| Surgical variables | Rarely native | SurgeryOS: graft counts, donor economics, OR orchestration |
+| Longitudinal patient intelligence | Fragmented charts | Patient Twin™ across years |
+| Independent audit | Internal QA only | AuditOS aligned with HairAudit |
+| Workforce certification | Disconnected LMS | AcademyOS + IIOHR pathways |
+| Hair-specific imaging | Ad-hoc photos | ImagingOS protocols and progression sets |
+| Global benchmarking | Siloed per clinic | Governed structured signal across programmes |
+
+## Deployment model
+
+- Modular enterprise pricing scoped to clinic size, modules, integrations, and deployment pathway
+- Can integrate alongside existing CRM/booking tools before becoming the primary OS
+- URL: https://www.follicleintelligence.ai/pricing
+
+## Contact & demo
+
+- Demo: https://www.follicleintelligence.ai/demo
+- Contact: https://www.follicleintelligence.ai/contact
+- Partnership enquiries: https://www.follicleintelligence.ai/contact?intent=partnership
+
+## Ecosystem brands (related entities)
+
+- HairAudit: https://hairaudit.com
+- Hair Longevity Institute: https://hairlongevityinstitute.com
+- International Institute of Hair Restoration: https://iiohr.com

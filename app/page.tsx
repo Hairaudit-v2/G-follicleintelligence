@@ -1,36 +1,25 @@
-import type { Metadata } from "next";
-
 import { FiMarketingHomeView } from "@/components/home/FiMarketingHomeView";
-import { SITE_SEO_DESCRIPTION, SITE_SEO_TITLE } from "@/lib/structured-data";
-import { PUBLIC_IMAGES } from "@/src/lib/brand/publicImages";
+import { JsonLd } from "@/components/seo/json-ld";
+import { SITE_URL } from "@/lib/seo/constants";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import {
+  buildFAQPageSchema,
+  HOME_PAGE_FAQS,
+  SITE_SEO_DESCRIPTION,
+  SITE_SEO_TITLE,
+} from "@/lib/structured-data";
 
-const OG_IMAGE = PUBLIC_IMAGES.appleTouchIcon;
-
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: SITE_SEO_TITLE,
   description: SITE_SEO_DESCRIPTION,
-  openGraph: {
-    title: SITE_SEO_TITLE,
-    description: SITE_SEO_DESCRIPTION,
-    siteName: "Follicle Intelligence",
-    type: "website",
-    images: [
-      {
-        url: OG_IMAGE.src,
-        width: OG_IMAGE.width,
-        height: OG_IMAGE.height,
-        alt: "Follicle Intelligence — The Operating System For The Future Of Hair Restoration",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_SEO_TITLE,
-    description: SITE_SEO_DESCRIPTION,
-    images: [OG_IMAGE.src],
-  },
-};
+  path: "/",
+});
 
 export default function HomePage() {
-  return <FiMarketingHomeView />;
+  return (
+    <>
+      <JsonLd data={buildFAQPageSchema(SITE_URL, HOME_PAGE_FAQS)} />
+      <FiMarketingHomeView />
+    </>
+  );
 }

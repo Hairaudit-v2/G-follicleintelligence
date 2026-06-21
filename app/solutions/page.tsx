@@ -1,11 +1,11 @@
-﻿import type { Metadata } from "next";
-import Link from "next/link";
+﻿import Link from "next/link";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import type { LucideIcon } from "lucide-react";
 import {
   Building2,
@@ -16,11 +16,12 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Solutions by Buyer: Clinical, Enterprise & Institutional | Follicle Intelligence",
   description:
     "How Follicle Intelligence maps to surgeons, clinics, networks, standards bodies, platform partners, and strategic investors—pain points, outcomes, deployment, and platform fit.",
-};
+  path: "/solutions",
+});
 
 function SectionIntro({
   eyebrow,

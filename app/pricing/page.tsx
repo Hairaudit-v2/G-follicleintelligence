@@ -1,18 +1,21 @@
-import type { Metadata } from "next";
-
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { SITE_URL } from "@/lib/seo/constants";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { buildFAQPageSchema, PRICING_PAGE_FAQS } from "@/lib/structured-data";
 import { Building2, CheckCircle2, Globe2, Stethoscope } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Enterprise Pricing | Follicle Intelligence",
   description:
     "Modular enterprise pricing for hair restoration clinics—scoped to clinic size, modules, integrations, and deployment pathway. No fixed tiers; request a tailored quote.",
-};
+  path: "/pricing",
+});
 
 function SectionIntro({
   eyebrow,
@@ -71,6 +74,7 @@ const PRICING_FACTORS = [
 export default function PricingPage() {
   return (
     <>
+      <JsonLd data={buildFAQPageSchema(`${SITE_URL}/pricing`, PRICING_PAGE_FAQS)} />
       <PageHero
         eyebrow="Pricing"
         title="Enterprise Pricing"

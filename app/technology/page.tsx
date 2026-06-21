@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHero } from "@/components/layout/page-hero";
@@ -6,40 +5,21 @@ import { Section } from "@/components/layout/section";
 import { PlatformArchitectureMap } from "@/components/platform/PlatformArchitectureMap";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
-import { PUBLIC_IMAGES } from "@/src/lib/brand/publicImages";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { ArrowRight, CheckCircle2, GitMerge, Layers3, Shield } from "lucide-react";
 
-const OG_IMAGE = PUBLIC_IMAGES.appleTouchIcon;
-
-const PAGE_TITLE = "Technology: Connected Infrastructure for Hair Restoration Clinics | Follicle Intelligence";
+const PAGE_TITLE =
+  "Technology: Connected Infrastructure for Hair Restoration Clinics | Follicle Intelligence";
 
 const PAGE_DESCRIPTION =
   "How Follicle Intelligence unifies acquisition, operations, patient intelligence, clinical workflows, imaging, surgery, outcomes, training, and analytics in one structured platform for modern hair restoration.";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: PAGE_TITLE,
   description: PAGE_DESCRIPTION,
-  openGraph: {
-    title: PAGE_TITLE,
-    description: PAGE_DESCRIPTION,
-    siteName: "Follicle Intelligence",
-    type: "website",
-    images: [
-      {
-        url: OG_IMAGE.src,
-        width: OG_IMAGE.width,
-        height: OG_IMAGE.height,
-        alt: "Follicle Intelligence — technology and platform architecture",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: PAGE_TITLE,
-    description: PAGE_DESCRIPTION,
-    images: [OG_IMAGE.src],
-  },
-};
+  path: "/technology",
+  imageAlt: "Follicle Intelligence — technology and platform architecture",
+});
 
 function SectionIntro({
   eyebrow,

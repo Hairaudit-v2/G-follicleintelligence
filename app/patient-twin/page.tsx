@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import {
   Activity,
   ArrowRight,
@@ -18,13 +18,15 @@ import {
   ScanLine,
 } from "lucide-react";
 
-const PAGE_TITLE = "Patient Twin™: Lifelong Clinical Intelligence for Every Hair Restoration Patient | Follicle Intelligence";
+const PAGE_TITLE =
+  "Patient Twin™: Lifelong Clinical Intelligence for Every Hair Restoration Patient | Follicle Intelligence";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: PAGE_TITLE,
   description:
     "Patient Twin™ is the lifelong clinical intelligence record for every hair restoration patient—one timeline connecting consultations, imaging, pathology, medications, regenerative treatments, surgery, follow-ups, outcomes, and satisfaction across the Follicle Intelligence platform.",
-};
+  path: "/patient-twin",
+});
 
 function SectionIntro({
   eyebrow,

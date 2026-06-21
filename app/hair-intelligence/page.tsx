@@ -1,11 +1,11 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import {
   ArrowRight,
   BarChart3,
@@ -20,11 +20,12 @@ import {
   Users,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "HairAudit & Hair Restoration: Why Hair Is the Lead Category | Follicle Intelligence",
   description:
     "Hair restoration is the ideal launch category for benchmarked audit intelligence: high stakes, uneven quality, and narrative-heavy markets. HairAudit is the first live FI application—proof in production, deepened by HLI and IIOHR.",
-};
+  path: "/hair-intelligence",
+});
 
 function SectionIntro({
   eyebrow,

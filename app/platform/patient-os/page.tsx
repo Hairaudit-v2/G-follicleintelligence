@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -15,11 +15,12 @@ import {
   UserCircle2,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "PatientOS: Lifelong Patient Intelligence & Clinical Journey Engine | Follicle Intelligence",
   description:
     "PatientOS is the intelligence engine powering the complete patient journey—connecting consultations, imaging, pathology, medications, surgery, treatments, follow-ups, and long-term outcomes in one lifelong Patient Twin™ record for every patient.",
-};
+  path: "/platform/patient-os",
+});
 
 function SectionIntro({
   eyebrow,

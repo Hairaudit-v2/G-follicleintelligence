@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -7,6 +6,7 @@ import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { FadeIn } from "@/components/ui/fade-in";
 import { AnimatedDivider } from "@/components/ui/animated-divider";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { ArrowUpRight } from "lucide-react";
 
 const ArchitectureDiagramDynamic = dynamic(
@@ -25,11 +25,12 @@ const ArchitectureDiagramDynamic = dynamic(
   }
 );
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Modules: Reusable Intelligence Primitives | Follicle Intelligence",
   description:
     "Composable extraction, scoring, and reporting primitives inside Follicle Intelligence—reused across HairAudit, HLI, white-label, and benchmark and governance infrastructure.",
-};
+  path: "/modules",
+});
 
 function SectionIntro({
   eyebrow,

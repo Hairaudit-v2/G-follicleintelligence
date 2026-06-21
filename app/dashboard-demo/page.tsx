@@ -1,11 +1,11 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { cn } from "@/lib/utils";
 import {
   Activity,
@@ -22,11 +22,12 @@ import {
   Users,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Dashboard Walkthrough: Command Layer for Benchmarked Quality | Follicle Intelligence",
   description:
     "Product walkthrough: executive quality view, domain scores, cohort standing, governance queues, and disclosure controls—the operating interface for audit, benchmarks, and institutional reporting.",
-};
+  path: "/dashboard-demo",
+});
 
 function SectionIntro({
   eyebrow,

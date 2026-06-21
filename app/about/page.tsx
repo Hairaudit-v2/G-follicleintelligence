@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHero } from "@/components/layout/page-hero";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "About Follicle Intelligence | Built To Raise The Standard Worldwide",
   description:
     "Why Follicle Intelligence exists: accountable quality infrastructure for hair restoration—transparency, benchmarks, governance, and standards across HairAudit, HLI, and the International Institute of Hair Restoration. Mission, platform direction, and long-term focus.",
-};
+  path: "/about",
+});
 
 function SectionIntro({
   eyebrow,

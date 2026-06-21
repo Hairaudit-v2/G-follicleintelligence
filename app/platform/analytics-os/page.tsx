@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -15,11 +15,12 @@ import {
   Users,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "AnalyticsOS: Business Intelligence for Hair Restoration Clinics | Follicle Intelligence",
   description:
     "Business intelligence for modern hair restoration clinics—AnalyticsOS helps teams understand revenue, conversion, marketing ROI, staff productivity, surgical efficiency, and long-term clinical performance with operational intelligence across Follicle Intelligence.",
-};
+  path: "/platform/analytics-os",
+});
 
 function SectionIntro({
   eyebrow,

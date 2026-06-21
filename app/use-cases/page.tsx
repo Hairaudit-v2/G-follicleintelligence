@@ -1,14 +1,15 @@
 import { FadeIn } from "@/components/ui/fade-in";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Metadata } from "next";
 
 import { PageHero } from "@/components/layout/page-hero";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Hair Audit Use Cases: Clinics, Labs, Telehealth & Program Analytics | Follicle Intelligence",
   description:
     "Trichology clinics, diagnostic labs, telehealth providers, and multi-site quality programs. One infrastructure for evidence-based scoring and benchmarking across settings.",
-};
+  path: "/use-cases",
+});
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { Section } from "@/components/layout/section";
 import { Building2, FlaskConical, Stethoscope, Users } from "lucide-react";

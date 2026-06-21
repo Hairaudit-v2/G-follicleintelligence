@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
@@ -7,13 +6,15 @@ import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { ArrowRight, CheckCircle2, HelpCircle } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Licensing: Clinic, Enterprise API & Partner Programs | Follicle Intelligence",
   description:
     "How to choose a licensing path for Follicle Intelligence: clinic programs, enterprise API and volume, and white-label partner models—aligned to the central intelligence layer and your deployment reality.",
-};
+  path: "/licensing",
+});
 
 function SectionIntro({
   eyebrow,

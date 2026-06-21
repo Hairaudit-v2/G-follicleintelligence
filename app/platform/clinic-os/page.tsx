@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -15,11 +15,12 @@ import {
   Workflow,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "ClinicOS: Operational System for Modern Hair Restoration Clinics | Follicle Intelligence",
   description:
     "ClinicOS is the operational system running the modern hair restoration clinic—scheduling, staff management, appointments, services, procedure calendars, room management, and workflow in one connected dashboard.",
-};
+  path: "/platform/clinic-os",
+});
 
 function SectionIntro({
   eyebrow,

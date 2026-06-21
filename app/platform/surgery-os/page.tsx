@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -15,11 +15,12 @@ import {
   Users,
 } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "SurgeryOS: Surgical Workflow Engine for Hair Restoration Clinics | Follicle Intelligence",
   description:
     "SurgeryOS is the surgical workflow engine for modern hair restoration clinics—plan, track, document, and improve every procedure from case preparation through long-term outcome, connected to the Patient Twin and structured for measurable quality.",
-};
+  path: "/platform/surgery-os",
+});
 
 function SectionIntro({
   eyebrow,

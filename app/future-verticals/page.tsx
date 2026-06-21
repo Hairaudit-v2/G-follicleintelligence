@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
@@ -7,13 +6,15 @@ import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { ArrowRightLeft, HeartPulse, ScanLine, Smile, Sparkles, Syringe } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Future Verticals: Beyond Hair Restoration | Follicle Intelligence",
   description:
     "Hair first with a reusable audit and benchmark architecture—disciplined expansion into adjacent procedural and aesthetic categories when scoring models and evidence patterns align.",
-};
+  path: "/future-verticals",
+});
 
 const VERTICALS = [
   {

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 
 import { EcosystemMention } from "@/components/ecosystem/EcosystemMention";
 import { PageHero } from "@/components/layout/page-hero";
@@ -7,13 +6,15 @@ import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn } from "@/components/ui/fade-in";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { BadgeCheck, Building2, Hospital, Shield, UserRound } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "White-Label: Branded Audit & Benchmark Infrastructure | Follicle Intelligence",
   description:
     "Deploy the central intelligence layer under your brand: governance, benchmarks, and reporting—with HairAudit, HLI, and IIOHR connected behind the scenes.",
-};
+  path: "/white-label",
+});
 
 const WHITE_LABEL_MODELS = [
   {

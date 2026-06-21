@@ -1,0 +1,64 @@
+# Follicle Intelligence
+
+> Follicle Intelligence is an enterprise operating system for hair restoration clinics—connecting acquisition, clinical operations, surgery, independent audit, workforce training, finance, and longitudinal outcome intelligence in one governed platform.
+
+Canonical site: https://www.follicleintelligence.ai
+
+## What we are
+
+- Category: Enterprise clinical / surgical operating system for hair restoration
+- Audience: Surgeons, clinic owners, multi-site groups, training partners, institutional collaborators
+- Product: Follicle Intelligence Platform (FI OS) — modular OS modules on a shared Patient Twin intelligence substrate
+
+## Ecosystem (sister brands)
+
+- HairAudit — surgical evidence, independent review, and quality scoring: https://hairaudit.com
+- Hair Longevity Institute — biology and longitudinal treatment intelligence: https://hairlongevityinstitute.com
+- International Institute of Hair Restoration — training, certification, and standards: https://iiohr.com
+
+## Start here
+
+- Home: https://www.follicleintelligence.ai/
+- Platform architecture: https://www.follicleintelligence.ai/platform
+- Technology overview: https://www.follicleintelligence.ai/technology
+- Patient Twin: https://www.follicleintelligence.ai/patient-twin
+- About: https://www.follicleintelligence.ai/about
+- Enterprise pricing: https://www.follicleintelligence.ai/pricing
+- Book demo: https://www.follicleintelligence.ai/demo
+- Contact: https://www.follicleintelligence.ai/contact
+
+## Platform modules
+
+- Ecosystem architecture: https://www.follicleintelligence.ai/platform/ecosystem
+- Platform progress (public delivery status): https://www.follicleintelligence.ai/platform/progress
+- LeadFlow (acquisition & CRM): https://www.follicleintelligence.ai/platform/leadflow
+- ClinicOS (scheduling & operations): https://www.follicleintelligence.ai/platform/clinic-os
+- PatientOS (Patient Twin & records): https://www.follicleintelligence.ai/platform/patient-os
+- ImagingOS (clinical imaging): https://www.follicleintelligence.ai/platform/imaging-os
+- SurgeryOS (surgical workflow): https://www.follicleintelligence.ai/platform/surgery-os
+- AnalyticsOS (business intelligence): https://www.follicleintelligence.ai/platform/analytics-os
+
+## Audience pathways
+
+- Surgeons: https://www.follicleintelligence.ai/surgeons
+- Clinic owners: https://www.follicleintelligence.ai/clinic-owners
+- Enterprise / multi-site: https://www.follicleintelligence.ai/enterprise
+- Academy & training: https://www.follicleintelligence.ai/academy
+- Audit network: https://www.follicleintelligence.ai/audit-network
+- Intelligence layer: https://www.follicleintelligence.ai/intelligence
+- White-label: https://www.follicleintelligence.ai/white-label
+
+## Company
+
+- Why we exist: https://www.follicleintelligence.ai/why-follicle-intelligence
+- Vision: https://www.follicleintelligence.ai/vision
+- Research: https://www.follicleintelligence.ai/research
+- Partners: https://www.follicleintelligence.ai/partners
+- Investors: https://www.follicleintelligence.ai/investors
+- Security: https://www.follicleintelligence.ai/security
+- Integration: https://www.follicleintelligence.ai/integration
+
+## Extended reference
+
+Full product descriptions: https://www.follicleintelligence.ai/llms-full.txt
+Sitemap: https://www.follicleintelligence.ai/sitemap.xml
