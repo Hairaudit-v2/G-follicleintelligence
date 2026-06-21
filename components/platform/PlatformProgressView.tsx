@@ -8,6 +8,7 @@ import {
   PlatformProgressAnimatedBar,
   PlatformProgressStatusBadge,
 } from "@/components/platform/PlatformProgressPrimitives";
+import { EcosystemCompletionSnapshot } from "@/components/platform/EcosystemCompletionSnapshot";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -88,41 +89,34 @@ function DeliverySnapshot({ modules }: { modules: PlatformProgressModule[] }) {
   const snapshot = getPlatformProgressSnapshot(modules);
 
   return (
-    <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <GlassCard className="border-amber-400/12 !p-5 sm:!p-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-200/70">Ecosystem average</p>
-        <p className="mt-3 font-mono text-4xl font-semibold tabular-nums tracking-tight text-foreground">
-          {snapshot.ecosystemAverage}
-          <span className="text-xl text-muted-foreground">%</span>
-        </p>
-        <div className="mt-4">
-          <PlatformProgressAnimatedBar percent={snapshot.ecosystemAverage} status="Production" />
-        </div>
-      </GlassCard>
+    <div className="mt-10 space-y-8">
+      <EcosystemCompletionSnapshot variant="marketing" />
 
-      <GlassCard className="border-white/[0.07] !p-5 sm:!p-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Modules tracked</p>
-        <p className="mt-3 font-mono text-4xl font-semibold tabular-nums tracking-tight text-foreground">
-          {snapshot.activeModuleCount}
-        </p>
-        <p className="mt-3 text-sm text-muted-foreground">Connected FI OS surfaces in this registry</p>
-      </GlassCard>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <GlassCard className="border-white/[0.07] !p-5 sm:!p-6">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">FI OS modules tracked</p>
+          <p className="mt-3 font-mono text-4xl font-semibold tabular-nums tracking-tight text-foreground">
+            {snapshot.activeModuleCount}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">Connected OS surfaces in the delivery registry</p>
+        </GlassCard>
 
-      <GlassCard className="border-emerald-400/10 !p-5 sm:!p-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200/70">Deployable surfaces</p>
-        <p className="mt-3 font-mono text-4xl font-semibold tabular-nums tracking-tight text-foreground">
-          {snapshot.deployableSurfaceCount}
-        </p>
-        <p className="mt-3 text-sm text-muted-foreground">Live, production, or pilot-ready modules</p>
-      </GlassCard>
+        <GlassCard className="border-emerald-400/10 !p-5 sm:!p-6">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200/70">Deployable surfaces</p>
+          <p className="mt-3 font-mono text-4xl font-semibold tabular-nums tracking-tight text-foreground">
+            {snapshot.deployableSurfaceCount}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">Live, production, or pilot-ready modules</p>
+        </GlassCard>
 
-      <GlassCard className="border-cyan-400/10 !p-5 sm:!p-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70">Last updated</p>
-        <p className="mt-3 font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground sm:text-3xl">
-          {snapshot.lastUpdated}
-        </p>
-        <p className="mt-3 text-sm text-muted-foreground">Manual registry — edit in platformProgressPageContent.ts</p>
-      </GlassCard>
+        <GlassCard className="border-cyan-400/10 !p-5 sm:!p-6 sm:col-span-2 lg:col-span-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70">Last updated</p>
+          <p className="mt-3 font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground sm:text-3xl">
+            {snapshot.lastUpdated}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">Manual registry — edit in platformProgressPageContent.ts</p>
+        </GlassCard>
+      </div>
     </div>
   );
 }

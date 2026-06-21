@@ -7,6 +7,7 @@ import {
   PlatformProgressAnimatedBar,
   PlatformProgressStatusBadge,
 } from "@/components/platform/PlatformProgressPrimitives";
+import { EcosystemCompletionSnapshot } from "@/components/platform/EcosystemCompletionSnapshot";
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
@@ -25,31 +26,6 @@ const c = PLATFORM_PROGRESS_PAGE_CONTENT.homepage;
 const snapshot = getPlatformProgressSnapshot(PLATFORM_PROGRESS_MODULES);
 const featuredModules = getFeaturedPlatformProgressModules();
 const latestUpdate = getLatestPlatformProgressChangelogEntry();
-
-const SNAPSHOT_METRICS = [
-  {
-    label: "Ecosystem average",
-    value: `${snapshot.ecosystemAverage}%`,
-    detail: "Completion across all FI OS modules",
-    barPercent: snapshot.ecosystemAverage,
-    barStatus: "Production" as const,
-  },
-  {
-    label: "Active modules",
-    value: String(snapshot.activeModuleCount),
-    detail: "Connected systems in the delivery registry",
-  },
-  {
-    label: "Pilot / production surfaces",
-    value: String(snapshot.deployableSurfaceCount),
-    detail: "Modules live, in production, or pilot-ready",
-  },
-  {
-    label: "Last updated",
-    value: snapshot.lastUpdated,
-    detail: "Public progress registry refresh date",
-  },
-] as const;
 
 function LatestPlatformUpdateCard() {
   if (!latestUpdate) return null;
@@ -116,28 +92,23 @@ export function FiMarketingPlatformProgressSection() {
       <FadeIn>
         <SectionHeading id={`${c.id}-heading`} eyebrow={c.eyebrow} title={c.headline} description={c.description} />
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {SNAPSHOT_METRICS.map((metric) => (
-            <GlassCard
-              key={metric.label}
-              className="border-white/[0.07] !p-5 sm:!p-6"
-            >
-              <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">{metric.label}</p>
-              <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
-                {metric.value}
-              </p>
-              {"barPercent" in metric && metric.barPercent != null ? (
-                <div className="mt-4">
-                  <PlatformProgressAnimatedBar
-                    percent={metric.barPercent}
-                    status={metric.barStatus}
-                    delay={0.06}
-                  />
-                </div>
-              ) : null}
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{metric.detail}</p>
-            </GlassCard>
-          ))}
+        <EcosystemCompletionSnapshot variant="marketing" className="mt-10" />
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <GlassCard className="border-white/[0.07] !p-5 sm:!p-6">
+            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">FI OS modules tracked</p>
+            <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
+              {snapshot.activeModuleCount}
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Connected systems in the delivery registry</p>
+          </GlassCard>
+          <GlassCard className="border-white/[0.07] !p-5 sm:!p-6">
+            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">Last updated</p>
+            <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
+              {snapshot.lastUpdated}
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Public progress registry refresh date</p>
+          </GlassCard>
         </div>
 
         <LatestPlatformUpdateCard />

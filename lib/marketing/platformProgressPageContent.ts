@@ -39,6 +39,55 @@ export type PlatformRecentRelease = {
   date: string;
 };
 
+export type FiEcosystemPlatformCompletion = {
+  id: string;
+  name: string;
+  completionPercent: number;
+  description: string;
+  href?: string;
+  external?: boolean;
+};
+
+/** Manual ecosystem-wide completion rollup — edit as delivery advances. */
+export const FI_ECOSYSTEM_COMPLETION_SUMMARY = {
+  overallEcosystemPercent: 74,
+  fiOsCorePlatformPercent: 86,
+} as const;
+
+/** Satellite and workforce platforms in the broader FI ecosystem. */
+export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] = [
+  {
+    id: "workforce-os",
+    name: "WorkforceOS",
+    completionPercent: 30,
+    description: "Healthcare workforce infrastructure, onboarding, compliance, and operational staff governance.",
+  },
+  {
+    id: "hairaudit",
+    name: "HairAudit",
+    completionPercent: 82,
+    description: "Independent surgical audit, evidence capture, quality scoring, and outcome verification.",
+    href: "https://hairaudit.com",
+    external: true,
+  },
+  {
+    id: "iiohr",
+    name: "IIOHR Infrastructure",
+    completionPercent: 78,
+    description: "Training, certification, Nexus provisioning, and institute-aligned workforce standards.",
+    href: "https://iiohr.com",
+    external: true,
+  },
+  {
+    id: "hli",
+    name: "HLI Platform",
+    completionPercent: 71,
+    description: "Hair Longevity Institute diagnostics, treatment pathways, and longitudinal biology intelligence.",
+    href: "https://hairlongevityinstitute.com",
+    external: true,
+  },
+];
+
 export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   hero: {
     eyebrow: "Platform Progress",
@@ -52,7 +101,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     eyebrow: "Delivery snapshot",
     headline: "Built in the open. Shipped with discipline.",
     intro:
-      "Percentages reflect functional completeness against each module’s defined scope — schema, workflows, admin surfaces, integrations, and pilot hardening. Updated manually as milestones land.",
+      "Percentages reflect functional completeness across the FI ecosystem — core OS modules, workforce infrastructure, and connected satellite platforms including HairAudit, IIOHR, and HLI.",
   },
 
   modules: {
@@ -141,8 +190,13 @@ export function computePlatformProgressEcosystemAverage(modules: readonly Platfo
 }
 
 export function getPlatformProgressSnapshot(modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES) {
+  const fiOsModuleAverage = computePlatformProgressEcosystemAverage(modules);
   return {
-    ecosystemAverage: computePlatformProgressEcosystemAverage(modules),
+    overallEcosystemPercent: FI_ECOSYSTEM_COMPLETION_SUMMARY.overallEcosystemPercent,
+    fiOsCorePlatformPercent: FI_ECOSYSTEM_COMPLETION_SUMMARY.fiOsCorePlatformPercent,
+    /** @deprecated Use `overallEcosystemPercent` or `fiOsCorePlatformPercent` in UI copy. */
+    ecosystemAverage: fiOsModuleAverage,
+    fiOsModuleAverage,
     activeModuleCount: modules.length,
     deployableSurfaceCount: modules.filter((mod) => DEPLOYABLE_STATUSES.includes(mod.status)).length,
     lastUpdated: PLATFORM_PROGRESS_PAGE_CONTENT.hero.lastUpdated,

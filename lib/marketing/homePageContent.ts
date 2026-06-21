@@ -187,7 +187,8 @@ export const HOME_PAGE_CONTENT = {
     subtext:
       "Every module inside Follicle Intelligence is being developed as enterprise-grade healthcare infrastructure designed for global multi-clinic deployment.",
     metrics: [
-      { label: "Total codebase modules", value: "12" },
+      { label: "Overall FI ecosystem completion", value: "~74%" },
+      { label: "FI OS core platform", value: "~86%" },
       { label: "Production infrastructure modules", value: "8" },
       { label: "Multi-tenant systems active", value: "11" },
       { label: "Operational workflows deployed", value: "40+" },

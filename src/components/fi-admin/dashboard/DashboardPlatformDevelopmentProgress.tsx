@@ -1,43 +1,28 @@
 import Link from "next/link";
 
+import { EcosystemCompletionSnapshot } from "@/components/platform/EcosystemCompletionSnapshot";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import {
   PlatformProgressAnimatedBar,
   PlatformProgressStatusBadge,
 } from "@/components/platform/PlatformProgressPrimitives";
-import {
-  getPlatformProgressSnapshot,
-  PLATFORM_PROGRESS_MODULES,
-} from "@/lib/marketing/platformProgressPageContent";
+import { PLATFORM_PROGRESS_MODULES } from "@/lib/marketing/platformProgressPageContent";
 
 export function DashboardPlatformDevelopmentProgress() {
-  const snapshot = getPlatformProgressSnapshot(PLATFORM_PROGRESS_MODULES);
-
   return (
     <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-platform-progress-heading">
       <SectionHeader
         id="dash-platform-progress-heading"
         kicker="FI OS platform"
         title="Platform Development Progress"
-        description="Live delivery status across all active OS modules — updated as infrastructure milestones ship."
+        description="Live delivery status across the FI ecosystem and all active OS modules."
       />
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-white/[0.08] bg-[#141C33]/60 px-4 py-3">
-          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Ecosystem average</p>
-          <p className="mt-1 font-mono text-2xl font-semibold tabular-nums text-[#F8FAFC]">{snapshot.ecosystemAverage}%</p>
-        </div>
-        <div className="rounded-xl border border-white/[0.08] bg-[#141C33]/60 px-4 py-3">
-          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Active modules</p>
-          <p className="mt-1 font-mono text-2xl font-semibold tabular-nums text-[#F8FAFC]">{snapshot.activeModuleCount}</p>
-        </div>
-        <div className="rounded-xl border border-white/[0.08] bg-[#141C33]/60 px-4 py-3">
-          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Last updated</p>
-          <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-[#F8FAFC]">{snapshot.lastUpdated}</p>
-        </div>
-      </div>
+      <EcosystemCompletionSnapshot variant="admin" className="mt-4" />
 
-      <ul className="mt-5 space-y-3">
+      <p className="mt-5 text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">FI OS module registry</p>
+
+      <ul className="mt-3 space-y-3">
         {PLATFORM_PROGRESS_MODULES.map((mod) => (
           <li
             key={mod.id}
