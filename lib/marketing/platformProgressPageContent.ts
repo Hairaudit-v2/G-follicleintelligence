@@ -231,6 +231,15 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
   {
+    id: "2026-06-21-project-nexus-phase-9b",
+    date: "2026-06-21",
+    tag: "project-nexus",
+    title: "Project Nexus Phase 9B — IIOHR ProductionAdapter",
+    summary:
+      "IIOHR ProductionAdapter implemented for signed FI OS Nexus provisioning, state reconciliation, rollback, dry-run safety, and audit logging.",
+    modules: ["AcademyOS", "WorkforceOS"],
+  },
+  {
     id: "2026-06-21-workforce-os-module",
     date: "2026-06-21",
     tag: "workforce-os",
