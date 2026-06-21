@@ -6,7 +6,7 @@ import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPri
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
-import type { HomeEcosystemModule } from "@/lib/marketing/homePageContent";
+import type { HomeEcosystemLayer } from "@/lib/marketing/homePageContent";
 import { HOME_PAGE_CONTENT } from "@/lib/marketing/homePageContent";
 import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
@@ -86,19 +86,13 @@ function ChipList({ items }: { items: readonly string[] }) {
 }
 
 function EcosystemArchitectureSection({
-  modules,
+  layers,
   caption,
 }: {
-  modules: readonly HomeEcosystemModule[];
+  layers: readonly HomeEcosystemLayer[];
   caption: string;
 }) {
-  const m = [...modules];
-  const bands: { label: string; items: HomeEcosystemModule[] }[] = [
-    { label: "Acquisition & demand", items: [m[0]] },
-    { label: "Clinical operations & diagnostics", items: [m[1], m[2]] },
-    { label: "Surgical execution", items: [m[3]] },
-    { label: "Governance, learning, analytics & records", items: [m[4], m[5], m[6], m[7]] },
-  ];
+  let moduleIndex = 0;
 
   return (
     <div className="relative mt-12 overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.12),transparent_50%),linear-gradient(180deg,rgb(255_255_255_/0.045),transparent)] p-5 shadow-[0_24px_80px_rgb(0_0_0_/0.38),inset_0_1px_0_rgb(255_255_255_/0.05)] sm:mt-14 sm:rounded-[2rem] sm:p-8 md:p-10">
@@ -111,30 +105,30 @@ function EcosystemArchitectureSection({
         {caption}
       </p>
       <div className="relative mt-10 space-y-10">
-        {bands.map((band, bandIdx) => (
-          <div key={band.label}>
+        {layers.map((layer, bandIdx) => (
+          <div key={layer.title}>
             <div className="relative flex flex-col items-center">
               <span className="rounded-full border border-amber-400/20 bg-[rgb(6_10_18_/0.85)] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-100/90 shadow-[0_0_24px_rgb(212_175_55_/0.08)]">
-                {band.label}
+                {layer.title}
               </span>
               <div
                 className={cn(
                   "mt-5 grid w-full gap-3",
-                  band.items.length === 1 && "mx-auto max-w-md",
-                  band.items.length === 2 && "sm:grid-cols-2",
-                  band.items.length === 3 && "sm:grid-cols-2 lg:grid-cols-3",
-                  band.items.length >= 4 && "sm:grid-cols-2 lg:grid-cols-4"
+                  layer.modules.length === 1 && "mx-auto max-w-md",
+                  layer.modules.length === 2 && "sm:grid-cols-2",
+                  layer.modules.length === 3 && "sm:grid-cols-2 lg:grid-cols-3",
+                  layer.modules.length >= 4 && "sm:grid-cols-2 lg:grid-cols-4"
                 )}
               >
-                {band.items.map((mod) => {
-                  const index = m.indexOf(mod);
+                {layer.modules.map((mod) => {
+                  const index = moduleIndex++;
                   return (
                     <OsModuleCard key={mod.name} index={index} name={mod.name} description={mod.description} />
                   );
                 })}
               </div>
             </div>
-            {bandIdx < bands.length - 1 ? (
+            {bandIdx < layers.length - 1 ? (
               <div className="mx-auto mt-10 flex h-10 w-px flex-col items-center justify-center bg-gradient-to-b from-amber-400/35 via-amber-400/12 to-transparent" aria-hidden />
             ) : null}
           </div>
@@ -365,7 +359,7 @@ export function FiMarketingHomeView() {
             title={c.onePlatform.headline}
             description={c.onePlatform.subtext}
           />
-          <EcosystemArchitectureSection modules={c.onePlatform.modules} caption={c.onePlatform.architectureCaption} />
+          <EcosystemArchitectureSection layers={c.onePlatform.layers} caption={c.onePlatform.architectureCaption} />
         </FadeIn>
       </Section>
 

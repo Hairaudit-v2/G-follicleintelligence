@@ -38,7 +38,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "Engineering the complete hair restoration operating system",
     subtext:
       "Transparent delivery status across every Follicle Intelligence module — from infrastructure foundations through pilot-ready surfaces and production deployments.",
-    lastUpdated: "2026-06-19",
+    lastUpdated: "2026-06-21",
   },
 
   summary: {
@@ -50,7 +50,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 
   modules: {
     eyebrow: "Module grid",
-    headline: "Eleven connected systems. One delivery spine.",
+    headline: "Twelve connected systems. One delivery spine.",
     intro: "Filter by status or scan completion across the FI OS surface area.",
   },
 
@@ -191,6 +191,15 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     learnMoreHref: "/academy",
   },
   {
+    id: "workforce-os",
+    name: "WorkforceOS",
+    completionPercent: 22,
+    stage: "Infrastructure Planning",
+    description:
+      "End-to-end workforce intelligence for hair restoration clinics, including recruitment, onboarding, rostering, payroll readiness, SOP compliance, credentialing, training readiness, and clinical performance tracking.",
+    status: "Active Development",
+  },
+  {
     id: "analytics-os",
     name: "AnalyticsOS",
     completionPercent: 63,
@@ -221,6 +230,15 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-21-workforce-os-module",
+    date: "2026-06-21",
+    tag: "workforce-os",
+    title: "WorkforceOS added as a first-class platform module",
+    summary:
+      "Introduced WorkforceOS as the people infrastructure layer of Follicle Intelligence, connecting HR operations, onboarding, rostering, SOP compliance, credentialing, training readiness, and future clinical workforce performance intelligence.",
+    modules: ["WorkforceOS"],
+  },
   {
     id: "2026-06-19-financial-os-enterprise-intelligence",
     date: "2026-06-19",

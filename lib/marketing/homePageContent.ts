@@ -13,6 +13,11 @@ export type HomeEcosystemModule = {
   description: string;
 };
 
+export type HomeEcosystemLayer = {
+  title: string;
+  modules: readonly HomeEcosystemModule[];
+};
+
 export type HomeAudienceCard = {
   headline: string;
   outcome: string;
@@ -138,42 +143,78 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "The operating system",
     headline: "One Platform. Every Layer Of Hair Restoration.",
     subtext:
-      "Eight modules share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
-    architectureCaption: "Connected OS modules · single intelligence substrate",
-    modules: [
+      "Eleven modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
+    architectureCaption: "Four engines · connected OS modules · single intelligence substrate",
+    layers: [
       {
-        name: "LeadFlowOS",
-        description: "Acquisition, CRM, follow-up, and pipeline intelligence—before a patient ever enters the clinical spine.",
+        title: "Growth Engine",
+        modules: [
+          {
+            name: "LeadFlow",
+            description:
+              "Acquisition, CRM, follow-up, and pipeline intelligence—before a patient ever enters the clinical spine.",
+          },
+          {
+            name: "ConsultationOS",
+            description:
+              "Structured consultation forms, pathway launcher, quote acceptance, and conversion intelligence.",
+          },
+          {
+            name: "PatientOS",
+            description: "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
+          },
+        ],
       },
       {
-        name: "ClinicOS",
-        description: "Scheduling, services, staff, and the operational rhythm that keeps high-volume hair programs coherent.",
+        title: "Clinical Engine",
+        modules: [
+          {
+            name: "ImagingOS",
+            description: "Template-driven photography sessions, slot progress, and surgical-domain progression assessments.",
+          },
+          {
+            name: "SurgeryOS",
+            description: "Surgical planning, donor intelligence, graft economics, and procedure-day orchestration built for the OR.",
+          },
+          {
+            name: "AuditOS",
+            description: "HairAudit-aligned verification, independent review, and quality scoring that makes excellence legible.",
+          },
+        ],
       },
       {
-        name: "HairIntel",
-        description: "AI-assisted intake, diagnostics, blood intelligence, and treatment reasoning aligned to restoration workflows.",
+        title: "Workforce Engine",
+        modules: [
+          {
+            name: "WorkforceOS",
+            description:
+              "End-to-end workforce intelligence for hair restoration clinics, including recruitment, onboarding, rostering, payroll readiness, SOP compliance, credentialing, training readiness, and clinical performance tracking.",
+          },
+          {
+            name: "AcademyOS",
+            description: "Doctor, nurse, consultant, and technician pathways—anchored to the International Institute of Hair Restoration.",
+          },
+        ],
       },
       {
-        name: "SurgeryOS",
-        description: "Surgical planning, donor intelligence, graft economics, and procedure-day orchestration built for the OR.",
+        title: "Enterprise Engine",
+        modules: [
+          {
+            name: "FinancialOS",
+            description:
+              "Master ledger, surgery profitability, revenue attribution, accounts receivable, and executive forecasting.",
+          },
+          {
+            name: "AnalyticsOS",
+            description: "Conversion, productivity, and cohort analytics across reception, consultation, and financial surfaces.",
+          },
+          {
+            name: "ClinicOS",
+            description: "Scheduling, services, staff, and the operational rhythm that keeps high-volume hair programs coherent.",
+          },
+        ],
       },
-      {
-        name: "AuditOS",
-        description: "HairAudit-aligned verification, independent review, and quality scoring that makes excellence legible.",
-      },
-      {
-        name: "AcademyOS",
-        description: "Doctor, nurse, consultant, and technician pathways—anchored to the International Institute of Hair Restoration.",
-      },
-      {
-        name: "AnalyticsOS",
-        description: "Conversion, revenue, productivity, and cohort performance—without divorcing commercial signal from clinical truth.",
-      },
-      {
-        name: "FoundationOS",
-        description: "Patient records, digital twin continuity, and longitudinal timelines that survive handoffs across years.",
-      },
-    ] satisfies HomeEcosystemModule[],
+    ] satisfies readonly HomeEcosystemLayer[],
   },
 
   /**
