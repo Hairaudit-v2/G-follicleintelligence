@@ -80,7 +80,8 @@ export function resolveFiOsPrimarySidebarItems(
   tenantBackendAdminRole?: FiTenantAdminRole | null,
   showAuditOsNav: boolean = true,
   showConfigurationHubNav: boolean = true,
-  showFiPaymentsInboxNav: boolean = false
+  showFiPaymentsInboxNav: boolean = false,
+  showHrOsNav: boolean = false
 ): FiOsPrimarySidebarItem[] {
   const b = normalizeBase(base);
   const blocks = primaryNavClinicalBlocks(tenantBackendAdminRole ?? null);
@@ -317,6 +318,18 @@ export function resolveFiOsPrimarySidebarItems(
       disabled: false,
       hint: "People, roles, and workspace defaults for this clinic.",
     },
+    ...(showHrOsNav
+      ? [
+          {
+            id: "hr-os",
+            label: "HR OS",
+            shortLabel: "HR",
+            href: hrefFor(b, "hr-os"),
+            disabled: false,
+            hint: "Workforce operations, staff readiness, and HR sync health.",
+          } satisfies FiOsPrimarySidebarItem,
+        ]
+      : []),
     {
       id: "settings",
       featureKey: "settings",
@@ -390,6 +403,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (firstEarly === "financial-os") return "financial-os";
     if (firstEarly === "financial") return "financial-os";
     if (firstEarly === "staff") return "staff";
+    if (firstEarly === "hr-os") return "hr-os";
   }
 
   const legacy = getClinicOsShellActiveNavId(pathname, base);
@@ -420,6 +434,7 @@ export function getFiOsShellActiveSidebarId(pathname: string, base: string): str
     if (first === "financial") return "financial-os";
     if (first === "system-status") return "calendar";
     if (first === "settings") return "settings";
+    if (first === "hr-os") return "hr-os";
   }
 
   return null;

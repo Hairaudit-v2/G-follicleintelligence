@@ -42,7 +42,8 @@ if (files.length === 0) {
 }
 
 const cli = join(root, "node_modules", "tsx", "dist", "cli.mjs");
-const r = spawnSync(process.execPath, [cli, "--test", ...files], {
+const patchServerOnly = join(root, "scripts", "patch-server-only-for-scripts.cjs");
+const r = spawnSync(process.execPath, ["-r", patchServerOnly, cli, "--test", ...files], {
   cwd: root,
   stdio: "inherit",
 });

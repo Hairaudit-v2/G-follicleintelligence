@@ -46,6 +46,7 @@ export function FiOsAppShell({
   showAuditOsNav = true,
   showConfigurationHubNav = true,
   showFiPaymentsInboxNav = false,
+  showHrOsNav = false,
   workspaceProfileKey = "default",
   featureAccess = null,
   effective,
@@ -76,6 +77,8 @@ export function FiOsAppShell({
   showConfigurationHubNav?: boolean;
   /** RevenueOS payments inbox (`/payments`) when `FI_PAYMENTS_ENABLED` is true. */
   showFiPaymentsInboxNav?: boolean;
+  /** HR OS primary nav when tenant entitlement + role allow. */
+  showHrOsNav?: boolean;
   /** Stage UI activation — workspace persona for nav emphasis (does not bypass Stage 2). */
   workspaceProfileKey?: FiWorkspaceProfileKey;
   /** Stage 2: serialized feature map; null skips clinic-settings strip filtering. */
@@ -120,7 +123,8 @@ export function FiOsAppShell({
       tenantBackendAdminRole ?? null,
       showAuditOsNav,
       showConfigurationHubNav,
-      showFiPaymentsInboxNav
+      showFiPaymentsInboxNav,
+      showHrOsNav
     );
     return filterFiOsPrimarySidebarItemsByFeatureAccess(raw, featureAccessMap);
   }, [
@@ -131,6 +135,7 @@ export function FiOsAppShell({
     showAuditOsNav,
     showConfigurationHubNav,
     showFiPaymentsInboxNav,
+    showHrOsNav,
     featureAccessMap,
   ]);
 
