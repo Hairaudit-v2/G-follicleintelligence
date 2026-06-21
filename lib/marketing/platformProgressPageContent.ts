@@ -306,11 +306,11 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "analytics-os",
     name: "AnalyticsOS",
-    completionPercent: 72,
-    stage: "Executive intelligence · event pipeline · cross-module scoring",
+    completionPercent: 78,
+    stage: "Cross-platform intelligence event coverage",
     description:
       "Conversion, productivity, and cohort analytics across reception, consultation, and financial surfaces — plus deterministic executive health scoring from the AnalyticsOS event pipeline.",
-    status: "Active Development",
+    status: "Infrastructure Complete",
     learnMoreHref: "/platform/analytics-os",
   },
   {
