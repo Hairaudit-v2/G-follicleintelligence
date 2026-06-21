@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
+import { AnalyticsExecutiveIntelligence } from "@/src/components/fi-admin/analytics/AnalyticsExecutiveIntelligence";
 import { AnalyticsOsDashboard } from "@/src/components/fi-admin/analytics/AnalyticsOsDashboard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { loadAnalyticsExecutiveDashboard } from "@/src/lib/analytics-os/analyticsExecutive.server";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadAnalyticsOsDashboard } from "@/src/lib/fiAdmin/analyticsOsDashboardRead.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
@@ -35,7 +37,15 @@ export default async function AnalyticsOsPage({ params }: { params: Promise<{ te
     getBookingsBoardNavAllowed(tenantId),
   ]);
 
-  const model = await loadAnalyticsOsDashboard(tenantId.trim(), { showCrmNav, showBookingsBoard });
+  const [model, executive] = await Promise.all([
+    loadAnalyticsOsDashboard(tenantId.trim(), { showCrmNav, showBookingsBoard }),
+    loadAnalyticsExecutiveDashboard(tenantId.trim()),
+  ]);
 
-  return <AnalyticsOsDashboard model={model} />;
+  return (
+    <div className="space-y-10">
+      <AnalyticsExecutiveIntelligence model={executive} />
+      <AnalyticsOsDashboard model={model} />
+    </div>
+  );
 }
