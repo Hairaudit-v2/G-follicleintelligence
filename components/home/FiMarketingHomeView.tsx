@@ -88,9 +88,11 @@ function ChipList({ items }: { items: readonly string[] }) {
 function EcosystemArchitectureSection({
   layers,
   caption,
+  secondaryCta,
 }: {
   layers: readonly HomeEcosystemLayer[];
   caption: string;
+  secondaryCta?: { label: string; href: string };
 }) {
   let moduleIndex = 0;
 
@@ -134,6 +136,16 @@ function EcosystemArchitectureSection({
           </div>
         ))}
       </div>
+      {secondaryCta ? (
+        <div className="relative mt-8 flex justify-center sm:mt-10">
+          <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
+            <Link href={secondaryCta.href}>
+              {secondaryCta.label}
+              <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+            </Link>
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -359,7 +371,11 @@ export function FiMarketingHomeView() {
             title={c.onePlatform.headline}
             description={c.onePlatform.subtext}
           />
-          <EcosystemArchitectureSection layers={c.onePlatform.layers} caption={c.onePlatform.architectureCaption} />
+          <EcosystemArchitectureSection
+            layers={c.onePlatform.layers}
+            caption={c.onePlatform.architectureCaption}
+            secondaryCta={c.onePlatform.secondaryCta}
+          />
         </FadeIn>
       </Section>
 

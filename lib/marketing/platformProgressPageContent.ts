@@ -74,6 +74,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     description:
       "Follicle Intelligence is actively engineered and deployed module by module — with public delivery status across the full FI OS surface area.",
     cta: { label: "View platform progress", href: "/platform/progress" },
+    secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
       title: "Latest platform update",
       readFullLogLabel: "Read full progress log",

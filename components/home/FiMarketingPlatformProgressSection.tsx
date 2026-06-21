@@ -17,7 +17,7 @@ import {
   PLATFORM_PROGRESS_MODULES,
   PLATFORM_PROGRESS_PAGE_CONTENT,
 } from "@/lib/marketing/platformProgressPageContent";
-import { MARKETING_CTA_PRIMARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
+import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
 import { ArrowRight, GitCommitHorizontal } from "lucide-react";
 
@@ -190,12 +190,20 @@ export function FiMarketingPlatformProgressSection() {
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             Full module grid, status filters, and public engineering changelog on the platform progress page.
           </p>
-          <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>
-            <Link href={c.cta.href}>
-              {c.cta.label}
-              <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-            </Link>
-          </Button>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+            <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>
+              <Link href={c.secondaryCta.href}>
+                {c.secondaryCta.label}
+                <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
+            <Button asChild size="lg" className={cn(MARKETING_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>
+              <Link href={c.cta.href}>
+                {c.cta.label}
+                <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              </Link>
+            </Button>
+          </div>
         </div>
       </FadeIn>
     </Section>

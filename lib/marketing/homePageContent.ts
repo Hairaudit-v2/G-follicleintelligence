@@ -145,6 +145,7 @@ export const HOME_PAGE_CONTENT = {
     subtext:
       "Eleven modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
     architectureCaption: "Four engines · connected OS modules · single intelligence substrate",
+    secondaryCta: { label: "View Ecosystem Architecture", href: "/platform/ecosystem" as const },
     layers: [
       {
         title: "Growth Engine",
