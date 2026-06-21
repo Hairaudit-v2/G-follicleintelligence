@@ -254,7 +254,7 @@ export const HOME_PAGE_CONTENT = {
           {
             name: "WorkforceOS",
             description:
-              "Healthcare workforce infrastructure, onboarding, compliance, training readiness, and operational staff governance.",
+              "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, and active staffing orchestration.",
           },
           {
             name: "AcademyOS",

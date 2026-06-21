@@ -59,8 +59,9 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 78,
-    description: "Healthcare workforce infrastructure, onboarding, compliance, and operational staff governance.",
+    completionPercent: 85,
+    description:
+      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, and active staffing orchestration.",
   },
   {
     id: "hairaudit",
@@ -149,6 +150,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-22-workforce-roster-command-centre",
+    title: "WorkforceOS Roster Command Centre",
+    module: "WorkforceOS",
+    date: "2026-06-22",
+  },
   {
     id: "2026-06-21-workforce-onboarding-centre",
     title: "WorkforceOS onboarding centre",
@@ -317,16 +324,25 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 78,
-    stage: "Identity · readiness · clinical rostering · ops integration",
+    completionPercent: 85,
+    stage: "Roster Command Centre · assignment intelligence · ops integration",
     description:
-      "Healthcare workforce infrastructure, onboarding, compliance, training readiness, clinical rostering, and operational staff governance.",
-    status: "Active Development",
+      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, Roster Command Centre assignment editor, and SurgeryOS / ClinicOS staffing orchestration.",
+    status: "Pilot Ready",
   },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-workforce-roster-command-centre",
+    date: "2026-06-22",
+    tag: "workforce-os",
+    title: "WorkforceOS Phase 2E Roster Command Centre completed",
+    summary:
+      "Active workforce orchestration — Roster Command Centre with ranked assignment candidates, shift and availability management, and deep links from SurgeryOS, ClinicOS, and appointment surfaces.",
+    modules: ["WorkforceOS", "SurgeryOS", "ClinicOS"],
+  },
   {
     id: "2026-06-22-workforce-surgery-clinic-integration",
     date: "2026-06-22",
