@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { publishSurgeryEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { parseAppointmentProcedureMetadata } from "@/src/lib/bookings/appointmentMetadata";
 import {
@@ -384,6 +385,21 @@ export async function logSurgeryProcedureEvent(input: {
         .update({ occurred_at: input.occurredAt })
         .eq("id", result.event.id);
       result.event.occurred_at = input.occurredAt;
+    }
+    if (input.eventKind === "procedure_completed") {
+      void publishSurgeryEvent({
+        tenantId: input.tenantId,
+        clinicId: result.surgery.clinic_id ?? null,
+        eventType: "surgery_completed",
+        entityId: input.surgeryId,
+        entityType: "surgery",
+        eventMetadata: {
+          surgery_id: input.surgeryId,
+          procedure_event_id: result.event.id,
+          actor_fi_user_id: input.actorFiUserId,
+        },
+        occurredAt: input.occurredAt ?? result.event.occurred_at,
+      });
     }
     return result;
   }

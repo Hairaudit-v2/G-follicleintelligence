@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { publishFinancialEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import {
   aggregateRevenueAttributionDashboard,
   buildRevenueAttributionEvent,
@@ -546,7 +547,25 @@ export async function triggerRevenueAttributionOnInvoicePaid(args: {
       invoiceTotalCents: inv.total_cents,
     });
 
-    return await persistRevenueAttributionEvent(draft);
+    const persisted = await persistRevenueAttributionEvent(draft);
+
+    void publishFinancialEvent({
+      tenantId: tid,
+      clinicId: inv.clinic_id,
+      eventType: "payment_received",
+      entityId: inv.id,
+      entityType: "invoice",
+      eventValue: inv.total_cents / 100,
+      eventMetadata: {
+        invoice_id: inv.id,
+        invoice_amount: inv.total_cents,
+        patient_id: inv.patient_id,
+        trigger_source: "invoice_paid",
+      },
+      occurredAt: inv.paid_at ?? undefined,
+    });
+
+    return persisted;
   } catch {
     return null;
   }

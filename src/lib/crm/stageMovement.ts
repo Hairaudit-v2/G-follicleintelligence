@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { publishConsultationEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { createTimelineEvent } from "@/src/lib/fi/foundation/createTimelineEvent";
 import { appendCrmActivityEvent } from "./activity";
 import { mapFiCrmLeadRow } from "./leadRow";
@@ -175,6 +176,23 @@ export async function moveCrmLeadToStage(
     },
     supabase
   );
+
+  if (stage.slug === "quote_sent") {
+    void publishConsultationEvent({
+      tenantId,
+      clinicId: outLead.clinic_id,
+      eventType: "quote_sent",
+      entityId: leadId,
+      entityType: "lead",
+      eventMetadata: {
+        lead_id: leadId,
+        case_id: outLead.case_id,
+        patient_id: outLead.patient_id,
+        to_stage_id: toStageId,
+        source,
+      },
+    });
+  }
 
   return { lead: outLead, timelineEventId };
 }

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { publishWorkforceEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import {
   DEFAULT_CLINICAL_STAFFING_TEMPLATES,
@@ -747,7 +748,26 @@ export async function assignStaffToClinicalEventAction(input: {
     .single();
 
   if (error || !data) throw new Error(error?.message ?? "Could not create event assignment.");
-  return mapAssignment(data as Record<string, unknown>);
+  const assignment = mapAssignment(data as Record<string, unknown>);
+
+  void publishWorkforceEvent({
+    tenantId: tid,
+    clinicId: input.clinicId,
+    eventType: "staff_assigned",
+    entityId: input.eventId?.trim() || assignment.id,
+    entityType: input.eventSource === "surgery" ? "surgery" : "booking",
+    eventValue: result.readiness.score,
+    eventMetadata: {
+      staff_id: sid,
+      staff_role: input.assignedRole.trim().toLowerCase(),
+      event_source: input.eventSource,
+      assignment_status: result.assignmentStatus,
+      assignment_id: assignment.id,
+    },
+    occurredAt: input.startsAt,
+  });
+
+  return assignment;
 }
 
 export async function loadClinicalEventStaffingStatus(input: {
