@@ -328,7 +328,7 @@ export function createNexusTestStore(tenantId: string, siteId?: string): NexusTe
         });
       }
     }
-    if (table === "fi_nexus_tenant_memberships" && tenant_id) {
+    if (table === "fi_nexus_tenant_memberships" && tenant_id && gid) {
       const key = membershipKey(gid, tenant_id);
       const row = store.memberships.get(key);
       if (row && (nexus_created === undefined || row.nexus_created === nexus_created)) {

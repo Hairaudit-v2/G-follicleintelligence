@@ -60,6 +60,19 @@ export async function verifyNexusSignedJsonRequest(
   return { ok: true };
 }
 
+function isNexusHttpResponse(
+  value: NexusHttpResponse | Record<string, unknown>
+): value is NexusHttpResponse {
+  return (
+    "httpStatus" in value &&
+    "body" in value &&
+    typeof value.httpStatus === "number" &&
+    typeof value.body === "object" &&
+    value.body !== null &&
+    "ok" in value.body
+  );
+}
+
 function parseJsonBody(rawBody: string): NexusHttpResponse | Record<string, unknown> {
   try {
     const parsed: unknown = JSON.parse(rawBody);
@@ -81,7 +94,7 @@ export async function handleNexusProvisionHttp(
   if ("httpStatus" in verified) return verified;
 
   const parsed = parseJsonBody(rawBody);
-  if ("httpStatus" in parsed) return parsed;
+  if (isNexusHttpResponse(parsed)) return parsed;
 
   const payload = parsed as unknown as NexusProvisionPayload;
   const result = await provisionExternalProfessionalFromNexus(payload);
@@ -100,7 +113,7 @@ export async function handleNexusRollbackHttp(
   if ("httpStatus" in verified) return verified;
 
   const parsed = parseJsonBody(rawBody);
-  if ("httpStatus" in parsed) return parsed;
+  if (isNexusHttpResponse(parsed)) return parsed;
 
   const payload = parsed as unknown as NexusRollbackPayload;
   const result = await rollbackExternalProfessionalProvisioning(payload);
