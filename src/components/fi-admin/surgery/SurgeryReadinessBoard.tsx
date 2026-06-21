@@ -11,6 +11,8 @@ import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/Copy
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
+import { ClinicalStaffingStatusBadge } from "@/src/components/fi/workforce/ClinicalStaffingStatusBadge";
+import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import {
   SURGERY_READINESS_ISSUE_LABEL,
   cardMatchesManagerFilter,
@@ -90,6 +92,9 @@ function SurgeryCard({ tenantId, card }: { tenantId: string; card: SurgeryReadin
         <span className="shrink-0 rounded-md border border-white/[0.08] bg-black/30 px-2 py-0.5 text-[0.65rem] font-medium text-slate-400">
           {card.bookingStatusLabel}
         </span>
+        {card.clinicalStaffing ? (
+          <ClinicalStaffingStatusBadge status={card.clinicalStaffing.displayStatus} compact />
+        ) : null}
       </div>
       <dl className="mt-2 space-y-1 text-xs text-slate-500">
         {card.assigneeLabel ? (
@@ -138,6 +143,20 @@ function SurgeryCard({ tenantId, card }: { tenantId: string; card: SurgeryReadin
             </li>
           ))}
         </ul>
+      ) : null}
+      {card.clinicalStaffing ? (
+        <div className="mt-2">
+          <ClinicalStaffingStatusCard
+            tenantId={tenantId}
+            summary={card.clinicalStaffing}
+            compact
+            rosterLink={{
+              eventSource: "booking",
+              eventId: card.bookingId,
+              date: card.startAt,
+            }}
+          />
+        </div>
       ) : null}
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.7rem] font-semibold">
         {card.hrefs.case ? (

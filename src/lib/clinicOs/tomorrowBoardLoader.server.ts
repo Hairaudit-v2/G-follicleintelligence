@@ -43,6 +43,8 @@ import {
   loadStaffAndUserLabels,
   resolvePatientIdForCaseRow,
 } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
+import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
+import { loadClinicalStaffingSummariesForBookings } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 
 const BOARD_LIMIT = Math.min(480, MAX_OPERATOR_BOOKINGS_LIMIT);
 
@@ -134,6 +136,7 @@ export type TomorrowScheduleRow = {
   financialPipeline: FinancialSurgeryPipelineStatus | null;
   financialClearance: FinancialClearanceResult | null;
   caseId: string | null;
+  clinicalStaffing: ClinicalStaffingSummaryDto | null;
 };
 
 export type TomorrowScheduleGroup = {
@@ -153,6 +156,7 @@ export type TomorrowStaffPrep = {
 export type TomorrowSurgeryReadinessBoardRow = TomorrowSurgeryReadinessDerived & {
   financialPipeline: FinancialSurgeryPipelineStatus | null;
   financialClearance: FinancialClearanceResult | null;
+  clinicalStaffing: ClinicalStaffingSummaryDto | null;
 };
 
 export type TomorrowBoardPayload = {
@@ -299,10 +303,15 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
     { todayYmd: window.todayYmd, calendarTimezone: window.calendarTimezone }
   );
 
+  const clinicalStaffingByBooking = await loadClinicalStaffingSummariesForBookings(tid, agendaBookings, {
+    syncExistingStaff: true,
+  });
+
   const surgeryReadinessWithFinancial: TomorrowSurgeryReadinessBoardRow[] = surgeryReadiness.map((row) => ({
     ...row,
     financialPipeline: financialByBooking.get(row.bookingId) ?? null,
     financialClearance: financialClearanceByBooking.get(row.bookingId) ?? null,
+    clinicalStaffing: clinicalStaffingByBooking.get(row.bookingId) ?? null,
   }));
 
   let assignedBookings = 0;
@@ -374,6 +383,7 @@ export async function loadTomorrowBoardPayload(tenantId: string, now: Date = new
       financialPipeline: isSurgery ? financialByBooking.get(b.id) ?? null : null,
       financialClearance: isSurgery ? financialClearanceByBooking.get(b.id) ?? null : null,
       caseId: b.case_id?.trim() || null,
+      clinicalStaffing: clinicalStaffingByBooking.get(b.id) ?? null,
     };
   });
 

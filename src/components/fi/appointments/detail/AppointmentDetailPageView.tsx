@@ -33,6 +33,7 @@ import { AppointmentDetailTabNav } from "./AppointmentDetailTabNav";
 import { AppointmentClinicalNotesPanel } from "./AppointmentClinicalNotesPanel";
 import { AppointmentInvoicePreviewPanel } from "./AppointmentInvoicePreviewPanel";
 import { AppointmentOverviewStats } from "./AppointmentOverviewStats";
+import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import { AppointmentPostProcedurePlanPanel } from "./AppointmentPostProcedurePlanPanel";
 import { AppointmentProcedurePhotosPanel } from "./AppointmentProcedurePhotosPanel";
 import { useAppointmentDetailState } from "./useAppointmentDetailState";
@@ -176,6 +177,15 @@ export function AppointmentDetailPageView({
             onRescheduleSubmit={state.onRescheduleSubmit}
             rescheduleBusy={state.rescheduleBusy}
             rescheduleErr={state.rescheduleErr}
+          />
+          <ClinicalStaffingStatusCard
+            tenantId={tenantId}
+            summary={payload.clinicalStaffing}
+            rosterLink={{
+              eventSource: "booking",
+              eventId: booking.id,
+              date: booking.start_at,
+            }}
           />
           <AppointmentAnchorFlowsSection
             booking={booking}

@@ -43,6 +43,8 @@ import { appointmentTitleFromBooking } from "./appointmentDisplay";
 import { parseAppointmentInvoicePreview, type AppointmentInvoicePreview } from "./appointmentInvoicePreview";
 import { loadPostOpTrackingForCase, type CasePostOpTrackingRow } from "@/src/lib/cases/postOpLoaders";
 import type { FiBookingRow } from "./types";
+import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
+import { loadBookingClinicalStaffingSummary } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 
 export type AppointmentSlideOverLeadAnchor = {
   lead: FiCrmLeadRow;
@@ -76,6 +78,8 @@ export type AppointmentSlideOverPayload = {
   timeline: AppointmentSlideOverTimeline;
   /** IANA zone for datetime-local fields (tenant clinic clock). */
   calendarTimezone: string;
+  /** WorkforceOS Phase 2D — staffing readiness for this appointment. */
+  clinicalStaffing: ClinicalStaffingSummaryDto;
 };
 
 export type AppointmentShellRelatedAppointmentItem = {
@@ -141,6 +145,7 @@ export async function loadAppointmentSlideOverPayload(
     clinicalScalesSummary,
     patientImages,
     surgeryPlan,
+    clinicalStaffing,
   ] = await Promise.all([
     loadClinicalStaffPickerOptions(tid),
     loadCrmShellScopePickerOptions(tid),
@@ -161,6 +166,7 @@ export async function loadAppointmentSlideOverPayload(
     patientId ? loadClinicalScalesSummaryForPatient(tid, patientId) : Promise.resolve(null),
     patientId ? loadPatientImagesProfileBundle(tid, patientId) : Promise.resolve(null),
     caseId ? loadSurgeryPlanForCase(tid, caseId) : Promise.resolve(null),
+    loadBookingClinicalStaffingSummary(tid, booking, { syncExistingStaff: true }),
   ]);
 
   const meta = booking.metadata ?? {};
@@ -191,6 +197,7 @@ export async function loadAppointmentSlideOverPayload(
     leadAnchor,
     pipelineStages,
     timeline: timelineBundle,
+    clinicalStaffing,
   };
 }
 

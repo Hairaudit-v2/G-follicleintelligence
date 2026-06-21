@@ -133,7 +133,7 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
         </dl>
       </section>
 
-      <HrOsClinicalRosteringSection overview={rosterOverview} />
+      <HrOsClinicalRosteringSection overview={rosterOverview} tenantId={tid} />
 
       <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-6">
         <h2 className="text-sm font-semibold text-slate-100">Getting started</h2>
@@ -142,6 +142,11 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
           routes until migration completes.
         </p>
         <ul className="mt-4 space-y-2 text-sm text-slate-300">
+          <li>
+            <a className="text-cyan-400 hover:text-cyan-300" href={`/fi-admin/${tenantId.trim()}/hr-os/roster`}>
+              Roster Command Centre
+            </a>
+          </li>
           <li>
             <a className="text-cyan-400 hover:text-cyan-300" href={`/fi-admin/${tenantId.trim()}/hr/staff-readiness`}>
               Staff readiness

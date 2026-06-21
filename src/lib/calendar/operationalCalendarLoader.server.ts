@@ -22,6 +22,7 @@ import type {
   OperationalCalendarResourceColumn,
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import { mergeOperationalCalendarShellAndGrid } from "@/src/lib/calendar/operationalCalendarMerge";
+import { loadClinicalStaffingSummariesForBookings } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 
 export type {
   OperationalCalendarBookingDisplay,
@@ -569,7 +570,7 @@ export async function loadOperationalCalendarGridData(
   const monthSummaryMode = operationalCalendarSkipsHeavyEnrichment(query.view);
 
   const tEnrichStart = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const [displayMaps, clinicalMap, assignmentMap] = await Promise.all([
+  const [displayMaps, clinicalMap, assignmentMap, clinicalStaffingByBooking] = await Promise.all([
     loadBookingDisplayContextMaps(tid, structured),
     monthSummaryMode
       ? Promise.resolve(new Map<string, ClinicalLite>())
@@ -583,6 +584,9 @@ export async function loadOperationalCalendarGridData(
           tenantId: tid,
           bookingIds: structured.map((b) => b.id),
         }),
+    monthSummaryMode
+      ? Promise.resolve(new Map())
+      : loadClinicalStaffingSummariesForBookings(tid, structured, { syncExistingStaff: true }),
   ]);
   const tEnrichEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
@@ -632,6 +636,7 @@ export async function loadOperationalCalendarGridData(
         null,
       resourceRoomLine: resourceLines.roomLine,
       resourceTeamLine: resourceLines.teamLine,
+      clinicalStaffing: clinicalStaffingByBooking.get(row.id) ?? null,
     };
   }
 

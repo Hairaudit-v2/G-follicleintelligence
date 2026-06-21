@@ -43,6 +43,8 @@ import {
   resolvePatientIdForCaseRow,
 } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
 import { hasHighRiskSeverity, isActiveSurgeryBookingStatus, hasConsultationConsentSignal } from "@/src/lib/surgery/surgeryReadinessBoardModel";
+import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
+import { loadClinicalStaffingSummariesForBookings } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 
 const BOARD_LIMIT = 240;
 
@@ -171,6 +173,7 @@ export type ProcedureDayScheduleCard = {
   };
   pipelinePhase: ReturnType<typeof deriveSurgeryDayPipelinePhase>;
   hrefs: { appointment: string; case: string | null; patient: string | null; calendar: string };
+  clinicalStaffing: ClinicalStaffingSummaryDto | null;
 };
 
 export type ProcedureDayBoardPayload = {
@@ -247,7 +250,15 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
     }
   }
 
-  const [pathologySets, consultationsByCase, surgeryPayments, roomNames, fiUserLabels, financialByBooking] = await Promise.all([
+  const [
+    pathologySets,
+    consultationsByCase,
+    surgeryPayments,
+    roomNames,
+    fiUserLabels,
+    financialByBooking,
+    clinicalStaffingByBooking,
+  ] = await Promise.all([
     loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology)),
     loadConsultationsByCaseId(supabase, tid, caseIds),
     loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
@@ -265,6 +276,7 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
         start_at: b.start_at,
       })),
     }),
+    loadClinicalStaffingSummariesForBookings(tid, surgeryBookings, { syncExistingStaff: true }),
   ]);
   const financialClearanceByBooking = buildFinancialClearanceMapFromPipeline(
     surgeryBookings.map((b) => ({
@@ -443,6 +455,7 @@ export async function loadProcedureDayBoardPayload(tenantId: string, now: Date =
         patient: patientHref,
         calendar: `${base}/calendar?date=${encodeURIComponent(surgeryLocalYmd)}`,
       },
+      clinicalStaffing: clinicalStaffingByBooking.get(b.id) ?? null,
     };
     cards.push(card);
 

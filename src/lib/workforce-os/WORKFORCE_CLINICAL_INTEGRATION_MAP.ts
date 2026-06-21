@@ -31,4 +31,4 @@
  * - No auto-assignment without existing booking staff or admin action
  */
 
-export const WORKFORCE_CLINICAL_INTEGRATION_MAP_VERSION = "2d";
+export const WORKFORCE_CLINICAL_INTEGRATION_MAP_VERSION = "2e";

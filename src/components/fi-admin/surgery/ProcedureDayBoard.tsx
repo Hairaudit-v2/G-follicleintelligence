@@ -11,6 +11,8 @@ import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/Copy
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
+import { ClinicalStaffingStatusBadge } from "@/src/components/fi/workforce/ClinicalStaffingStatusBadge";
+import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import { SURGERY_READINESS_ISSUE_LABEL, type SurgeryReadinessIssueSeverity } from "@/src/lib/surgery/surgeryReadinessBoardModel";
 
 function severityChipClass(sev: SurgeryReadinessIssueSeverity): string {
@@ -62,6 +64,7 @@ function ScheduleCard({ c, tenantId }: { c: ProcedureDayScheduleCard; tenantId: 
         <span className="shrink-0 rounded-md border border-white/[0.08] bg-black/30 px-2 py-0.5 text-[0.65rem] font-medium text-slate-400">
           {c.bookingStatusLabel}
         </span>
+        {c.clinicalStaffing ? <ClinicalStaffingStatusBadge status={c.clinicalStaffing.displayStatus} compact /> : null}
       </div>
       <dl className="mt-2 grid gap-1 text-xs text-slate-500 sm:grid-cols-2">
         <div className="flex gap-1 sm:col-span-2">
@@ -138,6 +141,20 @@ function ScheduleCard({ c, tenantId }: { c: ProcedureDayScheduleCard; tenantId: 
             </li>
           ))}
         </ul>
+      ) : null}
+      {c.clinicalStaffing ? (
+        <div className="mt-2">
+          <ClinicalStaffingStatusCard
+            tenantId={tenantId}
+            summary={c.clinicalStaffing}
+            compact
+            rosterLink={{
+              eventSource: "booking",
+              eventId: c.bookingId,
+              date: c.startAt,
+            }}
+          />
+        </div>
       ) : null}
       <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.65rem] text-slate-600">
         <Link href={c.hrefs.calendar} className="text-cyan-200/80 hover:underline">

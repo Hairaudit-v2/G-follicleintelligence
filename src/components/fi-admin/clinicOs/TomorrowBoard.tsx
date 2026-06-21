@@ -6,6 +6,7 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
 import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
 import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
+import { ClinicalStaffingStatusBadge } from "@/src/components/fi/workforce/ClinicalStaffingStatusBadge";
 import { formatCalendarLongWeekdayDate } from "@/src/lib/calendar/calendarTimezone";
 import type { TomorrowBoardPayload } from "@/src/lib/clinicOs/tomorrowBoardLoader.server";
 import { FINANCIAL_SURGERY_PIPELINE_UNAVAILABLE_COPY } from "@/src/lib/financialOs/financialSurgeryPipelineStatusCore";
@@ -152,6 +153,9 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                                 Reminder queue
                               </span>
                             ) : null}
+                            {r.clinicalStaffing ? (
+                              <ClinicalStaffingStatusBadge status={r.clinicalStaffing.displayStatus} compact />
+                            ) : null}
                           </div>
                         </div>
                         {r.financialPipeline ? (
@@ -217,6 +221,9 @@ export function TomorrowBoard({ data }: { data: TomorrowBoardPayload }) {
                   <span className="shrink-0 rounded-md border border-white/[0.08] bg-black/30 px-2 py-0.5 text-[0.65rem] text-slate-400">
                     {row.bookingStatus}
                   </span>
+                  {row.clinicalStaffing ? (
+                    <ClinicalStaffingStatusBadge status={row.clinicalStaffing.displayStatus} compact />
+                  ) : null}
                 </div>
                 <div
                   className={cn(

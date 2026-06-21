@@ -3,16 +3,38 @@ import Link from "next/link";
 import { ClinicalStaffingStatusBadge } from "@/src/components/fi/workforce/ClinicalStaffingStatusBadge";
 import { formatRequiredRolesLine } from "@/src/lib/workforce-os/clinicalStaffingStatusDisplay";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
+import {
+  buildRosterCommandCentreHref,
+  type BuildRosterCommandCentreHrefInput,
+} from "@/src/lib/workforce-os/workforceRosterQueryParams";
 
 export type ClinicalStaffingStatusCardProps = {
   tenantId?: string;
   summary: ClinicalStaffingSummaryDto;
   compact?: boolean;
   className?: string;
+  rosterLink?: Pick<
+    BuildRosterCommandCentreHrefInput,
+    "eventSource" | "eventId" | "date" | "status"
+  >;
 };
 
-function rosterHref(tenantId: string): string {
-  return `/fi-admin/${tenantId}/hr-os`;
+function rosterHref(
+  tenantId: string,
+  summary: ClinicalStaffingSummaryDto,
+  rosterLink?: ClinicalStaffingStatusCardProps["rosterLink"]
+): string {
+  return buildRosterCommandCentreHref({
+    tenantId,
+    eventSource: rosterLink?.eventSource ?? null,
+    eventId: rosterLink?.eventId ?? null,
+    date: rosterLink?.date ?? null,
+    status: rosterLink?.status ?? (summaryNeedsRoster(summary) ? "missing_roles" : null),
+  });
+}
+
+function summaryNeedsRoster(summary: ClinicalStaffingSummaryDto): boolean {
+  return summary.displayStatus === "missing_roles" || summary.displayStatus === "blocked";
 }
 
 export function ClinicalStaffingStatusCard({
@@ -20,6 +42,7 @@ export function ClinicalStaffingStatusCard({
   summary,
   compact,
   className,
+  rosterLink,
 }: ClinicalStaffingStatusCardProps) {
   const shellClass = compact
     ? "rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"
@@ -86,10 +109,10 @@ export function ClinicalStaffingStatusCard({
       {tenantId ? (
         <div className="mt-3">
           <Link
-            href={rosterHref(tenantId)}
+            href={rosterHref(tenantId, summary, rosterLink)}
             className="text-xs font-medium text-cyan-300 hover:text-cyan-200 hover:underline"
           >
-            Open HR OS roster →
+            Manage staffing →
           </Link>
         </div>
       ) : null}

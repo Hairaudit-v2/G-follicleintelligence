@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { AlertTriangle, Calendar, Clock, Users } from "lucide-react";
 
+import { buildRosterCommandCentreHref } from "@/src/lib/workforce-os/workforceRosterQueryParams";
 import type { WorkforceRosterOverview } from "@/src/lib/workforce-os/workforceRostering.server";
 
 function statusLabel(status: WorkforceRosterOverview["todaysStaffingReadiness"][number]["status"]): string {
@@ -34,14 +36,30 @@ function formatRequiredRoles(roles: Record<string, number>): string {
   return entries.map(([role, count]) => `${role} ×${count}`).join(", ");
 }
 
-export function HrOsClinicalRosteringSection({ overview }: { overview: WorkforceRosterOverview }) {
+export function HrOsClinicalRosteringSection({
+  overview,
+  tenantId,
+}: {
+  overview: WorkforceRosterOverview;
+  tenantId: string;
+}) {
+  const rosterHref = buildRosterCommandCentreHref({ tenantId });
   return (
     <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-6">
-      <h2 className="text-sm font-semibold text-slate-100">Clinical Rostering Foundation</h2>
-      <p className="mt-2 text-sm text-slate-400">
-        Operational workforce orchestration — shifts, availability, staffing templates, and clinical event assignments.
-        Full calendar UI ships in a later phase.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-100">Clinical Rostering Foundation</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Operational workforce orchestration — shifts, availability, staffing templates, and clinical event assignments.
+          </p>
+        </div>
+        <Link
+          href={rosterHref}
+          className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-200 hover:bg-cyan-500/15"
+        >
+          Roster Command Centre →
+        </Link>
+      </div>
 
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">

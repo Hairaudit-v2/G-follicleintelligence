@@ -7,6 +7,7 @@ import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPic
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
+import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 
 export type OperationalCalendarBookingDisplay = {
   anchorLabel: string;
@@ -27,6 +28,8 @@ export type OperationalCalendarBookingDisplay = {
   resourceRoomLine?: string | null;
   /** Compact team line (primary + assignment staff). */
   resourceTeamLine?: string | null;
+  /** WorkforceOS Phase 2D — staffing readiness badge data. */
+  clinicalStaffing?: ClinicalStaffingSummaryDto | null;
 };
 
 export type OperationalCalendarResourceColumn = {

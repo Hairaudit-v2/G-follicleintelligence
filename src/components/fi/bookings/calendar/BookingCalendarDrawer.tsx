@@ -13,6 +13,8 @@ import { BookingStatusBadge } from "@/src/components/fi/bookings/operator/Bookin
 import { BookingTypeBadge } from "@/src/components/fi/bookings/operator/BookingTypeBadge";
 import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
+import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
+import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 
 function clinicName(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
   if (row.clinic_id) {
@@ -112,6 +114,7 @@ export function BookingCalendarDrawer({
   procedureLabel,
   patientContactEmail,
   patientContactPhone,
+  clinicalStaffing,
   onBookingUpdated,
 }: {
   tenantId: string;
@@ -135,6 +138,7 @@ export function BookingCalendarDrawer({
   procedureLabel?: string | null;
   patientContactEmail?: string | null;
   patientContactPhone?: string | null;
+  clinicalStaffing?: ClinicalStaffingSummaryDto | null;
   onBookingUpdated?: (b: FiBookingRow) => void;
 }) {
   const router = useRouter();
@@ -435,6 +439,24 @@ export function BookingCalendarDrawer({
                   </div>
                 ) : null}
               </dl>
+              {clinicalStaffing ? (
+                <div className="mt-4">
+                  <ClinicalStaffingStatusCard
+                    tenantId={tenantId}
+                    summary={clinicalStaffing}
+                    compact
+                    rosterLink={
+                      booking
+                        ? {
+                            eventSource: "booking",
+                            eventId: booking.id,
+                            date: booking.start_at,
+                          }
+                        : undefined
+                    }
+                  />
+                </div>
+              ) : null}
 
               {cancelled ? (
                 <div className="mt-3 rounded-md border border-amber-500/25 bg-amber-950/40 p-2.5 text-[11px] text-amber-100">

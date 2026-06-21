@@ -22,6 +22,8 @@ import { displayFromPersonMetadata } from "@/src/lib/patients/patientLabels";
 import { loadPaymentRecordsForSurgeryBoard } from "@/src/lib/payments/paymentRecordLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { paymentRecordNeedsCollection, surgeryDepositBoardLabel, SURGERY_DEPOSIT_BOARD_COPY } from "@/src/lib/payments/paymentRecordModel";
+import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
+import { loadClinicalStaffingSummariesForBookings } from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
 import {
   aggregateSurgeryReadinessKpis,
   buildSurgeryReadinessIssues,
@@ -73,6 +75,8 @@ export type SurgeryReadinessBoardCard = {
   };
   /** Raw ISO start for deep links / sorting */
   startAt: string;
+  /** WorkforceOS Phase 2D — template-based staffing readiness for this surgery booking. */
+  clinicalStaffing: ClinicalStaffingSummaryDto | null;
 };
 
 export type SurgeryReadinessBoardPayload = {
@@ -308,7 +312,8 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
   }
 
   const surgeryBookingIds = surgeryBookings.map((b) => b.id);
-  const [pathologySets, consultationsByCase, surgeryPayments, financialByBooking] = await Promise.all([
+  const [pathologySets, consultationsByCase, surgeryPayments, financialByBooking, clinicalStaffingByBooking] =
+    await Promise.all([
     loadPathologyPatientSets(supabase, tid, Array.from(patientIdsForPathology)),
     loadConsultationsByCaseId(supabase, tid, caseIds),
     loadPaymentRecordsForSurgeryBoard(tid, surgeryBookingIds, caseIds),
@@ -324,6 +329,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
         start_at: b.start_at,
       })),
     }),
+    loadClinicalStaffingSummariesForBookings(tid, surgeryBookings, { syncExistingStaff: true }),
   ]);
   const financialClearanceByBooking = buildFinancialClearanceMapFromPipeline(
     surgeryBookings.map((b) => ({
@@ -447,6 +453,7 @@ export async function loadSurgeryReadinessBoardPayload(tenantId: string, now: Da
         appointments: `/fi-admin/${tid}/appointments/${encodeURIComponent(b.id)}`,
       },
       startAt: b.start_at,
+      clinicalStaffing: clinicalStaffingByBooking.get(b.id) ?? null,
     };
 
     columns[primary].push(card);

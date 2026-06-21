@@ -567,6 +567,42 @@ export async function cancelAvailabilityBlock(
   return mapAvailabilityBlock(data as Record<string, unknown>);
 }
 
+export async function cancelStaffShift(tenantId: string, shiftId: string): Promise<FiStaffShiftRow> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const sid = assertNonEmptyUuid(shiftId, "shiftId");
+  const supabase = supabaseAdmin();
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("fi_staff_shifts")
+    .update({ status: "cancelled", updated_at: now })
+    .eq("tenant_id", tid)
+    .eq("id", sid)
+    .select("*")
+    .single();
+  if (error || !data) throw new Error(error?.message ?? "Could not cancel shift.");
+  return mapShift(data as Record<string, unknown>);
+}
+
+export async function cancelStaffEventAssignment(
+  tenantId: string,
+  assignmentId: string
+): Promise<FiStaffEventAssignmentRow> {
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const aid = assertNonEmptyUuid(assignmentId, "assignmentId");
+  const supabase = supabaseAdmin();
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("fi_staff_event_assignments")
+    .update({ assignment_status: "cancelled", updated_at: now })
+    .eq("tenant_id", tid)
+    .eq("id", aid)
+    .neq("assignment_status", "cancelled")
+    .select("*")
+    .single();
+  if (error || !data) throw new Error(error?.message ?? "Could not cancel assignment.");
+  return mapAssignment(data as Record<string, unknown>);
+}
+
 export async function createClinicalStaffingTemplate(input: {
   tenantId: string;
   clinicId?: string | null;
@@ -609,6 +645,23 @@ export async function assignStaffToClinicalEventAction(input: {
 
   const staff = await loadStaffMemberForTenant(tid, sid);
   if (!staff) throw new Error("Staff member not found.");
+
+  if (input.eventId?.trim()) {
+    const { data: existingRows, error: existingErr } = await supabase
+      .from("fi_staff_event_assignments")
+      .select("*")
+      .eq("tenant_id", tid)
+      .eq("event_source", input.eventSource)
+      .eq("event_id", input.eventId.trim())
+      .eq("staff_id", sid)
+      .eq("assigned_role", input.assignedRole.trim().toLowerCase())
+      .neq("assignment_status", "cancelled")
+      .maybeSingle();
+    if (existingErr) throw new Error(existingErr.message);
+    if (existingRows) {
+      return mapAssignment(existingRows as Record<string, unknown>);
+    }
+  }
 
   const [blocksRes, shiftsRes, assignmentsRes] = await Promise.all([
     supabase

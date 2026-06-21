@@ -574,6 +574,7 @@ function CalendarPageImpl({
         procedureLabel={drawer ? data.bookingDisplay[drawer.id]?.procedureCatalogName ?? null : null}
         patientContactEmail={drawer ? data.bookingDisplay[drawer.id]?.patientEmail ?? null : null}
         patientContactPhone={drawer ? data.bookingDisplay[drawer.id]?.patientPhone ?? null : null}
+        clinicalStaffing={drawer ? data.bookingDisplay[drawer.id]?.clinicalStaffing ?? null : null}
         onBookingUpdated={(b) => {
           upsertBooking(b);
           setDrawer(b);
