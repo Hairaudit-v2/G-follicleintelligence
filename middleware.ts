@@ -49,6 +49,7 @@ function isBypassedApiRoute(pathname: string): boolean {
   if (pathname.startsWith("/api/webhooks/")) return true;
   if (pathname.startsWith("/api/health/")) return true;
   if (pathname.startsWith("/api/fi-staff-pin/")) return true;
+  if (pathname.startsWith("/api/nexus/")) return true;
   // Supabase auth callback
   if (pathname.startsWith("/api/auth/")) return true;
   return false;
