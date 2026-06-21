@@ -7,8 +7,10 @@ import type { Metadata } from "next";
  * - BING_SITE_VERIFICATION — meta content value for msvalidate.01 from Bing Webmaster Tools
  */
 export function buildSiteVerificationMetadata(): Metadata["verification"] | undefined {
-  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
-  const bing = process.env.BING_SITE_VERIFICATION?.trim();
+  const google =
+    process.env.GOOGLE_SITE_VERIFICATION?.trim().replace(/\s+/g, "") || undefined;
+  const bing =
+    process.env.BING_SITE_VERIFICATION?.trim().replace(/\s+/g, "") || undefined;
 
   if (!google && !bing) return undefined;
 
