@@ -6,6 +6,7 @@ import { shallowMergeMetadata } from "@/src/lib/fi/foundation/internal";
 import { resolveOrCreateCaseFoundation } from "@/src/lib/fi/foundation/resolveCaseFoundation";
 import { resolveOrCreatePatient } from "@/src/lib/fi/foundation/resolvePatient";
 import { appendCrmActivityEvent } from "./activity";
+import { publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import {
   CRM_LEAD_CONVERSION_SOURCE_SYSTEM,
   assertCaseSeedAllowed,
@@ -280,6 +281,20 @@ export async function executeCrmLeadConversion(
       supabase
     );
   }
+
+  void publishLeadFlowEvent({
+    tenantId,
+    clinicId: outLead.clinic_id,
+    eventType: "lead_converted",
+    entityId: lead.id,
+    entityType: "lead",
+    eventMetadata: {
+      patient_id: patient.id,
+      case_id: newCaseId,
+      case_seeded: caseSeeded,
+      conversion_mode: conversionMode,
+    },
+  });
 
   return {
     lead: outLead,

@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { organisationBelongsToTenant, clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
 import { appendCrmActivityEvent } from "./activity";
+import { publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import {
   collectChangedLeadDetailKeys,
   leadDetailSnapshotsEqual,
@@ -163,6 +164,36 @@ export async function updateCrmLeadDetails(
     },
     supabase
   );
+
+  const scoringChanged =
+    changedKeys.includes("priority") ||
+    changedKeys.includes("metadata");
+  if (scoringChanged) {
+    const meta = out.metadata && typeof out.metadata === "object" && !Array.isArray(out.metadata)
+      ? (out.metadata as Record<string, unknown>)
+      : {};
+    const scoreValue =
+      typeof meta.lead_score === "number"
+        ? meta.lead_score
+        : typeof meta.conversion_probability === "number"
+          ? Math.round(meta.conversion_probability * 100)
+          : null;
+
+    void publishLeadFlowEvent({
+      tenantId,
+      clinicId: out.clinic_id,
+      eventType: "lead_scored",
+      entityId: leadId,
+      entityType: "lead",
+      eventValue: scoreValue,
+      eventMetadata: {
+        priority: out.priority,
+        stage: out.current_stage_id,
+        score: scoreValue,
+        changed_keys: changedKeys,
+      },
+    });
+  }
 
   return out;
 }

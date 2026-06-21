@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import { isSupabaseMissingRelationError } from "@/src/lib/supabase/missingRelationError";
 import type { FollowUpUpsertPatch, PostOpTrackingUpsertPatch } from "./postOpTypes";
+import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 const POST_OP_MIGRATION_HINT =
   "Post-op tables are not deployed yet. Run: npm run supabase:push:post-op-tracking (with SUPABASE_DB_PASSWORD set).";
@@ -157,13 +158,16 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
   if (p.id) {
     const { data: row, error: re } = await supabase
       .from("fi_case_follow_ups")
-      .select("id")
+      .select("id, follow_up_status, checkpoint")
       .eq("tenant_id", tid)
       .eq("case_id", cid)
       .eq("id", p.id)
       .maybeSingle();
     if (re) throwPostOpDbError(re);
     if (!row) throw new Error("Follow-up row not found for this patient.");
+
+    const priorStatus = String((row as { follow_up_status?: string }).follow_up_status ?? "");
+    const checkpoint = String((row as { checkpoint?: string }).checkpoint ?? "");
 
     const updatePayload: Record<string, unknown> = { updated_at: now };
     if (linkedIdsForWrite !== undefined) updatePayload.linked_image_ids = linkedIdsForWrite;
@@ -174,6 +178,19 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
 
     const { error: ue } = await supabase.from("fi_case_follow_ups").update(updatePayload).eq("tenant_id", tid).eq("case_id", cid).eq("id", p.id);
     if (ue) throwPostOpDbError(ue);
+
+    if (p.follow_up_status === "completed" && priorStatus !== "completed") {
+      void publishPatientEvent({
+        tenantId: tid,
+        eventType: "patient_followup_completed",
+        entityId: cid,
+        entityType: "case",
+        eventMetadata: {
+          follow_up_id: p.id,
+          checkpoint,
+        },
+      });
+    }
     return;
   }
 
@@ -181,7 +198,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
 
   const { data: byCp, error: be } = await supabase
     .from("fi_case_follow_ups")
-    .select("id")
+    .select("id, follow_up_status")
     .eq("tenant_id", tid)
     .eq("case_id", cid)
     .eq("checkpoint", p.checkpoint)
@@ -189,6 +206,7 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
   if (be) throwPostOpDbError(be);
 
   if (byCp?.id) {
+    const priorStatus = String((byCp as { follow_up_status?: string }).follow_up_status ?? "");
     const updatePayload: Record<string, unknown> = {
       updated_at: now,
     };
@@ -205,6 +223,19 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
       .eq("case_id", cid)
       .eq("id", String((byCp as { id: string }).id));
     if (ue) throwPostOpDbError(ue);
+
+    if (p.follow_up_status === "completed" && priorStatus !== "completed") {
+      void publishPatientEvent({
+        tenantId: tid,
+        eventType: "patient_followup_completed",
+        entityId: cid,
+        entityType: "case",
+        eventMetadata: {
+          follow_up_id: String((byCp as { id: string }).id),
+          checkpoint: p.checkpoint ?? null,
+        },
+      });
+    }
     return;
   }
 
@@ -226,6 +257,18 @@ export async function upsertFollowUpForCase(params: UpsertFollowUpParams, client
 
   const { error: ie } = await supabase.from("fi_case_follow_ups").insert(insertPayload);
   if (ie) throwPostOpDbError(ie);
+
+  if ((p.follow_up_status ?? "pending") === "completed") {
+    void publishPatientEvent({
+      tenantId: tid,
+      eventType: "patient_followup_completed",
+      entityId: cid,
+      entityType: "case",
+      eventMetadata: {
+        checkpoint: p.checkpoint,
+      },
+    });
+  }
 }
 
 export type DeleteFollowUpParams = {

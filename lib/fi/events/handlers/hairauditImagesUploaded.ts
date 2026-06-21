@@ -26,6 +26,7 @@ import {
   type FiSubmitDecision,
   type FiTriggerDecision,
 } from "../trigger";
+import { publishAuditEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 export type HairAuditImagesUploadedResult = {
   ok: boolean;
@@ -293,6 +294,20 @@ async function handleHairAuditImagesUploadedImpl(
     });
 
     const createdCount = uploads.filter((upload) => upload.created).length;
+
+    if (createdCount > 0) {
+      void publishAuditEvent({
+        tenantId: envelope.tenant_id,
+        eventType: "audit_images_uploaded",
+        entityId: fiCase.id,
+        entityType: "case",
+        eventMetadata: {
+          upload_count: createdCount,
+          global_case_id: linkedGlobalCase.id,
+          source_system: envelope.source_system,
+        },
+      });
+    }
 
     return {
       ok: true,

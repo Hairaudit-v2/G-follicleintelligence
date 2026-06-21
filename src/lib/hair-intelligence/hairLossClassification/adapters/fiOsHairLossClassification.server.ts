@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createPatientImageSignedUrls } from "@/src/lib/patientImages/patientImagesServer";
 import { classifyAndPersistHairLossClassification } from "../classifyHairLoss.server";
 import type { HairLossClassificationModelResult } from "../types";
+import { publishAuditEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 export type ClassifyFiOsPatientImageHairLossParams = {
   tenantId: string;
@@ -99,6 +100,20 @@ export async function classifyFiOsPatientImageHairLossAndPersist(
     },
     supabase
   );
+
+  void publishAuditEvent({
+    tenantId: tid,
+    eventType: "concern_classification_completed",
+    entityId: iid,
+    entityType: "image",
+    eventMetadata: {
+      patient_id: patientId,
+      case_id: caseId,
+      classification_grade: result.classification_grade,
+      pattern_type: result.pattern_type,
+      concern_band: result.classification_grade,
+    },
+  });
 
   return { result, classifierVersion, usedOpenAi, persistedId: persisted.id };
 }

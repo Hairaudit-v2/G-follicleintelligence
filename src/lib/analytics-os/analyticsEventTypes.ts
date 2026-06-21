@@ -1,5 +1,5 @@
 /**
- * AnalyticsOS Phase A — typed event contracts per FI OS module.
+ * AnalyticsOS Phase A+C — typed event contracts per FI OS module.
  */
 
 export const ANALYTICS_MODULE_NAMES = [
@@ -47,16 +47,46 @@ export type ConsultationAnalyticsEventType = (typeof CONSULTATION_EVENTS)[number
 export const LEADFLOW_EVENTS = [
   "lead_created",
   "lead_scored",
+  "lead_qualified",
+  "consultation_booked",
+  "lead_stage_changed",
   "lead_converted",
 ] as const;
 export type LeadFlowAnalyticsEventType = (typeof LEADFLOW_EVENTS)[number];
 
 export const PATIENT_EVENTS = [
-  "patient_uploaded_images",
+  "patient_onboarding_started",
+  "patient_document_uploaded",
+  "patient_images_uploaded",
   "patient_report_generated",
+  "patient_followup_completed",
+  "patient_journey_completed",
+  /** @deprecated Phase A alias — kept for backward compatibility */
+  "patient_uploaded_images",
+  /** @deprecated Phase A alias — kept for backward compatibility */
   "followup_completed",
 ] as const;
 export type PatientAnalyticsEventType = (typeof PATIENT_EVENTS)[number];
+
+export const IMAGING_EVENTS = [
+  "imaging_session_created",
+  "imaging_protocol_completed",
+  "scalp_map_completed",
+  "ai_imaging_completed",
+  "annotation_completed",
+  "image_classification_completed",
+] as const;
+export type ImagingAnalyticsEventType = (typeof IMAGING_EVENTS)[number];
+
+export const AUDIT_EVENTS = [
+  "audit_started",
+  "audit_images_uploaded",
+  "audit_report_generated",
+  "audit_intelligence_completed",
+  "graft_integrity_scored",
+  "concern_classification_completed",
+] as const;
+export type AuditAnalyticsEventType = (typeof AUDIT_EVENTS)[number];
 
 export const ANALYTICS_ENTITY_TYPES = [
   "booking",
@@ -67,6 +97,10 @@ export const ANALYTICS_ENTITY_TYPES = [
   "consultation",
   "lead",
   "quote",
+  "case",
+  "image",
+  "session",
+  "report",
 ] as const;
 export type AnalyticsEntityType = (typeof ANALYTICS_ENTITY_TYPES)[number];
 
@@ -79,8 +113,8 @@ export const MODULE_EVENT_TYPES: Record<AnalyticsModuleName, readonly string[]> 
   patient_os: PATIENT_EVENTS,
   clinic_os: [],
   leadflow: LEADFLOW_EVENTS,
-  imaging_os: [],
-  audit_os: [],
+  imaging_os: IMAGING_EVENTS,
+  audit_os: AUDIT_EVENTS,
 };
 
 export function isAnalyticsModuleName(value: string): value is AnalyticsModuleName {

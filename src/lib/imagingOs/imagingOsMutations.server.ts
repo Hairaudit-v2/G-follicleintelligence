@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { IMAGING_ANNOTATION_SCHEMA_VERSION } from "./imagingOsConstants";
 import { loadPatientImageForPatient } from "@/src/lib/patientImages/patientImagesServer";
+import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 function assertPayloadObject(name: string, v: unknown): Record<string, unknown> {
   if (!v || typeof v !== "object" || Array.isArray(v)) {
@@ -52,6 +53,18 @@ export async function upsertImagingAnnotationSet(
       .eq("tenant_id", tid)
       .eq("patient_image_id", iid);
     if (error) throw new Error(error.message);
+
+    void publishImagingEvent({
+      tenantId: tid,
+      eventType: "annotation_completed",
+      entityId: iid,
+      entityType: "image",
+      eventMetadata: {
+        patient_id: pid,
+        patient_image_id: iid,
+        updated: true,
+      },
+    });
     return;
   }
 
@@ -66,6 +79,18 @@ export async function upsertImagingAnnotationSet(
     updated_at: now,
   });
   if (error) throw new Error(error.message);
+
+  void publishImagingEvent({
+    tenantId: tid,
+    eventType: "annotation_completed",
+    entityId: iid,
+    entityType: "image",
+    eventMetadata: {
+      patient_id: pid,
+      patient_image_id: iid,
+      updated: false,
+    },
+  });
 }
 
 export async function upsertImagingScalpMap(
@@ -105,6 +130,17 @@ export async function upsertImagingScalpMap(
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+
+    void publishImagingEvent({
+      tenantId: tid,
+      eventType: "scalp_map_completed",
+      entityId: mid,
+      entityType: "session",
+      eventMetadata: {
+        patient_id: pid,
+        updated: true,
+      },
+    });
     return { id: String((data as { id: string }).id) };
   }
 
@@ -121,5 +157,18 @@ export async function upsertImagingScalpMap(
   };
   const { data, error } = await supabase.from("fi_imaging_scalp_maps").insert(insert).select("id").single();
   if (error) throw new Error(error.message);
-  return { id: String((data as { id: string }).id) };
+  const mapId = String((data as { id: string }).id);
+
+  void publishImagingEvent({
+    tenantId: tid,
+    eventType: "scalp_map_completed",
+    entityId: mapId,
+    entityType: "session",
+    eventMetadata: {
+      patient_id: pid,
+      updated: false,
+    },
+  });
+
+  return { id: mapId };
 }

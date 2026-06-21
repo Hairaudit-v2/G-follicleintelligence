@@ -10,6 +10,7 @@ import {
 } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
 import { PROGRESS_META_KEY } from "@/src/lib/imagingOs/imagingOsProtocol";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -133,8 +134,23 @@ export async function enqueueImagingAiJobAction(
       .select("id")
       .single();
     if (insErr) throw new Error(insErr.message);
+    const jobId = String((ins as { id: string }).id);
+
+    void publishImagingEvent({
+      tenantId: tid,
+      eventType: "ai_imaging_completed",
+      entityId: parsed.patientImageId,
+      entityType: "image",
+      eventMetadata: {
+        patient_id: pid,
+        analysis_kind: parsed.analysisKind,
+        job_id: jobId,
+        mode: "queued",
+      },
+    });
+
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
-    return { ok: true, jobId: String((ins as { id: string }).id) };
+    return { ok: true, jobId };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }
@@ -178,10 +194,25 @@ export async function createImagingProtocolSessionAction(
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+    const sessionId = String((ins as { id: string }).id);
+
+    void publishImagingEvent({
+      tenantId: tid,
+      eventType: "imaging_session_created",
+      entityId: sessionId,
+      entityType: "session",
+      eventMetadata: {
+        patient_id: pid,
+        protocol: parsed.templateSlug.trim(),
+        case_id: parsed.caseId ?? null,
+        consultation_id: parsed.consultationId ?? null,
+      },
+    });
+
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
-    return { ok: true, sessionId: String((ins as { id: string }).id) };
+    return { ok: true, sessionId };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

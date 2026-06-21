@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { publishConsultationEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+import { publishConsultationEvent, publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { createTimelineEvent } from "@/src/lib/fi/foundation/createTimelineEvent";
 import { appendCrmActivityEvent } from "./activity";
 import { mapFiCrmLeadRow } from "./leadRow";
@@ -190,6 +190,34 @@ export async function moveCrmLeadToStage(
         patient_id: outLead.patient_id,
         to_stage_id: toStageId,
         source,
+      },
+    });
+  }
+
+  void publishLeadFlowEvent({
+    tenantId,
+    clinicId: outLead.clinic_id,
+    eventType: "lead_stage_changed",
+    entityId: leadId,
+    entityType: "lead",
+    eventMetadata: {
+      from_stage_id: fromStageId,
+      to_stage_id: toStageId,
+      stage: stage.slug,
+      source,
+    },
+  });
+
+  if (/qualified/i.test(stage.slug)) {
+    void publishLeadFlowEvent({
+      tenantId,
+      clinicId: outLead.clinic_id,
+      eventType: "lead_qualified",
+      entityId: leadId,
+      entityType: "lead",
+      eventMetadata: {
+        stage: stage.slug,
+        to_stage_id: toStageId,
       },
     });
   }

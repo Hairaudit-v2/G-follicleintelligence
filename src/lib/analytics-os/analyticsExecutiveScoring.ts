@@ -7,6 +7,7 @@ import type { FiAnalyticsEventRow } from "./analyticsEventCore";
 import type {
   AnalyticsExecutiveContributingSignal,
   AnalyticsExecutiveScore,
+  AnalyticsModuleCoverageRow,
   AnalyticsScoreBand,
 } from "./analyticsExecutiveTypes";
 
@@ -33,10 +34,12 @@ export type WorkforceReadinessScoringContext = {
 
 export type ExecutiveScoringInput = ExecutiveScoringPeriodInput & {
   workforceReadiness?: WorkforceReadinessScoringContext;
-  /** Modules with at least one event in the current period. */
+  /** Modules with active coverage (> threshold events) in the current period. */
   activeModuleNames: string[];
   /** Total modules in the analytics pipeline contract. */
   expectedModuleCount: number;
+  /** Per-module coverage rows for completeness scoring. */
+  moduleCoverage?: AnalyticsModuleCoverageRow[];
 };
 
 export const OVERALL_HEALTH_WEIGHTS = {
@@ -113,6 +116,10 @@ export function buildExecutiveScoringEventSummary(events: FiAnalyticsEventRow[])
 
 function getTypeCount(summary: ExecutiveScoringEventSummary, eventType: string): number {
   return summary.byEventType.get(eventType)?.count ?? 0;
+}
+
+function getTypeCounts(summary: ExecutiveScoringEventSummary, eventTypes: string[]): number {
+  return eventTypes.reduce((sum, eventType) => sum + getTypeCount(summary, eventType), 0);
 }
 
 function getTypeValue(summary: ExecutiveScoringEventSummary, eventType: string): number {
@@ -265,6 +272,9 @@ export function calculateWorkforceReadinessScore(input: ExecutiveScoringInput): 
 
 export function calculateConversionPerformanceScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
   const leadCreated = getTypeCount(input.current, "lead_created");
+  const leadScored = getTypeCount(input.current, "lead_scored");
+  const leadQualified = getTypeCount(input.current, "lead_qualified");
+  const leadStageChanged = getTypeCount(input.current, "lead_stage_changed");
   const consultationBooked = getTypeCount(input.current, "consultation_booked");
   const quoteSent = getTypeCount(input.current, "quote_sent");
   const leadConverted = getTypeCount(input.current, "lead_converted");
@@ -276,6 +286,9 @@ export function calculateConversionPerformanceScore(input: ExecutiveScoringInput
   score += Math.min(25, quoteSent * 4);
   score += Math.min(15, consultationBooked * 3);
   score += Math.min(15, leadConverted * 5);
+  score += Math.min(10, leadScored * 2);
+  score += Math.min(8, leadQualified * 3);
+  score += Math.min(6, leadStageChanged);
   score += Math.min(10, Math.round(conversionRate * 100) * 0.1);
 
   if (consultationBooked > 0 && quoteSent < consultationBooked * 0.5) {
@@ -284,13 +297,16 @@ export function calculateConversionPerformanceScore(input: ExecutiveScoringInput
     score += 8;
   }
 
+  const hasLeadFlow = input.current.byModule.has("leadflow");
   const hasConversionModule =
-    input.current.byModule.has("consultation_os") ||
-    input.current.byModule.has("leadflow");
-  const limitedSignal = !hasConversionModule && quoteSent === 0 && consultationBooked === 0;
+    input.current.byModule.has("consultation_os") || hasLeadFlow;
+  const limitedSignal = !hasConversionModule && quoteSent === 0 && consultationBooked === 0 && leadCreated === 0;
 
   const signals: AnalyticsExecutiveContributingSignal[] = [
     { key: "lead_created", label: "Leads created", value: leadCreated },
+    { key: "lead_scored", label: "Leads scored", value: leadScored },
+    { key: "lead_qualified", label: "Leads qualified", value: leadQualified },
+    { key: "lead_stage_changed", label: "Lead stage changes", value: leadStageChanged },
     { key: "consultation_booked", label: "Consultations booked", value: consultationBooked },
     { key: "quote_sent", label: "Quotes sent", value: quoteSent },
     { key: "lead_converted", label: "Leads converted", value: leadConverted },
@@ -302,9 +318,11 @@ export function calculateConversionPerformanceScore(input: ExecutiveScoringInput
       ? "Limited conversion signal — no ConsultationOS or LeadFlow events in this period."
       : consultationBooked > 0 && quoteSent < consultationBooked * 0.5
         ? "Quote activity is low relative to consultation activity."
-        : quoteSent > 0
-          ? "Conversion performance reflects quote, consultation, and lead progression events."
-          : "Conversion funnel activity is minimal this period.";
+        : hasLeadFlow && leadScored > 0
+          ? "Conversion performance reflects LeadFlow scoring, stage progression, and funnel events."
+          : quoteSent > 0
+            ? "Conversion performance reflects quote, consultation, and lead progression events."
+            : "Conversion funnel activity is minimal this period.";
 
   return buildScore(score, "Conversion performance", explanation, signals, limitedSignal);
 }
@@ -313,6 +331,9 @@ export function calculateSurgicalEfficiencyScore(input: ExecutiveScoringInput): 
   const surgeryCompleted = getTypeCount(input.current, "surgery_completed");
   const surgeryStarted = getTypeCount(input.current, "surgery_started");
   const graftRecorded = getTypeCount(input.current, "graft_count_recorded");
+  const imagingProtocolCompleted = getTypeCount(input.current, "imaging_protocol_completed");
+  const auditReportGenerated = getTypeCount(input.current, "audit_report_generated");
+  const graftIntegrityScored = getTypeCount(input.current, "graft_integrity_scored");
   const prevCompleted =
     input.comparison != null ? getTypeCount(input.comparison, "surgery_completed") : undefined;
 
@@ -322,15 +343,23 @@ export function calculateSurgicalEfficiencyScore(input: ExecutiveScoringInput): 
     score += completionRatio >= 0.9 ? 10 : completionRatio >= 0.7 ? 5 : -5;
   }
   score += Math.min(8, graftRecorded * 2);
+  score += Math.min(6, imagingProtocolCompleted * 2);
+  score += Math.min(6, auditReportGenerated * 2);
+  score += Math.min(8, graftIntegrityScored * 3);
   score += momentumBonus(surgeryCompleted, prevCompleted, 10);
 
   const hasSurgeryModule = input.current.byModule.has("surgery_os");
-  const limitedSignal = !hasSurgeryModule && surgeryCompleted === 0;
+  const hasSupportSignals =
+    input.current.byModule.has("imaging_os") || input.current.byModule.has("audit_os");
+  const limitedSignal = !hasSurgeryModule && surgeryCompleted === 0 && !hasSupportSignals;
 
   const signals: AnalyticsExecutiveContributingSignal[] = [
     { key: "surgery_completed", label: "Surgeries completed", value: surgeryCompleted },
     { key: "surgery_started", label: "Surgeries started", value: surgeryStarted },
     { key: "graft_count_recorded", label: "Graft counts recorded", value: graftRecorded },
+    { key: "imaging_protocol_completed", label: "Imaging protocols completed", value: imagingProtocolCompleted },
+    { key: "audit_report_generated", label: "Audit reports generated", value: auditReportGenerated },
+    { key: "graft_integrity_scored", label: "Graft integrity scores", value: graftIntegrityScored },
   ];
   if (prevCompleted != null) {
     signals.push({
@@ -342,7 +371,7 @@ export function calculateSurgicalEfficiencyScore(input: ExecutiveScoringInput): 
 
   const explanation =
     limitedSignal
-      ? "Limited surgical signal — no SurgeryOS events in this period."
+      ? "Limited surgical signal — no SurgeryOS, ImagingOS, or AuditOS support events in this period."
       : prevCompleted != null && surgeryCompleted === prevCompleted
         ? "Surgery completion activity is stable compared with the previous period."
         : prevCompleted != null && surgeryCompleted > prevCompleted
@@ -353,23 +382,33 @@ export function calculateSurgicalEfficiencyScore(input: ExecutiveScoringInput): 
 }
 
 export function calculatePatientJourneyScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
-  const imagesUploaded = getTypeCount(input.current, "patient_uploaded_images");
+  const onboardingStarted = getTypeCount(input.current, "patient_onboarding_started");
+  const documentUploaded = getTypeCount(input.current, "patient_document_uploaded");
+  const imagesUploaded = getTypeCounts(input.current, ["patient_images_uploaded", "patient_uploaded_images"]);
   const reportGenerated = getTypeCount(input.current, "patient_report_generated");
-  const followupCompleted = getTypeCount(input.current, "followup_completed");
+  const followupCompleted = getTypeCounts(input.current, ["patient_followup_completed", "followup_completed"]);
+  const journeyCompleted = getTypeCount(input.current, "patient_journey_completed");
 
-  const journeyEvents = imagesUploaded + reportGenerated + followupCompleted;
+  const journeyEvents =
+    onboardingStarted + documentUploaded + imagesUploaded + reportGenerated + followupCompleted + journeyCompleted;
   let score = activityBaseScore(journeyEvents, [1, 3, 8]);
+  score += Math.min(6, onboardingStarted * 3);
+  score += Math.min(6, documentUploaded * 2);
   score += Math.min(8, imagesUploaded * 2);
   score += Math.min(8, reportGenerated * 3);
   score += Math.min(10, followupCompleted * 4);
+  score += Math.min(10, journeyCompleted * 5);
 
   const hasPatientModule = input.current.byModule.has("patient_os");
   const limitedSignal = !hasPatientModule && journeyEvents === 0;
 
   const signals: AnalyticsExecutiveContributingSignal[] = [
-    { key: "patient_uploaded_images", label: "Patient image uploads", value: imagesUploaded },
+    { key: "patient_onboarding_started", label: "Onboarding started", value: onboardingStarted },
+    { key: "patient_document_uploaded", label: "Documents uploaded", value: documentUploaded },
+    { key: "patient_images_uploaded", label: "Patient image uploads", value: imagesUploaded },
     { key: "patient_report_generated", label: "Reports generated", value: reportGenerated },
-    { key: "followup_completed", label: "Follow-ups completed", value: followupCompleted },
+    { key: "patient_followup_completed", label: "Follow-ups completed", value: followupCompleted },
+    { key: "patient_journey_completed", label: "Journeys completed", value: journeyCompleted },
   ];
 
   const explanation = limitedSignal
@@ -382,30 +421,45 @@ export function calculatePatientJourneyScore(input: ExecutiveScoringInput): Anal
 }
 
 export function calculateDataCompletenessScore(input: ExecutiveScoringInput): AnalyticsExecutiveScore {
-  const activeCount = input.activeModuleNames.length;
+  const coverage = input.moduleCoverage ?? [];
+  const activeCount = coverage.filter((row) => row.status === "active").length;
+  const limitedCount = coverage.filter((row) => row.status === "limited").length;
+  const publishingCount = activeCount + limitedCount;
   const expected = Math.max(1, input.expectedModuleCount);
-  const coverageRatio = activeCount / expected;
   const entityCoverage = input.current.distinctEntityIds.size;
 
-  let score = Math.round(coverageRatio * 70);
-  score += Math.min(15, input.current.eventCount >= 10 ? 15 : input.current.eventCount >= 3 ? 8 : input.current.eventCount > 0 ? 3 : 0);
-  score += Math.min(15, entityCoverage >= 20 ? 15 : entityCoverage >= 5 ? 8 : entityCoverage > 0 ? 3 : 0);
+  let score = Math.round((activeCount / expected) * 65);
+  score += Math.round((limitedCount / expected) * 20);
+  score += Math.min(
+    10,
+    input.current.eventCount >= 50 ? 10 : input.current.eventCount >= 20 ? 7 : input.current.eventCount >= 10 ? 4 : input.current.eventCount > 0 ? 2 : 0
+  );
+  score += Math.min(
+    10,
+    entityCoverage >= 20 ? 10 : entityCoverage >= 10 ? 6 : entityCoverage >= 5 ? 3 : entityCoverage > 0 ? 1 : 0
+  );
+  if (activeCount >= 6) score += 8;
+  if (activeCount >= 8) score += 5;
 
-  const limitedSignal = activeCount < 3;
+  const limitedSignal = activeCount < Math.ceil(expected * 0.45);
 
   const signals: AnalyticsExecutiveContributingSignal[] = [
     { key: "active_modules", label: "Active publishing modules", value: activeCount },
+    { key: "limited_modules", label: "Limited-signal modules", value: limitedCount },
+    { key: "publishing_modules", label: "Modules with any events", value: publishingCount },
     { key: "expected_modules", label: "Expected pipeline modules", value: expected },
     { key: "total_events", label: "Total events", value: input.current.eventCount },
     { key: "distinct_entities", label: "Distinct entities", value: entityCoverage },
   ];
 
   const explanation =
-    activeCount === 0
+    publishingCount === 0
       ? "No modules published analytics events this period — executive confidence is very limited."
-      : activeCount < 3
-        ? `Analytics confidence is limited because only ${activeCount} module${activeCount === 1 ? "" : "s"} published events this period.`
-        : "Data completeness reflects module coverage, event volume, and entity breadth.";
+      : activeCount < 4
+        ? `Analytics confidence is limited — ${activeCount} module${activeCount === 1 ? "" : "s"} actively publishing (>20 events), ${limitedCount} on limited signal.`
+        : activeCount >= 6
+          ? "Strong module coverage — executive scores use rich cross-module intelligence signals."
+          : "Data completeness reflects module coverage tiers, event volume, and entity breadth.";
 
   return buildScore(score, "Data completeness", explanation, signals, limitedSignal);
 }
@@ -438,8 +492,9 @@ export function calculateOverallClinicHealthScore(input: OverallHealthScoreInput
   ].filter((s) => s.limitedSignal).length;
 
   let score = weighted;
-  if (limitedCount >= 3) score -= 8;
+  if (limitedCount >= 4) score -= 8;
   else if (limitedCount >= 2) score -= 4;
+  else if (limitedCount === 1) score -= 2;
 
   const explanation =
     limitedCount > 0
@@ -482,7 +537,7 @@ export function calculateOverallClinicHealthScore(input: OverallHealthScoreInput
         value: `${OVERALL_HEALTH_WEIGHTS.dataCompleteness * 100}%`,
       },
     ],
-    limitedCount >= 2
+    limitedCount >= 3
   );
 }
 

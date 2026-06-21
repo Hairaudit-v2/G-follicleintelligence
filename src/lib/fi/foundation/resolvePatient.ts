@@ -7,6 +7,7 @@ import type {
   ResolvePatientInput,
   ResolvePatientResult,
 } from "./types";
+import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 function asPatientRow(row: Record<string, unknown>): FiPatientRow {
   const out: FiPatientRow = {
@@ -186,5 +187,18 @@ export async function resolveOrCreatePatient(
     mappingSourceSystem,
     mappingSourcePatientId
   );
+
+  void publishPatientEvent({
+    tenantId,
+    clinicId: patient.primary_clinic_id,
+    eventType: "patient_onboarding_started",
+    entityId: patient.id,
+    entityType: "patient",
+    eventMetadata: {
+      person_id: patient.person_id,
+      mapping_created: mappingCreated,
+    },
+  });
+
   return { patient, created: true, mapping_created: mappingCreated };
 }

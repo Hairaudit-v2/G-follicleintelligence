@@ -13,6 +13,7 @@ import {
   persistPathologyRequestPdfStorage,
 } from "@/src/lib/pathology/pathologyRequestMutations.server";
 import { renderPathologyBloodRequestPdfBytes } from "@/src/lib/pathology/pathologyPdfRender.server";
+import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { sendResendEmailHttp } from "@/src/lib/email/resendHttpSend.server";
 import { buildResendFromAddress, isEmailDeliveryConfigured } from "@/src/lib/reminders/reminderDeliveryConfig";
 import { loadReminderDeliveryConfig } from "@/src/lib/reminders/reminderDeliveryConfig.server";
@@ -121,6 +122,18 @@ export async function sendPathologyRequestToPatientEmail(params: {
       to_email_domain: to.includes("@") ? to.split("@")[1]?.toLowerCase() ?? null : null,
     },
     occurredAt: sentAt,
+  });
+
+  void publishPatientEvent({
+    tenantId: tid,
+    eventType: "patient_report_generated",
+    entityId: rid,
+    entityType: "report",
+    eventMetadata: {
+      patient_id: pid,
+      report_type: "pathology_request_pdf",
+      delivery_path: "pathology_patient_pdf",
+    },
   });
 
   return { resendId, to };

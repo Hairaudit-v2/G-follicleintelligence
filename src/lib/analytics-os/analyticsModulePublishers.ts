@@ -4,8 +4,10 @@ import {
   type PublishAnalyticsEventInput,
 } from "./analyticsEventCore";
 import type {
+  AuditAnalyticsEventType,
   ConsultationAnalyticsEventType,
   FinancialAnalyticsEventType,
+  ImagingAnalyticsEventType,
   LeadFlowAnalyticsEventType,
   PatientAnalyticsEventType,
   SurgeryAnalyticsEventType,
@@ -54,4 +56,18 @@ export async function publishPatientEvent(
   options?: AnalyticsEventCoreOptions
 ) {
   return publishAnalyticsEvent({ ...input, moduleName: "patient_os" }, options);
+}
+
+export async function publishImagingEvent(
+  input: ModulePublishInput & { eventType: ImagingAnalyticsEventType },
+  options?: AnalyticsEventCoreOptions
+) {
+  return publishAnalyticsEvent({ ...input, moduleName: "imaging_os" }, options);
+}
+
+export async function publishAuditEvent(
+  input: ModulePublishInput & { eventType: AuditAnalyticsEventType },
+  options?: AnalyticsEventCoreOptions
+) {
+  return publishAnalyticsEvent({ ...input, moduleName: "audit_os" }, options);
 }

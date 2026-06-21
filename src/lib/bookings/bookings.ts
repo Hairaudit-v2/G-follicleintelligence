@@ -27,6 +27,7 @@ import {
 } from "@/src/lib/staff/staff.server";
 import { assertStaffAppointmentWithinWorkingHours } from "@/src/lib/staff/staffSlotHours.server";
 import { syncBookingReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
+import { publishConsultationEvent, publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { checkAppointmentAvailability, DEFAULT_APPOINTMENT_BUFFER_MINUTES } from "./appointmentAvailability";
 import { AppointmentConflictError } from "./bookingErrors";
 import {
@@ -770,6 +771,37 @@ export async function createBooking(params: CreateBookingParams, client?: Supaba
   }
 
   await syncBookingReminderJobs(row, supabase);
+
+  if (row.booking_type === "consultation") {
+    void publishConsultationEvent({
+      tenantId: tid,
+      clinicId: row.clinic_id,
+      eventType: "consultation_booked",
+      entityId: row.id,
+      entityType: "booking",
+      eventMetadata: {
+        lead_id: row.lead_id,
+        patient_id: row.patient_id,
+        case_id: row.case_id,
+        booking_type: row.booking_type,
+      },
+    });
+
+    if (row.lead_id) {
+      void publishLeadFlowEvent({
+        tenantId: tid,
+        clinicId: row.clinic_id,
+        eventType: "consultation_booked",
+        entityId: row.lead_id,
+        entityType: "lead",
+        eventMetadata: {
+          booking_id: row.id,
+          patient_id: row.patient_id,
+          case_id: row.case_id,
+        },
+      });
+    }
+  }
 
   return row;
 }

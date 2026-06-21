@@ -1,10 +1,11 @@
 /**
- * AnalyticsOS Phase B — executive snapshot composition engine.
+ * AnalyticsOS Phase B+C — executive snapshot composition engine.
  */
 
 import type { FiAnalyticsEventRow } from "./analyticsEventCore";
 import { ANALYTICS_PIPELINE_MODULES } from "./analyticsExecutiveTypes";
 import type {
+  AnalyticsConfidenceLevel,
   AnalyticsExecutiveSnapshot,
   AnalyticsModuleCoverageRow,
   AnalyticsModuleCoverageStatus,
@@ -39,15 +40,19 @@ export type BuildAnalyticsExecutiveSnapshotInput = {
   generatedAt?: string;
 };
 
-function deriveActiveModules(events: FiAnalyticsEventRow[]): AnalyticsModuleName[] {
-  const set = new Set<AnalyticsModuleName>();
-  for (const event of events) {
-    set.add(event.module_name);
-  }
-  return [...set];
+/** Event count above which a module is considered actively publishing. */
+export const MODULE_COVERAGE_ACTIVE_THRESHOLD = 20;
+
+/** Minimum event count for limited (non-zero) coverage. */
+export const MODULE_COVERAGE_LIMITED_MIN = 1;
+
+export function resolveModuleCoverageStatus(eventCount: number): AnalyticsModuleCoverageStatus {
+  if (eventCount > MODULE_COVERAGE_ACTIVE_THRESHOLD) return "active";
+  if (eventCount >= MODULE_COVERAGE_LIMITED_MIN) return "limited";
+  return "waiting";
 }
 
-function buildModuleCoverage(events: FiAnalyticsEventRow[]): AnalyticsModuleCoverageRow[] {
+function countEventsByModule(events: FiAnalyticsEventRow[]): Map<AnalyticsModuleName, { count: number; lastAt: string | null }> {
   const byModule = new Map<AnalyticsModuleName, { count: number; lastAt: string | null }>();
 
   for (const event of events) {
@@ -59,22 +64,41 @@ function buildModuleCoverage(events: FiAnalyticsEventRow[]): AnalyticsModuleCove
     byModule.set(event.module_name, existing);
   }
 
+  return byModule;
+}
+
+export function buildModuleCoverage(events: FiAnalyticsEventRow[]): AnalyticsModuleCoverageRow[] {
+  const byModule = countEventsByModule(events);
+
   return ANALYTICS_PIPELINE_MODULES.map((moduleName) => {
     const stats = byModule.get(moduleName);
-    let status: AnalyticsModuleCoverageStatus = "waiting";
-    if (stats && stats.count > 0) status = "active";
-    else if (moduleName === "workforce_os" || moduleName === "financial_os" || moduleName === "surgery_os" || moduleName === "consultation_os") {
-      status = stats ? "active" : "waiting";
-    }
+    const eventCount = stats?.count ?? 0;
 
     return {
       moduleName,
       displayLabel: ANALYTICS_MODULE_DISPLAY_LABELS[moduleName],
-      status,
-      eventCount: stats?.count ?? 0,
+      status: resolveModuleCoverageStatus(eventCount),
+      eventCount,
       lastEventAt: stats?.lastAt ?? null,
     };
   });
+}
+
+/** Modules with active coverage (> threshold events) in the period. */
+export function deriveActiveModules(events: FiAnalyticsEventRow[]): AnalyticsModuleName[] {
+  const byModule = countEventsByModule(events);
+  return ANALYTICS_PIPELINE_MODULES.filter(
+    (moduleName) => (byModule.get(moduleName)?.count ?? 0) > MODULE_COVERAGE_ACTIVE_THRESHOLD
+  );
+}
+
+export function deriveAnalyticsConfidence(coverage: AnalyticsModuleCoverageRow[]): AnalyticsConfidenceLevel {
+  const activeCount = coverage.filter((row) => row.status === "active").length;
+  const publishingCount = coverage.filter((row) => row.status !== "waiting").length;
+
+  if (activeCount >= 6) return "high";
+  if (activeCount >= 3 || publishingCount >= 5) return "medium";
+  return "low";
 }
 
 export function buildAnalyticsExecutiveSnapshot(
@@ -86,7 +110,9 @@ export function buildAnalyticsExecutiveSnapshot(
       ? buildExecutiveScoringEventSummary(input.comparisonEvents)
       : null;
 
+  const moduleCoverage = buildModuleCoverage(input.currentEvents);
   const activeModuleNames = deriveActiveModules(input.currentEvents);
+  const analyticsConfidence = deriveAnalyticsConfidence(moduleCoverage);
 
   const scoringInput: ExecutiveScoringInput = {
     current: currentSummary,
@@ -94,6 +120,7 @@ export function buildAnalyticsExecutiveSnapshot(
     workforceReadiness: input.workforceReadiness ?? null,
     activeModuleNames,
     expectedModuleCount: ANALYTICS_PIPELINE_MODULES.length,
+    moduleCoverage,
   };
 
   const revenueEfficiencyScore = calculateRevenueEfficiencyScore(scoringInput);
@@ -112,7 +139,6 @@ export function buildAnalyticsExecutiveSnapshot(
     dataCompletenessScore,
   });
 
-  const moduleCoverage = buildModuleCoverage(input.currentEvents);
   const metrics = buildExecutiveMetrics(scoringInput);
 
   const snapshot: AnalyticsExecutiveSnapshot = {
@@ -131,6 +157,7 @@ export function buildAnalyticsExecutiveSnapshot(
     metrics,
     insights: [],
     moduleCoverage,
+    analyticsConfidence,
   };
 
   snapshot.insights = generateAnalyticsExecutiveInsights(snapshot, input.currentEvents);

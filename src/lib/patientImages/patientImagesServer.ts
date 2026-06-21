@@ -36,6 +36,7 @@ import type {
   PatientImageStatus,
   PatientImagesProfileBundle,
 } from "./patientImageTypes";
+import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 const SIGNED_URL_TTL_SEC = 3600;
 const ACTIVE_SIGNED_LIMIT = 50;
@@ -541,8 +542,24 @@ export async function createPatientImageRecord(
     throw new Error(insErr.message);
   }
 
+  const mappedRow = mapRow(ins as Record<string, unknown>);
+
+  void publishPatientEvent({
+    tenantId: input.tenantId.trim(),
+    clinicId: mappedRow.clinic_id,
+    eventType: "patient_images_uploaded",
+    entityId: mappedRow.id,
+    entityType: "image",
+    eventMetadata: {
+      patient_id: input.patientId.trim(),
+      case_id: mappedRow.case_id,
+      upload_count: 1,
+      image_category: mappedRow.image_category,
+    },
+  });
+
   return {
-    row: mapRow(ins as Record<string, unknown>),
+    row: mappedRow,
     changed_keys: ["created"],
   };
 }

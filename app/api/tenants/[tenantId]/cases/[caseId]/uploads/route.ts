@@ -8,6 +8,7 @@ import { normalizeFiUploadType, buildFiUploadPath } from "@/lib/fi/uploadTypes";
 import { validateUploadFileByType } from "@/lib/fi/validation";
 import { assertCrmTenantWriteAllowed } from "@/src/lib/crm/crmGate";
 import { extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
+import { publishAuditEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 const BUCKET = process.env.FI_STORAGE_BUCKET_INTAKES || "fi-intakes";
 
@@ -103,6 +104,17 @@ export async function POST(
 
     if (insertErr)
       return NextResponse.json({ ok: false, error: insertErr.message }, { status: 500 });
+
+    void publishAuditEvent({
+      tenantId,
+      eventType: "audit_images_uploaded",
+      entityId: caseId,
+      entityType: "case",
+      eventMetadata: {
+        upload_count: fileRows.length,
+        upload_types: fileRows.map((r) => r.type),
+      },
+    });
 
     return NextResponse.json({
       ok: true,

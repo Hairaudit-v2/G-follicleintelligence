@@ -14,6 +14,7 @@ import {
   type ImagingOsAiVisionTaskType,
   validateAiVisionModelOutputContract,
 } from "./aiVision";
+import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 // ---------------------------------------------------------------------------
 // Feature flags
@@ -305,6 +306,11 @@ export type ExecuteImagingAiVisionTaskInput = {
   request: ImagingOsAiVisionRequestContract;
   flags?: ImagingOsAiFeatureFlags;
   provider?: ImagingOsAiProvider;
+  analyticsContext?: {
+    tenantId: string;
+    entityId: string;
+    patientId?: string | null;
+  };
 };
 
 export type ExecuteImagingAiVisionTaskResult = {
@@ -328,6 +334,26 @@ function buildExecutionAuditLog(
     ...(modelName ? { model_name: modelName } : {}),
     ...(modelVersion ? { model_version: modelVersion } : {}),
     ...(metadata ? { metadata } : {}),
+  });
+}
+
+function publishAiImagingAnalytics(
+  input: ExecuteImagingAiVisionTaskInput,
+  mode: "dry_run" | "executed",
+  taskType: ImagingOsAiVisionTaskType
+) {
+  const ctx = input.analyticsContext;
+  if (!ctx?.tenantId?.trim()) return;
+  void publishImagingEvent({
+    tenantId: ctx.tenantId.trim(),
+    eventType: "ai_imaging_completed",
+    entityId: ctx.entityId,
+    entityType: "image",
+    eventMetadata: {
+      patient_id: ctx.patientId ?? null,
+      task_type: taskType,
+      mode,
+    },
   });
 }
 
@@ -371,6 +397,7 @@ export async function executeImagingAiVisionTask(
   }
 
   if (flags.dry_run_mode) {
+    publishAiImagingAnalytics(input, "dry_run", request.task_type);
     return {
       execution_status: "dry_run",
       request,
@@ -410,6 +437,7 @@ export async function executeImagingAiVisionTask(
     };
   }
 
+  publishAiImagingAnalytics(input, "executed", request.task_type);
   return {
     execution_status: "executed",
     request,

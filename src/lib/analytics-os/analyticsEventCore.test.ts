@@ -350,7 +350,9 @@ describe("analyticsEventTypes", () => {
     assert.ok(types.SURGERY_EVENTS.includes("surgery_completed"));
     assert.ok(types.FINANCIAL_EVENTS.includes("payment_received"));
     assert.ok(types.CONSULTATION_EVENTS.includes("quote_sent"));
-    assert.ok(types.LEADFLOW_EVENTS.includes("lead_created"));
-    assert.ok(types.PATIENT_EVENTS.includes("patient_uploaded_images"));
+    assert.ok(types.LEADFLOW_EVENTS.includes("lead_stage_changed"));
+    assert.ok(types.PATIENT_EVENTS.includes("patient_images_uploaded"));
+    assert.ok(types.IMAGING_EVENTS.includes("imaging_protocol_completed"));
+    assert.ok(types.AUDIT_EVENTS.includes("audit_intelligence_completed"));
   });
 });

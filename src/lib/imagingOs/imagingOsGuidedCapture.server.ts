@@ -16,6 +16,27 @@ import {
   type ProgressMeta,
   type ProtocolSlotDef,
 } from "./imagingOsProtocol";
+import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+
+function publishImagingProtocolCompleted(params: {
+  tenantId: string;
+  patientId: string;
+  sessionId: string;
+  templateSlug: string;
+  completionPercent: number;
+}) {
+  void publishImagingEvent({
+    tenantId: params.tenantId,
+    eventType: "imaging_protocol_completed",
+    entityId: params.sessionId,
+    entityType: "session",
+    eventMetadata: {
+      patient_id: params.patientId,
+      protocol: params.templateSlug,
+      completion_percent: params.completionPercent,
+    },
+  });
+}
 
 export type GuidedSessionRow = {
   id: string;
@@ -150,6 +171,16 @@ export async function applyGuidedCaptureToSession(params: {
     .eq("id", session.id);
   if (upErr) throw new Error(upErr.message);
 
+  if (sessionCompleted) {
+    publishImagingProtocolCompleted({
+      tenantId: tid,
+      patientId: pid,
+      sessionId: session.id,
+      templateSlug: session.template_slug,
+      completionPercent: pct,
+    });
+  }
+
   return {
     completionPercent: pct,
     sessionCompleted,
@@ -215,6 +246,17 @@ export async function skipOptionalProtocolSlot(params: {
     .eq("patient_id", pid)
     .eq("id", session.id);
   if (error) throw new Error(error.message);
+
+  if (sessionCompleted) {
+    publishImagingProtocolCompleted({
+      tenantId: tid,
+      patientId: pid,
+      sessionId: session.id,
+      templateSlug: session.template_slug,
+      completionPercent: pct,
+    });
+  }
+
   return {
     completionPercent: pct,
     sessionCompleted,
@@ -248,4 +290,12 @@ export async function finishProtocolSessionManually(params: {
     .eq("patient_id", pid)
     .eq("id", session.id);
   if (error) throw new Error(error.message);
+
+  publishImagingProtocolCompleted({
+    tenantId: tid,
+    patientId: pid,
+    sessionId: session.id,
+    templateSlug: session.template_slug,
+    completionPercent: 100,
+  });
 }

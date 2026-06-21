@@ -19,6 +19,7 @@ import type {
   AnalyticsExecutiveInsight,
   AnalyticsExecutiveScore,
   AnalyticsModuleCoverageRow,
+  AnalyticsConfidenceLevel,
   AnalyticsScoreBand,
 } from "@/src/lib/analytics-os/analyticsExecutiveTypes";
 
@@ -77,6 +78,18 @@ function coverageStatusLabel(status: AnalyticsModuleCoverageRow["status"]): stri
   if (status === "active") return "Active";
   if (status === "limited") return "Limited";
   return "Waiting";
+}
+
+function analyticsConfidenceClass(level: AnalyticsConfidenceLevel): string {
+  if (level === "high") return "text-emerald-300 ring-emerald-500/35 bg-emerald-950/30";
+  if (level === "medium") return "text-sky-300 ring-sky-500/35 bg-sky-950/30";
+  return "text-amber-200 ring-amber-400/35 bg-amber-950/25";
+}
+
+function analyticsConfidenceLabel(level: AnalyticsConfidenceLevel): string {
+  if (level === "high") return "High";
+  if (level === "medium") return "Medium";
+  return "Low";
 }
 
 function formatPeriodDate(iso: string): string {
@@ -140,7 +153,7 @@ export function AnalyticsExecutiveIntelligence({ model }: { model: AnalyticsExec
         />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0 border-l-4 border-[#7C3AED]/70 pl-5 sm:pl-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#A78BFA]/95">Phase B</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#A78BFA]/95">Phase B+C</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#F8FAFC] sm:text-3xl">
               Executive Intelligence Engine
             </h2>
@@ -151,6 +164,11 @@ export function AnalyticsExecutiveIntelligence({ model }: { model: AnalyticsExec
             <p className="mt-2 text-xs text-[#64748B]">
               Period: {formatPeriodDate(snapshot.periodStart)} – {formatPeriodDate(snapshot.periodEnd)}
             </p>
+            <span
+              className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ring-1 ${analyticsConfidenceClass(snapshot.analyticsConfidence)}`}
+            >
+              Analytics confidence: {analyticsConfidenceLabel(snapshot.analyticsConfidence)}
+            </span>
           </div>
           <div className="flex shrink-0 flex-col items-center rounded-2xl border border-white/[0.1] bg-[#0c1220]/80 px-8 py-6 text-center">
             <Brain className="h-8 w-8 text-[#22C1FF]" aria-hidden />
@@ -250,33 +268,45 @@ export function AnalyticsExecutiveIntelligence({ model }: { model: AnalyticsExec
         <SectionHeader
           kicker="Pipeline"
           title="Module event coverage"
-          description="Which FI OS modules are feeding AnalyticsOS this period."
+          description="Which FI OS modules are feeding AnalyticsOS this period (Active >20 events, Limited 1–19, Waiting 0)."
           className="mb-4"
         />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {snapshot.moduleCoverage.map((row) => (
-            <div
-              key={row.moduleName}
-              className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-3"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <p className="truncate text-sm font-semibold text-[#F8FAFC]">{row.displayLabel}</p>
-                <span
-                  className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${coverageStatusClass(row.status)}`}
-                >
-                  {coverageStatusLabel(row.status)}
-                </span>
-              </div>
-              <p className="mt-2 text-sm tabular-nums text-[#94A3B8]">
-                {row.eventCount} event{row.eventCount === 1 ? "" : "s"}
+        <div className="overflow-x-auto rounded-xl border border-white/[0.08]">
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-white/[0.08] bg-[#0c1220]/90 text-xs uppercase tracking-wide text-[#64748B]">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Module</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold text-right">Event count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {snapshot.moduleCoverage.map((row) => (
+                <tr key={row.moduleName} className="border-b border-white/[0.06] last:border-0">
+                  <td className="px-4 py-3 font-medium text-[#F8FAFC]">{row.displayLabel}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${coverageStatusClass(row.status)}`}
+                    >
+                      {coverageStatusLabel(row.status)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right tabular-nums text-[#94A3B8]">
+                    {row.eventCount} event{row.eventCount === 1 ? "" : "s"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {snapshot.moduleCoverage.map((row) =>
+            row.lastEventAt ? (
+              <p key={`${row.moduleName}-last`} className="text-xs text-[#64748B]">
+                {row.displayLabel} last event: {formatPeriodDate(row.lastEventAt)}
               </p>
-              {row.lastEventAt ? (
-                <p className="mt-1 text-xs text-[#64748B]">
-                  Last: {formatPeriodDate(row.lastEventAt)}
-                </p>
-              ) : null}
-            </div>
-          ))}
+            ) : null
+          )}
         </div>
       </DashboardCard>
 

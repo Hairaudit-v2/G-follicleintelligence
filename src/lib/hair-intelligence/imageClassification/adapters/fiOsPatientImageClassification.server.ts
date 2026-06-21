@@ -11,6 +11,7 @@ import {
   inferClinicalUseContextForFiPatientImage,
   insertHliImageClassificationRow,
 } from "../persistHliClassification.server";
+import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 export type ClassifyFiPatientImageParams = {
   tenantId: string;
@@ -104,6 +105,18 @@ export async function classifyFiPatientImageAndPersist(params: ClassifyFiPatient
     .eq("tenant_id", tid)
     .eq("id", iid);
   if (upErr) throw new Error(upErr.message);
+
+  void publishImagingEvent({
+    tenantId: tid,
+    eventType: "image_classification_completed",
+    entityId: iid,
+    entityType: "image",
+    eventMetadata: {
+      patient_id: patientId,
+      category: result.category,
+      image_count: 1,
+    },
+  });
 
   return { result, classifierVersion, usedOpenAi };
 }

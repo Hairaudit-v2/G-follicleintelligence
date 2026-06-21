@@ -3,6 +3,7 @@ import {
   validateIntakeRequirements,
   type MissingRequirement,
 } from "@/src/lib/fi/requirements";
+import { publishAuditEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 export type FiCaseSubmissionState =
   | {
@@ -134,11 +135,23 @@ export async function submitCaseIfReady(
 
   const { data: updated } = await supabaseAdmin()
     .from("fi_cases")
-    .select("status")
+    .select("status, patient_id")
     .eq("id", fiCaseId)
     .eq("tenant_id", tenantId)
     .is("deleted_at", null)
     .single();
+
+  void publishAuditEvent({
+    tenantId,
+    eventType: "audit_started",
+    entityId: fiCaseId,
+    entityType: "case",
+    eventMetadata: {
+      patient_id: (updated as { patient_id?: string | null } | null)?.patient_id ?? null,
+      status_before: state.status,
+      status_after: updated?.status ?? "submitted",
+    },
+  });
 
   return {
     ok: true,

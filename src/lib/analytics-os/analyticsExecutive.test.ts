@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { describe, it } from "node:test";
 
-import { buildAnalyticsExecutiveSnapshot } from "@/src/lib/analytics-os/analyticsExecutiveEngine";
+import { buildAnalyticsExecutiveSnapshot, buildModuleCoverage } from "@/src/lib/analytics-os/analyticsExecutiveEngine";
 import { generateAnalyticsExecutiveInsights } from "@/src/lib/analytics-os/analyticsExecutiveInsights";
 import {
   buildExecutiveScoringEventSummary,
@@ -43,7 +43,7 @@ function baseScoringInput(overrides?: Partial<ExecutiveScoringInput>): Executive
     comparison: null,
     workforceReadiness: null,
     activeModuleNames: [],
-    expectedModuleCount: 8,
+    expectedModuleCount: 9,
     ...overrides,
   };
 }
@@ -209,30 +209,32 @@ describe("analyticsExecutiveScoring", () => {
     assert.equal(improved.limitedSignal, false);
   });
 
-  it("scores data completeness from module coverage", () => {
+  it("scores data completeness from module coverage tiers", () => {
     const sparse = calculateDataCompletenessScore(
-      baseScoringInput({ activeModuleNames: ["financial_os"], current: buildExecutiveScoringEventSummary([event({ module_name: "financial_os", event_type: "payment_received" })]) })
+      baseScoringInput({
+        activeModuleNames: [],
+        moduleCoverage: buildModuleCoverage([
+          event({ module_name: "financial_os", event_type: "payment_received" }),
+        ]),
+        current: buildExecutiveScoringEventSummary([event({ module_name: "financial_os", event_type: "payment_received" })]),
+      })
+    );
+    const richModules = ["financial_os", "workforce_os", "surgery_os", "consultation_os", "leadflow", "patient_os", "imaging_os", "audit_os"] as const;
+    const richEvents = richModules.flatMap((moduleName) =>
+      Array.from({ length: 25 }, () => event({ module_name: moduleName, event_type: "payment_received" }))
     );
     const rich = calculateDataCompletenessScore(
       baseScoringInput({
-        activeModuleNames: ["financial_os", "workforce_os", "surgery_os", "consultation_os"],
-        current: buildExecutiveScoringEventSummary([
-          event({ module_name: "financial_os", event_type: "payment_received" }),
-          event({ module_name: "workforce_os", event_type: "staff_assigned" }),
-          event({ module_name: "surgery_os", event_type: "surgery_completed" }),
-          event({ module_name: "consultation_os", event_type: "quote_sent" }),
-          event({ module_name: "consultation_os", event_type: "quote_sent" }),
-          event({ module_name: "consultation_os", event_type: "quote_sent" }),
-          event({ module_name: "consultation_os", event_type: "quote_sent" }),
-          event({ module_name: "consultation_os", event_type: "quote_sent" }),
-          event({ module_name: "consultation_os", event_type: "quote_sent" }),
-          event({ module_name: "consultation_os", event_type: "quote_sent" }),
-        ]),
+        activeModuleNames: [...richModules],
+        moduleCoverage: buildModuleCoverage(richEvents),
+        current: buildExecutiveScoringEventSummary(richEvents),
       })
     );
 
     assert.ok(rich.score > sparse.score);
     assert.equal(sparse.limitedSignal, true);
+    assert.equal(rich.limitedSignal, false);
+    assert.ok(rich.score >= 88);
   });
 });
 
@@ -268,7 +270,8 @@ describe("analyticsExecutiveEngine", () => {
     assert.equal(snapshot.tenantId, TENANT);
     assert.ok(snapshot.overallClinicHealthScore.score > 0);
     assert.equal(snapshot.generatedAt, "2026-06-22T12:00:00.000Z");
-    assert.equal(snapshot.moduleCoverage.filter((m) => m.status === "active").length, 4);
+    assert.equal(snapshot.moduleCoverage.filter((m) => m.status === "limited").length, 4);
+    assert.equal(snapshot.analyticsConfidence, "low");
     assert.ok(snapshot.metrics.length >= 5);
     assert.ok(snapshot.insights.length > 0);
 

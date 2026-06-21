@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 import { createTimelineEvent } from "@/src/lib/fi/foundation/createTimelineEvent";
 import { loadConsultationForTenant } from "@/src/lib/consultations/consultationLoaders.server";
+import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 import type { ConsultationCompletionSummary } from "./completion/consultationCompletionTypes";
 import { buildConsultationCompletionSummary } from "./completion/buildConsultationCompletionSummary";
@@ -1403,6 +1404,20 @@ export async function completeConsultationFormInstance(
     );
     await advanceCrmLeadOnConsultationComplete(tid, reloadedConsultation, supabase);
   }
+
+  void publishPatientEvent({
+    tenantId: tid,
+    eventType: "patient_document_uploaded",
+    entityId: iid,
+    entityType: "consultation",
+    eventMetadata: {
+      patient_id: patientId,
+      case_id: caseId,
+      consultation_id: cid,
+      template_slug: existing.template.slug,
+      outcome_type: summary.outcomeType,
+    },
+  });
 
   return { instance: loadedInst, summary };
 }

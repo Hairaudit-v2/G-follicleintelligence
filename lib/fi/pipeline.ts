@@ -13,6 +13,7 @@ import {
   runReportCompose,
   runPdfRender,
 } from "./stages";
+import { publishAuditEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 const BLOOD_TYPES = ["blood_pdf", "blood_csv"];
 const IMAGE_TYPES = [
@@ -222,6 +223,29 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
         .eq("tenant_id", tenantId);
 
       await completeJob(jobId!, tenantId);
+
+      void publishAuditEvent({
+        tenantId,
+        eventType: "audit_report_generated",
+        entityId: pdfResult.data.reportId,
+        entityType: "report",
+        eventMetadata: {
+          case_id: caseId,
+          job_id: jobId,
+          storage_path: pdfResult.data.storagePath,
+        },
+      });
+
+      void publishAuditEvent({
+        tenantId,
+        eventType: "audit_intelligence_completed",
+        entityId: caseId,
+        entityType: "case",
+        eventMetadata: {
+          report_id: pdfResult.data.reportId,
+          job_id: jobId,
+        },
+      });
 
       return {
         ok: true,

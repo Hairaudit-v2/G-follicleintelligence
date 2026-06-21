@@ -69,6 +69,8 @@ export type AnalyticsExecutiveInsight = {
 
 export type AnalyticsModuleCoverageStatus = "active" | "waiting" | "limited";
 
+export type AnalyticsConfidenceLevel = "low" | "medium" | "high";
+
 export type AnalyticsModuleCoverageRow = {
   moduleName: AnalyticsModuleName;
   displayLabel: string;
@@ -95,6 +97,8 @@ export type AnalyticsExecutiveSnapshot = {
   metrics: AnalyticsExecutiveMetric[];
   insights: AnalyticsExecutiveInsight[];
   moduleCoverage: AnalyticsModuleCoverageRow[];
+  /** Derived from module coverage thresholds — Low / Medium / High. */
+  analyticsConfidence: AnalyticsConfidenceLevel;
 };
 
 export type AnalyticsExecutiveDashboardPayload = {
@@ -116,14 +120,15 @@ export const ANALYTICS_MODULE_DISPLAY_LABELS: Record<AnalyticsModuleName, string
   audit_os: "AuditOS",
 };
 
-/** Modules expected to feed AnalyticsOS event pipeline (Phase A+B). */
+/** Modules expected to feed AnalyticsOS event pipeline (Phase A+B+C). */
 export const ANALYTICS_PIPELINE_MODULES: AnalyticsModuleName[] = [
   "workforce_os",
-  "financial_os",
   "surgery_os",
+  "financial_os",
   "consultation_os",
-  "leadflow",
   "patient_os",
+  "clinic_os",
+  "leadflow",
   "imaging_os",
   "audit_os",
 ];

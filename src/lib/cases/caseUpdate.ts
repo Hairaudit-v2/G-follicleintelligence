@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { shallowMergeMetadata } from "@/src/lib/fi/foundation/internal";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import type { CaseProfilePatchBody } from "@/src/lib/cases/caseTypes";
+import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 export type UpdateCaseProfileParams = {
   tenantId: string;
@@ -23,7 +24,7 @@ export async function updateCaseProfile(params: UpdateCaseProfileParams, client?
 
   const { data: existing, error: re } = await supabase
     .from("fi_cases")
-    .select("id, metadata")
+    .select("id, metadata, status, patient_id")
     .eq("tenant_id", tid)
     .eq("id", cid)
     .is("deleted_at", null)
@@ -66,4 +67,20 @@ export async function updateCaseProfile(params: UpdateCaseProfileParams, client?
 
   const { error: ue } = await supabase.from("fi_cases").update(updateRow).eq("tenant_id", tid).eq("id", cid);
   if (ue) throw new Error(ue.message);
+
+  const priorStatus = String((existing as { status?: string }).status ?? "");
+  if (p.status === "complete" && priorStatus !== "complete") {
+    const patientId = (existing as { patient_id?: string | null }).patient_id;
+    void publishPatientEvent({
+      tenantId: tid,
+      eventType: "patient_journey_completed",
+      entityId: cid,
+      entityType: "case",
+      eventMetadata: {
+        patient_id: patientId,
+        journey_stage: "completed",
+        prior_status: priorStatus,
+      },
+    });
+  }
 }

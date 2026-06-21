@@ -7,6 +7,7 @@ import type { AndrogenAgeOutput } from "./androgen_age_model";
 import type { FiScorecardV1 } from "../scorecard";
 import { resolveScorecardWeights, computeOverallScore, tierFromScore } from "../scorecard";
 import { getTenantConfig } from "../tenantConfig";
+import { publishAuditEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
 export type RiskScoreInput = {
   androgenOutput: AndrogenAgeOutput;
@@ -65,6 +66,21 @@ export async function runRiskScore(
     } else {
       await supabase.from("fi_scorecards").insert(payload);
     }
+
+    const surgicalReadiness = scorecard.sections.surgical_readiness?.score ?? scorecard.overall_score;
+    void publishAuditEvent({
+      tenantId,
+      eventType: "graft_integrity_scored",
+      entityId: caseId,
+      entityType: "case",
+      eventValue: surgicalReadiness,
+      eventMetadata: {
+        graft_integrity_score: surgicalReadiness,
+        overall_score: scorecard.overall_score,
+        risk_tier: scorecard.risk_tier,
+        concern_band: scorecard.risk_tier,
+      },
+    });
   }
 
   return { ok: true, data: output };

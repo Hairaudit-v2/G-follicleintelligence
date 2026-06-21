@@ -8,6 +8,7 @@ import { appendCrmActivityEvent } from "./activity";
 import { appendCrmLeadStageHistory } from "./stageHistory";
 import { ensureDefaultPipelineStages, getEntryPipelineStage } from "./pipeline";
 import { syncLeadCreatedReminderJobs } from "@/src/lib/reminders/reminderEnqueue.server";
+import { publishLeadFlowEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import type { CrmPipelineScope, FiCrmLeadRow } from "./types";
 import { CRM_DEFAULT_PERSON_SOURCE_SYSTEM } from "./types";
 import { organisationBelongsToTenant, clinicBelongsToTenant } from "@/src/lib/fi/foundation/tenantSettings";
@@ -225,6 +226,20 @@ export async function createCrmLeadWithPerson(
   );
 
   await syncLeadCreatedReminderJobs(lead, supabase);
+
+  void publishLeadFlowEvent({
+    tenantId,
+    clinicId: lead.clinic_id,
+    eventType: "lead_created",
+    entityId: lead.id,
+    entityType: "lead",
+    eventMetadata: {
+      source: leadSource?.source_system ?? "direct",
+      stage: entry.slug,
+      patient_id: lead.patient_id,
+      case_id: lead.case_id,
+    },
+  });
 
   return lead;
 }
