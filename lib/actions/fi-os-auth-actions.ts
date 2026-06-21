@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient, type CookieOptions, type SetAllCookies } from "@supabase/ssr";
 
+import { loadFiOsIdentity, loadFirstTenantIdForAuthUser } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { resolveFiOsPostLoginRedirect } from "@/src/lib/fiOs/fiOsRedirect.server";
+
+/** Temporary diagnostic logging — env presence only; never log secrets or tokens. */
+function logFiOsSignIn(stage: string, details: Record<string, unknown>): void {
+  console.info("[fi-os-auth]", stage, JSON.stringify(details));
+}
 
 function firstForwardedValue(raw: string | null): string | null {
   if (!raw) return null;
@@ -40,7 +46,15 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  logFiOsSignIn("env_check", {
+    hasSupabaseUrl: Boolean(url),
+    hasAnonKey: Boolean(anon),
+  });
   if (!url || !anon) {
+    logFiOsSignIn("redirect", {
+      reason: "server_misconfigured",
+      target: "/follicle-intelligence/login?error=server_misconfigured",
+    });
     redirect("/follicle-intelligence/login?error=server_misconfigured");
   }
 
@@ -64,10 +78,32 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.user) {
+    logFiOsSignIn("auth_error", {
+      code: error?.code ?? "no_user",
+      message: error?.message ?? "signInWithPassword returned no user",
+    });
+    logFiOsSignIn("redirect", {
+      reason: "invalid_credentials",
+      target: "/follicle-intelligence/login?error=invalid_credentials",
+    });
     redirect("/follicle-intelligence/login?error=invalid_credentials");
   }
 
   const dest = next ?? (await resolveFiOsPostLoginRedirect(data.user.id));
+  const [osIdentity, tenantId] = await Promise.all([
+    loadFiOsIdentity(data.user.id),
+    loadFirstTenantIdForAuthUser(data.user.id),
+  ]);
+  logFiOsSignIn("membership", {
+    hasOsIdentity: Boolean(osIdentity),
+    osRole: osIdentity?.osRole ?? null,
+    hasTenantMembership: Boolean(tenantId),
+    tenantIdPresent: Boolean(tenantId),
+  });
+  logFiOsSignIn("redirect", {
+    reason: next ? "explicit_next" : "post_login_resolver",
+    target: dest,
+  });
   redirect(dest);
 }
 
