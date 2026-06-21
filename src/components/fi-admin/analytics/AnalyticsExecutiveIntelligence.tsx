@@ -22,8 +22,6 @@ import type {
   AnalyticsScoreBand,
 } from "@/src/lib/analytics-os/analyticsExecutiveTypes";
 
-const ICON = 20;
-
 function bandBadgeClass(band: AnalyticsScoreBand): string {
   switch (band) {
     case "excellent":

@@ -269,7 +269,6 @@ export function calculateConversionPerformanceScore(input: ExecutiveScoringInput
   const quoteSent = getTypeCount(input.current, "quote_sent");
   const leadConverted = getTypeCount(input.current, "lead_converted");
 
-  const funnelDenominator = Math.max(leadCreated, consultationBooked, quoteSent, 1);
   const quoteToConsultRatio = consultationBooked > 0 ? quoteSent / consultationBooked : quoteSent > 0 ? 0.5 : 0;
   const conversionRate = leadCreated > 0 ? leadConverted / leadCreated : leadConverted > 0 ? 1 : 0;
 
@@ -442,7 +441,6 @@ export function calculateOverallClinicHealthScore(input: OverallHealthScoreInput
   if (limitedCount >= 3) score -= 8;
   else if (limitedCount >= 2) score -= 4;
 
-  const band = resolveScoreBand(clampScore(score));
   const explanation =
     limitedCount > 0
       ? `Overall clinic health is a weighted blend of six operational scores (${limitedCount} dimension${limitedCount === 1 ? "" : "s"} on limited signal).`

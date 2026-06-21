@@ -14,7 +14,6 @@ import {
   validateAnalyticsEventInput,
   validateAnalyticsEventMetadata,
   AnalyticsEventValidationError,
-  type FiAnalyticsEventRow,
 } from "@/src/lib/analytics-os/analyticsEventCore";
 import { publishWorkforceEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 
