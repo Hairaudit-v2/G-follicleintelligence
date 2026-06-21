@@ -55,8 +55,18 @@ npm run supabase:stop
 For a **linked remote** project (dashboard-linked):
 
 ```bash
+# Preferred — compares local files vs hosted history and applies pending DDL
+npm run supabase:push:remote:dry-run   # inspect only
+npm run supabase:push:remote           # apply (requires SUPABASE_DB_PASSWORD in .env.local)
+
+# Continuous monitor (poll + filesystem watch)
+npm run supabase:watch:migrations
+
+# Supabase CLI (alternative when linked + password works)
 npx supabase db push
 ```
+
+Set `SUPABASE_DB_PASSWORD` from **Project Settings → Database** in `.env.local` (never commit).
 
 Use hosted project credentials from the Supabase dashboard; never commit secrets.
 

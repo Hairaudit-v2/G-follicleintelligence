@@ -1,0 +1,11 @@
+---
+pid: 30540
+cwd: "G:\follicleintelligence"
+command: "cd \"G:\\follicleintelligence\"; vercel login 2>&1"
+started_at: 2026-06-20T23:45:53.611Z
+running_for_ms: 7440011  
+---
+> 
+  Visit https://vercel.com/oauth/device?user_code=PWXQ-PBKN
+
+Waiting for authentication...

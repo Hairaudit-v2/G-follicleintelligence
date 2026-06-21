@@ -1,0 +1,353 @@
+---
+pid: 30736
+cwd: "G:\follicleintelligence"
+command: "Set-Location G:\\follicleintelligence; npm run clean; npm run build"
+started_at: 2026-06-21T02:39:32.168Z
+running_for_ms: 18505004 
+---
+
+> follicleintelligence@0.1.0 clean
+> node -e "require('node:fs').rmSync('.next',{recursive:true,force:true})"
+
+node:internal/fs/rimraf:292
+    throw originalErr;
+    ^
+
+Error: EPERM: operation not permitted, lstat 'G:\follicleintelligence\.next\trace'
+    at lstatSync (node:fs:1642:25)
+    at rimrafSync (node:internal/fs/rimraf:182:13)
+    at node:internal/fs/rimraf:255:9
+    at Array.forEach (<anonymous>)
+    at _rmdirSync (node:internal/fs/rimraf:252:7)
+    at fixWinEPERMSync (node:internal/fs/rimraf:306:5)
+    at rimrafSync (node:internal/fs/rimraf:202:14)
+    at Object.rmSync (node:fs:1264:10)
+    at [eval]:1:20
+    at runScriptInThisContext (node:internal/vm:209:10) {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'lstat',
+  path: 'G:\\follicleintelligence\\.next\\trace'
+}
+
+Node.js v20.19.0
+
+> follicleintelligence@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (133kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./components/calendar/CalendarPage.tsx
+266:5  Warning: React Hook useMemo has a missing dependency: 'openBookingDrawer'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/calendar/MonthView.tsx
+551:5  Warning: React Hook useMemo has a missing dependency: 'bookings'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/fi-admin/calendar/FiOsCalendarTodayCommandStrip.tsx
+51:5  Warning: React Hook useMemo has a missing dependency: 'bookings'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/fi-admin/calendar/OperationalCalendarPage.tsx
+47:7  Warning: React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+ ⚠ Using edge runtime on a page currently disables static generation for that page
+   Generating static pages (0/79) ...
+   Generating static pages (19/79) 
+   Generating static pages (39/79) 
+   Generating static pages (59/79) 
+ ✓ Generating static pages (79/79)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                                                         Size     First Load JS
+┌ ○ /                                                                                               10.3 kB         167 kB
+├ ○ /_not-found                                                                                     880 B          89.4 kB
+├ ○ /about                                                                                          882 B           147 kB
+├ ○ /academy                                                                                        8.76 kB         155 kB
+├ ○ /admin/platform/tenants                                                                         205 B          88.7 kB
+├ ○ /ai-hair-transplant-analysis                                                                    882 B           147 kB
+├ ƒ /api/cron/fi-payments/reminders                                                                 0 B                0 B
+├ ƒ /api/cron/fi-photo-protocol-alerts                                                              0 B                0 B
+├ ƒ /api/cron/fi-reminder-jobs                                                                      0 B                0 B
+├ ƒ /api/cron/financial-os/automation                                                               0 B                0 B
+├ ƒ /api/cron/financial-os/clearance-snapshots                                                      0 B                0 B
+├ ƒ /api/cron/financial-os/pathway-task-escalation                                                  0 B                0 B
+├ ƒ /api/cron/iiohr-hr-perth-staff-sync                                                             0 B                0 B
+├ ƒ /api/fi-os/impersonation/start                                                                  0 B                0 B
+├ ƒ /api/fi-os/impersonation/stop                                                                   0 B                0 B
+├ ƒ /api/fi-payments/stripe/webhook                                                                 0 B                0 B
+├ ƒ /api/fi-staff-pin/login                                                                         0 B                0 B
+├ ƒ /api/fi-staff-pin/logout                                                                        0 B                0 B
+├ ƒ /api/fi/audit/approve                                                                           0 B                0 B
+├ ƒ /api/fi/audit/dashboard                                                                         0 B                0 B
+├ ƒ /api/fi/audit/queue                                                                             0 B                0 B
+├ ƒ /api/fi/audit/reject                                                                            0 B                0 B
+├ ƒ /api/fi/cases                                                                                   0 B                0 B
+├ ƒ /api/fi/copy-check                                                                              0 B                0 B
+├ ƒ /api/fi/events                                                                                  0 B                0 B
+├ ƒ /api/fi/partners                                                                                0 B                0 B
+├ ƒ /api/fi/patient-twin/[patientId]                                                                0 B                0 B
+├ ƒ /api/fi/report                                                                                  0 B                0 B
+├ ƒ /api/fi/run-model                                                                               0 B                0 B
+├ ƒ /api/fi/submit                                                                                  0 B                0 B
+├ ƒ /api/fi/uploads                                                                                 0 B                0 B
+├ ƒ /api/health/iiohr-hr-staff-sync                                                                 0 B                0 B
+├ ƒ /api/ingest/[tenantId]/partners                                                                 0 B                0 B
+├ ƒ /api/internal/hairaudit/image-classify                                                          0 B                0 B
+├ ƒ /api/nexus/iiohr/provision                                                                      0 B                0 B
+├ ƒ /api/nexus/iiohr/rollback                                                                       0 B                0 B
+├ ƒ /api/nexus/iiohr/state                                                                          0 B                0 B
+├ ƒ /api/tenants                                                                                    0 B                0 B
+├ ƒ /api/tenants/[tenantId]/appointments                                                            0 B                0 B
+├ ƒ /api/tenants/[tenantId]/appointments/[appointmentId]                                            0 B                0 B
+├ ƒ /api/tenants/[tenantId]/bookings                                                                0 B                0 B
+├ ƒ /api/tenants/[tenantId]/bookings/[bookingId]                                                    0 B                0 B
+├ ƒ /api/tenants/[tenantId]/bookings/[bookingId]/cancel                                             0 B                0 B
+├ ƒ /api/tenants/[tenantId]/bookings/[bookingId]/complete                                           0 B                0 B
+├ ƒ /api/tenants/[tenantId]/cases                                                                   0 B                0 B
+├ ƒ /api/tenants/[tenantId]/cases/[caseId]                                                          0 B                0 B
+├ ƒ /api/tenants/[tenantId]/cases/[caseId]/run-model                                                0 B                0 B
+├ ƒ /api/tenants/[tenantId]/cases/[caseId]/submit                                                   0 B                0 B
+├ ƒ /api/tenants/[tenantId]/cases/[caseId]/uploads                                                  0 B                0 B
+├ ƒ /api/tenants/[tenantId]/clinic-os/global-search                                                 0 B                0 B
+├ ƒ /api/tenants/[tenantId]/consultations/search-links                                              0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads                                                               0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]                                                      0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/activity                                             0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/communications                                       0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/communications/[communicationId]                     0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/communications/[communicationId]/archive             0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/convert                                              0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/messages/preview                                     0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/notes                                                0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/notes/[noteId]                                       0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/notes/[noteId]/archive                               0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/previews                                             0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/stage                                                0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/tasks                                                0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/leads/[leadId]/tasks/[taskId]                                       0 B                0 B
+├ ƒ /api/tenants/[tenantId]/crm/pipeline-stages                                                     0 B                0 B
+├ ƒ /api/tenants/[tenantId]/financial-os                                                            0 B                0 B
+├ ƒ /api/tenants/[tenantId]/foundation-integrity                                                    0 B                0 B
+├ ƒ /api/tenants/[tenantId]/integrations/hubspot/contact                                            0 B                0 B
+├ ƒ /api/tenants/[tenantId]/integrations/hubspot/deal                                               0 B                0 B
+├ ƒ /api/tenants/[tenantId]/integrations/hubspot/email-event                                        0 B                0 B
+├ ƒ /api/tenants/[tenantId]/integrations/iiohr-hr/staff-sync                                        0 B                0 B
+├ ƒ /api/tenants/[tenantId]/integrations/timely/appointment                                         0 B                0 B
+├ ƒ /api/tenants/[tenantId]/integrations/timely/discovery                                           0 B                0 B
+├ ƒ /api/tenants/[tenantId]/integrations/timely/patient                                             0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patient-directory/[patientId]                                           0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patient-directory/[patientId]/clinical-details                          0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patient-directory/[patientId]/images                                    0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patient-directory/[patientId]/images/[imageId]                          0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patient-directory/[patientId]/images/[imageId]/archive                  0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]                                                    0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/clinical-details                                   0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/images                                             0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/images/[imageId]                                   0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/images/[imageId]/archive                           0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-requests                                 0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-requests/[requestId]                     0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-requests/[requestId]/cancel              0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-requests/[requestId]/pdf                 0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-requests/[requestId]/send-to-patient     0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-results                                  0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-results/[resultId]                       0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/pathology-results/[resultId]/ai-interpretation     0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/prescriptions/[prescriptionId]/pharmacy-order-pdf  0 B                0 B
+├ ƒ /api/tenants/[tenantId]/patients/[patientId]/voice-notes/process                                0 B                0 B
+├ ƒ /api/tenants/[tenantId]/reception-os                                                            0 B                0 B
+├ ƒ /api/tenants/[tenantId]/reception-os/export                                                     0 B                0 B
+├ ƒ /api/tenants/[tenantId]/reception-tasks                                                         0 B                0 B
+├ ƒ /api/tenants/[tenantId]/seed                                                                    0 B                0 B
+├ ƒ /api/tenants/[tenantId]/staff                                                                   0 B                0 B
+├ ƒ /api/tenants/[tenantId]/staff/[staffId]                                                         0 B                0 B
+├ ƒ /api/tenants/[tenantId]/surgery-os                                                              0 B                0 B
+├ ƒ /api/tenants/[tenantId]/tick-jobs                                                               0 B                0 B
+├ ○ /apple-icon.png                                                                                 0 B                0 B
+├ ○ /audit-network                                                                                  9.27 kB         155 kB
+├ ○ /clinic-owners                                                                                  9.64 kB         156 kB
+├ ○ /contact                                                                                        882 B           147 kB
+├ ƒ /crm_operator                                                                                   205 B          88.7 kB
+├ ○ /dashboard-demo                                                                                 882 B           147 kB
+├ ƒ /dashboard/calendar                                                                             233 B           302 kB
+├ ○ /demo                                                                                           735 B           147 kB
+├ ○ /design-system                                                                                  8.98 kB         115 kB
+├ ○ /enterprise                                                                                     9.4 kB          156 kB
+├ ƒ /fi_clinic_admin                                                                                205 B          88.7 kB
+├ ƒ /fi-admin                                                                                       3.56 kB         109 kB
+├ ƒ /fi-admin/[tenantId]                                                                            3.53 kB         123 kB
+├ ƒ /fi-admin/[tenantId]/analytics                                                                  257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/appointments                                                               9.2 kB          161 kB
+├ ƒ /fi-admin/[tenantId]/appointments/[appointmentId]                                               9.67 kB         166 kB
+├ ƒ /fi-admin/[tenantId]/audit                                                                      7.1 kB          113 kB
+├ ƒ /fi-admin/[tenantId]/audit/[reportId]                                                           2.53 kB        99.7 kB
+├ ƒ /fi-admin/[tenantId]/bookings                                                                   8.24 kB         129 kB
+├ ƒ /fi-admin/[tenantId]/bookings/new                                                               257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/calendar                                                                   1.59 kB         303 kB
+├ ƒ /fi-admin/[tenantId]/calendar/testing                                                           8.9 kB          114 kB
+├ ƒ /fi-admin/[tenantId]/cases                                                                      560 B          97.8 kB
+├ ƒ /fi-admin/[tenantId]/cases/[caseId]                                                             26.7 kB         192 kB
+├ ƒ /fi-admin/[tenantId]/cases/[caseId]/summary                                                     402 B          97.6 kB
+├ ƒ /fi-admin/[tenantId]/cases/new                                                                  3.43 kB         101 kB
+├ ƒ /fi-admin/[tenantId]/configuration                                                              9.2 kB          120 kB
+├ ƒ /fi-admin/[tenantId]/consultation-conversion                                                    4 kB            110 kB
+├ ƒ /fi-admin/[tenantId]/consultations                                                              257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/consultations/[consultationId]                                             8.55 kB         148 kB
+├ ƒ /fi-admin/[tenantId]/consultations/[consultationId]/forms                                       150 B           143 kB
+├ ƒ /fi-admin/[tenantId]/consultations/[consultationId]/forms/female-hair-loss                      151 B           143 kB
+├ ƒ /fi-admin/[tenantId]/consultations/[consultationId]/forms/follow-up                             151 B           143 kB
+├ ƒ /fi-admin/[tenantId]/consultations/[consultationId]/forms/hair-loss-treatment                   151 B           143 kB
+├ ƒ /fi-admin/[tenantId]/consultations/[consultationId]/forms/pathology                             151 B           143 kB
+├ ƒ /fi-admin/[tenantId]/consultations/[consultationId]/forms/repair                                151 B           143 kB
+├ ƒ /fi-admin/[tenantId]/consultations/new                                                          4.66 kB         123 kB
+├ ƒ /fi-admin/[tenantId]/crm                                                                        11.7 kB         222 kB
+├ ƒ /fi-admin/[tenantId]/crm/leads/[leadId]                                                         17.2 kB         176 kB
+├ ƒ /fi-admin/[tenantId]/directory                                                                  5.64 kB         111 kB
+├ ƒ /fi-admin/[tenantId]/doctor                                                                     257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/financial                                                                  205 B          88.7 kB
+├ ƒ /fi-admin/[tenantId]/financial-os                                                               6.95 kB         118 kB
+├ ƒ /fi-admin/[tenantId]/financial-os/accounts-receivable                                           3.19 kB         114 kB
+├ ƒ /fi-admin/[tenantId]/financial-os/cost-models                                                   3 kB            113 kB
+├ ƒ /fi-admin/[tenantId]/financial-os/executive                                                     3.21 kB         113 kB
+├ ƒ /fi-admin/[tenantId]/financial/dashboard                                                        1.41 kB         111 kB
+├ ƒ /fi-admin/[tenantId]/financial/deposit-rules                                                    205 B          88.7 kB
+├ ƒ /fi-admin/[tenantId]/financial/finance-applications                                             4.28 kB         105 kB
+├ ƒ /fi-admin/[tenantId]/financial/installments                                                     1.42 kB         102 kB
+├ ƒ /fi-admin/[tenantId]/financial/international-transfers                                          5.36 kB         106 kB
+├ ƒ /fi-admin/[tenantId]/financial/invoices                                                         257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/financial/pathway-inbox                                                    4.71 kB         114 kB
+├ ƒ /fi-admin/[tenantId]/financial/payment-pathways                                                 3.35 kB         104 kB
+├ ƒ /fi-admin/[tenantId]/financial/payment-requests                                                 257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/financial/payments                                                         205 B          88.7 kB
+├ ƒ /fi-admin/[tenantId]/financial/providers                                                        2.58 kB         103 kB
+├ ƒ /fi-admin/[tenantId]/financial/super-release                                                    4.61 kB         106 kB
+├ ƒ /fi-admin/[tenantId]/foundation-integrity                                                       4.52 kB         110 kB
+├ ƒ /fi-admin/[tenantId]/global-command-centre                                                      5.33 kB         111 kB
+├ ƒ /fi-admin/[tenantId]/global-command-centre/presentation                                         5.96 kB         111 kB
+├ ƒ /fi-admin/[tenantId]/hr-os                                                                      257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/hr/staff-import                                                            9.81 kB         115 kB
+├ ƒ /fi-admin/[tenantId]/hr/staff-import/payroll                                                    5.73 kB         111 kB
+├ ƒ /fi-admin/[tenantId]/hr/staff-readiness                                                         7.97 kB         121 kB
+├ ƒ /fi-admin/[tenantId]/hr/sync-health                                                             8.32 kB         115 kB
+├ ƒ /fi-admin/[tenantId]/medication-reorders                                                        1.78 kB        90.3 kB
+├ ƒ /fi-admin/[tenantId]/module-unavailable                                                         2.48 kB        99.7 kB
+├ ƒ /fi-admin/[tenantId]/operations                                                                 2.02 kB         108 kB
+├ ƒ /fi-admin/[tenantId]/patients                                                                   3.57 kB         163 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]                                                       16.6 kB         182 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]/blood-request                                         3.26 kB         100 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]/blood-request/[requestId]                             2.8 kB          100 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]/blood-results/[resultId]                              4.96 kB         102 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]/blood-results/new                                     3.2 kB          100 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]/imaging                                               9.44 kB         112 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]/timeline                                              257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/patients/[patientId]/twin                                                  13.2 kB         119 kB
+├ ƒ /fi-admin/[tenantId]/patients/new                                                               3.72 kB         109 kB
+├ ƒ /fi-admin/[tenantId]/payments                                                                   257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/prescriptions                                                              257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/prescriptions/[prescriptionId]                                             157 B           123 kB
+├ ƒ /fi-admin/[tenantId]/prescriptions/new                                                          157 B           123 kB
+├ ƒ /fi-admin/[tenantId]/procedure-day                                                              4.05 kB         120 kB
+├ ƒ /fi-admin/[tenantId]/reception                                                                  5.46 kB         111 kB
+├ ƒ /fi-admin/[tenantId]/reception-os                                                               25.2 kB         148 kB
+├ ƒ /fi-admin/[tenantId]/rooms                                                                      4.45 kB         114 kB
+├ ƒ /fi-admin/[tenantId]/services                                                                   7.35 kB         117 kB
+├ ƒ /fi-admin/[tenantId]/settings/admin-users                                                       3.24 kB         100 kB
+├ ƒ /fi-admin/[tenantId]/settings/clinic-setup                                                      4.73 kB         114 kB
+├ ƒ /fi-admin/[tenantId]/settings/imports/hubspot                                                   4.22 kB         110 kB
+├ ƒ /fi-admin/[tenantId]/settings/integrations/timely                                               257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/settings/integrations/timely/discovery                                     1.39 kB        98.6 kB
+├ ƒ /fi-admin/[tenantId]/settings/payments                                                          257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/settings/reminders                                                         2.81 kB         104 kB
+├ ƒ /fi-admin/[tenantId]/settings/tax-localisation                                                  3.56 kB         101 kB
+├ ƒ /fi-admin/[tenantId]/staff                                                                      10.7 kB         136 kB
+├ ƒ /fi-admin/[tenantId]/staff-pin-login                                                            3.38 kB         100 kB
+├ ƒ /fi-admin/[tenantId]/staff/[staffId]/twin                                                       3.43 kB         109 kB
+├ ƒ /fi-admin/[tenantId]/staff/import/iiohr-hr                                                      204 B          88.7 kB
+├ ƒ /fi-admin/[tenantId]/staff/link-users                                                           3.25 kB         100 kB
+├ ƒ /fi-admin/[tenantId]/staff/me/hr                                                                257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/staff/role-review                                                          3.73 kB         120 kB
+├ ƒ /fi-admin/[tenantId]/surgery-os                                                                 9.44 kB         139 kB
+├ ƒ /fi-admin/[tenantId]/surgery-os/graft-counting                                                  8.33 kB         135 kB
+├ ƒ /fi-admin/[tenantId]/surgery-readiness                                                          3.03 kB         118 kB
+├ ƒ /fi-admin/[tenantId]/system-status                                                              257 B          97.5 kB
+├ ƒ /fi-admin/[tenantId]/tomorrow                                                                   353 B           112 kB
+├ ƒ /fi-admin/ihrg-global/global-command-centre                                                     205 B          88.7 kB
+├ ƒ /fi-admin/ihrg-global/global-command-centre/presentation                                        205 B          88.7 kB
+├ ƒ /fi-admin/system                                                                                257 B          97.5 kB
+├ ƒ /fi-admin/system/academy                                                                        256 B          97.5 kB
+├ ƒ /fi-admin/system/audit-logs                                                                     257 B          97.5 kB
+├ ƒ /fi-admin/system/clinics                                                                        257 B          97.5 kB
+├ ƒ /fi-admin/system/doctors                                                                        257 B          97.5 kB
+├ ƒ /fi-admin/system/integrations                                                                   205 B          88.7 kB
+├ ƒ /fi-admin/system/intelligence-event-logs                                                        205 B          88.7 kB
+├ ƒ /fi-admin/system/intelligence-event-logs/replay                                                 257 B          97.5 kB
+├ ƒ /fi-admin/system/medication-catalogue                                                           257 B          97.5 kB
+├ ƒ /fi-admin/system/permissions                                                                    204 B          88.7 kB
+├ ƒ /fi-admin/system/services                                                                       257 B          97.5 kB
+├ ƒ /fi-admin/system/staff                                                                          257 B          97.5 kB
+├ ƒ /fi-admin/system/system-settings                                                                204 B          88.7 kB
+├ ƒ /fi-admin/system/tenants                                                                        1.7 kB         98.9 kB
+├ ƒ /fi-admin/system/users                                                                          2.31 kB        90.8 kB
+├ ƒ /fi-login                                                                                       205 B          88.7 kB
+├ ○ /follicle-intelligence/forgot-password                                                          1.31 kB        98.5 kB
+├ ƒ /follicle-intelligence/login                                                                    257 B          97.5 kB
+├ ƒ /follicle-intelligence/settings/imports/hubspot                                                 205 B          88.7 kB
+├ ○ /follicle-intelligence/update-password                                                          52.5 kB         150 kB
+├ ○ /future-verticals                                                                               882 B           147 kB
+├ ƒ /hair-audit/admin                                                                               258 B          97.5 kB
+├ ○ /hair-intelligence                                                                              882 B           147 kB
+├ ○ /icon.png                                                                                       0 B                0 B
+├ ○ /integration                                                                                    882 B           147 kB
+├ ○ /intelligence                                                                                   10.3 kB         156 kB
+├ ○ /investors                                                                                      10 kB           156 kB
+├ ○ /licensing                                                                                      882 B           147 kB
+├ ○ /methodology                                                                                    882 B           147 kB
+├ ○ /modules                                                                                        2.47 kB         149 kB
+├ ƒ /opengraph-image                                                                                0 B                0 B
+├ ○ /partners                                                                                       9.17 kB         155 kB
+├ ○ /patient-twin                                                                                   735 B           147 kB
+├ ƒ /patient/[tenantId]                                                                             205 B          88.7 kB
+├ ƒ /patient/[tenantId]/medications                                                                 3.06 kB        91.5 kB
+├ ƒ /pay/[paymentRequestToken]                                                                      1.31 kB        98.5 kB
+├ ○ /platform                                                                                       10.8 kB         157 kB
+├ ○ /platform/analytics-os                                                                          735 B           147 kB
+├ ○ /platform/clinic-os                                                                             735 B           147 kB
+├ ○ /platform/ecosystem                                                                             8.63 kB         155 kB
+├ ○ /platform/imaging-os                                                                            735 B           147 kB
+├ ○ /platform/leadflow                                                                              735 B           147 kB
+├ ○ /platform/patient-os                                                                            735 B           147 kB
+├ ○ /platform/progress                                                                              5.95 kB         158 kB
+├ ○ /platform/surgery-os                                                                            735 B           147 kB
+├ ○ /pricing                                                                                        882 B           147 kB
+├ ○ /research                                                                                       9.79 kB         156 kB
+├ ○ /robots.txt                                                                                     0 B                0 B
+├ ○ /security                                                                                       882 B           147 kB
+├ ○ /sitemap.xml                                                                                    0 B                0 B
+├ ○ /solutions                                                                                      882 B           147 kB
+├ ○ /surgeons                                                                                       9.22 kB         155 kB
+├ ○ /technology                                                                                     4.01 kB         150 kB
+├ ○ /the-future-of-hair-restoration                                                                 9.27 kB         155 kB
+├ ○ /twitter-image.png                                                                              0 B                0 B
+├ ○ /use-cases                                                                                      882 B           147 kB
+├ ○ /vision                                                                                         841 B           152 kB
+├ ○ /white-label                                                                                    882 B           147 kB
+└ ○ /why-follicle-intelligence                                                                      8.84 kB         155 kB
++ First Load JS shared by all                                                                       88.5 kB
+  ├ chunks/2117-e61671f08746911f.js                                                                 31.9 kB
+  ├ chunks/fd9d1056-64cbc9eb7d35cb53.js                                                             53.6 kB
+  └ other shared chunks (total)                                                                     2.93 kB
+
+
+ƒ Middleware                                                                                        74.5 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
