@@ -11,6 +11,10 @@ import {
   normalizeFiStaffSourceSystem,
   normalizeFiStaffSourceUrl,
 } from "@/src/lib/staff/staffSourceIdsNormalize";
+import {
+  canonicaliseWorkforceSourceSystem,
+  WORKFORCE_IDENTITY_SOURCE_SYSTEMS,
+} from "@/src/lib/workforce-os/workforceIdentitySources";
 
 import type {
   IiohrHrImportExistingSourceId,
@@ -40,7 +44,9 @@ export type {
 } from "./iiohrHrStaffImportTypes";
 
 /** Canonical `source_system` for IIOHR HR rows in `fi_staff_source_ids`. */
-export const IIOHR_HR_SOURCE_SYSTEM = normalizeFiStaffSourceSystem("iiohr_hr");
+export const IIOHR_HR_SOURCE_SYSTEM = canonicaliseWorkforceSourceSystem(
+  WORKFORCE_IDENTITY_SOURCE_SYSTEMS.IIOHR_HR
+);
 
 function emailKey(email: string | null | undefined): string | null {
   if (email == null) return null;

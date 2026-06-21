@@ -74,6 +74,9 @@ export async function rollbackExternalProfessionalProvisioning(
 
     if (membershipErr) throw new Error(membershipErr.message);
 
+    const { markNexusIdentityLinkRevoked } = await import("@/src/lib/workforce-os/nexusFiStaffBridge.server");
+    await markNexusIdentityLinkRevoked(tenantId, globalProfessionalId, supabase);
+
     const stateResult = await readExternalProfessionalState(globalProfessionalId, supabase);
     if (!stateResult.ok) {
       return { ok: false, error: stateResult.error, httpStatus: stateResult.httpStatus };

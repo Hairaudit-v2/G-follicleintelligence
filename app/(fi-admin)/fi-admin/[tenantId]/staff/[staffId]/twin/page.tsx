@@ -9,6 +9,8 @@ import { StaffPayrollMetadataPanel } from "@/src/components/fi/staff/StaffPayrol
 import { pickStaffHrNotificationFromSourceRows } from "@/src/lib/staff/staffHrNotificationSummary";
 import { StaffPinSettingsPanel } from "@/src/components/fi/staff/StaffPinSettingsPanel";
 import { StaffTwinIiohrComplianceCard } from "@/src/components/staff/staffComplianceReadOnly";
+import { StaffWorkforceIdentityPanel } from "@/src/components/fi/staff/StaffWorkforceIdentityPanel";
+import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/workforce-os/workforceIdentitySummary";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import { pickPayrollSourceDisplayFromRows } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { isStaffRoleNeedsReview } from "@/src/lib/staff/staffRolePolicy";
@@ -51,6 +53,13 @@ export default async function StaffTwinPage({
     sourceIds.map((row) => ({
       source_system: row.source_system,
       source_url: row.source_url,
+      metadata: row.metadata,
+    }))
+  );
+  const identitySummary = buildWorkforceIdentitySummaryFromSourceRows(
+    sourceIds.map((row) => ({
+      source_system: row.source_system,
+      source_staff_id: row.source_staff_id,
       metadata: row.metadata,
     }))
   );
@@ -158,6 +167,10 @@ export default async function StaffTwinPage({
         ) : (
           <p className="mt-4 text-sm text-[#94A3B8]">No FI user is linked to this staff profile.</p>
         )}
+      </DashboardCard>
+
+      <DashboardCard className="p-6 sm:p-8">
+        <StaffWorkforceIdentityPanel summary={identitySummary} variant="dark" />
       </DashboardCard>
 
       <DashboardCard className="p-6 sm:p-8">

@@ -61,7 +61,7 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
   const [feedPreview, setFeedPreview] = useState<Awaited<ReturnType<typeof previewHrStaffFeedAction>> | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const { overview, latestRun, latestSuccessfulRun, envChecklist, staffIssues } = pageModel;
+  const { overview, latestRun, latestSuccessfulRun, envChecklist, staffIssues, identityOverview } = pageModel;
 
   const exportCsv = useCallback(() => {
     const csv = buildHrSyncIssuesCsvExport(staffIssues);
@@ -137,6 +137,45 @@ export function HrSyncHealthClient({ tenantId, pageModel }: { tenantId: string; 
           {actionMessage}
         </InfoNotice>
       ) : null}
+
+      <DashboardCard className="p-5 border-white/10">
+        <h2 className="text-lg font-semibold text-[#F8FAFC]">Workforce identity coverage</h2>
+        <p className="mt-1 text-sm text-[#94A3B8]">
+          Active staff identity links across IIOHR HR, Academy, and Nexus (operational projection — not source of record).
+        </p>
+        <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Active staff</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{identityOverview.activeStaffCount}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">HR linked</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {identityOverview.hrLinkedCount} / {identityOverview.activeStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Nexus linked</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {identityOverview.nexusLinkedCount} / {identityOverview.activeStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Academy linked</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">
+              {identityOverview.academyLinkedCount} / {identityOverview.activeStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Stale identity sync</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{identityOverview.staleIdentityCount}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-[#64748B]">Fully linked (3 systems)</dt>
+            <dd className="mt-0.5 text-sm font-medium text-[#E2E8F0]">{identityOverview.fullyLinkedCount}</dd>
+          </div>
+        </dl>
+      </DashboardCard>
 
       <DashboardCard className={`p-5 ${healthBorder(overview.variant)}`}>
         <div className="flex flex-wrap items-start gap-3">

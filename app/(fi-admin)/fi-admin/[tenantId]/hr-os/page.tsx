@@ -2,6 +2,8 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
+import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
 import { resolveHrOsRouteAccess } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 
 export const metadata = {
@@ -19,7 +21,10 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
   const access = await resolveHrOsRouteAccess(tenantId.trim());
   if (!access.ok) notFound();
 
-  const base = `/fi-admin/${tenantId.trim()}/hr-os`;
+  const tid = tenantId.trim();
+  const base = `/fi-admin/${tid}/hr-os`;
+  const staff = await loadAllStaffForTenant(tid);
+  const identityOverview = await buildTenantWorkforceIdentityOverview(tid, staff);
 
   return (
     <div className="relative z-[1] mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
@@ -40,6 +45,46 @@ export default async function HrOsHomePage({ params }: { params: Promise<{ tenan
           platform entitlements — only verified clinics with an active subscription and enabled HR OS access can use it.
         </p>
       </header>
+
+      <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-6">
+        <h2 className="text-sm font-semibold text-slate-100">Identity layer</h2>
+        <p className="mt-2 text-sm text-slate-400">
+          Tenant-wide workforce identity link coverage across HR, Academy, and Nexus. Staff Twin shows per-person
+          detail.
+        </p>
+        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+          <div>
+            <dt className="text-slate-500">Active staff</dt>
+            <dd className="mt-1 font-semibold text-slate-100">{identityOverview.activeStaffCount}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">HR linked</dt>
+            <dd className="mt-1 font-semibold text-slate-100">
+              {identityOverview.hrLinkedCount} / {identityOverview.activeStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Nexus linked</dt>
+            <dd className="mt-1 font-semibold text-slate-100">
+              {identityOverview.nexusLinkedCount} / {identityOverview.activeStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Academy linked</dt>
+            <dd className="mt-1 font-semibold text-slate-100">
+              {identityOverview.academyLinkedCount} / {identityOverview.activeStaffCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Stale identity sync</dt>
+            <dd className="mt-1 font-semibold text-slate-100">{identityOverview.staleIdentityCount}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Fully linked (3 systems)</dt>
+            <dd className="mt-1 font-semibold text-slate-100">{identityOverview.fullyLinkedCount}</dd>
+          </div>
+        </dl>
+      </section>
 
       <section className="mt-8 rounded-2xl border border-white/[0.08] bg-[#0F1629]/60 p-6">
         <h2 className="text-sm font-semibold text-slate-100">Getting started</h2>

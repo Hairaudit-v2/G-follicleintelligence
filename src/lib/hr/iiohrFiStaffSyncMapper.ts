@@ -6,6 +6,7 @@
 import {
   extractValidatedHrReadinessFields,
   HR_STAFF_SENSITIVE_METADATA_KEYS,
+  buildHrWorkforceIdentityMetadataProjection,
 } from "@/src/lib/staff/hrStaffReadinessMetadata";
 import type { IiohrHrStaffSyncRow } from "@/src/lib/staffImport/iiohrHrStaffSyncTypes";
 
@@ -141,6 +142,10 @@ export function mapIiohrHrStaffToFiSyncRow(record: IiohrHrPortalStaffRecord): Ii
     metadata_snapshot: {
       ...buildBoundedMetadataSnapshotV1(record),
       ...buildHrReadinessMetadataSnapshot(record),
+      ...buildHrWorkforceIdentityMetadataProjection({
+        externalStaffId: ext,
+        iiohrUserId: trimStr(record.iiohr_user_id),
+      }),
     } as Record<string, unknown>,
   };
 }

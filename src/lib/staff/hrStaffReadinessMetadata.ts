@@ -8,9 +8,20 @@ import {
   isAllowedHrPortalUrl,
 } from "@/src/lib/staff/myHrPortalSelection";
 import {
+  isStaffSensitiveMetadataKey,
+  parseIsoStaffMetadataDate,
+  STAFF_SENSITIVE_METADATA_KEYS,
+} from "@/src/lib/staff/staffSensitiveMetadataKeys";
+import {
   normalizeFiStaffSourceMetadata,
   normalizeFiStaffSourceSystem,
 } from "@/src/lib/staff/staffSourceIdsNormalize";
+import {
+  extractWorkforceIdentityMetadataFields,
+  WORKFORCE_IDENTITY_METADATA_KEYS,
+  WORKFORCE_IDENTITY_SAFE_METADATA_KEYS,
+} from "@/src/lib/workforce-os/workforceIdentityMetadata";
+import { canonicaliseWorkforceSourceSystem } from "@/src/lib/workforce-os/workforceIdentitySources";
 
 /** Readiness keys surfaced by FI OS staff directory / HR notification UI. */
 export const HR_STAFF_READINESS_METADATA_KEYS = [
@@ -38,36 +49,17 @@ export const IIOHR_HR_LEGACY_METADATA_SNAPSHOT_KEYS = [
 export const IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS = new Set<string>([
   ...IIOHR_HR_LEGACY_METADATA_SNAPSHOT_KEYS,
   ...HR_STAFF_READINESS_METADATA_KEYS,
+  ...WORKFORCE_IDENTITY_METADATA_KEYS,
 ]);
 
-/** Must never be written into FI metadata from HR feeds (defence in depth). */
-export const HR_STAFF_SENSITIVE_METADATA_KEYS = [
-  "bank",
-  "bank_details",
-  "tfn",
-  "taxfilenumber",
-  "tax_file_number",
-  "tax_details",
-  "super",
-  "super_details",
-  "dob",
-  "date_of_birth",
-  "address",
-  "home_address",
-  "pay_rate",
-  "rate",
-  "salary",
-  "tax_information",
-  "contracts",
-  "offer_letters",
-  "hr_letters",
-  "identity_documents",
-  "private_notes",
-] as const;
+/** Workforce identity keys merged on HR sync (projection only). */
+export const HR_WORKFORCE_IDENTITY_METADATA_KEYS = WORKFORCE_IDENTITY_METADATA_KEYS;
+
+export const HR_STAFF_SENSITIVE_METADATA_KEYS = STAFF_SENSITIVE_METADATA_KEYS;
 
 export function isHrStaffSourceSystem(sourceSystem: string): boolean {
-  const norm = normalizeFiStaffSourceSystem(sourceSystem);
-  return (HR_PORTAL_SOURCE_SYSTEM_PRIORITY as readonly string[]).includes(norm);
+  const canon = canonicaliseWorkforceSourceSystem(sourceSystem);
+  return canon === "iiohr_hr";
 }
 
 /** Lower rank = higher priority (`iiohr_hr` first). */
@@ -78,8 +70,7 @@ export function hrStaffSourceSystemRank(sourceSystem: string): number {
 }
 
 function isSensitiveMetadataKey(key: string): boolean {
-  const lower = key.toLowerCase();
-  return HR_STAFF_SENSITIVE_METADATA_KEYS.some((k) => lower === k);
+  return isStaffSensitiveMetadataKey(key);
 }
 
 export function parseNonNegativeCount(v: unknown): number | undefined {
@@ -95,12 +86,7 @@ export function parseNonNegativeCount(v: unknown): number | undefined {
 }
 
 export function parseIsoMetadataDate(v: unknown): string | undefined {
-  if (v == null || v === "") return undefined;
-  const s = String(v).trim();
-  if (!s) return undefined;
-  const t = Date.parse(s);
-  if (Number.isNaN(t)) return undefined;
-  return new Date(t).toISOString();
+  return parseIsoStaffMetadataDate(v);
 }
 
 export function parseOnboardingStatus(v: unknown): string | undefined {
@@ -171,11 +157,13 @@ export function sanitizeIiohrHrMetadataSnapshot(
   const out = extractValidatedHrReadinessFields(readinessInput);
 
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    Object.assign(out, extractWorkforceIdentityMetadataFields(raw));
     for (const [key, value] of Object.entries(raw)) {
       if (isSensitiveMetadataKey(key)) continue;
       if ((HR_STAFF_READINESS_METADATA_KEYS as readonly string[]).includes(key as (typeof HR_STAFF_READINESS_METADATA_KEYS)[number])) {
         continue;
       }
+      if (WORKFORCE_IDENTITY_SAFE_METADATA_KEYS.has(key)) continue;
       if (!IIOHR_HR_SAFE_METADATA_SNAPSHOT_KEYS.has(key)) continue;
       if (value === undefined) continue;
       out[key] = value;
@@ -198,5 +186,23 @@ export function mergeHrStaffSourceMetadataOnSync(
     ...base,
     ...incoming,
     last_synced_at: lastSyncedAt,
+    sync_status: "active",
+    training_source: incoming.training_source ?? base.training_source ?? "iiohr_hr",
+    certification_source: incoming.certification_source ?? base.certification_source ?? "iiohr_hr",
+  });
+}
+
+/** Builds HR sync identity projection fields from an external staff id and optional user id. */
+export function buildHrWorkforceIdentityMetadataProjection(input: {
+  externalStaffId: string;
+  iiohrUserId?: string | null;
+}): Record<string, unknown> {
+  return extractWorkforceIdentityMetadataFields({
+    iiohr_hr_profile_id: input.externalStaffId.trim(),
+    iiohr_user_id: input.iiohrUserId,
+    sync_status: "active",
+    training_source: "iiohr_hr",
+    certification_source: "iiohr_hr",
+    competency_source: "iiohr_hr",
   });
 }

@@ -11,6 +11,7 @@ import {
   type HrSyncLatestRunSummary,
 } from "@/src/lib/hr/hrStaffSyncHealthDashboard";
 import { buildHrStaffAutomationStatus } from "@/src/lib/hr/hrStaffAutomationStatus";
+import { buildTenantWorkforceIdentityOverview } from "@/src/lib/workforce-os/workforceIdentityTenantOverview.server";
 import { loadAllStaffForTenant } from "@/src/lib/staff/staff.server";
 import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotificationLoader.server";
 import { listRecentStaffSyncRunsForTenant, type FiStaffSyncRunRow } from "@/src/lib/staffImport/iiohrHrStaffSyncRuns.server";
@@ -24,6 +25,7 @@ export type HrSyncHealthPageModel = {
   recentRuns: FiStaffSyncRunRow[];
   automationCronPath: string;
   isEvolvedPerthCronTenant: boolean;
+  identityOverview: Awaited<ReturnType<typeof buildTenantWorkforceIdentityOverview>>;
 };
 
 function mapRunRefs(rows: FiStaffSyncRunRow[]) {
@@ -71,6 +73,8 @@ export async function loadHrSyncHealthPageModel(tenantId: string): Promise<HrSyn
     getEnv: (k) => process.env[k],
   });
 
+  const identityOverview = await buildTenantWorkforceIdentityOverview(tid, staff);
+
   return {
     overview,
     latestRun: summarizeSyncRunRow(recentRuns[0] ?? null),
@@ -80,5 +84,6 @@ export async function loadHrSyncHealthPageModel(tenantId: string): Promise<HrSyn
     recentRuns: recentRuns.slice(0, 10),
     automationCronPath: automation.cronPath,
     isEvolvedPerthCronTenant: automation.evolvedPerthTenantMatchesPageTenant,
+    identityOverview,
   };
 }

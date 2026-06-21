@@ -283,6 +283,11 @@ export async function provisionExternalProfessionalFromNexus(
     await assignApprovedRolesIdempotently(supabase, globalProfessionalId, tenantId, roleValidation.roles);
     await maybeCreateAuthUserForNexus(payload);
 
+    const { linkNexusProfessionalToFiStaff } = await import(
+      "@/src/lib/workforce-os/nexusFiStaffBridge.server"
+    );
+    await linkNexusProfessionalToFiStaff(payload, globalProfessionalId, tenantId, siteId, supabase);
+
     const stateResult = await readExternalProfessionalState(globalProfessionalId, supabase);
     if (!stateResult.ok) {
       return { ok: false, error: stateResult.error, httpStatus: stateResult.httpStatus };
