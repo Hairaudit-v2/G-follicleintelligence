@@ -9,7 +9,7 @@ const INDEXNOW_ENDPOINTS = [
 ] as const;
 
 export function getIndexNowKey(): string | null {
-  const key = process.env.INDEXNOW_KEY?.trim();
+  const key = process.env.INDEXNOW_KEY?.trim().replace(/\s+/g, "");
   if (!key || !INDEXNOW_KEY_PATTERN.test(key)) return null;
   return key;
 }
