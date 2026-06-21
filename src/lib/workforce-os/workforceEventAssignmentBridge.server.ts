@@ -24,7 +24,6 @@ import {
   extractEventWindowFromSnapshot,
   resolveClinicalStaffingTemplate,
   type StaffAvailabilityBlockRecord,
-  type StaffEventAssignmentRecord,
   type StaffShiftRecord,
 } from "@/src/lib/workforce-os/workforceRosteringEngine";
 import {
@@ -231,7 +230,6 @@ async function upsertWorkforceAssignment(input: {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const sid = assertNonEmptyUuid(input.staffId, "staffId");
   const role = input.assignedRole.trim().toLowerCase();
-  const key = assignmentDedupKey(sid, role);
 
   const existingRows = input.existing ?? (await loadExistingAssignmentsForEvent(tid, input.eventSource, input.eventId));
   const activeMatch = existingRows.find(
@@ -242,7 +240,7 @@ async function upsertWorkforceAssignment(input: {
   );
   if (activeMatch) return activeMatch;
 
-  const { staff, readinessInput } = await buildReadinessInputForStaff(tid, sid);
+  const { readinessInput } = await buildReadinessInputForStaff(tid, sid);
   const supabase = supabaseAdmin();
 
   const [blocksRes, shiftsRes, assignmentsRes] = await Promise.all([
