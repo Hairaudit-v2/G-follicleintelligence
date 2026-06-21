@@ -175,7 +175,7 @@ describe("financialSurgeryPipelineStatusCore", () => {
           baseInvoice({
             id: invId,
             invoice_kind: "surgery_balance",
-            status: "issued",
+            status: "awaiting_payment",
             total_cents: 1000_00,
             amount_paid_cents: 0,
             due_date: "2026-12-31",
@@ -202,7 +202,7 @@ describe("financialSurgeryPipelineStatusCore", () => {
           baseInvoice({
             id: "99999999-9999-4999-8999-999999999999",
             invoice_kind: "surgery_balance",
-            status: "issued",
+            status: "awaiting_payment",
             total_cents: 2000_00,
             amount_paid_cents: 0,
             due_date: "2026-06-25",
@@ -242,7 +242,7 @@ describe("financialSurgeryPipelineStatusCore", () => {
           baseInvoice({
             id: invId,
             invoice_kind: "surgery_deposit",
-            status: "issued",
+            status: "awaiting_payment",
             total_cents: 500_00,
             amount_paid_cents: 0,
           }),

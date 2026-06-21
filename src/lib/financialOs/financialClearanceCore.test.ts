@@ -145,7 +145,7 @@ describe("financialClearanceCore", () => {
         baseInvoice({
           id: "11111111-1111-4111-8111-111111111111",
           invoice_kind: "surgery_deposit",
-          status: "issued",
+          status: "awaiting_payment",
           total_cents: 500_00,
           amount_paid_cents: 0,
           due_date: "2026-07-01",
@@ -153,7 +153,7 @@ describe("financialClearanceCore", () => {
         baseInvoice({
           id: "22222222-2222-4222-8222-222222222222",
           invoice_kind: "surgery_balance",
-          status: "issued",
+          status: "awaiting_payment",
           total_cents: 5000_00,
           amount_paid_cents: 0,
           due_date: "2026-08-01",
@@ -179,7 +179,7 @@ describe("financialClearanceCore", () => {
         baseInvoice({
           id: "22222222-2222-4222-8222-222222222222",
           invoice_kind: "surgery_balance",
-          status: "issued",
+          status: "awaiting_payment",
           total_cents: 5000_00,
           amount_paid_cents: 0,
           due_date: "2026-09-01",
@@ -326,7 +326,7 @@ describe("financialClearanceCore", () => {
         baseInvoice({
           id: "22222222-2222-4222-8222-222222222222",
           invoice_kind: "surgery_balance",
-          status: "issued",
+          status: "awaiting_payment",
           total_cents: 5000_00,
           amount_paid_cents: 0,
           due_date: "2026-09-01",
@@ -389,7 +389,7 @@ describe("financialClearanceCore", () => {
         baseInvoice({
           id: "22222222-2222-4222-8222-222222222222",
           invoice_kind: "surgery_balance",
-          status: "issued",
+          status: "awaiting_payment",
           total_cents: 5000_00,
           amount_paid_cents: 0,
           due_date: "2026-09-01",
@@ -466,7 +466,7 @@ describe("financialClearanceCore", () => {
         baseInvoice({
           id: "22222222-2222-4222-8222-222222222222",
           invoice_kind: "surgery_balance",
-          status: "issued",
+          status: "awaiting_payment",
           total_cents: 5000_00,
           amount_paid_cents: 0,
           due_date: "2026-09-01",

@@ -100,6 +100,7 @@ export type FiCrmLeadStageHistoryRow = {
 export type FiCrmActivityEventRow = {
   id: string;
   tenant_id: string;
+  /** Nullable when `patient_id` is set (pathology / patient-native events); check: lead_id or patient_id required. */
   lead_id: string | null;
   activity_kind: string;
   title: string | null;

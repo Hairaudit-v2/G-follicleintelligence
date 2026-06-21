@@ -17,6 +17,9 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { assertNeverHardDeleteFiCase } from "./fiCasesDeletePolicy";
+
+export { assertNeverHardDeleteFiCase };
 
 // ---------------------------------------------------------------------------
 // Types
@@ -109,25 +112,4 @@ export async function softDeleteFiCase(
   return { ok: true, archivedAt: now };
 }
 
-// ---------------------------------------------------------------------------
-// assertNeverHardDeleteFiCase
-// ---------------------------------------------------------------------------
 
-/**
- * Call this in place of any `.from("fi_cases").delete()` statement.
- * Throws unconditionally at runtime — the caller must use softDeleteFiCase()
- * instead.
- *
- * Example usage in a route that previously hard-deleted:
- *   assertNeverHardDeleteFiCase("DELETE /api/fi/cases/:id");
- *
- * @throws {Error} Always.
- */
-export function assertNeverHardDeleteFiCase(context: string): never {
-  throw new Error(
-    `[fiCasesGuard] Hard delete of fi_cases is not permitted from application code ` +
-      `(context: ${context}). ` +
-      `Use softDeleteFiCase() to archive the case and preserve the clinical audit trail. ` +
-      `See lib/fi/cases/fiCasesGuard.ts for details.`
-  );
-}

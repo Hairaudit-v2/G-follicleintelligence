@@ -7,9 +7,8 @@ import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboar
 import { FI_DASHBOARD_WIDGET_LABELS } from "@/src/config/fiDashboardRegistry";
 
 /**
- * TODO(Stage 2 loader): Replace proxy counts with real SurgeryOS pipeline stages
- * (planning / ready / post-op) keyed off `fi_cases` + readiness + post-op tracking aggregates.
- * Current cards use the best available operational-dashboard fields only.
+ * Operational dashboard surgery snapshot. Planning / ready / post-op counts are estimated
+ * proxies until Stage 2 loaders wire real SurgeryOS pipeline stages.
  */
 
 function PipelinePill({
@@ -47,11 +46,11 @@ function PipelinePill({
 
 export function DashboardSurgeryPipeline(props: {
   base: string;
-  /** TODO: true “planning” queue — today: open consultations as pre-surgical funnel proxy. */
+  /** Estimated: open consultations as pre-surgical funnel proxy. */
   planningProxyCount: number;
-  /** TODO: booked vs readiness-qualified — today: week surgeries minus bookings missing a linked case. */
+  /** Estimated: week surgeries minus bookings missing a linked case. */
   readyForSurgeryApprox: number;
-  /** TODO: `fi_case_post_op_tracking` pending aggregate — today: medication reorder reviews pending as clinical queue proxy. */
+  /** Estimated: medication reorder reviews pending as post-op queue proxy. */
   postOpProxyCount: number;
   followUpsDue: number;
 }) {
@@ -60,27 +59,32 @@ export function DashboardSurgeryPipeline(props: {
 
   return (
     <DashboardCard className="p-4 sm:p-5" role="region" aria-labelledby="dash-surgery-pipeline-heading">
-      <SectionHeader id="dash-surgery-pipeline-heading" kicker="Surgery" title={meta.title} description={meta.description} />
+      <SectionHeader
+        id="dash-surgery-pipeline-heading"
+        kicker="Surgery"
+        title={meta.title}
+        description={`${meta.description} Counts marked “estimated” are operational proxies, not audited pipeline stages.`}
+      />
       <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
         <PipelinePill
           href={`${base}/consultations`}
-          label="Planning"
+          label="Planning (est.)"
           value={planningProxyCount}
-          foot="Open consultations (proxy — see TODO above)"
+          foot="Open consultations — estimated pre-surgical funnel"
           icon={<Stethoscope className="h-3.5 w-3.5" />}
         />
         <PipelinePill
           href={`${base}/cases`}
-          label="Ready for surgery"
+          label="Ready (est.)"
           value={readyForSurgeryApprox}
-          foot="Week surgeries − missing case (approx.)"
+          foot="Week surgeries minus bookings without a case"
           icon={<Scissors className="h-3.5 w-3.5" />}
         />
         <PipelinePill
           href={`${base}/cases`}
-          label="Post-op pending"
+          label="Post-op (est.)"
           value={postOpProxyCount}
-          foot="Medication reviews pending (proxy — see TODO above)"
+          foot="Medication reviews pending — estimated queue"
           icon={<HeartPulse className="h-3.5 w-3.5" />}
         />
         <PipelinePill

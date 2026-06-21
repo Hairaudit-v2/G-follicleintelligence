@@ -52,15 +52,12 @@ export type Referral = {
   created_at: string;
 };
 
+/** Matches `fi_patients` — PII lives on `fi_persons` / `fi_intakes`, not this row. */
 export type Patient = {
   id: string;
   tenant_id: string;
-  partner_id?: string;
-  full_name: string;
-  email: string;
-  dob: string;
-  sex: string;
-  country?: string;
+  person_id: string;
+  primary_clinic_id?: string | null;
   metadata?: Record<string, unknown>;
   created_at: string;
   updated_at?: string;

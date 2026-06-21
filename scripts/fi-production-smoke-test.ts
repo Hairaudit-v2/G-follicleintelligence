@@ -71,13 +71,29 @@ async function main(): Promise<void> {
   console.log(`FI OS production smoke test → ${b} (tenant ${tid})`);
   console.log("---");
 
-  // A — HR health (no auth)
+  // A — HR health (production requires cron Bearer)
   {
-    const { status } = await fetchStatus("/api/health/iiohr-hr-staff-sync");
-    if (status !== 200) {
-      fail("A health iiohr-hr-staff-sync", `expected 200, got ${status}`);
+    const unauth = await fetchStatus("/api/health/iiohr-hr-staff-sync");
+    if (unauth.status === 200) {
+      fail("A health iiohr-hr-staff-sync unauthenticated", "unexpected 200 without cron secret");
     }
-    pass("A health iiohr-hr-staff-sync", "200");
+    if (unauth.status !== 401 && unauth.status !== 503) {
+      fail("A health iiohr-hr-staff-sync unauthenticated", `expected 401 or 503, got ${unauth.status}`);
+    }
+    pass("A health iiohr-hr-staff-sync unauthenticated", `status ${unauth.status}`);
+
+    const cronSecret = process.env.CRON_SECRET?.trim() || process.env.FI_HR_SYNC_CRON_SECRET?.trim();
+    if (cronSecret) {
+      const authed = await fetchStatus("/api/health/iiohr-hr-staff-sync", {
+        headers: { authorization: `Bearer ${cronSecret}` },
+      });
+      if (authed.status !== 200) {
+        fail("A health iiohr-hr-staff-sync authenticated", `expected 200, got ${authed.status}`);
+      }
+      pass("A health iiohr-hr-staff-sync authenticated", "200");
+    } else {
+      skip("A health iiohr-hr-staff-sync authenticated", "CRON_SECRET or FI_HR_SYNC_CRON_SECRET not set locally");
+    }
   }
 
   // B — Legacy FI events without auth
