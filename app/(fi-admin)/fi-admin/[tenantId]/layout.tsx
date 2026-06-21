@@ -21,6 +21,7 @@ import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
 import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGuard.server";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
+import { loadHrOsNavVisibleForViewer } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
 import { readFiPaymentsEnabled } from "@/src/lib/payments/fiPaymentEnv.server";
 import { isGlobalCommandCentrePresentationPath } from "@/src/lib/enterprise-demo/enterpriseDemoGlobalCommandCentrePresentationModel";
 import {
@@ -118,8 +119,9 @@ export default async function TenantAdminLayout({
     showConfigurationHubNav,
     featureAccessMap,
     workspaceProfileKey,
+    showHrOsNav,
   ] = pinFloorMode
-    ? [false, true, pinSession!.staffName, false, null, false, false, false, false, null, "default" as const]
+    ? [false, true, pinSession!.staffName, false, null, false, false, false, false, null, "default" as const, false]
     : await Promise.all([
         getCrmShellNavAllowed(tenantId),
         getBookingsBoardNavAllowed(tenantId),
@@ -134,6 +136,7 @@ export default async function TenantAdminLayout({
         canViewTenantConfigurationHub(tenantId),
         loadFiOsFeatureAccessMapOrNullForViewer(tenantId),
         loadWorkspaceProfileKeyForViewer(tenantId),
+        loadHrOsNavVisibleForViewer(tenantId),
       ]);
   const tenantBackendAdminRole = pinFloorMode ? null : adminProf?.adminRole ?? null;
   const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
@@ -181,6 +184,7 @@ export default async function TenantAdminLayout({
         showAuditOsNav={showAuditOsNav}
         showConfigurationHubNav={showConfigurationHubNav}
         showFiPaymentsInboxNav={showFiPaymentsInboxNav}
+        showHrOsNav={showHrOsNav}
         workspaceProfileKey={workspaceProfileKey}
         featureAccess={featureAccessRecord}
         effective={effective}
