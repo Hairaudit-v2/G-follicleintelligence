@@ -59,7 +59,7 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 68,
+    completionPercent: 78,
     description: "Healthcare workforce infrastructure, onboarding, compliance, and operational staff governance.",
   },
   {
@@ -317,8 +317,8 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 68,
-    stage: "Identity · readiness · clinical rostering",
+    completionPercent: 78,
+    stage: "Identity · readiness · clinical rostering · ops integration",
     description:
       "Healthcare workforce infrastructure, onboarding, compliance, training readiness, clinical rostering, and operational staff governance.",
     status: "Active Development",
@@ -327,6 +327,15 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-workforce-surgery-clinic-integration",
+    date: "2026-06-22",
+    tag: "workforce-os",
+    title: "WorkforceOS Phase 2D SurgeryOS / ClinicOS staffing integration completed",
+    summary:
+      "Clinical rostering wired into SurgeryOS readiness, procedure day, and tomorrow boards plus ClinicOS calendar and appointment detail — assignment bridge syncs existing assigned staff to fi_staff_event_assignments with readiness visibility.",
+    modules: ["WorkforceOS", "SurgeryOS", "ClinicOS"],
+  },
   {
     id: "2026-06-22-workforce-clinical-rostering",
     date: "2026-06-22",

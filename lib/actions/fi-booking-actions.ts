@@ -19,6 +19,10 @@ import { assertAppointmentProcedureStaffAssignments } from "@/src/lib/staff/asse
 import { loadBookingForTenant } from "@/src/lib/bookings/bookings";
 import { cancelBooking, completeBooking, createBooking, updateBooking } from "@/src/lib/bookings/server";
 import {
+  cancelWorkforceAssignmentsForEvent,
+  syncExistingAssignedStaffToWorkforceAssignments,
+} from "@/src/lib/workforce-os/workforceEventAssignmentBridge.server";
+import {
   loadBookingResourceAssignments,
   type FiBookingResourceAssignmentRow,
 } from "@/src/lib/calendar/bookingResourceRequirements.server";
@@ -71,6 +75,13 @@ export async function createBookingAction(
       resourceAssignments: parsed.resourceAssignments,
       createdByUserId,
     });
+    if (booking.assigned_staff_id?.trim() || parsed.resourceAssignments?.length) {
+      try {
+        await syncExistingAssignedStaffToWorkforceAssignments({ tenantId, booking, allowBlockedDraft: true });
+      } catch {
+        /* Non-blocking — calendar assignment remains source for column layout. */
+      }
+    }
     return { ok: true, booking };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
@@ -108,6 +119,19 @@ export async function updateBookingAction(
       metadata: parsed.metadata ?? undefined,
       resourceAssignments: parsed.resourceAssignments ?? undefined,
     });
+    if (
+      parsed.assignedStaffId !== undefined ||
+      parsed.resourceAssignments !== undefined ||
+      parsed.bookingType !== undefined ||
+      parsed.startAt !== undefined ||
+      parsed.endAt !== undefined
+    ) {
+      try {
+        await syncExistingAssignedStaffToWorkforceAssignments({ tenantId, booking, allowBlockedDraft: true });
+      } catch {
+        /* Non-blocking workforce bridge. */
+      }
+    }
     return { ok: true, booking };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
@@ -129,6 +153,11 @@ export async function cancelBookingAction(
       cancellationReason: parsed.cancellationReason ?? null,
       cancelledByUserId,
     });
+    try {
+      await cancelWorkforceAssignmentsForEvent({ tenantId, eventSource: "booking", eventId: bookingId });
+    } catch {
+      /* Non-blocking workforce bridge. */
+    }
     return { ok: true, booking };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
