@@ -349,8 +349,18 @@ function collectWarnings(input: {
 
   for (const item of input.certificationItems) {
     if (item.status === "due_soon") {
-      warnings.push("certification_expiring_soon");
-      break;
+      const exp = parseIsoDate(item.expiresAt);
+      if (exp && daysUntil(exp, input.now) <= CERT_EXPIRING_SOON_DAYS) {
+        warnings.push("certification_expiring_soon");
+        break;
+      }
+    }
+    if (item.status === "current" && item.expiresAt) {
+      const exp = parseIsoDate(item.expiresAt);
+      if (exp && daysUntil(exp, input.now) <= CERT_EXPIRING_SOON_DAYS) {
+        warnings.push("certification_expiring_soon");
+        break;
+      }
     }
   }
   if (!warnings.includes("certification_expiring_soon") && (input.hr.certificates_outstanding_count ?? 0) > 0) {
