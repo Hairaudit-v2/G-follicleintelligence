@@ -54,7 +54,9 @@ export const FOOTER_INTELLIGENCE_LAYERS: FooterNavLink[] = [
 
 export const FOOTER_COMPANY: FooterNavLink[] = [
   { label: "About", href: "/about" },
+  { label: "Investors", href: "/investors" },
   { label: "Why Follicle Intelligence", href: "/why-follicle-intelligence" },
+  { label: "The Future of Hair Restoration", href: "/the-future-of-hair-restoration" },
   { label: "Vision", href: "/vision" },
   { label: "Contact", href: "/contact" },
   { label: "Solutions", href: "/solutions" },
