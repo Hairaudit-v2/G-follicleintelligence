@@ -131,7 +131,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     description:
       "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
     onboardingHighlight:
-      "OnboardingOS is in active development — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and the Deployment Intelligence Command Centre for weighted clinic deployment scoring.",
+      "OnboardingOS Phase F1 complete — clinics can securely register and prepare connections to existing software including HubSpot, Pabau, Cliniko, Stripe, Xero, Google Calendar, Outlook, Meta Ads, and Google Ads, alongside tenant provisioning, Guided Assist, go-live readiness, and Deployment Intelligence.",
     cta: { label: "View platform progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
@@ -152,6 +152,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-f1",
+    title: "OnboardingOS Phase F1 — Legacy System Connector Layer",
+    module: "OnboardingOS",
+    date: "2026-06-22",
+  },
   {
     id: "2026-06-22-onboarding-os-phase-e2",
     title: "OnboardingOS Deployment Intelligence Command Centre",
@@ -348,16 +354,25 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "onboarding-os",
     name: "OnboardingOS",
-    completionPercent: 52,
-    stage: "Deployment Intelligence Command Centre",
+    completionPercent: 68,
+    stage: "Legacy System Connector Layer",
     description:
-      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and weighted Deployment Intelligence scoring across infrastructure, workflow, staff, operational readiness, adoption confidence, and executive approval.",
+      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and Deployment Intelligence. Phase F1 adds secure connector architecture so clinics can register and prepare integrations with HubSpot, Pabau, Cliniko, Stripe, Xero, Google Calendar, Outlook, Meta Ads, and Google Ads without immediate migration.",
     status: "Active Development",
   },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-f1",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "OnboardingOS Phase F1 Legacy System Connector Layer completed",
+    summary:
+      "Enterprise connector architecture allowing clinics to securely register and prepare connections to existing software systems — HubSpot, Pabau, Cliniko, Stripe, Xero, Google Calendar, Outlook, Meta Ads, and Google Ads — with encrypted credentials, sync health tracking, data mapping plans, and Connect Existing Systems onboarding UI (foundation only; live OAuth and API sync in later phases).",
+    modules: ["OnboardingOS"],
+  },
   {
     id: "2026-06-22-onboarding-os-phase-e2",
     date: "2026-06-22",

@@ -16,9 +16,11 @@ import {
 import type {
   DeploymentIntelligenceSnapshot,
   GuidedAssistAdoptionInput,
+  ConnectorAuthReadinessInput,
   PlatformDeploymentDashboardRow,
 } from "./deploymentIntelligenceTypes";
 import { loadGoLiveReadinessSnapshot } from "./goLiveReadiness.server";
+import { loadConnectorAuthReadinessInput } from "./externalConnectorAuth.server";
 import { summarizeGuidedAssistUsageEvents } from "./guidedAssistCore";
 import { parseSandboxSeedHistory } from "./tenantProvisioningCore";
 import type { ProvisioningInput, ProvisioningSessionStatus } from "./tenantProvisioningTypes";
@@ -202,7 +204,10 @@ async function buildSnapshotForSession(
   const input = session.input_snapshot as ProvisioningInput;
   const sandboxHistory = parseSandboxSeedHistory(session.metadata ?? {});
   const sandboxSeedEnabled = parseDeploymentPlanSandboxEnabled(session.deployment_snapshot ?? {});
-  const guidedAssistAdoption = await loadGuidedAssistAdoptionInput(supabase, session.tenant_id);
+  const [guidedAssistAdoption, connectorAuthReadiness] = await Promise.all([
+    loadGuidedAssistAdoptionInput(supabase, session.tenant_id),
+    loadConnectorAuthReadinessInput(supabase, session.tenant_id),
+  ]);
 
   const calculatedAt = new Date().toISOString();
   const snapshot = buildDeploymentIntelligenceSnapshot({
@@ -217,6 +222,7 @@ async function buildSnapshotForSession(
     sandboxSeedApplied: sandboxHistory.length > 0,
     goLiveReadiness: goLiveLoaded.snapshot,
     guidedAssistAdoption,
+    connectorAuthReadiness,
     calculatedAt,
   });
 

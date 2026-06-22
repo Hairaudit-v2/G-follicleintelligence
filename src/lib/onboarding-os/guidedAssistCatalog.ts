@@ -255,6 +255,20 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     actionLabel: "Connect systems",
     actionHrefSuffix: "configuration",
   },
+  {
+    code: "onboarding_verify_existing_systems",
+    area: "analytics_os",
+    title: "Verify connector credentials",
+    body: "After registering external systems, verify credentials and permission scopes before any live sync is enabled. Test-mode verification only — no data is imported yet.",
+    pageKey: "configuration",
+    pageKeyPrefix: true,
+    priority: 4,
+    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    dismissible: true,
+    snoozeHours: 24,
+    actionLabel: "Verify connectors",
+    actionHrefSuffix: "configuration",
+  },
 ];
 
 export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefinition[] = [
@@ -299,13 +313,23 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     requiresSetupFlags: { clinicSettingsComplete: true, firstCaseCreated: false },
   },
   {
+    code: "next_verify_connector_permissions",
+    area: "analytics_os",
+    title: "Verify connector permissions",
+    description: "Confirm external system credentials and required API scopes before live sync.",
+    hrefSuffix: "configuration",
+    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    priority: 5,
+    requiresSetupFlags: { clinicSettingsComplete: true, firstCaseCreated: false },
+  },
+  {
     code: "next_first_case",
     area: "reception_os",
     title: "Create your first patient case",
     description: "Use the guided wizard to add your first active case.",
     hrefSuffix: "cases/new",
     roleScope: { anyRole: true },
-    priority: 5,
+    priority: 6,
     requiresSetupFlags: { clinicSettingsComplete: true, firstCaseCreated: false },
   },
   {

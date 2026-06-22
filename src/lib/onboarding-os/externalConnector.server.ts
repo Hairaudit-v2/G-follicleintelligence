@@ -430,6 +430,13 @@ export async function createExternalConnector(
     integration_id: row.id,
   });
 
+  try {
+    const { createConnectorAuthSession } = await import("./externalConnectorAuth.server");
+    await createConnectorAuthSession(row.id, tenantId, null, { ...opts, skipAuthCheck: true });
+  } catch {
+    // Auth session bootstrap is best-effort during F2 rollout.
+  }
+
   const credentialFlags = await loadCredentialFlags(supabase, [row.id]);
   const syncMap = await loadSyncStatusMap(supabase, [row.id]);
 

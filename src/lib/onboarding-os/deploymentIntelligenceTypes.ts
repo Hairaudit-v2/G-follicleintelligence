@@ -133,3 +133,11 @@ export type GuidedAssistAdoptionInput = {
   nextActionsClicked: number;
   modulesNeedingGuidanceReviewCount: number;
 };
+
+export type ConnectorAuthReadinessInput = {
+  registeredCount: number;
+  verifiedCount: number;
+  unverifiedCount: number;
+  failedCount: number;
+  avgPermissionCoverage: number;
+};

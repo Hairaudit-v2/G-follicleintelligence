@@ -7,6 +7,7 @@ import { DeploymentIntelligencePanel } from "@/src/components/onboarding-os/Depl
 import { GoLiveReadinessPanel } from "@/src/components/onboarding-os/GoLiveReadinessPanel";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { loadDeploymentIntelligenceSnapshot } from "@/src/lib/onboarding-os/deploymentIntelligence.server";
+import { loadConnectorAuthSummary } from "@/src/lib/onboarding-os/externalConnectorAuth.server";
 import { loadTenantExternalConnectors } from "@/src/lib/onboarding-os/externalConnector.server";
 import { loadGoLiveReadinessSnapshot } from "@/src/lib/onboarding-os/goLiveReadiness.server";
 import { loadTenantProvisioningSessionDetail } from "@/src/lib/onboarding-os/tenantProvisioning.server";
@@ -35,6 +36,10 @@ export default async function OnboardingSessionDetailPage({
     session.tenant_id != null
       ? await loadTenantExternalConnectors(session.tenant_id, { skipAuthCheck: true })
       : null;
+  const authLoaded =
+    session.tenant_id != null
+      ? await loadConnectorAuthSummary(session.tenant_id, { skipAuthCheck: true, allowTenantMemberRead: true })
+      : null;
 
   return (
     <div className="space-y-6">
@@ -61,6 +66,7 @@ export default async function OnboardingSessionDetailPage({
       {connectorsLoaded?.ok ? (
         <ConnectExistingSystemsPanel
           snapshot={connectorsLoaded.snapshot}
+          authSnapshot={authLoaded?.ok ? authLoaded.snapshot : null}
           mode="platform"
           sessionId={session.id}
         />

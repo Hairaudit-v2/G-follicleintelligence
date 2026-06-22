@@ -1,13 +1,27 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import {
   createExternalConnectorAction,
   updateExternalConnectorAction,
 } from "@/lib/actions/fi-onboarding-os-external-connector-actions";
+import {
+  loadConnectorAuthSummaryAction,
+  revokeConnectorAuthSessionAction,
+  verifyConnectorCredentialsAction,
+} from "@/lib/actions/fi-onboarding-os-external-connector-auth-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import {
+  defaultAuthMethodForProvider,
+  resolveSupportedAuthMethods,
+} from "@/src/lib/onboarding-os/externalConnectorAuthCore";
+import type {
+  ExternalConnectorAuthSummary,
+  TenantConnectorAuthSnapshot,
+} from "@/src/lib/onboarding-os/externalConnectorAuthTypes";
+import { EXTERNAL_CONNECTOR_AUTH_STATUS_BADGES } from "@/src/lib/onboarding-os/externalConnectorAuthTypes";
 import { groupConnectorCatalogByCategory } from "@/src/lib/onboarding-os/externalConnectorCore";
 import type {
   ExternalConnectorCatalogEntry,
@@ -16,9 +30,7 @@ import type {
   ExternalConnectorProvider,
   TenantExternalConnectorsSnapshot,
 } from "@/src/lib/onboarding-os/externalConnectorTypes";
-import {
-  EXTERNAL_CONNECTOR_STATUS_BADGES,
-} from "@/src/lib/onboarding-os/externalConnectorTypes";
+import { EXTERNAL_CONNECTOR_STATUS_BADGES } from "@/src/lib/onboarding-os/externalConnectorTypes";
 
 const BADGE_CLASSES: Record<string, string> = {
   neutral: "bg-slate-500/15 text-slate-300",
@@ -37,47 +49,143 @@ const HEALTH_BAND_CLASSES: Record<string, string> = {
 
 type Props = {
   snapshot: TenantExternalConnectorsSnapshot;
+  authSnapshot?: TenantConnectorAuthSnapshot | null;
   mode: "platform" | "tenant";
   sessionId?: string | null;
 };
 
 function StatusBadge({ label, tone }: { label: string; tone: string }) {
   return (
-    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_CLASSES[tone] ?? BADGE_CLASSES.neutral}`}>
+    <span
+      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_CLASSES[tone] ?? BADGE_CLASSES.neutral}`}
+    >
       {label}
     </span>
+  );
+}
+
+function ScopeList({
+  label,
+  scopes,
+}: {
+  label: string;
+  scopes: readonly { scopeKey: string; scopeLabel: string; granted?: boolean; required?: boolean }[];
+}) {
+  if (scopes.length === 0) return null;
+  return (
+    <div>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <ul className="mt-1 flex flex-wrap gap-1">
+        {scopes.map((s) => (
+          <li
+            key={s.scopeKey}
+            className={`rounded px-1.5 py-0.5 text-[11px] ${
+              s.granted
+                ? "bg-emerald-500/10 text-emerald-300"
+                : s.required
+                  ? "bg-amber-500/10 text-amber-300"
+                  : "bg-slate-700/40 text-slate-400"
+            }`}
+          >
+            {s.scopeKey}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 function ConnectorCard({
   integration,
   health,
+  authSummary,
+  pending,
+  onVerify,
+  onRevoke,
 }: {
   integration: ExternalConnectorIntegrationRow;
   health: ExternalConnectorHealthStatus | undefined;
+  authSummary: ExternalConnectorAuthSummary | undefined;
+  pending: boolean;
+  onVerify: () => void;
+  onRevoke: () => void;
 }) {
   const badge = EXTERNAL_CONNECTOR_STATUS_BADGES[integration.status];
   const band = health?.healthBand ?? "unknown";
+  const authStatus = authSummary?.authSession?.authStatus ?? "not_started";
+  const authBadge = EXTERNAL_CONNECTOR_AUTH_STATUS_BADGES[authStatus];
+  const authMethod = authSummary?.authSession?.authMethod ?? defaultAuthMethodForProvider(integration.provider);
+  const grantedScopes = authSummary?.grantedScopes.filter((s) => s.granted) ?? [];
+  const requiredScopes = authSummary?.requiredScopes ?? [];
+  const coverage = authSummary?.permissionCoveragePercent ?? 0;
 
   return (
-    <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4">
+    <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4 space-y-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="font-medium text-slate-100">{integration.displayName}</p>
           <p className="text-xs text-slate-400">{integration.provider.replace(/_/g, " ")}</p>
         </div>
-        <StatusBadge label={badge.label} tone={badge.tone} />
+        <div className="flex flex-wrap gap-1">
+          <StatusBadge label={badge.label} tone={badge.tone} />
+          <StatusBadge label={authBadge.label} tone={authBadge.tone} />
+        </div>
       </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-400">
+
+      <div className="rounded border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-200/90">
+        Verification required before live sync — no data is imported during test-mode verification.
+      </div>
+
+      <div className="grid gap-2 text-xs text-slate-400">
         <p>
           Health:{" "}
           <span className={HEALTH_BAND_CLASSES[band] ?? HEALTH_BAND_CLASSES.unknown}>
             {health?.healthScore ?? 0}% · {band}
           </span>
         </p>
+        <p>Auth method: {authMethod.replace(/_/g, " ")}</p>
         <p>Credentials: {integration.credentialConfigured ? "Stored (encrypted)" : "Not configured"}</p>
+        <p>Permission coverage: {coverage}%</p>
+        {authSummary?.tokenExpiryWarning ? (
+          <p className="text-amber-400">{authSummary.tokenExpiryWarning}</p>
+        ) : null}
         <p>Sync mode: {integration.syncMode.replace(/_/g, " ")} · Live sync: not available yet</p>
-        {health?.summary ? <p className="text-slate-500">{health.summary}</p> : null}
+        {authSummary?.healthSummary.summary ? (
+          <p className="text-slate-500">{authSummary.healthSummary.summary}</p>
+        ) : null}
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <ScopeList label="Required scopes" scopes={requiredScopes} />
+        <ScopeList label="Granted scopes" scopes={grantedScopes} />
+      </div>
+
+      {authSummary?.latestVerificationEvent ? (
+        <p className="text-[11px] text-slate-500">
+          Latest verification: {authSummary.latestVerificationEvent.outcome} ·{" "}
+          {new Date(authSummary.latestVerificationEvent.occurredAt).toLocaleString()} ·{" "}
+          {authSummary.latestVerificationEvent.detail.summary as string | undefined ??
+            authSummary.latestVerificationEvent.authStatus}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={pending || !integration.credentialConfigured}
+          onClick={onVerify}
+          className="rounded bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-cyan-500 disabled:opacity-50"
+        >
+          Verify credentials
+        </button>
+        <button
+          type="button"
+          disabled={pending || authStatus === "not_started" || authStatus === "revoked"}
+          onClick={onRevoke}
+          className="rounded border border-red-500/40 px-3 py-1.5 text-xs text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+        >
+          Revoke
+        </button>
       </div>
     </div>
   );
@@ -115,17 +223,44 @@ function CatalogProviderButton({
   );
 }
 
-export function ConnectExistingSystemsPanel({ snapshot: initialSnapshot, mode, sessionId }: Props) {
+export function ConnectExistingSystemsPanel({
+  snapshot: initialSnapshot,
+  authSnapshot: initialAuthSnapshot,
+  mode,
+  sessionId,
+}: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [snapshot, setSnapshot] = useState(initialSnapshot);
+  const [authSnapshot, setAuthSnapshot] = useState<TenantConnectorAuthSnapshot | null>(
+    initialAuthSnapshot ?? null
+  );
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<ExternalConnectorProvider | null>(null);
   const [credential, setCredential] = useState("");
 
+  useEffect(() => {
+    if (initialAuthSnapshot) return;
+    let cancelled = false;
+    void loadConnectorAuthSummaryAction(snapshot.tenantId).then((res) => {
+      if (cancelled || !res.ok || !res.authSnapshot) return;
+      setAuthSnapshot(res.authSnapshot);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialAuthSnapshot, snapshot.tenantId]);
+
   const grouped = groupConnectorCatalogByCategory(snapshot.catalog);
   const configuredProviders = new Set(snapshot.integrations.map((i) => i.provider));
   const healthById = new Map(snapshot.healthStatuses.map((h) => [h.integrationId, h]));
+  const authByIntegrationId = new Map(
+    (authSnapshot?.summaries ?? []).map((s) => [s.integrationId, s])
+  );
+
+  function refreshAuth(resAuth?: TenantConnectorAuthSnapshot) {
+    if (resAuth) setAuthSnapshot(resAuth);
+  }
 
   function runCreate(provider: ExternalConnectorProvider) {
     setMessage(null);
@@ -161,7 +296,14 @@ export function ConnectExistingSystemsPanel({ snapshot: initialSnapshot, mode, s
       if (res.snapshot) setSnapshot(res.snapshot);
       setSelectedProvider(null);
       setCredential("");
-      setMessage({ kind: "ok", text: `${entry.label} connector registered (architecture mode — no live sync).` });
+
+      const authLoaded = await loadConnectorAuthSummaryAction(snapshot.tenantId);
+      if (authLoaded.ok && authLoaded.authSnapshot) setAuthSnapshot(authLoaded.authSnapshot);
+
+      setMessage({
+        kind: "ok",
+        text: `${entry.label} connector registered — verify credentials before live sync.`,
+      });
       router.refresh();
     });
   }
@@ -185,14 +327,53 @@ export function ConnectExistingSystemsPanel({ snapshot: initialSnapshot, mode, s
     });
   }
 
+  function verifyConnector(integration: ExternalConnectorIntegrationRow) {
+    setMessage(null);
+    startTransition(async () => {
+      const authMethod = defaultAuthMethodForProvider(integration.provider);
+      const res = await verifyConnectorCredentialsAction(
+        snapshot.tenantId,
+        integration.id,
+        {
+          authMethod,
+          testMode: true,
+          apiKey: "architecture-test-key",
+          grantedScopes: undefined,
+        },
+        sessionId
+      );
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      refreshAuth(res.authSnapshot);
+      setMessage({ kind: "ok", text: "Credential verification completed (test mode)." });
+      router.refresh();
+    });
+  }
+
+  function revokeAuth(integration: ExternalConnectorIntegrationRow) {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await revokeConnectorAuthSessionAction(snapshot.tenantId, integration.id, sessionId);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      refreshAuth(res.authSnapshot);
+      setMessage({ kind: "ok", text: "Connector auth session revoked." });
+      router.refresh();
+    });
+  }
+
   return (
     <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 sm:p-5 space-y-4">
       <div>
-        <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase F1</p>
+        <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase F1–F2</p>
         <h2 className="text-lg font-semibold text-slate-50">Connect Existing Systems</h2>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
           Register legacy CRM, calendar, finance, and marketing systems for coexistence during onboarding.
-          Architecture foundation only — no OAuth, webhooks, or live API sync yet.
+          Authenticate and verify credentials before any live sync — no OAuth callbacks or data import yet.
         </p>
       </div>
 
@@ -206,7 +387,14 @@ export function ConnectExistingSystemsPanel({ snapshot: initialSnapshot, mode, s
           <div className="grid gap-3 sm:grid-cols-2">
             {snapshot.integrations.map((integration) => (
               <div key={integration.id} className="space-y-2">
-                <ConnectorCard integration={integration} health={healthById.get(integration.id)} />
+                <ConnectorCard
+                  integration={integration}
+                  health={healthById.get(integration.id)}
+                  authSummary={authByIntegrationId.get(integration.id)}
+                  pending={pending}
+                  onVerify={() => verifyConnector(integration)}
+                  onRevoke={() => revokeAuth(integration)}
+                />
                 {mode === "platform" || mode === "tenant" ? (
                   <button
                     type="button"
@@ -251,7 +439,12 @@ export function ConnectExistingSystemsPanel({ snapshot: initialSnapshot, mode, s
             Register {snapshot.catalog.find((c) => c.provider === selectedProvider)?.label}
           </p>
           <p className="text-xs text-slate-400">
-            Enter placeholder credential material for architecture testing. Credentials are encrypted at rest; no external API calls are made.
+            Supported auth:{" "}
+            {resolveSupportedAuthMethods(selectedProvider)
+              .map((m) => m.replace(/_/g, " "))
+              .join(", ")}
+            . Enter placeholder credential material for architecture testing. Credentials are encrypted at rest; no
+            external API calls are made.
           </p>
           <input
             type="password"

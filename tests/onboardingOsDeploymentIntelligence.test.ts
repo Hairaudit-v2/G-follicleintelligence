@@ -114,6 +114,13 @@ function makeDeploymentSignals(overrides: Partial<DeploymentIntelligenceInputSig
       nextActionsClicked: 4,
       modulesNeedingGuidanceReviewCount: 0,
     },
+    connectorAuthReadiness: {
+      registeredCount: 0,
+      verifiedCount: 0,
+      unverifiedCount: 0,
+      failedCount: 0,
+      avgPermissionCoverage: 0,
+    },
     calculatedAt: GENERATED_AT,
     ...overrides,
   };

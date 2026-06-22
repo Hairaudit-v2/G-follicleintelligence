@@ -12,6 +12,7 @@ import type {
   DeploymentIntelligenceStatus,
   DeploymentScoreBreakdown,
   GuidedAssistAdoptionInput,
+  ConnectorAuthReadinessInput,
 } from "./deploymentIntelligenceTypes";
 import {
   DEPLOYMENT_INTELLIGENCE_DOMAIN_LABELS,
@@ -32,6 +33,7 @@ export type DeploymentIntelligenceInputSignals = {
   sandboxSeedApplied: boolean;
   goLiveReadiness: GoLiveReadinessSnapshot;
   guidedAssistAdoption: GuidedAssistAdoptionInput;
+  connectorAuthReadiness: ConnectorAuthReadinessInput;
   calculatedAt: string;
 };
 
@@ -135,6 +137,56 @@ export function mapGoLiveReadinessToExecutiveApproval(
   return { scorePercent: score, summary, blockers };
 }
 
+/** Apply connector auth readiness bonus to infrastructure score (warnings only for unverified). */
+export function applyConnectorAuthInfrastructureBonus(
+  basePercent: number,
+  connectorAuth: ConnectorAuthReadinessInput
+): { percent: number; warnings: string[] } {
+  const warnings: string[] = [];
+  if (connectorAuth.registeredCount === 0) {
+    return { percent: basePercent, warnings };
+  }
+
+  let bonus = 5;
+  if (connectorAuth.verifiedCount > 0) {
+    bonus += Math.min(10, connectorAuth.verifiedCount * 5);
+  }
+  if (connectorAuth.unverifiedCount > 0) {
+    warnings.push(
+      `${connectorAuth.unverifiedCount} connector(s) registered but not verified — verification recommended before live sync.`
+    );
+  }
+  if (connectorAuth.failedCount > 0) {
+    warnings.push(`${connectorAuth.failedCount} connector(s) failed credential verification.`);
+  }
+
+  return { percent: Math.min(100, basePercent + bonus), warnings };
+}
+
+/** Apply connector verification bonus to adoption confidence. */
+export function applyConnectorAuthAdoptionBonus(
+  basePercent: number,
+  connectorAuth: ConnectorAuthReadinessInput
+): { percent: number; warnings: string[] } {
+  const warnings: string[] = [];
+  if (connectorAuth.registeredCount === 0) {
+    return { percent: basePercent, warnings };
+  }
+
+  let bonus = 3;
+  if (connectorAuth.verifiedCount > 0) {
+    bonus += Math.min(12, connectorAuth.verifiedCount * 4);
+  }
+  if (connectorAuth.avgPermissionCoverage >= 80 && connectorAuth.verifiedCount > 0) {
+    bonus += 5;
+  }
+  if (connectorAuth.unverifiedCount > 0) {
+    warnings.push("Complete connector credential verification to strengthen adoption signals.");
+  }
+
+  return { percent: Math.min(100, basePercent + bonus), warnings };
+}
+
 /** Map Guided Assist usage into adoption confidence domain score. */
 export function mapGuidedAssistSummaryToAdoptionConfidence(
   input: GuidedAssistAdoptionInput
@@ -208,18 +260,28 @@ export function buildDeploymentIntelligenceDomains(
   const checks = signals.goLiveReadiness.checks;
 
   const infra = checkScoreFromCodes(checks, INFRASTRUCTURE_CHECKS, { treatSkippedAsPass: false });
+  const infraBoost = applyConnectorAuthInfrastructureBonus(infra.percent, signals.connectorAuthReadiness);
   const workflow = checkScoreFromCodes(checks, WORKFLOW_CHECKS, { treatSkippedAsPass: true });
   const staff = checkScoreFromCodes(checks, STAFF_CHECKS);
   const operational = operationalReadinessScore(signals);
-  const adoption = mapGuidedAssistSummaryToAdoptionConfidence(signals.guidedAssistAdoption);
+  const adoptionBase = mapGuidedAssistSummaryToAdoptionConfidence(signals.guidedAssistAdoption);
+  const adoptionBoost = applyConnectorAuthAdoptionBonus(
+    adoptionBase.scorePercent,
+    signals.connectorAuthReadiness
+  );
   const executive = mapGoLiveReadinessToExecutiveApproval(signals.goLiveReadiness);
+
+  const infraBlockers = [...infra.blockers];
+  const adoptionBlockers = [...adoptionBase.blockers, ...adoptionBoost.warnings];
 
   return [
     buildDomainScore(
       "infrastructure_readiness",
-      infra.percent,
-      infra.percent >= 100 ? "Core infrastructure provisioned." : "Infrastructure provisioning incomplete.",
-      infra.blockers
+      infraBoost.percent,
+      infraBoost.percent >= 100
+        ? "Core infrastructure provisioned."
+        : "Infrastructure provisioning incomplete.",
+      [...infraBlockers, ...infraBoost.warnings]
     ),
     buildDomainScore(
       "workflow_readiness",
@@ -241,9 +303,9 @@ export function buildDeploymentIntelligenceDomains(
     ),
     buildDomainScore(
       "adoption_confidence",
-      adoption.scorePercent,
-      adoption.summary,
-      adoption.blockers
+      adoptionBoost.percent,
+      adoptionBase.summary,
+      adoptionBlockers
     ),
     buildDomainScore(
       "executive_approval",
