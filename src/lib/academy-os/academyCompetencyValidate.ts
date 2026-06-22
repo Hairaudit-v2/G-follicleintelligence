@@ -26,7 +26,7 @@ function isUuidLike(s: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
 }
 
-function parseCompetencyItem(raw: unknown, index: number): FiCompetencyExportItemV1 | null {
+function parseCompetencyItem(raw: unknown, _index: number): FiCompetencyExportItemV1 | null {
   if (!isRecord(raw)) return null;
 
   const competencyKey = trimStr(raw.competencyKey ?? raw.competency_key).toLowerCase();
