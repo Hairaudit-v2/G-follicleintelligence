@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -11,36 +10,18 @@ import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/li
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
-import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthoritySection";
 import { FiMarketingClinicalEcosystemSection } from "@/components/home/FiMarketingClinicalEcosystemSection";
-import { FiMarketingConnectedIntelligenceEcosystemSection } from "@/components/home/FiMarketingConnectedIntelligenceEcosystemSection";
-import { FiMarketingDigitalTwinSection } from "@/components/home/FiMarketingDigitalTwinSection";
+import { FiMarketingClinicsAtEveryStageSection } from "@/components/home/FiMarketingClinicsAtEveryStageSection";
 import { FiMarketingEnterpriseInfrastructureSection } from "@/components/home/FiMarketingEnterpriseInfrastructureSection";
 import { FiMarketingEngineeringCredibilitySection } from "@/components/home/FiMarketingEngineeringCredibilitySection";
-import { FiMarketingGlobalIntelligenceNetworkSection } from "@/components/home/FiMarketingGlobalIntelligenceNetworkSection";
 import { FiMarketingIndustrySoftwareGapSection } from "@/components/home/FiMarketingIndustrySoftwareGapSection";
+import { FiMarketingIntelligenceNetworkSection } from "@/components/home/FiMarketingIntelligenceNetworkSection";
+import { FiMarketingInvestorPositioningSection } from "@/components/home/FiMarketingInvestorPositioningSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 import { FiMarketingPlatformProgressSection } from "@/components/home/FiMarketingPlatformProgressSection";
 import { PartnersInvestorsStrip } from "@/components/marketing/PartnersInvestorsStrip";
-
-const GlobalHairIntelligenceSectionClient = dynamic(
-  () =>
-    import("@/components/ecosystem/GlobalHairIntelligenceSection").then((m) => ({
-      default: m.GlobalHairIntelligenceSection,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <GlobalHairIntelligenceSectionPlaceholder
-        heading={HOME_PAGE_CONTENT.networkDiagram.heading}
-        description={HOME_PAGE_CONTENT.networkDiagram.description}
-        className="scroll-mt-0"
-      />
-    ),
-  }
-);
 
 const FiMarketingOsHeroVisual = dynamic(
   () =>
@@ -70,85 +51,6 @@ function ChipList({ items }: { items: readonly string[] }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function PatientJourneyTimeline({ steps }: { steps: readonly string[] }) {
-  return (
-    <>
-      {/* Desktop: horizontal pipeline */}
-      <div className="relative mt-12 hidden lg:block">
-        <div
-          className="pointer-events-none absolute left-0 right-0 top-[42%] h-px bg-gradient-to-r from-transparent via-amber-400/25 to-transparent"
-          aria-hidden
-        />
-        <div className="overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-amber-400/25">
-          <ol className="flex min-w-min items-stretch gap-0 px-1">
-            {steps.map((step, index) => (
-              <Fragment key={step}>
-                <li className="flex w-[9.5rem] shrink-0 flex-col">
-                  <GlassCard variant="default" className="h-full border-amber-400/10 !p-4 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]">
-                    <span className="font-mono text-[9px] font-semibold uppercase tabular-nums tracking-[0.18em] text-amber-200/55">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <p className="mt-2 text-[0.8125rem] font-medium leading-snug text-foreground">{step}</p>
-                  </GlassCard>
-                </li>
-                {index < steps.length - 1 ? (
-                  <li className="flex w-8 shrink-0 items-center justify-center self-center pt-6" aria-hidden>
-                    <ChevronRight className="h-4 w-4 text-amber-400/45" strokeWidth={2} />
-                  </li>
-                ) : null}
-              </Fragment>
-            ))}
-          </ol>
-        </div>
-      </div>
-
-      {/* Mobile / tablet: vertical timeline */}
-      <ol className="relative mx-auto mt-10 max-w-3xl space-y-0 border-l border-amber-400/25 pl-6 sm:mt-12 sm:pl-8 md:max-w-4xl lg:hidden">
-        {steps.map((step, index) => (
-          <li key={step} className="relative pb-7 last:pb-0 sm:pb-9">
-            <span
-              aria-hidden
-              className="absolute -left-[19px] top-2 flex h-3 w-3 items-center justify-center rounded-full border border-amber-300/45 bg-gradient-to-br from-amber-200/55 to-amber-800/30 shadow-[0_0_16px_rgb(212_175_55_/0.35)] sm:-left-[21px]"
-            />
-            <GlassCard variant="default" className="border-amber-400/10 !shadow-[0_12px_40px_rgb(0_0_0_/0.28)]">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
-                Stage {String(index + 1).padStart(2, "0")}
-              </span>
-              <p className="mt-2 text-[0.95rem] font-medium leading-snug text-foreground sm:text-lg">{step}</p>
-            </GlassCard>
-          </li>
-        ))}
-      </ol>
-    </>
-  );
-}
-
-function IntelligenceCategoryGrid({
-  groups,
-}: {
-  groups: typeof HOME_PAGE_CONTENT.surgicalIntelligence.intelligenceGroups;
-}) {
-  return (
-    <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {groups.map((group) => (
-        <GlassCard key={group.title} variant="default" className="border-white/[0.07]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200/80">{group.title}</p>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {group.items.map((item) => (
-              <li
-                key={item}
-                className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-xs font-medium leading-snug text-foreground/90"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        </GlassCard>
-      ))}
-    </div>
   );
 }
 
@@ -259,15 +161,13 @@ export function FiMarketingHomeView() {
 
       <FiMarketingPlatformProgressSection />
 
+      <FiMarketingClinicsAtEveryStageSection />
+
       <FiMarketingEnterpriseInfrastructureSection />
 
       <FiMarketingIndustrySoftwareGapSection />
 
-      <FiMarketingConnectedIntelligenceEcosystemSection />
-
-      <FiMarketingGlobalIntelligenceNetworkSection />
-
-      <FiMarketingDigitalTwinSection />
+      <FiMarketingIntelligenceNetworkSection />
 
       <Section
         id={c.industryProblem.id}
@@ -297,22 +197,6 @@ export function FiMarketingHomeView() {
       </Section>
 
       <FiMarketingProductShowcaseSection section={c.productShowcase} />
-
-      <Section
-        id={c.patientJourney.id}
-        className="border-b border-border/50 py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.patientJourney.id}-heading`}
-      >
-        <FadeIn>
-          <SectionHeading
-            id={`${c.patientJourney.id}-heading`}
-            eyebrow={c.patientJourney.storyEyebrow}
-            title={c.patientJourney.headline}
-            description={c.patientJourney.subtext}
-          />
-          <PatientJourneyTimeline steps={c.patientJourney.steps} />
-        </FadeIn>
-      </Section>
 
       <Section
         id={c.builtForOperators.id}
@@ -366,24 +250,6 @@ export function FiMarketingHomeView() {
       </Section>
 
       <Section
-        id={c.surgicalIntelligence.id}
-        className="border-b border-border/50 bg-gradient-to-b from-muted/[0.05] to-background py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.surgicalIntelligence.id}-heading`}
-      >
-        <FadeIn>
-          <SectionHeading
-            id={`${c.surgicalIntelligence.id}-heading`}
-            eyebrow={c.surgicalIntelligence.storyEyebrow}
-            title={c.surgicalIntelligence.headline}
-          />
-          <IntelligenceCategoryGrid groups={c.surgicalIntelligence.intelligenceGroups} />
-          <p className="mt-10 max-w-3xl text-base font-medium leading-relaxed text-muted-foreground sm:mt-12 md:text-lg">
-            {c.surgicalIntelligence.closing}
-          </p>
-        </FadeIn>
-      </Section>
-
-      <Section
         id={c.auditNetwork.id}
         className="border-b border-border/50 py-20 sm:py-24 md:py-28"
         aria-labelledby={`${c.auditNetwork.id}-heading`}
@@ -425,59 +291,6 @@ export function FiMarketingHomeView() {
         </FadeIn>
       </Section>
 
-      <Section
-        id={c.globalIntelligence.id}
-        className="border-b border-border/50 bg-muted/[0.04] py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.globalIntelligence.id}-heading`}
-      >
-        <FadeIn>
-          <SectionHeading
-            id={`${c.globalIntelligence.id}-heading`}
-            eyebrow={c.globalIntelligence.storyEyebrow}
-            title={c.globalIntelligence.headline}
-            description={c.globalIntelligence.subtext}
-          />
-          <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{c.globalIntelligence.futureFacingNote}</p>
-          <p className="mt-8 text-sm font-semibold uppercase tracking-[0.2em] text-amber-200/80">
-            {c.globalIntelligence.twinDataLabel}
-          </p>
-          <ChipList items={c.globalIntelligence.twinDataPoints} />
-        </FadeIn>
-      </Section>
-
-      <div id="ecosystem" className="scroll-mt-20">
-        <GlobalHairIntelligenceSectionClient
-          variant="follicle-intelligence"
-          heading={c.networkDiagram.heading}
-          description={c.networkDiagram.description}
-          networkTitle={c.networkDiagram.networkTitle}
-          networkFooterCaption={c.networkDiagram.networkFooterCaption}
-          size="hero"
-          theme="dark"
-          className="scroll-mt-0"
-        />
-      </div>
-
-      <Section
-        id={c.predictiveFuture.id}
-        className="border-b border-border/50 py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.predictiveFuture.id}-heading`}
-      >
-        <FadeIn>
-          <SectionHeading
-            id={`${c.predictiveFuture.id}-heading`}
-            eyebrow={c.predictiveFuture.storyEyebrow}
-            title={c.predictiveFuture.headline}
-          />
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">{c.predictiveFuture.intro}</p>
-          <p className="mt-8 text-sm font-semibold uppercase tracking-[0.2em] text-amber-200/75">
-            {c.predictiveFuture.modelsLabel}
-          </p>
-          <ChipList items={c.predictiveFuture.models} />
-          <p className="mt-10 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">{c.predictiveFuture.closing}</p>
-        </FadeIn>
-      </Section>
-
       <FiMarketingMoonshotSection section={c.moonshot} />
 
       <FiMarketingEngineeringCredibilitySection />
@@ -513,6 +326,8 @@ export function FiMarketingHomeView() {
       </Section>
 
       <FiMarketingAuthoritySection section={c.authority} />
+
+      <FiMarketingInvestorPositioningSection />
 
       <section
         id={c.finalCta.id}
