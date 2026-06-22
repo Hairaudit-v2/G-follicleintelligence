@@ -20,7 +20,7 @@ export default async function OnboardingSessionDetailPage({
     return <p className="text-sm text-red-400">{loaded.error}</p>;
   }
 
-  const { session, steps, progress } = loaded.detail;
+  const { session, steps, progress, deploymentPlan, templateReadiness } = loaded.detail;
 
   return (
     <div className="space-y-6">
@@ -41,6 +41,8 @@ export default async function OnboardingSessionDetailPage({
         progressPercent={progress.percent}
         errorMessage={session.error_message}
         steps={steps}
+        deploymentPlan={deploymentPlan}
+        templateReadiness={templateReadiness}
       />
     </div>
   );

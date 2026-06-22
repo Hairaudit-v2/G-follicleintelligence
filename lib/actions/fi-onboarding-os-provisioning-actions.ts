@@ -21,7 +21,10 @@ const createSessionSchema = z.object({
   defaultTimezone: z.string().min(1).max(120),
   firstTenantAdminEmail: z.string().email(),
   supportEmail: z.string().email().optional().nullable(),
+  templateCode: z.string().optional().nullable(),
+  deploymentTemplateCode: z.string().optional().nullable(),
   enabledModuleCodes: z.array(z.string()).optional().nullable(),
+  sandboxSeedEnabled: z.boolean().optional().nullable(),
 });
 
 export type OnboardingOsActionResult =
@@ -57,7 +60,10 @@ export async function createOnboardingSessionAction(body: unknown): Promise<Onbo
         defaultTimezone: parsed.defaultTimezone.trim(),
         firstTenantAdminEmail: parsed.firstTenantAdminEmail.trim(),
         supportEmail: parsed.supportEmail?.trim() || null,
+        templateCode: parsed.templateCode?.trim() || null,
+        deploymentTemplateCode: parsed.deploymentTemplateCode?.trim() || null,
         enabledModuleCodes: parsed.enabledModuleCodes ?? null,
+        sandboxSeedEnabled: parsed.sandboxSeedEnabled ?? null,
       },
       { actorAuthUserId: auth.authId, skipAuthCheck: true }
     );
@@ -135,6 +141,9 @@ export async function runAllOnboardingStepsAction(sessionId: string): Promise<On
     "provision_tenant_core",
     "apply_module_entitlements",
     "apply_verification_status",
+    "deploy_clinic_configuration",
+    "assign_academy_training",
+    "prepare_sandbox_seed",
   ] as const;
 
   for (const stepCode of stepCodes) {

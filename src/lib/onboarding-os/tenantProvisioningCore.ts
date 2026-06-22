@@ -4,9 +4,20 @@
  */
 
 import { FI_OS_MODULE_CODES, isFiModuleCode } from "@/src/lib/platform/entitlements/modules";
-import { FI_TENANT_ADMIN_ROLES } from "@/src/lib/tenantAdmin/tenantAdminRoles";
+import { FI_TENANT_ADMIN_ROLES, isFiTenantAdminRoleString } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 
+import {
+  CLINIC_DEPLOYMENT_TEMPLATES,
+  isClinicDeploymentTemplateCode,
+  LEGACY_TEMPLATE_CODE_MAP,
+  MODULE_BUNDLES,
+  ROLE_PACKS,
+} from "./clinicDeploymentCatalog";
 import type {
+  AcademyAssignmentPlan,
+  ClinicDeploymentPlan,
+  ClinicDeploymentTemplate,
+  ClinicDeploymentTemplateCode,
   ProvisioningAuditSnapshot,
   ProvisioningInput,
   ProvisioningModuleTemplate,
@@ -17,6 +28,9 @@ import type {
   ProvisioningStepDefinition,
   ProvisioningStepProgress,
   ProvisioningStepStatus,
+  SandboxSeedPlan,
+  ServiceWorkflowPack,
+  TemplateReadinessResult,
 } from "./tenantProvisioningTypes";
 import { PROVISIONING_STEP_CODES } from "./tenantProvisioningTypes";
 
@@ -43,6 +57,18 @@ const STEP_LABELS: Record<ProvisioningStepCode, { label: string; description: st
     label: "Apply verification status",
     description: "Set tenant verification gate for paid modules.",
   },
+  deploy_clinic_configuration: {
+    label: "Deploy clinic configuration",
+    description: "Apply service catalog from deployment template (workflows stored as plan — no CRM import).",
+  },
+  assign_academy_training: {
+    label: "Assign AcademyOS training",
+    description: "Build AcademyOS training track assignment plan from deployment template.",
+  },
+  prepare_sandbox_seed: {
+    label: "Prepare sandbox seed",
+    description: "Generate optional demo seed plan when sandbox mode is enabled.",
+  },
   ready_for_review: {
     label: "Ready for review",
     description: "Mark session ready for platform admin review before go-live.",
@@ -68,7 +94,7 @@ export function buildTenantSlug(tenantName: string): string {
   return base.slice(0, 80);
 }
 
-/** Ordered provisioning steps for Phase A (no billing/CRM connectors). */
+/** Ordered provisioning steps for Phase B (no billing/CRM connectors). */
 export function buildProvisioningSteps(): ProvisioningStepDefinition[] {
   return PROVISIONING_STEP_CODES.map((stepCode, index) => {
     const meta = STEP_LABELS[stepCode];
@@ -181,6 +207,17 @@ export function validateProvisioningInput(raw: unknown): ProvisioningInputValida
     input.templateCode == null || String(input.templateCode).trim() === ""
       ? null
       : String(input.templateCode).trim();
+  const deploymentTemplateCode =
+    input.deploymentTemplateCode == null || String(input.deploymentTemplateCode).trim() === ""
+      ? null
+      : String(input.deploymentTemplateCode).trim();
+
+  if (deploymentTemplateCode && !isClinicDeploymentTemplateCode(deploymentTemplateCode)) {
+    errors.push(`Unknown deployment template code: ${deploymentTemplateCode}`);
+  }
+
+  const sandboxSeedEnabled =
+    input.sandboxSeedEnabled == null ? null : Boolean(input.sandboxSeedEnabled);
 
   if (!tenantName) errors.push("Tenant name is required.");
   if (tenantName.length > 200) errors.push("Tenant name must be 200 characters or fewer.");
@@ -223,8 +260,228 @@ export function validateProvisioningInput(raw: unknown): ProvisioningInputValida
       firstTenantAdminEmail,
       supportEmail,
       templateCode,
+      deploymentTemplateCode,
       enabledModuleCodes,
+      sandboxSeedEnabled,
     },
+  };
+}
+
+/** Resolve a deployment template code from session input (Phase B) or legacy template code. */
+export function resolveDeploymentTemplateCode(input: ProvisioningInput): ClinicDeploymentTemplateCode {
+  const explicit = input.deploymentTemplateCode?.trim();
+  if (explicit && isClinicDeploymentTemplateCode(explicit)) return explicit;
+
+  const legacy = input.templateCode?.trim();
+  if (legacy && isClinicDeploymentTemplateCode(legacy)) return legacy;
+  if (legacy && LEGACY_TEMPLATE_CODE_MAP[legacy]) return LEGACY_TEMPLATE_CODE_MAP[legacy];
+
+  return "standard_hair_restoration";
+}
+
+/** Build a fully resolved clinic deployment template from catalog. */
+export function buildClinicDeploymentTemplate(
+  templateCode: ClinicDeploymentTemplateCode | string
+): ClinicDeploymentTemplate | null {
+  const code = String(templateCode ?? "").trim();
+  if (!isClinicDeploymentTemplateCode(code)) return null;
+  return CLINIC_DEPLOYMENT_TEMPLATES[code];
+}
+
+/** Resolve a module bundle by code with optional module overrides from session input. */
+export function resolveModuleBundle(
+  bundleCode: string,
+  input?: ProvisioningInput | null
+): ProvisioningModuleTemplate & { code: string; displayName: string } {
+  const bundle = MODULE_BUNDLES[bundleCode] ?? MODULE_BUNDLES.core_clinic;
+  const overrides = input?.enabledModuleCodes?.filter(isFiModuleCode) ?? null;
+  return {
+    code: bundle.code,
+    displayName: bundle.displayName,
+    subscriptionStatus: bundle.subscriptionStatus,
+    verificationStatus: bundle.verificationStatus,
+    enabledModules: overrides?.length ? overrides : [...bundle.enabledModules],
+  };
+}
+
+/** Resolve role pack from catalog code. */
+export function resolveRolePack(rolePackCode: string): ProvisioningRoleTemplate & { code: string; displayName: string } {
+  const pack = ROLE_PACKS[rolePackCode] ?? ROLE_PACKS.standard_clinic_roles;
+  return {
+    code: pack.code,
+    displayName: pack.displayName,
+    primaryAdminRole: pack.primaryAdminRole,
+    additionalRoles: [...pack.additionalRoles],
+  };
+}
+
+/** Resolve service + workflow pack for a deployment template. */
+export function resolveServiceWorkflowPack(template: ClinicDeploymentTemplate): ServiceWorkflowPack {
+  return {
+    serviceTemplates: [...template.serviceTemplates],
+    workflowTemplates: [...template.workflowTemplates],
+  };
+}
+
+/** Build AcademyOS training assignment plan from deployment template. */
+export function buildAcademyAssignmentPlan(
+  template: ClinicDeploymentTemplate,
+  moduleBundle?: { enabledModules: readonly string[] }
+): AcademyAssignmentPlan {
+  const hasAcademy = moduleBundle?.enabledModules.includes("academy_os") ?? false;
+  const assignments = hasAcademy
+    ? [...template.academyAssignments]
+    : template.academyAssignments.filter((a) => !a.mandatory);
+
+  return {
+    templateCode: template.code,
+    assignments,
+    mandatoryCount: assignments.filter((a) => a.mandatory).length,
+    optionalCount: assignments.filter((a) => !a.mandatory).length,
+  };
+}
+
+/** Prepare sandbox seed plan from deployment template and session overrides. */
+export function prepareSandboxSeedPlan(
+  template: ClinicDeploymentTemplate,
+  input?: ProvisioningInput | null
+): SandboxSeedPlan {
+  const enabled =
+    input?.sandboxSeedEnabled != null ? input.sandboxSeedEnabled : template.sandboxSeed.enabled;
+
+  const seed = enabled ? template.sandboxSeed : { ...template.sandboxSeed, enabled: false };
+
+  const items: SandboxSeedPlan["items"] = [
+    {
+      kind: "demo_patients",
+      description: "Sample patient records for walkthrough",
+      included: seed.enabled && seed.includeDemoPatients,
+    },
+    {
+      kind: "demo_bookings",
+      description: "Sample calendar bookings linked to services",
+      included: seed.enabled && seed.includeDemoBookings,
+    },
+    {
+      kind: "demo_staff",
+      description: "Sample staff roster with working hours",
+      included: seed.enabled && seed.includeDemoStaff,
+    },
+  ];
+
+  return { enabled: seed.enabled, templateCode: template.code, items };
+}
+
+/** Assess deployment template readiness before provisioning. */
+export function calculateTemplateReadiness(
+  template: ClinicDeploymentTemplate,
+  input?: ProvisioningInput | null
+): TemplateReadinessResult {
+  const issues: TemplateReadinessResult["issues"][number][] = [];
+  const moduleBundle = resolveModuleBundle(template.moduleBundleCode, input);
+  const rolePack = ROLE_PACKS[template.rolePackCode] ?? ROLE_PACKS.standard_clinic_roles;
+
+  if (!MODULE_BUNDLES[template.moduleBundleCode]) {
+    issues.push({
+      code: "unknown_module_bundle",
+      severity: "blocker",
+      message: `Module bundle "${template.moduleBundleCode}" is not defined.`,
+    });
+  }
+
+  if (!ROLE_PACKS[template.rolePackCode]) {
+    issues.push({
+      code: "unknown_role_pack",
+      severity: "blocker",
+      message: `Role pack "${template.rolePackCode}" is not defined.`,
+    });
+  }
+
+  for (const mod of moduleBundle.enabledModules) {
+    if (!isFiModuleCode(mod)) {
+      issues.push({
+        code: "invalid_module",
+        severity: "blocker",
+        message: `Unknown module code in bundle: ${mod}`,
+      });
+    }
+  }
+
+  if (!isFiTenantAdminRoleString(rolePack.primaryAdminRole)) {
+    issues.push({
+      code: "invalid_primary_role",
+      severity: "blocker",
+      message: `Primary admin role "${rolePack.primaryAdminRole}" is not recognized.`,
+    });
+  }
+
+  if (template.serviceTemplates.length === 0) {
+    issues.push({
+      code: "no_services",
+      severity: "warning",
+      message: "Template has no service catalog entries.",
+    });
+  }
+
+  const hasAcademyModule = moduleBundle.enabledModules.includes("academy_os");
+  if (hasAcademyModule && template.academyAssignments.length === 0) {
+    issues.push({
+      code: "academy_module_no_tracks",
+      severity: "warning",
+      message: "Academy OS is enabled but no training tracks are assigned.",
+    });
+  }
+
+  if (!hasAcademyModule && template.academyAssignments.some((a) => a.mandatory)) {
+    issues.push({
+      code: "mandatory_academy_without_module",
+      severity: "warning",
+      message: "Mandatory Academy tracks defined but academy_os is not in the module bundle.",
+    });
+  }
+
+  const sandboxEnabled =
+    input?.sandboxSeedEnabled != null ? input.sandboxSeedEnabled : template.sandboxSeed.enabled;
+
+  const blockers = issues.filter((i) => i.severity === "blocker").length;
+  const warnings = issues.filter((i) => i.severity === "warning").length;
+  const score = Math.max(0, 100 - blockers * 25 - warnings * 5);
+
+  return {
+    ready: blockers === 0,
+    score,
+    issues,
+    summary: {
+      moduleCount: moduleBundle.enabledModules.length,
+      roleCount: 1 + rolePack.additionalRoles.length,
+      serviceCount: template.serviceTemplates.length,
+      workflowCount: template.workflowTemplates.length,
+      academyTrackCount: template.academyAssignments.length,
+      sandboxEnabled,
+    },
+  };
+}
+
+/** Build a resolved deployment plan for session storage. */
+export function buildClinicDeploymentPlan(input: ProvisioningInput): ClinicDeploymentPlan {
+  const templateCode = resolveDeploymentTemplateCode(input);
+  const template = CLINIC_DEPLOYMENT_TEMPLATES[templateCode];
+  const rolePack = ROLE_PACKS[template.rolePackCode] ?? ROLE_PACKS.standard_clinic_roles;
+  const moduleBundle = resolveModuleBundle(template.moduleBundleCode, input);
+  const sandboxSeed =
+    input.sandboxSeedEnabled != null
+      ? { ...template.sandboxSeed, enabled: input.sandboxSeedEnabled }
+      : template.sandboxSeed;
+
+  return {
+    templateCode,
+    templateDisplayName: template.displayName,
+    rolePack,
+    moduleBundle,
+    serviceTemplates: [...template.serviceTemplates],
+    workflowTemplates: [...template.workflowTemplates],
+    academyAssignments: [...template.academyAssignments],
+    sandboxSeed,
   };
 }
 
@@ -245,14 +502,27 @@ export function buildDefaultModuleTemplate(): ProvisioningModuleTemplate {
   };
 }
 
-/** Resolve module template with optional overrides from session input. */
+/** Resolve module template from deployment plan or legacy defaults. */
 export function resolveModuleTemplateFromInput(input: ProvisioningInput): ProvisioningModuleTemplate {
-  const base = buildDefaultModuleTemplate();
-  const overrides = input.enabledModuleCodes?.filter(isFiModuleCode) ?? null;
-  if (overrides?.length) {
-    return { ...base, enabledModules: overrides };
-  }
-  return base;
+  const deploymentCode = resolveDeploymentTemplateCode(input);
+  const template = CLINIC_DEPLOYMENT_TEMPLATES[deploymentCode];
+  const resolved = resolveModuleBundle(template.moduleBundleCode, input);
+  return {
+    subscriptionStatus: resolved.subscriptionStatus,
+    verificationStatus: resolved.verificationStatus,
+    enabledModules: resolved.enabledModules,
+  };
+}
+
+/** Resolve role template from deployment plan or legacy defaults. */
+export function resolveRoleTemplateFromInput(input: ProvisioningInput): ProvisioningRoleTemplate {
+  const deploymentCode = resolveDeploymentTemplateCode(input);
+  const template = CLINIC_DEPLOYMENT_TEMPLATES[deploymentCode];
+  const pack = ROLE_PACKS[template.rolePackCode] ?? ROLE_PACKS.standard_clinic_roles;
+  return {
+    primaryAdminRole: pack.primaryAdminRole,
+    additionalRoles: [...pack.additionalRoles],
+  };
 }
 
 /** Whether a failed step can be retried (Phase A policy). */

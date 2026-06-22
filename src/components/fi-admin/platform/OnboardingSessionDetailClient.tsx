@@ -17,8 +17,10 @@ import {
   resolveProvisioningStepStatusBadge,
 } from "@/src/lib/onboarding-os/tenantProvisioningCore";
 import type {
+  ClinicDeploymentPlan,
   ProvisioningSessionStatus,
   ProvisioningStepStatus,
+  TemplateReadinessResult,
 } from "@/src/lib/onboarding-os/tenantProvisioningTypes";
 import type { TenantProvisioningStepRow } from "@/src/lib/onboarding-os/tenantProvisioning.server";
 
@@ -47,6 +49,8 @@ type Props = {
   progressPercent: number;
   errorMessage: string | null;
   steps: TenantProvisioningStepRow[];
+  deploymentPlan: ClinicDeploymentPlan | null;
+  templateReadiness: TemplateReadinessResult | null;
 };
 
 export function OnboardingSessionDetailClient({
@@ -58,6 +62,8 @@ export function OnboardingSessionDetailClient({
   progressPercent,
   errorMessage,
   steps,
+  deploymentPlan,
+  templateReadiness,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -145,6 +151,68 @@ export function OnboardingSessionDetailClient({
           </div>
         ) : null}
       </section>
+
+      {deploymentPlan ? (
+        <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-200">Deployment template</h3>
+              <p className="mt-1 text-sm text-slate-300">{deploymentPlan.templateDisplayName}</p>
+              <p className="mt-0.5 font-mono text-xs text-slate-600">{deploymentPlan.templateCode}</p>
+            </div>
+            {templateReadiness ? (
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                  templateReadiness.ready ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
+                }`}
+              >
+                {templateReadiness.score}% {templateReadiness.ready ? "Ready" : "Review"}
+              </span>
+            ) : null}
+          </div>
+
+          {templateReadiness?.issues.length ? (
+            <ul className="mt-3 space-y-1 text-xs text-amber-400">
+              {templateReadiness.issues.map((issue) => (
+                <li key={issue.code}>{issue.message}</li>
+              ))}
+            </ul>
+          ) : null}
+
+          <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <dt className="font-medium text-slate-500">Modules</dt>
+              <dd className="mt-1 text-slate-300">{deploymentPlan.moduleBundle.enabledModules.join(", ")}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-slate-500">Roles</dt>
+              <dd className="mt-1 text-slate-300">
+                {[deploymentPlan.rolePack.primaryAdminRole, ...deploymentPlan.rolePack.additionalRoles].join(", ")}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium text-slate-500">Services</dt>
+              <dd className="mt-1 text-slate-300">{deploymentPlan.serviceTemplates.map((s) => s.name).join(", ")}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-slate-500">Workflows</dt>
+              <dd className="mt-1 text-slate-300">{deploymentPlan.workflowTemplates.map((w) => w.name).join(", ")}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-slate-500">Academy tracks</dt>
+              <dd className="mt-1 text-slate-300">
+                {deploymentPlan.academyAssignments.length
+                  ? deploymentPlan.academyAssignments.map((a) => a.trackName).join(", ")
+                  : "None"}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium text-slate-500">Sandbox seed</dt>
+              <dd className="mt-1 text-slate-300">{deploymentPlan.sandboxSeed.enabled ? "Enabled" : "Disabled"}</dd>
+            </div>
+          </dl>
+        </section>
+      ) : null}
 
       <section>
         <h3 className="text-sm font-semibold text-slate-200">Provisioning steps</h3>

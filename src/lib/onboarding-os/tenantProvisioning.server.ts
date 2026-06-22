@@ -15,19 +15,30 @@ import { activateTenantModule } from "@/src/lib/platform/entitlements/activateTe
 import { logStructured } from "@/src/lib/server/structuredLog";
 
 import {
+  buildAcademyAssignmentPlan,
+  buildClinicDeploymentPlan,
+  buildClinicDeploymentTemplate,
   buildProvisioningAuditSnapshot,
   buildProvisioningSteps,
   calculateProvisioningProgress,
+  calculateTemplateReadiness,
   canRetryProvisioningStep,
+  prepareSandboxSeedPlan,
   provisioningStepStatusAfterRetryRequest,
+  resolveDeploymentTemplateCode,
   resolveModuleTemplateFromInput,
+  resolveServiceWorkflowPack,
   validateProvisioningInput,
 } from "./tenantProvisioningCore";
 import type {
+  AcademyAssignmentPlan,
+  ClinicDeploymentPlan,
   ProvisioningInput,
   ProvisioningSessionStatus,
   ProvisioningStepCode,
   ProvisioningStepStatus,
+  SandboxSeedPlan,
+  TemplateReadinessResult,
 } from "./tenantProvisioningTypes";
 
 export type TenantProvisioningSessionRow = {
@@ -39,6 +50,7 @@ export type TenantProvisioningSessionRow = {
   tenant_slug: string;
   input_snapshot: Record<string, unknown>;
   result_snapshot: Record<string, unknown>;
+  deployment_snapshot: Record<string, unknown>;
   progress_percent: number;
   current_step_code: string | null;
   error_message: string | null;
@@ -48,6 +60,27 @@ export type TenantProvisioningSessionRow = {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type TenantProvisioningTemplateRow = {
+  id: string;
+  code: string;
+  display_name: string;
+  description: string | null;
+  is_default: boolean;
+  is_active: boolean;
+  role_template: Record<string, unknown>;
+  module_template: Record<string, unknown>;
+  deployment_template: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+};
+
+export type TenantProvisioningSessionDetail = {
+  session: TenantProvisioningSessionRow;
+  steps: TenantProvisioningStepRow[];
+  progress: ReturnType<typeof calculateProvisioningProgress>;
+  deploymentPlan: ClinicDeploymentPlan | null;
+  templateReadiness: TemplateReadinessResult | null;
 };
 
 export type TenantProvisioningStepRow = {
@@ -64,12 +97,6 @@ export type TenantProvisioningStepRow = {
   error_message: string | null;
   input_snapshot: Record<string, unknown>;
   output_snapshot: Record<string, unknown>;
-};
-
-export type TenantProvisioningSessionDetail = {
-  session: TenantProvisioningSessionRow;
-  steps: TenantProvisioningStepRow[];
-  progress: ReturnType<typeof calculateProvisioningProgress>;
 };
 
 type ServerOpts = {
@@ -130,6 +157,149 @@ async function loadDefaultTemplateId(supabase: SupabaseClient, templateCode?: st
   return String((data as { id: string }).id);
 }
 
+function parseDeploymentPlanFromSnapshot(snapshot: Record<string, unknown>): ClinicDeploymentPlan | null {
+  const plan = snapshot?.plan;
+  if (!plan || typeof plan !== "object") return null;
+  return plan as ClinicDeploymentPlan;
+}
+
+function parseTemplateReadinessFromSnapshot(snapshot: Record<string, unknown>): TemplateReadinessResult | null {
+  const readiness = snapshot?.readiness;
+  if (!readiness || typeof readiness !== "object") return null;
+  return readiness as TemplateReadinessResult;
+}
+
+/** Apply resolved deployment template to a provisioning session (Phase B). */
+export async function applyDeploymentTemplateToSession(
+  supabase: SupabaseClient,
+  sessionId: string,
+  input: ProvisioningInput
+): Promise<{ ok: true; plan: ClinicDeploymentPlan; readiness: TemplateReadinessResult } | { ok: false; error: string }> {
+  const templateCode = resolveDeploymentTemplateCode(input);
+  const template = buildClinicDeploymentTemplate(templateCode);
+  if (!template) {
+    return { ok: false, error: `Deployment template "${templateCode}" is not available.` };
+  }
+
+  const plan = buildClinicDeploymentPlan(input);
+  const readiness = calculateTemplateReadiness(template, input);
+
+  const { error } = await supabase
+    .from("fi_tenant_provisioning_sessions")
+    .update({
+      deployment_snapshot: { plan, readiness, applied_at: new Date().toISOString() },
+      metadata: { phase: "B", deployment_template_code: templateCode },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", sessionId);
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, plan, readiness };
+}
+
+/** Deploy service catalog from deployment template (workflows remain template-only). */
+export async function deployDefaultClinicConfiguration(
+  supabase: SupabaseClient,
+  tenantId: string,
+  plan: ClinicDeploymentPlan
+): Promise<
+  | { ok: true; deployedServices: string[]; workflowPlan: ReturnType<typeof resolveServiceWorkflowPack> }
+  | { ok: false; error: string }
+> {
+  const pack = resolveServiceWorkflowPack({
+    code: plan.templateCode,
+    displayName: plan.templateDisplayName,
+    description: "",
+    rolePackCode: plan.rolePack.code,
+    moduleBundleCode: plan.moduleBundle.code,
+    serviceTemplates: plan.serviceTemplates,
+    workflowTemplates: plan.workflowTemplates,
+    academyAssignments: plan.academyAssignments,
+    sandboxSeed: plan.sandboxSeed,
+  });
+
+  const deployedServices: string[] = [];
+  const failures: string[] = [];
+
+  for (const svc of pack.serviceTemplates) {
+    const bookingType = svc.bookingType.trim();
+    const { data: existing } = await supabase
+      .from("fi_services")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("booking_type", bookingType)
+      .maybeSingle();
+
+    const row = {
+      tenant_id: tenantId,
+      name: svc.name,
+      duration_minutes: svc.durationMinutes,
+      base_price: svc.basePrice ?? 0,
+      color: svc.color ?? "#0ea5e9",
+      category: svc.category,
+      booking_type: bookingType,
+      is_active: true,
+    };
+
+    if (existing) {
+      const { error } = await supabase.from("fi_services").update(row).eq("id", (existing as { id: string }).id);
+      if (error) failures.push(`${svc.code}: ${error.message}`);
+      else deployedServices.push(svc.code);
+    } else {
+      const { error } = await supabase.from("fi_services").insert(row);
+      if (error) failures.push(`${svc.code}: ${error.message}`);
+      else deployedServices.push(svc.code);
+    }
+  }
+
+  if (failures.length) {
+    return { ok: false, error: failures.join("; ") };
+  }
+
+  return {
+    ok: true,
+    deployedServices,
+    workflowPlan: pack,
+  };
+}
+
+/** Build AcademyOS training assignment plan for a session (template-only — no academy DB writes). */
+export function assignAcademyTrainingTracks(plan: ClinicDeploymentPlan): AcademyAssignmentPlan {
+  return buildAcademyAssignmentPlan(
+    {
+      code: plan.templateCode,
+      displayName: plan.templateDisplayName,
+      description: "",
+      rolePackCode: plan.rolePack.code,
+      moduleBundleCode: plan.moduleBundle.code,
+      serviceTemplates: plan.serviceTemplates,
+      workflowTemplates: plan.workflowTemplates,
+      academyAssignments: plan.academyAssignments,
+      sandboxSeed: plan.sandboxSeed,
+    },
+    plan.moduleBundle
+  );
+}
+
+export async function loadTenantProvisioningTemplates(
+  opts: ServerOpts = {}
+): Promise<{ ok: true; templates: TenantProvisioningTemplateRow[] } | { ok: false; error: string }> {
+  const auth = await resolvePlatformAdminAuth(opts);
+  if (!auth.ok) return auth;
+
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const { data, error } = await supabase
+    .from("fi_tenant_provisioning_templates")
+    .select(
+      "id, code, display_name, description, is_default, is_active, role_template, module_template, deployment_template, metadata"
+    )
+    .eq("is_active", true)
+    .order("display_name", { ascending: true });
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, templates: (data ?? []) as TenantProvisioningTemplateRow[] };
+}
+
 async function syncSessionProgress(
   supabase: SupabaseClient,
   sessionId: string,
@@ -174,7 +344,11 @@ export async function createTenantProvisioningSession(
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const input = validated.value;
-  const templateId = await loadDefaultTemplateId(supabase, input.templateCode);
+  const deploymentCode = resolveDeploymentTemplateCode(input);
+  const templateId = await loadDefaultTemplateId(
+    supabase,
+    input.deploymentTemplateCode ?? input.templateCode ?? deploymentCode
+  );
   const stepDefs = buildProvisioningSteps();
   const now = new Date().toISOString();
 
@@ -187,7 +361,7 @@ export async function createTenantProvisioningSession(
       tenant_slug: input.tenantSlug,
       input_snapshot: input,
       actor_auth_user_id: auth.actorAuthUserId,
-      metadata: { phase: "A" },
+      metadata: { phase: "B", deployment_template_code: deploymentCode },
     })
     .select("id")
     .single();
@@ -212,6 +386,23 @@ export async function createTenantProvisioningSession(
     return { ok: false, error: stepsErr.message };
   }
 
+  const applied = await applyDeploymentTemplateToSession(supabase, sessionId, input);
+  if (!applied.ok) {
+    await supabase.from("fi_tenant_provisioning_sessions").delete().eq("id", sessionId);
+    return applied;
+  }
+
+  await writeProvisioningAudit(supabase, {
+    sessionId,
+    eventKind: "deployment_template.applied",
+    actorAuthUserId: auth.actorAuthUserId,
+    detail: {
+      template_code: applied.plan.templateCode,
+      readiness_score: applied.readiness.score,
+      readiness_ready: applied.readiness.ready,
+    },
+  });
+
   await writeProvisioningAudit(supabase, {
     sessionId,
     eventKind: "session.created",
@@ -224,7 +415,10 @@ export async function createTenantProvisioningSession(
       eventKind: "session.created",
       progressPercent: 0,
       capturedAt: now,
-      detail: { tenant_name: input.tenantName },
+      detail: {
+        tenant_name: input.tenantName,
+        deployment_template_code: applied.plan.templateCode,
+      },
     }),
   });
 
@@ -247,7 +441,7 @@ export async function loadTenantProvisioningSessions(
   const { data, error } = await supabase
     .from("fi_tenant_provisioning_sessions")
     .select(
-      "id, tenant_id, template_id, status, tenant_name, tenant_slug, input_snapshot, result_snapshot, progress_percent, current_step_code, error_message, retry_count, actor_auth_user_id, started_at, completed_at, created_at, updated_at"
+      "id, tenant_id, template_id, status, tenant_name, tenant_slug, input_snapshot, result_snapshot, deployment_snapshot, progress_percent, current_step_code, error_message, retry_count, actor_auth_user_id, started_at, completed_at, created_at, updated_at"
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -271,7 +465,7 @@ export async function loadTenantProvisioningSessionDetail(
   const { data: session, error: sessionErr } = await supabase
     .from("fi_tenant_provisioning_sessions")
     .select(
-      "id, tenant_id, template_id, status, tenant_name, tenant_slug, input_snapshot, result_snapshot, progress_percent, current_step_code, error_message, retry_count, actor_auth_user_id, started_at, completed_at, created_at, updated_at"
+      "id, tenant_id, template_id, status, tenant_name, tenant_slug, input_snapshot, result_snapshot, deployment_snapshot, progress_percent, current_step_code, error_message, retry_count, actor_auth_user_id, started_at, completed_at, created_at, updated_at"
     )
     .eq("id", id)
     .maybeSingle();
@@ -291,13 +485,18 @@ export async function loadTenantProvisioningSessionDetail(
 
   const stepRows = (steps ?? []) as TenantProvisioningStepRow[];
   const progress = calculateProvisioningProgress(stepRows);
+  const sessionRow = session as TenantProvisioningSessionRow;
+  const deploymentPlan = parseDeploymentPlanFromSnapshot(sessionRow.deployment_snapshot ?? {});
+  const templateReadiness = parseTemplateReadinessFromSnapshot(sessionRow.deployment_snapshot ?? {});
 
   return {
     ok: true,
     detail: {
-      session: session as TenantProvisioningSessionRow,
+      session: sessionRow,
       steps: stepRows,
       progress,
+      deploymentPlan,
+      templateReadiness,
     },
   };
 }
@@ -416,6 +615,68 @@ async function executeStepLogic(
         .eq("id", tenantId);
       if (error) return { ok: false, errorCode: "verification_update_failed", error: error.message };
       return { ok: true, output: { verification_status: moduleTemplate.verificationStatus } };
+    }
+
+    case "deploy_clinic_configuration": {
+      const tenantId = session.tenant_id;
+      if (!tenantId) {
+        return { ok: false, errorCode: "tenant_missing", error: "Tenant must be provisioned before clinic configuration." };
+      }
+      const plan =
+        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ?? buildClinicDeploymentPlan(input);
+      const deployed = await deployDefaultClinicConfiguration(supabase, tenantId, plan);
+      if (!deployed.ok) {
+        return { ok: false, errorCode: "clinic_config_failed", error: deployed.error };
+      }
+      return {
+        ok: true,
+        output: {
+          deployed_services: deployed.deployedServices,
+          workflow_plan: deployed.workflowPlan.workflowTemplates.map((w) => ({
+            code: w.code,
+            name: w.name,
+            type: w.type,
+          })),
+          crm_import_deferred: true,
+        },
+      };
+    }
+
+    case "assign_academy_training": {
+      const plan =
+        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ?? buildClinicDeploymentPlan(input);
+      const academyPlan = assignAcademyTrainingTracks(plan);
+      return {
+        ok: true,
+        output: {
+          academy_plan: academyPlan,
+          template_only: true,
+        },
+      };
+    }
+
+    case "prepare_sandbox_seed": {
+      const plan =
+        parseDeploymentPlanFromSnapshot(session.deployment_snapshot ?? {}) ?? buildClinicDeploymentPlan(input);
+      const template = buildClinicDeploymentTemplate(plan.templateCode);
+      if (!template) {
+        return { ok: false, errorCode: "template_missing", error: "Deployment template not found for sandbox seed." };
+      }
+      const seedPlan: SandboxSeedPlan = prepareSandboxSeedPlan(template, input);
+      if (!seedPlan.enabled) {
+        return {
+          ok: true,
+          output: { skipped: true, reason: "sandbox_disabled", seed_plan: seedPlan },
+        };
+      }
+      return {
+        ok: true,
+        output: {
+          seed_plan: seedPlan,
+          template_only: true,
+          note: "Sandbox seed plan recorded — demo data insertion deferred to Phase C.",
+        },
+      };
     }
 
     case "ready_for_review": {
@@ -641,7 +902,16 @@ export async function finalizeTenantProvisioning(
   const auth = await resolvePlatformAdminAuth(opts);
   if (!auth.ok) return auth;
 
-  const prereqSteps = ["validate_input", "check_slug_availability", "provision_tenant_core", "apply_module_entitlements", "apply_verification_status"];
+  const prereqSteps = [
+    "validate_input",
+    "check_slug_availability",
+    "provision_tenant_core",
+    "apply_module_entitlements",
+    "apply_verification_status",
+    "deploy_clinic_configuration",
+    "assign_academy_training",
+    "prepare_sandbox_seed",
+  ];
   for (const stepCode of prereqSteps) {
     const res = await runTenantProvisioningStep(sessionId, stepCode, {
       ...opts,
