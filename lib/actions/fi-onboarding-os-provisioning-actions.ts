@@ -8,11 +8,14 @@ import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsRoleAllowedForPlatformTenantProvisioning } from "@/src/lib/fiOs/platformTenantProvisionGate";
 import {
   createTenantProvisioningSession,
+  applySandboxSeedToTenant,
   finalizeTenantProvisioning,
+  loadSandboxSeedPreview,
   markProvisioningReadyForReview,
   retryTenantProvisioningStep,
   runTenantProvisioningStep,
 } from "@/src/lib/onboarding-os/tenantProvisioning.server";
+import type { SandboxSeedPackCode } from "@/src/lib/onboarding-os/tenantProvisioningTypes";
 
 const createSessionSchema = z.object({
   tenantName: z.string().min(1).max(200),
@@ -156,4 +159,59 @@ export async function runAllOnboardingStepsAction(sessionId: string): Promise<On
 
   revalidateOnboardingPaths(sessionId);
   return { ok: true, sessionId };
+}
+
+const applySandboxSeedSchema = z.object({
+  sessionId: z.string().min(1),
+  packCode: z.enum(["light_demo", "standard_demo", "enterprise_demo"]).optional().nullable(),
+  force: z.boolean().optional(),
+});
+
+export async function loadSandboxSeedPreviewAction(
+  sessionId: string,
+  packCode?: SandboxSeedPackCode | null
+): Promise<
+  | {
+      ok: true;
+      preview: import("@/src/lib/onboarding-os/tenantProvisioningTypes").SandboxSeedPreview;
+      history: import("@/src/lib/onboarding-os/tenantProvisioningTypes").SandboxSeedHistoryEntry[];
+    }
+  | { ok: false; error: string }
+> {
+  const auth = await assertPlatformAdmin();
+  if (!auth.ok) return auth;
+
+  const result = await loadSandboxSeedPreview(sessionId, {
+    packCode: packCode ?? null,
+    actorAuthUserId: auth.authId,
+    skipAuthCheck: true,
+  });
+  if (!result.ok) return result;
+  return { ok: true, preview: result.preview, history: result.history };
+}
+
+export async function applySandboxSeedAction(body: unknown): Promise<OnboardingOsActionResult> {
+  try {
+    const auth = await assertPlatformAdmin();
+    if (!auth.ok) return auth;
+
+    const parsed = applySandboxSeedSchema.parse(body);
+    const result = await applySandboxSeedToTenant(
+      {
+        sessionId: parsed.sessionId.trim(),
+        packCode: parsed.packCode ?? null,
+        force: parsed.force ?? false,
+      },
+      { actorAuthUserId: auth.authId, skipAuthCheck: true }
+    );
+
+    if (!result.ok) return { ok: false, error: result.error };
+    revalidateOnboardingPaths(parsed.sessionId.trim());
+    return { ok: true, sessionId: parsed.sessionId.trim() };
+  } catch (e) {
+    if (e instanceof z.ZodError) {
+      return { ok: false, error: e.errors.map((x) => x.message).join("; ") };
+    }
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
 }

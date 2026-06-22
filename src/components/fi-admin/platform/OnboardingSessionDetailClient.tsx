@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import {
+  applySandboxSeedAction,
   finalizeOnboardingSessionAction,
+  loadSandboxSeedPreviewAction,
   markOnboardingReadyForReviewAction,
   retryOnboardingStepAction,
   runAllOnboardingStepsAction,
   runOnboardingStepAction,
 } from "@/lib/actions/fi-onboarding-os-provisioning-actions";
+import { listSandboxSeedPackSummaries, SANDBOX_SEED_PACK_CODES } from "@/src/lib/onboarding-os/sandboxSeedCatalog";
 import {
   canRetryProvisioningStep,
   resolveProvisioningStatusBadge,
@@ -20,6 +23,9 @@ import type {
   ClinicDeploymentPlan,
   ProvisioningSessionStatus,
   ProvisioningStepStatus,
+  SandboxSeedHistoryEntry,
+  SandboxSeedPackCode,
+  SandboxSeedPreview,
   TemplateReadinessResult,
 } from "@/src/lib/onboarding-os/tenantProvisioningTypes";
 import type { TenantProvisioningStepRow } from "@/src/lib/onboarding-os/tenantProvisioning.server";
@@ -51,6 +57,8 @@ type Props = {
   steps: TenantProvisioningStepRow[];
   deploymentPlan: ClinicDeploymentPlan | null;
   templateReadiness: TemplateReadinessResult | null;
+  sandboxSeedPreview: SandboxSeedPreview | null;
+  sandboxSeedHistory: SandboxSeedHistoryEntry[];
 };
 
 export function OnboardingSessionDetailClient({
@@ -64,10 +72,19 @@ export function OnboardingSessionDetailClient({
   steps,
   deploymentPlan,
   templateReadiness,
+  sandboxSeedPreview,
+  sandboxSeedHistory,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [selectedPack, setSelectedPack] = useState<SandboxSeedPackCode>(
+    sandboxSeedPreview?.plan.packCode ?? "standard_demo"
+  );
+  const [preview, setPreview] = useState<SandboxSeedPreview | null>(sandboxSeedPreview);
+  const [history, setHistory] = useState<SandboxSeedHistoryEntry[]>(sandboxSeedHistory);
+  const [forceApply, setForceApply] = useState(false);
+  const packSummaries = listSandboxSeedPackSummaries();
 
   const sessionBadge = resolveProvisioningStatusBadge(sessionStatus);
   const isClosed = sessionStatus === "completed" || sessionStatus === "cancelled";
@@ -84,6 +101,39 @@ export function OnboardingSessionDetailClient({
       router.refresh();
     });
   }
+
+  function refreshPreview(packCode: SandboxSeedPackCode) {
+    setSelectedPack(packCode);
+    startTransition(async () => {
+      const res = await loadSandboxSeedPreviewAction(sessionId, packCode);
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error });
+        return;
+      }
+      setPreview(res.preview);
+      setHistory(res.history);
+    });
+  }
+
+  function applySandboxSeed() {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await applySandboxSeedAction({
+        sessionId,
+        packCode: selectedPack,
+        force: forceApply,
+      });
+      if (!res.ok) {
+        setMessage({ kind: "err", text: res.error ?? "Sandbox seed apply failed." });
+        return;
+      }
+      setMessage({ kind: "ok", text: "Sandbox demo data applied." });
+      router.refresh();
+    });
+  }
+
+  const sandboxEnabled = deploymentPlan?.sandboxSeed.enabled ?? false;
+  const canApplySeed = sandboxEnabled && !!tenantId && !isClosed;
 
   return (
     <div className="space-y-6">
@@ -211,6 +261,120 @@ export function OnboardingSessionDetailClient({
               <dd className="mt-1 text-slate-300">{deploymentPlan.sandboxSeed.enabled ? "Enabled" : "Disabled"}</dd>
             </div>
           </dl>
+        </section>
+      ) : null}
+
+      {sandboxEnabled ? (
+        <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-200">Sandbox demo data</h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Preview and apply obviously fake training data. Blocked after go-live (session finalized).
+              </p>
+            </div>
+            {preview ? (
+              <span className="inline-flex rounded-full bg-cyan-500/15 px-2 py-0.5 text-xs font-medium text-cyan-300">
+                {preview.plan.totalRecords} records
+              </span>
+            ) : null}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-end gap-3">
+            <label className="block text-xs text-slate-400">
+              Seed pack
+              <select
+                value={selectedPack}
+                disabled={pending}
+                onChange={(ev) => refreshPreview(ev.target.value as SandboxSeedPackCode)}
+                className="mt-1 block w-full min-w-[220px] rounded-lg border border-white/[0.08] bg-[#0a1220] px-3 py-2 text-sm text-slate-200"
+              >
+                {SANDBOX_SEED_PACK_CODES.map((code) => {
+                  const summary = packSummaries.find((p) => p.code === code);
+                  return (
+                    <option key={code} value={code}>
+                      {summary?.displayName ?? code}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+            {canApplySeed ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-2 text-xs text-slate-400">
+                  <input
+                    type="checkbox"
+                    checked={forceApply}
+                    onChange={(ev) => setForceApply(ev.target.checked)}
+                    className="rounded border-white/20"
+                  />
+                  Force re-apply
+                </label>
+                <button
+                  type="button"
+                  disabled={pending || (preview?.alreadyApplied && !forceApply)}
+                  onClick={applySandboxSeed}
+                  className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-50"
+                >
+                  Apply sandbox seed
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-amber-400">
+                {!tenantId ? "Provision tenant core before applying seed." : "Session is closed — seed apply disabled."}
+              </p>
+            )}
+          </div>
+
+          {preview?.alreadyApplied && !forceApply ? (
+            <p className="mt-3 text-xs text-amber-400">
+              This pack was already applied for this session. Enable force re-apply to insert again (idempotent keys skip duplicates).
+            </p>
+          ) : null}
+
+          {preview ? (
+            <div className="mt-4 overflow-x-auto rounded-lg border border-white/[0.06]">
+              <table className="min-w-full text-left text-xs">
+                <thead className="bg-white/[0.03] text-slate-500">
+                  <tr>
+                    <th className="px-3 py-2 font-medium">Entity</th>
+                    <th className="px-3 py-2 font-medium">Count</th>
+                    <th className="px-3 py-2 font-medium">Included</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.06] text-slate-300">
+                  {preview.plan.entities.map((row) => (
+                    <tr key={row.entityType}>
+                      <td className="px-3 py-2">{row.label}</td>
+                      <td className="px-3 py-2 font-mono">{row.count}</td>
+                      <td className="px-3 py-2">{row.included ? "Yes" : "No"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+
+          {history.length ? (
+            <div className="mt-4">
+              <h4 className="text-xs font-semibold text-slate-400">Seed history</h4>
+              <ul className="mt-2 space-y-2">
+                {history.map((entry, idx) => (
+                  <li key={`${entry.packCode}-${entry.appliedAt}-${idx}`} className="rounded-lg bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                    <span className="font-medium text-slate-300">{entry.packCode}</span>
+                    <span className="mx-2">·</span>
+                    <span>{new Date(entry.appliedAt).toLocaleString()}</span>
+                    <span className="mx-2">·</span>
+                    <span>
+                      {Object.entries(entry.entityCounts)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join(", ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

@@ -104,13 +104,109 @@ export type AcademyTrainingAssignment = {
   mandatory: boolean;
 };
 
-/** Phase B — optional sandbox demo seed plan. */
+/** Phase B — optional sandbox demo seed toggles on deployment template. */
 export type SandboxSeedOption = {
   enabled: boolean;
   includeDemoPatients: boolean;
   includeDemoBookings: boolean;
   includeDemoStaff: boolean;
 };
+
+/** Phase C — named deterministic demo data pack. */
+export const SANDBOX_SEED_PACK_CODES = ["light_demo", "standard_demo", "enterprise_demo"] as const;
+export type SandboxSeedPackCode = (typeof SANDBOX_SEED_PACK_CODES)[number];
+
+/** Phase C — entity categories seeded into a sandbox tenant. */
+export const SANDBOX_SEED_ENTITY_TYPES = [
+  "patients",
+  "leads",
+  "appointments",
+  "consultations",
+  "surgeries",
+  "invoices",
+  "payments",
+  "staff",
+  "academy_readiness",
+  "surgery_os_metrics",
+  "financial_os_metrics",
+] as const;
+export type SandboxSeedEntityType = (typeof SANDBOX_SEED_ENTITY_TYPES)[number];
+
+export type SandboxSeedPackEntityCounts = Record<SandboxSeedEntityType, number>;
+
+export type SandboxSeedPack = {
+  code: SandboxSeedPackCode;
+  displayName: string;
+  description: string;
+  counts: SandboxSeedPackEntityCounts;
+  recommendedTemplateCodes?: readonly ClinicDeploymentTemplateCode[];
+};
+
+/** Phase B provisioning step output — high-level seed toggles only. */
+export type SandboxSeedStepPlan = {
+  enabled: boolean;
+  templateCode: ClinicDeploymentTemplateCode;
+  items: readonly { kind: string; description: string; included: boolean }[];
+};
+
+/** Phase C — resolved sandbox seed plan for preview/apply. */
+export type SandboxSeedPlan = {
+  packCode: SandboxSeedPackCode;
+  packDisplayName: string;
+  sessionId: string;
+  tenantId: string | null;
+  tenantSlug: string;
+  templateCode: ClinicDeploymentTemplateCode;
+  sandboxEnabled: boolean;
+  entities: readonly {
+    entityType: SandboxSeedEntityType;
+    label: string;
+    count: number;
+    included: boolean;
+  }[];
+  totalRecords: number;
+  generatedAt: string;
+  seedFingerprint: string;
+};
+
+export type SandboxSeedPreview = {
+  plan: SandboxSeedPlan;
+  warnings: readonly string[];
+  alreadyApplied: boolean;
+  lastAppliedAt: string | null;
+};
+
+export type SandboxSeedEntityCounts = Partial<
+  Record<SandboxSeedEntityType, { created: number; existing: number; skipped?: number }>
+>;
+
+export type SandboxSeedResult = {
+  ok: boolean;
+  plan: SandboxSeedPlan;
+  appliedAt: string;
+  entityCounts: SandboxSeedEntityCounts;
+  skippedReason?: string;
+  warnings: readonly string[];
+};
+
+export type SandboxSeedHistoryEntry = {
+  packCode: SandboxSeedPackCode;
+  appliedAt: string;
+  entityCounts: Partial<Record<SandboxSeedEntityType, number>>;
+  actorAuthUserId?: string | null;
+  sessionId: string;
+  seedFingerprint: string;
+};
+
+export type SandboxSeedRequest = {
+  sessionId: string;
+  packCode?: SandboxSeedPackCode | null;
+  force?: boolean;
+};
+
+export type SandboxSeedValidationResult =
+  | { ok: true; packCode: SandboxSeedPackCode; sandboxEnabled: boolean }
+  | { ok: false; errorCode: string; error: string };
 
 export const CLINIC_DEPLOYMENT_TEMPLATE_CODES = [
   "standard_hair_restoration",
@@ -156,12 +252,6 @@ export type AcademyAssignmentPlan = {
   assignments: readonly AcademyTrainingAssignment[];
   mandatoryCount: number;
   optionalCount: number;
-};
-
-export type SandboxSeedPlan = {
-  enabled: boolean;
-  templateCode: ClinicDeploymentTemplateCode;
-  items: readonly { kind: string; description: string; included: boolean }[];
 };
 
 export type TemplateReadinessIssue = {

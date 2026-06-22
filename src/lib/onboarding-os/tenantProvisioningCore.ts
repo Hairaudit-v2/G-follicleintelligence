@@ -13,6 +13,13 @@ import {
   MODULE_BUNDLES,
   ROLE_PACKS,
 } from "./clinicDeploymentCatalog";
+import {
+  isSandboxSeedPackCode,
+  SANDBOX_SEED_DEFAULT_PACK_BY_TEMPLATE,
+  SANDBOX_SEED_ENTITY_LABELS,
+  SANDBOX_SEED_PACKS,
+  SANDBOX_SEED_SOURCE,
+} from "./sandboxSeedCatalog";
 import type {
   AcademyAssignmentPlan,
   ClinicDeploymentPlan,
@@ -28,7 +35,16 @@ import type {
   ProvisioningStepDefinition,
   ProvisioningStepProgress,
   ProvisioningStepStatus,
+  SandboxSeedEntityType,
+  SandboxSeedHistoryEntry,
+  SandboxSeedPack,
+  SandboxSeedPackCode,
   SandboxSeedPlan,
+  SandboxSeedPreview,
+  SandboxSeedRequest,
+  SandboxSeedStepPlan,
+  SandboxSeedValidationResult,
+  SandboxSeedOption,
   ServiceWorkflowPack,
   TemplateReadinessResult,
 } from "./tenantProvisioningTypes";
@@ -341,17 +357,33 @@ export function buildAcademyAssignmentPlan(
   };
 }
 
-/** Prepare sandbox seed plan from deployment template and session overrides. */
+/** Resolve sandbox toggles from template defaults and session override. */
+export function resolveSandboxSeedOption(
+  template: ClinicDeploymentTemplate,
+  input?: ProvisioningInput | null
+): SandboxSeedOption {
+  if (input?.sandboxSeedEnabled === false) {
+    return { ...template.sandboxSeed, enabled: false };
+  }
+  if (input?.sandboxSeedEnabled === true) {
+    return {
+      enabled: true,
+      includeDemoPatients: true,
+      includeDemoBookings: true,
+      includeDemoStaff: true,
+    };
+  }
+  return template.sandboxSeed;
+}
+
+/** Prepare sandbox seed step plan from deployment template and session overrides (Phase B step). */
 export function prepareSandboxSeedPlan(
   template: ClinicDeploymentTemplate,
   input?: ProvisioningInput | null
-): SandboxSeedPlan {
-  const enabled =
-    input?.sandboxSeedEnabled != null ? input.sandboxSeedEnabled : template.sandboxSeed.enabled;
+): SandboxSeedStepPlan {
+  const seed = resolveSandboxSeedOption(template, input);
 
-  const seed = enabled ? template.sandboxSeed : { ...template.sandboxSeed, enabled: false };
-
-  const items: SandboxSeedPlan["items"] = [
+  const items: SandboxSeedStepPlan["items"] = [
     {
       kind: "demo_patients",
       description: "Sample patient records for walkthrough",
@@ -468,10 +500,7 @@ export function buildClinicDeploymentPlan(input: ProvisioningInput): ClinicDeplo
   const template = CLINIC_DEPLOYMENT_TEMPLATES[templateCode];
   const rolePack = ROLE_PACKS[template.rolePackCode] ?? ROLE_PACKS.standard_clinic_roles;
   const moduleBundle = resolveModuleBundle(template.moduleBundleCode, input);
-  const sandboxSeed =
-    input.sandboxSeedEnabled != null
-      ? { ...template.sandboxSeed, enabled: input.sandboxSeedEnabled }
-      : template.sandboxSeed;
+  const sandboxSeed = resolveSandboxSeedOption(template, input);
 
   return {
     templateCode,
@@ -570,7 +599,234 @@ export function buildProvisioningAuditSnapshot(opts: {
   };
 }
 
-/** All known FI OS module codes (for admin UI pickers). */
+/** List available FI OS module codes (for admin UI pickers). */
 export function listAvailableModuleCodesForProvisioning(): readonly string[] {
   return FI_OS_MODULE_CODES;
+}
+
+/** Build standard metadata stamped on every sandbox-seeded record. */
+export function buildSandboxSeedRecordMetadata(opts: {
+  seedPack: SandboxSeedPackCode;
+  sessionId: string;
+  generatedAt: string;
+  entityKey: string;
+  entityType?: SandboxSeedEntityType;
+}): Record<string, unknown> {
+  return {
+    demo_data: true,
+    source: SANDBOX_SEED_SOURCE,
+    seed_pack: opts.seedPack,
+    session_id: opts.sessionId,
+    generated_at: opts.generatedAt,
+    sandbox_entity_key: opts.entityKey,
+    ...(opts.entityType ? { entity_type: opts.entityType } : {}),
+  };
+}
+
+/** Resolve a sandbox seed pack by explicit code or deployment template default. */
+export function resolveSandboxSeedPack(
+  templateCode: ClinicDeploymentTemplateCode,
+  packCode?: SandboxSeedPackCode | string | null
+): SandboxSeedPack | null {
+  const explicit = String(packCode ?? "").trim();
+  if (explicit && isSandboxSeedPackCode(explicit)) return SANDBOX_SEED_PACKS[explicit];
+  return SANDBOX_SEED_PACKS[SANDBOX_SEED_DEFAULT_PACK_BY_TEMPLATE[templateCode] ?? "standard_demo"] ?? null;
+}
+
+/** Sum entity counts for a pack (optionally filtered by deployment toggles). */
+export function calculateSandboxSeedSize(
+  pack: SandboxSeedPack,
+  deploymentPlan?: ClinicDeploymentPlan | null
+): number {
+  let total = 0;
+  for (const entityType of Object.keys(pack.counts) as SandboxSeedEntityType[]) {
+    const count = pack.counts[entityType];
+    if (count <= 0) continue;
+    if (deploymentPlan && !isSandboxEntityIncluded(entityType, deploymentPlan)) continue;
+    total += count;
+  }
+  return total;
+}
+
+function isSandboxEntityIncluded(entityType: SandboxSeedEntityType, plan: ClinicDeploymentPlan): boolean {
+  const { sandboxSeed, moduleBundle } = plan;
+  if (!sandboxSeed.enabled) return false;
+  if (entityType === "staff") return sandboxSeed.includeDemoStaff;
+  if (entityType === "patients" || entityType === "leads" || entityType === "consultations") {
+    return sandboxSeed.includeDemoPatients;
+  }
+  if (entityType === "appointments") return sandboxSeed.includeDemoBookings;
+  if (entityType === "surgeries" || entityType === "surgery_os_metrics") {
+    return moduleBundle.enabledModules.includes("surgery_os");
+  }
+  if (entityType === "invoices" || entityType === "payments" || entityType === "financial_os_metrics") {
+    return moduleBundle.enabledModules.includes("financial_os");
+  }
+  if (entityType === "academy_readiness") {
+    return moduleBundle.enabledModules.includes("academy_os");
+  }
+  return true;
+}
+
+/** Deterministic fingerprint for idempotency checks. */
+export function buildSandboxSeedFingerprint(opts: {
+  sessionId: string;
+  packCode: SandboxSeedPackCode;
+  templateCode: ClinicDeploymentTemplateCode;
+  generatedAt: string;
+}): string {
+  return `onboarding_os_sandbox:${opts.sessionId}:${opts.packCode}:${opts.templateCode}:${opts.generatedAt.slice(0, 10)}`;
+}
+
+/** Build a Phase C sandbox seed plan for preview/apply. */
+export function buildSandboxSeedPlan(opts: {
+  sessionId: string;
+  tenantId: string | null;
+  tenantSlug: string;
+  templateCode: ClinicDeploymentTemplateCode;
+  deploymentPlan: ClinicDeploymentPlan;
+  packCode?: SandboxSeedPackCode | string | null;
+  generatedAt?: string;
+}): SandboxSeedPlan | null {
+  const pack = resolveSandboxSeedPack(opts.templateCode, opts.packCode);
+  if (!pack) return null;
+
+  const generatedAt = opts.generatedAt ?? new Date(0).toISOString();
+  const sandboxEnabled = opts.deploymentPlan.sandboxSeed.enabled;
+
+  const entities = (Object.keys(pack.counts) as SandboxSeedEntityType[]).map((entityType) => {
+    const count = pack.counts[entityType];
+    const included = sandboxEnabled && count > 0 && isSandboxEntityIncluded(entityType, opts.deploymentPlan);
+    return {
+      entityType,
+      label: SANDBOX_SEED_ENTITY_LABELS[entityType],
+      count,
+      included,
+    };
+  });
+
+  const totalRecords = entities.filter((e) => e.included).reduce((sum, e) => sum + e.count, 0);
+
+  return {
+    packCode: pack.code,
+    packDisplayName: pack.displayName,
+    sessionId: opts.sessionId,
+    tenantId: opts.tenantId,
+    tenantSlug: opts.tenantSlug,
+    templateCode: opts.templateCode,
+    sandboxEnabled,
+    entities,
+    totalRecords,
+    generatedAt,
+    seedFingerprint: buildSandboxSeedFingerprint({
+      sessionId: opts.sessionId,
+      packCode: pack.code,
+      templateCode: opts.templateCode,
+      generatedAt,
+    }),
+  };
+}
+
+/** Build a human-readable preview from a plan and optional history. */
+export function buildSandboxSeedPreview(opts: {
+  plan: SandboxSeedPlan;
+  history?: readonly SandboxSeedHistoryEntry[] | null;
+  warnings?: readonly string[];
+}): SandboxSeedPreview {
+  const history = opts.history ?? [];
+  const matching = history.filter(
+    (h) => h.sessionId === opts.plan.sessionId && h.packCode === opts.plan.packCode
+  );
+  const last = history.length ? history[history.length - 1] : null;
+
+  return {
+    plan: opts.plan,
+    warnings: opts.warnings ?? [],
+    alreadyApplied: matching.length > 0,
+    lastAppliedAt: last?.appliedAt ?? null,
+  };
+}
+
+/** Whether a tenant should be treated as live (sandbox seeding blocked). */
+export function isSandboxSeedTenantLive(opts: {
+  sessionStatus: ProvisioningSessionStatus;
+  tenantBillingStatus?: string | null;
+  tenantSettingsMetadata?: Record<string, unknown> | null;
+}): boolean {
+  if (opts.sessionStatus === "completed") return true;
+  const meta = opts.tenantSettingsMetadata ?? {};
+  if (meta.is_live === true) return true;
+  if (typeof meta.go_live_at === "string" && meta.go_live_at.trim()) return true;
+  if (opts.tenantBillingStatus === "active") return true;
+  return false;
+}
+
+/** Validate a sandbox seed apply request (pure guards — auth enforced server-side). */
+export function validateSandboxSeedRequest(opts: {
+  request: SandboxSeedRequest;
+  sessionStatus: ProvisioningSessionStatus;
+  sandboxEnabled: boolean;
+  tenantId: string | null;
+  tenantBillingStatus?: string | null;
+  tenantSettingsMetadata?: Record<string, unknown> | null;
+  history?: readonly SandboxSeedHistoryEntry[] | null;
+  templateCode: ClinicDeploymentTemplateCode;
+}): SandboxSeedValidationResult {
+  const pack = resolveSandboxSeedPack(opts.templateCode, opts.request.packCode);
+  if (!pack) {
+    return { ok: false, errorCode: "unknown_pack", error: "Unknown sandbox seed pack." };
+  }
+
+  if (!opts.sandboxEnabled) {
+    return { ok: false, errorCode: "sandbox_disabled", error: "Sandbox seed is disabled for this session." };
+  }
+
+  if (!opts.tenantId) {
+    return { ok: false, errorCode: "tenant_missing", error: "Tenant must be provisioned before applying sandbox seed." };
+  }
+
+  if (isSandboxSeedTenantLive(opts)) {
+    return {
+      ok: false,
+      errorCode: "tenant_live",
+      error: "Sandbox seed cannot be applied to a live tenant.",
+    };
+  }
+
+  if (!opts.request.force) {
+    const applied = (opts.history ?? []).some(
+      (h) => h.sessionId === opts.request.sessionId && h.packCode === pack.code
+    );
+    if (applied) {
+      return {
+        ok: false,
+        errorCode: "already_applied",
+        error: "Sandbox seed pack was already applied. Pass force=true to re-apply.",
+      };
+    }
+  }
+
+  return { ok: true, packCode: pack.code, sandboxEnabled: opts.sandboxEnabled };
+}
+
+export function parseSandboxSeedHistory(metadata: unknown): SandboxSeedHistoryEntry[] {
+  if (metadata == null || typeof metadata !== "object" || Array.isArray(metadata)) return [];
+  const raw = (metadata as Record<string, unknown>).sandbox_seed_history;
+  if (!Array.isArray(raw)) return [];
+  const entries: SandboxSeedHistoryEntry[] = [];
+  for (const item of raw) {
+    if (item == null || typeof item !== "object" || Array.isArray(item)) continue;
+    const row = item as Record<string, unknown>;
+    const packCode = String(row.packCode ?? row.pack_code ?? "").trim();
+    if (!isSandboxSeedPackCode(packCode)) continue;
+    entries.push({
+      packCode,
+      appliedAt: String(row.appliedAt ?? row.applied_at ?? ""),
+      entityCounts: (row.entityCounts ?? row.entity_counts ?? {}) as Partial<Record<SandboxSeedEntityType, number>>,
+      actorAuthUserId: row.actorAuthUserId != null ? String(row.actorAuthUserId) : null,
+      sessionId: String(row.sessionId ?? row.session_id ?? ""),
+      seedFingerprint: String(row.seedFingerprint ?? row.seed_fingerprint ?? ""),
+    });
+  }
+  return entries;
 }

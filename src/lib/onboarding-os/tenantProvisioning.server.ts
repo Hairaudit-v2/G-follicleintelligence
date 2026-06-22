@@ -20,16 +20,25 @@ import {
   buildClinicDeploymentTemplate,
   buildProvisioningAuditSnapshot,
   buildProvisioningSteps,
+  buildSandboxSeedPlan,
+  buildSandboxSeedPreview,
   calculateProvisioningProgress,
   calculateTemplateReadiness,
   canRetryProvisioningStep,
-  prepareSandboxSeedPlan,
+  parseSandboxSeedHistory,
+  prepareSandboxSeedPlan as buildSandboxSeedStepPlan,
   provisioningStepStatusAfterRetryRequest,
   resolveDeploymentTemplateCode,
   resolveModuleTemplateFromInput,
   resolveServiceWorkflowPack,
   validateProvisioningInput,
+  validateSandboxSeedRequest,
 } from "./tenantProvisioningCore";
+import {
+  buildHistoryEntryFromApply,
+  executeSandboxSeedApply,
+  resolvePackForApply,
+} from "./sandboxSeedApply.server";
 import type {
   AcademyAssignmentPlan,
   ClinicDeploymentPlan,
@@ -37,7 +46,13 @@ import type {
   ProvisioningSessionStatus,
   ProvisioningStepCode,
   ProvisioningStepStatus,
+  SandboxSeedHistoryEntry,
+  SandboxSeedPackCode,
   SandboxSeedPlan,
+  SandboxSeedPreview,
+  SandboxSeedRequest,
+  SandboxSeedResult,
+  SandboxSeedStepPlan,
   TemplateReadinessResult,
 } from "./tenantProvisioningTypes";
 
@@ -60,6 +75,7 @@ export type TenantProvisioningSessionRow = {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  metadata: Record<string, unknown>;
 };
 
 export type TenantProvisioningTemplateRow = {
@@ -81,6 +97,8 @@ export type TenantProvisioningSessionDetail = {
   progress: ReturnType<typeof calculateProvisioningProgress>;
   deploymentPlan: ClinicDeploymentPlan | null;
   templateReadiness: TemplateReadinessResult | null;
+  sandboxSeedPreview: SandboxSeedPreview | null;
+  sandboxSeedHistory: SandboxSeedHistoryEntry[];
 };
 
 export type TenantProvisioningStepRow = {
@@ -167,6 +185,202 @@ function parseTemplateReadinessFromSnapshot(snapshot: Record<string, unknown>): 
   const readiness = snapshot?.readiness;
   if (!readiness || typeof readiness !== "object") return null;
   return readiness as TemplateReadinessResult;
+}
+
+const SANDBOX_SEED_GENERATED_AT = "2026-06-01T00:00:00.000Z";
+
+async function loadTenantBillingStatus(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("fi_tenant_billing_status")
+    .select("subscription_status")
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
+  return data ? String((data as { subscription_status: string }).subscription_status) : null;
+}
+
+async function loadTenantSettingsMetadata(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<Record<string, unknown> | null> {
+  const { data } = await supabase.from("fi_tenant_settings").select("metadata").eq("tenant_id", tenantId).maybeSingle();
+  const raw = (data as { metadata?: unknown } | null)?.metadata;
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return null;
+  return raw as Record<string, unknown>;
+}
+
+function buildSandboxContextFromSession(session: TenantProvisioningSessionRow, deploymentPlan: ClinicDeploymentPlan | null) {
+  const input = session.input_snapshot as ProvisioningInput;
+  const plan = deploymentPlan ?? buildClinicDeploymentPlan(input);
+  const templateCode = plan.templateCode;
+  const history = parseSandboxSeedHistory(session.metadata ?? {});
+  return { input, plan, templateCode, history };
+}
+
+/** Resolve Phase C sandbox seed plan for a provisioning session. */
+export async function prepareSandboxSeedPlan(
+  sessionId: string,
+  opts: ServerOpts & { packCode?: SandboxSeedPackCode | null } = {}
+): Promise<{ ok: true; plan: SandboxSeedPlan; preview: SandboxSeedPreview } | { ok: false; error: string }> {
+  const auth = await resolvePlatformAdminAuth(opts);
+  if (!auth.ok) return auth;
+
+  const loaded = await loadTenantProvisioningSessionDetail(sessionId, {
+    ...opts,
+    skipAuthCheck: true,
+    actorAuthUserId: auth.actorAuthUserId,
+  });
+  if (!loaded.ok) return loaded;
+
+  const { session, deploymentPlan } = loaded.detail;
+  const { plan, templateCode, history } = buildSandboxContextFromSession(session, deploymentPlan);
+  const seedPlan = buildSandboxSeedPlan({
+    sessionId: session.id,
+    tenantId: session.tenant_id,
+    tenantSlug: session.tenant_slug,
+    templateCode,
+    deploymentPlan: plan,
+    packCode: opts.packCode,
+    generatedAt: SANDBOX_SEED_GENERATED_AT,
+  });
+
+  if (!seedPlan) return { ok: false, error: "Could not resolve sandbox seed plan." };
+
+  const preview = buildSandboxSeedPreview({ plan: seedPlan, history });
+  return { ok: true, plan: seedPlan, preview };
+}
+
+/** Load sandbox seed preview for admin UI. */
+export async function loadSandboxSeedPreview(
+  sessionId: string,
+  opts: ServerOpts & { packCode?: SandboxSeedPackCode | null } = {}
+): Promise<{ ok: true; preview: SandboxSeedPreview; history: SandboxSeedHistoryEntry[] } | { ok: false; error: string }> {
+  const prepared = await prepareSandboxSeedPlan(sessionId, opts);
+  if (!prepared.ok) return prepared;
+  const loaded = await loadTenantProvisioningSessionDetail(sessionId, {
+    ...opts,
+    skipAuthCheck: true,
+    actorAuthUserId: opts.actorAuthUserId ?? undefined,
+  });
+  const history = loaded.ok ? loaded.detail.sandboxSeedHistory : [];
+  return { ok: true, preview: prepared.preview, history };
+}
+
+/** Apply sandbox demo data pack to a provisioned tenant (Phase C). */
+export async function applySandboxSeedToTenant(
+  request: SandboxSeedRequest,
+  opts: ServerOpts = {}
+): Promise<{ ok: true; result: SandboxSeedResult } | { ok: false; error: string; errorCode?: string }> {
+  const auth = await resolvePlatformAdminAuth(opts);
+  if (!auth.ok) return auth;
+
+  const sessionId = request.sessionId.trim();
+  if (!sessionId) return { ok: false, error: "sessionId is required.", errorCode: "invalid_request" };
+
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const loaded = await loadTenantProvisioningSessionDetail(sessionId, {
+    ...opts,
+    skipAuthCheck: true,
+    actorAuthUserId: auth.actorAuthUserId,
+  });
+  if (!loaded.ok) return loaded;
+
+  const { session, deploymentPlan } = loaded.detail;
+  const { plan, templateCode, history } = buildSandboxContextFromSession(session, deploymentPlan);
+  const tenantId = session.tenant_id;
+  const billingStatus = tenantId ? await loadTenantBillingStatus(supabase, tenantId) : null;
+  const tenantSettingsMetadata = tenantId ? await loadTenantSettingsMetadata(supabase, tenantId) : null;
+
+  const validation = validateSandboxSeedRequest({
+    request: { sessionId, packCode: request.packCode, force: request.force },
+    sessionStatus: session.status,
+    sandboxEnabled: plan.sandboxSeed.enabled,
+    tenantId,
+    tenantBillingStatus: billingStatus,
+    tenantSettingsMetadata,
+    history,
+    templateCode,
+  });
+
+  if (!validation.ok) {
+    return { ok: false, error: validation.error, errorCode: validation.errorCode };
+  }
+
+  const packCode = resolvePackForApply(templateCode, validation.packCode);
+  const seedPlan = buildSandboxSeedPlan({
+    sessionId: session.id,
+    tenantId,
+    tenantSlug: session.tenant_slug,
+    templateCode,
+    deploymentPlan: plan,
+    packCode,
+    generatedAt: SANDBOX_SEED_GENERATED_AT,
+  });
+
+  if (!seedPlan) return { ok: false, error: "Could not build sandbox seed plan.", errorCode: "plan_failed" };
+
+  try {
+    const applied = await executeSandboxSeedApply({
+      supabase,
+      tenantId: tenantId!,
+      sessionId: session.id,
+      timezone: (session.input_snapshot as ProvisioningInput).defaultTimezone,
+      plan: seedPlan,
+      deploymentPlan: plan,
+      packCode,
+      generatedAt: SANDBOX_SEED_GENERATED_AT,
+    });
+
+    const appliedAt = new Date().toISOString();
+    const { entry } = buildHistoryEntryFromApply({
+      plan: seedPlan,
+      appliedAt,
+      entityCounts: applied.entityCounts,
+      actorAuthUserId: auth.actorAuthUserId,
+    });
+
+    const nextHistory = [...history, entry];
+    await supabase
+      .from("fi_tenant_provisioning_sessions")
+      .update({
+        metadata: {
+          ...(session.metadata ?? {}),
+          phase: "C",
+          sandbox_seed_history: nextHistory,
+          last_sandbox_seed_pack: packCode,
+        },
+        updated_at: appliedAt,
+      })
+      .eq("id", session.id);
+
+    await writeProvisioningAudit(supabase, {
+      sessionId: session.id,
+      tenantId,
+      eventKind: "sandbox_seed.applied",
+      actorAuthUserId: auth.actorAuthUserId,
+      stepCode: "prepare_sandbox_seed",
+      detail: { pack_code: packCode, entity_counts: entry.entityCounts },
+    });
+
+    return {
+      ok: true,
+      result: {
+        ok: true,
+        plan: seedPlan,
+        appliedAt,
+        entityCounts: applied.entityCounts,
+        warnings: applied.warnings,
+      },
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : String(e),
+      errorCode: "apply_failed",
+    };
+  }
 }
 
 /** Apply resolved deployment template to a provisioning session (Phase B). */
@@ -465,7 +679,7 @@ export async function loadTenantProvisioningSessionDetail(
   const { data: session, error: sessionErr } = await supabase
     .from("fi_tenant_provisioning_sessions")
     .select(
-      "id, tenant_id, template_id, status, tenant_name, tenant_slug, input_snapshot, result_snapshot, deployment_snapshot, progress_percent, current_step_code, error_message, retry_count, actor_auth_user_id, started_at, completed_at, created_at, updated_at"
+      "id, tenant_id, template_id, status, tenant_name, tenant_slug, input_snapshot, result_snapshot, deployment_snapshot, progress_percent, current_step_code, error_message, retry_count, actor_auth_user_id, started_at, completed_at, created_at, updated_at, metadata"
     )
     .eq("id", id)
     .maybeSingle();
@@ -488,6 +702,19 @@ export async function loadTenantProvisioningSessionDetail(
   const sessionRow = session as TenantProvisioningSessionRow;
   const deploymentPlan = parseDeploymentPlanFromSnapshot(sessionRow.deployment_snapshot ?? {});
   const templateReadiness = parseTemplateReadinessFromSnapshot(sessionRow.deployment_snapshot ?? {});
+  const sandboxSeedHistory = parseSandboxSeedHistory(sessionRow.metadata ?? {});
+  const { plan: resolvedPlan, templateCode } = buildSandboxContextFromSession(sessionRow, deploymentPlan);
+  const seedPlan = buildSandboxSeedPlan({
+    sessionId: sessionRow.id,
+    tenantId: sessionRow.tenant_id,
+    tenantSlug: sessionRow.tenant_slug,
+    templateCode,
+    deploymentPlan: resolvedPlan,
+    generatedAt: SANDBOX_SEED_GENERATED_AT,
+  });
+  const sandboxSeedPreview = seedPlan
+    ? buildSandboxSeedPreview({ plan: seedPlan, history: sandboxSeedHistory })
+    : null;
 
   return {
     ok: true,
@@ -497,6 +724,8 @@ export async function loadTenantProvisioningSessionDetail(
       progress,
       deploymentPlan,
       templateReadiness,
+      sandboxSeedPreview,
+      sandboxSeedHistory,
     },
   };
 }
@@ -662,19 +891,28 @@ async function executeStepLogic(
       if (!template) {
         return { ok: false, errorCode: "template_missing", error: "Deployment template not found for sandbox seed." };
       }
-      const seedPlan: SandboxSeedPlan = prepareSandboxSeedPlan(template, input);
-      if (!seedPlan.enabled) {
+      const stepPlan: SandboxSeedStepPlan = buildSandboxSeedStepPlan(template, input);
+      if (!stepPlan.enabled) {
         return {
           ok: true,
-          output: { skipped: true, reason: "sandbox_disabled", seed_plan: seedPlan },
+          output: { skipped: true, reason: "sandbox_disabled", seed_plan: stepPlan },
         };
       }
+      const phaseCPlan = buildSandboxSeedPlan({
+        sessionId: session.id,
+        tenantId: session.tenant_id,
+        tenantSlug: session.tenant_slug,
+        templateCode: plan.templateCode,
+        deploymentPlan: plan,
+        generatedAt: SANDBOX_SEED_GENERATED_AT,
+      });
       return {
         ok: true,
         output: {
-          seed_plan: seedPlan,
-          template_only: true,
-          note: "Sandbox seed plan recorded — demo data insertion deferred to Phase C.",
+          step_plan: stepPlan,
+          sandbox_seed_plan: phaseCPlan,
+          preview_total_records: phaseCPlan?.totalRecords ?? 0,
+          apply_via_admin_ui: true,
         },
       };
     }
