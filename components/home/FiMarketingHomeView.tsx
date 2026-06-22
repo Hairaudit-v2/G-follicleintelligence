@@ -19,7 +19,6 @@ import { FiMarketingIndustrySoftwareGapSection } from "@/components/home/FiMarke
 import { FiMarketingIntelligenceNetworkSection } from "@/components/home/FiMarketingIntelligenceNetworkSection";
 import { FiMarketingInvestorPositioningSection } from "@/components/home/FiMarketingInvestorPositioningSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
-import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 import { FiMarketingPlatformProgressSection } from "@/components/home/FiMarketingPlatformProgressSection";
 import { PartnersInvestorsStrip } from "@/components/marketing/PartnersInvestorsStrip";
 
@@ -195,8 +194,6 @@ export function FiMarketingHomeView() {
           </p>
         </FadeIn>
       </Section>
-
-      <FiMarketingProductShowcaseSection section={c.productShowcase} />
 
       <Section
         id={c.builtForOperators.id}
