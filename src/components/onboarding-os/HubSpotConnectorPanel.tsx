@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
@@ -56,11 +57,13 @@ function StatusBadge({ label, tone }: { label: string; tone: string }) {
 }
 
 function ContactReviewCard({
+  tenantId,
   contact,
   pending,
   onApprove,
   onReject,
 }: {
+  tenantId: string;
   contact: HubspotStagingContact;
   pending: boolean;
   onApprove: () => void;
@@ -113,24 +116,38 @@ function ContactReviewCard({
           </button>
         </div>
       ) : (
-        <p className="text-[11px] text-slate-500">
-          {contact.importStatus === "approved"
-            ? "Approved for staging — no FI lead created."
-            : contact.importStatus === "rejected"
-              ? "Rejected — will not be imported."
-              : "Review complete."}
-        </p>
+        <>
+          <p className="text-[11px] text-slate-500">
+            {contact.importStatus === "approved"
+              ? "Approved — ready for staged import review."
+              : contact.importStatus === "rejected"
+                ? "Rejected — will not be imported."
+                : contact.importStatus === "imported"
+                  ? "Imported into FI."
+                  : "Review complete."}
+          </p>
+          {contact.importStatus === "approved" ? (
+            <Link
+              href={`/fi-admin/${tenantId}/onboarding-os/import-review`}
+              className="text-xs text-cyan-400 hover:text-cyan-300"
+            >
+              Open import review →
+            </Link>
+          ) : null}
+        </>
       )}
     </div>
   );
 }
 
 function DealReviewCard({
+  tenantId,
   deal,
   pending,
   onApprove,
   onReject,
 }: {
+  tenantId: string;
   deal: HubspotStagingDeal;
   pending: boolean;
   onApprove: () => void;
@@ -183,13 +200,25 @@ function DealReviewCard({
           </button>
         </div>
       ) : (
-        <p className="text-[11px] text-slate-500">
-          {deal.importStatus === "approved"
-            ? "Approved for staging — no FI opportunity created."
-            : deal.importStatus === "rejected"
-              ? "Rejected — will not be imported."
-              : "Review complete."}
-        </p>
+        <>
+          <p className="text-[11px] text-slate-500">
+            {deal.importStatus === "approved"
+              ? "Approved — ready for staged import review."
+              : deal.importStatus === "rejected"
+                ? "Rejected — will not be imported."
+                : deal.importStatus === "imported"
+                  ? "Imported into FI."
+                  : "Review complete."}
+          </p>
+          {deal.importStatus === "approved" ? (
+            <Link
+              href={`/fi-admin/${tenantId}/onboarding-os/import-review`}
+              className="text-xs text-cyan-400 hover:text-cyan-300"
+            >
+              Open import review →
+            </Link>
+          ) : null}
+        </>
       )}
     </div>
   );
@@ -413,6 +442,7 @@ export function HubSpotConnectorPanel({
               {contactQueue.map((contact) => (
                 <ContactReviewCard
                   key={contact.id}
+                  tenantId={tenantId}
                   contact={contact}
                   pending={pending}
                   onApprove={() => approveContact(contact.id)}
@@ -430,6 +460,7 @@ export function HubSpotConnectorPanel({
             {dealQueue.map((deal) => (
               <DealReviewCard
                 key={deal.id}
+                tenantId={tenantId}
                 deal={deal}
                 pending={pending}
                 onApprove={() => approveDeal(deal.id)}

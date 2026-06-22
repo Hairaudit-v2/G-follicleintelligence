@@ -41,6 +41,12 @@ export const HUBSPOT_IMPORT_AUDIT_ACTIONS = [
   "deal_approved",
   "deal_rejected",
   "pipeline_mapped",
+  "contact_imported",
+  "deal_imported",
+  "contact_import_cancelled",
+  "deal_import_cancelled",
+  "contact_merged",
+  "deal_merged",
 ] as const;
 export type HubspotImportAuditAction = (typeof HUBSPOT_IMPORT_AUDIT_ACTIONS)[number];
 
