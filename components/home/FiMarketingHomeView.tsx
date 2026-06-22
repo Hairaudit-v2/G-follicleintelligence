@@ -6,7 +6,6 @@ import { GlassCard, SectionHeading } from "@/components/marketing/FiMarketingPri
 import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
-import type { HomeEcosystemLayer } from "@/lib/marketing/homePageContent";
 import { HOME_PAGE_CONTENT } from "@/lib/marketing/homePageContent";
 import { MARKETING_CTA_PRIMARY_CLASS, MARKETING_CTA_SECONDARY_CLASS } from "@/lib/marketing/marketingCtaClasses";
 import { cn } from "@/lib/utils";
@@ -14,11 +13,8 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthoritySection";
-import { FiMarketingComparisonSection } from "@/components/home/FiMarketingComparisonSection";
+import { FiMarketingClinicalEcosystemSection } from "@/components/home/FiMarketingClinicalEcosystemSection";
 import { FiMarketingEngineeringCredibilitySection } from "@/components/home/FiMarketingEngineeringCredibilitySection";
-import { FiMarketingGlobalHealthcareSection } from "@/components/home/FiMarketingGlobalHealthcareSection";
-import { FiMarketingHealthcareStackSection } from "@/components/home/FiMarketingHealthcareStackSection";
-import { FiMarketingIntegrationSection } from "@/components/home/FiMarketingIntegrationSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 import { FiMarketingPlatformProgressSection } from "@/components/home/FiMarketingPlatformProgressSection";
@@ -57,23 +53,6 @@ const FiMarketingOsHeroVisual = dynamic(
   }
 );
 
-function OsModuleCard({ index, name, description }: { index: number; name: string; description: string }) {
-  return (
-    <GlassCard variant="os" className="group flex h-full min-h-[10.5rem] flex-col sm:min-h-[11.5rem]">
-      <div className="flex items-center border-b border-white/[0.07] pb-3">
-        <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
-      </div>
-      <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
-        {name}
-      </p>
-      <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
-    </GlassCard>
-  );
-}
-
 function ChipList({ items }: { items: readonly string[] }) {
   return (
     <ul className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -86,71 +65,6 @@ function ChipList({ items }: { items: readonly string[] }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function EcosystemArchitectureSection({
-  layers,
-  caption,
-  secondaryCta,
-}: {
-  layers: readonly HomeEcosystemLayer[];
-  caption: string;
-  secondaryCta?: { label: string; href: string };
-}) {
-  let moduleIndex = 0;
-
-  return (
-    <div className="relative mt-12 overflow-hidden rounded-[1.75rem] border border-amber-400/12 bg-[radial-gradient(ellipse_at_50%_0%,rgb(212_175_55_/0.12),transparent_50%),linear-gradient(180deg,rgb(255_255_255_/0.045),transparent)] p-5 shadow-[0_24px_80px_rgb(0_0_0_/0.38),inset_0_1px_0_rgb(255_255_255_/0.05)] sm:mt-14 sm:rounded-[2rem] sm:p-8 md:p-10">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-amber-400/25 via-amber-400/10 to-transparent"
-        style={{ transform: "translateX(-50%)" }}
-      />
-      <p className="relative text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200/70">
-        {caption}
-      </p>
-      <div className="relative mt-10 space-y-10">
-        {layers.map((layer, bandIdx) => (
-          <div key={layer.title}>
-            <div className="relative flex flex-col items-center">
-              <span className="rounded-full border border-amber-400/20 bg-[rgb(6_10_18_/0.85)] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-100/90 shadow-[0_0_24px_rgb(212_175_55_/0.08)]">
-                {layer.title}
-              </span>
-              <div
-                className={cn(
-                  "mt-5 grid w-full gap-3",
-                  layer.modules.length === 1 && "mx-auto max-w-md",
-                  layer.modules.length === 2 && "sm:grid-cols-2",
-                  layer.modules.length === 3 && "sm:grid-cols-2 lg:grid-cols-3",
-                  layer.modules.length >= 4 && "sm:grid-cols-2 lg:grid-cols-4"
-                )}
-              >
-                {layer.modules.map((mod) => {
-                  const index = moduleIndex++;
-                  return (
-                    <OsModuleCard key={mod.name} index={index} name={mod.name} description={mod.description} />
-                  );
-                })}
-              </div>
-            </div>
-            {bandIdx < layers.length - 1 ? (
-              <div className="mx-auto mt-10 flex h-10 w-px flex-col items-center justify-center bg-gradient-to-b from-amber-400/35 via-amber-400/12 to-transparent" aria-hidden />
-            ) : null}
-          </div>
-        ))}
-      </div>
-      {secondaryCta ? (
-        <div className="relative mt-8 flex justify-center sm:mt-10">
-          <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "min-w-[12rem]")}>
-            <Link href={secondaryCta.href}>
-              {secondaryCta.label}
-              <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-            </Link>
-          </Button>
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -336,6 +250,10 @@ export function FiMarketingHomeView() {
         </div>
       </section>
 
+      <FiMarketingClinicalEcosystemSection />
+
+      <FiMarketingPlatformProgressSection />
+
       <Section
         id={c.industryProblem.id}
         className="border-b border-border/50 bg-gradient-to-b from-background via-muted/[0.06] to-background py-20 sm:py-24 md:py-28"
@@ -363,37 +281,7 @@ export function FiMarketingHomeView() {
         </FadeIn>
       </Section>
 
-      <FiMarketingIntegrationSection />
-
-      <Section
-        id={c.onePlatform.id}
-        className="border-b border-border/50 bg-muted/[0.05] py-20 sm:py-24 md:py-28"
-        aria-labelledby={`${c.onePlatform.id}-heading`}
-      >
-        <FadeIn>
-          <SectionHeading
-            id={`${c.onePlatform.id}-heading`}
-            eyebrow={c.onePlatform.storyEyebrow}
-            title={c.onePlatform.headline}
-            description={c.onePlatform.subtext}
-          />
-          <EcosystemArchitectureSection
-            layers={c.onePlatform.layers}
-            caption={c.onePlatform.architectureCaption}
-            secondaryCta={c.onePlatform.secondaryCta}
-          />
-        </FadeIn>
-      </Section>
-
-      <FiMarketingGlobalHealthcareSection />
-
-      <FiMarketingHealthcareStackSection />
-
-      <FiMarketingPlatformProgressSection />
-
       <FiMarketingProductShowcaseSection section={c.productShowcase} />
-
-      <FiMarketingComparisonSection section={c.platformComparison} />
 
       <Section
         id={c.patientJourney.id}

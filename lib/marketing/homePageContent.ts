@@ -102,13 +102,12 @@ export type HomeMoonshotClosingBlock = {
 export const HOME_PAGE_CONTENT = {
   hero: {
     eyebrow: "Enterprise hair restoration infrastructure",
-    headline: "The Operating System For The Future Of Hair Restoration",
+    headline: "The Operating System for Global Hair Restoration",
     subheadline:
-      "A unified substrate for acquisition, clinical depth, surgery, independent verification, workforce certification, and longitudinal outcome intelligence—built so serious operators can govern quality at scale.",
+      "A unified infrastructure layer connecting patient acquisition, clinical intelligence, surgical workflow, workforce systems, financial operations, training, and global outcome intelligence.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
-    secondaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
-    supportingLine:
-      "For independent surgeons, clinic builders, multi-site groups, education partners, and investors who believe the category deserves infrastructure—not another generic clinic stack.",
+    secondaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
+    supportingLine: "Built specifically for the hair restoration industry.",
     orbitModules: [
       { label: "LeadFlowOS", subtitle: "Acquisition & pipeline" },
       { label: "ClinicOS", subtitle: "Operations spine" },
@@ -121,6 +120,28 @@ export const HOME_PAGE_CONTENT = {
     ] satisfies HomeOrbitModule[],
     coreEyebrow: "Intelligence core",
     coreTitle: "Follicle Intelligence",
+  },
+
+  clinicalEcosystem: {
+    id: "clinical-ecosystem",
+    storyEyebrow: "Complete ecosystem",
+    headline: "Built Around The Entire Clinical Ecosystem",
+    subtext:
+      "Modern hair restoration clinics require more than patient management software. Follicle Intelligence connects the full operational stack. From first enquiry to long-term patient outcomes. One connected infrastructure layer.",
+    modules: [
+      { name: "LeadFlow", description: "Patient acquisition and conversion" },
+      { name: "ReceptionOS", description: "Front desk operations and scheduling" },
+      { name: "ConsultationOS", description: "Clinical consultation workflow management" },
+      { name: "SurgeryOS", description: "Procedure planning and surgical intelligence" },
+      { name: "FinancialOS", description: "Revenue intelligence and financial operations" },
+      { name: "WorkforceOS", description: "Staff management, SOP compliance, credentialing" },
+      { name: "PatientOS", description: "Patient communication and treatment journey management" },
+      { name: "ImagingOS", description: "Clinical imaging, scalp mapping, photography intelligence" },
+      { name: "AuditOS", description: "Clinical auditing and outcome verification" },
+      { name: "AcademyOS", description: "Training, certification and competency systems" },
+      { name: "AnalyticsOS", description: "Business intelligence and predictive reporting" },
+      { name: "ClinicOS", description: "Multi-location operational infrastructure" },
+    ] satisfies readonly HomeEcosystemModule[],
   },
 
   industryProblem: {

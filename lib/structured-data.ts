@@ -10,10 +10,10 @@ const SCHEMA_CONTEXT = "https://schema.org";
 
 /** Canonical SEO title and meta description (root layout, homepage, JSON-LD WebSite). */
 export const SITE_SEO_TITLE =
-  "Follicle Intelligence | The Operating System For The Future Of Hair Restoration";
+  "Follicle Intelligence | The Operating System for Global Hair Restoration";
 
 export const SITE_SEO_DESCRIPTION =
-  "Follicle Intelligence is the healthcare operating system for hair restoration — thirteen connected OS modules spanning clinical operations, surgical intelligence, workforce infrastructure, enterprise deployment, finance, and global clinical accreditation. Enterprise infrastructure for multi-clinic deployment.";
+  "Follicle Intelligence is the operating system for the global hair restoration industry — a unified infrastructure layer connecting patient acquisition, clinical intelligence, surgical workflow, workforce systems, financial operations, training, and global outcome intelligence.";
 
 /** Entity definition for AI assistants and knowledge graphs. */
 export const SITE_ENTITY_DEFINITION =
