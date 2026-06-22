@@ -14,7 +14,9 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthoritySection";
 import { FiMarketingClinicalEcosystemSection } from "@/components/home/FiMarketingClinicalEcosystemSection";
+import { FiMarketingEnterpriseInfrastructureSection } from "@/components/home/FiMarketingEnterpriseInfrastructureSection";
 import { FiMarketingEngineeringCredibilitySection } from "@/components/home/FiMarketingEngineeringCredibilitySection";
+import { FiMarketingIndustrySoftwareGapSection } from "@/components/home/FiMarketingIndustrySoftwareGapSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 import { FiMarketingPlatformProgressSection } from "@/components/home/FiMarketingPlatformProgressSection";
@@ -253,6 +255,10 @@ export function FiMarketingHomeView() {
       <FiMarketingClinicalEcosystemSection />
 
       <FiMarketingPlatformProgressSection />
+
+      <FiMarketingEnterpriseInfrastructureSection />
+
+      <FiMarketingIndustrySoftwareGapSection />
 
       <Section
         id={c.industryProblem.id}

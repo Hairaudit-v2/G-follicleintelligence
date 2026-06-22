@@ -28,7 +28,7 @@ export const SITE_SEO_KEYWORDS = [
   "surgical intelligence platform",
   "hair transplant clinic operating system",
   "medical workforce compliance platform",
-  "clinical infrastructure software",
+  "clinical infrastructure platform",
 ] as const;
 
 export type FaqItem = { question: string; answer: string };

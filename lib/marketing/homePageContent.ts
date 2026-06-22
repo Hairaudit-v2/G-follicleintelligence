@@ -88,6 +88,17 @@ export type HomeIntegrationAdoptionCard = {
   copy: string;
 };
 
+export type HomeEnterpriseInfrastructureCard = {
+  title: string;
+  description: string;
+  bullets: readonly string[];
+};
+
+export type HomeIndustryInfrastructureColumn = {
+  headline: string;
+  items: readonly string[];
+};
+
 export type HomeMoonshotPredictionCard = {
   headline: string;
   copy: string;
@@ -107,7 +118,7 @@ export const HOME_PAGE_CONTENT = {
       "A unified infrastructure layer connecting patient acquisition, clinical intelligence, surgical workflow, workforce systems, financial operations, training, and global outcome intelligence.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
     secondaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
-    supportingLine: "Built specifically for the hair restoration industry.",
+    supportingLine: "Enterprise medical infrastructure built for the global hair restoration vertical.",
     orbitModules: [
       { label: "LeadFlowOS", subtitle: "Acquisition & pipeline" },
       { label: "ClinicOS", subtitle: "Operations spine" },
@@ -127,7 +138,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Complete ecosystem",
     headline: "Built Around The Entire Clinical Ecosystem",
     subtext:
-      "Modern hair restoration clinics require more than patient management software. Follicle Intelligence connects the full operational stack. From first enquiry to long-term patient outcomes. One connected infrastructure layer.",
+      "Modern hair restoration clinics require more than fragmented operational tools. Follicle Intelligence connects the full clinical and operational architecture—from first enquiry to long-term patient outcomes—through one governed intelligence network.",
     modules: [
       { name: "LeadFlow", description: "Patient acquisition and conversion" },
       { name: "ReceptionOS", description: "Front desk operations and scheduling" },
@@ -149,7 +160,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "The industry problem",
     headline: "Hair Restoration Has Scaled Faster Than Quality Control",
     subtext:
-      "Demand is global; governance is local and uneven. Without shared evidence, longitudinal structure, and accountable review, quality becomes a narrative instead of a measurable standard.",
+      "Demand is global; governance is local and uneven. Without shared evidence, longitudinal structure, and accountable review, quality becomes narrative instead of measurable clinical standard.",
     cards: [
       "Limited procedural depth in training pathways",
       "Inconsistent outcomes across markets",
@@ -161,7 +172,115 @@ export const HOME_PAGE_CONTENT = {
       "No single operating layer connecting the full journey",
     ],
     transition:
-      "The category does not need another horizontal clinic tool. It needs an operating system that connects every layer of serious hair restoration.",
+      "The category does not need another horizontal vendor stack. It needs an operating system that connects every layer of serious hair restoration.",
+  },
+
+  enterpriseInfrastructure: {
+    id: "enterprise-infrastructure",
+    storyEyebrow: "Deployed infrastructure",
+    headline: "Enterprise Infrastructure Already Deployed",
+    subtext:
+      "Follicle Intelligence is actively building operational infrastructure across every major layer of modern hair restoration medicine.",
+    cards: [
+      {
+        title: "Clinical Intelligence",
+        description:
+          "Advanced diagnostic intelligence designed to standardize patient evaluation and improve treatment decision making.",
+        bullets: [
+          "AI diagnostics",
+          "Blood interpretation systems",
+          "Risk scoring engines",
+          "Trichology intelligence",
+          "Treatment recommendation systems",
+        ],
+      },
+      {
+        title: "Surgical Intelligence",
+        description:
+          "Purpose-built infrastructure designed specifically for high-precision hair restoration surgery.",
+        bullets: [
+          "Live graft counting",
+          "Transection monitoring",
+          "Surgical workflow management",
+          "Procedure analytics",
+          "Team performance intelligence",
+        ],
+      },
+      {
+        title: "Financial Intelligence",
+        description:
+          "Enterprise financial infrastructure providing operational visibility across clinic performance.",
+        bullets: [
+          "Revenue forecasting",
+          "Accounts receivable intelligence",
+          "Profitability analytics",
+          "Invoice automation systems",
+          "Executive finance dashboards",
+        ],
+      },
+      {
+        title: "Workforce Intelligence",
+        description:
+          "Comprehensive workforce infrastructure designed to standardize operational excellence.",
+        bullets: [
+          "Staff onboarding systems",
+          "SOP compliance tracking",
+          "Credential management",
+          "Procedure privilege engine",
+          "Staff readiness scoring",
+        ],
+      },
+      {
+        title: "Outcome Intelligence",
+        description:
+          "Global outcome verification infrastructure creating measurable accountability for clinical performance.",
+        bullets: [
+          "HairAudit verification engine",
+          "Growth tracking systems",
+          "Donor recovery intelligence",
+          "Surgical outcome benchmarking",
+          "Long-term patient outcome analytics",
+        ],
+      },
+    ] satisfies readonly HomeEnterpriseInfrastructureCard[],
+  },
+
+  industrySoftwareGap: {
+    id: "industry-software-gap",
+    storyEyebrow: "Industry architecture",
+    headline: "The Industry Has Outgrown Generic Software",
+    subtext:
+      "Hair restoration clinics currently operate through fragmented systems that were never designed specifically for the complexity of this medical specialty.",
+    currentProblems: {
+      headline: "Disconnected Operational Systems",
+      items: [
+        "Generic CRM platforms",
+        "Multiple disconnected calendars",
+        "Spreadsheet-based surgery planning",
+        "Manual patient communication systems",
+        "Fragmented financial reporting",
+        "External training systems",
+        "Disconnected patient records",
+        "No procedural intelligence layer",
+      ],
+    },
+    modernNeeds: {
+      headline: "What Modern Clinics Actually Need",
+      items: [
+        "Unified patient acquisition systems",
+        "Clinical intelligence infrastructure",
+        "Purpose-built surgical workflow systems",
+        "Outcome measurement architecture",
+        "Workforce management systems",
+        "Financial operating intelligence",
+        "Training and certification infrastructure",
+        "Longitudinal patient intelligence",
+      ],
+    },
+    closingStatement: {
+      line1: "No unified infrastructure layer currently exists for the global hair restoration industry.",
+      line2: "Until now.",
+    },
   },
 
   worksWithExistingSoftware: {
@@ -366,12 +485,12 @@ export const HOME_PAGE_CONTENT = {
    */
   productShowcase: {
     id: "product-showcase",
-    storyEyebrow: "Product depth",
+    storyEyebrow: "Operational depth",
     headline: "Built On Real Operational Infrastructure",
     subtext:
       "Follicle Intelligence is not a concept. Every layer of the operating system is designed around real clinical, operational, surgical, training, and intelligence workflows.",
     previewDisclaimer:
-      "Product previews are representative of the platform architecture and can be replaced with live screenshots as modules are finalised.",
+      "Infrastructure previews are representative of the operational architecture and can be replaced with live screenshots as modules are finalised.",
     cards: [
       {
         id: "clinic-os",
@@ -383,7 +502,7 @@ export const HOME_PAGE_CONTENT = {
       {
         id: "leadflow-os",
         name: "LeadFlowOS",
-        description: "CRM pipelines, tasks, follow-ups, patient acquisition.",
+        description: "Acquisition pipelines, tasks, follow-ups, and patient conversion intelligence.",
         shell: "crm-pipeline",
         // screenshotSrc: "/marketing/product-showcase/leadflow-os.png",
       },
@@ -542,7 +661,7 @@ export const HOME_PAGE_CONTENT = {
   builtForOperators: {
     id: "built-for-operators",
     storyEyebrow: "Who it is for",
-    headline: "Built For The People Who Run Hair Restoration At Serious Scale",
+    headline: "Built For The Operators Who Run Hair Restoration At Institutional Scale",
     audiences: [
       {
         headline: "Surgeons",
@@ -670,7 +789,7 @@ export const HOME_PAGE_CONTENT = {
     subtext:
       "As structured outcome data grows across participating programmes, cohorts deepen and comparisons become more informative. Follicle Intelligence is built to compound that signal with governance—not to confuse marketing reach with clinical truth.",
     futureFacingNote:
-      "Today, the platform prioritises structured capture, reviewability, and transparent limitations. Predictive layers are a forward roadmap—not a promise that every model is production-ready for every jurisdiction tomorrow.",
+      "Today, the operating system prioritises structured capture, reviewability, and transparent limitations. Predictive layers are a forward roadmap—not a promise that every model is production-ready for every jurisdiction tomorrow.",
     twinDataLabel: "Patient digital twin signal (examples)",
     twinDataPoints: [
       "Baseline imaging",
@@ -765,8 +884,8 @@ export const HOME_PAGE_CONTENT = {
       {
         id: "clinical-depth",
         headline: "Clinical depth",
-        label: "Beyond generic software",
-        copy: "Designed around the real workflows that determine outcomes in hair restoration — not adapted from general clinic software.",
+        label: "Purpose-built infrastructure",
+        copy: "Designed around the real workflows that determine outcomes in hair restoration — not adapted from horizontal healthcare systems.",
       },
       {
         id: "training-infrastructure",
@@ -797,7 +916,7 @@ export const HOME_PAGE_CONTENT = {
       eyebrow: "Founder authority",
       headline: "Built by people who have lived the industry.",
       body: "The strongest systems are built by people who understand where the existing ones break. Follicle Intelligence was created from years of observing the same problem from every angle: clinical knowledge, operational systems, training standards, surgical execution, and patient outcomes were disconnected.",
-      closingLine: "That is the gap this platform was built to close.",
+      closingLine: "That is the gap this operating system was built to close.",
     },
   },
 
@@ -815,7 +934,7 @@ Follicle Intelligence exists to change that—not for a single operator, but as 
     id: "final-cta",
     headline: "The Future Of Hair Restoration Starts Now",
     subtext:
-      "Whether you lead surgery, own clinics, run a multi-site group, represent an industry body, or invest behind accountable quality—this is the operating layer built to scale with evidence.",
+      "Whether you lead surgery, own clinics, run a multi-site group, represent an industry body, or invest behind accountable quality—this is the operational architecture built to scale with evidence.",
     primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
     secondaryCta: { label: "Explore The Platform", href: "/platform" as const },
     /** Calm path to the public vision narrative (not a conversion CTA). */

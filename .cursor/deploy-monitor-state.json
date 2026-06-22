@@ -1,8 +1,8 @@
 {
-  "lastSeenDeploymentId": "dpl_DqXMXrLyyA6u5m2FurrMu44DwKWd",
-  "lastSeenState": "BUILDING",
-  "lastCommitSha": "34a49e04b7fc7f16f60235a765a752764e265444",
-  "lastCheckedAt": "2026-06-22T02:20:00Z",
-  "previousReadyDeploymentId": "dpl_5ddSJPHPcWYJirRUUZcCJhGxr8zN",
-  "previousReadyCommitSha": "8f56771e5ef34a91f9d62d073ad47d9a4087062f"
+  "lastSeenDeploymentId": "dpl_gvo7aLH7oDGJKTXBA7vRLcEkSo6y",
+  "lastSeenState": "ERROR",
+  "lastCommitSha": "a5f93b11a86bd7b37c6f5bcec740e979a46d78a8",
+  "lastCheckedAt": "2026-06-22T02:30:00Z",
+  "previousReadyDeploymentId": "dpl_AStsSPWFkUdXWJxyWQ3CmSKGtpPp",
+  "previousReadyCommitSha": "640828ee054b9767412f2beebf3aec5180382816"
 }
