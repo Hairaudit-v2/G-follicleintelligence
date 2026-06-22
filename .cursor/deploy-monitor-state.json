@@ -1,9 +1,9 @@
 {
-  "lastSeenDeploymentId": "dpl_EH1KRSNfL5aTQcqUmuyg6oEmJQfL",
+  "lastSeenDeploymentId": "dpl_9ZzdkGKBmh5HEvMQjb4zoz8fownj",
   "lastSeenState": "ERROR",
-  "lastCommitSha": "9148100aa8efa2fec0246884d30298a6e4f48fb2",
-  "lastCheckedAt": "2026-06-19T22:30:00Z",
-  "previousReadyDeploymentId": "dpl_7pKHBCDahYGGSBMmGAmNW96ptqQm",
-  "previousReadyCommitSha": "5eeb530de4f4152afa978aa8ff1b17aca5223bf5",
-  "lastError": "Type error: TenantProvisioningStepRow missing attemptCount/maxAttempts for canRetryProvisioningStep"
+  "lastCommitSha": "d5832d16c388b08740cbe3808a020f011fb93775",
+  "lastCheckedAt": "2026-06-20T00:15:00Z",
+  "previousReadyDeploymentId": "dpl_4FQbj8Q3UvW3PkKKq9wXGHAi7Rzs",
+  "previousReadyCommitSha": "bbb707bd85956145a1c4355fb6fba72ed6341e00",
+  "lastError": "Syntax error in guidedAssist.server.ts — missing buildGuidedAssistSessionPayload call"
 }

@@ -238,6 +238,7 @@ export async function loadGuidedAssistSessionPayload(
       isOnboardingPhase,
     };
 
+    const payload = buildGuidedAssistSessionPayload({
       ctx,
       resolved,
       userPreferences,
@@ -408,6 +409,39 @@ export async function snoozeGuidedAssistTip(
   }
 }
 
+export async function canViewGuidedAssistUsageSummary(
+  tenantId: string,
+  serverOpts: ServerOpts = {}
+): Promise<boolean> {
+  const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
+  if (!auth.ok) return false;
+
+  const adminProf = await loadActiveTenantAdminProfileForSession(tenantId, auth.actorAuthUserId);
+  return (
+    adminProf?.adminRole === "clinic_admin" ||
+    adminProf?.adminRole === "operations_admin" ||
+    adminProf?.adminRole === "data_safety_admin"
+  );
+}
+
+async function enrichReliantUsersWithEmail(
+  supabase: SupabaseClient,
+  rows: { fiUserId: string; tipsShown: number }[]
+): Promise<{ fiUserId: string; email: string | null; tipsShown: number }[]> {
+  if (rows.length === 0) return [];
+  const ids = rows.map((r) => r.fiUserId);
+  const { data } = await supabase.from("fi_users").select("id, email").in("id", ids);
+  const emailById = new Map<string, string | null>();
+  for (const row of (data ?? []) as { id: string; email: string | null }[]) {
+    emailById.set(String(row.id), row.email ? String(row.email) : null);
+  }
+  return rows.map((row) => ({
+    fiUserId: row.fiUserId,
+    email: emailById.get(row.fiUserId) ?? null,
+    tipsShown: row.tipsShown,
+  }));
+}
+
 export async function loadGuidedAssistUsageSummary(
   tenantId: string,
   windowDays = 30,
@@ -417,12 +451,7 @@ export async function loadGuidedAssistUsageSummary(
     const auth = await resolveTenantMemberAuth(tenantId, serverOpts);
     if (!auth.ok) return auth;
 
-    const adminProf = await loadActiveTenantAdminProfileForSession(tenantId, auth.actorAuthUserId);
-    if (
-      adminProf?.adminRole !== "clinic_admin" &&
-      adminProf?.adminRole !== "operations_admin" &&
-      adminProf?.adminRole !== "data_safety_admin"
-    ) {
+    if (!(await canViewGuidedAssistUsageSummary(tenantId, serverOpts))) {
       return { ok: false, error: "Admin access is required to view assist usage." };
     }
 
@@ -447,12 +476,15 @@ export async function loadGuidedAssistUsageSummary(
       windowDays
     );
 
+    const reliantUsers = await enrichReliantUsersWithEmail(supabase, stats.reliantUsers);
+
     return {
       ok: true,
       summary: {
         tenantId: tenantId.trim(),
         windowDays,
         ...stats,
+        reliantUsers,
       },
     };
   } catch (e) {
