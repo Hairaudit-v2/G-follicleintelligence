@@ -1,7 +1,6 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { SectionHeading } from "@/components/marketing/FiMarketingPrimitives";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import { HOME_PAGE_CONTENT } from "@/lib/marketing/homePageContent";
