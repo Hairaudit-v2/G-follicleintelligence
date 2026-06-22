@@ -16,7 +16,6 @@ import {
 import type {
   DeploymentIntelligenceSnapshot,
   GuidedAssistAdoptionInput,
-  ConnectorAuthReadinessInput,
   PlatformDeploymentDashboardRow,
 } from "./deploymentIntelligenceTypes";
 import { loadGoLiveReadinessSnapshot } from "./goLiveReadiness.server";

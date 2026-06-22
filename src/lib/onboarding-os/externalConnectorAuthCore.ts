@@ -204,8 +204,6 @@ export function buildConnectorVerificationResult(opts: {
 }): ExternalConnectorVerificationResult {
   const testMode = opts.input.testMode === true;
   const requiredScopes = buildRequiredPermissionScopes(opts.provider);
-  const blockers: string[] = [];
-  const warnings: string[] = [];
 
   const validation = validateConnectorAuthInput(opts.provider, opts.input);
   if (!validation.ok) {
