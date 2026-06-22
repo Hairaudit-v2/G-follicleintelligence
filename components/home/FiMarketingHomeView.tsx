@@ -18,6 +18,7 @@ import { FiMarketingComparisonSection } from "@/components/home/FiMarketingCompa
 import { FiMarketingEngineeringCredibilitySection } from "@/components/home/FiMarketingEngineeringCredibilitySection";
 import { FiMarketingGlobalHealthcareSection } from "@/components/home/FiMarketingGlobalHealthcareSection";
 import { FiMarketingHealthcareStackSection } from "@/components/home/FiMarketingHealthcareStackSection";
+import { FiMarketingIntegrationSection } from "@/components/home/FiMarketingIntegrationSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
 import { FiMarketingPlatformProgressSection } from "@/components/home/FiMarketingPlatformProgressSection";
@@ -361,6 +362,8 @@ export function FiMarketingHomeView() {
           </p>
         </FadeIn>
       </Section>
+
+      <FiMarketingIntegrationSection />
 
       <Section
         id={c.onePlatform.id}

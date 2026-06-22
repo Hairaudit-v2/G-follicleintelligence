@@ -83,6 +83,11 @@ export type HomeComparisonRow = {
 };
 
 /** Future-facing infrastructure vision cards (careful, non-definitive language). */
+export type HomeIntegrationAdoptionCard = {
+  title: string;
+  copy: string;
+};
+
 export type HomeMoonshotPredictionCard = {
   headline: string;
   copy: string;
@@ -136,6 +141,52 @@ export const HOME_PAGE_CONTENT = {
     ],
     transition:
       "The category does not need another horizontal clinic tool. It needs an operating system that connects every layer of serious hair restoration.",
+  },
+
+  worksWithExistingSoftware: {
+    id: "works-with-existing-software",
+    storyEyebrow: "Integration-first adoption",
+    headline: "Works With Your Existing Software",
+    body: "Follicle Intelligence is designed to integrate with the systems clinics already use.",
+    principles: [
+      "No forced migration.",
+      "No operational disruption.",
+      "Connect first. Transition at your own pace.",
+    ] as const,
+    supportingCopy:
+      "Start by connecting your existing CRM, booking, payments, calendar, communication, and patient record systems. Follicle Intelligence creates an intelligence layer above your current infrastructure so clinics can unlock value immediately while keeping day-to-day workflows running.",
+    integrationCaption: "Designed to connect with common clinic systems",
+    integrationSystems: [
+      "HubSpot",
+      "Pabau",
+      "Cliniko",
+      "Timely",
+      "Stripe",
+      "Google Calendar",
+      "Zapier",
+      "EMR",
+    ] as const,
+    intelligenceLayerLabel: "Follicle Intelligence layer",
+    cards: [
+      {
+        title: "Keep current workflows",
+        copy:
+          "Clinics can continue using the systems their teams already know while FI begins connecting operational, clinical, and commercial data.",
+      },
+      {
+        title: "Connect before replacing",
+        copy: "Integrate first with existing tools, then transition modules only when the clinic is ready.",
+      },
+      {
+        title: "Reduce adoption risk",
+        copy: "Avoid painful go-lives, forced migrations, and operational downtime.",
+      },
+      {
+        title: "Build toward full OS adoption",
+        copy:
+          "As confidence grows, clinics can activate more FI modules across LeadFlow, ClinicOS, SurgeryOS, AuditOS, AcademyOS, and AnalyticsOS.",
+      },
+    ] satisfies HomeIntegrationAdoptionCard[],
   },
 
   globalHealthcareInfrastructure: {
