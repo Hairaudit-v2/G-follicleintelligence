@@ -1,6 +1,10 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import {
+  evaluateStaffProcedurePrivilegeForEvent,
+  loadAllProcedurePrivilegeRequirementsForTenant,
+} from "@/src/lib/academy-os/procedurePrivileges.server";
 import { loadBookingsForOperatorView } from "@/src/lib/bookings/bookings";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
@@ -588,6 +592,8 @@ export async function loadRosterAssignableStaff(
     .filter((row) => row.assignment_status !== "cancelled")
     .map((row) => ({ staffId: row.staff_id, assignedRole: row.assigned_role, assignmentStatus: row.assignment_status }));
 
+  const allPrivilegeRequirements = await loadAllProcedurePrivilegeRequirementsForTenant(tid);
+
   const availabilityByStaff = new Map<
     string,
     import("@/src/lib/workforce-os/workforceRosteringEngine").StaffAvailabilityRangeInput
@@ -655,6 +661,15 @@ export async function loadRosterAssignableStaff(
     );
 
     const profileExtras = parseStaffProfileExtras(staff.staff_metadata);
+    const privilegeEligibility = await evaluateStaffProcedurePrivilegeForEvent({
+      tenantId: tid,
+      staffId: staff.id,
+      clinicId: input.clinicId,
+      eventType: input.eventType,
+      assignedRole: input.assignedRole,
+      requirements: allPrivilegeRequirements,
+    });
+
     staffList.push({
       staffId: staff.id,
       name: staff.full_name?.trim() || "Staff",
@@ -662,6 +677,7 @@ export async function loadRosterAssignableStaff(
       isActive: staff.is_active,
       clinicId: profileExtras.primary_clinic_id,
       readinessInput: await buildReadinessInputForStaff(tid, staff),
+      privilegeEligibility,
     });
   }
 

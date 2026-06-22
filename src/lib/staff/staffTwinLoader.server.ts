@@ -13,6 +13,13 @@ import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComp
 import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
 import { loadStaffCompetencyProjections } from "@/src/lib/academy-os/academyCompetencyReceiver.server";
 import type { FiStaffCompetencyProjectionRow } from "@/src/lib/academy-os/academyCompetencyTypes";
+import {
+  filterNovelPrivilegeSuggestions,
+  suggestProcedurePrivilegesFromProjections,
+} from "@/src/lib/academy-os/procedurePrivilegeSuggestionEngine";
+import type { ProcedurePrivilegeSuggestionResult } from "@/src/lib/academy-os/procedurePrivilegeSuggestionEngine";
+import { loadStaffProcedurePrivileges } from "@/src/lib/academy-os/procedurePrivileges.server";
+import type { FiStaffProcedurePrivilegeRow } from "@/src/lib/academy-os/procedurePrivilegeTypes";
 
 export type StaffTwinLinkedUser = {
   id: string;
@@ -41,6 +48,10 @@ export type StaffTwinPageData = {
   complianceSummary: StaffComplianceSummary;
   /** AcademyOS operational competency projections from IIOHR exports. */
   competencyProjections: FiStaffCompetencyProjectionRow[];
+  /** AcademyOS operational procedure privileges (clinic authorization). */
+  procedurePrivileges: FiStaffProcedurePrivilegeRow[];
+  /** Suggested privileges from competency projections — not auto-granted. */
+  suggestedProcedurePrivileges: ProcedurePrivilegeSuggestionResult[];
   canManageStaffPin: boolean;
   pinMetadata: StaffPinMetadata | null;
 };
@@ -169,6 +180,11 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
   );
 
   const competencyProjections = await loadStaffCompetencyProjections(tid, sid);
+  const procedurePrivileges = await loadStaffProcedurePrivileges(tid, sid);
+  const suggestedProcedurePrivileges = filterNovelPrivilegeSuggestions({
+    suggestions: suggestProcedurePrivilegesFromProjections(competencyProjections),
+    existingPrivileges: procedurePrivileges,
+  });
 
   const weekly = parseStaffWeeklyHours(staff.working_hours);
   const workingHoursSummary = formatStaffWeeklyHoursSummary(weekly).trim();
@@ -184,6 +200,8 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
     schedulingTimezoneLabel,
     complianceSummary,
     competencyProjections,
+    procedurePrivileges,
+    suggestedProcedurePrivileges,
     canManageStaffPin,
     pinMetadata,
   };

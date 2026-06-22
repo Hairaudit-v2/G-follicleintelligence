@@ -11,6 +11,11 @@ import {
 import { canStaffBeAssignedClinically } from "@/src/lib/workforce-os/workforceReadinessClinicalEligibility";
 import type { StaffClinicalAssignmentResult } from "@/src/lib/workforce-os/workforceReadinessClinicalEligibility";
 import {
+  canStaffBeAssignedToProcedure,
+  type StaffProcedureAssignmentResult,
+} from "@/src/lib/workforce-os/workforceProcedureClinicalEligibility";
+import type { ProcedurePrivilegeEligibilityResult } from "@/src/lib/academy-os/procedurePrivilegeTypes";
+import {
   normalizeRequiredRoles,
   type ClinicalStaffingRequiredRoles,
 } from "@/src/lib/workforce-os/workforceClinicalStaffingTemplateDefaults";
@@ -82,6 +87,7 @@ export type CandidateAssignment = {
   staffId: string;
   assignedRole: string;
   readinessInput: WorkforceReadinessScoreInput;
+  privilegeEligibility?: ProcedurePrivilegeEligibilityResult;
 };
 
 export type StaffAvailabilityRangeInput = {
@@ -149,9 +155,23 @@ export type AssignStaffToClinicalEventInput = {
   endsAt: string;
   assignedBy?: string | null;
   readinessInput: WorkforceReadinessScoreInput;
+  privilegeEligibility?: ProcedurePrivilegeEligibilityResult;
   conflicts: SchedulingConflict[];
   allowBlockedDraft?: boolean;
 };
+
+function evaluateClinicalAssignment(input: {
+  readinessInput: WorkforceReadinessScoreInput;
+  privilegeEligibility?: ProcedurePrivilegeEligibilityResult;
+}): StaffClinicalAssignmentResult | StaffProcedureAssignmentResult {
+  if (input.privilegeEligibility) {
+    return canStaffBeAssignedToProcedure({
+      readinessInput: input.readinessInput,
+      privilegeEligibility: input.privilegeEligibility,
+    });
+  }
+  return canStaffBeAssignedClinically(input.readinessInput);
+}
 
 export type AssignStaffToClinicalEventResult =
   | {
@@ -362,7 +382,10 @@ export function validateClinicalEventStaffing(
   const scores: number[] = [];
 
   for (const candidate of input.candidateAssignments) {
-    const eligibility = canStaffBeAssignedClinically(candidate.readinessInput);
+    const eligibility = evaluateClinicalAssignment({
+      readinessInput: candidate.readinessInput,
+      privilegeEligibility: candidate.privilegeEligibility,
+    });
     scores.push(eligibility.score);
 
     if (!candidate.readinessInput.is_active) {
@@ -382,7 +405,7 @@ export function validateClinicalEventStaffing(
       });
     } else if (eligibility.warnings.length > 0) {
       warnings.push(
-        `Staff ${candidate.staffId}: ${eligibility.warnings.length} readiness warning(s)`
+        `Staff ${candidate.staffId}: ${eligibility.warnings.length} readiness/privilege warning(s)`
       );
     }
 
@@ -427,7 +450,10 @@ export function validateClinicalEventStaffing(
 export function assignStaffToClinicalEvent(
   input: AssignStaffToClinicalEventInput
 ): AssignStaffToClinicalEventResult {
-  const readiness = canStaffBeAssignedClinically(input.readinessInput);
+  const readiness = evaluateClinicalAssignment({
+    readinessInput: input.readinessInput,
+    privilegeEligibility: input.privilegeEligibility,
+  });
 
   if (input.conflicts.length > 0 && !input.allowBlockedDraft) {
     return {
@@ -461,6 +487,9 @@ export function assignStaffToClinicalEvent(
     event_ends_at: input.endsAt,
     conflicts: input.conflicts.map((c) => ({ kind: c.kind, message: c.message })),
     assigned_at: new Date().toISOString(),
+    ...("procedurePrivilegeSnapshot" in readiness
+      ? (readiness as StaffProcedureAssignmentResult).procedurePrivilegeSnapshot
+      : {}),
   };
 
   const warnings = [

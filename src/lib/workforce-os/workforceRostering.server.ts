@@ -4,6 +4,11 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishWorkforceEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
 import {
+  evaluateStaffProcedurePrivilegeForEvent,
+  loadAllProcedurePrivilegeRequirementsForTenant,
+  seedDefaultProcedurePrivilegeRequirementsForTenant,
+} from "@/src/lib/academy-os/procedurePrivileges.server";
+import {
   DEFAULT_CLINICAL_STAFFING_TEMPLATES,
   normalizeRequiredRoles,
   type ClinicalStaffingRequiredRoles,
@@ -89,6 +94,8 @@ export type ClinicalStaffingTemplateSeedResult = {
   created: number;
   skipped: number;
 };
+
+export { seedDefaultProcedurePrivilegeRequirementsForTenant };
 
 export async function seedDefaultClinicalStaffingTemplatesForTenant(
   tenantId: string,
@@ -703,6 +710,16 @@ export async function assignStaffToClinicalEventAction(input: {
   });
 
   const readinessInput = await buildReadinessInputForStaff(tid, staff);
+  const privilegeEligibility = input.eventType?.trim()
+    ? await evaluateStaffProcedurePrivilegeForEvent({
+        tenantId: tid,
+        staffId: sid,
+        clinicId: input.clinicId,
+        eventType: input.eventType.trim().toLowerCase(),
+        assignedRole: input.assignedRole,
+      })
+    : undefined;
+
   const result = assignStaffToClinicalEvent({
     tenantId: tid,
     clinicId: input.clinicId,
@@ -714,6 +731,7 @@ export async function assignStaffToClinicalEventAction(input: {
     endsAt: input.endsAt,
     assignedBy: input.assignedBy,
     readinessInput,
+    privilegeEligibility,
     conflicts,
     allowBlockedDraft: input.allowBlockedDraft,
   });
@@ -787,6 +805,7 @@ export async function loadClinicalEventStaffingStatus(input: {
     templates,
   });
   const requiredRoles = template?.required_roles ?? {};
+  const allPrivilegeRequirements = await loadAllProcedurePrivilegeRequirementsForTenant(tid);
 
   const availabilityByStaff = new Map<
     string,
@@ -797,6 +816,7 @@ export async function loadClinicalEventStaffingStatus(input: {
     staffId: string;
     assignedRole: string;
     readinessInput: WorkforceReadinessScoreInput;
+    privilegeEligibility?: import("@/src/lib/academy-os/procedurePrivilegeTypes").ProcedurePrivilegeEligibilityResult;
   }> = [];
 
   for (const candidate of input.candidateStaffIds) {
@@ -853,10 +873,19 @@ export async function loadClinicalEventStaffingStatus(input: {
     conflictsByStaff.set(candidate.staffId, conflicts);
 
     const readinessInput = await buildReadinessInputForStaff(tid, staff);
+    const privilegeEligibility = await evaluateStaffProcedurePrivilegeForEvent({
+      tenantId: tid,
+      staffId: candidate.staffId,
+      clinicId: input.clinicId,
+      eventType: input.eventType,
+      assignedRole: candidate.assignedRole,
+      requirements: allPrivilegeRequirements,
+    });
     candidateAssignments.push({
       staffId: candidate.staffId,
       assignedRole: candidate.assignedRole,
       readinessInput,
+      privilegeEligibility,
     });
   }
 

@@ -4,6 +4,7 @@ import { publishAnalyticsEvent } from "@/src/lib/analytics-os/analyticsEventCore
 import type { AcademyAnalyticsEventType } from "@/src/lib/analytics-os/analyticsEventTypes";
 
 import type { FiStaffCompetencyProjectionRow } from "./academyCompetencyTypes";
+import type { FiStaffProcedurePrivilegeRow } from "./procedurePrivilegeTypes";
 
 export async function publishAcademyEvent(input: {
   eventType: AcademyAnalyticsEventType;
@@ -74,5 +75,49 @@ export async function publishAcademyCompetencyAnalytics(input: {
         certification_level: projection.certificationLevel,
       },
     });
+  }
+}
+
+export async function publishAcademyProcedurePrivilegeEvent(input: {
+  eventType: Extract<
+    AcademyAnalyticsEventType,
+    | "procedure_privilege_granted"
+    | "procedure_privilege_suspended"
+    | "procedure_privilege_revoked"
+    | "procedure_privilege_expired"
+    | "privilege_requirement_missing"
+  >;
+  tenantId: string;
+  staffId: string;
+  privilege: FiStaffProcedurePrivilegeRow | null;
+  reason?: string | null;
+  eventMetadata?: Record<string, unknown>;
+  occurredAt?: string;
+}): Promise<void> {
+  try {
+    await publishAnalyticsEvent({
+      tenantId: input.tenantId,
+      moduleName: "academy_os",
+      eventType: input.eventType,
+      entityId: input.staffId,
+      entityType: "staff",
+      eventMetadata: {
+        ...(input.eventMetadata ?? {}),
+        ...(input.privilege
+          ? {
+              procedure_privilege_id: input.privilege.id,
+              procedure_key: input.privilege.procedureKey,
+              privilege_level: input.privilege.privilegeLevel,
+              privilege_status: input.privilege.privilegeStatus,
+              clinic_id: input.privilege.clinicId,
+              source_projection_id: input.privilege.sourceProjectionId,
+            }
+          : {}),
+        ...(input.reason ? { reason: input.reason } : {}),
+      },
+      occurredAt: input.occurredAt,
+    });
+  } catch {
+    // Non-blocking — analytics must not fail privilege operations.
   }
 }

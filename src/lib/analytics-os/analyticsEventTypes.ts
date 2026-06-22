@@ -94,6 +94,11 @@ export const ACADEMY_EVENTS = [
   "competency_expired",
   "competency_restricted",
   "certification_verified",
+  "procedure_privilege_granted",
+  "procedure_privilege_suspended",
+  "procedure_privilege_revoked",
+  "procedure_privilege_expired",
+  "privilege_requirement_missing",
 ] as const;
 export type AcademyAnalyticsEventType = (typeof ACADEMY_EVENTS)[number];
 

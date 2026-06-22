@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadBookingResourceAssignmentsForBookings } from "@/src/lib/calendar/bookingResourceRequirements.server";
 import type { FiBookingResourceAssignmentRow } from "@/src/lib/calendar/bookingResourceRequirements.server";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
+import { evaluateStaffProcedurePrivilegeForEvent } from "@/src/lib/academy-os/procedurePrivileges.server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
 import { toClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingStatusDisplay";
@@ -241,6 +242,13 @@ async function upsertWorkforceAssignment(input: {
   if (activeMatch) return activeMatch;
 
   const { readinessInput } = await buildReadinessInputForStaff(tid, sid);
+  const privilegeEligibility = await evaluateStaffProcedurePrivilegeForEvent({
+    tenantId: tid,
+    staffId: sid,
+    clinicId: input.clinicId,
+    eventType: input.eventType,
+    assignedRole: role,
+  });
   const supabase = supabaseAdmin();
 
   const [blocksRes, shiftsRes, assignmentsRes] = await Promise.all([
@@ -281,6 +289,7 @@ async function upsertWorkforceAssignment(input: {
     endsAt: input.endsAt,
     assignedBy: input.assignedBy,
     readinessInput,
+    privilegeEligibility,
     conflicts,
     allowBlockedDraft: input.allowBlockedDraft ?? true,
   });

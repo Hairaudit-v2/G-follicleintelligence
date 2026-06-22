@@ -1,6 +1,8 @@
 {
-  "lastSeenDeploymentId": "dpl_BeG7HneBxYndhL8VbJeiBS3L8JfD",
+  "lastSeenDeploymentId": "dpl_7pKHBCDahYGGSBMmGAmNW96ptqQm",
   "lastSeenState": "READY",
-  "lastCommitSha": "37206e511ac462df8d01801d6288cf16f9a58a66",
-  "lastCheckedAt": "2026-06-19T12:05:00Z"
+  "lastCommitSha": "5eeb530de4f4152afa978aa8ff1b17aca5223bf5",
+  "lastCheckedAt": "2026-06-19T22:00:00Z",
+  "previousReadyDeploymentId": "dpl_5tFc8ioad4n7yYV2YAPHrXr9eERF",
+  "previousReadyCommitSha": "3ee9486f710fdb6d512ebd33d11ecca8d927ced4"
 }

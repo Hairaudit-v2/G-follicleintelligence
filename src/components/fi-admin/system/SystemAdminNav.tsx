@@ -9,6 +9,7 @@ import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 const LINKS: { href: string; label: string }[] = [
   { href: "/fi-admin/system", label: "Overview" },
   { href: "/fi-admin/system/tenants", label: "Tenants" },
+  { href: "/fi-admin/platform/onboarding", label: "Onboarding" },
   { href: "/fi-admin/system/clinics", label: "Clinics" },
   { href: "/fi-admin/system/staff", label: "Staff" },
   { href: "/fi-admin/system/doctors", label: "Doctors" },

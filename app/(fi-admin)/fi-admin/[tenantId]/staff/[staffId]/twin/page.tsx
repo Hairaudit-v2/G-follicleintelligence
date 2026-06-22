@@ -13,6 +13,7 @@ import { StaffWorkforceIdentityPanel } from "@/src/components/fi/staff/StaffWork
 import { StaffWorkforceReadinessCard } from "@/src/components/fi/staff/StaffWorkforceReadinessPanel";
 import { StaffWorkforceRosterPanel } from "@/src/components/fi/staff/StaffWorkforceRosterPanel";
 import { StaffAcademyCompetencyProjectionPanel } from "@/src/components/fi/staff/StaffAcademyCompetencyProjectionPanel";
+import { StaffProcedurePrivilegePanel } from "@/src/components/fi/staff/StaffProcedurePrivilegePanel";
 import { loadStaffRosterProfile } from "@/src/lib/workforce-os/workforceRostering.server";
 import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/workforce-os/workforceIdentitySummary";
 import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
@@ -55,6 +56,8 @@ export default async function StaffTwinPage({
     schedulingTimezoneLabel,
     complianceSummary,
     competencyProjections,
+    procedurePrivileges,
+    suggestedProcedurePrivileges,
     canManageStaffPin,
     pinMetadata,
   } = data;
@@ -204,6 +207,14 @@ export default async function StaffTwinPage({
 
       <DashboardCard className="p-6 sm:p-8">
         <StaffAcademyCompetencyProjectionPanel projections={competencyProjections} variant="dark" />
+      </DashboardCard>
+
+      <DashboardCard className="p-6 sm:p-8">
+        <StaffProcedurePrivilegePanel
+          privileges={procedurePrivileges}
+          suggestions={suggestedProcedurePrivileges}
+          variant="dark"
+        />
       </DashboardCard>
 
       <DashboardCard className="p-6 sm:p-8">

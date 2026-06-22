@@ -3,6 +3,10 @@
  */
 
 import { canStaffBeAssignedClinically } from "@/src/lib/workforce-os/workforceReadinessClinicalEligibility";
+import {
+  canStaffBeAssignedToProcedure,
+} from "@/src/lib/workforce-os/workforceProcedureClinicalEligibility";
+import type { ProcedurePrivilegeEligibilityResult } from "@/src/lib/academy-os/procedurePrivilegeTypes";
 import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
 import {
   getStaffAvailabilityForRange,
@@ -17,6 +21,7 @@ export type RosterCandidateStaffInput = {
   isActive: boolean;
   clinicId?: string | null;
   readinessInput: WorkforceReadinessScoreInput;
+  privilegeEligibility?: ProcedurePrivilegeEligibilityResult;
 };
 
 export type RankAssignableStaffInput = {
@@ -46,6 +51,9 @@ export type RosterAssignableCandidate = {
   conflicts: SchedulingConflict[];
   rankScore: number;
   section: RosterCandidateSection;
+  procedurePrivilegeStatus: ProcedurePrivilegeEligibilityResult["status"] | null;
+  procedurePrivilegeEligible: boolean;
+  privilegeWarnings: ProcedurePrivilegeEligibilityResult["warnings"];
 };
 
 function normalizeRole(value: string | null | undefined): string {
@@ -120,8 +128,22 @@ export function rankAssignableStaffForRole(input: RankAssignableStaffInput): Ros
       ? getStaffAvailabilityForRange(availabilityInput)
       : { available: true, reasons: [] as string[], activeBlocks: [], matchingShifts: [] };
 
-    const clinical = canStaffBeAssignedClinically(staff.readinessInput);
-    const eligible = staff.isActive && clinical.eligible && availability.available && conflicts.length === 0;
+    const clinical = staff.privilegeEligibility
+      ? canStaffBeAssignedToProcedure({
+          readinessInput: staff.readinessInput,
+          privilegeEligibility: staff.privilegeEligibility,
+        })
+      : canStaffBeAssignedClinically(staff.readinessInput);
+
+    const privilegeStatus = staff.privilegeEligibility?.status ?? null;
+    const privilegeWarnings = staff.privilegeEligibility?.warnings ?? [];
+    const procedurePrivilegeEligible =
+      staff.privilegeEligibility == null ||
+      staff.privilegeEligibility.eligible ||
+      privilegeWarnings.includes("no_privilege_requirement_configured");
+
+    const eligible =
+      staff.isActive && clinical.eligible && availability.available && conflicts.length === 0;
 
     const reasons: string[] = [];
     if (!staff.isActive) reasons.push("Staff member is inactive");
@@ -129,7 +151,7 @@ export function rankAssignableStaffForRole(input: RankAssignableStaffInput): Ros
     if (!availability.available) reasons.push(...availability.reasons);
     if (conflicts.length) reasons.push(...conflicts.map((c) => c.message));
 
-    const warnings = clinical.warnings.map(String);
+    const warnings = [...clinical.warnings.map(String), ...privilegeWarnings.map(String)];
     const section = resolveCandidateSection({
       isActive: staff.isActive,
       eligible,
@@ -159,6 +181,9 @@ export function rankAssignableStaffForRole(input: RankAssignableStaffInput): Ros
       conflicts,
       rankScore,
       section,
+      procedurePrivilegeStatus: privilegeStatus,
+      procedurePrivilegeEligible,
+      privilegeWarnings,
     });
   }
 

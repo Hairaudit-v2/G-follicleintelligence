@@ -112,21 +112,31 @@ create policy fi_competency_import_events_select_tenant_member
 grant select on public.fi_competency_import_events to authenticated, service_role;
 grant insert, update, delete on public.fi_competency_import_events to service_role;
 
--- AnalyticsOS: allow academy_os module events.
+-- AnalyticsOS: allow academy_os module events (only when fi_analytics_events exists).
 
-alter table public.fi_analytics_events drop constraint if exists fi_analytics_events_module_name;
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.tables
+    where table_schema = 'public'
+      and table_name = 'fi_analytics_events'
+  ) then
+    alter table public.fi_analytics_events drop constraint if exists fi_analytics_events_module_name;
 
-alter table public.fi_analytics_events add constraint fi_analytics_events_module_name check (
-  module_name in (
-    'workforce_os',
-    'surgery_os',
-    'financial_os',
-    'consultation_os',
-    'patient_os',
-    'clinic_os',
-    'leadflow',
-    'imaging_os',
-    'audit_os',
-    'academy_os'
-  )
-);
+    alter table public.fi_analytics_events add constraint fi_analytics_events_module_name check (
+      module_name in (
+        'workforce_os',
+        'surgery_os',
+        'financial_os',
+        'consultation_os',
+        'patient_os',
+        'clinic_os',
+        'leadflow',
+        'imaging_os',
+        'audit_os',
+        'academy_os'
+      )
+    );
+  end if;
+end $$;
