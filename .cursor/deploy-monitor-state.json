@@ -1,8 +1,9 @@
 {
-  "lastSeenDeploymentId": "dpl_7pKHBCDahYGGSBMmGAmNW96ptqQm",
-  "lastSeenState": "READY",
-  "lastCommitSha": "5eeb530de4f4152afa978aa8ff1b17aca5223bf5",
-  "lastCheckedAt": "2026-06-19T22:00:00Z",
-  "previousReadyDeploymentId": "dpl_5tFc8ioad4n7yYV2YAPHrXr9eERF",
-  "previousReadyCommitSha": "3ee9486f710fdb6d512ebd33d11ecca8d927ced4"
+  "lastSeenDeploymentId": "dpl_EH1KRSNfL5aTQcqUmuyg6oEmJQfL",
+  "lastSeenState": "ERROR",
+  "lastCommitSha": "9148100aa8efa2fec0246884d30298a6e4f48fb2",
+  "lastCheckedAt": "2026-06-19T22:30:00Z",
+  "previousReadyDeploymentId": "dpl_7pKHBCDahYGGSBMmGAmNW96ptqQm",
+  "previousReadyCommitSha": "5eeb530de4f4152afa978aa8ff1b17aca5223bf5",
+  "lastError": "Type error: TenantProvisioningStepRow missing attemptCount/maxAttempts for canRetryProvisioningStep"
 }

@@ -587,7 +587,13 @@ export async function retryTenantProvisioningStep(
   const step = loaded.detail.steps.find((s) => s.step_code === code);
   if (!step) return { ok: false, error: "Step not found." };
 
-  if (!canRetryProvisioningStep(step)) {
+  if (
+    !canRetryProvisioningStep({
+      status: step.status,
+      attemptCount: step.attempt_count,
+      maxAttempts: step.max_attempts,
+    })
+  ) {
     return { ok: false, error: "Step cannot be retried (not failed or max attempts reached)." };
   }
 

@@ -177,7 +177,11 @@ function StepRow({
 }) {
   const badge = resolveProvisioningStepStatusBadge(step.status as ProvisioningStepStatus);
   const label = String((step.input_snapshot as { label?: string }).label ?? step.step_code);
-  const canRetry = canRetryProvisioningStep(step);
+  const canRetry = canRetryProvisioningStep({
+    status: step.status,
+    attemptCount: step.attempt_count,
+    maxAttempts: step.max_attempts,
+  });
   const canRun = step.status === "pending" || step.status === "retry_pending";
 
   return (
