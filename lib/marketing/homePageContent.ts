@@ -144,7 +144,7 @@ export const HOME_PAGE_CONTENT = {
     headline: "Built as a living healthcare operating system",
     subtext:
       "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
-    gridCaption: "Twelve OS modules · live delivery status · single intelligence substrate",
+    gridCaption: "Thirteen OS modules · live delivery status · single intelligence substrate",
     cta: { label: "View full platform progress", href: "/platform/progress" as const },
   },
 
@@ -167,7 +167,7 @@ export const HOME_PAGE_CONTENT = {
       },
       {
         title: "Layer 3 — Business Infrastructure",
-        modules: ["FinancialOS", "AnalyticsOS", "FoundationOS"],
+        modules: ["FinancialOS", "AnalyticsOS", "FoundationOS", "OnboardingOS"],
       },
       {
         title: "Layer 4 — Human Infrastructure",
@@ -208,7 +208,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "The operating system",
     headline: "One Platform. Every Layer Of Hair Restoration.",
     subtext:
-      "Twelve modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
+      "Thirteen modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
     architectureCaption: "Four engines · connected OS modules · single intelligence substrate",
     secondaryCta: { label: "View Ecosystem Architecture", href: "/platform/ecosystem" as const },
     layers: [
@@ -277,6 +277,11 @@ export const HOME_PAGE_CONTENT = {
           {
             name: "ClinicOS",
             description: "Scheduling, services, staff, and the operational rhythm that keeps high-volume hair programs coherent.",
+          },
+          {
+            name: "OnboardingOS",
+            description:
+              "Enterprise clinic deployment engine — guided tenant provisioning, configuration templates, module activation planning, and sandbox onboarding environments.",
           },
         ],
       },

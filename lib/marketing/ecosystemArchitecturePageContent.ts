@@ -100,7 +100,7 @@ export const ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT = {
   finalCta: {
     id: "ecosystem-final-cta",
     eyebrow: "Platform progress",
-    headline: "One infrastructure layer. Twelve connected systems.",
+    headline: "One infrastructure layer. Thirteen connected systems.",
     body:
       "Follicle Intelligence is being built as a living healthcare operating system for clinics, educators, auditors, and industry leaders who want to raise the standard of hair restoration globally.",
     cta: { label: "View live platform progress", href: "/platform/progress" },

@@ -149,7 +149,7 @@ export function EcosystemCompletionSnapshot({ variant = "marketing", className }
         <CompletionCard
           label="FI OS core platform"
           percent={fiOsCorePlatformPercent}
-          detail="Twelve connected OS modules — clinical, surgical, business, and workforce infrastructure inside Follicle Intelligence."
+          detail="Thirteen connected OS modules — clinical, surgical, business, workforce, and deployment infrastructure inside Follicle Intelligence."
           accent="cyan"
         />
       </div>

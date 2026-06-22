@@ -107,7 +107,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 
   modules: {
     eyebrow: "Module grid",
-    headline: "Twelve connected systems. One delivery spine.",
+    headline: "Thirteen connected systems. One delivery spine.",
     intro: "Filter by status or scan completion across the FI OS surface area.",
   },
 
@@ -130,6 +130,8 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "Built as a living healthcare operating system",
     description:
       "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
+    onboardingHighlight:
+      "OnboardingOS is now in active development — designed to make clinic adoption faster, safer, and easier by automating tenant setup, module activation, deployment templates, and sandbox training environments.",
     cta: { label: "View platform progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
@@ -150,6 +152,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-ab",
+    title: "OnboardingOS clinic deployment templates",
+    module: "OnboardingOS",
+    date: "2026-06-22",
+  },
   {
     id: "2026-06-22-workforce-roster-command-centre",
     title: "WorkforceOS Roster Command Centre",
@@ -331,10 +339,28 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
       "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, Roster Command Centre assignment editor, and SurgeryOS / ClinicOS staffing orchestration.",
     status: "Pilot Ready",
   },
+  {
+    id: "onboarding-os",
+    name: "OnboardingOS",
+    completionPercent: 28,
+    stage: "Tenant Provisioning + Deployment Templates",
+    description:
+      "Enterprise clinic deployment engine that provisions new tenants, applies clinic templates, assigns modules, and prepares sandbox onboarding environments.",
+    status: "Active Development",
+  },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-ab",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "OnboardingOS Phase A–B foundations added",
+    summary:
+      "OnboardingOS Phase A–B foundations added: tenant provisioning sessions, deployment templates, module bundle activation planning, role packs, service workflow templates, and sandbox seed planning.",
+    modules: ["OnboardingOS"],
+  },
   {
     id: "2026-06-22-workforce-roster-command-centre",
     date: "2026-06-22",

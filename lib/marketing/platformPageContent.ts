@@ -48,7 +48,7 @@ export const PLATFORM_PAGE_CONTENT = {
   modules: {
     id: "modules",
     eyebrow: "Module surface",
-    headline: "Ten connected systems. One operating model.",
+    headline: "Eleven connected systems. One operating model.",
     intro:
       "Each module is a product-grade surface with explicit integration contracts. Together they form the architecture serious operators deploy—not a loose bundle of features.",
     items: [
@@ -150,6 +150,17 @@ export const PLATFORM_PAGE_CONTENT = {
         why: "Dashboards built on fragmented extracts go stale. AnalyticsOS inherits semantics from modules so KPIs mean the same thing across sites.",
         learnMoreHref: "/platform/analytics-os",
         learnMoreLabel: "AnalyticsOS module",
+      },
+      {
+        id: "onboarding-os",
+        name: "OnboardingOS",
+        tagline: "Enterprise clinic deployment, module activation, and sandbox onboarding.",
+        description:
+          "OnboardingOS is the enterprise deployment engine for new clinic tenants—guided provisioning sessions, clinic configuration templates, module bundle planning, role packs, and sandbox training environments that accelerate safe adoption.",
+        connects: "ClinicOS services, module entitlements, AcademyOS training tracks, WorkforceOS bootstrap, and platform admin governance.",
+        why: "Multi-clinic groups cannot scale on manual setup. OnboardingOS standardises how new organisations enter the FI ecosystem with repeatable, reviewable deployment templates.",
+        learnMoreHref: "/platform/progress#progress-onboarding-os",
+        learnMoreLabel: "OnboardingOS progress",
       },
       {
         id: "global-intelligence",
