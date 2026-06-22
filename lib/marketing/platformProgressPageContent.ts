@@ -131,7 +131,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     description:
       "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
     onboardingHighlight:
-      "OnboardingOS is now in active development — designed to make clinic adoption faster, safer, and easier by automating tenant setup, module activation, deployment templates, and sandbox training environments.",
+      "OnboardingOS is in active development — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and the Deployment Intelligence Command Centre for weighted clinic deployment scoring.",
     cta: { label: "View platform progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
@@ -152,6 +152,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-e2",
+    title: "OnboardingOS Deployment Intelligence Command Centre",
+    module: "OnboardingOS",
+    date: "2026-06-22",
+  },
   {
     id: "2026-06-22-onboarding-os-phase-ab",
     title: "OnboardingOS clinic deployment templates",
@@ -342,16 +348,34 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "onboarding-os",
     name: "OnboardingOS",
-    completionPercent: 28,
-    stage: "Tenant Provisioning + Deployment Templates",
+    completionPercent: 52,
+    stage: "Deployment Intelligence Command Centre",
     description:
-      "Enterprise clinic deployment engine that provisions new tenants, applies clinic templates, assigns modules, and prepares sandbox onboarding environments.",
+      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and weighted Deployment Intelligence scoring across infrastructure, workflow, staff, operational readiness, adoption confidence, and executive approval.",
     status: "Active Development",
   },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-e2",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "OnboardingOS Phase E2 Deployment Intelligence Command Centre",
+    summary:
+      "OnboardingOS Phase E2 added Deployment Intelligence: a weighted clinic deployment score across infrastructure, workflow, staff, operational readiness, adoption confidence, and executive approval.",
+    modules: ["OnboardingOS"],
+  },
+  {
+    id: "2026-06-22-onboarding-os-phase-e",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "OnboardingOS Phase E Go-Live Readiness Command Centre",
+    summary:
+      "Go-live readiness checklist, owner and platform review sign-offs, and explicit platform-admin approval gate — embedded as the executive approval domain inside Deployment Intelligence.",
+    modules: ["OnboardingOS"],
+  },
   {
     id: "2026-06-22-onboarding-os-phase-ab",
     date: "2026-06-22",

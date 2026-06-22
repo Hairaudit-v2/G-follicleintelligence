@@ -133,6 +133,27 @@ describe("OnboardingOS Phase E2 — deployment intelligence core", () => {
     );
   });
 
+  it("operational readiness reaches 100% when all four scoring conditions pass", () => {
+    const domains = buildDeploymentIntelligenceDomains(
+      makeDeploymentSignals({
+        provisioningProgressPercent: 85,
+        sandboxSeedEnabled: false,
+        sandboxSeedApplied: false,
+        guidedAssistAdoption: {
+          guidedAssistConfigured: true,
+          totalEvents: 10,
+          uniqueUsers: 2,
+          tipsShown: 5,
+          tipsDismissed: 1,
+          nextActionsClicked: 2,
+          modulesNeedingGuidanceReviewCount: 0,
+        },
+      })
+    );
+    const operational = domains.find((d) => d.domain === "operational_readiness");
+    assert.equal(operational?.scorePercent, 100);
+  });
+
   it("resolveDeploymentStatus maps score bands correctly", () => {
     assert.equal(resolveDeploymentStatus(20), "early_setup");
     assert.equal(resolveDeploymentStatus(40), "infrastructure_in_progress");

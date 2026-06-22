@@ -84,6 +84,15 @@ function operationalReadinessScore(signals: DeploymentIntelligenceInputSignals):
     signals.goLiveReadiness.checks.find((c) => c.code === "service_catalog_deployed")?.state === "pass";
   if (clinicDeployed) points += 1;
   else blockers.push("Clinic configuration not fully deployed.");
+
+  if (!signals.sandboxSeedEnabled || signals.sandboxSeedApplied) points += 1;
+  else blockers.push("Sandbox demo data not applied for operational testing.");
+
+  const testingSignals =
+    signals.guidedAssistAdoption.totalEvents > 0 || signals.provisioningProgressPercent >= 60;
+  if (testingSignals) points += 1;
+  else blockers.push("Limited operational testing activity detected.");
+
   return { percent: Math.round((points / max) * 100), blockers };
 }
 
