@@ -8,6 +8,7 @@ import { assertFiPlatformAdminSystemAccess } from "@/src/lib/fiOs/fiOsPlatformSy
 export const dynamic = "force-dynamic";
 
 const PLATFORM_LINKS = [
+  { href: "/fi-admin/platform/deployments", label: "Deployments" },
   { href: "/fi-admin/platform/onboarding", label: "Onboarding" },
   { href: "/fi-admin/system/tenants", label: "Tenants (legacy)" },
   { href: "/fi-admin/system", label: "System admin" },

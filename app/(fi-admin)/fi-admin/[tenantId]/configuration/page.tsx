@@ -5,13 +5,17 @@ import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import { TenantConfigurationPanel } from "@/src/components/fi/TenantConfigurationPanel";
 import { GuidedAssistUsagePanel } from "@/src/components/onboarding-os/GuidedAssistUsagePanel";
+import { TenantDeploymentIntelligencePanel } from "@/src/components/onboarding-os/TenantDeploymentIntelligencePanel";
+import { TenantGoLiveReadinessPanel } from "@/src/components/onboarding-os/TenantGoLiveReadinessPanel";
 import {
   loadTenantConfigurationOverview,
   resolveConfigurationPreviewContext,
   resolveEffectiveBranding,
 } from "@/src/lib/fi/foundation/tenantSettings";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { canViewTenantDeploymentIntelligence } from "@/src/lib/onboarding-os/deploymentIntelligence.server";
 import { canViewGuidedAssistUsageSummary } from "@/src/lib/onboarding-os/guidedAssist.server";
+import { canViewTenantGoLiveReadiness } from "@/src/lib/onboarding-os/goLiveReadiness.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 export const dynamic = "force-dynamic";
@@ -61,6 +65,8 @@ export default async function TenantConfigurationPage({
 
   const showCascadePreview = Boolean(previewCtx.organisationId || previewCtx.clinicId);
   const showGuidedAssistUsage = await canViewGuidedAssistUsageSummary(tenantId);
+  const showGoLiveReadiness = await canViewTenantGoLiveReadiness(tenantId);
+  const showDeploymentIntelligence = await canViewTenantDeploymentIntelligence(tenantId);
 
   return (
     <div className="space-y-4">
@@ -73,6 +79,8 @@ export default async function TenantConfigurationPage({
           panel below. See design doc 15 (<span className="font-mono text-[#CBD5E1]">15-configuration-admin-editing.md</span>) for fields and access control.
         </p>
       </div>
+      {showDeploymentIntelligence ? <TenantDeploymentIntelligencePanel tenantId={tenantId} /> : null}
+      {showGoLiveReadiness ? <TenantGoLiveReadinessPanel tenantId={tenantId} /> : null}
       {showGuidedAssistUsage ? <GuidedAssistUsagePanel tenantId={tenantId} /> : null}
       <TenantConfigurationPanel
         tenantId={tenantId}
