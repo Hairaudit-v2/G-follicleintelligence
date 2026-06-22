@@ -241,6 +241,20 @@ export const GUIDED_ASSIST_TIPS: readonly GuidedAssistTipDefinition[] = [
     actionLabel: "New case wizard",
     actionHrefSuffix: "cases/new",
   },
+  {
+    code: "onboarding_connect_existing_systems",
+    area: "analytics_os",
+    title: "Connect existing systems",
+    body: "Register legacy CRM, calendar, finance, or marketing tools for coexistence during onboarding. No data migration required yet — architecture foundation only.",
+    pageKey: "configuration",
+    pageKeyPrefix: true,
+    priority: 3,
+    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    dismissible: true,
+    snoozeHours: 24,
+    actionLabel: "Connect systems",
+    actionHrefSuffix: "configuration",
+  },
 ];
 
 export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefinition[] = [
@@ -275,13 +289,23 @@ export const GUIDED_ASSIST_NEXT_ACTIONS: readonly GuidedAssistNextActionDefiniti
     requiresSetupFlags: { clinicCreated: true, clinicSettingsComplete: false },
   },
   {
+    code: "next_connect_existing_systems",
+    area: "analytics_os",
+    title: "Connect existing systems",
+    description: "Register legacy CRM, calendar, finance, or marketing tools without immediate migration.",
+    hrefSuffix: "configuration",
+    roleScope: { tenantAdminRoles: ["clinic_admin", "operations_admin"], workspaceProfiles: ["director", "clinic_manager"] },
+    priority: 4,
+    requiresSetupFlags: { clinicSettingsComplete: true, firstCaseCreated: false },
+  },
+  {
     code: "next_first_case",
     area: "reception_os",
     title: "Create your first patient case",
     description: "Use the guided wizard to add your first active case.",
     hrefSuffix: "cases/new",
     roleScope: { anyRole: true },
-    priority: 4,
+    priority: 5,
     requiresSetupFlags: { clinicSettingsComplete: true, firstCaseCreated: false },
   },
   {

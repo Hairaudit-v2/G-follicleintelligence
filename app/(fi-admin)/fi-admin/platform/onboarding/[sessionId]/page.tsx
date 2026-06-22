@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ConnectExistingSystemsPanel } from "@/src/components/onboarding-os/ConnectExistingSystemsPanel";
 import { OnboardingSessionDetailClient } from "@/src/components/fi-admin/platform/OnboardingSessionDetailClient";
 import { DeploymentIntelligencePanel } from "@/src/components/onboarding-os/DeploymentIntelligencePanel";
 import { GoLiveReadinessPanel } from "@/src/components/onboarding-os/GoLiveReadinessPanel";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { loadDeploymentIntelligenceSnapshot } from "@/src/lib/onboarding-os/deploymentIntelligence.server";
+import { loadTenantExternalConnectors } from "@/src/lib/onboarding-os/externalConnector.server";
 import { loadGoLiveReadinessSnapshot } from "@/src/lib/onboarding-os/goLiveReadiness.server";
 import { loadTenantProvisioningSessionDetail } from "@/src/lib/onboarding-os/tenantProvisioning.server";
 import type { ProvisioningSessionStatus } from "@/src/lib/onboarding-os/tenantProvisioningTypes";
@@ -29,6 +31,10 @@ export default async function OnboardingSessionDetailPage({
 
   const readinessLoaded = await loadGoLiveReadinessSnapshot(sessionId);
   const intelligenceLoaded = await loadDeploymentIntelligenceSnapshot(sessionId);
+  const connectorsLoaded =
+    session.tenant_id != null
+      ? await loadTenantExternalConnectors(session.tenant_id, { skipAuthCheck: true })
+      : null;
 
   return (
     <div className="space-y-6">
@@ -50,6 +56,18 @@ export default async function OnboardingSessionDetailPage({
         <GoLiveReadinessPanel snapshot={readinessLoaded.snapshot} mode="platform" />
       ) : (
         <p className="text-sm text-slate-500">{readinessLoaded.error}</p>
+      )}
+
+      {connectorsLoaded?.ok ? (
+        <ConnectExistingSystemsPanel
+          snapshot={connectorsLoaded.snapshot}
+          mode="platform"
+          sessionId={session.id}
+        />
+      ) : session.tenant_id ? (
+        <p className="text-sm text-slate-500">{connectorsLoaded?.error ?? "External connectors unavailable."}</p>
+      ) : (
+        <p className="text-sm text-slate-500">Connect existing systems after tenant core is provisioned.</p>
       )}
 
       <OnboardingSessionDetailClient

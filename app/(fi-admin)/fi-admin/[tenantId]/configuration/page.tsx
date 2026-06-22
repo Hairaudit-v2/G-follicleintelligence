@@ -5,6 +5,7 @@ import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { FiTenantBrandFrame } from "@/src/components/fi/FiTenantBrandFrame";
 import { TenantConfigurationPanel } from "@/src/components/fi/TenantConfigurationPanel";
 import { GuidedAssistUsagePanel } from "@/src/components/onboarding-os/GuidedAssistUsagePanel";
+import { TenantConnectExistingSystemsPanel } from "@/src/components/onboarding-os/TenantConnectExistingSystemsPanel";
 import { TenantDeploymentIntelligencePanel } from "@/src/components/onboarding-os/TenantDeploymentIntelligencePanel";
 import { TenantGoLiveReadinessPanel } from "@/src/components/onboarding-os/TenantGoLiveReadinessPanel";
 import {
@@ -13,6 +14,7 @@ import {
   resolveEffectiveBranding,
 } from "@/src/lib/fi/foundation/tenantSettings";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { canViewTenantExternalConnectors } from "@/src/lib/onboarding-os/externalConnector.server";
 import { canViewTenantDeploymentIntelligence } from "@/src/lib/onboarding-os/deploymentIntelligence.server";
 import { canViewGuidedAssistUsageSummary } from "@/src/lib/onboarding-os/guidedAssist.server";
 import { canViewTenantGoLiveReadiness } from "@/src/lib/onboarding-os/goLiveReadiness.server";
@@ -67,6 +69,7 @@ export default async function TenantConfigurationPage({
   const showGuidedAssistUsage = await canViewGuidedAssistUsageSummary(tenantId);
   const showGoLiveReadiness = await canViewTenantGoLiveReadiness(tenantId);
   const showDeploymentIntelligence = await canViewTenantDeploymentIntelligence(tenantId);
+  const showExternalConnectors = await canViewTenantExternalConnectors(tenantId);
 
   return (
     <div className="space-y-4">
@@ -81,6 +84,7 @@ export default async function TenantConfigurationPage({
       </div>
       {showDeploymentIntelligence ? <TenantDeploymentIntelligencePanel tenantId={tenantId} /> : null}
       {showGoLiveReadiness ? <TenantGoLiveReadinessPanel tenantId={tenantId} /> : null}
+      {showExternalConnectors ? <TenantConnectExistingSystemsPanel tenantId={tenantId} /> : null}
       {showGuidedAssistUsage ? <GuidedAssistUsagePanel tenantId={tenantId} /> : null}
       <TenantConfigurationPanel
         tenantId={tenantId}
