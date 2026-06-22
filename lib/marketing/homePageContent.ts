@@ -99,6 +99,17 @@ export type HomeIndustryInfrastructureColumn = {
   items: readonly string[];
 };
 
+export type HomeConnectedEcosystemCard = {
+  name: string;
+  description: string;
+  label: string;
+};
+
+export type HomeIntelligenceNetworkColumn = {
+  title: string;
+  tracks: readonly string[];
+};
+
 export type HomeMoonshotPredictionCard = {
   headline: string;
   copy: string;
@@ -138,7 +149,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Complete ecosystem",
     headline: "Built Around The Entire Clinical Ecosystem",
     subtext:
-      "Modern hair restoration clinics require more than fragmented operational tools. Follicle Intelligence connects the full clinical and operational architecture—from first enquiry to long-term patient outcomes—through one governed intelligence network.",
+      "Modern hair restoration clinics require more than fragmented operational systems. Follicle Intelligence connects the full clinical and operational architecture—from first enquiry to long-term patient outcomes—through one governed intelligence network.",
     modules: [
       { name: "LeadFlow", description: "Patient acquisition and conversion" },
       { name: "ReceptionOS", description: "Front desk operations and scheduling" },
@@ -172,7 +183,7 @@ export const HOME_PAGE_CONTENT = {
       "No single operating layer connecting the full journey",
     ],
     transition:
-      "The category does not need another horizontal vendor stack. It needs an operating system that connects every layer of serious hair restoration.",
+      "The category does not need another horizontal vendor stack. It needs intelligence infrastructure that connects every layer of serious hair restoration.",
   },
 
   enterpriseInfrastructure: {
@@ -283,6 +294,116 @@ export const HOME_PAGE_CONTENT = {
     },
   },
 
+  connectedIntelligenceEcosystem: {
+    id: "connected-intelligence-ecosystem",
+    storyEyebrow: "Connected ecosystem",
+    headline: "A Connected Intelligence Ecosystem",
+    subtext:
+      "Four independent systems continuously learn together, creating the world's first connected intelligence infrastructure for hair restoration medicine.",
+    cards: [
+      {
+        name: "Follicle Intelligence",
+        description:
+          "The operational infrastructure layer powering clinic workflow, surgery management, patient intelligence, workforce systems, and financial operations.",
+        label: "Operational Infrastructure",
+      },
+      {
+        name: "Hair Longevity Institute",
+        description:
+          "Advanced clinical diagnostic intelligence focused on hair loss analysis, blood interpretation, trichology systems, and treatment pathway optimization.",
+        label: "Diagnostic Intelligence",
+      },
+      {
+        name: "HairAudit",
+        description:
+          "Independent outcome verification infrastructure designed to measure surgical quality, benchmark results, and create accountability across procedural performance.",
+        label: "Outcome Intelligence",
+      },
+      {
+        name: "IIOHR",
+        description:
+          "Global education and certification infrastructure standardizing surgeon training, competency validation, staff development, and clinical accreditation.",
+        label: "Training Intelligence",
+      },
+    ] satisfies readonly HomeConnectedEcosystemCard[],
+    closingStatement: {
+      line1: "Each system strengthens the intelligence capability of every other system.",
+      line2: "This creates compounding enterprise value.",
+    },
+  },
+
+  globalIntelligenceNetwork: {
+    id: "global-intelligence-network",
+    storyEyebrow: "Global intelligence network",
+    headline: "Building The Global Hair Restoration Intelligence Network",
+    subtext:
+      "Every patient interaction contributes structured intelligence that improves decision making across the entire ecosystem.",
+    columns: [
+      {
+        title: "Patient Intelligence",
+        tracks: [
+          "Baseline photography",
+          "Trichoscopy imaging",
+          "Medical history",
+          "Family history",
+          "Blood markers",
+          "Medication history",
+          "Treatment pathways",
+        ],
+      },
+      {
+        title: "Procedure Intelligence",
+        tracks: [
+          "Graft extraction metrics",
+          "Hair-to-graft ratios",
+          "Punch size analytics",
+          "Implantation methodology",
+          "Team performance data",
+          "Procedure timing",
+          "Transection analytics",
+        ],
+      },
+      {
+        title: "Outcome Intelligence",
+        tracks: [
+          "Growth progression",
+          "Density measurements",
+          "Donor recovery analysis",
+          "Survival benchmarking",
+          "Patient satisfaction scoring",
+          "Long-term treatment response",
+          "Comparative global outcomes",
+        ],
+      },
+    ] satisfies readonly HomeIntelligenceNetworkColumn[],
+    closingStatement: {
+      line1: "Every clinical interaction becomes structured intelligence.",
+      line2: "The intelligence improves with every patient.",
+    },
+  },
+
+  hairRestorationDigitalTwin: {
+    id: "hair-restoration-digital-twin",
+    storyEyebrow: "Strategic moat",
+    headline: "The Hair Restoration Digital Twin",
+    subtext:
+      "Every patient journey creates a continuously evolving intelligence model that learns across diagnostics, treatment, surgery, and long-term outcomes.",
+    stages: [
+      "Baseline",
+      "Clinical Assessment",
+      "Diagnostic Intelligence",
+      "Treatment Planning",
+      "Surgical Procedure",
+      "Recovery Monitoring",
+      "Outcome Measurement",
+      "Longitudinal Progress Tracking",
+    ] as const,
+    closingStatement: {
+      line1: "Over time, millions of patient journeys create the world's largest structured hair restoration dataset.",
+      line2: "This intelligence becomes more valuable than the software itself.",
+    },
+  },
+
   worksWithExistingSoftware: {
     id: "works-with-existing-software",
     storyEyebrow: "Integration-first adoption",
@@ -332,9 +453,9 @@ export const HOME_PAGE_CONTENT = {
   globalHealthcareInfrastructure: {
     id: "global-healthcare-infrastructure",
     storyEyebrow: "Building global healthcare infrastructure",
-    headline: "Built as a living healthcare operating system",
+    headline: "Built as living medical infrastructure",
     subtext:
-      "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
+      "Follicle Intelligence is building the world's first specialised intelligence infrastructure for hair restoration—connecting clinic operations, workforce systems, surgical intelligence, patient intelligence, and global clinical accreditation.",
     gridCaption: "Thirteen OS modules · live delivery status · single intelligence substrate",
     cta: { label: "View full platform progress", href: "/platform/progress" as const },
   },
@@ -396,10 +517,10 @@ export const HOME_PAGE_CONTENT = {
 
   onePlatform: {
     id: "one-platform",
-    storyEyebrow: "The operating system",
-    headline: "One Platform. Every Layer Of Hair Restoration.",
+    storyEyebrow: "Enterprise architecture",
+    headline: "One Infrastructure Layer. Every Layer Of Hair Restoration.",
     subtext:
-      "Thirteen modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so leadership sees the same truth across sites, teams, and time horizons.",
+      "Thirteen modules across four engines share one spine—structured patient intelligence, procedural evidence, and governance-ready reporting—so enterprise operators see the same truth across sites, teams, and time horizons.",
     architectureCaption: "Four engines · connected OS modules · single intelligence substrate",
     secondaryCta: { label: "View Ecosystem Architecture", href: "/platform/ecosystem" as const },
     layers: [
@@ -556,7 +677,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Category clarity",
     headline: "More Than Software. Industry Infrastructure.",
     subtext:
-      "Generic tools optimise a single department. Follicle Intelligence connects acquisition, clinical depth, surgery, verification, workforce standards, and longitudinal intelligence in one governed substrate.",
+      "Generic systems optimise a single department. Follicle Intelligence connects acquisition, clinical depth, surgery, verification, workforce standards, and longitudinal intelligence in one governed substrate.",
     footnote:
       "The Follicle Intelligence column reflects one integrated operating system—not a patchwork of disconnected vendor modules.",
     columns: ["Traditional CRM", "Generic Clinic Software", "Follicle Intelligence"] as const,
@@ -787,7 +908,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Global intelligence",
     headline: "Structured Signal That Makes The Entire Network Smarter—Responsibly",
     subtext:
-      "As structured outcome data grows across participating programmes, cohorts deepen and comparisons become more informative. Follicle Intelligence is built to compound that signal with governance—not to confuse marketing reach with clinical truth.",
+      "As structured outcome data grows across participating programmes, cohorts deepen and comparisons become more informative. Follicle Intelligence compounds that signal with governance—not marketing reach masquerading as clinical truth.",
     futureFacingNote:
       "Today, the operating system prioritises structured capture, reviewability, and transparent limitations. Predictive layers are a forward roadmap—not a promise that every model is production-ready for every jurisdiction tomorrow.",
     twinDataLabel: "Patient digital twin signal (examples)",
@@ -932,13 +1053,12 @@ Follicle Intelligence exists to change that—not for a single operator, but as 
 
   finalCta: {
     id: "final-cta",
-    headline: "The Future Of Hair Restoration Starts Now",
+    eyebrow: "Enterprise infrastructure",
+    headline: "Building Infrastructure For The Future Of Hair Restoration",
     subtext:
-      "Whether you lead surgery, own clinics, run a multi-site group, represent an industry body, or invest behind accountable quality—this is the operational architecture built to scale with evidence.",
-    primaryCta: { label: "Book Enterprise Demo", href: "/demo" as const },
-    secondaryCta: { label: "Explore The Platform", href: "/platform" as const },
-    /** Calm path to the public vision narrative (not a conversion CTA). */
-    visionCta: { label: "The future of hair restoration medicine", href: "/vision" as const },
+      "Follicle Intelligence is not another clinic software platform. It is the foundational operating infrastructure for the next generation of global hair restoration medicine.",
+    primaryCta: { label: "Explore The Platform", href: "/platform" as const },
+    secondaryCta: { label: "Request Enterprise Access", href: "/demo" as const },
   },
 
   /** Copy for the lazy-loaded global network diagram (matches loading placeholder). */

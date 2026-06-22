@@ -14,8 +14,11 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { GlobalHairIntelligenceSectionPlaceholder } from "@/components/ecosystem/GlobalHairIntelligenceSectionPlaceholder";
 import { FiMarketingAuthoritySection } from "@/components/home/FiMarketingAuthoritySection";
 import { FiMarketingClinicalEcosystemSection } from "@/components/home/FiMarketingClinicalEcosystemSection";
+import { FiMarketingConnectedIntelligenceEcosystemSection } from "@/components/home/FiMarketingConnectedIntelligenceEcosystemSection";
+import { FiMarketingDigitalTwinSection } from "@/components/home/FiMarketingDigitalTwinSection";
 import { FiMarketingEnterpriseInfrastructureSection } from "@/components/home/FiMarketingEnterpriseInfrastructureSection";
 import { FiMarketingEngineeringCredibilitySection } from "@/components/home/FiMarketingEngineeringCredibilitySection";
+import { FiMarketingGlobalIntelligenceNetworkSection } from "@/components/home/FiMarketingGlobalIntelligenceNetworkSection";
 import { FiMarketingIndustrySoftwareGapSection } from "@/components/home/FiMarketingIndustrySoftwareGapSection";
 import { FiMarketingMoonshotSection } from "@/components/home/FiMarketingMoonshotSection";
 import { FiMarketingProductShowcaseSection } from "@/components/home/FiMarketingProductShowcaseSection";
@@ -259,6 +262,12 @@ export function FiMarketingHomeView() {
       <FiMarketingEnterpriseInfrastructureSection />
 
       <FiMarketingIndustrySoftwareGapSection />
+
+      <FiMarketingConnectedIntelligenceEcosystemSection />
+
+      <FiMarketingGlobalIntelligenceNetworkSection />
+
+      <FiMarketingDigitalTwinSection />
 
       <Section
         id={c.industryProblem.id}
@@ -515,7 +524,7 @@ export function FiMarketingHomeView() {
             <div className="rounded-[1.75rem] border border-amber-400/18 bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-7 shadow-[0_28px_90px_rgb(0_0_0_/0.48),inset_0_1px_0_rgb(255_255_255_/0.06)] backdrop-blur-md sm:rounded-[2rem] sm:p-10 md:p-12">
               <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">Get started</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">{c.finalCta.eyebrow}</p>
                   <div className="mt-3 h-px w-14 bg-gradient-to-r from-amber-300/70 via-amber-400/25 to-transparent" aria-hidden />
                   <h2
                     id={`${c.finalCta.id}-heading`}
@@ -540,15 +549,6 @@ export function FiMarketingHomeView() {
                       <ChevronRight className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
                     </Link>
                   </Button>
-                  <p className="pt-1 text-center text-sm text-muted-foreground lg:text-left">
-                    <Link
-                      href={c.finalCta.visionCta.href}
-                      className="font-medium text-foreground/85 underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary/50"
-                    >
-                      {c.finalCta.visionCta.label}
-                    </Link>
-                    <span className="text-muted-foreground/80"> — read the public vision.</span>
-                  </p>
                 </div>
               </div>
             </div>
