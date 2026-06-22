@@ -135,6 +135,21 @@ export type GuidedAssistSessionPayload = {
   safetyNotice: string;
 };
 
+export type GuidedAssistAreaInsight = {
+  guidanceArea: GuidedAssistArea;
+  tipsShown: number;
+  tipsDismissed: number;
+  tipsSnoozed: number;
+  dismissRate: number;
+  needsGuidanceReview: boolean;
+};
+
+export type GuidedAssistReliantUser = {
+  fiUserId: string;
+  email: string | null;
+  tipsShown: number;
+};
+
 export type GuidedAssistUsageSummary = {
   tenantId: string;
   windowDays: number;
@@ -148,6 +163,11 @@ export type GuidedAssistUsageSummary = {
   nextActionsClicked: number;
   topTips: readonly { guidanceCode: string; count: number }[];
   eventsByArea: readonly { guidanceArea: GuidedAssistArea; count: number }[];
+  topReliedTips: readonly { guidanceCode: string; shownCount: number; dismissedCount: number }[];
+  topDismissedTips: readonly { guidanceCode: string; count: number }[];
+  areaInsights: readonly GuidedAssistAreaInsight[];
+  modulesNeedingGuidanceReview: readonly GuidedAssistArea[];
+  reliantUsers: readonly GuidedAssistReliantUser[];
 };
 
 export const GUIDED_ASSIST_SAFETY_NOTICE =

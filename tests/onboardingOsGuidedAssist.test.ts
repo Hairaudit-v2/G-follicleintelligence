@@ -129,16 +129,23 @@ describe("OnboardingOS Phase D — guided assist core", () => {
       BASE_CTX.tenantId,
       [
         { fi_user_id: "u1", event_kind: "tip_shown", guidance_area: "reception_os", guidance_code: "a" },
+        { fi_user_id: "u1", event_kind: "tip_shown", guidance_area: "reception_os", guidance_code: "a" },
         { fi_user_id: "u1", event_kind: "tip_dismissed", guidance_area: "reception_os", guidance_code: "a" },
         { fi_user_id: "u2", event_kind: "assist_enabled", guidance_area: null, guidance_code: null },
       ],
       30
     );
-    assert.equal(summary.totalEvents, 3);
+    assert.equal(summary.totalEvents, 4);
     assert.equal(summary.uniqueUsers, 2);
-    assert.equal(summary.tipsShown, 1);
+    assert.equal(summary.tipsShown, 2);
     assert.equal(summary.tipsDismissed, 1);
     assert.equal(summary.assistEnabledUsers, 1);
+    assert.equal(summary.topReliedTips[0]?.guidanceCode, "a");
+    assert.equal(summary.topReliedTips[0]?.shownCount, 2);
+    assert.equal(summary.topDismissedTips[0]?.count, 1);
+    assert.equal(summary.reliantUsers[0]?.fiUserId, "u1");
+    assert.equal(summary.reliantUsers[0]?.tipsShown, 2);
+    assert.ok(summary.modulesNeedingGuidanceReview.includes("reception_os"));
   });
 
   it("catalog tips remain deterministic and operational", () => {
