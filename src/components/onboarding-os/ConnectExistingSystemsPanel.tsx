@@ -13,6 +13,7 @@ import {
   verifyConnectorCredentialsAction,
 } from "@/lib/actions/fi-onboarding-os-external-connector-auth-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
+import { GoogleCalendarConnectorPanel } from "@/src/components/onboarding-os/GoogleCalendarConnectorPanel";
 import {
   defaultAuthMethodForProvider,
   resolveSupportedAuthMethods,
@@ -369,11 +370,11 @@ export function ConnectExistingSystemsPanel({
   return (
     <section className="rounded-xl border border-white/[0.08] bg-[#060d18]/80 p-4 sm:p-5 space-y-4">
       <div>
-        <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase F1–F2</p>
+        <p className={fiOsChromeClasses.sectionEyebrow}>OnboardingOS · Phase F1–F3</p>
         <h2 className="text-lg font-semibold text-slate-50">Connect Existing Systems</h2>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
           Register legacy CRM, calendar, finance, and marketing systems for coexistence during onboarding.
-          Authenticate and verify credentials before any live sync — no OAuth callbacks or data import yet.
+          Authenticate and verify credentials before live sync. Google Calendar supports read-only staging sync (Phase F3).
         </p>
       </div>
 
@@ -476,6 +477,18 @@ export function ConnectExistingSystemsPanel({
           </div>
         </div>
       ) : null}
+
+      {snapshot.integrations
+        .filter((i) => i.provider === "google_calendar")
+        .map((integration) => (
+          <GoogleCalendarConnectorPanel
+            key={`gcal-${integration.id}`}
+            tenantId={snapshot.tenantId}
+            integrationId={integration.id}
+            integrationLabel={integration.displayName}
+            sessionId={sessionId}
+          />
+        ))}
     </section>
   );
 }
