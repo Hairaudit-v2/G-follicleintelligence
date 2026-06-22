@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { fiAdminAmbientBackgroundStyle } from "@/src/components/fi-admin/dashboard-ui";
 import { FiOsAppShell } from "@/src/components/fi-os/FiOsAppShell";
+import { GuidedAssistMount } from "@/src/components/onboarding-os/GuidedAssistMount";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { buildBrandingCssVariables } from "@/src/lib/fi/foundation/brandingCss";
 import type { EffectiveBranding } from "@/src/lib/fi/foundation/tenantSettings";
@@ -197,6 +198,7 @@ export default async function TenantAdminLayout({
         staffPinLogoutTenantId={pinFloorMode ? tenantId : null}
       >
         {mainSurface}
+        {!pinFloorMode && !isCommandCentrePresentation ? <GuidedAssistMount tenantId={tenantId} /> : null}
       </FiOsAppShell>
     </div>
   );
