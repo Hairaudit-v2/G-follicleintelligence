@@ -159,7 +159,7 @@ export function FiMarketingPlatformProgressSection() {
 
         <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Full module grid, status filters, and public engineering changelog on the platform progress page.
+            Full module grid, status filters, and engineering changelog on the platform progress page.
           </p>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>

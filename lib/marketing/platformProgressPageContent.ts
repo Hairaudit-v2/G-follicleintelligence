@@ -129,7 +129,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     eyebrow: "Platform progress",
     headline: "Built as a Living Operating System",
     description:
-      "Follicle Intelligence is actively being engineered as enterprise medical infrastructure. 12 operating modules. Continuous weekly deployment. Production architecture already operational.",
+      "Enterprise medical infrastructure in active development. 12 operating modules. Weekly deployment. Production architecture operational.",
     cta: { label: "View Live Platform Progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
@@ -143,7 +143,6 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 /** Featured modules surfaced on the public homepage highlight section. */
 export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
   "foundation-os",
-  "reception-os",
   "financial-os",
   "surgery-os",
 ] as const;

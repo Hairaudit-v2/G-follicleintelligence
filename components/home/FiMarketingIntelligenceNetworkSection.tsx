@@ -40,16 +40,13 @@ export function FiMarketingIntelligenceNetworkSection() {
           description={c.subtext}
           tone="intelligence"
         />
-        <ul className="mt-12 grid list-none gap-4 p-0 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-12 grid list-none gap-4 p-0 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
           {c.cards.map((card, index) => (
             <li key={card.title}>
               <IntelligenceCard index={index} title={card.title} description={card.description} />
             </li>
           ))}
         </ul>
-        <p className="mx-auto mt-12 max-w-3xl text-center text-base font-medium leading-relaxed text-foreground/90 sm:mt-14 sm:text-lg">
-          {c.closingStatement}
-        </p>
       </FadeIn>
     </Section>
   );
