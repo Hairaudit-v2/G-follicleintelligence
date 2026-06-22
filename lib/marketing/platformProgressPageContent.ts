@@ -127,12 +127,10 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   homepage: {
     id: "platform-progress",
     eyebrow: "Platform progress",
-    headline: "Built as a living healthcare operating system",
+    headline: "Built as a Living Operating System",
     description:
-      "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
-    onboardingHighlight:
-      "OnboardingOS Phase F3 added the first live read-only connector, allowing Google Calendar events to sync safely into a staging review queue before any FI booking import — building on the Live Connector Framework, Phase F2 auth verification, tenant provisioning, Guided Assist, go-live readiness, and Deployment Intelligence.",
-    cta: { label: "View platform progress", href: "/platform/progress" },
+      "Follicle Intelligence is actively being engineered as enterprise medical infrastructure. 12 operating modules. Continuous weekly deployment. Production architecture already operational.",
+    cta: { label: "View Live Platform Progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
       title: "Latest platform update",
@@ -152,6 +150,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-f5",
+    title: "OnboardingOS Phase F5 — Staged Import Engine",
+    module: "OnboardingOS",
+    date: "2026-06-22",
+  },
   {
     id: "2026-06-22-onboarding-os-phase-f3",
     title: "OnboardingOS Phase F3 — Google Calendar Read-Only Connector",
@@ -367,15 +371,24 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     id: "onboarding-os",
     name: "OnboardingOS",
     completionPercent: 74,
-    stage: "Live Connector Framework",
+    stage: "Staged import engine",
     description:
-      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and Deployment Intelligence. Phase F3 added the first live read-only connector, allowing Google Calendar events to sync safely into a staging review queue before any FI booking import.",
+      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, Deployment Intelligence, and live read-only connectors. Phase F5 added a controlled staged import engine: approved HubSpot records can be reviewed, duplicate-checked, imported into FI, mapped to source records, and audited without write-back to HubSpot.",
     status: "Active Development",
   },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-f5",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "OnboardingOS Phase F5 — Staged Import Engine",
+    summary:
+      "Controlled staged import engine added: approved HubSpot records can now be reviewed, duplicate-checked, imported into FI, mapped back to source records, and audited without write-back to HubSpot.",
+    modules: ["OnboardingOS", "LeadFlow"],
+  },
   {
     id: "2026-06-22-onboarding-os-phase-f3",
     date: "2026-06-22",
