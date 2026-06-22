@@ -131,7 +131,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     description:
       "Follicle Intelligence is building the world's first specialised operating system for hair restoration, clinic operations, workforce infrastructure, surgical intelligence, patient intelligence, and global clinical accreditation.",
     onboardingHighlight:
-      "OnboardingOS Phase F1 complete — clinics can securely register and prepare connections to existing software including HubSpot, Pabau, Cliniko, Stripe, Xero, Google Calendar, Outlook, Meta Ads, and Google Ads, alongside tenant provisioning, Guided Assist, go-live readiness, and Deployment Intelligence.",
+      "OnboardingOS Phase F3 added the first live read-only connector, allowing Google Calendar events to sync safely into a staging review queue before any FI booking import — building on the Live Connector Framework, Phase F2 auth verification, tenant provisioning, Guided Assist, go-live readiness, and Deployment Intelligence.",
     cta: { label: "View platform progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
@@ -152,6 +152,18 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-f3",
+    title: "OnboardingOS Phase F3 — Google Calendar Read-Only Connector",
+    module: "OnboardingOS",
+    date: "2026-06-22",
+  },
+  {
+    id: "2026-06-22-onboarding-os-phase-f2",
+    title: "OnboardingOS Phase F2 — Connector Auth & Verification",
+    module: "OnboardingOS",
+    date: "2026-06-22",
+  },
   {
     id: "2026-06-22-onboarding-os-phase-f1",
     title: "OnboardingOS Phase F1 — Legacy System Connector Layer",
@@ -354,16 +366,34 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "onboarding-os",
     name: "OnboardingOS",
-    completionPercent: 68,
-    stage: "Legacy System Connector Layer",
+    completionPercent: 74,
+    stage: "Live Connector Framework",
     description:
-      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and Deployment Intelligence. Phase F1 adds secure connector architecture so clinics can register and prepare integrations with HubSpot, Pabau, Cliniko, Stripe, Xero, Google Calendar, Outlook, Meta Ads, and Google Ads without immediate migration.",
+      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, and Deployment Intelligence. Phase F3 added the first live read-only connector, allowing Google Calendar events to sync safely into a staging review queue before any FI booking import.",
     status: "Active Development",
   },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-22-onboarding-os-phase-f3",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "OnboardingOS Phase F3 Google Calendar read-only connector completed",
+    summary:
+      "OnboardingOS Phase F3 added the first live read-only connector, allowing Google Calendar events to sync safely into a staging review queue before any FI booking import. Includes deterministic event classification, duplicate detection, sync health tracking, and platform/tenant admin approve/reject review — no write-back to Google.",
+    modules: ["OnboardingOS"],
+  },
+  {
+    id: "2026-06-22-onboarding-os-phase-f2",
+    date: "2026-06-22",
+    tag: "onboarding-os",
+    title: "OnboardingOS Phase F2 Connector Auth & Verification completed",
+    summary:
+      "Connector authentication and verification engine — OAuth/API credential lifecycle, required permission scope tracking, token expiry warnings, verification events, and deployment intelligence signals. Architecture verification in test mode; prerequisite for live connector sync.",
+    modules: ["OnboardingOS"],
+  },
   {
     id: "2026-06-22-onboarding-os-phase-f1",
     date: "2026-06-22",

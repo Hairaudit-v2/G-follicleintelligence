@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/fi-onboarding-os-external-connector-auth-actions";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
 import { GoogleCalendarConnectorPanel } from "@/src/components/onboarding-os/GoogleCalendarConnectorPanel";
+import { HubSpotConnectorPanel } from "@/src/components/onboarding-os/HubSpotConnectorPanel";
 import {
   defaultAuthMethodForProvider,
   resolveSupportedAuthMethods,
@@ -483,6 +484,18 @@ export function ConnectExistingSystemsPanel({
         .map((integration) => (
           <GoogleCalendarConnectorPanel
             key={`gcal-${integration.id}`}
+            tenantId={snapshot.tenantId}
+            integrationId={integration.id}
+            integrationLabel={integration.displayName}
+            sessionId={sessionId}
+          />
+        ))}
+
+      {snapshot.integrations
+        .filter((i) => i.provider === "hubspot")
+        .map((integration) => (
+          <HubSpotConnectorPanel
+            key={`hubspot-${integration.id}`}
             tenantId={snapshot.tenantId}
             integrationId={integration.id}
             integrationLabel={integration.displayName}

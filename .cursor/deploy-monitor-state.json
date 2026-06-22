@@ -1,9 +1,6 @@
 {
-  "lastSeenDeploymentId": "dpl_F34AKnoin4AheXrtXTYJEB257AQu",
-  "lastSeenState": "ERROR",
-  "lastCommitSha": "7acec9a48a360c24c07d4cbf6c7f4dad5ddb367c",
-  "lastCheckedAt": "2026-06-20T00:25:00Z",
-  "previousReadyDeploymentId": "dpl_4FQbj8Q3UvW3PkKKq9wXGHAi7Rzs",
-  "previousReadyCommitSha": "bbb707bd85956145a1c4355fb6fba72ed6341e00",
-  "lastError": "ESLint no-unused-vars: windowDays in guidedAssistCore.ts"
+  "lastSeenDeploymentId": "dpl_5ddSJPHPcWYJirRUUZcCJhGxr8zN",
+  "lastSeenState": "READY",
+  "lastCommitSha": "8f56771e5ef34a91f9d62d073ad47d9a4087062f",
+  "lastCheckedAt": "2026-06-22T02:10:00Z"
 }
