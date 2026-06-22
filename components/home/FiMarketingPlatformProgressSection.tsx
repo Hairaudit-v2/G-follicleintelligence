@@ -92,10 +92,6 @@ export function FiMarketingPlatformProgressSection() {
       <FadeIn>
         <SectionHeading id={`${c.id}-heading`} eyebrow={c.eyebrow} title={c.headline} description={c.description} />
 
-        {"onboardingHighlight" in c && c.onboardingHighlight ? (
-          <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{c.onboardingHighlight}</p>
-        ) : null}
-
         <EcosystemCompletionSnapshot variant="marketing" className="mt-10" />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
