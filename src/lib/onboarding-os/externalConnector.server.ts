@@ -33,7 +33,6 @@ import type {
   ExternalConnectorSyncMode,
   ExternalSyncEventKind,
   ExternalSyncEventStatus,
-  ExternalSyncStatus,
   TenantExternalConnectorsSnapshot,
 } from "./externalConnectorTypes";
 import {
