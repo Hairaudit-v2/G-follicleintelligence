@@ -11,6 +11,8 @@ import { loadStaffPinMetadataForStaff, type StaffPinMetadata } from "@/src/lib/s
 import { buildStaffComplianceSummaryFromSourceRows } from "@/src/lib/staffCompliance/staffComplianceSummary";
 import type { StaffComplianceSummary } from "@/src/lib/staffCompliance/staffComplianceTypes";
 import { formatStaffWeeklyHoursSummary, parseStaffWeeklyHours } from "@/src/lib/staff/staffWeeklyHours";
+import { loadStaffCompetencyProjections } from "@/src/lib/academy-os/academyCompetencyReceiver.server";
+import type { FiStaffCompetencyProjectionRow } from "@/src/lib/academy-os/academyCompetencyTypes";
 
 export type StaffTwinLinkedUser = {
   id: string;
@@ -37,6 +39,8 @@ export type StaffTwinPageData = {
   schedulingTimezoneLabel: string;
   /** Read-only IIOHR / Academy snapshot from `fi_staff_source_ids.metadata` (not the system of record). */
   complianceSummary: StaffComplianceSummary;
+  /** AcademyOS operational competency projections from IIOHR exports. */
+  competencyProjections: FiStaffCompetencyProjectionRow[];
   canManageStaffPin: boolean;
   pinMetadata: StaffPinMetadata | null;
 };
@@ -164,6 +168,8 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
     sourceIds.map((row) => ({ source_system: row.source_system, metadata: row.metadata }))
   );
 
+  const competencyProjections = await loadStaffCompetencyProjections(tid, sid);
+
   const weekly = parseStaffWeeklyHours(staff.working_hours);
   const workingHoursSummary = formatStaffWeeklyHoursSummary(weekly).trim();
   const schedulingTimezoneLabel =
@@ -177,6 +183,7 @@ export async function loadStaffTwinPage(tenantId: string, staffId: string): Prom
     workingHoursSummary,
     schedulingTimezoneLabel,
     complianceSummary,
+    competencyProjections,
     canManageStaffPin,
     pinMetadata,
   };

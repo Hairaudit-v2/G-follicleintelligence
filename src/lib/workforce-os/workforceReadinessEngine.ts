@@ -15,6 +15,7 @@ import {
   type WorkforceIdentityReadinessSignals,
 } from "@/src/lib/workforce-os/workforceIdentityReadinessSignals";
 import type { WorkforceIdentitySourceRowInput } from "@/src/lib/workforce-os/workforceIdentitySummary";
+import type { AcademyCompetencySignals } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
 import {
   clampWorkforceReadinessScore,
   resolveWorkforceReadinessBand,
@@ -67,6 +68,8 @@ export type WorkforceReadinessScoreInput = {
   compliance: StaffComplianceSummary;
   /** Optional competency review due date (ISO) from identity metadata. */
   competencyReviewDueAt?: string | null;
+  /** AcademyOS competency projection signals — preferred over legacy metadata heuristics. */
+  academyCompetencySignals?: AcademyCompetencySignals | null;
   now?: Date;
 };
 
@@ -260,6 +263,21 @@ function scoreCompetency(
   now: Date
 ): number {
   const max = WORKFORCE_READINESS_FACTOR_WEIGHTS.competency;
+  const academy = signals.academyCompetencySignals;
+
+  if (academy?.hasProjection) {
+    if (academy.restrictedCompetencies > 0 || academy.expiredCompetencies > 0) {
+      return Math.max(0, Math.round(max * 0.2));
+    }
+    if (academy.certificationsExpiringSoon > 0) {
+      return Math.round(max * 0.75);
+    }
+    if (academy.activeCompetencies > 0) {
+      return max;
+    }
+    return Math.round(max * 0.4);
+  }
+
   if (competencyItems.some((i) => i.status === "expired" || i.status === "missing")) {
     return Math.max(0, Math.round(max * 0.3));
   }
@@ -308,6 +326,11 @@ function collectBlockingIssues(input: {
     issues.push("mandatory_sop_incomplete");
   }
   if (input.compliance.overallStatus === "expired" && input.compliance.counts.expired > 0) {
+    issues.push("critical_compliance_expired");
+  }
+
+  const academy = input.signals.academyCompetencySignals;
+  if (academy?.hasProjection && (academy.restrictedCompetencies > 0 || academy.expiredCompetencies > 0)) {
     issues.push("critical_compliance_expired");
   }
 
@@ -374,6 +397,11 @@ function collectWarnings(input: {
     warnings.push("competency_review_due_soon");
   }
 
+  const academy = input.signals.academyCompetencySignals;
+  if (academy?.hasProjection && academy.certificationsExpiringSoon > 0) {
+    warnings.push("competency_review_due_soon");
+  }
+
   return [...new Set(warnings)];
 }
 
@@ -384,7 +412,11 @@ export function calculateWorkforceReadinessScore(
   input: WorkforceReadinessScoreInput
 ): WorkforceReadinessScoreResult {
   const now = input.now ?? new Date();
-  const signals = buildWorkforceIdentityReadinessSignals(input.identityRows, now);
+  const signals = buildWorkforceIdentityReadinessSignals(
+    input.identityRows,
+    now,
+    input.academyCompetencySignals ?? null
+  );
   const competencyReviewDueAt =
     input.competencyReviewDueAt ?? extractCompetencyReviewDueAt(input.identityRows);
 

@@ -26,6 +26,7 @@ test("readiness signals expose identity boundary without changing HR state machi
   assert.equal(signals.hasNexusIdentityLink, false);
   assert.equal(signals.trainingSource, "iiohr_hr");
   assert.equal(signals.isHrSyncStale, false);
+  assert.equal(signals.academyCompetencySignals, null);
 });
 
 test("detects missing global professional identity", () => {

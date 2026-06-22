@@ -12,9 +12,11 @@ import { StaffTwinIiohrComplianceCard } from "@/src/components/staff/staffCompli
 import { StaffWorkforceIdentityPanel } from "@/src/components/fi/staff/StaffWorkforceIdentityPanel";
 import { StaffWorkforceReadinessCard } from "@/src/components/fi/staff/StaffWorkforceReadinessPanel";
 import { StaffWorkforceRosterPanel } from "@/src/components/fi/staff/StaffWorkforceRosterPanel";
+import { StaffAcademyCompetencyProjectionPanel } from "@/src/components/fi/staff/StaffAcademyCompetencyProjectionPanel";
 import { loadStaffRosterProfile } from "@/src/lib/workforce-os/workforceRostering.server";
 import { buildWorkforceIdentitySummaryFromSourceRows } from "@/src/lib/workforce-os/workforceIdentitySummary";
 import { calculateWorkforceReadinessScore } from "@/src/lib/workforce-os/workforceReadinessEngine";
+import { buildAcademyCompetencySignalsFromProjections } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
 import { isAllowedHrPortalUrl } from "@/src/lib/staff/myHrPortalSelection";
 import { pickPayrollSourceDisplayFromRows } from "@/src/lib/staff/staffPayrollSourceDisplay";
 import { isStaffRoleNeedsReview } from "@/src/lib/staff/staffRolePolicy";
@@ -52,6 +54,7 @@ export default async function StaffTwinPage({
     workingHoursSummary,
     schedulingTimezoneLabel,
     complianceSummary,
+    competencyProjections,
     canManageStaffPin,
     pinMetadata,
   } = data;
@@ -75,6 +78,7 @@ export default async function StaffTwinPage({
     source_staff_id: row.source_staff_id,
     metadata: row.metadata,
   }));
+  const academyCompetencySignals = buildAcademyCompetencySignalsFromProjections(competencyProjections);
   const workforceReadiness = calculateWorkforceReadinessScore({
     is_active: staff.is_active,
     staff_role: staff.staff_role,
@@ -82,6 +86,7 @@ export default async function StaffTwinPage({
     hr: hrNotification,
     identityRows,
     compliance: complianceSummary,
+    academyCompetencySignals,
   });
 
   return (
@@ -196,6 +201,10 @@ export default async function StaffTwinPage({
       <StaffWorkforceReadinessCard readiness={workforceReadiness} variant="dark" />
 
       <StaffWorkforceRosterPanel profile={rosterProfile} variant="dark" />
+
+      <DashboardCard className="p-6 sm:p-8">
+        <StaffAcademyCompetencyProjectionPanel projections={competencyProjections} variant="dark" />
+      </DashboardCard>
 
       <DashboardCard className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-[#F8FAFC]">External systems</h2>

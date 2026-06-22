@@ -118,6 +118,7 @@ export const ANALYTICS_MODULE_DISPLAY_LABELS: Record<AnalyticsModuleName, string
   leadflow: "LeadFlow",
   imaging_os: "ImagingOS",
   audit_os: "AuditOS",
+  academy_os: "AcademyOS",
 };
 
 /** Modules expected to feed AnalyticsOS event pipeline (Phase A+B+C). */
@@ -131,4 +132,5 @@ export const ANALYTICS_PIPELINE_MODULES: AnalyticsModuleName[] = [
   "leadflow",
   "imaging_os",
   "audit_os",
+  "academy_os",
 ];

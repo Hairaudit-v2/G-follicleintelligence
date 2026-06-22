@@ -12,6 +12,7 @@ export const ANALYTICS_MODULE_NAMES = [
   "leadflow",
   "imaging_os",
   "audit_os",
+  "academy_os",
 ] as const;
 
 export type AnalyticsModuleName = (typeof ANALYTICS_MODULE_NAMES)[number];
@@ -88,6 +89,14 @@ export const AUDIT_EVENTS = [
 ] as const;
 export type AuditAnalyticsEventType = (typeof AUDIT_EVENTS)[number];
 
+export const ACADEMY_EVENTS = [
+  "competency_verified",
+  "competency_expired",
+  "competency_restricted",
+  "certification_verified",
+] as const;
+export type AcademyAnalyticsEventType = (typeof ACADEMY_EVENTS)[number];
+
 export const ANALYTICS_ENTITY_TYPES = [
   "booking",
   "surgery",
@@ -115,6 +124,7 @@ export const MODULE_EVENT_TYPES: Record<AnalyticsModuleName, readonly string[]> 
   leadflow: LEADFLOW_EVENTS,
   imaging_os: IMAGING_EVENTS,
   audit_os: AUDIT_EVENTS,
+  academy_os: ACADEMY_EVENTS,
 };
 
 export function isAnalyticsModuleName(value: string): value is AnalyticsModuleName {

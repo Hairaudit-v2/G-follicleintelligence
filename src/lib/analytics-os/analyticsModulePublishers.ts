@@ -5,6 +5,7 @@ import {
 } from "./analyticsEventCore";
 import type {
   AuditAnalyticsEventType,
+  AcademyAnalyticsEventType,
   ConsultationAnalyticsEventType,
   FinancialAnalyticsEventType,
   ImagingAnalyticsEventType,
@@ -70,4 +71,11 @@ export async function publishAuditEvent(
   options?: AnalyticsEventCoreOptions
 ) {
   return publishAnalyticsEvent({ ...input, moduleName: "audit_os" }, options);
+}
+
+export async function publishAcademyEvent(
+  input: ModulePublishInput & { eventType: AcademyAnalyticsEventType },
+  options?: AnalyticsEventCoreOptions
+) {
+  return publishAnalyticsEvent({ ...input, moduleName: "academy_os" }, options);
 }

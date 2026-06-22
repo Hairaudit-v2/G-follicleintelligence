@@ -1,6 +1,18 @@
 export type { CompetencyEvidenceV1 } from "./competencyEvidenceV1";
 export { COMPETENCY_EVIDENCE_V1_VERSION } from "./competencyEvidenceV1";
 
+export type {
+  FiCompetencyExportItemV1,
+  FiCompetencyExportPayload,
+  FiCompetencyExportReadinessBand,
+  FiCompetencyExportStatus,
+} from "./fiCompetencyExportPayloadV1";
+export {
+  FI_COMPETENCY_EXPORT_PAYLOAD_V1_VERSION,
+  FI_COMPETENCY_EXPORT_READINESS_BANDS,
+  FI_COMPETENCY_EXPORT_STATUSES,
+} from "./fiCompetencyExportPayloadV1";
+
 export type { ProfessionalGraphSnapshotV1 } from "./professionalGraphSnapshotV1";
 export { PROFESSIONAL_GRAPH_SNAPSHOT_V1_VERSION } from "./professionalGraphSnapshotV1";
 

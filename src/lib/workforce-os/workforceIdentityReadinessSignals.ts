@@ -13,6 +13,7 @@ import {
   buildWorkforceIdentitySummaryFromSourceRows,
   type WorkforceIdentitySourceRowInput,
 } from "@/src/lib/workforce-os/workforceIdentitySummary";
+import type { AcademyCompetencySignals } from "@/src/lib/academy-os/academyWorkforceSignalAdapter";
 
 export type WorkforceIdentityReadinessSignals = {
   hasHrIdentityLink: boolean;
@@ -32,6 +33,8 @@ export type WorkforceIdentityReadinessSignals = {
   isNexusSyncStale: boolean;
   /** True when Academy link exists but metadata sync is older than stale threshold. */
   isAcademySyncStale: boolean;
+  /** AcademyOS competency projection signals when available; null uses legacy metadata heuristics. */
+  academyCompetencySignals: AcademyCompetencySignals | null;
 };
 
 function metaStr(meta: Record<string, unknown> | null | undefined, key: string): string | null {
@@ -52,7 +55,8 @@ function pickRow(rows: WorkforceIdentitySourceRowInput[], system: string): Workf
  */
 export function buildWorkforceIdentityReadinessSignals(
   rows: WorkforceIdentitySourceRowInput[],
-  now?: Date
+  now?: Date,
+  academyCompetencySignals?: AcademyCompetencySignals | null
 ): WorkforceIdentityReadinessSignals {
   const at = now ?? new Date();
   const summary = buildWorkforceIdentitySummaryFromSourceRows(rows, at);
@@ -98,6 +102,7 @@ export function buildWorkforceIdentityReadinessSignals(
     isHrSyncStale: summary.hr.linked && summary.hr.isSyncStale,
     isNexusSyncStale: summary.nexus.linked && summary.nexus.isSyncStale,
     isAcademySyncStale: summary.academy.linked && summary.academy.isSyncStale,
+    academyCompetencySignals: academyCompetencySignals ?? null,
   };
 }
 
