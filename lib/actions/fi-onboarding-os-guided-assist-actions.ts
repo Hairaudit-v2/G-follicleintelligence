@@ -12,7 +12,10 @@ import {
   setGuidedAssistTenantDefaults,
   snoozeGuidedAssistTip,
 } from "@/src/lib/onboarding-os/guidedAssist.server";
-import type { GuidedAssistEventKind } from "@/src/lib/onboarding-os/guidedAssistTypes";
+import type {
+  GuidedAssistEventKind,
+  GuidedAssistUsageSummary,
+} from "@/src/lib/onboarding-os/guidedAssistTypes";
 
 export type GuidedAssistActionResult = { ok: true } | { ok: false; error: string };
 
@@ -165,10 +168,7 @@ export async function setGuidedAssistTenantDefaultsAction(
 export async function loadGuidedAssistUsageSummaryAction(
   tenantId: string,
   windowDays = 30
-): Promise<
-  | { ok: true; summary: Awaited<ReturnType<typeof loadGuidedAssistUsageSummary>> extends { ok: true; summary: infer S } ? S : never }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; summary: GuidedAssistUsageSummary } | { ok: false; error: string }> {
   try {
     const tid = tenantIdSchema.parse(tenantId);
     const authId = await resolveActorAuthId();
