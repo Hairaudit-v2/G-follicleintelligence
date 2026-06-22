@@ -9,6 +9,7 @@ import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { GUIDED_ASSIST_NEXT_ACTIONS, GUIDED_ASSIST_TIPS } from "./guidedAssistCatalog";
 import type {
   GuidedAssistArea,
+  GuidedAssistAreaInsight,
   GuidedAssistNextActionView,
   GuidedAssistResolvedPreferences,
   GuidedAssistRoleScope,
@@ -220,6 +221,9 @@ export function validateGuidedAssistSnoozeHours(hours: number | null | undefined
   return Math.max(1, Math.min(Math.floor(hours), 168));
 }
 
+const GUIDANCE_REVIEW_MIN_SHOWN = 2;
+const GUIDANCE_REVIEW_DISMISS_RATE = 0.4;
+
 export function summarizeGuidedAssistUsageEvents(
   tenantId: string,
   events: readonly {
@@ -228,7 +232,7 @@ export function summarizeGuidedAssistUsageEvents(
     guidance_area: string | null;
     guidance_code: string | null;
   }[],
-  windowDays: number
+  _windowDays: number
 ): {
   totalEvents: number;
   uniqueUsers: number;
@@ -240,12 +244,26 @@ export function summarizeGuidedAssistUsageEvents(
   nextActionsClicked: number;
   topTips: { guidanceCode: string; count: number }[];
   eventsByArea: { guidanceArea: GuidedAssistArea; count: number }[];
+  topReliedTips: { guidanceCode: string; shownCount: number; dismissedCount: number }[];
+  topDismissedTips: { guidanceCode: string; count: number }[];
+  areaInsights: GuidedAssistAreaInsight[];
+  modulesNeedingGuidanceReview: GuidedAssistArea[];
+  reliantUsers: { fiUserId: string; tipsShown: number }[];
 } {
+  void tenantId;
+  void _windowDays;
+
   const userIds = new Set<string>();
   const enabledUsers = new Set<string>();
   const disabledUsers = new Set<string>();
   const tipCounts = new Map<string, number>();
+  const shownByTip = new Map<string, number>();
+  const dismissedByTip = new Map<string, number>();
   const areaCounts = new Map<GuidedAssistArea, number>();
+  const shownByArea = new Map<GuidedAssistArea, number>();
+  const dismissedByArea = new Map<GuidedAssistArea, number>();
+  const snoozedByArea = new Map<GuidedAssistArea, number>();
+  const userShownCounts = new Map<string, number>();
 
   let tipsShown = 0;
   let tipsDismissed = 0;
@@ -257,8 +275,15 @@ export function summarizeGuidedAssistUsageEvents(
     const kind = e.event_kind.trim();
     if (kind === "assist_enabled" && e.fi_user_id) enabledUsers.add(e.fi_user_id);
     if (kind === "assist_disabled" && e.fi_user_id) disabledUsers.add(e.fi_user_id);
-    if (kind === "tip_shown") tipsShown += 1;
-    if (kind === "tip_dismissed") tipsDismissed += 1;
+    if (kind === "tip_shown") {
+      tipsShown += 1;
+      if (e.fi_user_id) userShownCounts.set(e.fi_user_id, (userShownCounts.get(e.fi_user_id) ?? 0) + 1);
+      if (e.guidance_code) shownByTip.set(e.guidance_code, (shownByTip.get(e.guidance_code) ?? 0) + 1);
+    }
+    if (kind === "tip_dismissed") {
+      tipsDismissed += 1;
+      if (e.guidance_code) dismissedByTip.set(e.guidance_code, (dismissedByTip.get(e.guidance_code) ?? 0) + 1);
+    }
     if (kind === "tip_snoozed") tipsSnoozed += 1;
     if (kind === "next_action_clicked") nextActionsClicked += 1;
     if (e.guidance_code && (kind === "tip_shown" || kind === "tip_dismissed" || kind === "tip_snoozed")) {
@@ -267,6 +292,9 @@ export function summarizeGuidedAssistUsageEvents(
     if (e.guidance_area && e.guidance_area in GUIDED_ASSIST_AREA_LABELS) {
       const area = e.guidance_area as GuidedAssistArea;
       areaCounts.set(area, (areaCounts.get(area) ?? 0) + 1);
+      if (kind === "tip_shown") shownByArea.set(area, (shownByArea.get(area) ?? 0) + 1);
+      if (kind === "tip_dismissed") dismissedByArea.set(area, (dismissedByArea.get(area) ?? 0) + 1);
+      if (kind === "tip_snoozed") snoozedByArea.set(area, (snoozedByArea.get(area) ?? 0) + 1);
     }
   }
 
@@ -279,6 +307,52 @@ export function summarizeGuidedAssistUsageEvents(
     .sort((a, b) => b[1] - a[1])
     .map(([guidanceArea, count]) => ({ guidanceArea, count }));
 
+  const topReliedTips = [...shownByTip.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([guidanceCode, shownCount]) => ({
+      guidanceCode,
+      shownCount,
+      dismissedCount: dismissedByTip.get(guidanceCode) ?? 0,
+    }));
+
+  const topDismissedTips = [...dismissedByTip.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([guidanceCode, count]) => ({ guidanceCode, count }));
+
+  const areaInsightAreas = new Set<GuidedAssistArea>([
+    ...shownByArea.keys(),
+    ...dismissedByArea.keys(),
+    ...snoozedByArea.keys(),
+  ]);
+
+  const areaInsights = [...areaInsightAreas]
+    .map((guidanceArea) => {
+      const areaShown = shownByArea.get(guidanceArea) ?? 0;
+      const areaDismissed = dismissedByArea.get(guidanceArea) ?? 0;
+      const areaSnoozed = snoozedByArea.get(guidanceArea) ?? 0;
+      const dismissRate = areaShown > 0 ? areaDismissed / areaShown : 0;
+      return {
+        guidanceArea,
+        tipsShown: areaShown,
+        tipsDismissed: areaDismissed,
+        tipsSnoozed: areaSnoozed,
+        dismissRate,
+        needsGuidanceReview: areaShown >= GUIDANCE_REVIEW_MIN_SHOWN && dismissRate >= GUIDANCE_REVIEW_DISMISS_RATE,
+      };
+    })
+    .sort((a, b) => b.dismissRate - a.dismissRate || b.tipsShown - a.tipsShown);
+
+  const modulesNeedingGuidanceReview = areaInsights
+    .filter((row) => row.needsGuidanceReview)
+    .map((row) => row.guidanceArea);
+
+  const reliantUsers = [...userShownCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([fiUserId, tipsShownCount]) => ({ fiUserId, tipsShown: tipsShownCount }));
+
   return {
     totalEvents: events.length,
     uniqueUsers: userIds.size,
@@ -290,6 +364,11 @@ export function summarizeGuidedAssistUsageEvents(
     nextActionsClicked,
     topTips,
     eventsByArea,
+    topReliedTips,
+    topDismissedTips,
+    areaInsights,
+    modulesNeedingGuidanceReview,
+    reliantUsers,
   };
 }
 

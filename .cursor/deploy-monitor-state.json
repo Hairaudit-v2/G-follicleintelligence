@@ -1,9 +1,9 @@
 {
-  "lastSeenDeploymentId": "dpl_9ZzdkGKBmh5HEvMQjb4zoz8fownj",
+  "lastSeenDeploymentId": "dpl_F34AKnoin4AheXrtXTYJEB257AQu",
   "lastSeenState": "ERROR",
-  "lastCommitSha": "d5832d16c388b08740cbe3808a020f011fb93775",
-  "lastCheckedAt": "2026-06-20T00:15:00Z",
+  "lastCommitSha": "7acec9a48a360c24c07d4cbf6c7f4dad5ddb367c",
+  "lastCheckedAt": "2026-06-20T00:25:00Z",
   "previousReadyDeploymentId": "dpl_4FQbj8Q3UvW3PkKKq9wXGHAi7Rzs",
   "previousReadyCommitSha": "bbb707bd85956145a1c4355fb6fba72ed6341e00",
-  "lastError": "Syntax error in guidedAssist.server.ts — missing buildGuidedAssistSessionPayload call"
+  "lastError": "ESLint no-unused-vars: windowDays in guidedAssistCore.ts"
 }
