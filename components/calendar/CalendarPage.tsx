@@ -119,9 +119,18 @@ function CalendarPageImpl({
   );
 
   const renderCountRef = useRef(0);
+  const renderStartedAtRef = useRef(0);
+  if (process.env.NODE_ENV === "development" && typeof performance !== "undefined") {
+    renderStartedAtRef.current = performance.now();
+  }
   renderCountRef.current += 1;
   useEffect(() => {
+    const renderCommitMs =
+      process.env.NODE_ENV === "development" && typeof performance !== "undefined"
+        ? performance.now() - renderStartedAtRef.current
+        : undefined;
     logCalendarClientPerf("calendar-page", {
+      renderCommitMs,
       renderCount: renderCountRef.current,
       view: data.query.view,
       dateAnchor: data.query.dateAnchor,
@@ -219,6 +228,29 @@ function CalendarPageImpl({
     [data.gridConfig, openQuickCreateFromSlot, quickCreateColumnIdFromFilters]
   );
 
+  const handleEmptySlotClick = useCallback(
+    (info: { dayKey: string; columnId: string; localStart: string }) => {
+      openQuickCreateFromSlot(info, "consultation");
+    },
+    [openQuickCreateFromSlot]
+  );
+
+  const handleEmptySlotContextMenu = useCallback(
+    (info: { clientX: number; clientY: number; dayKey: string; columnId: string; localStart: string }) => {
+      setSlotContextMenu({
+        x: info.clientX,
+        y: info.clientY,
+        dayKey: info.dayKey,
+        columnId: info.columnId,
+        localStart: info.localStart,
+      });
+    },
+    []
+  );
+
+  const onEmptySlotClick = quickCreateEnabled ? handleEmptySlotClick : undefined;
+  const onEmptySlotContextMenu = quickCreateEnabled ? handleEmptySlotContextMenu : undefined;
+
   const quickCreateFabPrefill = useMemo(
     () => ({
       localStart: slotPrefillLocal,
@@ -263,7 +295,7 @@ function CalendarPageImpl({
         )}
       />
     ),
-    [base, bookingDisplay, bookings, data.calendarTimezone, data.canMutateBookings, isFiOsWorkspace]
+    [base, bookingDisplay, bookings, data.calendarTimezone, data.canMutateBookings, isFiOsWorkspace, openBookingDrawer]
   );
 
   const rightPanel = useMemo(
@@ -403,21 +435,8 @@ function CalendarPageImpl({
                   addAppointmentHref: `${base}/bookings/new`,
                 }}
                 highlightedBookingId={highlightedBookingId}
-                onEmptySlotClick={
-                  quickCreateEnabled ? (info) => openQuickCreateFromSlot(info, "consultation") : undefined
-                }
-                onEmptySlotContextMenu={
-                  quickCreateEnabled
-                    ? (info) =>
-                        setSlotContextMenu({
-                          x: info.clientX,
-                          y: info.clientY,
-                          dayKey: info.dayKey,
-                          columnId: info.columnId,
-                          localStart: info.localStart,
-                        })
-                    : undefined
-                }
+                onEmptySlotClick={onEmptySlotClick}
+                onEmptySlotContextMenu={onEmptySlotContextMenu}
                 calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                 fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
               />
@@ -473,21 +492,8 @@ function CalendarPageImpl({
                       addAppointmentHref: `${base}/bookings/new`,
                     }}
                     highlightedBookingId={highlightedBookingId}
-                    onEmptySlotClick={
-                      quickCreateEnabled ? (info) => openQuickCreateFromSlot(info, "consultation") : undefined
-                    }
-                    onEmptySlotContextMenu={
-                      quickCreateEnabled
-                        ? (info) =>
-                            setSlotContextMenu({
-                              x: info.clientX,
-                              y: info.clientY,
-                              dayKey: info.dayKey,
-                              columnId: info.columnId,
-                              localStart: info.localStart,
-                            })
-                        : undefined
-                    }
+                    onEmptySlotClick={onEmptySlotClick}
+                    onEmptySlotContextMenu={onEmptySlotContextMenu}
                     calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                     fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
                   />

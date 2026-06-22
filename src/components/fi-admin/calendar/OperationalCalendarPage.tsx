@@ -41,10 +41,11 @@ export function OperationalCalendarPage({
   children: React.ReactNode;
 }) {
   const [gridPatch, setGridPatch] = useState<OperationalCalendarGridPatch | null>(null);
+  const shellResetKey = shellFingerprint(shell);
 
   useEffect(() => {
     setGridPatch(null);
-  }, [shellFingerprint(shell)]);
+  }, [shellResetKey]);
 
   const mergedData = useMemo(
     () => (gridPatch ? mergeOperationalCalendarShellAndGrid(shell, gridPatch) : shell),

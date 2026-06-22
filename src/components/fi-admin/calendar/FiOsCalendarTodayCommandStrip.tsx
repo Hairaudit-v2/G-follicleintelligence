@@ -15,7 +15,7 @@ import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezo
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { bookingsOverlappingDayKey, computeFiOsTodayStripCounts } from "@/src/lib/calendar/fiOsCalendarTodayStrip";
-import { calendarBookingsHydrationFingerprint } from "@/src/lib/calendar/calendarHydrationFingerprint";
+import { useBookingsStableByFingerprint } from "@/src/lib/calendar/useBookingsStableByFingerprint";
 
 function chipClass(active: boolean): string {
   return cn(
@@ -44,11 +44,10 @@ export function FiOsCalendarTodayCommandStrip({
   const tz = query.calendarTimezone;
   const todayYmd = calendarDateStringFromInstant(new Date(), tz);
 
-  const bookingsStripKey = useMemo(() => calendarBookingsHydrationFingerprint(bookings), [bookings]);
+  const { rows: bookingsForStrip } = useBookingsStableByFingerprint(bookings);
   const dayRows = useMemo(
-    () => bookingsOverlappingDayKey(bookings, lanes, query.dateAnchor),
-    // bookingsStripKey captures visible booking payload; avoids recomputing overlaps when RSC re-sends the same rows with a new array identity.
-    [bookingsStripKey, lanes, query.dateAnchor]
+    () => bookingsOverlappingDayKey(bookingsForStrip, lanes, query.dateAnchor),
+    [bookingsForStrip, lanes, query.dateAnchor]
   );
   const counts = useMemo(() => computeFiOsTodayStripCounts(dayRows), [dayRows]);
 

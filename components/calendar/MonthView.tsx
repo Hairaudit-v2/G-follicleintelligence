@@ -33,7 +33,10 @@ import {
 } from "@/lib/calendar/calendarResponsive";
 import { calendarShellVariants } from "@/lib/calendar/calendarMotion";
 import { rescheduleErrorMessage } from "@/lib/calendar/rescheduleFeedback";
-import { measureCalendarSync } from "@/lib/calendar/calendarInteractionPerfDev";
+import {
+  calendarInteractionPerfEnabled,
+  warnIfSlowCalendarSync,
+} from "@/lib/calendar/calendarInteractionPerfDev";
 import { pushCalendarHref } from "@/lib/calendar/calendarRouterTransition";
 import { getAppointmentStyle } from "@/lib/calendar/getAppointmentStyle";
 import type { CalendarRescheduleResult } from "@/hooks/useCalendarAppointments";
@@ -62,7 +65,7 @@ import type {
 } from "@/src/lib/calendar/operationalCalendarTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { logCalendarClientPerf } from "@/src/lib/calendar/calendarPerfDev";
-import { calendarBookingsHydrationFingerprint } from "@/src/lib/calendar/calendarHydrationFingerprint";
+import { useBookingsStableByFingerprint } from "@/src/lib/calendar/useBookingsStableByFingerprint";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -407,9 +410,15 @@ const MonthDayCell = memo(function MonthDayCell({
     data: { dayKey: cell.dayKey },
   });
 
-  const visible = dayBookings.slice(0, MONTH_MAX_VISIBLE_APPOINTMENTS);
+  const visible = useMemo(
+    () => dayBookings.slice(0, MONTH_MAX_VISIBLE_APPOINTMENTS),
+    [dayBookings]
+  );
   const overflow = dayBookings.length - visible.length;
-  const providerSummary = summarizeProvidersForDay(dayBookings, resourceColumns, staffIdByUserId);
+  const providerSummary = useMemo(
+    () => summarizeProvidersForDay(dayBookings, resourceColumns, staffIdByUserId),
+    [dayBookings, resourceColumns, staffIdByUserId]
+  );
   const visibleProviders = providerSummary.slice(0, 4);
   const overflowProviders = providerSummary.length - visibleProviders.length;
   const isQuietDay = cell.inCurrentMonth && dayBookings.length === 0;
@@ -544,12 +553,20 @@ function MonthViewInner({
     () => buildMonthGridCells(monthAnchor, gridConfig.timeZone),
     [monthAnchor, gridConfig.timeZone]
   );
-  const monthBookingsKey = useMemo(() => calendarBookingsHydrationFingerprint(bookings), [bookings]);
-  const buckets = useMemo(
-    () =>
-      measureCalendarSync("calendar.month.buckets", () => bucketBookingsForMonthCells(bookings, cells)),
-    [cells, monthBookingsKey]
-  );
+  const { rows: bookingsForBuckets, fingerprint: monthBookingsKey } = useBookingsStableByFingerprint(bookings);
+  const bucketGroupingPerfRef = useRef<{ groupingMs: number; bookingCount: number } | null>(null);
+  const buckets = useMemo(() => {
+    const t0 = typeof performance !== "undefined" ? performance.now() : 0;
+    const map = bucketBookingsForMonthCells(bookingsForBuckets, cells);
+    if (process.env.NODE_ENV === "development") {
+      const groupingMs = (typeof performance !== "undefined" ? performance.now() : 0) - t0;
+      bucketGroupingPerfRef.current = { groupingMs, bookingCount: bookingsForBuckets.length };
+      if (calendarInteractionPerfEnabled()) {
+        warnIfSlowCalendarSync("calendar.month.buckets", groupingMs);
+      }
+    }
+    return map;
+  }, [cells, bookingsForBuckets]);
   const monthTitle = useMemo(
     () => formatMonthTitle(monthAnchor, gridConfig.timeZone),
     [monthAnchor, gridConfig.timeZone]
@@ -563,8 +580,9 @@ function MonthViewInner({
       monthAnchor,
       bookingCount: bookings.length,
       cellCount: cells.length,
+      ...(bucketGroupingPerfRef.current ?? {}),
     });
-  }, [bookings.length, cells.length, monthAnchor]);
+  }, [bookings.length, cells.length, monthAnchor, monthBookingsKey]);
 
   const monthStats = useMemo(() => {
     let total = 0;
