@@ -246,7 +246,7 @@ export async function loadGuidedAssistSessionPayload(
 
     return { ok: true, payload };
   } catch (e) {
-    logStructured("guided_assist.load_session_error", { tenantId, error: String(e) });
+    logStructured("error", "guided_assist.load_session_error", { tenantId, error: String(e) });
     return { ok: false, error: e instanceof Error ? e.message : "Failed to load guided assist." };
   }
 }
