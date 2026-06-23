@@ -8,9 +8,9 @@ import {
 } from "./crmLeadListQuery";
 
 describe("crmLeadListQuery", () => {
-  it("defaults sort, pagination, and list view", () => {
+  it("defaults sort, pagination, and workspace view", () => {
     const q = parseCrmLeadListQuery({});
-    assert.equal(q.view, "list");
+    assert.equal(q.view, "workspace");
     assert.equal(q.sort, "updated_at_desc");
     assert.equal(q.page, 1);
     assert.equal(q.pageSize, 25);

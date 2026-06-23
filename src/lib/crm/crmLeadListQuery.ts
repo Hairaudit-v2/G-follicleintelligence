@@ -15,7 +15,7 @@ export const CRM_LEAD_LIST_SORTS = [
 
 export type CrmLeadListSort = (typeof CRM_LEAD_LIST_SORTS)[number];
 
-export type CrmLeadListViewMode = "list" | "board";
+export type CrmLeadListViewMode = "workspace" | "list" | "board";
 
 export type ParsedCrmLeadListQuery = {
   /** Primary CRM index layout: table vs kanban (default list). */
@@ -66,8 +66,9 @@ export function parseCrmLeadListQuery(
 
   const searchRaw = (get("search") ?? "").trim().slice(0, 200);
 
-  const viewRaw = (get("view") ?? "list").trim().toLowerCase();
-  const view: CrmLeadListViewMode = viewRaw === "board" ? "board" : "list";
+  const viewRaw = (get("view") ?? "workspace").trim().toLowerCase();
+  const view: CrmLeadListViewMode =
+    viewRaw === "board" ? "board" : viewRaw === "list" ? "list" : "workspace";
 
   const updatedFromRaw = (get("updatedFrom") ?? "").trim();
   const updatedToRaw = (get("updatedTo") ?? "").trim();
@@ -155,7 +156,7 @@ export type CrmLeadListHrefQuery = Partial<{
 
 export function parsedCrmLeadListToHrefQuery(q: ParsedCrmLeadListQuery): CrmLeadListHrefQuery {
   return {
-    view: q.view === "board" ? "board" : undefined,
+    view: q.view === "board" ? "board" : q.view === "list" ? "list" : undefined,
     stage: q.stageId ?? undefined,
     status: q.status ?? undefined,
     priority: q.priority ?? undefined,
@@ -172,6 +173,7 @@ export function parsedCrmLeadListToHrefQuery(q: ParsedCrmLeadListQuery): CrmLead
 export function buildCrmLeadListHref(tenantId: string, q: CrmLeadListHrefQuery): string {
   const sp = new URLSearchParams();
   if (q.view === "board") sp.set("view", "board");
+  else if (q.view === "list") sp.set("view", "list");
   if (q.stage?.trim()) sp.set("stage", q.stage.trim());
   if (q.status?.trim()) sp.set("status", q.status.trim());
   if (q.priority?.trim()) sp.set("priority", q.priority.trim());
