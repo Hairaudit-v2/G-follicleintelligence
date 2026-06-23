@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { FiOsLoginMagicLinkHandler } from "@/src/components/fi/os/FiOsLoginMagicLinkHandler";
 import { FiOsLoginScreen } from "@/src/components/fi/os/FiOsLoginScreen";
 
 export const metadata: Metadata = {
@@ -28,5 +29,10 @@ export default function FollicleIntelligenceOsLoginPage({
   const noticeCode = pickString(searchParams.notice);
   const safeNextPath = sanitizeNextPath(pickString(searchParams.next));
 
-  return <FiOsLoginScreen errorCode={errorCode} noticeCode={noticeCode} safeNextPath={safeNextPath} />;
+  return (
+    <>
+      <FiOsLoginMagicLinkHandler safeNextPath={safeNextPath || "/fi-admin"} />
+      <FiOsLoginScreen errorCode={errorCode} noticeCode={noticeCode} safeNextPath={safeNextPath} />
+    </>
+  );
 }

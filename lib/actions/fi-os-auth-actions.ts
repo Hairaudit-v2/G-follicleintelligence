@@ -7,6 +7,7 @@ import { createServerClient, type CookieOptions, type SetAllCookies } from "@sup
 
 import { loadFiOsIdentity, loadFirstTenantIdForAuthUser } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { resolveFiOsPostLoginRedirect } from "@/src/lib/fiOs/fiOsRedirect.server";
+import { buildFiOsAuthConfirmUrl } from "@/src/lib/supabase/authLinkBootstrap";
 
 /** Temporary diagnostic logging — env presence only; never log secrets or tokens. */
 function logFiOsSignIn(stage: string, details: Record<string, unknown>): void {
@@ -119,13 +120,15 @@ export async function fiOsRequestPasswordResetAction(formData: FormData): Promis
     return { ok: false, error: "Server misconfigured." };
   }
 
-  const origin = getRequestOrigin();
+  const origin = getRequestOrigin().replace(/\/$/, "");
+  const updatePasswordPath = "/follicle-intelligence/update-password";
+
   const supabase = createClient(url, anon, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin.replace(/\/$/, "")}/follicle-intelligence/update-password`,
+    redirectTo: buildFiOsAuthConfirmUrl(origin, updatePasswordPath),
   });
 
   if (error) {

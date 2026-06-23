@@ -17,6 +17,7 @@ function isMarketingBareShell(pathname: string | null): boolean {
   if (pathname.startsWith("/follicle-intelligence/login")) return true;
   if (pathname.startsWith("/follicle-intelligence/forgot-password")) return true;
   if (pathname.startsWith("/follicle-intelligence/update-password")) return true;
+  if (pathname.startsWith("/follicle-intelligence/auth/confirm")) return true;
   if (pathname.startsWith("/hair-audit")) return true;
   return false;
 }

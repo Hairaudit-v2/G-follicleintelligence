@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { FiOsUpdatePasswordForm } from "@/src/components/fi/os/FiOsUpdatePasswordForm";
 
@@ -23,7 +24,9 @@ export default function FollicleIntelligenceUpdatePasswordPage() {
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Choose a new password</h1>
         </div>
         <div className="rounded-2xl border border-cyan-500/15 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-md">
-          <FiOsUpdatePasswordForm />
+          <Suspense fallback={<p className="text-center text-sm text-slate-400">Verifying reset link…</p>}>
+            <FiOsUpdatePasswordForm />
+          </Suspense>
         </div>
       </div>
     </div>

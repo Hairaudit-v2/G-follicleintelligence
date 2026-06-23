@@ -5,6 +5,7 @@ import { resolveTenantConfig } from "@/lib/fi/tenantConfig";
 import { FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { insertFiTenantAdminAuditEvent } from "@/src/lib/tenantAdmin/tenantAdminAudit.server";
+import { buildFiOsAuthConfirmUrl } from "@/src/lib/supabase/authLinkBootstrap";
 
 function firstForwardedValue(raw: string | null): string | null {
   if (!raw) return null;
@@ -168,7 +169,8 @@ export async function provisionPlatformTenant(
 
     if (!authUserId) {
       const origin = getRequestOriginFromHeaders(opts.getHeader).replace(/\/$/, "");
-      const redirectTo = `${origin}/follicle-intelligence/login?next=${encodeURIComponent(`/fi-admin/${tenantId}`)}`;
+      const nextPath = `/fi-admin/${tenantId}`;
+      const redirectTo = buildFiOsAuthConfirmUrl(origin, nextPath);
       const { data: inv, error: invErr } = await supabase.auth.admin.inviteUserByEmail(email, {
         redirectTo,
         data: {

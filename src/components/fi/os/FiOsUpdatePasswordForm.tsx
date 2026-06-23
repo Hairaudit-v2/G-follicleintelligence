@@ -2,10 +2,23 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { createBrowserClient } from "@/lib/supabase/client";
+import { createBrowserClient, createRecoveryBrowserClient } from "@/lib/supabase/client";
+import {
+  bootstrapSupabaseSessionFromAuthLink,
+  readAuthLinkCredentialsFromUrl,
+  safeInternalPath,
+  stripAuthParamsFromUrlKeepSearch,
+} from "@/src/lib/supabase/authLinkBootstrap";
+
+const EXPIRED_MESSAGE =
+  "This reset link is invalid or has expired. Request a new one from the forgot password page.";
 
 export function FiOsUpdatePasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const afterPasswordPath = safeInternalPath(searchParams.get("next"), "/follicle-intelligence/login");
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -15,52 +28,44 @@ export function FiOsUpdatePasswordForm() {
 
   useEffect(() => {
     let cancelled = false;
+    const credentials = readAuthLinkCredentialsFromUrl();
 
     async function bootstrapRecoverySession() {
       try {
+        if (credentials.kind !== "none") {
+          const supabase = createRecoveryBrowserClient();
+          const ok = await bootstrapSupabaseSessionFromAuthLink(supabase, credentials);
+          if (cancelled) return;
+          if (!ok) {
+            setError(EXPIRED_MESSAGE);
+            return;
+          }
+          stripAuthParamsFromUrlKeepSearch();
+          setReady(true);
+          return;
+        }
+
         const supabase = createBrowserClient();
-        const expiredMessage =
-          "This reset link is invalid or has expired. Request a new one from the forgot password page.";
-
-        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-        const accessToken = hash.get("access_token");
-        const refreshToken = hash.get("refresh_token");
-        const type = hash.get("type");
-
-        if (accessToken && refreshToken && type === "recovery") {
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((event, session) => {
           if (cancelled) return;
-          if (sessionError) {
-            setError(expiredMessage);
-            return;
+          if (event === "PASSWORD_RECOVERY" && session) {
+            setReady(true);
           }
-          window.history.replaceState(null, "", window.location.pathname + window.location.search);
-          setReady(true);
-          return;
-        }
-
-        const code = new URLSearchParams(window.location.search).get("code");
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (cancelled) return;
-          if (exchangeError) {
-            setError(expiredMessage);
-            return;
-          }
-          window.history.replaceState(null, "", window.location.pathname);
-          setReady(true);
-          return;
-        }
+        });
 
         const { data } = await supabase.auth.getSession();
-        if (cancelled) return;
-        if (!data.session) {
-          setError(expiredMessage);
+        if (cancelled) {
+          subscription.unsubscribe();
           return;
         }
+        if (!data.session) {
+          subscription.unsubscribe();
+          setError(EXPIRED_MESSAGE);
+          return;
+        }
+        subscription.unsubscribe();
         setReady(true);
       } catch {
         if (!cancelled) setError("Could not verify your session.");
@@ -93,6 +98,7 @@ export function FiOsUpdatePasswordForm() {
         return;
       }
       setDone(true);
+      router.replace(afterPasswordPath);
     } catch {
       setError("Could not update password.");
     } finally {
@@ -105,10 +111,10 @@ export function FiOsUpdatePasswordForm() {
       <div className="space-y-4 text-center">
         <p className="text-emerald-200">Your password was updated.</p>
         <Link
-          href="/follicle-intelligence/login"
+          href={afterPasswordPath}
           className="inline-block rounded-lg bg-gradient-to-r from-cyan-600 to-sky-600 px-4 py-3 text-sm font-semibold text-white hover:from-cyan-500 hover:to-sky-500"
         >
-          Sign in
+          Continue
         </Link>
       </div>
     );

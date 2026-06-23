@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { FinancialOsCommandCentreDashboard } from "@/src/components/fi-admin/financial-os/FinancialOsCommandCentreDashboard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadFinancialOsCommandCentrePayload } from "@/src/lib/financialOs/financialOsCommandCentreLoader.server";
 import type { SurgeryEconomicsDashboardFilters } from "@/src/lib/financialOs/financialSurgeryEconomics.server";
@@ -83,11 +84,13 @@ export default async function FiAdminFinancialOsPage({
   let data: Awaited<ReturnType<typeof loadFinancialOsCommandCentrePayload>>;
   let filterOptions: Awaited<ReturnType<typeof loadSurgeryEconomicsFilterOptions>>;
   let attributionFilterOptions: Awaited<ReturnType<typeof loadRevenueAttributionFilterOptions>>;
+  let showDiagnosticsExpanded: boolean;
   try {
-    [data, filterOptions, attributionFilterOptions] = await Promise.all([
+    [data, filterOptions, attributionFilterOptions, showDiagnosticsExpanded] = await Promise.all([
       loadFinancialOsCommandCentrePayload(tid, new Date(), filters, attributionFilters),
       loadSurgeryEconomicsFilterOptions(tid),
       loadRevenueAttributionFilterOptions(tid),
+      canViewDashboardSystemDiagnostics(tid),
     ]);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
@@ -114,6 +117,7 @@ export default async function FiAdminFinancialOsPage({
           data={data}
           surgeryEconomicsFilterOptions={filterOptions}
           revenueAttributionFilterOptions={attributionFilterOptions}
+          showDiagnosticsExpanded={showDiagnosticsExpanded}
         />
       </Suspense>
     </div>

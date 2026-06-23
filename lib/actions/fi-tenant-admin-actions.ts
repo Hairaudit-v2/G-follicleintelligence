@@ -8,6 +8,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { FI_AUTH_INVITE_EMAIL_PUBLIC_FAILED_MESSAGE } from "@/src/lib/email/emailDeliveryPublicMessages";
 import { insertFiTenantAdminAuditEvent } from "@/src/lib/tenantAdmin/tenantAdminAudit.server";
 import { logStructured } from "@/src/lib/server/structuredLog";
+import { buildFiOsAuthConfirmUrl } from "@/src/lib/supabase/authLinkBootstrap";
 import {
   getTenantAdminUsersManageAllowed,
   resolveActorFiUserIdForTenantAdminActions,
@@ -131,7 +132,8 @@ export async function inviteTenantAdminUserAction(body: unknown): Promise<FiTena
 
     if (!authUserId) {
       const origin = getRequestOrigin().replace(/\/$/, "");
-      const redirectTo = `${origin}/follicle-intelligence/login?next=${encodeURIComponent(`/fi-admin/${tid}`)}`;
+      const nextPath = `/fi-admin/${tid}`;
+      const redirectTo = buildFiOsAuthConfirmUrl(origin, nextPath);
       const { data: inv, error: invErr } = await supabase.auth.admin.inviteUserByEmail(email, {
         redirectTo,
         data: {
