@@ -148,9 +148,14 @@ export function patientDirectoryQueryToHrefQuery(q: PatientDirectoryQuery): Reco
   return out;
 }
 
-export function buildPatientDirectoryHref(tenantId: string, q: PatientDirectoryQuery): string {
+export function buildPatientDirectoryHref(
+  tenantId: string,
+  q: PatientDirectoryQuery,
+  opts?: { view?: "list" }
+): string {
   const tid = tenantId.trim();
   const params = new URLSearchParams(patientDirectoryQueryToHrefQuery(q));
+  if (opts?.view === "list") params.set("view", "list");
   const qs = params.toString();
   return qs ? `/fi-admin/${tid}/patients?${qs}` : `/fi-admin/${tid}/patients`;
 }

@@ -8,12 +8,16 @@ export function PatientDirectoryFilters({
   tenantId,
   query,
   leadSourceOptions,
+  listView = false,
 }: {
   tenantId: string;
   query: PatientDirectoryQuery;
   leadSourceOptions: string[];
+  listView?: boolean;
 }) {
-  const action = `/fi-admin/${tenantId}/patients`;
+  const action = listView
+    ? `/fi-admin/${tenantId}/patients?view=list`
+    : `/fi-admin/${tenantId}/patients`;
   const norwoodChoices = NORWOOD_OPTIONS.filter((o) => o.value !== "unknown");
 
   return (
