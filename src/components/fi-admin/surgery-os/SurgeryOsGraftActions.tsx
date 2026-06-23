@@ -69,8 +69,13 @@ export function SurgeryOsGraftActions({
 
   const allowedActions = GRAFT_ACTIONS.filter((a) => surgeryOsGraftActionAllowed(ctx, a.action));
 
+  const primaryGraftKeys = new Set<GraftModalKind>(["extraction", "implantation", "reconcile"]);
+  const primaryActions = allowedActions.filter((a) => a.key && primaryGraftKeys.has(a.key));
+  const secondaryActions = allowedActions.filter((a) => a.key && !primaryGraftKeys.has(a.key));
+
   const [surgeryId, setSurgeryId] = useState(surgeries[0]?.id ?? "");
   const [modal, setModal] = useState<GraftModalKind>(null);
+  const [showSecondary, setShowSecondary] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -108,19 +113,47 @@ export function SurgeryOsGraftActions({
             </option>
           ))}
         </select>
-        {allowedActions.map((a) => (
+        {primaryActions.map((a) => (
           <button
             key={a.key}
             type="button"
             onClick={() => setModal(a.key)}
             className={cn(
               fiOsChromeClasses.toolbarControlSurface,
-              "px-2.5 py-1.5 text-xs font-semibold text-slate-200",
+              "px-2.5 py-1.5 text-xs font-semibold text-violet-100",
             )}
           >
             {a.label}
           </button>
         ))}
+        {secondaryActions.length ? (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowSecondary((v) => !v)}
+              className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2.5 py-1.5 text-xs font-semibold text-slate-400")}
+            >
+              More graft tools
+            </button>
+            {showSecondary ? (
+              <div className="absolute left-0 top-full z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-lg border border-white/[0.1] bg-[#0c1220] p-1 shadow-lg">
+                {secondaryActions.map((a) => (
+                  <button
+                    key={a.key}
+                    type="button"
+                    onClick={() => {
+                      setShowSecondary(false);
+                      setModal(a.key);
+                    }}
+                    className="rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-slate-300 hover:bg-white/[0.06] hover:text-slate-100"
+                  >
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         {pending ? <Loader2 className="h-4 w-4 animate-spin text-violet-400" aria-hidden /> : null}
       </div>
       {selectedGraft ? (

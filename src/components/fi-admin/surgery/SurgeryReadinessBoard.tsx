@@ -2,184 +2,124 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
-import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
-import type { SurgeryReadinessBoardCard, SurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
-import { CopyProcedureDayLinkButton } from "@/src/components/fi-admin/cases/CopyProcedureDayLinkButton";
-import { FinancialPaymentPathwayBadge } from "@/src/components/fi/financial/FinancialPaymentPathwayBadge";
-import { FinancialClearancePanel } from "@/src/components/fi/financial/FinancialClearancePanel";
-import { FinancialSurgeryPipelineInline } from "@/src/components/fi/financial/FinancialSurgeryPipelineInline";
+import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
 import { ClinicalStaffingStatusBadge } from "@/src/components/fi/workforce/ClinicalStaffingStatusBadge";
-import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import {
-  SURGERY_READINESS_ISSUE_LABEL,
+  buildClearanceChecklistSummary,
+  buildReadinessClearancePriorities,
+  buildReadinessSnapshotCards,
+  buildUpcomingProcedureReadinessList,
+  flattenReadinessCards,
+  surgicalAttentionSeverityClass,
+  surgeryLinkButtonClass,
+} from "@/src/lib/fiAdmin/surgeryPresentation";
+import type { SurgeryReadinessBoardPayload } from "@/src/lib/surgery/surgeryReadinessBoardLoader.server";
+import {
   cardMatchesManagerFilter,
-  type SurgeryReadinessBoardColumnId,
-  type SurgeryReadinessIssueSeverity,
   type SurgeryReadinessManagerFilter,
 } from "@/src/lib/surgery/surgeryReadinessBoardModel";
-
-const COLUMN_META: { id: SurgeryReadinessBoardColumnId; title: string; tone: string }[] = [
-  { id: "ready", title: "Ready", tone: "border-emerald-500/20 bg-emerald-500/[0.06]" },
-  { id: "needs_attention", title: "Needs attention", tone: "border-amber-500/25 bg-amber-500/[0.06]" },
-  { id: "high_risk", title: "High risk", tone: "border-rose-500/30 bg-rose-500/[0.07]" },
-  { id: "missing_pathology", title: "Missing pathology", tone: "border-violet-500/25 bg-violet-500/[0.06]" },
-  { id: "missing_consent", title: "Missing consent", tone: "border-sky-500/25 bg-sky-500/[0.06]" },
-  { id: "on_hold_not_linked", title: "On hold / not linked", tone: "border-slate-600/40 bg-slate-900/40" },
-];
+import { SurgeryReadinessSystemDiagnostics } from "@/src/components/fi-admin/surgery/SurgeryReadinessSystemDiagnostics";
 
 const FILTER_CHIPS: { id: SurgeryReadinessManagerFilter; label: string }[] = [
   { id: "all", label: "All" },
   { id: "ready", label: "Ready" },
   { id: "needs_attention", label: "Needs attention" },
-  { id: "high_risk", label: "High risk" },
-  { id: "missing_pathology", label: "Missing pathology" },
-  { id: "missing_consent", label: "Missing consent" },
+  { id: "high_risk", label: "Blocked" },
+  { id: "missing_pathology", label: "Pathology" },
+  { id: "missing_consent", label: "Consent" },
   { id: "not_linked", label: "Not linked" },
 ];
 
-function severityChipClass(sev: SurgeryReadinessIssueSeverity): string {
-  if (sev === "high_risk") return "border-rose-500/40 bg-rose-500/15 text-rose-100";
-  if (sev === "warning") return "border-amber-500/35 bg-amber-500/10 text-amber-100";
-  return "border-slate-600/40 bg-slate-800/60 text-slate-400";
-}
-
-function severityLabel(sev: SurgeryReadinessIssueSeverity): string {
-  if (sev === "high_risk") return "High risk";
-  if (sev === "warning") return "Warning";
-  return "Info";
-}
-
-function KpiTile(props: {
-  label: string;
-  value: number | string;
-  sub?: string;
-  highlight?: boolean;
-}) {
+function ReadinessPrimaryActions({ base }: { base: string }) {
   return (
-    <div
-      className={cn(
-        "flex min-w-0 flex-col rounded-xl border px-3 py-3 shadow-inner shadow-black/25 backdrop-blur-sm",
-        props.highlight
-          ? "border-cyan-500/30 bg-cyan-500/[0.08]"
-          : "border-white/[0.07] bg-[#0c1426]/70",
-      )}
-    >
-      <p className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{props.label}</p>
-      <p className="mt-2 font-mono text-xl font-semibold tabular-nums tracking-tight text-slate-50">{props.value}</p>
-      {props.sub ? <p className="mt-1 text-[0.7rem] leading-snug text-slate-500">{props.sub}</p> : null}
+    <div className="mt-6 flex flex-wrap gap-2">
+      <Link href={`${base}/procedure-day`} className={surgeryLinkButtonClass}>
+        Open Procedure Day
+      </Link>
+      <Link href={`${base}/surgery-os`} className={surgeryLinkButtonClass}>
+        Open SurgeryOS
+      </Link>
+      <Link href={`${base}/calendar`} className={surgeryLinkButtonClass}>
+        Open Calendar
+      </Link>
+      <Link href={`${base}/patients`} className={surgeryLinkButtonClass}>
+        Open PatientOS
+      </Link>
+      <Link href={`${base}/doctor`} className={surgeryLinkButtonClass}>
+        Open Doctor Workspace
+      </Link>
     </div>
   );
 }
 
-function SurgeryCard({ tenantId, card }: { tenantId: string; card: SurgeryReadinessBoardCard }) {
-  const displayIssues = card.issues.filter((i) => i.kind !== "no_payment_tracking").slice(0, 8);
+function UpcomingProcedureCard({ tenantId, item }: { tenantId: string; item: ReturnType<typeof buildUpcomingProcedureReadinessList>[number] }) {
+  const { card } = item;
+  const base = `/fi-admin/${tenantId}`;
   return (
-    <article className="rounded-lg border border-white/[0.06] bg-[#0a101f]/90 p-3 text-sm text-slate-200 shadow-sm shadow-black/30">
-      <div className="flex flex-wrap items-start justify-between gap-2">
+    <article className="rounded-xl border border-white/[0.08] bg-[#0c1220]/75 p-4 text-sm text-slate-200">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate font-semibold text-slate-50">{card.patientLabel}</p>
-          <p className="mt-0.5 text-xs text-slate-500">
-            {card.surgeryLocalYmd}
-            <span className="text-slate-600"> · </span>
-            {card.bookingTimeLabel}
-            <span className="text-slate-600"> · </span>
-            {card.daysUntil === 0 ? "Today" : card.daysUntil === 1 ? "1 day" : `${card.daysUntil} days`}
+          <p className="truncate font-semibold text-[#F8FAFC]">{card.patientLabel}</p>
+          <p className="mt-1 text-xs text-[#64748B]">
+            {card.surgeryLocalYmd} · {card.bookingTimeLabel} · {card.bookingTypeLabel}
           </p>
         </div>
-        <span className="shrink-0 rounded-md border border-white/[0.08] bg-black/30 px-2 py-0.5 text-[0.65rem] font-medium text-slate-400">
-          {card.bookingStatusLabel}
-        </span>
-        {card.clinicalStaffing ? (
-          <ClinicalStaffingStatusBadge status={card.clinicalStaffing.displayStatus} compact />
-        ) : null}
-      </div>
-      <dl className="mt-2 space-y-1 text-xs text-slate-500">
-        {card.assigneeLabel ? (
-          <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">Staff</dt>
-            <dd className="min-w-0 truncate text-slate-400">{card.assigneeLabel}</dd>
-          </div>
-        ) : null}
-        {card.caseStatusLabel ? (
-          <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">Case</dt>
-            <dd className="min-w-0 truncate text-slate-400">{card.caseStatusLabel}</dd>
-          </div>
-        ) : null}
-        {card.readinessPercent != null ? (
-          <div className="flex gap-1">
-            <dt className="shrink-0 text-slate-600">Readiness</dt>
-            <dd className="font-mono text-slate-300">{card.readinessPercent}%</dd>
-          </div>
-        ) : null}
-        <div className="flex gap-1">
-          <dt className="shrink-0 text-slate-600">Deposit</dt>
-          <dd className="min-w-0 text-slate-300">{card.surgeryDepositLabel}</dd>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <span
+            className={cn(
+              "rounded-md border px-2 py-0.5 text-[0.65rem] font-semibold",
+              card.primaryColumn === "ready"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
+                : card.primaryColumn === "high_risk"
+                  ? "border-rose-500/30 bg-rose-500/10 text-rose-100"
+                  : "border-amber-500/25 bg-amber-500/10 text-amber-100",
+            )}
+          >
+            {item.readinessLabel}
+          </span>
+          {card.clinicalStaffing ? (
+            <ClinicalStaffingStatusBadge status={card.clinicalStaffing.displayStatus} compact />
+          ) : null}
         </div>
-      </dl>
-      <FinancialSurgeryPipelineInline tenantId={tenantId} caseId={card.caseId} status={card.financialPipeline} variant="dark" />
-      <FinancialClearancePanel
-        tenantId={tenantId}
-        clearance={card.financialClearance}
-        currency={card.financialPipeline.currency}
-        variant="dark"
-        compact
-      />
-      <div className="mt-1.5">
-        <FinancialPaymentPathwayBadge summary={card.financialPipeline.paymentPathway} variant="dark" />
       </div>
-      {displayIssues.length ? (
-        <ul className="mt-2 space-y-1">
-          {displayIssues.map((it) => (
+
+      {item.blockers.length ? (
+        <ul className="mt-3 flex flex-wrap gap-1.5">
+          {item.blockers.map((b) => (
             <li
-              key={it.kind}
-              className={cn("flex flex-wrap items-center gap-1.5 rounded border px-2 py-1 text-[0.68rem]", severityChipClass(it.severity))}
+              key={b}
+              className="rounded border border-white/[0.08] bg-black/20 px-2 py-0.5 text-[0.68rem] text-[#94A3B8]"
             >
-              <span className="font-medium uppercase tracking-wide text-[0.55rem] opacity-80">{severityLabel(it.severity)}</span>
-              <span>{SURGERY_READINESS_ISSUE_LABEL[it.kind]}</span>
+              {b}
             </li>
           ))}
         </ul>
       ) : null}
-      {card.clinicalStaffing ? (
-        <div className="mt-2">
-          <ClinicalStaffingStatusCard
-            tenantId={tenantId}
-            summary={card.clinicalStaffing}
-            compact
-            rosterLink={{
-              eventSource: "booking",
-              eventId: card.bookingId,
-              date: card.startAt,
-            }}
-          />
-        </div>
-      ) : null}
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.7rem] font-semibold">
+
+      <p className="mt-3 text-xs leading-relaxed text-[#94A3B8]">
+        <span className="font-semibold text-[#CBD5E1]">Next: </span>
+        {item.nextAction}
+      </p>
+
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.7rem] font-semibold">
         {card.hrefs.case ? (
-          <>
-            <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.case}>
-              Case
-            </Link>
-            <CopyProcedureDayLinkButton relativeHref={card.hrefs.case} />
-          </>
-        ) : null}
-        {card.hrefs.patient ? (
-          <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.patient}>
-            Patient
+          <Link href={card.hrefs.case} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
+            Open case
           </Link>
         ) : null}
-        <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.calendar}>
+        {card.hrefs.patient ? (
+          <Link href={card.hrefs.patient} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
+            PatientOS
+          </Link>
+        ) : null}
+        <Link href={`${base}/doctor`} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
+          Doctor review
+        </Link>
+        <Link href={card.hrefs.calendar} className="text-[#22C1FF]/90 hover:text-[#22C1FF]">
           Calendar
-        </Link>
-        <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.appointments}>
-          Appointment
-        </Link>
-        <Link className="text-cyan-400/95 hover:text-cyan-300" href={card.hrefs.operationsCentre}>
-          Operations
         </Link>
       </div>
     </article>
@@ -188,87 +128,124 @@ function SurgeryCard({ tenantId, card }: { tenantId: string; card: SurgeryReadin
 
 export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; data: SurgeryReadinessBoardPayload }) {
   const base = `/fi-admin/${tenantId}`;
-  const { kpis, window, columns } = data;
+  const { window } = data;
   const [filter, setFilter] = useState<SurgeryReadinessManagerFilter>("all");
 
-  const filteredColumns = useMemo(() => {
-    const out = {} as Record<SurgeryReadinessBoardColumnId, SurgeryReadinessBoardCard[]>;
-    for (const col of COLUMN_META) {
-      const list = columns[col.id];
-      out[col.id] =
-        filter === "all" ? list : list.filter((card) => cardMatchesManagerFilter(card.issues, card.primaryColumn, filter));
-    }
-    return out;
-  }, [columns, filter]);
+  const snapshotCards = buildReadinessSnapshotCards(base, data);
+  const priorityItems = buildReadinessClearancePriorities(base, data, 5);
+  const allCards = flattenReadinessCards(data);
+  const checklistGroups = buildClearanceChecklistSummary(allCards);
+
+  const upcomingList = useMemo(() => {
+    const list = buildUpcomingProcedureReadinessList(data);
+    if (filter === "all") return list;
+    return list.filter((item) =>
+      cardMatchesManagerFilter(item.card.issues, item.card.primaryColumn, filter),
+    );
+  }, [data, filter]);
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 pb-10">
-      <header className="flex flex-col gap-3 border-b border-white/[0.07] pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/85">SurgeryOS · Readiness board</p>
-          <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Surgery readiness</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Next 14 days ({window.todayYmd} → {window.windowEndYmd}) · {window.calendarTimezone}
+    <div className="mx-auto min-w-0 max-w-[88rem] space-y-8 pb-10 sm:space-y-10 sm:pb-14">
+      <DashboardCard elevated className="relative overflow-hidden p-6 sm:p-8">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(560px_260px_at_0%_0%,rgba(34,193,255,0.11),transparent_55%),radial-gradient(420px_200px_at_100%_100%,rgba(124,58,237,0.07),transparent_50%)]"
+          aria-hidden
+        />
+        <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS · Surgery</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">Surgery Readiness</h1>
+          <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
+            Upcoming procedure preparation, blockers, clearance, and patient readiness before surgery day.
           </p>
+          <p className="mt-2 text-sm text-[#64748B]">
+            Next 14 days · {window.todayYmd} → {window.windowEndYmd}
+          </p>
+          <ReadinessPrimaryActions base={base} />
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href={`${base}/tomorrow`}
-            className={cn(
-              fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex px-3 py-2 text-sm font-semibold text-cyan-100/95",
-            )}
-          >
-            Tomorrow board
-          </Link>
-          <Link
-            href={`${base}/procedure-day`}
-            className={cn(
-              fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex px-3 py-2 text-sm font-semibold text-slate-200",
-            )}
-          >
-            Procedure day
-          </Link>
-          <Link
-            href={`${base}/cases`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
-          >
-            SurgeryOS cases
-          </Link>
-          <Link
-            href={`${base}/calendar`}
-            className={cn(
-              fiOsChromeClasses.toolbarControlSurface,
-              "inline-flex px-3 py-2 text-sm font-semibold text-cyan-100/95",
-            )}
-          >
-            Calendar
-          </Link>
-          <Link
-            href={`${base}/reception`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
-          >
-            Reception board
-          </Link>
-          <Link
-            href={`${base}/consultation-conversion`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
-          >
-            Conversion board
-          </Link>
-          <Link
-            href={`${base}/operations`}
-            className={cn(fiOsChromeClasses.toolbarControlSurface, "inline-flex px-3 py-2 text-sm font-semibold text-slate-200")}
-          >
-            Operations centre
-          </Link>
-        </div>
-      </header>
+      </DashboardCard>
 
-      <DashboardCard className="p-4 sm:p-5">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Manager filters</p>
-        <div className="mt-2 flex flex-wrap gap-2">
+      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-snapshot-heading">
+        <SectionHeader
+          id="readiness-snapshot-heading"
+          kicker="Upcoming"
+          title="Readiness snapshot"
+          description="Clearance signals across the next 14 days of surgical procedures."
+          className="mb-4"
+        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {snapshotCards.map((card) => {
+            const inner = (
+              <>
+                <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
+                <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+                <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
+              </>
+            );
+            if (card.href) {
+              return (
+                <Link
+                  key={card.id}
+                  href={card.href}
+                  className="group flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4 transition hover:border-[#22C1FF]/25"
+                >
+                  {inner}
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#22C1FF]/80 opacity-0 transition group-hover:opacity-100">
+                    Open <ArrowRight className="h-3 w-3" aria-hidden />
+                  </span>
+                </Link>
+              );
+            }
+            return (
+              <div key={card.id} className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4">
+                {inner}
+              </div>
+            );
+          })}
+        </div>
+      </DashboardCard>
+
+      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-priorities-heading">
+        <SectionHeader
+          id="readiness-priorities-heading"
+          kicker="Clearance"
+          title="What needs clearance"
+          description="Top preparation priorities before surgery day."
+          className="mb-4"
+        />
+        {priorityItems.length === 0 ? (
+          <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-4">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
+            <p className="text-sm leading-relaxed text-[#CBD5E1]">All upcoming procedures are cleared for preparation.</p>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {priorityItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={item.href ?? `${base}/surgery-readiness`}
+                  className={`flex items-start justify-between gap-4 rounded-xl border px-4 py-4 transition hover:border-[#22C1FF]/30 ${surgicalAttentionSeverityClass(item.severity)}`}
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[#F8FAFC]">{item.headline}</p>
+                    {item.detail ? <p className="mt-1 text-sm text-[#94A3B8]">{item.detail}</p> : null}
+                  </div>
+                  <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#22C1FF]/70" aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardCard>
+
+      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-upcoming-heading">
+        <SectionHeader
+          id="readiness-upcoming-heading"
+          kicker="Board"
+          title="Upcoming procedure readiness"
+          description="Each procedure with clearance status, blockers, and next action."
+          className="mb-4"
+        />
+        <div className="mb-4 flex flex-wrap gap-2">
           {FILTER_CHIPS.map((c) => (
             <button
               key={c.id}
@@ -285,51 +262,49 @@ export function SurgeryReadinessBoard({ tenantId, data }: { tenantId: string; da
             </button>
           ))}
         </div>
+        {upcomingList.length === 0 ? (
+          <p className="text-sm text-[#64748B]">No procedures match this filter in the upcoming window.</p>
+        ) : (
+          <ul className="space-y-3">
+            {upcomingList.map((item) => (
+              <li key={item.card.bookingId}>
+                <UpcomingProcedureCard tenantId={tenantId} item={item} />
+              </li>
+            ))}
+          </ul>
+        )}
       </DashboardCard>
 
-      <DashboardCard className="p-4 sm:p-5">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">KPIs</p>
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
-          <KpiTile label="Upcoming (14d)" value={kpis.upcomingNext14Days} highlight />
-          <KpiTile label="Ready" value={kpis.ready} />
-          <KpiTile label="Needs attention" value={kpis.needsAttention} />
-          <KpiTile label="High risk" value={kpis.highRisk} />
-          <KpiTile label="Missing pathology" value={kpis.missingPathology} />
-          <KpiTile label="Missing consent" value={kpis.missingConsent} />
-          <KpiTile
-            label="Deposit tracking"
-            value={`${kpis.surgeryDepositsPending} pending`}
-            sub={`${kpis.surgeryPaymentRecordsTracked} surgery rows tracked on this board (manual payment tracking).`}
-          />
-        </div>
-      </DashboardCard>
-
-      <div className="overflow-x-auto pb-2">
-        <div className="flex min-w-[900px] gap-3 xl:min-w-0 xl:grid xl:grid-cols-6 xl:gap-3">
-        {COLUMN_META.map((col) => (
-          <section
-            key={col.id}
-            aria-labelledby={`srcol-${col.id}`}
-            className={cn(
-              "flex min-h-[220px] w-[min(100%,16rem)] shrink-0 flex-col rounded-xl border p-3 xl:w-auto xl:min-w-0",
-              col.tone,
-            )}
-          >
-            <h2 id={`srcol-${col.id}`} className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {col.title}
-              <span className="ml-1 font-mono text-slate-500">({filteredColumns[col.id].length})</span>
-            </h2>
-            <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-              {filteredColumns[col.id].length === 0 ? (
-                <p className="py-6 text-center text-xs text-slate-600">Nothing in this column (try another filter).</p>
-              ) : (
-                filteredColumns[col.id].map((c) => <SurgeryCard key={c.bookingId} tenantId={tenantId} card={c} />)
+      <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="readiness-checklist-heading">
+        <SectionHeader
+          id="readiness-checklist-heading"
+          kicker="Summary"
+          title="Clearance checklist summary"
+          description="Grouped clearance categories across upcoming procedures."
+          className="mb-4"
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {checklistGroups.map((g) => (
+            <div
+              key={g.id}
+              className={cn(
+                "rounded-xl border px-3 py-3",
+                g.blockedCount > 0
+                  ? "border-amber-500/25 bg-amber-500/[0.06]"
+                  : "border-white/[0.08] bg-[#0c1220]/75",
               )}
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">{g.label}</p>
+              <p className="mt-2 text-lg font-semibold tabular-nums text-[#F8FAFC]">
+                {g.blockedCount > 0 ? `${g.blockedCount} blocked` : "Clear"}
+              </p>
+              <p className="mt-1 text-[0.65rem] text-[#64748B]">{g.clearedCount} cleared</p>
             </div>
-          </section>
-        ))}
+          ))}
         </div>
-      </div>
+      </DashboardCard>
+
+      <SurgeryReadinessSystemDiagnostics tenantId={tenantId} payload={data} />
     </div>
   );
 }

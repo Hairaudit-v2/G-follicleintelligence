@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Loader2, Play, Plus, Stethoscope, Users } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { fiOsChromeClasses } from "@/src/components/fi-os/fiOsChromeTokens";
@@ -81,6 +81,7 @@ export function SurgeryOsLiveActions({
 
   const [modal, setModal] = useState<ModalKind>(null);
   const [surgeryId, setSurgeryId] = useState("");
+  const [showSecondary, setShowSecondary] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -128,20 +129,71 @@ export function SurgeryOsLiveActions({
         ) : (
           <span className="text-xs text-slate-500">No active surgeries</span>
         )}
-        {canPhase && selectedSurgery ? (
-          <ActionButton icon={Play} label="Start phase" onClick={() => setModal("phase")} />
+        {canPhase && selectedSurgery && nextPhase ? (
+          <ActionButton icon={Play} label="Continue phase" onClick={() => setModal("phase")} primary />
         ) : null}
-        {canEvent && selectedSurgery ? (
-          <ActionButton icon={Stethoscope} label="Log event" onClick={() => setModal("event")} />
-        ) : null}
-        {canNote && selectedSurgery ? (
-          <ActionButton icon={Plus} label="Add note" onClick={() => setModal("note")} />
-        ) : null}
-        {canTeam && teamForSurgery.length > 0 ? (
-          <ActionButton icon={Users} label="Team status" onClick={() => setModal("team")} />
-        ) : null}
-        {canBooking ? (
-          <ActionButton icon={Plus} label="Create from booking" onClick={() => setModal("booking")} />
+        {(canEvent || canNote || canTeam || canBooking) ? (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowSecondary((v) => !v)}
+              className={cn(fiOsChromeClasses.toolbarControlSurface, "px-2.5 py-1.5 text-xs font-semibold text-slate-400")}
+            >
+              More actions
+            </button>
+            {showSecondary ? (
+              <div className="absolute left-0 top-full z-20 mt-1 flex min-w-[11rem] flex-col gap-1 rounded-lg border border-white/[0.1] bg-[#0c1220] p-1 shadow-lg">
+                {canEvent && selectedSurgery ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSecondary(false);
+                      setModal("event");
+                    }}
+                    className="rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-slate-300 hover:bg-white/[0.06]"
+                  >
+                    Log event
+                  </button>
+                ) : null}
+                {canNote && selectedSurgery ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSecondary(false);
+                      setModal("note");
+                    }}
+                    className="rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-slate-300 hover:bg-white/[0.06]"
+                  >
+                    Add note
+                  </button>
+                ) : null}
+                {canTeam && teamForSurgery.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSecondary(false);
+                      setModal("team");
+                    }}
+                    className="rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-slate-300 hover:bg-white/[0.06]"
+                  >
+                    Team status
+                  </button>
+                ) : null}
+                {canBooking ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSecondary(false);
+                      setModal("booking");
+                    }}
+                    className="rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-slate-300 hover:bg-white/[0.06]"
+                  >
+                    Create from booking
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         ) : null}
         {pending ? <Loader2 className="h-4 w-4 animate-spin text-cyan-400" aria-hidden /> : null}
       </div>
@@ -243,10 +295,12 @@ function ActionButton({
   icon: Icon,
   label,
   onClick,
+  primary = false,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   onClick: () => void;
+  primary?: boolean;
 }) {
   return (
     <button
@@ -254,7 +308,8 @@ function ActionButton({
       onClick={onClick}
       className={cn(
         fiOsChromeClasses.toolbarControlSurface,
-        "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-200",
+        "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold",
+        primary ? "text-cyan-100" : "text-slate-200",
       )}
     >
       <Icon className="h-3.5 w-3.5" aria-hidden />
