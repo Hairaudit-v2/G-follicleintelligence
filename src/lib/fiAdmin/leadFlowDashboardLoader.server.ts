@@ -7,54 +7,43 @@ import { enrichCrmKanbanCards } from "@/src/lib/crm/crmKanbanExtras.server";
 import { loadCrmShellPipelineStages } from "@/src/lib/crm/crmShellLoaders";
 import { loadCrmLeadsShellPage } from "@/src/lib/crm/leadList";
 import type { FiImportBatchRow } from "@/src/lib/crm/hubspotImport/hubspotImportBatchLoad.server";
-import type { CrmKanbanLeadCard, FiCrmActivityEventRow, FiCrmPipelineStageRow } from "@/src/lib/crm/types";
+import type { CrmKanbanLeadCard } from "@/src/lib/crm/types";
 import {
   DEFAULT_STALE_LEAD_STAGE_DAYS,
   loadTenantOperationalDashboard,
-  type CrmPipelineLeadVolumePayload,
-  type StaleLeadItem,
-  type TaskDueItem,
-  type TenantActionCentre,
-  type TenantClinicToday,
-  type TenantLaunchControl,
-  type TenantQuickStats,
 } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
+import type {
+  LeadFlowActivityRow,
+  LeadFlowDashboardPayload,
+  LeadFlowHubspotDiagnostics,
+} from "@/src/lib/fiAdmin/leadFlowDashboardTypes";
 
-export type LeadFlowActivityRow = {
-  id: string;
-  leadId: string | null;
-  activityKind: string;
-  title: string | null;
-  occurredAt: string;
-};
-
-export type LeadFlowHubspotDiagnostics = {
-  latestBatch: FiImportBatchRow | null;
-  stagingRowCount: number;
-  duplicateEmailCount: number;
-  duplicatePhoneCount: number;
-  duplicateRecordIdCount: number;
-};
-
-export type LeadFlowDashboardPayload = {
-  staleLeads: StaleLeadItem[];
-  tasksDue: TaskDueItem[];
-  quickStats: TenantQuickStats;
-  actionCentre: TenantActionCentre;
-  launchControl: TenantLaunchControl;
-  clinicToday: TenantClinicToday;
-  crmPipelineLeadVolume: CrmPipelineLeadVolumePayload;
-  crmPipelineStages: FiCrmPipelineStageRow[];
-  conversionKpis: ConsultationConversionKpis;
-  conversionLostCount: number;
-  enrichedLeads: CrmKanbanLeadCard[];
-  recentActivity: LeadFlowActivityRow[];
-  hubspotImport: LeadFlowHubspotDiagnostics;
-  staleLeadThresholdDays: number;
-};
+export type {
+  LeadFlowActivityRow,
+  LeadFlowDashboardPayload,
+  LeadFlowHubspotDiagnostics,
+} from "@/src/lib/fiAdmin/leadFlowDashboardTypes";
 
 const ENRICHED_LEAD_LIMIT = 120;
 const RECENT_ACTIVITY_LIMIT = 14;
+
+const EMPTY_CONVERSION_KPIS: ConsultationConversionKpis = {
+  consultationsBookedNext30Days: 0,
+  consultationsCompletedLast30Days: 0,
+  quotesSent: 0,
+  quotesAccepted: 0,
+  surgeryBookedFromConsults: 0,
+  conversionRateQuoteToSurgery: null,
+  conversionRateLabel: "Not enough quote/surgery signals for a reliable rate",
+};
+
+const EMPTY_HUBSPOT_DIAGNOSTICS: LeadFlowHubspotDiagnostics = {
+  latestBatch: null,
+  stagingRowCount: 0,
+  duplicateEmailCount: 0,
+  duplicatePhoneCount: 0,
+  duplicateRecordIdCount: 0,
+};
 
 function mapActivityRow(row: Record<string, unknown>): LeadFlowActivityRow {
   return {
@@ -110,15 +99,7 @@ async function loadHubspotImportDiagnostics(tenantId: string): Promise<LeadFlowH
     .maybeSingle();
   if (error) throw new Error(error.message);
 
-  if (!batch) {
-    return {
-      latestBatch: null,
-      stagingRowCount: 0,
-      duplicateEmailCount: 0,
-      duplicatePhoneCount: 0,
-      duplicateRecordIdCount: 0,
-    };
-  }
+  if (!batch) return EMPTY_HUBSPOT_DIAGNOSTICS;
 
   const batchRow = batch as FiImportBatchRow;
   const dup = readDryRunDuplicateCounts(batchRow.dry_run_report);
@@ -140,7 +121,7 @@ async function loadEnrichedActiveLeads(tenantId: string): Promise<CrmKanbanLeadC
   const page = await loadCrmLeadsShellPage(tenantId, {
     view: "list",
     stageId: null,
-    status: "open",
+    status: null,
     priority: null,
     ownerUserId: null,
     searchRaw: "",
@@ -154,6 +135,15 @@ async function loadEnrichedActiveLeads(tenantId: string): Promise<CrmKanbanLeadC
   return enrichCrmKanbanCards(tenantId, page.items);
 }
 
+async function settle<T>(label: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error(`[LeadFlow] ${label} failed:`, error);
+    return fallback;
+  }
+}
+
 /**
  * Tenant-scoped LeadFlow workspace payload — composes existing operational, CRM, and conversion loaders.
  */
@@ -164,13 +154,14 @@ export async function loadLeadFlowDashboardPayload(
   const tid = tenantId.trim();
   const staleLeadThresholdDays = options?.staleLeadStageDays ?? DEFAULT_STALE_LEAD_STAGE_DAYS;
 
-  const [operational, conversion, stages, enrichedLeads, recentActivity, hubspotImport] = await Promise.all([
-    loadTenantOperationalDashboard(tid, { staleLeadStageDays: staleLeadThresholdDays }),
-    loadConsultationConversionBoardPayload(tid),
+  const operational = await loadTenantOperationalDashboard(tid, { staleLeadStageDays: staleLeadThresholdDays });
+
+  const [conversion, stages, enrichedLeads, recentActivity, hubspotImport] = await Promise.all([
+    settle("conversion board", () => loadConsultationConversionBoardPayload(tid), null),
     loadCrmShellPipelineStages(tid),
-    loadEnrichedActiveLeads(tid),
-    loadRecentLeadFlowActivity(tid),
-    loadHubspotImportDiagnostics(tid),
+    settle("enriched leads", () => loadEnrichedActiveLeads(tid), [] as CrmKanbanLeadCard[]),
+    settle("recent activity", () => loadRecentLeadFlowActivity(tid), [] as LeadFlowActivityRow[]),
+    settle("hubspot import diagnostics", () => loadHubspotImportDiagnostics(tid), EMPTY_HUBSPOT_DIAGNOSTICS),
   ]);
 
   return {
@@ -182,14 +173,11 @@ export async function loadLeadFlowDashboardPayload(
     clinicToday: operational.clinicToday,
     crmPipelineLeadVolume: operational.crmPipelineLeadVolume,
     crmPipelineStages: stages,
-    conversionKpis: conversion.kpis,
-    conversionLostCount: conversion.columns.lost.length,
+    conversionKpis: conversion?.kpis ?? EMPTY_CONVERSION_KPIS,
+    conversionLostCount: conversion?.columns.lost.length ?? 0,
     enrichedLeads,
     recentActivity,
     hubspotImport,
     staleLeadThresholdDays,
   };
 }
-
-/** Re-export for diagnostics panels that need raw activity shape. */
-export type { FiCrmActivityEventRow };

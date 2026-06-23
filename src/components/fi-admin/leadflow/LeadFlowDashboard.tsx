@@ -1,13 +1,11 @@
-"use client";
-
 import Link from "next/link";
 import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { CrmLeadIndexViewTabs } from "@/src/components/fi/crm/CrmLeadIndexViewTabs";
 import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { LeadFlowNewLeadButton } from "@/src/components/fi-admin/leadflow/LeadFlowNewLeadButton";
 import { LeadFlowSystemDiagnostics } from "@/src/components/fi-admin/leadflow/LeadFlowSystemDiagnostics";
-import { dispatchOpenCreateLeadModal } from "@/src/lib/fiAdmin/clinicOsShellCreateLeadEvent";
-import type { LeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardLoader.server";
+import type { LeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardTypes";
 import {
   attentionSeverityClass,
   buildAtRiskLeadItems,
@@ -27,9 +25,7 @@ import type { CrmShellClinicOption, CrmShellOrgOption, CrmShellUserPickerOption 
 function LeadFlowPrimaryActions({ base }: { base: string }) {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
-      <button type="button" onClick={() => dispatchOpenCreateLeadModal()} className={leadFlowLinkButtonClass}>
-        New lead
-      </button>
+      <LeadFlowNewLeadButton />
       <Link href={`${base}/calendar`} className={leadFlowLinkButtonClass}>
         Open Calendar
       </Link>

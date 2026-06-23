@@ -43,7 +43,7 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       // unsafe-inline required for Next.js App Router hydration scripts
-      "script-src 'self' 'unsafe-inline' https://va.vercel-analytics.com https://vitals.vercel-insights.com",
+      "script-src 'self' 'unsafe-inline' https://va.vercel-analytics.com https://vitals.vercel-insights.com https://vercel.live",
       // unsafe-inline required for Tailwind CSS-in-JS class injection
       "style-src 'self' 'unsafe-inline'",
       // Supabase storage URLs are HTTPS; data:/blob: needed for canvas/previews

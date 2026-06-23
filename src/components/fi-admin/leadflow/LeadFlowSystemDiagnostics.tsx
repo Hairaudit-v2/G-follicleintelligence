@@ -5,7 +5,7 @@ import { CrmCreateLeadPanel } from "@/src/components/fi/crm/CrmCreateLeadPanel";
 import { CrmLeadIdJump } from "@/src/components/fi/crm/CrmLeadIdJump";
 import { CrmPipelinePanel } from "@/src/components/fi/crm/CrmDataPanels";
 import { DashboardCard, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
-import type { LeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardLoader.server";
+import type { LeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardTypes";
 import { summarizeHubspotDiagnostics } from "@/src/lib/fiAdmin/leadFlowPresentation";
 import type { CrmShellClinicOption, CrmShellOrgOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 

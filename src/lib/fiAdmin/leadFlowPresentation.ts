@@ -9,7 +9,7 @@ import type {
   LeadFlowActivityRow,
   LeadFlowDashboardPayload,
   LeadFlowHubspotDiagnostics,
-} from "@/src/lib/fiAdmin/leadFlowDashboardLoader.server";
+} from "@/src/lib/fiAdmin/leadFlowDashboardTypes";
 import type { TaskDueItem } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 
 export const leadFlowLinkButtonClass =

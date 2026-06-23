@@ -8,7 +8,7 @@ import {
   deriveBookingReadiness,
   hasUrgentLeadFlowAttention,
 } from "@/src/lib/fiAdmin/leadFlowPresentation";
-import type { LeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardLoader.server";
+import type { LeadFlowDashboardPayload } from "@/src/lib/fiAdmin/leadFlowDashboardTypes";
 import type { CrmKanbanLeadCard } from "@/src/lib/crm/types";
 
 const basePayload: LeadFlowDashboardPayload = {

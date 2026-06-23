@@ -5,6 +5,7 @@ import { ClinicOsOperationsCentre } from "@/src/components/fi-admin/operations/C
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
+import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 
@@ -30,7 +31,10 @@ export default async function ClinicOsOperationsPage({ params }: { params: Promi
     );
   }
 
-  const showCrmNav = await getCrmShellNavAllowed(tenantId);
+  const [showCrmNav, showDiagnosticsExpanded] = await Promise.all([
+    getCrmShellNavAllowed(tenantId),
+    canViewDashboardSystemDiagnostics(tenantId),
+  ]);
 
   let data;
   try {
@@ -43,7 +47,11 @@ export default async function ClinicOsOperationsPage({ params }: { params: Promi
 
   return (
     <CalendarToastProvider>
-      <ClinicOsOperationsCentre data={data} showCrmNav={showCrmNav} />
+      <ClinicOsOperationsCentre
+        data={data}
+        showCrmNav={showCrmNav}
+        showDiagnosticsExpanded={showDiagnosticsExpanded}
+      />
     </CalendarToastProvider>
   );
 }
