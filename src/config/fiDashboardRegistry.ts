@@ -126,14 +126,12 @@ export const FI_DASHBOARD_WIDGET_LABELS = {
   },
 } as const satisfies Record<FiDashboardWidgetKey, { title: string; description?: string }>;
 
-/** Default home stack order — keep `FiOsControlCentreHome` / Stage 3 default profile in sync when changing. */
+/**
+ * Legacy widget order — home dashboard now uses fixed command-centre sections in `FiOsControlCentreHome`.
+ * Platform maturity widgets remain available under System diagnostics (admin-only).
+ */
 export const FI_DASHBOARD_HOME_WIDGET_ORDER: readonly FiDashboardWidgetKey[] = [
-  "quick_actions",
-  "clinic_metrics",
-  "platform_development_progress",
-  "recent_platform_releases",
-  "operational_workspace",
-  "surgery_pipeline",
-  "my_workspace",
   "attention_centre",
+  "clinic_metrics",
+  "operational_workspace",
 ];
