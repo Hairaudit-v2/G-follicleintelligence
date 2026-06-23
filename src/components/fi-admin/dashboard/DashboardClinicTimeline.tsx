@@ -8,7 +8,6 @@ import type { TenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationa
 export function DashboardClinicTimeline(props: { base: string; data: TenantOperationalDashboard }) {
   const { base, data } = props;
   const entries = buildTodayTimeline({
-    tenantId: data.tenantId,
     base,
     operationalDay: data.operationalDay,
     agendaByBucket: data.agendaByBucket,

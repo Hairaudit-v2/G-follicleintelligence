@@ -289,14 +289,13 @@ function timelineLabelForBooking(bucket: AgendaBucket, row: DashboardBookingItem
 }
 
 export function buildTodayTimeline(input: {
-  tenantId: string;
   base: string;
   operationalDay: TenantOperationalDay;
   agendaByBucket: Record<AgendaBucket, DashboardBookingItem[]>;
   paymentCommercialKpis: TenantPaymentCommercialKpis;
   maxItems?: number;
 }): TimelineEntry[] {
-  const { tenantId, base, operationalDay, agendaByBucket, paymentCommercialKpis, maxItems = 12 } = input;
+  const { base, operationalDay, agendaByBucket, paymentCommercialKpis, maxItems = 12 } = input;
   const { localStartIso, localEndIso, calendarTimezone } = operationalDay;
 
   const appointmentEntries: TimelineEntry[] = (["consult", "surgery", "follow_up", "other"] as AgendaBucket[])

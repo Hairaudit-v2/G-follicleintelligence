@@ -95,7 +95,6 @@ export function FiOsControlCentreHome(props: {
   });
 
   const timelineEntries = buildTodayTimeline({
-    tenantId: data.tenantId,
     base,
     operationalDay: data.operationalDay,
     agendaByBucket: data.agendaByBucket,

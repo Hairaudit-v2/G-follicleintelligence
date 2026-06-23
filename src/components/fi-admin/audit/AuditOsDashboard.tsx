@@ -3,87 +3,53 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ClipboardList, ListChecks, Users } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, FileCheck } from "lucide-react";
 
-import { FiCard } from "@/src/components/fi-design/FiCard";
+import { AuditOsSystemDiagnostics } from "@/src/components/fi-admin/audit/AuditOsSystemDiagnostics";
+import { DashboardCard, SectionHeader, StatCard } from "@/src/components/fi-admin/dashboard-ui";
 import { FiEmptyState } from "@/src/components/fi-design/FiEmptyState";
-import { FiKpiTile } from "@/src/components/fi-design/FiKpiTile";
-import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
-import { FiQuickActionCard } from "@/src/components/fi-design/FiQuickActionCard";
-import type {
-  AuditActivityRow,
-  AuditDashboardKpis,
-  AuditPipelineSnapshot,
-  AuditQueueItem,
-} from "@/src/lib/fiAdmin/auditDashboardTypes";
+import type { AuditDashboardSnapshot } from "@/src/lib/fiAdmin/auditDashboardTypes";
+import {
+  auditOsLinkButtonClass,
+  buildAuditAttentionPriorities,
+  buildAuditHealthCards,
+  buildEvidenceReadinessSummary,
+  buildOutcomeSnapshotAreas,
+  buildQualityTrendMetrics,
+  buildRecentAuditCases,
+  formatAuditDateTime,
+  hasAuditWorkspaceData,
+  hasUrgentAuditAttention,
+} from "@/src/lib/fiAdmin/auditIntelligencePresentation";
 
-type DashboardResponse =
-  | ({ ok: true } & {
-      kpis: AuditDashboardKpis;
-      queue: AuditQueueItem[];
-      recent_audit_activity: AuditActivityRow[];
-      pipeline: AuditPipelineSnapshot;
-    })
-  | { ok: false; error?: string };
+type DashboardResponse = ({ ok: true } & AuditDashboardSnapshot) | { ok: false; error?: string };
 
-function formatShortId(id: string): string {
-  const t = id.trim();
-  if (t.length <= 10) return t;
-  return `${t.slice(0, 8)}…`;
-}
-
-function formatDateTime(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  } catch {
-    return iso;
+function statusBadgeClass(label: string): string {
+  if (label === "Released" || label === "Issued" || label === "Complete") {
+    return "bg-emerald-500/15 text-emerald-100 ring-emerald-500/30";
   }
-}
-
-function formatOldestQueue(kpis: AuditDashboardKpis): { value: string; description: string } {
-  if (kpis.pending_reviews === 0) {
-    return { value: "—", description: "No items in the audit queue" };
+  if (label === "Evidence needed" || label === "Incomplete" || label === "Needs revision") {
+    return "bg-amber-500/15 text-amber-100 ring-amber-400/35";
   }
-  if (!kpis.oldest_queue_created_at) {
-    return { value: "—", description: "Oldest draft or changes-required report" };
+  if (label === "Awaiting review" || label === "Ready for review" || label === "Under review") {
+    return "bg-sky-500/15 text-sky-200 ring-sky-500/30";
   }
-  const d = new Date(kpis.oldest_queue_created_at);
-  const now = Date.now();
-  const ageMs = now - d.getTime();
-  const days = Math.floor(ageMs / (24 * 60 * 60 * 1000));
-  const ageLabel = days >= 1 ? `${days}d in queue` : "< 1d in queue";
-  return {
-    value: d.toLocaleDateString(undefined, { dateStyle: "medium" }),
-    description: `${ageLabel} · oldest draft or changes-required`,
-  };
+  return "bg-white/[0.06] text-[#CBD5E1] ring-white/10";
 }
 
-function activityStatusLabel(status: string): string {
-  if (status === "approved") return "Issued";
-  if (status === "changes_required") return "Changes required";
-  return status;
+function outcomeStatusClass(status: "strong" | "building" | "limited"): string {
+  if (status === "strong") return "text-emerald-300 ring-emerald-500/30";
+  if (status === "building") return "text-sky-200 ring-sky-500/30";
+  return "text-slate-400 ring-white/10";
 }
 
-function queueStatusBadgeClass(status: string): string {
-  if (status === "draft") return "bg-sky-100 text-sky-900 ring-sky-200/80";
-  if (status === "changes_required") return "bg-amber-100 text-amber-950 ring-amber-200/80";
-  return "bg-slate-100 text-slate-800 ring-slate-200/80";
+function outcomeStatusLabel(status: "strong" | "building" | "limited"): string {
+  if (status === "strong") return "Strong";
+  if (status === "building") return "Building";
+  return "Limited";
 }
 
-function SectionCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
-  return (
-    <FiCard>
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-      {description ? <p className="mt-1 text-sm text-slate-600">{description}</p> : null}
-      <div className="mt-3">{children}</div>
-    </FiCard>
-  );
-}
-
-export function AuditOsDashboard() {
+export function AuditOsDashboard({ showDiagnosticsExpanded = false }: { showDiagnosticsExpanded?: boolean }) {
   const params = useParams();
   const tenantId = (params.tenantId as string)?.trim() ?? "";
   const base = `/fi-admin/${tenantId}`;
@@ -106,13 +72,13 @@ export function AuditOsDashboard() {
   }, [load]);
 
   if (!tenantId) {
-    return <p className="text-sm text-slate-500">Missing tenant.</p>;
+    return <p className="text-sm text-[#94A3B8]">Missing tenant.</p>;
   }
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center text-sm text-slate-500">
-        Loading AuditOS…
+      <div className="rounded-xl border border-dashed border-white/[0.1] bg-[#0c1220]/60 px-4 py-10 text-center text-sm text-[#94A3B8]">
+        Loading Audit Intelligence…
       </div>
     );
   }
@@ -135,224 +101,266 @@ export function AuditOsDashboard() {
     );
   }
 
-  const { kpis, queue, recent_audit_activity, pipeline } = data;
-  const oldest = formatOldestQueue(kpis);
-  const hasAnyReports =
-    kpis.draft_reports + kpis.changes_required_reports + kpis.released_reports > 0;
-  const pipelineBusy = pipeline.model_runs.queued + pipeline.model_runs.running > 0;
-  const pipelineHasFailures = pipeline.model_runs.failed > 0;
+  const snapshot: AuditDashboardSnapshot = {
+    kpis: data.kpis,
+    queue: data.queue,
+    recent_audit_activity: data.recent_audit_activity,
+    pipeline: data.pipeline,
+  };
+
+  const healthCards = buildAuditHealthCards(snapshot);
+  const attentionItems = buildAuditAttentionPriorities(base, snapshot, 5);
+  const showCalmAttention = !hasUrgentAuditAttention(attentionItems);
+  const outcomeAreas = buildOutcomeSnapshotAreas(snapshot);
+  const evidence = buildEvidenceReadinessSummary(data.kpis);
+  const recentCases = buildRecentAuditCases(data.queue, data.recent_audit_activity, 8);
+  const qualityTrends = buildQualityTrendMetrics(data.kpis);
+  const hasData = hasAuditWorkspaceData(snapshot);
+  const pendingAnchor = data.kpis.pending_reviews > 0 ? "#recent-audit-cases" : undefined;
 
   return (
-    <div className="space-y-6">
-      <FiPageHeader
-        eyebrow="FI OS"
-        title="AuditOS"
-        description="Read-only overview of the HairAudit-style report queue, human audit trail, and FI scoring pipeline for this tenant. Open a report to approve, reject, or review — workflows are unchanged."
-        titleId="auditos-dashboard-heading"
-      />
-
-      {!hasAnyReports &&
-      recent_audit_activity.length === 0 &&
-      pipeline.scorecards_total === 0 &&
-      pipeline.model_runs.complete === 0 ? (
-        <FiEmptyState
-          title="No audit data yet"
-          description="When reports are generated or auditors act, KPIs, queue rows, activity, and pipeline counts will appear here. SurgeryOS cases can feed the report pipeline after ingest."
+    <div className="mx-auto min-w-0 max-w-[88rem] space-y-8 pb-10 sm:space-y-10 sm:pb-14">
+      <DashboardCard elevated className="relative overflow-hidden p-6 sm:p-8">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(560px_260px_at_0%_0%,rgba(34,193,255,0.11),transparent_55%),radial-gradient(420px_200px_at_100%_100%,rgba(124,58,237,0.07),transparent_50%)]"
+          aria-hidden
         />
+        <div className="relative border-l-4 border-[#22C1FF]/80 pl-5 sm:pl-6">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22C1FF]/95">FI OS</p>
+          <h1 id="auditos-dashboard-heading" className="mt-3 text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-4xl">
+            Audit Intelligence
+          </h1>
+          <p className="mt-2 max-w-3xl text-base leading-relaxed text-[#94A3B8]">
+            Clinical quality, outcome review, patient evidence, and audit readiness across surgical cases.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Link href="/hair-audit/admin" className={auditOsLinkButtonClass}>
+              Open AuditOS
+            </Link>
+            <Link href={`${base}/cases`} className={auditOsLinkButtonClass}>
+              Open HairAudit Cases
+            </Link>
+            <Link href={`${base}/foundation-integrity`} className={auditOsLinkButtonClass}>
+              Open Patient Twin
+            </Link>
+            <Link href={`${base}/cases`} className={auditOsLinkButtonClass}>
+              Open SurgeryOS
+            </Link>
+            {pendingAnchor ? (
+              <Link href={`${base}/audit${pendingAnchor}`} className={auditOsLinkButtonClass}>
+                Review pending reports
+              </Link>
+            ) : (
+              <span className={auditOsLinkButtonClass} title="No pending reports">
+                Review pending reports
+              </span>
+            )}
+          </div>
+        </div>
+      </DashboardCard>
+
+      {!hasData ? (
+        <DashboardCard className="p-5 sm:p-6">
+          <FiEmptyState
+            title="No audit data yet"
+            description="When surgical cases enter review and outcome reports are captured, clinical quality signals will appear here."
+          />
+        </DashboardCard>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-        <FiKpiTile label="Draft reports" value={String(kpis.draft_reports)} description="Awaiting review" tone="info" />
-        <FiKpiTile
-          label="Changes required"
-          value={String(kpis.changes_required_reports)}
-          description="Returned to pipeline or data"
-          tone={kpis.changes_required_reports > 0 ? "warning" : "neutral"}
+      <DashboardCard className="p-5 sm:p-6">
+        <SectionHeader
+          kicker="Health"
+          title="Clinical audit health"
+          description="Clinic-facing signals for outcome review, evidence completeness, and report readiness."
+          className="mb-4"
         />
-        <FiKpiTile
-          label="Released reports"
-          value={String(kpis.released_reports)}
-          description="Issued (immutable)"
-          tone="success"
-        />
-        <FiKpiTile
-          label="Pending reviews"
-          value={String(kpis.pending_reviews)}
-          description="Draft + changes required"
-          tone={kpis.pending_reviews > 0 ? "warning" : "neutral"}
-        />
-        <FiKpiTile label="Oldest queue item" value={oldest.value} description={oldest.description} tone="neutral" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="space-y-5 lg:col-span-8">
-          <SectionCard
-            title="Audit queue"
-            description="Reports in draft or changes-required status. Select a row to open the existing review screen."
-          >
-            <div id="audit-queue" className="scroll-mt-24">
-              {queue.length === 0 ? (
-                <FiEmptyState
-                  title="Queue is clear"
-                  description="No reports are waiting for audit right now. New drafts appear here after the FI report pipeline produces them."
-                />
-              ) : (
-                <div className="overflow-x-auto rounded-lg border border-slate-200">
-                  <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50/90">
-                        <th className="px-3 py-2.5 font-semibold text-slate-700">Report</th>
-                        <th className="px-3 py-2.5 font-semibold text-slate-700">Case</th>
-                        <th className="px-3 py-2.5 font-semibold text-slate-700">Patient</th>
-                        <th className="px-3 py-2.5 font-semibold text-slate-700">Status</th>
-                        <th className="px-3 py-2.5 font-semibold text-slate-700">Created</th>
-                        <th className="px-3 py-2.5 font-semibold text-slate-700">Ver.</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {queue.map((q) => (
-                        <tr key={q.report_id} className="hover:bg-slate-50/80">
-                          <td className="px-3 py-2.5 align-top">
-                            <Link
-                              href={`${base}/audit/${q.report_id}`}
-                              className="font-medium text-sky-700 hover:underline"
-                            >
-                              {formatShortId(q.report_id)}
-                            </Link>
-                          </td>
-                          <td className="px-3 py-2.5 align-top">
-                            <Link
-                              href={`${base}/cases/${q.case_id}`}
-                              className="text-sky-700 hover:underline"
-                              title="Open case in SurgeryOS"
-                            >
-                              {formatShortId(q.case_id)}
-                            </Link>
-                          </td>
-                          <td className="max-w-[220px] px-3 py-2.5 align-top text-slate-700">
-                            <span className="block truncate font-medium">{q.patient?.full_name?.trim() || "—"}</span>
-                            <span className="block truncate text-xs text-slate-500">{q.patient?.email?.trim() || "—"}</span>
-                          </td>
-                          <td className="px-3 py-2.5 align-top">
-                            <span
-                              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${queueStatusBadgeClass(q.report_status)}`}
-                            >
-                              {q.report_status}
-                            </span>
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-2.5 align-top text-slate-600">{formatDateTime(q.created_at)}</td>
-                          <td className="whitespace-nowrap px-3 py-2.5 align-top tabular-nums text-slate-600">{q.version}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {healthCards.map((card) => (
+            <div
+              key={card.id}
+              className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4"
+            >
+              <p className="text-sm font-semibold text-[#F8FAFC]">{card.label}</p>
+              <p className="mt-2 text-3xl font-semibold tabular-nums text-[#F8FAFC]">{card.value}</p>
+              <p className="mt-2 text-xs leading-relaxed text-[#64748B]">{card.detail}</p>
             </div>
-          </SectionCard>
+          ))}
+        </div>
+      </DashboardCard>
 
-          <SectionCard
-            title="Recent audit activity"
-            description="Latest rows from fi_audits (approve / reject decisions)."
-          >
-            {recent_audit_activity.length === 0 ? (
-              <FiEmptyState
-                title="No audit decisions recorded"
-                description="Approvals and rejections append to the audit trail when reviewers use the existing review routes."
-              />
-            ) : (
-              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
-                {recent_audit_activity.map((row) => (
-                  <li key={row.id} className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
-                            row.status === "approved"
-                              ? "bg-emerald-100 text-emerald-950 ring-emerald-200/80"
-                              : "bg-amber-100 text-amber-950 ring-amber-200/80"
-                          }`}
-                        >
-                          {activityStatusLabel(row.status)}
-                        </span>
-                        <span className="text-xs text-slate-500">{formatDateTime(row.created_at)}</span>
-                      </div>
-                      <p className="mt-1 text-sm text-slate-700">
-                        Report{" "}
-                        <Link href={`${base}/audit/${row.report_id}`} className="font-medium text-sky-700 hover:underline">
-                          {formatShortId(row.report_id)}
-                        </Link>
-                        {" · "}
-                        <Link href={`${base}/cases/${row.case_id}`} className="text-sky-700 hover:underline">
-                          Case {formatShortId(row.case_id)}
-                        </Link>
-                      </p>
-                      {row.note ? <p className="mt-1 text-xs text-slate-600 line-clamp-2">{row.note}</p> : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </SectionCard>
-
-          <SectionCard
-            title="Report pipeline status"
-            description="fi_model_runs job counts and total fi_scorecards rows for this tenant (read-only health)."
-          >
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <FiKpiTile label="Runs queued" value={String(pipeline.model_runs.queued)} tone={pipelineBusy ? "info" : "neutral"} />
-              <FiKpiTile
-                label="Runs running"
-                value={String(pipeline.model_runs.running)}
-                tone={pipeline.model_runs.running > 0 ? "info" : "neutral"}
-              />
-              <FiKpiTile
-                label="Runs failed"
-                value={String(pipeline.model_runs.failed)}
-                tone={pipelineHasFailures ? "danger" : "neutral"}
-              />
-              <FiKpiTile label="Runs complete" value={String(pipeline.model_runs.complete)} tone="success" />
-            </div>
-            <p className="mt-4 text-sm text-slate-600">
-              <span className="font-semibold text-slate-800">{pipeline.scorecards_total}</span> scorecard
-              {pipeline.scorecards_total === 1 ? "" : "s"} recorded for this tenant (fi_scorecards).
+      <DashboardCard className="p-5 sm:p-6">
+        <SectionHeader
+          kicker="Priorities"
+          title="What needs attention"
+          description="Top audit priorities ranked for clinical leads — act here first."
+          className="mb-4"
+        />
+        {showCalmAttention ? (
+          <div className="flex gap-3 rounded-xl border border-emerald-500/25 bg-emerald-950/20 px-4 py-4">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" aria-hidden />
+            <p className="text-sm leading-relaxed text-emerald-50/95">
+              No urgent audit issues detected. Continue capturing consistent evidence to strengthen outcome intelligence.
             </p>
-          </SectionCard>
-        </div>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {attentionItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex flex-col gap-2 rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-3 sm:flex-row sm:items-start sm:justify-between"
+              >
+                <div className="flex min-w-0 gap-3">
+                  <AlertCircle
+                    className={`mt-0.5 h-5 w-5 shrink-0 ${
+                      item.severity === "critical" ? "text-orange-300" : item.severity === "warning" ? "text-amber-200" : "text-sky-300"
+                    }`}
+                    aria-hidden
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[#F8FAFC]">{item.headline}</p>
+                    {item.detail ? <p className="mt-1 text-xs leading-relaxed text-[#64748B]">{item.detail}</p> : null}
+                  </div>
+                </div>
+                {item.href ? (
+                  <Link
+                    href={item.href}
+                    className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#22C1FF] hover:text-[#22C1FF]/80"
+                  >
+                    Review
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardCard>
 
-        <div className="space-y-4 lg:col-span-4">
-          <FiCard>
-            <h2 className="text-sm font-semibold text-slate-900">Quick actions</h2>
-            <p className="mt-1 text-sm text-slate-600">Shortcuts use existing FI OS routes only.</p>
-            <div className="mt-4 grid grid-cols-1 gap-3">
-              <FiQuickActionCard
-                title="Open SurgeryOS"
-                description="Case worklist, planning, procedures, and readiness."
-                href={`${base}/cases`}
-                icon={<ClipboardList className="h-5 w-5" aria-hidden />}
-                showOpenAffordance={false}
-                className="!min-h-0 sm:!min-h-0"
-              />
-              <FiQuickActionCard
-                title="Open PatientOS"
-                description="Patient directory and profiles."
-                href={`${base}/patients`}
-                icon={<Users className="h-5 w-5" aria-hidden />}
-                showOpenAffordance={false}
-                className="!min-h-0 sm:!min-h-0"
-              />
-              <FiQuickActionCard
-                title="Review queue"
-                description="Jump to the audit queue table on this page."
-                href={`${base}/audit#audit-queue`}
-                icon={<ListChecks className="h-5 w-5" aria-hidden />}
-                showOpenAffordance={false}
-                className="!min-h-0 sm:!min-h-0"
-              />
+      <DashboardCard className="p-5 sm:p-6">
+        <SectionHeader
+          kicker="Outcomes"
+          title="Outcome intelligence snapshot"
+          description="Clinical interpretation of donor recovery, growth visibility, and follow-up coverage."
+          className="mb-4"
+        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {outcomeAreas.map((area) => (
+            <div
+              key={area.id}
+              className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-semibold text-[#F8FAFC]">{area.label}</p>
+                {area.id !== "limited" ? (
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${outcomeStatusClass(area.status)}`}
+                  >
+                    {outcomeStatusLabel(area.status)}
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">{area.summary}</p>
             </div>
-          </FiCard>
+          ))}
         </div>
-      </div>
+      </DashboardCard>
+
+      <DashboardCard className="p-5 sm:p-6">
+        <SectionHeader
+          kicker="Evidence"
+          title="Evidence readiness"
+          description="Photo, media, and report readiness across cases in audit review."
+          className="mb-4"
+        />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard label="Complete evidence sets" value={evidence.completeSets} icon={<FileCheck size={18} />} />
+          <StatCard label="Incomplete evidence sets" value={evidence.incompleteSets} />
+          <StatCard label="Missing follow-up photos" value={evidence.missingFollowUp} />
+          <StatCard label="Ready for auditor review" value={evidence.readyForReview} />
+        </div>
+      </DashboardCard>
+
+      <DashboardCard className="p-5 sm:p-6" id="recent-audit-cases">
+        <SectionHeader
+          kicker="Cases"
+          title="Recent audit cases"
+          description="Surgical cases in active or recent audit review with evidence and report readiness."
+          className="mb-4"
+        />
+        {recentCases.length === 0 ? (
+          <p className="text-sm text-[#64748B]">No cases in audit review yet. Link surgery cases to begin outcome tracking.</p>
+        ) : (
+          <ul className="space-y-3">
+            {recentCases.map((row) => (
+              <li
+                key={row.id}
+                className="rounded-xl border border-white/[0.08] bg-[#0c1220]/75 px-4 py-4"
+              >
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-[#F8FAFC]">{row.patientLabel}</p>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${statusBadgeClass(row.statusLabel)}`}
+                      >
+                        {row.statusLabel}
+                      </span>
+                    </div>
+                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-3">
+                      <div>
+                        <dt className="text-[#64748B]">Evidence readiness</dt>
+                        <dd className="mt-0.5 font-medium text-[#CBD5E1]">{row.evidenceLabel}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[#64748B]">Report readiness</dt>
+                        <dd className="mt-0.5 font-medium text-[#CBD5E1]">{row.reportLabel}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[#64748B]">Last updated</dt>
+                        <dd className="mt-0.5 font-medium text-[#CBD5E1]">{formatAuditDateTime(row.updatedAt)}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <div className="flex flex-wrap gap-2 lg:shrink-0 lg:justify-end">
+                    <Link href={`${base}/cases/${row.caseId}`} className={auditOsLinkButtonClass}>
+                      Open case
+                    </Link>
+                    <Link href={`${base}/audit/${row.reportId}`} className={auditOsLinkButtonClass}>
+                      Review evidence
+                    </Link>
+                    <Link href={`${base}/cases/${row.caseId}`} className={auditOsLinkButtonClass}>
+                      View patient twin
+                    </Link>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardCard>
+
+      <DashboardCard className="p-5 sm:p-6">
+        <SectionHeader
+          kicker="Trends"
+          title="Quality trends"
+          description="Simple outcome and evidence rates from completed audit activity."
+          className="mb-4"
+        />
+        {qualityTrends ? (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {qualityTrends.map((metric) => (
+              <StatCard key={metric.id} label={metric.label} value={metric.value} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm leading-relaxed text-[#64748B]">
+            Quality trend intelligence will appear once more reports and follow-up evidence are completed.
+          </p>
+        )}
+      </DashboardCard>
+
+      <AuditOsSystemDiagnostics snapshot={snapshot} showDiagnosticsExpanded={showDiagnosticsExpanded} />
     </div>
   );
 }
