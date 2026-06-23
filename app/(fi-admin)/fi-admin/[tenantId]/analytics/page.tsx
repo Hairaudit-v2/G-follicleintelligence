@@ -1,21 +1,46 @@
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 
-import { AnalyticsExecutiveIntelligence } from "@/src/components/fi-admin/analytics/AnalyticsExecutiveIntelligence";
 import { AnalyticsOsDashboard } from "@/src/components/fi-admin/analytics/AnalyticsOsDashboard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { loadAnalyticsExecutiveDashboard } from "@/src/lib/analytics-os/analyticsExecutive.server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { isFiOsPlatformAdminFullSessionBypass, resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadAnalyticsOsDashboard } from "@/src/lib/fiAdmin/analyticsOsDashboardRead.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
+import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
 
 export const metadata = {
   title: "AnalyticsOS",
-  description: "Executive intelligence across leads, patients, surgery, audit, foundation health, and clinic operations.",
+  description:
+    "Executive intelligence across revenue, consultations, surgery, patients, workforce, and clinic performance.",
   robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
+
+async function resolveAnalyticsDiagnosticsExpanded(
+  tenantId: string,
+  authUserId: string | null
+): Promise<boolean> {
+  if (!authUserId) return false;
+  if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) return true;
+
+  const os = await loadFiOsIdentity(authUserId);
+  if (os?.osRole === "fi_admin" || os?.osRole === "fi_platform_admin") return true;
+
+  const { data } = await supabaseAdmin()
+    .from("fi_users")
+    .select("role")
+    .eq("tenant_id", tenantId.trim())
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+
+  const role = normalizeFiOsRole((data as { role?: string | null } | null)?.role);
+  return role === "fi_admin" || role === "admin";
+}
 
 export default async function AnalyticsOsPage({ params }: { params: Promise<{ tenantId: string }> }) {
   noStore();
@@ -32,20 +57,26 @@ export default async function AnalyticsOsPage({ params }: { params: Promise<{ te
     );
   }
 
-  const [showCrmNav, showBookingsBoard] = await Promise.all([
-    getCrmShellNavAllowed(tenantId),
-    getBookingsBoardNavAllowed(tenantId),
+  const tid = tenantId.trim();
+
+  const [showCrmNav, showBookingsBoard, authUserId] = await Promise.all([
+    getCrmShellNavAllowed(tid),
+    getBookingsBoardNavAllowed(tid),
+    resolveAuthUserId(),
   ]);
 
+  const showDiagnosticsExpanded = await resolveAnalyticsDiagnosticsExpanded(tid, authUserId);
+
   const [model, executive] = await Promise.all([
-    loadAnalyticsOsDashboard(tenantId.trim(), { showCrmNav, showBookingsBoard }),
-    loadAnalyticsExecutiveDashboard(tenantId.trim()),
+    loadAnalyticsOsDashboard(tid, { showCrmNav, showBookingsBoard }),
+    loadAnalyticsExecutiveDashboard(tid),
   ]);
 
   return (
-    <div className="space-y-10">
-      <AnalyticsExecutiveIntelligence model={executive} />
-      <AnalyticsOsDashboard model={model} />
-    </div>
+    <AnalyticsOsDashboard
+      model={model}
+      executive={executive}
+      showDiagnosticsExpanded={showDiagnosticsExpanded}
+    />
   );
 }
