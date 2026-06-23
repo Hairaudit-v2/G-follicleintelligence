@@ -29,5 +29,9 @@ export default async function TenantPrescriptionsWorkspacePage({
     return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
   }
 
-  return <PrescriptionsWorkspacePage tenantId={tenantId.trim()} />;
+  return (
+    <div className="p-4 sm:p-6">
+      <PrescriptionsWorkspacePage tenantId={tenantId.trim()} />
+    </div>
+  );
 }
