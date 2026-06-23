@@ -136,10 +136,10 @@ export const HOME_PAGE_CONTENT = {
     eyebrow: "Enterprise hair restoration infrastructure",
     headline: "The Operating System for Global Hair Restoration",
     subheadline:
-      "One connected operating system for acquisition, clinical workflow, surgical intelligence, workforce, finance, training, and outcomes.",
+      "Run enquiries, consultations, surgery planning, patient records, staff management, payments, and clinical outcomes from one connected operating system built specifically for modern hair restoration clinics.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
     secondaryCta: { label: "View Platform Progress", href: "/platform/progress" as const },
-    supportingLine: "Built for modern hair restoration clinics.",
+    supportingLine: "Built for clinics today. Designed for the future of global hair restoration medicine.",
     orbitModules: [
       { label: "LeadFlowOS", subtitle: "Acquisition & pipeline" },
       { label: "ClinicOS", subtitle: "Operations spine" },
@@ -161,18 +161,18 @@ export const HOME_PAGE_CONTENT = {
     subtext:
       "From first enquiry to long-term outcomes—every part of the clinic in one platform.",
     modules: [
-      { name: "LeadFlow", description: "Patient acquisition and conversion" },
-      { name: "ReceptionOS", description: "Front desk and scheduling" },
-      { name: "ConsultationOS", description: "Clinical consultation workflow" },
-      { name: "SurgeryOS", description: "Procedure planning and surgical intelligence" },
-      { name: "FinancialOS", description: "Revenue intelligence and finance" },
-      { name: "WorkforceOS", description: "Staff management and SOP compliance" },
-      { name: "PatientOS", description: "Patient communication and treatment journeys" },
-      { name: "ImagingOS", description: "Clinical imaging and scalp mapping" },
-      { name: "AuditOS", description: "Clinical auditing and outcome verification" },
-      { name: "AcademyOS", description: "Training, certification, and competency" },
-      { name: "AnalyticsOS", description: "Business intelligence and reporting" },
-      { name: "ClinicOS", description: "Multi-location operational infrastructure" },
+      { name: "LeadFlow", description: "Capture enquiries faster, automate follow-up, and convert more consultations into procedures." },
+      { name: "ReceptionOS", description: "Manage appointments, front desk workflow, staff availability, and clinic scheduling from one place." },
+      { name: "ConsultationOS", description: "Standardize consultations, treatment plans, recommendations, quotes, and patient handovers." },
+      { name: "SurgeryOS", description: "Plan procedures, coordinate surgical teams, track grafts, and improve procedure quality." },
+      { name: "FinancialOS", description: "Track payments, revenue, outstanding balances, and clinic financial performance clearly." },
+      { name: "WorkforceOS", description: "Keep onboarding, training, SOPs, staff permissions, and compliance organized." },
+      { name: "PatientOS", description: "Manage patient journeys, communication, records, treatment history, and long-term care." },
+      { name: "ImagingOS", description: "Organize clinical photography, scalp imaging, treatment documentation, and visual progress tracking." },
+      { name: "AuditOS", description: "Track outcomes, review procedures, measure quality, and improve patient accountability." },
+      { name: "AcademyOS", description: "Train surgeons, certify teams, and maintain competency standards across the clinic." },
+      { name: "AnalyticsOS", description: "Understand conversion rates, productivity, financial trends, and operational performance." },
+      { name: "ClinicOS", description: "Coordinate daily clinic operations, staff schedules, appointments, and operational workflow." },
     ] satisfies readonly HomeEcosystemModule[],
   },
 
@@ -204,27 +204,27 @@ export const HOME_PAGE_CONTENT = {
     cards: [
       {
         title: "Clinical Intelligence",
-        description: "Clinical systems designed to improve diagnosis and patient outcomes.",
+        description: "Improve diagnosis, treatment planning, and patient assessment using connected clinical systems.",
         bullets: ["AI diagnostics", "Blood interpretation", "Trichology intelligence"],
       },
       {
         title: "Surgical Intelligence",
-        description: "Surgical systems built for high-precision hair restoration.",
+        description: "Track procedures, improve graft quality, and create more consistent surgical outcomes.",
         bullets: ["Live graft counting", "Transection monitoring", "Procedure analytics"],
       },
       {
         title: "Financial Intelligence",
-        description: "Financial systems built for visibility, forecasting, and operational growth.",
+        description: "Monitor revenue, payments, forecasting, and business performance across the clinic.",
         bullets: ["Revenue forecasting", "Accounts receivable", "Executive dashboards"],
       },
       {
         title: "Workforce Intelligence",
-        description: "Workforce systems for team performance and compliance.",
+        description: "Keep teams trained, compliant, credentialed, and operationally aligned.",
         bullets: ["Staff onboarding", "SOP compliance", "Readiness scoring"],
       },
       {
         title: "Outcome Intelligence",
-        description: "Outcome verification for measurable clinical accountability.",
+        description: "Track long-term patient outcomes and continuously improve clinical quality.",
         bullets: ["HairAudit verification", "Growth tracking", "Long-term analytics"],
       },
     ] satisfies readonly HomeEnterpriseInfrastructureCard[],
@@ -238,15 +238,15 @@ export const HOME_PAGE_CONTENT = {
     cards: [
       {
         title: "Growing Clinics",
-        description: "Scale demand without operational chaos.",
+        description: "Manage growth without losing control of patient follow-up, operations, and team coordination.",
       },
       {
         title: "Established Clinics",
-        description: "Standardize teams, improve conversion, and optimize surgery.",
+        description: "Improve consistency, optimize team performance, and standardize the patient journey.",
       },
       {
         title: "Enterprise Groups",
-        description: "Multi-location infrastructure with connected intelligence.",
+        description: "Manage multiple locations using connected systems, centralized reporting, and shared intelligence.",
       },
     ] satisfies readonly HomeClinicStageCard[],
   },
@@ -256,7 +256,7 @@ export const HOME_PAGE_CONTENT = {
     storyEyebrow: "Intelligence network",
     headline: "The Intelligence Network",
     subtext:
-      "Diagnostics, clinical workflow, surgical intelligence, and outcomes—one continuously learning ecosystem.",
+      "Diagnostics, clinical workflow, surgical intelligence, and outcomes—a connected system that improves with every patient and procedure.",
     cards: [
       {
         title: "Clinical Intelligence",
@@ -264,11 +264,11 @@ export const HOME_PAGE_CONTENT = {
       },
       {
         title: "Surgical Intelligence",
-        description: "Every procedure measured with purpose-built surgical systems.",
+        description: "Every procedure tracked to improve quality and consistency over time.",
       },
       {
         title: "Outcome Intelligence",
-        description: "Recovery, growth progression, and long-term results—continuously monitored.",
+        description: "Recovery, growth progression, and long-term results—monitored and reviewed.",
       },
     ] satisfies readonly HomeIntelligenceNetworkCard[],
   },
@@ -277,7 +277,7 @@ export const HOME_PAGE_CONTENT = {
     id: "investor-positioning",
     headline: "We Are Building The Data Layer For The Future Of Hair Restoration Medicine",
     subheadline:
-      "Every consultation, treatment, surgery, and patient outcome continuously improves intelligence across the entire ecosystem.",
+      "Every consultation, treatment, surgery, and patient outcome helps improve the way clinics diagnose, treat, operate, and deliver better long-term patient results.",
     subheadline2:
       "Over time, this creates the world's most valuable structured dataset in hair restoration medicine.",
   },
@@ -285,29 +285,29 @@ export const HOME_PAGE_CONTENT = {
   industrySoftwareGap: {
     id: "industry-software-gap",
     storyEyebrow: "The industry problem",
-    headline: "Why Generic Systems Fail Hair Restoration Clinics",
+    headline: "The Industry Has Outgrown Generic Software",
     subtext:
-      "Clinics run on fragmented tools never designed for this specialty.",
+      "Most hair restoration clinics still rely on disconnected software, spreadsheets, manual systems, and fragmented workflows that create inefficiency across daily operations.",
     currentProblems: {
       headline: "Disconnected Operational Systems",
       items: [
-        "Generic CRM platforms",
-        "Multiple disconnected calendars",
+        "Lost or poorly managed leads",
+        "Manual patient follow-up",
+        "Disconnected appointment systems",
         "Spreadsheet-based surgery planning",
-        "Manual patient communication",
-        "Fragmented financial reporting",
-        "No procedural intelligence layer",
+        "Limited financial visibility",
+        "No unified patient journey tracking",
       ],
     },
     modernNeeds: {
       headline: "What Modern Clinics Actually Need",
       items: [
-        "Unified patient acquisition",
-        "Clinical intelligence infrastructure",
-        "Purpose-built surgical workflow",
-        "Outcome measurement architecture",
-        "Financial operating intelligence",
-        "Longitudinal patient intelligence",
+        "Faster lead conversion",
+        "Better team coordination",
+        "Standardized consultations",
+        "Structured surgical planning",
+        "Better patient communication",
+        "Full operational visibility",
       ],
     },
     closingStatement: {
@@ -1077,7 +1077,7 @@ Follicle Intelligence exists to change that—not for a single operator, but as 
     id: "final-cta",
     eyebrow: "Enterprise infrastructure",
     headline: "Building Infrastructure For The Future Of Hair Restoration",
-    subtext: "Built for clinics today. Designed to power global hair restoration medicine.",
+    subtext: "Built to help clinics run smarter today while creating the foundation for the future of hair restoration medicine.",
     primaryCta: { label: "Explore The Platform", href: "/platform" as const },
     secondaryCta: { label: "Request Enterprise Access", href: "/demo" as const },
   },
