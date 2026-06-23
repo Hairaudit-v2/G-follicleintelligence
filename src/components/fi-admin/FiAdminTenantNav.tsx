@@ -204,13 +204,13 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
 
   groups.push({
     id: "foundationos",
-    label: "FoundationOS",
-    description: "Patient identity, media, timelines, events, and Patient Twin health.",
+    label: "Patient Twin",
+    description: "Unified patient identity, media, clinical timeline, and treatment history.",
     items: [
       {
         href: `${base}/foundation-integrity`,
-        label: "FoundationOS",
-        title: "FoundationOS — patient identity, media, timelines, events, and Patient Twin health.",
+        label: "Patient Twin",
+        title: "Patient Twin — unified patient identity, media, clinical timeline, and treatment history.",
       },
     ],
   });

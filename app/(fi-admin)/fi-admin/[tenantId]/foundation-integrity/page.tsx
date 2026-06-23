@@ -8,10 +8,15 @@ import {
   loadPhotoProtocolAnalyticsForTenant,
 } from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolAnalyticsLoader.server";
 import { loadPhotoProtocolAlertEventsForTenant } from "@/src/lib/hair-intelligence/photoProtocols/protocolAlertEvents.server";
+import { isFiOsPlatformAdminFullSessionBypass, resolveAuthUserId } from "@/src/lib/crm/crmGate";
+import {
+  buildPatientOsOverviewFallback,
+  loadPatientOsOverview,
+} from "@/src/lib/patients/patientOsDashboardLoader.server";
 
 export const metadata = {
-  title: "FoundationOS",
-  description: "Patient identity resolution, media unification, timelines, events, and Patient Twin health.",
+  title: "Patient Twin",
+  description: "Unified patient identity, media, clinical timeline, and treatment history across FI OS.",
   robots: { index: false, follow: false },
 };
 
@@ -24,7 +29,22 @@ export default async function FoundationIntegrityPage({ params }: { params: Prom
 
   const tid = tenantId.trim();
 
-  const data = await loadFoundationOsDashboard(tid);
+  const [data, patientOsResult, authUserId] = await Promise.all([
+    loadFoundationOsDashboard(tid),
+    loadPatientOsOverview(tid).catch(() => null),
+    resolveAuthUserId(),
+  ]);
+
+  const patientOs =
+    patientOsResult ??
+    buildPatientOsOverviewFallback({
+      totalPatients: data.twin_health.foundation_patients,
+      activePatients: 0,
+      withActiveCase: 0,
+      withFutureBooking: 0,
+    });
+
+  const showDiagnosticsExpanded = authUserId ? await isFiOsPlatformAdminFullSessionBypass(authUserId) : false;
 
   let analytics: Awaited<ReturnType<typeof loadPhotoProtocolAnalyticsForTenant>> | null = null;
   let incomplete: Awaited<ReturnType<typeof loadIncompletePhotoProtocolSessionsForTenant>> = [];
@@ -57,8 +77,14 @@ export default async function FoundationIntegrityPage({ params }: { params: Prom
     : null;
 
   return (
-    <div className="mx-auto max-w-[88rem] min-w-0 space-y-6 px-4 py-6 sm:px-6">
-      <FoundationOsDashboard tenantId={tid} data={data} photoProtocol={photoProtocol} />
+    <div className="mx-auto max-w-[88rem] min-w-0 px-1 sm:px-0">
+      <FoundationOsDashboard
+        tenantId={tid}
+        data={data}
+        patientOs={patientOs}
+        photoProtocol={photoProtocol}
+        showDiagnosticsExpanded={showDiagnosticsExpanded}
+      />
     </div>
   );
 }
