@@ -317,7 +317,7 @@ describe("reception board regression guard", () => {
   it("keeps legacy /reception board on tenant operational dashboard loader", () => {
     const receptionPage = readFileSync("app/(fi-admin)/fi-admin/[tenantId]/reception/page.tsx", "utf8");
     assert.match(receptionPage, /loadTenantOperationalDashboard/);
-    assert.match(receptionPage, /ReceptionBoardClient/);
+    assert.match(receptionPage, /ReceptionBoardDashboard/);
     assert.doesNotMatch(receptionPage, /loadReceptionOsBoardPayload/);
     assert.doesNotMatch(receptionPage, /ReceptionOsDashboard/);
   });

@@ -2,14 +2,16 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { CalendarToastProvider } from "@/components/calendar/CalendarToast";
-import { ReceptionBoardClient, type ReceptionMutationMode } from "@/src/components/fi-admin/reception/ReceptionBoardClient";
+import { ReceptionBoardDashboard } from "@/src/components/fi-admin/reception/ReceptionBoardDashboard";
+import type { ReceptionMutationMode } from "@/src/components/fi-admin/reception/ReceptionPatientFlowBoard";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSystemDiagnosticsAccess.server";
 import { assertFiTenantPortalAccessUnlessStaffPinSession } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadTenantOperationalDashboard } from "@/src/lib/fiOs/tenantOperationalDashboardLoader.server";
 import { getClinicFloorSessionIfAllowed } from "@/src/lib/staffPin/clinicFloorAccess";
 
 export const metadata = {
-  title: "Reception board",
+  title: "Reception Board",
   robots: { index: false, follow: false },
 };
 
@@ -32,10 +34,12 @@ export default async function FiAdminReceptionBoardPage({ params }: { params: Pr
 
   let data: Awaited<ReturnType<typeof loadTenantOperationalDashboard>>;
   let session: Awaited<ReturnType<typeof getClinicFloorSessionIfAllowed>>;
+  let showDiagnosticsExpanded: boolean;
   try {
-    [data, session] = await Promise.all([
+    [data, session, showDiagnosticsExpanded] = await Promise.all([
       loadTenantOperationalDashboard(tenantId.trim(), { includeReceptionBoard: true }),
       getClinicFloorSessionIfAllowed(tenantId.trim()),
+      canViewDashboardSystemDiagnostics(tenantId.trim()),
     ]);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
@@ -48,18 +52,13 @@ export default async function FiAdminReceptionBoardPage({ params }: { params: Pr
     mutationMode = session.authMode === "staff_pin" ? "pin_reception" : "full";
   }
 
-  const base = `/fi-admin/${data.tenantId}`;
-
   return (
     <CalendarToastProvider>
       <div className="p-4 sm:p-6">
-        <ReceptionBoardClient
-          tenantId={data.tenantId}
-          base={base}
-          calendarTimezone={data.operationalDay.calendarTimezone}
-          todayYmd={data.operationalDay.todayYmd}
-          cards={data.receptionBoard.cards}
+        <ReceptionBoardDashboard
+          data={data}
           mutationMode={mutationMode}
+          showDiagnosticsExpanded={showDiagnosticsExpanded}
         />
       </div>
     </CalendarToastProvider>
