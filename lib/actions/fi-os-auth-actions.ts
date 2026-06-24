@@ -107,6 +107,7 @@ export async function fiOsPasswordSignInAction(formData: FormData): Promise<void
 }
 
 export async function fiOsRequestPasswordResetAction(formData: FormData): Promise<{ ok: true } | { ok: false; error: string }> {
+  console.info("[fi-os-auth] SERVER FORGOT PASSWORD ACTION ENTERED");
   const email = String(formData.get("email") ?? "").trim();
   if (!email) {
     return { ok: false, error: "Enter the email address for your OS account." };

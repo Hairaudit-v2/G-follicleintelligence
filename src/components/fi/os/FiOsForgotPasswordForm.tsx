@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 
 import { fiOsRequestPasswordResetAction } from "@/lib/actions/fi-os-auth-actions";
@@ -10,21 +10,35 @@ export function FiOsForgotPasswordForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    console.log("CLIENT FORGOT PASSWORD FORM MOUNTED (AUTH DEBUG BUILD 4be26ac)");
+  }, []);
+
   return (
     <form
       className="space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
+        console.log("CLIENT FORGOT PASSWORD SUBMIT");
         const fd = new FormData(e.currentTarget);
         setMessage(null);
         setError(null);
-        startTransition(async () => {
-          const r = await fiOsRequestPasswordResetAction(fd);
-          if (r.ok) {
-            setMessage("If an account exists for that email, we sent a reset link. Check your inbox and spam folder.");
-          } else {
-            setError(r.error);
-          }
+        startTransition(() => {
+          void (async () => {
+            try {
+              console.log("CLIENT FORGOT PASSWORD calling fiOsRequestPasswordResetAction");
+              const r = await fiOsRequestPasswordResetAction(fd);
+              console.log("CLIENT FORGOT PASSWORD action result", r);
+              if (r.ok) {
+                setMessage("If an account exists for that email, we sent a reset link. Check your inbox and spam folder.");
+              } else {
+                setError(r.error);
+              }
+            } catch (err) {
+              console.error("CLIENT FORGOT PASSWORD action threw", err);
+              setError("Could not start password recovery. Try again or contact support.");
+            }
+          })();
         });
       }}
     >
