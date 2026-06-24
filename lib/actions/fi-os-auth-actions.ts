@@ -118,14 +118,19 @@ export async function fiOsRequestPasswordResetAction(formData: FormData): Promis
     return { ok: false, error: "Server misconfigured." };
   }
 
-  const origin = getRequestOrigin().replace(/\/$/, "");
-
   const supabase = createClient(url, anon, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  const redirectUrl = "https://follicleintelligence.ai/follicle-intelligence/update-password";
+
+  console.log("PASSWORD RESET DEBUG");
+  console.log("EMAIL:", email);
+  console.log("REDIRECT URL:", redirectUrl);
+  console.log("Sending redirectTo:", redirectUrl);
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/follicle-intelligence/update-password`,
+    redirectTo: redirectUrl,
   });
 
   if (error) {
