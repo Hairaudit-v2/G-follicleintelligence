@@ -18,7 +18,7 @@ function firstForwardedValue(raw: string | null): string | null {
   return first && first.length > 0 ? first : null;
 }
 
-function getRequestOrigin(): string {
+function _getRequestOrigin(): string {
   const h = headers();
   const host = firstForwardedValue(h.get("x-forwarded-host")) ?? h.get("host")?.trim() ?? null;
   const protoRaw = firstForwardedValue(h.get("x-forwarded-proto")) ?? "http";
