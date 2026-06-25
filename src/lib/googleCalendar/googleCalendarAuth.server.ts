@@ -208,7 +208,7 @@ async function refreshOAuthToken(
 /** Begin Google Calendar OAuth2 connection — returns authorize URL (no secrets client-side). */
 export async function connectGoogleCalendar(
   tenantId: string,
-  opts: ServerOpts & { statePayload?: Record<string, unknown> } = {}
+  _opts: ServerOpts & { statePayload?: Record<string, unknown> } = {}
 ): Promise<ConnectGoogleCalendarResult> {
   const config = resolveGoogleOAuthConfig();
   if (!config) {

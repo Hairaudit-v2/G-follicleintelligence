@@ -50,7 +50,7 @@ function createMockSupabase() {
     from(table: string) {
       if (table === "fi_calendar_integrations") {
         return {
-          upsert(row: IntegrationRow, opts?: { onConflict?: string }) {
+          upsert(row: IntegrationRow, _opts?: { onConflict?: string }) {
             const tenantId = String(row.tenant_id);
             const calendarId = String(row.calendar_id);
             const idx = integrations.findIndex(
@@ -477,7 +477,7 @@ describe("CalendarOS GC-1 — OAuth and token refresh", () => {
       { supabaseClientForTests: client }
     );
 
-    const fetchOverride: typeof fetch = async (url, init) => {
+    const fetchOverride: typeof fetch = async (url, _init) => {
       if (String(url).includes("oauth2.googleapis.com/token")) {
         return new Response(
           JSON.stringify({
