@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { LEADFLOW_EVENT_META_KEY } from "@/src/lib/leadFlow/leadFlowEventMeta";
-import type { FiExternalEventRow, FiLeadActivityRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
+import type { FiExternalEventRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
 import { loadLeadFlowQueueHealth } from "@/src/lib/leadFlow/leadFlowQueueHealth.server";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
@@ -44,7 +44,7 @@ function matchesHealthFilters(row: Record<string, unknown>, filters: Record<stri
 }
 
 function makeHealthStoreSupabase(store: Store): SupabaseClient {
-  const from = (table: string) => {
+  const from = (_table: string) => {
     const buildSelect = (opts?: { count?: string; head?: boolean }) => {
       const filters: Record<string, unknown> = {};
       let gteCol: { col: string; val: string } | null = null;

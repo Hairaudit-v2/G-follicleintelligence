@@ -41,6 +41,11 @@ function makeLead(overrides: Partial<FiLeadRow> = {}): FiLeadRow {
     current_stage: "new",
     lead_score: 0,
     conversion_probability: 0,
+    priority_band: null,
+    predicted_procedure: null,
+    scoring_reasons: [],
+    risk_flags: [],
+    scored_at: null,
     assigned_consultant: null,
     created_at: now,
     updated_at: now,
@@ -364,5 +369,139 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
     assert.equal(first.error, null);
     assert.equal(second.error?.code, "23505");
     assert.equal(store.externalEvents.length, 1);
+  });
+});
+
+describe("LeadFlow LF-3 HubSpot lead scoring", () => {
+  it("HubSpot-created lead receives score", async () => {
+    const store: Store = { externalEvents: [], leads: [], activity: [] };
+    const supabase = makeStoreSupabase(store);
+    const normalized = normalizeHubSpotContactToLead({
+      hubspot_contact_id: "801",
+      properties: {
+        firstname: "Score",
+        email: "score@example.com",
+        phone: "+61 400 111 222",
+        procedure_interest: "FUE transplant",
+        country: "Australia",
+        budget_range: "high",
+      },
+    });
+    assert.ok(normalized);
+
+    const result = await upsertLeadFromHubSpotContact(TENANT, normalized!, { supabase });
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+
+    assert.ok((store.leads[0]?.lead_score ?? 0) > 0);
+    assert.ok(store.leads[0]?.priority_band);
+    assert.ok(store.leads[0]?.predicted_procedure);
+    assert.ok(store.leads[0]?.scored_at);
+    assert.ok(Array.isArray(store.leads[0]?.scoring_reasons));
+  });
+
+  it("updated HubSpot lead recalculates score", async () => {
+    const store: Store = {
+      externalEvents: [],
+      leads: [
+        makeLead({
+          hubspot_contact_id: "802",
+          email: "recalc@example.com",
+          lead_score: 10,
+          conversion_probability: 8,
+          priority_band: "low",
+          predicted_procedure: "unknown",
+          scored_at: new Date().toISOString(),
+        }),
+      ],
+      activity: [],
+    };
+    const supabase = makeStoreSupabase(store);
+    const normalized = normalizeHubSpotContactToLead({
+      hubspot_contact_id: "802",
+      properties: {
+        email: "recalc@example.com",
+        phone: "+61 400 333 444",
+        procedure_interest: "FUE crown transplant",
+        budget_range: "surgery-ready",
+        country: "Australia",
+      },
+    });
+    assert.ok(normalized);
+
+    const result = await upsertLeadFromHubSpotContact(TENANT, normalized!, { supabase });
+    assert.equal(result.ok, true);
+    assert.ok((store.leads[0]?.lead_score ?? 0) > 10);
+    assert.notEqual(store.leads[0]?.priority_band, "low");
+    assert.equal(store.leads[0]?.predicted_procedure, "fue_transplant");
+  });
+
+  it("priority band change appends activity", async () => {
+    const store: Store = {
+      externalEvents: [],
+      leads: [
+        makeLead({
+          hubspot_contact_id: "803",
+          email: "band@example.com",
+          lead_score: 20,
+          priority_band: "low",
+          predicted_procedure: "unknown",
+          scored_at: new Date().toISOString(),
+        }),
+      ],
+      activity: [],
+    };
+    const supabase = makeStoreSupabase(store);
+    const normalized = normalizeHubSpotContactToLead({
+      hubspot_contact_id: "803",
+      properties: {
+        email: "band@example.com",
+        phone: "+61 400 555 666",
+        procedure_interest: "FUE hairline",
+        budget_range: "high",
+        country: "Australia",
+        lifecyclestage: "appointmentscheduled",
+      },
+    });
+    assert.ok(normalized);
+
+    const result = await upsertLeadFromHubSpotContact(TENANT, normalized!, { supabase });
+    assert.equal(result.ok, true);
+    assert.notEqual(store.leads[0]?.priority_band, "low");
+    assert.ok(store.activity.some((a) => a.activity_type === "priority_band_changed"));
+  });
+
+  it("predicted procedure change appends activity", async () => {
+    const store: Store = {
+      externalEvents: [],
+      leads: [
+        makeLead({
+          hubspot_contact_id: "804",
+          email: "proc@example.com",
+          phone: "61400555666",
+          procedure_interest: "PRP",
+          lead_score: 35,
+          priority_band: "low",
+          predicted_procedure: "prp",
+          scored_at: new Date().toISOString(),
+        }),
+      ],
+      activity: [],
+    };
+    const supabase = makeStoreSupabase(store);
+    const normalized = normalizeHubSpotContactToLead({
+      hubspot_contact_id: "804",
+      properties: {
+        email: "proc@example.com",
+        phone: "+61 400 555 666",
+        procedure_interest: "bad transplant repair case",
+      },
+    });
+    assert.ok(normalized);
+
+    const result = await upsertLeadFromHubSpotContact(TENANT, normalized!, { supabase });
+    assert.equal(result.ok, true);
+    assert.equal(store.leads[0]?.predicted_procedure, "repair_case");
+    assert.ok(store.activity.some((a) => a.activity_type === "predicted_procedure_changed"));
   });
 });

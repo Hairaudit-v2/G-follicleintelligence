@@ -37,6 +37,11 @@ export type FiLeadRow = {
   current_stage: FiLeadCurrentStage | string;
   lead_score: number;
   conversion_probability: number;
+  priority_band: string | null;
+  predicted_procedure: string | null;
+  scoring_reasons: string[] | unknown;
+  risk_flags: string[] | unknown;
+  scored_at: string | null;
   assigned_consultant: string | null;
   created_at: string;
   updated_at: string;

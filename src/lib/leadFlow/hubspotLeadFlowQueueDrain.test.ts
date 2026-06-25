@@ -84,11 +84,11 @@ function makeDrainStoreSupabase(store: Store): SupabaseClient {
         return chain;
       },
       maybeSingle: async () => {
-        let rows = getRows(table, filters, gteCol, notNullCol, orderCol, orderAsc, limit);
+        const rows = getRows(table, filters, gteCol, notNullCol, orderCol, orderAsc, limit);
         return { data: rows[0] ?? null, error: null, count: rows.length };
       },
       then: (onF: (v: unknown) => unknown, onR?: (e: unknown) => unknown) => {
-        let rows = getRows(table, filters, gteCol, notNullCol, orderCol, orderAsc, limit);
+        const rows = getRows(table, filters, gteCol, notNullCol, orderCol, orderAsc, limit);
         if (opts?.head && opts?.count === "exact") {
           return Promise.resolve({ data: null, error: null, count: rows.length }).then(onF, onR);
         }

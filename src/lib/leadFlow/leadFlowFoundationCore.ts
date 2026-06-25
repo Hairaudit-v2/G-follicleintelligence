@@ -43,6 +43,8 @@ export const FI_LEAD_ACTIVITY_TYPES = [
   "lead_updated",
   "stage_changed",
   "score_updated",
+  "priority_band_changed",
+  "predicted_procedure_changed",
   "consultant_assigned",
   "external_event_processed",
   "note_added",
@@ -143,6 +145,32 @@ export function buildLeadScoreUpdatedActivityMetadata(input: {
     ...(input.nextConversionProbability != null
       ? { next_conversion_probability: clampLeadScore(input.nextConversionProbability) }
       : {}),
+    ...(input.source?.trim() ? { source: input.source.trim() } : {}),
+  };
+}
+
+export function buildPriorityBandChangedActivityMetadata(input: {
+  fromBand: string;
+  toBand: string;
+  leadScore?: number;
+  source?: string | null;
+}): Record<string, unknown> {
+  return {
+    from_priority_band: input.fromBand,
+    to_priority_band: input.toBand,
+    ...(input.leadScore != null ? { lead_score: clampLeadScore(input.leadScore) } : {}),
+    ...(input.source?.trim() ? { source: input.source.trim() } : {}),
+  };
+}
+
+export function buildPredictedProcedureChangedActivityMetadata(input: {
+  fromProcedure: string;
+  toProcedure: string;
+  source?: string | null;
+}): Record<string, unknown> {
+  return {
+    from_predicted_procedure: input.fromProcedure,
+    to_predicted_procedure: input.toProcedure,
     ...(input.source?.trim() ? { source: input.source.trim() } : {}),
   };
 }

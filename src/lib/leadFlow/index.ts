@@ -18,6 +18,8 @@ export {
   assertLeadStageTransition,
   buildExternalEventProcessedActivityMetadata,
   buildLeadScoreUpdatedActivityMetadata,
+  buildPredictedProcedureChangedActivityMetadata,
+  buildPriorityBandChangedActivityMetadata,
   buildLeadStageChangedActivityMetadata,
   canTransitionLeadStage,
   clampLeadScore,
@@ -59,3 +61,22 @@ export {
   resolveHubSpotDealObjectId,
   resolveHubSpotLeadFlowEventType,
 } from "@/src/lib/leadFlow/hubspotLeadFlowCore";
+
+export type {
+  LeadPriorityBand,
+  LeadScoringActivityPlan,
+  LeadScoringInput,
+  LeadScoringResult,
+  PredictedProcedure,
+} from "@/src/lib/leadFlow/leadScoringEngine";
+
+export {
+  LEAD_PRIORITY_BANDS,
+  PREDICTED_PROCEDURES,
+  buildLeadScoringActivityPlan,
+  leadScoringInputFromLeadRow,
+  leadScoringRowFromResult,
+  mergeLeadRowForScoring,
+  resolveLeadPriorityBand,
+  scoreLead,
+} from "@/src/lib/leadFlow/leadScoringEngine";

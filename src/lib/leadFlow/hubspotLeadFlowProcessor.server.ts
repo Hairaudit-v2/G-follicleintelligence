@@ -3,10 +3,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   buildExternalEventProcessedActivityMetadata,
+  buildPredictedProcedureChangedActivityMetadata,
+  buildPriorityBandChangedActivityMetadata,
   type FiLeadActivityType,
 } from "@/src/lib/leadFlow/leadFlowFoundationCore";
 import { mergeLeadFlowEventMeta, readLeadFlowEventMeta } from "@/src/lib/leadFlow/leadFlowEventMeta";
-import type { FiExternalEventRow, FiLeadActivityRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
+import type { FiExternalEventRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
 import {
   buildLeadUpsertPlan,
   buildStageChangedActivityMetadataFromPlan,
@@ -15,8 +17,16 @@ import {
   leadUpdateRowFromPatch,
   normalizeHubSpotContactToLead,
   normalizeHubSpotDealToLeadPatch,
+  type HubSpotLeadFieldPatch,
   type NormalizedHubSpotLeadInput,
 } from "@/src/lib/leadFlow/hubspotLeadFlowCore";
+import {
+  buildLeadScoringActivityPlan,
+  leadScoringInputFromLeadRow,
+  leadScoringRowFromResult,
+  mergeLeadRowForScoring,
+  scoreLead,
+} from "@/src/lib/leadFlow/leadScoringEngine";
 
 const HUBSPOT_PROVIDER = "hubspot";
 export const LEADFLOW_HUBSPOT_PROCESS_DEFAULT_BATCH = 50;
@@ -45,6 +55,68 @@ async function appendLeadActivity(
     metadata: input.metadata && typeof input.metadata === "object" ? input.metadata : {},
   });
   if (error) console.error("[appendLeadActivity]", error.message);
+}
+
+async function appendLeadScoringActivities(
+  supabase: SupabaseClient,
+  leadId: string,
+  previous: {
+    priority_band?: string | null;
+    predicted_procedure?: string | null;
+  } | null,
+  scoring: ReturnType<typeof scoreLead>,
+  source: string
+): Promise<void> {
+  const plan = buildLeadScoringActivityPlan(previous, scoring);
+  if (plan.priorityBandChanged && plan.previousPriorityBand) {
+    await appendLeadActivity(supabase, {
+      leadId,
+      activityType: "priority_band_changed",
+      metadata: buildPriorityBandChangedActivityMetadata({
+        fromBand: plan.previousPriorityBand,
+        toBand: plan.nextPriorityBand,
+        leadScore: scoring.lead_score,
+        source,
+      }),
+    });
+  }
+  if (plan.predictedProcedureChanged && plan.previousPredictedProcedure) {
+    await appendLeadActivity(supabase, {
+      leadId,
+      activityType: "predicted_procedure_changed",
+      metadata: buildPredictedProcedureChangedActivityMetadata({
+        fromProcedure: plan.previousPredictedProcedure,
+        toProcedure: plan.nextPredictedProcedure,
+        source,
+      }),
+    });
+  }
+}
+
+function scoringFieldsForNormalizedInput(input: NormalizedHubSpotLeadInput): Record<string, unknown> {
+  const scoring = scoreLead(
+    leadScoringInputFromLeadRow({
+      procedure_interest: input.procedureInterest,
+      lead_source: input.leadSource,
+      country: input.country,
+      budget_range: input.budgetRange,
+      current_stage: input.currentStage,
+      email: input.email,
+      phone: input.phone,
+      first_name: input.firstName,
+      last_name: input.lastName,
+    })
+  );
+  return leadScoringRowFromResult(scoring);
+}
+
+function scoringFieldsForLeadUpdate(
+  existing: FiLeadRow,
+  patch: HubSpotLeadFieldPatch
+): { fields: Record<string, unknown>; scoring: ReturnType<typeof scoreLead> } {
+  const scoringInput = mergeLeadRowForScoring(existing, patch);
+  const scoring = scoreLead(scoringInput);
+  return { fields: leadScoringRowFromResult(scoring), scoring };
 }
 
 function normalizeProcessBatchLimit(limit?: number): number {
@@ -313,7 +385,10 @@ export async function upsertLeadFromHubSpotContact(
   if (!existing) {
     const { data, error } = await supabase
       .from("fi_leads")
-      .insert(leadRowFromNormalizedInput(tenantId, input))
+      .insert({
+        ...leadRowFromNormalizedInput(tenantId, input),
+        ...scoringFieldsForNormalizedInput(input),
+      })
       .select("*")
       .single();
     if (error) {
@@ -348,7 +423,12 @@ export async function upsertLeadFromHubSpotContact(
     return { ok: true, lead: existing, created: false };
   }
 
-  const updateRow = leadUpdateRowFromPatch(plan.patch);
+  const { fields: scoringFields, scoring } = scoringFieldsForLeadUpdate(existing, plan.patch);
+  const previousScoringState = {
+    priority_band: existing.priority_band,
+    predicted_procedure: existing.predicted_procedure,
+  };
+  const updateRow = { ...leadUpdateRowFromPatch(plan.patch), ...scoringFields };
   const { data, error } = await supabase
     .from("fi_leads")
     .update(updateRow)
@@ -360,6 +440,8 @@ export async function upsertLeadFromHubSpotContact(
     return { ok: false, message: error.message };
   }
   const lead = data as FiLeadRow;
+
+  await appendLeadScoringActivities(supabase, lead.id, previousScoringState, scoring, "hubspot");
 
   if (plan.stageChanged) {
     await appendLeadActivity(supabase, {
