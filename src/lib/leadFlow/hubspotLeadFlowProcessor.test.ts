@@ -63,6 +63,9 @@ function makeExternalEvent(payload: Record<string, unknown>, overrides: Partial<
     provider_event_id: `evt-${randomUUID()}`,
     payload_json: payload,
     status: "pending",
+    error_message: null,
+    retry_count: 0,
+    last_retry_at: null,
     processed_at: null,
     created_at: new Date().toISOString(),
     ...overrides,
@@ -297,12 +300,14 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
 
     const result = await processHubSpotContactEvent(claimed!, supabase);
     assert.equal(result.ok, false);
-    await markExternalEventFailed(TENANT, event.id, result.ok ? undefined : result.message, supabase);
-    assert.equal(store.externalEvents[0]?.status, "failed");
-    const meta = (store.externalEvents[0]?.payload_json as Record<string, unknown>)?.[LEADFLOW_EVENT_META_KEY] as {
-      processing_error?: string;
-    };
-    assert.ok(meta?.processing_error);
+    const marked = await markExternalEventFailed(TENANT, event.id, result.ok ? undefined : result.message, supabase);
+    assert.equal(marked.ok, true);
+    if (!marked.ok) return;
+    assert.equal(marked.outcome, "retried");
+    assert.equal(store.externalEvents[0]?.status, "retrying");
+    assert.equal(store.externalEvents[0]?.retry_count, 1);
+    assert.ok(store.externalEvents[0]?.error_message);
+    assert.ok(store.externalEvents[0]?.last_retry_at);
   });
 
   it("moves pending events through processing to processed", async () => {
@@ -319,7 +324,7 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
     const supabase = makeStoreSupabase(store);
     const results = await processPendingHubSpotExternalEvents({ tenantId: TENANT, supabase });
     assert.equal(results.length, 1);
-    assert.equal(results[0]?.ok, true);
+    assert.equal(results[0]?.outcome, "processed");
     assert.equal(store.leads.length, 1);
     assert.equal(store.externalEvents[0]?.status, "processed");
     const meta = (store.externalEvents[0]?.payload_json as Record<string, unknown>)?.[LEADFLOW_EVENT_META_KEY] as {
@@ -369,6 +374,56 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
     assert.equal(first.error, null);
     assert.equal(second.error?.code, "23505");
     assert.equal(store.externalEvents.length, 1);
+  });
+
+  it("records error_message and increments retry_count on failure", async () => {
+    const store: Store = {
+      externalEvents: [makeExternalEvent({ properties: {} }, { external_id: null })],
+      leads: [],
+      activity: [],
+    };
+    const supabase = makeStoreSupabase(store);
+    const event = store.externalEvents[0]!;
+
+    await processPendingHubSpotExternalEvents({ tenantId: TENANT, limit: 1, supabase });
+
+    assert.equal(store.externalEvents[0]?.status, "retrying");
+    assert.equal(store.externalEvents[0]?.retry_count, 1);
+    assert.ok(store.externalEvents[0]?.error_message);
+  });
+
+  it("stops retrying after 3 failed attempts", async () => {
+    const store: Store = {
+      externalEvents: [
+        makeExternalEvent({ properties: {} }, { external_id: null, retry_count: 2, status: "retrying" }),
+      ],
+      leads: [],
+      activity: [],
+    };
+    const supabase = makeStoreSupabase(store);
+
+    await processPendingHubSpotExternalEvents({ tenantId: TENANT, limit: 1, supabase });
+
+    assert.equal(store.externalEvents[0]?.status, "failed");
+    assert.equal(store.externalEvents[0]?.retry_count, 3);
+  });
+
+  it("does not reprocess already processed events with same provider_event_id", async () => {
+    const store: Store = {
+      externalEvents: [
+        makeExternalEvent(
+          { hubspot_contact_id: "501", properties: { email: "done@example.com" } },
+          { provider_event_id: "evt-done", status: "processed", processed_at: new Date().toISOString() }
+        ),
+      ],
+      leads: [makeLead({ hubspot_contact_id: "501", email: "done@example.com" })],
+      activity: [],
+    };
+    const supabase = makeStoreSupabase(store);
+
+    const results = await processPendingHubSpotExternalEvents({ tenantId: TENANT, supabase });
+    assert.equal(results.length, 0);
+    assert.equal(store.externalEvents[0]?.status, "processed");
   });
 });
 

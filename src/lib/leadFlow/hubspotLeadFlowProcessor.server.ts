@@ -31,13 +31,19 @@ import {
 const HUBSPOT_PROVIDER = "hubspot";
 export const LEADFLOW_HUBSPOT_PROCESS_DEFAULT_BATCH = 50;
 export const LEADFLOW_HUBSPOT_PROCESS_MAX_BATCH = 100;
-/** Reclaim processing rows stuck longer than this back to pending. */
+/** Terminal after this many failed processing attempts. */
+export const LEADFLOW_HUBSPOT_MAX_EVENT_RETRIES = 3;
+/** Reclaim processing rows stuck longer than this back to pending/retrying. */
 export const LEADFLOW_HUBSPOT_STALE_PROCESSING_MS = 15 * 60 * 1000;
+
+const DRAINABLE_STATUSES = ["pending", "retrying"] as const;
+
+export type HubSpotExternalEventProcessOutcome = "processed" | "failed" | "retried" | "skipped";
 
 export type HubSpotExternalEventProcessResult = {
   eventId: string;
   tenantId: string;
-  ok: boolean;
+  outcome: HubSpotExternalEventProcessOutcome;
   message?: string;
 };
 
@@ -135,7 +141,7 @@ export async function loadPendingExternalEvents(opts?: {
     .from("fi_external_events")
     .select("*")
     .eq("provider", HUBSPOT_PROVIDER)
-    .eq("status", "pending")
+    .in("status", [...DRAINABLE_STATUSES])
     .order("created_at", { ascending: true })
     .limit(limit);
 
@@ -159,7 +165,7 @@ export async function listTenantIdsWithPendingHubSpotEvents(opts?: {
     .from("fi_external_events")
     .select("tenant_id")
     .eq("provider", HUBSPOT_PROVIDER)
-    .eq("status", "pending");
+    .in("status", [...DRAINABLE_STATUSES]);
 
   if (error) {
     console.error("[listTenantIdsWithPendingHubSpotEvents]", error.message);
@@ -182,22 +188,23 @@ export async function claimHubSpotExternalEventForProcessing(
   const client = supabase ?? supabaseAdmin();
   const nowIso = new Date().toISOString();
 
-  const { data: pending, error: loadError } = await client
+  const { data: drainable, error: loadError } = await client
     .from("fi_external_events")
     .select("*")
     .eq("tenant_id", tenantId.trim())
     .eq("id", eventId.trim())
     .eq("provider", HUBSPOT_PROVIDER)
-    .eq("status", "pending")
+    .in("status", [...DRAINABLE_STATUSES])
     .maybeSingle();
 
   if (loadError) {
     console.error("[claimHubSpotExternalEventForProcessing]", loadError.message);
     return null;
   }
-  if (!pending) return null;
+  if (!drainable) return null;
 
-  const row = pending as FiExternalEventRow;
+  const row = drainable as FiExternalEventRow;
+  const fromStatus = row.status;
   const payload =
     row.payload_json && typeof row.payload_json === "object" && !Array.isArray(row.payload_json)
       ? row.payload_json
@@ -210,7 +217,7 @@ export async function claimHubSpotExternalEventForProcessing(
     .eq("tenant_id", tenantId.trim())
     .eq("id", eventId.trim())
     .eq("provider", HUBSPOT_PROVIDER)
-    .eq("status", "pending")
+    .eq("status", fromStatus)
     .select("*")
     .maybeSingle();
 
@@ -257,9 +264,12 @@ export async function reclaimStaleProcessingHubSpotExternalEvents(opts?: {
     const startedMs = Date.parse(startedAt);
     if (!Number.isFinite(startedMs) || startedMs > cutoff) continue;
 
+    const retryCount = Number((row as FiExternalEventRow).retry_count ?? 0);
+    const reclaimStatus = retryCount > 0 ? "retrying" : "pending";
+
     const { error: updateError } = await client
       .from("fi_external_events")
-      .update({ status: "pending" })
+      .update({ status: reclaimStatus })
       .eq("tenant_id", row.tenant_id)
       .eq("id", row.id)
       .eq("status", "processing");
@@ -277,7 +287,11 @@ export async function markExternalEventProcessed(
   const client = supabase ?? supabaseAdmin();
   const { error } = await client
     .from("fi_external_events")
-    .update({ status: "processed", processed_at: new Date().toISOString() })
+    .update({
+      status: "processed",
+      processed_at: new Date().toISOString(),
+      error_message: null,
+    })
     .eq("tenant_id", tenantId.trim())
     .eq("id", eventId.trim());
   if (error) {
@@ -292,23 +306,29 @@ export async function markExternalEventFailed(
   eventId: string,
   message?: string,
   supabase?: SupabaseClient
-): Promise<boolean> {
+): Promise<{ ok: true; outcome: "failed" | "retried"; retryCount: number } | { ok: false }> {
   const client = supabase ?? supabaseAdmin();
   const nowIso = new Date().toISOString();
+  const errorMessage = message?.trim() || "Processing failed.";
 
   const { data: existing, error: loadError } = await client
     .from("fi_external_events")
-    .select("payload_json, status")
+    .select("payload_json, status, retry_count")
     .eq("tenant_id", tenantId.trim())
     .eq("id", eventId.trim())
     .maybeSingle();
 
   if (loadError) {
     console.error("[markExternalEventFailed]", loadError.message);
-    return false;
+    return { ok: false };
   }
 
   const fromStatus = String((existing as { status?: string } | null)?.status ?? "pending");
+  const currentRetryCount = Number((existing as { retry_count?: number } | null)?.retry_count ?? 0);
+  const nextRetryCount = currentRetryCount + 1;
+  const terminal = nextRetryCount >= LEADFLOW_HUBSPOT_MAX_EVENT_RETRIES;
+  const nextStatus = terminal ? "failed" : "retrying";
+
   const payload =
     existing &&
     typeof (existing as { payload_json?: unknown }).payload_json === "object" &&
@@ -317,22 +337,33 @@ export async function markExternalEventFailed(
       : {};
 
   const nextPayload = mergeLeadFlowEventMeta(payload, {
-    processing_error: message?.trim() || "Processing failed.",
+    processing_error: errorMessage,
     failed_at: nowIso,
     failed_from_status: fromStatus,
   });
 
   const { error } = await client
     .from("fi_external_events")
-    .update({ status: "failed", processed_at: nowIso, payload_json: nextPayload })
+    .update({
+      status: nextStatus,
+      processed_at: terminal ? nowIso : null,
+      error_message: errorMessage,
+      retry_count: nextRetryCount,
+      last_retry_at: nowIso,
+      payload_json: nextPayload,
+    })
     .eq("tenant_id", tenantId.trim())
     .eq("id", eventId.trim())
-    .in("status", ["pending", "processing"]);
+    .in("status", ["pending", "processing", "retrying"]);
   if (error) {
     console.error("[markExternalEventFailed]", error.message);
-    return false;
+    return { ok: false };
   }
-  return true;
+  return {
+    ok: true,
+    outcome: terminal ? "failed" : "retried",
+    retryCount: nextRetryCount,
+  };
 }
 
 async function findExistingLead(
@@ -542,15 +573,19 @@ export async function processPendingHubSpotExternalEvents(opts: {
 
   for (const event of pending) {
     const claimed = await claimHubSpotExternalEventForProcessing(event.id, tenantId, supabase);
-    if (!claimed) continue;
+    if (!claimed) {
+      results.push({ eventId: event.id, tenantId, outcome: "skipped" });
+      continue;
+    }
 
     const result = await processHubSpotContactEvent(claimed, supabase);
     if (!result.ok) {
-      await markExternalEventFailed(tenantId, claimed.id, result.message, supabase);
-      results.push({ eventId: claimed.id, tenantId, ok: false, message: result.message });
+      const marked = await markExternalEventFailed(tenantId, claimed.id, result.message, supabase);
+      const outcome = marked.ok ? marked.outcome : "failed";
+      results.push({ eventId: claimed.id, tenantId, outcome, message: result.message });
       continue;
     }
-    results.push({ eventId: claimed.id, tenantId, ok: true });
+    results.push({ eventId: claimed.id, tenantId, outcome: "processed" });
   }
 
   return results;

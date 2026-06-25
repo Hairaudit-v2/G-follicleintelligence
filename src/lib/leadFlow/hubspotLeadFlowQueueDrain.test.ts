@@ -3,10 +3,14 @@ import { randomUUID } from "node:crypto";
 import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { drainHubSpotLeadFlowQueue } from "@/src/lib/leadFlow/hubspotLeadFlowQueueDrain.server";
+import {
+  drainHubSpotLeadFlowQueue,
+  summarizeLeadFlowDrainResults,
+} from "@/src/lib/leadFlow/hubspotLeadFlowQueueDrain.server";
 import type { FiExternalEventRow, FiLeadActivityRow, FiLeadRow } from "@/src/lib/leadFlow/leadFlowFoundationTypes";
 
 const TENANT = "11111111-1111-4111-8111-111111111111";
+const TENANT_B = "22222222-2222-4222-8222-222222222222";
 
 type Store = {
   externalEvents: FiExternalEventRow[];
@@ -24,6 +28,9 @@ function makeExternalEvent(payload: Record<string, unknown>, overrides: Partial<
     provider_event_id: `evt-${randomUUID()}`,
     payload_json: payload,
     status: "pending",
+    error_message: null,
+    retry_count: 0,
+    last_retry_at: null,
     processed_at: null,
     created_at: new Date().toISOString(),
     ...overrides,
@@ -175,7 +182,7 @@ function makeDrainStoreSupabase(store: Store): SupabaseClient {
 }
 
 describe("LeadFlow LF-2B HubSpot queue drain", () => {
-  it("drains pending events for a tenant and returns health", async () => {
+  it("drains pending events for a tenant and returns API-shaped summary", async () => {
     const store: Store = {
       externalEvents: [
         makeExternalEvent({
@@ -189,11 +196,77 @@ describe("LeadFlow LF-2B HubSpot queue drain", () => {
     const supabase = makeDrainStoreSupabase(store);
     const result = await drainHubSpotLeadFlowQueue({ tenantId: TENANT, limit: 50, supabase });
 
-    assert.equal(result.mode, "single_tenant");
-    assert.equal(result.processed.length, 1);
-    assert.equal(result.processed[0]?.ok, true);
+    assert.equal(result.success, true);
+    assert.equal(result.processed, 1);
+    assert.equal(result.failed, 0);
+    assert.equal(result.retried, 0);
+    assert.equal(result.skipped, 0);
+    assert.equal(result.tenants.length, 1);
+    assert.equal(result.tenants[0]?.tenant_id, TENANT);
     assert.equal(store.leads.length, 1);
     assert.equal(result.health.counts.pending, 0);
     assert.equal(result.health.counts.processed, 1);
+  });
+
+  it("tenantId only processes that tenant", async () => {
+    const store: Store = {
+      externalEvents: [
+        makeExternalEvent(
+          { hubspot_contact_id: "1", properties: { email: "a@example.com" } },
+          { tenant_id: TENANT }
+        ),
+        makeExternalEvent(
+          { hubspot_contact_id: "2", properties: { email: "b@example.com" } },
+          { tenant_id: TENANT_B }
+        ),
+      ],
+      leads: [],
+      activity: [],
+    };
+    const supabase = makeDrainStoreSupabase(store);
+    const result = await drainHubSpotLeadFlowQueue({ tenantId: TENANT, supabase });
+
+    assert.equal(result.processed, 1);
+    assert.equal(store.leads.length, 1);
+    assert.equal(store.externalEvents.find((e) => e.tenant_id === TENANT_B)?.status, "pending");
+  });
+
+  it("all-tenant mode processes multiple tenants safely", async () => {
+    const store: Store = {
+      externalEvents: [
+        makeExternalEvent(
+          { hubspot_contact_id: "1", properties: { email: "a@example.com" } },
+          { tenant_id: TENANT }
+        ),
+        makeExternalEvent(
+          { hubspot_contact_id: "2", properties: { email: "b@example.com" } },
+          { tenant_id: TENANT_B }
+        ),
+      ],
+      leads: [],
+      activity: [],
+    };
+    const supabase = makeDrainStoreSupabase(store);
+    const result = await drainHubSpotLeadFlowQueue({ limit: 50, supabase });
+
+    assert.equal(result.mode, "all_tenants");
+    assert.equal(result.processed, 2);
+    assert.equal(result.tenants.length, 2);
+    assert.equal(store.leads.length, 2);
+  });
+
+  it("summarizeLeadFlowDrainResults aggregates outcomes", () => {
+    const summary = summarizeLeadFlowDrainResults([
+      { eventId: "1", tenantId: TENANT, outcome: "processed" },
+      { eventId: "2", tenantId: TENANT, outcome: "retried", message: "bad payload" },
+      { eventId: "3", tenantId: TENANT_B, outcome: "failed", message: "terminal" },
+      { eventId: "4", tenantId: TENANT_B, outcome: "skipped" },
+    ]);
+
+    assert.equal(summary.processed, 1);
+    assert.equal(summary.retried, 1);
+    assert.equal(summary.failed, 1);
+    assert.equal(summary.skipped, 1);
+    assert.equal(summary.tenants.length, 2);
   });
 });

@@ -21,6 +21,7 @@ export const FI_LEAD_EXTERNAL_EVENT_STATUSES = [
   "processing",
   "processed",
   "failed",
+  "retrying",
   "skipped",
 ] as const;
 export type FiLeadExternalEventStatus = (typeof FI_LEAD_EXTERNAL_EVENT_STATUSES)[number];

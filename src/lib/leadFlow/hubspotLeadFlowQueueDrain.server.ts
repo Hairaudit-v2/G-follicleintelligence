@@ -15,18 +15,82 @@ import {
 export const LEADFLOW_HUBSPOT_DRAIN_DEFAULT_BATCH = 50;
 export const LEADFLOW_HUBSPOT_DRAIN_MAX_BATCH = 100;
 
-export type HubSpotLeadFlowDrainResult = {
+export type LeadFlowDrainTenantSummary = {
+  tenant_id: string;
+  processed: number;
+  failed: number;
+  retried: number;
+  skipped: number;
+};
+
+export type LeadFlowDrainSummary = {
+  success: boolean;
+  processed: number;
+  failed: number;
+  retried: number;
+  skipped: number;
+  tenants: LeadFlowDrainTenantSummary[];
+};
+
+export type HubSpotLeadFlowDrainResult = LeadFlowDrainSummary & {
   mode: "single_tenant" | "all_tenants";
-  tenantId: string | null;
-  batchLimit: number;
-  reclaimedStaleProcessing: number;
-  tenantsTouched: number;
-  processed: HubSpotExternalEventProcessResult[];
+  tenant_id: string | null;
+  batch_limit: number;
+  reclaimed_stale_processing: number;
+  tenants_touched: number;
+  events: HubSpotExternalEventProcessResult[];
   health: LeadFlowQueueHealth;
 };
 
 function normalizeBatchLimit(limit?: number): number {
   return Math.min(Math.max(limit ?? LEADFLOW_HUBSPOT_DRAIN_DEFAULT_BATCH, 1), LEADFLOW_HUBSPOT_DRAIN_MAX_BATCH);
+}
+
+export function summarizeLeadFlowDrainResults(
+  results: HubSpotExternalEventProcessResult[]
+): LeadFlowDrainSummary {
+  const tenantMap = new Map<string, LeadFlowDrainTenantSummary>();
+
+  let processed = 0;
+  let failed = 0;
+  let retried = 0;
+  let skipped = 0;
+
+  for (const result of results) {
+    let summary = tenantMap.get(result.tenantId);
+    if (!summary) {
+      summary = { tenant_id: result.tenantId, processed: 0, failed: 0, retried: 0, skipped: 0 };
+      tenantMap.set(result.tenantId, summary);
+    }
+
+    switch (result.outcome) {
+      case "processed":
+        processed += 1;
+        summary.processed += 1;
+        break;
+      case "failed":
+        failed += 1;
+        summary.failed += 1;
+        break;
+      case "retried":
+        retried += 1;
+        summary.retried += 1;
+        break;
+      case "skipped":
+        skipped += 1;
+        summary.skipped += 1;
+        break;
+    }
+  }
+
+  return {
+    success: true,
+    processed,
+    failed,
+    retried,
+    skipped,
+    tenants: [...tenantMap.values()].sort((a, b) => a.tenant_id.localeCompare(b.tenant_id)),
+  };
 }
 
 /**
@@ -47,38 +111,38 @@ export async function drainHubSpotLeadFlowQueue(opts?: {
     supabase,
   });
 
+  let events: HubSpotExternalEventProcessResult[] = [];
+  let tenantsTouched = 0;
+  let mode: HubSpotLeadFlowDrainResult["mode"] = "all_tenants";
+
   if (tenantId) {
-    const processed = await processPendingHubSpotExternalEvents({
+    mode = "single_tenant";
+    events = await processPendingHubSpotExternalEvents({
       tenantId,
       limit: batchLimit,
       supabase,
     });
-    const health = await loadLeadFlowQueueHealth({ tenantId, supabase });
-    return {
-      mode: "single_tenant",
-      tenantId,
-      batchLimit,
-      reclaimedStaleProcessing,
-      tenantsTouched: 1,
-      processed,
-      health,
-    };
+    tenantsTouched = events.length > 0 ? 1 : 0;
+  } else {
+    const allTenants = await processAllTenantsPendingHubSpotExternalEvents({
+      limit: batchLimit,
+      supabase,
+    });
+    events = allTenants.results;
+    tenantsTouched = allTenants.tenantsTouched;
   }
 
-  const allTenants = await processAllTenantsPendingHubSpotExternalEvents({
-    limit: batchLimit,
-    supabase,
-  });
-
-  const health = await loadLeadFlowQueueHealth({ supabase });
+  const summary = summarizeLeadFlowDrainResults(events);
+  const health = await loadLeadFlowQueueHealth({ tenantId: tenantId ?? undefined, supabase });
 
   return {
-    mode: "all_tenants",
-    tenantId: null,
-    batchLimit,
-    reclaimedStaleProcessing,
-    tenantsTouched: allTenants.tenantsTouched,
-    processed: allTenants.results,
+    ...summary,
+    mode,
+    tenant_id: tenantId,
+    batch_limit: batchLimit,
+    reclaimed_stale_processing: reclaimedStaleProcessing,
+    tenants_touched: tenantsTouched,
+    events,
     health,
   };
 }

@@ -23,6 +23,9 @@ function makeExternalEvent(overrides: Partial<FiExternalEventRow> = {}): FiExter
     provider_event_id: `evt-${randomUUID()}`,
     payload_json: {},
     status: "pending",
+    error_message: null,
+    retry_count: 0,
+    last_retry_at: null,
     processed_at: null,
     created_at: new Date().toISOString(),
     ...overrides,
@@ -144,10 +147,15 @@ describe("LeadFlow queue health", () => {
           status: "pending",
           created_at: new Date(now - 60_000).toISOString(),
         }),
+        makeExternalEvent({ status: "retrying" }),
         makeExternalEvent({ status: "processing" }),
         makeExternalEvent({
           status: "processed",
           processed_at: new Date(now - 30_000).toISOString(),
+        }),
+        makeExternalEvent({
+          status: "processed",
+          processed_at: new Date(now - 30 * 60 * 1000).toISOString(),
         }),
         makeExternalEvent({
           status: "failed",
@@ -163,12 +171,14 @@ describe("LeadFlow queue health", () => {
 
     const health = await loadLeadFlowQueueHealth({ tenantId: TENANT, supabase });
     assert.equal(health.counts.pending, 1);
+    assert.equal(health.counts.retrying, 1);
     assert.equal(health.counts.processing, 1);
-    assert.equal(health.counts.processed, 1);
+    assert.equal(health.counts.processed, 2);
     assert.equal(health.counts.failed, 2);
-    assert.equal(health.failedLast24h, 2);
-    assert.ok(health.oldestPendingAt);
-    assert.ok(health.newestProcessedAt);
+    assert.equal(health.failed_last_24h, 2);
+    assert.equal(health.processed_last_24h, 2);
+    assert.ok(health.oldest_pending_at);
+    assert.ok(health.newest_processed_at);
   });
 });
 

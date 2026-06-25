@@ -6,18 +6,20 @@ const HUBSPOT_PROVIDER = "hubspot";
 
 export type LeadFlowQueueHealthCounts = {
   pending: number;
+  retrying: number;
   processing: number;
   processed: number;
   failed: number;
 };
 
 export type LeadFlowQueueHealth = {
-  tenantId: string | null;
+  tenant_id: string | null;
   provider: typeof HUBSPOT_PROVIDER;
   counts: LeadFlowQueueHealthCounts;
-  oldestPendingAt: string | null;
-  newestProcessedAt: string | null;
-  failedLast24h: number;
+  oldest_pending_at: string | null;
+  newest_processed_at: string | null;
+  failed_last_24h: number;
+  processed_last_24h: number;
 };
 
 async function countEvents(
@@ -57,25 +59,32 @@ export async function loadLeadFlowQueueHealth(opts?: {
 }): Promise<LeadFlowQueueHealth> {
   const supabase = opts?.supabase ?? supabaseAdmin();
   const tenantId = opts?.tenantId?.trim() || null;
-  const failedSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  const [pending, processing, processed, failed, failedLast24h] = await Promise.all([
-    countEvents(supabase, { tenantId: tenantId ?? undefined, status: "pending" }),
-    countEvents(supabase, { tenantId: tenantId ?? undefined, status: "processing" }),
-    countEvents(supabase, { tenantId: tenantId ?? undefined, status: "processed" }),
-    countEvents(supabase, { tenantId: tenantId ?? undefined, status: "failed" }),
-    countEvents(supabase, {
-      tenantId: tenantId ?? undefined,
-      status: "failed",
-      processedSince: failedSince,
-    }),
-  ]);
+  const [pending, retrying, processing, processed, failed, failedLast24h, processedLast24h] =
+    await Promise.all([
+      countEvents(supabase, { tenantId: tenantId ?? undefined, status: "pending" }),
+      countEvents(supabase, { tenantId: tenantId ?? undefined, status: "retrying" }),
+      countEvents(supabase, { tenantId: tenantId ?? undefined, status: "processing" }),
+      countEvents(supabase, { tenantId: tenantId ?? undefined, status: "processed" }),
+      countEvents(supabase, { tenantId: tenantId ?? undefined, status: "failed" }),
+      countEvents(supabase, {
+        tenantId: tenantId ?? undefined,
+        status: "failed",
+        processedSince: since24h,
+      }),
+      countEvents(supabase, {
+        tenantId: tenantId ?? undefined,
+        status: "processed",
+        processedSince: since24h,
+      }),
+    ]);
 
   let oldestPendingQuery = supabase
     .from("fi_external_events")
     .select("created_at")
     .eq("provider", HUBSPOT_PROVIDER)
-    .eq("status", "pending")
+    .in("status", ["pending", "retrying"])
     .order("created_at", { ascending: true })
     .limit(1);
   if (tenantId) oldestPendingQuery = oldestPendingQuery.eq("tenant_id", tenantId);
@@ -96,11 +105,12 @@ export async function loadLeadFlowQueueHealth(opts?: {
   ]);
 
   return {
-    tenantId,
+    tenant_id: tenantId,
     provider: HUBSPOT_PROVIDER,
-    counts: { pending, processing, processed, failed },
-    oldestPendingAt: (oldestPending as { created_at?: string } | null)?.created_at ?? null,
-    newestProcessedAt: (newestProcessed as { processed_at?: string } | null)?.processed_at ?? null,
-    failedLast24h,
+    counts: { pending, retrying, processing, processed, failed },
+    oldest_pending_at: (oldestPending as { created_at?: string } | null)?.created_at ?? null,
+    newest_processed_at: (newestProcessed as { processed_at?: string } | null)?.processed_at ?? null,
+    failed_last_24h: failedLast24h,
+    processed_last_24h: processedLast24h,
   };
 }

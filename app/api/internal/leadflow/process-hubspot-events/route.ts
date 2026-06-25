@@ -21,7 +21,7 @@ const bodySchema = z
   .strict();
 
 export async function GET() {
-  return NextResponse.json({ ok: false, error: "Method not allowed." }, { status: 405 });
+  return NextResponse.json({ success: false, error: "Method not allowed." }, { status: 405 });
 }
 
 export async function POST(req: NextRequest) {
@@ -37,13 +37,13 @@ export async function POST(req: NextRequest) {
     const text = await req.text();
     if (text.trim()) rawBody = JSON.parse(text);
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid JSON." }, { status: 400 });
+    return NextResponse.json({ success: false, error: "Invalid JSON." }, { status: 400 });
   }
 
   const parsed = bodySchema.safeParse(rawBody);
   if (!parsed.success) {
     const message = parsed.error.errors[0]?.message ?? "Invalid request body.";
-    return NextResponse.json({ ok: false, error: message }, { status: 400 });
+    return NextResponse.json({ success: false, error: message }, { status: 400 });
   }
 
   try {
@@ -51,10 +51,18 @@ export async function POST(req: NextRequest) {
       tenantId: parsed.data.tenantId,
       limit: parsed.data.limit,
     });
-    return NextResponse.json({ ok: true, ...result });
+
+    return NextResponse.json({
+      success: result.success,
+      processed: result.processed,
+      failed: result.failed,
+      retried: result.retried,
+      skipped: result.skipped,
+      tenants: result.tenants,
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : "unknown_error";
     logStructured("error", "leadflow_hubspot_drain_failed", { message });
-    return NextResponse.json({ ok: false, error: "Processor unavailable." }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Processor unavailable." }, { status: 500 });
   }
 }

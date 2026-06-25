@@ -18,6 +18,9 @@ export type FiExternalEventRow = {
   provider_event_id: string | null;
   payload_json: Record<string, unknown>;
   status: FiLeadExternalEventStatus;
+  error_message: string | null;
+  retry_count: number;
+  last_retry_at: string | null;
   processed_at: string | null;
   created_at: string;
 };
