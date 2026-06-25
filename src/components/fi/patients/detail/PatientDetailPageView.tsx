@@ -5,6 +5,7 @@ import { Suspense, type ReactNode } from "react";
 import type { PatientDetailTabId } from "@/src/lib/patients/patientDetailTabs";
 import type { PatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
 import { PatientProfileHeader } from "../PatientProfileHeader";
+import { PatientPhotoCaptureActions } from "../PatientPhotoCaptureActions";
 import { PatientContactDetailsCard } from "../PatientContactDetailsCard";
 import { PatientImportedSourceSection } from "../PatientImportedSourceSection";
 import { PatientProfileSummaryCards } from "../PatientProfileSummaryCards";
@@ -16,6 +17,7 @@ import { PatientTreatmentTimelineCard } from "../timeline/PatientTreatmentTimeli
 import { PatientDetailBreadcrumbs } from "./PatientDetailBreadcrumbs";
 import { PatientDetailTabNav } from "./PatientDetailTabNav";
 import { PatientDetailPreviewUrlSync } from "./PatientDetailPreviewUrlSync";
+import { PatientPhotoAddedFeedback } from "./PatientPhotoAddedFeedback";
 import { PatientNextAppointmentCard } from "./PatientNextAppointmentCard";
 import { PatientPersonLeadHistoryCard } from "../shared/PatientPersonLeadHistoryCard";
 import { PatientConsultationsCard } from "../shared/PatientConsultationsCard";
@@ -42,6 +44,7 @@ export function PatientDetailPageView({
   patientInvoiceSummary,
   /** Server-rendered async tab; passed from the route so this client module never imports prescribing loaders. */
   prescriptionsTab,
+  canCapturePatientPhotos = false,
 }: {
   tenantId: string;
   patientId: string;
@@ -53,18 +56,30 @@ export function PatientDetailPageView({
   canMutatePaymentRecords?: boolean;
   patientInvoiceSummary: PatientInvoiceSummary;
   prescriptionsTab?: ReactNode;
+  canCapturePatientPhotos?: boolean;
 }) {
   const { profile } = initialPayload;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 py-6">
+    <div className="mx-auto max-w-6xl space-y-6 py-6 pb-24 md:pb-6">
       <PatientDetailBreadcrumbs tenantId={tenantId} patientName={initialPayload.displayName} />
 
-      <header className="space-y-1">
-        <PatientProfileHeader tenantId={tenantId} data={profile} />
-        <p className="text-sm text-gray-600">
-          Foundation patient · <span className="font-mono text-xs">{patientId}</span>
-        </p>
+      <header className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1 space-y-1">
+            <PatientProfileHeader tenantId={tenantId} data={profile} />
+            <p className="text-sm text-gray-600">
+              Foundation patient · <span className="font-mono text-xs">{patientId}</span>
+            </p>
+          </div>
+          <PatientPhotoCaptureActions
+            tenantId={tenantId}
+            patientId={patientId}
+            canCapture={canCapturePatientPhotos}
+            source="patient_profile"
+            className="shrink-0 sm:pt-1"
+          />
+        </div>
       </header>
 
       <PatientContactDetailsCard data={profile} />
@@ -72,6 +87,10 @@ export function PatientDetailPageView({
 
       <Suspense fallback={null}>
         <PatientDetailPreviewUrlSync currentPatientId={patientId} previewPatientId={previewPatientId} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <PatientPhotoAddedFeedback />
       </Suspense>
 
       <Suspense fallback={<div className="h-10 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
@@ -188,6 +207,14 @@ export function PatientDetailPageView({
       ) : null}
 
       {activeTab === "documents" ? <PatientDocumentsTab tenantId={tenantId} data={profile} /> : null}
+
+      <PatientPhotoCaptureActions
+        tenantId={tenantId}
+        patientId={patientId}
+        canCapture={canCapturePatientPhotos}
+        source="patient_profile"
+        variant="mobile-bar"
+      />
     </div>
   );
 }

@@ -49,6 +49,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     const imagingProtocolSlotSlug = form.get("imaging_protocol_slot_slug");
     const protocolSessionIdRaw = form.get("protocol_session_id");
     const guidedReplaceRaw = form.get("guided_replace");
+    const captureType = form.get("capture_type");
+    const captureSource = form.get("capture_source");
+    const imageWidthRaw = form.get("image_width");
+    const imageHeightRaw = form.get("image_height");
     const metadataRaw = form.get("metadata");
 
     const protocolSessionId = protocolSessionIdRaw != null ? String(protocolSessionIdRaw).trim() : "";
@@ -77,6 +81,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     }
     const actingUserId = await tryResolveFiUserIdForTenant(tid, req);
 
+    const parseDim = (raw: FormDataEntryValue | null): number | null => {
+      if (raw == null) return null;
+      const n = Number(String(raw).trim());
+      return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+    };
+
     const result = await createPatientImageRecord({
       tenantId: tid,
       patientId: pid,
@@ -99,6 +109,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       imagingProtocolTemplateSlug: imagingProtocolTemplateSlug == null ? null : String(imagingProtocolTemplateSlug),
       imagingProtocolSlotSlug: imagingProtocolSlotSlug == null ? null : String(imagingProtocolSlotSlug),
       actingUserId,
+      captureType: captureType == null ? null : String(captureType),
+      captureSource: captureSource == null ? null : String(captureSource),
+      imageWidth: parseDim(imageWidthRaw),
+      imageHeight: parseDim(imageHeightRaw),
     });
 
     let guided_session:
@@ -134,6 +148,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     return crmJsonOk({
       image: result.row,
       changed_keys: result.changed_keys,
+      ...(result.attribution
+        ? {
+            attribution: {
+              quality: result.attribution.quality,
+              classification: result.attribution.classification,
+              timeline_entry: result.attribution.timeline_entry,
+              watermark_applied: result.attribution.watermark_applied,
+              marketing_version_created: result.attribution.marketing_version_created,
+            },
+          }
+        : {}),
       ...(guided_session ? { guided_session } : {}),
     });
   } catch (e) {

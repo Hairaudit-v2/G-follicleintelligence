@@ -18,6 +18,7 @@ import { calendarDateStringFromInstant } from "@/src/lib/calendar/calendarTimezo
 import { getPaymentRecordMutationCapability } from "@/src/lib/payments/paymentRecordAccess.server";
 import { loadPaymentRecordsForPatientId } from "@/src/lib/payments/paymentRecordLoaders.server";
 import { loadPatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
+import { getPatientImagingCaptureCapability } from "@/src/lib/patientImages/patientImagingCaptureAccess.server";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -74,13 +75,15 @@ export default async function PatientProfileRoutePage({
   const payload = await loadPatientDetailPayload(tenantId, patientId);
   if (!payload) notFound();
 
-  const [services, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap, patientInvoiceSummary] = await Promise.all([
+  const [services, clinicalStaffOptions, calendarSettings, initialPaymentRecords, payCap, patientInvoiceSummary, imagingCaptureCap] =
+    await Promise.all([
     loadFiServicesForTenant(tenantId.trim()),
     loadClinicalStaffPickerOptions(tenantId.trim()),
     loadTenantOperationalCalendarSettings(tenantId.trim()),
     loadPaymentRecordsForPatientId(tenantId.trim(), patientId.trim()),
     getPaymentRecordMutationCapability(tenantId.trim()),
     loadPatientInvoiceSummary(tenantId.trim(), patientId.trim()),
+    getPatientImagingCaptureCapability(tenantId.trim()),
   ]);
   const operationalTodayYmd = calendarDateStringFromInstant(new Date(), calendarSettings.calendarTimezone);
 
@@ -107,6 +110,7 @@ export default async function PatientProfileRoutePage({
           initialPaymentRecords={initialPaymentRecords}
           canMutatePaymentRecords={payCap.canMutate}
           patientInvoiceSummary={patientInvoiceSummary}
+          canCapturePatientPhotos={imagingCaptureCap.canCapture}
           prescriptionsTab={
             activeTab === "prescriptions" ? (
               <Suspense

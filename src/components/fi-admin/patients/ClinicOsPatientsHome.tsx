@@ -103,7 +103,7 @@ export function ClinicOsPatientsHome({
                 disabledReason="Bookings require scheduling access (admin/CRM operator or active staff link)."
               />
               <FiQuickActionCard
-                title="Create lead"
+                title="New enquiry"
                 description="Open the CRM pipeline for new enquiries."
                 href={showCrmNav ? `${base}/crm` : undefined}
                 disabled={!showCrmNav}

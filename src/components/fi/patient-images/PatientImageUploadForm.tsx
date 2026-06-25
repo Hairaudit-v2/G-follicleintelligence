@@ -34,6 +34,8 @@ export function PatientImageUploadForm({
       }
       startTransition(async () => {
         try {
+          fd.set("capture_type", "upload");
+          fd.set("capture_source", "profile_upload_form");
           const res = await fetch(`/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/images`, {
             method: "POST",
             body: fd,

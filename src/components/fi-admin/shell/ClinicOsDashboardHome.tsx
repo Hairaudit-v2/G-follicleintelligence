@@ -57,7 +57,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
                 href={crmHref}
                 className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
               >
-                New lead
+                New enquiry
               </Link>
             ) : (
               <button
@@ -66,7 +66,7 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
                 className="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-dashed border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-400"
                 title="Requires CRM workspace access"
               >
-                New lead
+                New enquiry
               </button>
             )
           }
@@ -121,8 +121,8 @@ export function ClinicOsDashboardHome({ tenantId, clinicLabel, showCrmNav }: Cli
                 href={newBookingLauncherHref}
               />
               <FiQuickActionCard
-                title="Create lead"
-                description="CRM pipeline and new lead"
+                title="New enquiry"
+                description="CRM pipeline and new enquiry"
                 href={crmHref ?? undefined}
                 disabled={!crmHref}
                 disabledReason={!crmHref ? "Requires CRM workspace access (fi_admin or crm_operator)." : undefined}

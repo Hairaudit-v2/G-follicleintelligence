@@ -31,13 +31,13 @@ export function DashboardQuickActions(props: {
         {showCrmNav ? (
           <QuickActionCard
             href={`${base}/crm`}
-            title="New lead"
-            description="Open the CRM workspace to create or manage leads."
+            title="New enquiry"
+            description="Open LeadFlow to capture or manage enquiries."
             icon={<UserPlus size={ICON} strokeWidth={1.75} aria-hidden />}
           />
         ) : (
           <div className="rounded-xl border border-dashed border-white/[0.12] bg-[#081020]/30 p-4 text-sm text-[#94A3B8]">
-            <p className="font-medium text-[#E2E8F0]">New lead</p>
+            <p className="font-medium text-[#E2E8F0]">New enquiry</p>
             <p className="mt-1 text-xs">CRM access is not enabled for your role on this tenant.</p>
           </div>
         )}

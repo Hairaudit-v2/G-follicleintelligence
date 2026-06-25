@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
 import {
@@ -14,6 +14,11 @@ import { ImagingGuidedCaptureWizard } from "@/src/components/fi-admin/imaging/Im
 import { IMAGING_AI_ANALYSIS_KINDS, IMAGING_COMPARE_PRESETS, IMAGING_LIBRARY_AXES } from "@/src/lib/imagingOs/imagingOsConstants";
 import type { ImagingOsPatientPayload } from "@/src/lib/imagingOs/imagingOsLoad.server";
 import type { PatientImageProfileTile } from "@/src/lib/patientImages/patientImageTypes";
+import {
+  parseImagingCaptureIntent,
+  parseImagingWorkspaceTab,
+  parsePatientPhotoQuickActionSource,
+} from "@/src/lib/patientImages/patientImagingCaptureRoutes";
 
 type TabId = "timeline" | "gallery" | "compare" | "protocols" | "scalp" | "annotate" | "capture";
 
@@ -33,11 +38,19 @@ export function ImagingOsWorkspace({
   initial: ImagingOsPatientPayload;
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<TabId>("gallery");
+  const searchParams = useSearchParams();
+  const urlTab = parseImagingWorkspaceTab(searchParams.get("tab"));
+  const captureIntent = parseImagingCaptureIntent(searchParams.get("intent"));
+  const captureSource = parsePatientPhotoQuickActionSource(searchParams.get("source"));
+  const [tab, setTab] = useState<TabId>(() => (urlTab === "capture" ? "capture" : "gallery"));
   const [axisFilter, setAxisFilter] = useState<string>("");
   const [adminKey, setAdminKey] = useState("");
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (urlTab === "capture") setTab("capture");
+  }, [urlTab]);
 
   const [compareLeft, setCompareLeft] = useState("");
   const [compareRight, setCompareRight] = useState("");
@@ -70,7 +83,20 @@ export function ImagingOsWorkspace({
 
   const timelineTiles = useMemo(() => {
     const list = [...initial.bundle.activeWithSignedUrls];
-    list.sort((a, b) => sortKeyMs(a) - sortKeyMs(b));
+    list.sort((a, b) => {
+      const aMeta = a.image.metadata?.fi_image_timeline;
+      const bMeta = b.image.metadata?.fi_image_timeline;
+      const aOrder =
+        aMeta && typeof aMeta === "object" && !Array.isArray(aMeta) && typeof (aMeta as { sort_order?: unknown }).sort_order === "number"
+          ? Number((aMeta as { sort_order: number }).sort_order)
+          : null;
+      const bOrder =
+        bMeta && typeof bMeta === "object" && !Array.isArray(bMeta) && typeof (bMeta as { sort_order?: unknown }).sort_order === "number"
+          ? Number((bMeta as { sort_order: number }).sort_order)
+          : null;
+      if (aOrder != null && bOrder != null && aOrder !== bOrder) return aOrder - bOrder;
+      return sortKeyMs(a) - sortKeyMs(b);
+    });
     return list;
   }, [initial.bundle.activeWithSignedUrls]);
 
@@ -252,20 +278,38 @@ export function ImagingOsWorkspace({
 
       {tab === "timeline" ? (
         <ol className="relative space-y-4 border-l border-gray-200 pl-6">
-          {timelineTiles.map((t) => (
-            <li key={t.image.id} className="text-sm">
-              <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-900" />
-              <p className="font-medium text-gray-900">{new Date(t.image.taken_at ?? t.image.created_at).toLocaleString()}</p>
-              <p className="text-xs text-gray-600">
-                {t.image.imaging_library_axis}
-                {t.image.visit_type ? ` · ${t.image.visit_type}` : ""}
-                {t.image.follow_up_interval ? ` · ${t.image.follow_up_interval}` : ""}
-              </p>
-              <div className="relative mt-2 h-40 max-w-xs overflow-hidden rounded border border-gray-100 bg-gray-50">
-                <Image src={t.signed.url} alt="" fill className="object-cover" sizes="200px" unoptimized />
-              </div>
-            </li>
-          ))}
+          {timelineTiles.map((t) => {
+            const timelineMeta = t.image.metadata?.fi_image_timeline;
+            const label =
+              timelineMeta &&
+              typeof timelineMeta === "object" &&
+              !Array.isArray(timelineMeta) &&
+              typeof (timelineMeta as { label?: unknown }).label === "string"
+                ? String((timelineMeta as { label: string }).label)
+                : null;
+            const imageType =
+              timelineMeta &&
+              typeof timelineMeta === "object" &&
+              !Array.isArray(timelineMeta) &&
+              typeof (timelineMeta as { image_type?: unknown }).image_type === "string"
+                ? String((timelineMeta as { image_type: string }).image_type).replace(/_/g, " ")
+                : null;
+            return (
+              <li key={t.image.id} className="text-sm">
+                <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-900" />
+                <p className="font-medium text-gray-900">{label ?? new Date(t.image.taken_at ?? t.image.created_at).toLocaleString()}</p>
+                <p className="text-xs text-gray-600">
+                  {imageType ? `${imageType} · ` : ""}
+                  {t.image.imaging_library_axis}
+                  {t.image.visit_type ? ` · ${t.image.visit_type}` : ""}
+                  {t.image.follow_up_interval ? ` · ${t.image.follow_up_interval}` : ""}
+                </p>
+                <div className="relative mt-2 h-40 max-w-xs overflow-hidden rounded border border-gray-100 bg-gray-50">
+                  <Image src={t.signed.url} alt="" fill className="object-cover" sizes="200px" unoptimized />
+                </div>
+              </li>
+            );
+          })}
         </ol>
       ) : null}
 
@@ -460,7 +504,14 @@ export function ImagingOsWorkspace({
       ) : null}
 
       {tab === "capture" ? (
-        <ImagingGuidedCaptureWizard tenantId={tenantId} patientId={patientId} adminKey={adminKey} initial={initial} />
+        <ImagingGuidedCaptureWizard
+          tenantId={tenantId}
+          patientId={patientId}
+          adminKey={adminKey}
+          initial={initial}
+          captureIntent={captureIntent}
+          captureSource={captureSource}
+        />
       ) : null}
     </div>
   );

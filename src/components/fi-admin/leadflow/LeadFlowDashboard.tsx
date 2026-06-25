@@ -22,10 +22,20 @@ import {
 import type { ParsedCrmLeadListQuery } from "@/src/lib/crm/crmLeadListQuery";
 import type { CrmShellClinicOption, CrmShellOrgOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 
-function LeadFlowPrimaryActions({ base }: { base: string }) {
+function LeadFlowPrimaryActions({
+  base,
+  tenantId,
+  owners,
+  defaultOwnerUserId,
+}: {
+  base: string;
+  tenantId: string;
+  owners: CrmShellUserPickerOption[];
+  defaultOwnerUserId?: string;
+}) {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
-      <LeadFlowNewLeadButton />
+      <LeadFlowNewLeadButton tenantId={tenantId} owners={owners} defaultOwnerUserId={defaultOwnerUserId} />
       <Link href={`${base}/calendar`} className={leadFlowLinkButtonClass}>
         Open Calendar
       </Link>
@@ -50,6 +60,7 @@ export function LeadFlowDashboard({
   query,
   showDiagnosticsExpanded = false,
   sessionLabel,
+  defaultOwnerUserId,
 }: {
   tenantId: string;
   payload: LeadFlowDashboardPayload;
@@ -58,6 +69,7 @@ export function LeadFlowDashboard({
   query: ParsedCrmLeadListQuery;
   showDiagnosticsExpanded?: boolean;
   sessionLabel?: string;
+  defaultOwnerUserId?: string;
 }) {
   const base = `/fi-admin/${tenantId}`;
   const healthCards = buildLeadFlowHealthCards(base, payload);
@@ -83,7 +95,12 @@ export function LeadFlowDashboard({
               Consultation conversion, follow-up priority, booking readiness, and revenue opportunity across every
               enquiry.
             </p>
-            <LeadFlowPrimaryActions base={base} />
+            <LeadFlowPrimaryActions
+              base={base}
+              tenantId={tenantId}
+              owners={owners}
+              defaultOwnerUserId={defaultOwnerUserId}
+            />
           </div>
           <CrmLeadIndexViewTabs tenantId={tenantId} query={query} variant="dark" />
         </div>

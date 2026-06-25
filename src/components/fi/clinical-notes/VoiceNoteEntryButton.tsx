@@ -32,10 +32,14 @@ export function VoiceNoteEntryButton({
   tenantId,
   patientId,
   caseId,
+  label = "Voice note",
+  className,
 }: {
   tenantId: string;
   patientId: string;
   caseId?: string | null;
+  label?: string;
+  className?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -165,9 +169,9 @@ export function VoiceNoteEntryButton({
           setDraft(null);
           resetCapture();
         }}
-        className="rounded border border-violet-300 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-950 hover:bg-violet-100"
+        className={className ?? "rounded border border-violet-300 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-950 hover:bg-violet-100"}
       >
-        Voice note
+        {label}
       </button>
 
       {open ? (

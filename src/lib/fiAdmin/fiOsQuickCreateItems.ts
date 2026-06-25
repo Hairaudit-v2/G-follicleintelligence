@@ -34,11 +34,10 @@ export const FI_OS_QUICK_CREATE_ITEMS: FiOsQuickCreateItemDefinition[] = [
   },
   {
     id: "lead",
-    label: "New lead",
-    description: "Open a quick lead form (name, contact, notes).",
+    label: "New enquiry",
+    description: "Capture a patient enquiry (name, contact, interest).",
     keywords: ["crm", "enquiry", "pipeline", "leadflow"],
     path: "crm",
-    hash: "fi-os-crm-create-lead",
     requiresCrmShellNav: true,
   },
   {

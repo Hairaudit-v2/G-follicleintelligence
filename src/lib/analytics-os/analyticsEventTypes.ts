@@ -59,6 +59,7 @@ export const PATIENT_EVENTS = [
   "patient_onboarding_started",
   "patient_document_uploaded",
   "patient_images_uploaded",
+  "patient_photo_quick_action_completed",
   "patient_report_generated",
   "patient_followup_completed",
   "patient_journey_completed",
@@ -76,6 +77,7 @@ export const IMAGING_EVENTS = [
   "ai_imaging_completed",
   "annotation_completed",
   "image_classification_completed",
+  "photo_capture_completed",
 ] as const;
 export type ImagingAnalyticsEventType = (typeof IMAGING_EVENTS)[number];
 

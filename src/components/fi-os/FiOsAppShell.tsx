@@ -22,7 +22,7 @@ import { CLINIC_OS_OPEN_CREATE_LEAD_EVENT } from "@/src/lib/fiAdmin/clinicOsShel
 import type { FiTenantAdminRole } from "@/src/lib/tenantAdmin/tenantAdminRoles";
 import { ClinicOsGlobalSearch } from "@/src/components/fi-admin/search/ClinicOsGlobalSearch";
 import { FiOsClinicSettingsNav } from "@/src/components/fi-os/FiOsClinicSettingsNav";
-import { FiOsCreateLeadModal } from "@/src/components/fi-os/FiOsCreateLeadModal";
+import { NewEnquiryDialog } from "@/src/components/fi-admin/leadflow/NewEnquiryDialog";
 import { FiOsQuickCreatePalette } from "@/src/components/fi-os/FiOsQuickCreatePalette";
 import { FiOsSidebar } from "@/src/components/fi-os/FiOsSidebar";
 import { FiOsTopBar } from "@/src/components/fi-os/FiOsTopBar";
@@ -298,7 +298,12 @@ export function FiOsAppShell({
       />
 
       {showCrmNav ? (
-        <FiOsCreateLeadModal tenantId={tenantId} open={createLeadOpen} onOpenChange={setCreateLeadOpen} />
+        <NewEnquiryDialog
+          tenantId={tenantId}
+          open={createLeadOpen}
+          onOpenChange={setCreateLeadOpen}
+          showTrigger={false}
+        />
       ) : null}
     </div>
   );

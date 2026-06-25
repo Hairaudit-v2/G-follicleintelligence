@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { ChevronLeft } from "lucide-react";
 
 import { ImagingOsWorkspace } from "@/src/components/fi-admin/imaging/ImagingOsWorkspace";
@@ -57,7 +58,9 @@ export default async function ImagingOsPatientPage({
         </p>
       </header>
 
-      <ImagingOsWorkspace tenantId={tid} patientId={pid} initial={initial} />
+      <Suspense fallback={<div className="h-48 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
+        <ImagingOsWorkspace tenantId={tid} patientId={pid} initial={initial} />
+      </Suspense>
     </div>
   );
 }

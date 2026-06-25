@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   createImagingProtocolSessionAction,
   finishGuidedProtocolSessionAction,
+  recordPatientPhotoQuickActionCompletedAction,
   skipGuidedProtocolSlotAction,
 } from "@/lib/actions/fi-imaging-actions";
 import { inferCaptureDeviceType } from "@/src/lib/imagingOs/imagingOsConstants";
@@ -19,9 +20,30 @@ import {
   slotIsSatisfied,
   type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
+import {
+  buildPatientProfilePhotoAddedHref,
+  type PatientImagingCaptureIntent,
+  type PatientPhotoQuickActionSource,
+} from "@/src/lib/patientImages/patientImagingCaptureRoutes";
 
 const EMPTY_PROGRESS: Record<string, unknown> = {};
 const EMPTY_SLOTS: ProtocolSlotDef[] = [];
+
+function readImageDimensions(file: File): Promise<{ width: number | null; height: number | null }> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      resolve({ width: img.naturalWidth || null, height: img.naturalHeight || null });
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      resolve({ width: null, height: null });
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+}
 
 const GUIDED_TEMPLATE_SLUGS = [
   "hair_loss_consultation",
@@ -50,11 +72,15 @@ export function ImagingGuidedCaptureWizard({
   patientId,
   adminKey,
   initial,
+  captureIntent = null,
+  captureSource = null,
 }: {
   tenantId: string;
   patientId: string;
   adminKey: string;
   initial: ImagingOsPatientPayload;
+  captureIntent?: PatientImagingCaptureIntent | null;
+  captureSource?: PatientPhotoQuickActionSource | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -70,6 +96,8 @@ export function ImagingGuidedCaptureWizard({
 
   const camRef = useRef<HTMLInputElement>(null);
   const libRef = useRef<HTMLInputElement>(null);
+  const sessionStartAttempted = useRef(false);
+  const captureOpenAttempted = useRef(false);
 
   useEffect(() => {
     setSessionId((prev) => {
@@ -149,23 +177,31 @@ export function ImagingGuidedCaptureWizard({
         suggestedRegion: slot?.suggested_region ?? null,
       });
 
-      const fd = new FormData();
-      fd.set("file", file);
-      fd.set("image_category", "scalp");
-      fd.set("protocol_session_id", currentSession.id);
-      fd.set("imaging_library_axis", fields.imaging_library_axis);
-      fd.set("visit_type", fields.visit_type);
-      fd.set("imaging_protocol_template_slug", fields.imaging_protocol_template_slug);
-      fd.set("imaging_protocol_slot_slug", fields.imaging_protocol_slot_slug);
-      if (fields.anatomical_region) fd.set("anatomical_region", fields.anatomical_region);
-      fd.set("device_type", fields.device_type);
-      if (fields.clinic_id) fd.set("clinic_id", fields.clinic_id);
-      if (fields.captured_by_staff_id) fd.set("captured_by_staff_id", fields.captured_by_staff_id);
-      if (replaceNext) fd.set("guided_replace", "1");
-      const k = adminKey.trim();
-      if (k) fd.set("adminKey", k);
-
       startTransition(async () => {
+        const dims = await readImageDimensions(file);
+        const fd = new FormData();
+        fd.set("file", file);
+        fd.set("image_category", "scalp");
+        fd.set("protocol_session_id", currentSession.id);
+        fd.set("imaging_library_axis", fields.imaging_library_axis);
+        fd.set("visit_type", fields.visit_type);
+        fd.set("imaging_protocol_template_slug", fields.imaging_protocol_template_slug);
+        fd.set("imaging_protocol_slot_slug", fields.imaging_protocol_slot_slug);
+        if (fields.anatomical_region) fd.set("anatomical_region", fields.anatomical_region);
+        fd.set("device_type", fields.device_type);
+        if (fields.clinic_id) fd.set("clinic_id", fields.clinic_id);
+        if (fields.captured_by_staff_id) fd.set("captured_by_staff_id", fields.captured_by_staff_id);
+        if (replaceNext) fd.set("guided_replace", "1");
+        fd.set("capture_type", captureIntent === "camera" ? "camera" : "upload");
+        fd.set(
+          "capture_source",
+          captureSource ?? "imaging_os_wizard"
+        );
+        if (dims.width) fd.set("image_width", String(dims.width));
+        if (dims.height) fd.set("image_height", String(dims.height));
+        const k = adminKey.trim();
+        if (k) fd.set("adminKey", k);
+
         const res = await fetch(
           `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/images`,
           { method: "POST", body: fd, credentials: "include" }
@@ -174,18 +210,37 @@ export function ImagingGuidedCaptureWizard({
           ok?: boolean;
           error?: string;
           guided_session?: GuidedSessionApi;
+          attribution?: { quality?: { alert_message?: string | null } };
         };
         if (!res.ok || !j.ok) {
           showFlash("error", j.error ?? `Upload failed (${res.status}).`);
           return;
         }
+
+        const qualityAlert = j.attribution?.quality?.alert_message;
+
+        if (captureIntent && captureSource) {
+          setReplaceNext(false);
+          if (camRef.current) camRef.current.value = "";
+          if (libRef.current) libRef.current.value = "";
+          void recordPatientPhotoQuickActionCompletedAction({
+            tenantId,
+            patientId,
+            intent: captureIntent,
+            source: captureSource,
+          });
+          router.push(buildPatientProfilePhotoAddedHref(tenantId, patientId, { tab: "gallery" }));
+          return;
+        }
+
         const g = j.guided_session;
         if (g) {
-          showFlash("success", g.sessionCompleted ? "Session complete — all required views captured." : "Image saved.");
+          const base = g.sessionCompleted ? "Session complete — all required views captured." : "Image saved.";
+          showFlash(qualityAlert ? "error" : "success", qualityAlert ? `${qualityAlert} ${base}` : base);
           if (g.nextSlotSlug) setSlotOverride(g.nextSlotSlug);
           else setSlotOverride(null);
         } else {
-          showFlash("success", "Image saved.");
+          showFlash(qualityAlert ? "error" : "success", qualityAlert ?? "Image saved.");
         }
         setReplaceNext(false);
         router.refresh();
@@ -199,6 +254,8 @@ export function ImagingGuidedCaptureWizard({
       currentSession,
       currentSlug,
       lastPreviewUrl,
+      captureIntent,
+      captureSource,
       patientId,
       replaceNext,
       router,
@@ -276,6 +333,35 @@ export function ImagingGuidedCaptureWizard({
     }
     return out;
   }, [initial]);
+
+  useEffect(() => {
+    if (!captureIntent || pending) return;
+
+    if (!currentSession && !sessionStartAttempted.current) {
+      const defaultTemplate = orderedTemplates[0];
+      if (!defaultTemplate) return;
+      sessionStartAttempted.current = true;
+      onStartTemplate(defaultTemplate.slug);
+      return;
+    }
+
+    if (currentSession && currentSlot && !sessionComplete && !captureOpenAttempted.current) {
+      captureOpenAttempted.current = true;
+      const t = window.setTimeout(() => {
+        const input = captureIntent === "library" ? libRef.current : camRef.current;
+        input?.click();
+      }, 150);
+      return () => window.clearTimeout(t);
+    }
+  }, [
+    captureIntent,
+    currentSession,
+    currentSlot,
+    onStartTemplate,
+    orderedTemplates,
+    pending,
+    sessionComplete,
+  ]);
 
   return (
     <section className="space-y-6 rounded-xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white p-4 sm:p-6">

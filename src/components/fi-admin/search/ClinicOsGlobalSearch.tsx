@@ -438,7 +438,7 @@ export function ClinicOsGlobalSearch({
                     onClick={() => onOpenChange(false)}
                     className="flex items-center justify-between rounded-lg px-2 py-2 text-sm font-medium text-slate-800 outline-none transition hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-sky-400/40"
                   >
-                    New Lead
+                    New enquiry
                     <ArrowRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
                   </Link>
                 ) : (
@@ -446,7 +446,7 @@ export function ClinicOsGlobalSearch({
                     className="flex cursor-not-allowed items-center justify-between rounded-lg px-2 py-2 text-sm text-slate-400"
                     title="Requires CRM workspace access"
                   >
-                    New Lead
+                    New enquiry
                   </span>
                 )}
               </li>

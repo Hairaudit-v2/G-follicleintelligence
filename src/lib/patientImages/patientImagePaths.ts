@@ -22,3 +22,25 @@ export function buildPatientImageStoragePath(params: {
   const fn = params.safeFilename.trim() || "image";
   return `tenant/${tid}/patients/${pid}/${iid}-${fn}`;
 }
+
+export type PatientImageDerivativeVariant = "watermarked" | "marketing" | "internal";
+
+export function buildPatientImageDerivativeStoragePath(params: {
+  tenantId: string;
+  patientId: string;
+  imageId: string;
+  safeFilename: string;
+  variant: PatientImageDerivativeVariant;
+}): string {
+  const tid = params.tenantId.trim();
+  const pid = params.patientId.trim();
+  const iid = params.imageId.trim();
+  const fn = params.safeFilename.trim() || "image";
+  const suffix =
+    params.variant === "watermarked"
+      ? "watermarked"
+      : params.variant === "marketing"
+        ? "marketing"
+        : "internal-attributed";
+  return `tenant/${tid}/patients/${pid}/${iid}-${suffix}-${fn}`;
+}

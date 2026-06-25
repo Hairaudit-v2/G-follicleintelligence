@@ -35,8 +35,11 @@ import type {
   PatientImageSignedDescriptor,
   PatientImageStatus,
   PatientImagesProfileBundle,
+  CreatePatientImageUploadInput,
 } from "./patientImageTypes";
 import { publishPatientEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+import { runPatientImagePostCapturePipeline } from "./patientImagePostCapturePipeline.server";
+import type { PatientImagePostCaptureResult } from "./fiImageAttributionTypes";
 
 const SIGNED_URL_TTL_SEC = 3600;
 const ACTIVE_SIGNED_LIMIT = 50;
@@ -416,34 +419,18 @@ export async function loadPatientImagesProfileBundle(
   };
 }
 
-export type CreatePatientImageUploadInput = {
-  tenantId: string;
-  patientId: string;
-  file: File;
-  imageCategory: unknown;
-  caption?: string | null;
-  takenAt?: string | null;
-  metadata?: unknown;
-  caseId?: string | null;
-  bookingId?: string | null;
-  leadId?: string | null;
-  consultationId?: string | null;
-  imagingLibraryAxis?: unknown;
-  clinicId?: string | null;
-  capturedByStaffId?: string | null;
-  deviceType?: string | null;
-  anatomicalRegion?: unknown;
-  visitType?: string | null;
-  followUpInterval?: string | null;
-  imagingProtocolTemplateSlug?: string | null;
-  imagingProtocolSlotSlug?: string | null;
-  actingUserId?: string | null;
+export type { CreatePatientImageUploadInput } from "./patientImageTypes";
+
+export type CreatePatientImageRecordResult = {
+  row: PatientImageRow;
+  changed_keys: string[];
+  attribution?: PatientImagePostCaptureResult;
 };
 
 export async function createPatientImageRecord(
   input: CreatePatientImageUploadInput,
   client?: SupabaseClient
-): Promise<{ row: PatientImageRow; changed_keys: string[] }> {
+): Promise<CreatePatientImageRecordResult> {
   const supabase = client ?? supabaseAdmin();
   const tid = input.tenantId.trim();
   const pid = input.patientId.trim();
@@ -558,9 +545,47 @@ export async function createPatientImageRecord(
     },
   });
 
+  let attribution: PatientImagePostCaptureResult | undefined;
+  let finalRow = mappedRow;
+
+  try {
+    const pipeline = await runPatientImagePostCapturePipeline(
+      {
+        ...input,
+        imageId,
+        safeFilename: safeName,
+        contentType,
+      },
+      mappedRow,
+      supabase
+    );
+
+    if (pipeline.quality_blocked) {
+      await supabase.from("fi_patient_images").delete().eq("tenant_id", tid).eq("id", imageId);
+      await supabase.storage.from(bucket).remove([storagePath]).catch(() => undefined);
+      throw new Error(pipeline.quality.alert_message ?? "Image quality too low. Please retake photo.");
+    }
+
+    finalRow = mapRow(pipeline.updatedRow);
+    attribution = {
+      metadata_patch: pipeline.metadata_patch,
+      quality: pipeline.quality,
+      derivatives: pipeline.derivatives,
+      classification: pipeline.classification,
+      timeline_entry: pipeline.timeline_entry,
+      watermark_applied: pipeline.watermark_applied,
+      marketing_version_created: pipeline.marketing_version_created,
+      quality_blocked: pipeline.quality_blocked,
+    };
+  } catch (e) {
+    if (e instanceof Error && e.message.includes("Image quality too low")) throw e;
+    // Attribution pipeline is best-effort — preserve successful clinical upload.
+  }
+
   return {
-    row: mappedRow,
+    row: finalRow,
     changed_keys: ["created"],
+    ...(attribution ? { attribution } : {}),
   };
 }
 

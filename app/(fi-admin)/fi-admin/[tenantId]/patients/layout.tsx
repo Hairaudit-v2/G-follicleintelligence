@@ -6,6 +6,7 @@ import { loadCrmShellScopePickerOptions } from "@/src/lib/crm/crmShellLoaders";
 import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPickerLoader.server";
 import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
+import { getPatientImagingCaptureCapability } from "@/src/lib/patientImages/patientImagingCaptureAccess.server";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +19,12 @@ type PatientsShellLayoutProps = {
 export default async function PatientsShellLayout({ children, params }: PatientsShellLayoutProps) {
   const { tenantId } = await params;
   const session = await getClinicFloorPageSession(tenantId);
-  const [assignees, scope, calendarSettings, services] = await Promise.all([
+  const [assignees, scope, calendarSettings, services, imagingCaptureCap] = await Promise.all([
     loadClinicalStaffPickerOptions(tenantId),
     loadCrmShellScopePickerOptions(tenantId),
     loadTenantOperationalCalendarSettings(tenantId),
     loadFiServicesForTenant(tenantId),
+    getPatientImagingCaptureCapability(tenantId),
   ]);
 
   return (
@@ -31,6 +33,7 @@ export default async function PatientsShellLayout({ children, params }: Patients
       operatorFiUserId={session.fiUserId}
       userRole={session.role}
       canUseClinicFeatures={session.canUseClinicFeatures}
+      canCapturePatientPhotos={imagingCaptureCap.canCapture}
     >
       <AppointmentSlideOverProvider
         tenantId={tenantId}

@@ -10,6 +10,7 @@ import { PatientBookNextAppointmentCard } from "./shared/PatientBookNextAppointm
 import { PatientConsultationsCard } from "./shared/PatientConsultationsCard";
 import { PatientPersonLeadHistoryCard } from "./shared/PatientPersonLeadHistoryCard";
 import { PatientStatusBadge } from "./PatientStatusBadge";
+import { PatientPhotoCaptureActions } from "./PatientPhotoCaptureActions";
 
 export type PatientShellOperatorContext = {
   tenantId: string;
@@ -21,6 +22,7 @@ export type PatientShellOperatorContext = {
 type SlideOverCtx = PatientShellOperatorContext & {
   /** Patient id currently shown in the slide-over drawer, if any. */
   activePatientId: string | null;
+  canCapturePatientPhotos?: boolean;
   openPatient: (patientId: string) => void;
   close: () => void;
 };
@@ -42,12 +44,14 @@ export function PatientSlideOverProvider({
   operatorFiUserId,
   userRole,
   canUseClinicFeatures,
+  canCapturePatientPhotos = false,
   children,
 }: {
   tenantId: string;
   operatorFiUserId: string;
   userRole: string;
   canUseClinicFeatures?: boolean;
+  canCapturePatientPhotos?: boolean;
   children: ReactNode;
 }) {
   const [patientId, setPatientId] = useState<string | null>(null);
@@ -55,8 +59,17 @@ export function PatientSlideOverProvider({
   const close = useCallback(() => setPatientId(null), []);
 
   const value = useMemo(
-    () => ({ tenantId, operatorFiUserId, userRole, canUseClinicFeatures, activePatientId: patientId, openPatient, close }),
-    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, patientId, openPatient, close]
+    () => ({
+      tenantId,
+      operatorFiUserId,
+      userRole,
+      canUseClinicFeatures,
+      canCapturePatientPhotos,
+      activePatientId: patientId,
+      openPatient,
+      close,
+    }),
+    [tenantId, operatorFiUserId, userRole, canUseClinicFeatures, canCapturePatientPhotos, patientId, openPatient, close]
   );
 
   return (
@@ -69,6 +82,7 @@ export function PatientSlideOverProvider({
         onClose={close}
         operatorFiUserId={operatorFiUserId}
         userRole={userRole}
+        canCapturePatientPhotos={canCapturePatientPhotos}
       />
     </PatientSlideOverContext.Provider>
   );
@@ -82,6 +96,7 @@ export function PatientSlideOverPanel({
   onClose,
   operatorFiUserId: _operatorFiUserId,
   userRole: _userRole,
+  canCapturePatientPhotos = false,
 }: {
   tenantId: string;
   patientId: string | null;
@@ -89,6 +104,7 @@ export function PatientSlideOverPanel({
   onClose: () => void;
   operatorFiUserId: string;
   userRole: string;
+  canCapturePatientPhotos?: boolean;
 }) {
   void _operatorFiUserId;
   void _userRole;
@@ -164,10 +180,10 @@ export function PatientSlideOverPanel({
           ) : null}
 
           {!loading && payload ? (
-            <div className="space-y-4">
+            <div className="space-y-4 pb-24">
               <section className={crmLeadCardClass}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Patient</h3>
                     <p className="mt-1 font-medium text-gray-900">{payload.displayName}</p>
                     <p className="mt-1 text-xs text-gray-600">
@@ -176,6 +192,14 @@ export function PatientSlideOverPanel({
                   </div>
                   <PatientStatusBadge status={payload.patientStatus} />
                 </div>
+                <PatientPhotoCaptureActions
+                  tenantId={tenantId}
+                  patientId={payload.patientId}
+                  canCapture={canCapturePatientPhotos}
+                  source="patient_slide_over"
+                  className="mt-3"
+                  onNavigate={onClose}
+                />
                 <p className="mt-2 text-xs text-gray-500">
                   Since {payload.createdAt.slice(0, 10)} · ID{" "}
                   <code className="rounded bg-gray-100 px-1">{payload.patientId.slice(0, 8)}…</code>
@@ -279,6 +303,17 @@ export function PatientSlideOverPanel({
             </div>
           ) : null}
         </div>
+
+        {payload ? (
+          <PatientPhotoCaptureActions
+            tenantId={tenantId}
+            patientId={payload.patientId}
+            canCapture={canCapturePatientPhotos}
+            source="patient_slide_over"
+            variant="mobile-bar"
+            onNavigate={onClose}
+          />
+        ) : null}
       </aside>
     </div>
   );

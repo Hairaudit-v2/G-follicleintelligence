@@ -88,3 +88,31 @@ export type PatientImagesProfileBundle = {
   /** Archived metadata only — no signed URLs (Stage 4C default). */
   archived: PatientImageRow[];
 };
+
+export type CreatePatientImageUploadInput = {
+  tenantId: string;
+  patientId: string;
+  file: File;
+  imageCategory: unknown;
+  caption?: string | null;
+  takenAt?: string | null;
+  metadata?: unknown;
+  caseId?: string | null;
+  bookingId?: string | null;
+  leadId?: string | null;
+  consultationId?: string | null;
+  imagingLibraryAxis?: unknown;
+  clinicId?: string | null;
+  capturedByStaffId?: string | null;
+  deviceType?: string | null;
+  anatomicalRegion?: unknown;
+  visitType?: string | null;
+  followUpInterval?: string | null;
+  imagingProtocolTemplateSlug?: string | null;
+  imagingProtocolSlotSlug?: string | null;
+  actingUserId?: string | null;
+  captureType?: unknown;
+  captureSource?: unknown;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
+};

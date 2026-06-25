@@ -1,12 +1,23 @@
 "use client";
 
-import { dispatchOpenCreateLeadModal } from "@/src/lib/fiAdmin/clinicOsShellCreateLeadEvent";
-import { leadFlowLinkButtonClass } from "@/src/lib/fiAdmin/leadFlowPresentation";
+import { NewEnquiryDialog } from "@/src/components/fi-admin/leadflow/NewEnquiryDialog";
+import type { CrmShellUserPickerOption } from "@/src/lib/crm/types";
 
-export function LeadFlowNewLeadButton() {
+export function LeadFlowNewLeadButton({
+  tenantId,
+  owners,
+  defaultOwnerUserId,
+}: {
+  tenantId: string;
+  owners?: Pick<CrmShellUserPickerOption, "id" | "email" | "full_name">[];
+  defaultOwnerUserId?: string;
+}) {
   return (
-    <button type="button" onClick={() => dispatchOpenCreateLeadModal()} className={leadFlowLinkButtonClass}>
-      New lead
-    </button>
+    <NewEnquiryDialog
+      tenantId={tenantId}
+      owners={owners}
+      defaultOwnerUserId={defaultOwnerUserId}
+      triggerLabel="+ New enquiry"
+    />
   );
 }

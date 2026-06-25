@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 import { LeadFlowDashboard } from "@/src/components/fi-admin/leadflow/LeadFlowDashboard";
-import { CrmCreateLeadPanel } from "@/src/components/fi/crm/CrmCreateLeadPanel";
+import { NewEnquiryDialog } from "@/src/components/fi-admin/leadflow/NewEnquiryDialog";
 import { CrmKanbanBoard } from "@/src/components/fi/crm/CrmKanbanBoard";
 import { CrmLeadIndexViewTabs } from "@/src/components/fi/crm/CrmLeadIndexViewTabs";
 import { CrmLeadListFilters } from "@/src/components/fi/crm/CrmLeadListFilters";
 import { CrmLeadListPagination } from "@/src/components/fi/crm/CrmLeadListPagination";
 import { CrmLeadListTable } from "@/src/components/fi/crm/CrmLeadListTable";
-import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { DashboardCard } from "@/src/components/fi-admin/dashboard-ui";
 import { getCrmShellPageSession } from "@/src/lib/crm/crmShellAccess";
 import {
   loadCrmShellLeadsBoardIndex,
@@ -72,6 +72,7 @@ export default async function CrmShellPage({
         query={parsed}
         showDiagnosticsExpanded={showDiagnosticsExpanded}
         sessionLabel={`${session.role}`}
+        defaultOwnerUserId={session.fiUserId}
       />
     );
   }
@@ -104,7 +105,10 @@ export default async function CrmShellPage({
               ← Back to LeadFlow workspace
             </Link>
           </div>
-          <CrmLeadIndexViewTabs tenantId={tenantId} query={query} variant="dark" />
+          <div className="flex flex-col items-stretch gap-3 sm:items-end">
+            <NewEnquiryDialog tenantId={tenantId} owners={owners} defaultOwnerUserId={session.fiUserId} />
+            <CrmLeadIndexViewTabs tenantId={tenantId} query={query} variant="dark" />
+          </div>
         </div>
       </DashboardCard>
 
@@ -115,7 +119,7 @@ export default async function CrmShellPage({
           {board.total === 0 && !filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
               <p className="font-medium text-[#F8FAFC]">No leads yet</p>
-              <p className="mt-2">Create a lead from the workspace or seed data to see cards here.</p>
+              <p className="mt-2">Create an enquiry from the workspace or seed data to see cards here.</p>
             </div>
           ) : board.total === 0 && filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
@@ -143,7 +147,7 @@ export default async function CrmShellPage({
           {list!.total === 0 && !filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
               <p className="font-medium text-[#F8FAFC]">No leads yet</p>
-              <p className="mt-2">Create a lead from the workspace or seed data to see rows here.</p>
+              <p className="mt-2">Create an enquiry from the workspace or seed data to see rows here.</p>
             </div>
           ) : list!.total === 0 && filtered ? (
             <div className="p-8 text-center text-sm text-[#94A3B8]">
@@ -174,17 +178,6 @@ export default async function CrmShellPage({
         </DashboardCard>
       )}
 
-      <section id="fi-os-crm-create-lead" className="scroll-mt-24">
-        <DashboardCard className="p-4 sm:p-5">
-          <SectionHeader title="Create lead" description="Capture a new enquiry directly from the lead index." className="mb-3" />
-          <CrmCreateLeadPanel
-            tenantId={tenantId}
-            owners={owners}
-            organisations={scope.organisations}
-            clinics={scope.clinics}
-          />
-        </DashboardCard>
-      </section>
     </div>
   );
 }

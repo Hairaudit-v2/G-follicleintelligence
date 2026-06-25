@@ -137,17 +137,23 @@ export function LeadFlowSystemDiagnostics({
           <CrmLeadIdJump tenantId={tenantId} />
         </DashboardCard>
 
-        <div id="fi-os-crm-create-lead" className="scroll-mt-24">
-          <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
-            <SectionHeader title="Create lead (operator)" description="Server-action lead capture for testing and imports." className="mb-3" />
-            <CrmCreateLeadPanel
-              tenantId={tenantId}
-              owners={owners}
-              organisations={scope.organisations}
-              clinics={scope.clinics}
-            />
-          </DashboardCard>
-        </div>
+        {showDiagnosticsExpanded ? (
+          <div id="fi-os-crm-create-lead" className="scroll-mt-24">
+            <DashboardCard className="border-white/[0.06] bg-[#0c1220]/40 p-4 sm:p-5">
+              <SectionHeader
+                title="Create lead (operator)"
+                description="Server-action lead capture for testing and imports."
+                className="mb-3"
+              />
+              <CrmCreateLeadPanel
+                tenantId={tenantId}
+                owners={owners}
+                organisations={scope.organisations}
+                clinics={scope.clinics}
+              />
+            </DashboardCard>
+          </div>
+        ) : null}
 
         <p className="flex items-center gap-2 text-xs text-[#64748B]">
           <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#22C1FF]/70" aria-hidden />

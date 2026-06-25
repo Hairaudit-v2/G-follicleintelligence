@@ -292,3 +292,28 @@ export async function finishGuidedProtocolSessionAction(
     return { ok: false, error: errMsg(e) };
   }
 }
+
+const patientPhotoQuickActionCompletedSchema = z
+  .object({
+    tenantId: z.string().uuid(),
+    patientId: z.string().uuid(),
+    intent: z.enum(["camera", "library"]),
+    source: z.enum(["patient_profile", "patient_slide_over"]),
+  })
+  .strict();
+
+export async function recordPatientPhotoQuickActionCompletedAction(
+  body: unknown
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const parsed = patientPhotoQuickActionCompletedSchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId: parsed.tenantId, request: undefined });
+    const { publishPatientPhotoQuickActionCompletedEvent } = await import(
+      "@/src/lib/patientImages/patientPhotoQuickActionAnalytics.server"
+    );
+    await publishPatientPhotoQuickActionCompletedEvent(parsed);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
