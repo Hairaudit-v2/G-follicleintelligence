@@ -93,6 +93,7 @@ export const serverEnvSchema = z.object({
   FI_PHOTO_PROTOCOL_ALERTS_CRON_SECRET: optionalString,
   FINANCIAL_OS_CRON_SECRET: optionalString,
   FI_PAYMENTS_CRON_SECRET: optionalString,
+  FI_LEADFLOW_CRON_SECRET: optionalString,
   FI_ADMIN_API_KEY: optionalString,
   FI_IMPORT_ADMIN_KEY: optionalString,
   FI_MACHINE_INGEST_MASTER_KEY: optionalString,
@@ -271,6 +272,7 @@ export function collectCrossEnvValidationIssues(
     minSecretIssue("FI_TIMELY_WEBHOOK_SECRET", g("FI_TIMELY_WEBHOOK_SECRET"), 16),
     minSecretIssue("FI_TIMELY_SYNC_CRON_SECRET", g("FI_TIMELY_SYNC_CRON_SECRET"), 16),
     minSecretIssue("FI_HUBSPOT_WEBHOOK_SECRET", g("FI_HUBSPOT_WEBHOOK_SECRET"), 16),
+    minSecretIssue("FI_LEADFLOW_CRON_SECRET", g("FI_LEADFLOW_CRON_SECRET"), 16),
     minSecretIssue("IIOHR_HR_SYNC_SECRET", g("IIOHR_HR_SYNC_SECRET"), 16),
     minSecretIssue("IIOHR_FI_COMPETENCY_EXPORT_SECRET", g("IIOHR_FI_COMPETENCY_EXPORT_SECRET"), 16),
   ]) {
