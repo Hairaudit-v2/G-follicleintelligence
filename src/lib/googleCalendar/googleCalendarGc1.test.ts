@@ -430,7 +430,7 @@ describe("CalendarOS GC-1 — OAuth and token refresh", () => {
     process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY = MASTER_KEY;
     process.env.GOOGLE_CALENDAR_CLIENT_ID = "client-id";
     process.env.GOOGLE_CALENDAR_CLIENT_SECRET = "client-secret";
-    process.env.GOOGLE_CALENDAR_REDIRECT_URI = "https://app.example.com/api/google-calendar/callback";
+    process.env.GOOGLE_CALENDAR_REDIRECT_URI = "https://app.example.com/api/google-calendar/oauth/callback";
   });
 
   afterEach(() => {

@@ -133,9 +133,14 @@ export function GoogleCalendarIntegrationCard({
       {!oauthConfigured ? (
         <p className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
           Google Calendar OAuth is not configured on this deployment. Set{" "}
-          <code className="text-[#22C1FF]">GOOGLE_CALENDAR_CLIENT_ID</code>,{" "}
-          <code className="text-[#22C1FF]">GOOGLE_CALENDAR_CLIENT_SECRET</code>, and{" "}
-          <code className="text-[#22C1FF]">GOOGLE_CALENDAR_REDIRECT_URI</code>.
+          <code className="text-[#22C1FF]">GOOGLE_CALENDAR_CLIENT_ID</code> (or{" "}
+          <code className="text-[#22C1FF]">GOOGLE_CLIENT_ID</code>),{" "}
+          <code className="text-[#22C1FF]">GOOGLE_CALENDAR_CLIENT_SECRET</code> (or{" "}
+          <code className="text-[#22C1FF]">GOOGLE_CLIENT_SECRET</code>),{" "}
+          <code className="text-[#22C1FF]">GOOGLE_CALENDAR_REDIRECT_URI</code> (or{" "}
+          <code className="text-[#22C1FF]">GOOGLE_OAUTH_REDIRECT_URI</code>), and{" "}
+          <code className="text-[#22C1FF]">FI_EXTERNAL_CONNECTOR_MASTER_KEY</code> for token
+          encryption and OAuth state signing.
         </p>
       ) : null}
 

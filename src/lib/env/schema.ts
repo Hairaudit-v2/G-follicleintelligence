@@ -140,9 +140,11 @@ export const serverEnvSchema = z.object({
   FI_REMINDERS_TEST_SEND: optionalString,
   FI_INTELLIGENCE_POLICY_DEV: optionalString,
   GOOGLE_SITE_VERIFICATION: optionalString,
+  FI_EXTERNAL_CONNECTOR_MASTER_KEY: optionalString,
   GOOGLE_CALENDAR_CLIENT_ID: optionalString,
   GOOGLE_CALENDAR_CLIENT_SECRET: optionalString,
   GOOGLE_CALENDAR_REDIRECT_URI: optionalHttpUrl,
+  GOOGLE_CALENDAR_OAUTH_STATE_SECRET: optionalString,
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
   GOOGLE_OAUTH_REDIRECT_URI: optionalHttpUrl,
@@ -170,6 +172,14 @@ function minSecretIssue(name: string, raw: string | undefined, min: number): Env
     return { variable: name, message: `Must be at least ${min} characters when set` };
   }
   return null;
+}
+
+/** True when Google Calendar OAuth client credentials are fully configured. */
+export function isGoogleCalendarOAuthEnvConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  const clientId = (env.GOOGLE_CALENDAR_CLIENT_ID ?? env.GOOGLE_CLIENT_ID ?? "").trim();
+  const clientSecret = (env.GOOGLE_CALENDAR_CLIENT_SECRET ?? env.GOOGLE_CLIENT_SECRET ?? "").trim();
+  const redirectUri = (env.GOOGLE_CALENDAR_REDIRECT_URI ?? env.GOOGLE_OAUTH_REDIRECT_URI ?? "").trim();
+  return Boolean(clientId && clientSecret && redirectUri);
 }
 
 /**
@@ -264,6 +274,14 @@ export function collectCrossEnvValidationIssues(
         });
       }
     }
+    if (isGoogleCalendarOAuthEnvConfigured(env)) {
+      if (!isPresent(g("FI_EXTERNAL_CONNECTOR_MASTER_KEY"))) {
+        issues.push({
+          variable: "FI_EXTERNAL_CONNECTOR_MASTER_KEY",
+          message: "Required in production when Google Calendar OAuth is configured",
+        });
+      }
+    }
   } else if (isPresent(supabaseUrl) && !httpUrlSchema.safeParse(supabaseUrl).success) {
     issues.push({
       variable: "NEXT_PUBLIC_SUPABASE_URL",
@@ -281,6 +299,8 @@ export function collectCrossEnvValidationIssues(
     minSecretIssue("FI_LEADFLOW_CRON_SECRET", g("FI_LEADFLOW_CRON_SECRET"), 16),
     minSecretIssue("IIOHR_HR_SYNC_SECRET", g("IIOHR_HR_SYNC_SECRET"), 16),
     minSecretIssue("IIOHR_FI_COMPETENCY_EXPORT_SECRET", g("IIOHR_FI_COMPETENCY_EXPORT_SECRET"), 16),
+    minSecretIssue("FI_EXTERNAL_CONNECTOR_MASTER_KEY", g("FI_EXTERNAL_CONNECTOR_MASTER_KEY"), 16),
+    minSecretIssue("GOOGLE_CALENDAR_OAUTH_STATE_SECRET", g("GOOGLE_CALENDAR_OAUTH_STATE_SECRET"), 16),
   ]) {
     if (issue) issues.push(issue);
   }
