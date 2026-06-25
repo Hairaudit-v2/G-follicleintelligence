@@ -5,6 +5,10 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron/leadflow/process-hubspot-events",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/iiohr-hr-perth-staff-sync",
       "schedule": "0 * * * *"
     },
