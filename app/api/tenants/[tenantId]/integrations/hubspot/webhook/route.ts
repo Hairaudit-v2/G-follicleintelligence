@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 import { ZodError, z } from "zod";
 
 import {
-  assertHubspotWebhookAuthorized,
+  assertHubspotLeadFlowWebhookAuthorized,
   HubspotWebhookAuthError,
 } from "@/src/lib/integrations/hubspot/hubspotWebhookAuth.server";
 import { queueHubSpotLeadFlowWebhookEvents } from "@/src/lib/leadFlow/hubspotLeadFlowWebhook.server";
@@ -18,11 +18,19 @@ const tenantIdParamSchema = z.string().uuid("Invalid tenantId.");
 
 export async function POST(req: Request, ctx: { params: Promise<{ tenantId: string }> }) {
   try {
-    assertHubspotWebhookAuthorized(req);
+    const rawBody = await req.text();
+    assertHubspotLeadFlowWebhookAuthorized(req, rawBody);
     const { tenantId: rawTenant } = await ctx.params;
     const tenantId = tenantIdParamSchema.parse(rawTenant?.trim());
 
-    const body = await req.json().catch(() => ({}));
+    const body = (() => {
+      if (!rawBody.trim()) return {};
+      try {
+        return JSON.parse(rawBody) as unknown;
+      } catch {
+        return {};
+      }
+    })();
     const result = await queueHubSpotLeadFlowWebhookEvents(tenantId, body);
 
     return NextResponse.json({
