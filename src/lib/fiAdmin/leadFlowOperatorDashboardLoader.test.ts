@@ -93,7 +93,7 @@ function makeOperatorDashboardSupabase(store: MockStore, tenantFilter?: string):
         },
         order: () => chain,
         then: (onF: (v: unknown) => unknown, onR?: (e: unknown) => unknown) => {
-          let rows = store.leads.filter((row) => {
+          const rows = store.leads.filter((row) => {
             for (const [key, value] of Object.entries(filters)) {
               if (String((row as unknown as Record<string, unknown>)[key]) !== value) return false;
             }
