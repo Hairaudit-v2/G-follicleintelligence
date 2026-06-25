@@ -168,9 +168,25 @@ export function resolveFiOsPrimarySidebarItems(
       featureKey: "crm",
       label: "Leads",
       shortLabel: "Leads",
-      href: hrefFor(b, "crm"),
+      href: hrefFor(b, "leadflow"),
       disabled: !showCrmNav,
       hint: !showCrmNav ? "Requires CRM shell role for this tenant." : undefined,
+      subItems: !showCrmNav
+        ? undefined
+        : [
+            {
+              id: "leadflow-dashboard",
+              label: "LeadFlow",
+              href: hrefFor(b, "leadflow"),
+              featureKey: "crm",
+            },
+            {
+              id: "crm-workspace",
+              label: "CRM workspace",
+              href: hrefFor(b, "crm"),
+              featureKey: "crm",
+            },
+          ],
     },
     {
       id: "follow-up-queue",

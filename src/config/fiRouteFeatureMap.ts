@@ -28,6 +28,7 @@ const RULES: readonly { test: (full: string) => boolean; feature: FiFeatureKey }
   { test: (f) => f.startsWith("patients/"), feature: "patients" },
   { test: (f) => f === "foundation-integrity" || f.startsWith("foundation-integrity/"), feature: "patient_twin" },
   { test: (f) => f === "crm" || f.startsWith("crm/"), feature: "crm" },
+  { test: (f) => f === "leadflow" || f.startsWith("leadflow/"), feature: "crm" },
   { test: (f) => f === "leads" || f.startsWith("leads/"), feature: "crm" },
   { test: (f) => f === "calendar" || f.startsWith("calendar/"), feature: "calendar" },
   { test: (f) => f === "appointments" || f.startsWith("appointments/"), feature: "calendar" },

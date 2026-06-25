@@ -172,7 +172,10 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
     id: "leadflow",
     label: "LeadFlow",
     description: "Enquiries, leads, pipeline, tasks, and follow-ups.",
-    items: [{ id: "leadflow", label: "LeadFlow", path: "crm", permissionHint: { requiresCrmShellNav: true } }],
+    items: [
+      { id: "leadflow", label: "LeadFlow", path: "leadflow", permissionHint: { requiresCrmShellNav: true } },
+      { id: "leadflow-crm", label: "CRM workspace", path: "crm", permissionHint: { requiresCrmShellNav: true } },
+    ],
   },
   {
     id: "patientos",
@@ -438,7 +441,8 @@ export function getClinicOsShellActiveNavId(pathname: string, base: string): str
   if (first === "surgery-os") return "surgery-os";
   if (first === "surgery-readiness") return "surgery-readiness-board";
   if (first === "procedure-day") return "procedure-day-board";
-  if (first === "crm") return "leadflow";
+  if (first === "leadflow") return "leadflow";
+  if (first === "crm") return "leadflow-crm";
   if (first === "analytics") return "analyticsos";
   if (first === "audit") return "auditos";
   if (first === "foundation-integrity") return "foundationos";
