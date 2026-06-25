@@ -383,7 +383,6 @@ describe("LeadFlow LF-2 HubSpot processor", () => {
       activity: [],
     };
     const supabase = makeStoreSupabase(store);
-    const event = store.externalEvents[0]!;
 
     await processPendingHubSpotExternalEvents({ tenantId: TENANT, limit: 1, supabase });
 
