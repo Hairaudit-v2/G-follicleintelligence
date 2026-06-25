@@ -1,7 +1,5 @@
 import "server-only";
 
-import { randomBytes } from "node:crypto";
-
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -16,6 +14,10 @@ import {
   computeTokenExpiresAt,
   isAccessTokenExpired,
 } from "./googleCalendarCore";
+import {
+  resolveGoogleCalendarOAuthStateSecret,
+  signGoogleCalendarOAuthState,
+} from "./googleCalendarOAuthState";
 import type {
   FiCalendarIntegration,
   FiCalendarIntegrationStatus,
@@ -138,6 +140,20 @@ async function loadIntegrationRow(
   return (data as IntegrationRow | null) ?? null;
 }
 
+async function fetchGoogleAccountEmail(accessToken: string, fetchFn: typeof fetch): Promise<string | null> {
+  const res = await fetchFn("https://www.googleapis.com/oauth2/v2/userinfo", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const json = (await res.json()) as { email?: string };
+  return json.email?.trim() ?? null;
+}
+
 async function exchangeOAuthCode(
   code: string,
   fetchFn: typeof fetch
@@ -202,14 +218,15 @@ export async function connectGoogleCalendar(
   const tenant = tenantId.trim();
   if (!tenant) return { ok: false, error: "Tenant id is required." };
 
-  const state = Buffer.from(
-    JSON.stringify({
-      tenantId: tenant,
-      nonce: randomBytes(16).toString("hex"),
-      ...(opts.statePayload ?? {}),
-    }),
-    "utf8"
-  ).toString("base64url");
+  const stateSecret = resolveGoogleCalendarOAuthStateSecret();
+  if (!stateSecret) {
+    return {
+      ok: false,
+      error: "Google Calendar OAuth state signing is not configured (set FI_EXTERNAL_CONNECTOR_MASTER_KEY).",
+    };
+  }
+
+  const state = signGoogleCalendarOAuthState(tenant, stateSecret);
 
   const authUrl = buildGoogleOAuthAuthorizeUrl({
     clientId: config.clientId,
@@ -294,11 +311,16 @@ export async function completeGoogleCalendarOAuth(
     return { ok: false, error: "Failed to exchange Google OAuth code." };
   }
 
+  const googleAccountEmail =
+    opts.googleAccountEmail?.trim() ??
+    (await fetchGoogleAccountEmail(tokenResponse.access_token, fetchFn)) ??
+    null;
+
   return storeGoogleCalendarCredentials(
     {
       tenantId,
       calendarId,
-      googleAccountEmail: opts.googleAccountEmail,
+      googleAccountEmail,
       accessToken: tokenResponse.access_token,
       refreshToken: tokenResponse.refresh_token,
       expiresInSeconds: tokenResponse.expires_in,

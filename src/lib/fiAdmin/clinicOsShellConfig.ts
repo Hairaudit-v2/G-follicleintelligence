@@ -309,6 +309,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
         description: "Configure tax, currency, invoice, and regional business settings for this clinic.",
       },
       {
+        id: "integrations",
+        label: "Integrations",
+        path: "settings/integrations",
+        permissionHint: {},
+        description: "Google Calendar OAuth and other clinic integrations.",
+      },
+      {
         id: "timely-zapier",
         label: "Integrations · Timely",
         path: "settings/integrations/timely",
