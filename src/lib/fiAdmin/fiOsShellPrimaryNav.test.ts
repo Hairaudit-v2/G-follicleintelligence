@@ -35,6 +35,7 @@ test("getFiOsShellActiveSidebarId: maps foundation and settings clusters", () =>
   assert.equal(getFiOsShellActiveSidebarId(`${base}/staff`, base), "staff");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/admin-users`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/tax-localisation`, base), "settings");
+  assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/settings/integrations/timely/discovery`, base), "settings");
   assert.equal(getFiOsShellActiveSidebarId(`${base}/system-status`, base), "calendar");

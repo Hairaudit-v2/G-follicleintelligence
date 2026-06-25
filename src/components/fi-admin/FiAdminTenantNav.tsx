@@ -257,6 +257,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       title: "Settings — tax, currency, invoice, and regional business settings.",
     },
     {
+      href: `${base}/settings/integrations`,
+      label: "Integrations",
+      title: "Settings — Google Calendar OAuth and other clinic integrations.",
+    },
+    {
       href: `${base}/settings/integrations/timely`,
       label: "Integrations · Timely",
       title: "Settings — Zapier webhooks for Timely patients and appointments.",

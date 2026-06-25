@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { test } from "node:test";
 
 import {
@@ -10,6 +11,13 @@ import {
 /** Synthetic tenant id (Evolved or any tenant uses the same URL shape). */
 const EVOLVED_LIKE_TENANT = "a0000000-0000-4000-8000-0000000000e1";
 const base = `/fi-admin/${EVOLVED_LIKE_TENANT}`;
+
+test("GC-2 integrations page exists at app router path", () => {
+  assert.ok(
+    existsSync("app/(fi-admin)/fi-admin/[tenantId]/settings/integrations/page.tsx"),
+    "Integrations page must exist at app/(fi-admin)/fi-admin/[tenantId]/settings/integrations/page.tsx"
+  );
+});
 
 test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   const items = resolveClinicOsShellNavItems(base, true);
@@ -49,6 +57,10 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.ok(taxLoc);
   assert.equal(taxLoc!.disabled, false);
   assert.equal(taxLoc!.href, `${base}/settings/tax-localisation`);
+  const integrations = items.find((i) => i.id === "integrations");
+  assert.ok(integrations);
+  assert.equal(integrations!.disabled, false);
+  assert.equal(integrations!.href, `${base}/settings/integrations`);
   const timely = items.find((i) => i.id === "timely-zapier");
   assert.ok(timely);
   assert.equal(timely!.disabled, false);
@@ -190,6 +202,10 @@ test("getClinicOsShellActiveNavId: admin users under settings cluster", () => {
 
 test("getClinicOsShellActiveNavId: tax localisation under settings cluster", () => {
   assert.equal(getClinicOsShellActiveNavId(`${base}/settings/tax-localisation`, base), "configuration");
+});
+
+test("getClinicOsShellActiveNavId: integrations hub under settings cluster", () => {
+  assert.equal(getClinicOsShellActiveNavId(`${base}/settings/integrations`, base), "configuration");
 });
 
 test("getClinicOsShellActiveNavId: Timely Zapier under settings cluster", () => {
