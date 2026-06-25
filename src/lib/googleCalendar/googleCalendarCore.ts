@@ -113,7 +113,9 @@ export function mapGoogleApiEventToFiFields(
 /** Detect duplicate FI calendar event before create (external id or title+start). */
 export function isDuplicateFiCalendarEvent(
   candidate: Pick<FiCalendarEvent, "externalEventId" | "title" | "startTime">,
-  existing: readonly Pick<FiCalendarEvent, "externalEventId" | "title" | "startTime" | "metadata">
+  existing: ReadonlyArray<
+    Pick<FiCalendarEvent, "externalEventId" | "title" | "startTime" | "metadata">
+  >
 ): boolean {
   for (const row of existing) {
     if (
@@ -156,7 +158,7 @@ export function shouldUpdateFiEventFromGoogle(
 
 /** Detect Google events removed since last sync — local external ids not in discovered set. */
 export function detectDeletedExternalEvents(
-  localEvents: readonly Pick<FiCalendarEvent, "id" | "externalEventId" | "metadata">,
+  localEvents: ReadonlyArray<Pick<FiCalendarEvent, "id" | "externalEventId" | "metadata">>,
   discoveredExternalIds: ReadonlySet<string>
 ): string[] {
   const deletedIds: string[] = [];
