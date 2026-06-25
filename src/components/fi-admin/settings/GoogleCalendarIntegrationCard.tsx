@@ -24,6 +24,13 @@ function displayConnectionLabel(status: GoogleCalendarConnectionStatus): string 
   return "Needs attention";
 }
 
+function formatSyncHealth(status: GoogleCalendarConnectionStatus): string {
+  if (!status.connected) return "—";
+  if (status.sync_health_label === "healthy") return "Healthy";
+  if (status.sync_health_label === "needs_attention") return "Needs attention";
+  return "Not synced yet";
+}
+
 function statusBadgeClass(label: string): string {
   if (label === "Connected") return "bg-emerald-500/15 text-emerald-300";
   if (label === "Not connected") return "bg-slate-500/15 text-slate-300";
@@ -88,6 +95,14 @@ export function GoogleCalendarIntegrationCard({
         status: body.status ?? prev.status,
         google_account_email: body.google_account_email ?? prev.google_account_email,
         calendar_id: body.calendar_id ?? prev.calendar_id,
+        last_synced_at: body.last_synced_at ?? prev.last_synced_at,
+        last_sync_status: body.last_sync_status ?? prev.last_sync_status,
+        sync_failure_count: body.sync_failure_count ?? prev.sync_failure_count,
+        last_sync_error_summary: body.last_sync_error_summary ?? prev.last_sync_error_summary,
+        last_validated_at: body.last_validated_at ?? prev.last_validated_at,
+        sync_health_label: body.sync_health_label ?? prev.sync_health_label,
+        can_create_meet: body.can_create_meet ?? prev.can_create_meet,
+        token_expires_at: body.token_expires_at ?? prev.token_expires_at,
       }));
 
       setValidateMessage(
@@ -155,6 +170,25 @@ export function GoogleCalendarIntegrationCard({
             status.last_synced_at
               ? new Date(status.last_synced_at).toLocaleString()
               : "Not synced yet"
+          }
+        />
+        <StatusRow
+          label="Sync health"
+          value={
+            <span className={syncHealthBadgeClass(formatSyncHealth(status))}>
+              {formatSyncHealth(status)}
+            </span>
+          }
+        />
+        {status.last_sync_error_summary ? (
+          <StatusRow label="Last sync error" value={status.last_sync_error_summary} />
+        ) : null}
+        <StatusRow
+          label="Last validated"
+          value={
+            status.last_validated_at
+              ? new Date(status.last_validated_at).toLocaleString()
+              : "—"
           }
         />
         <StatusRow label="Google Meet ready" value={status.can_create_meet ? "Yes" : "No"} />

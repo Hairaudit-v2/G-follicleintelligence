@@ -42,6 +42,13 @@ type IntegrationRow = {
   refresh_token_encrypted: string | null;
   token_expires_at: string | null;
   status: string;
+  last_synced_at: string | null;
+  last_sync_status: string;
+  last_sync_error: string | null;
+  sync_failure_count: number;
+  last_validated_at: string | null;
+  last_validation_status: string | null;
+  last_validation_error: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -114,6 +121,13 @@ function mapIntegrationRow(row: IntegrationRow): FiCalendarIntegration {
     calendarId: row.calendar_id,
     tokenExpiresAt: row.token_expires_at,
     status: row.status as FiCalendarIntegrationStatus,
+    lastSyncedAt: row.last_synced_at,
+    lastSyncStatus: (row.last_sync_status ?? "never_synced") as FiCalendarIntegration["lastSyncStatus"],
+    lastSyncError: row.last_sync_error,
+    syncFailureCount: row.sync_failure_count ?? 0,
+    lastValidatedAt: row.last_validated_at,
+    lastValidationStatus: row.last_validation_status as FiCalendarIntegration["lastValidationStatus"],
+    lastValidationError: row.last_validation_error,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -152,6 +166,44 @@ async function fetchGoogleAccountEmail(accessToken: string, fetchFn: typeof fetc
   if (!res.ok) return null;
   const json = (await res.json()) as { email?: string };
   return json.email?.trim() ?? null;
+}
+
+/** Fallback when userinfo scope is unavailable — primary calendar id is often the account email. */
+async function fetchGoogleAccountEmailFromCalendar(
+  accessToken: string,
+  calendarId: string,
+  fetchFn: typeof fetch
+): Promise<string | null> {
+  const encodedId = encodeURIComponent(calendarId.trim() || "primary");
+  const url = `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodedId}`;
+  const res = await fetchFn(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const json = (await res.json()) as { id?: string };
+  const candidate = json.id?.trim() ?? null;
+  if (candidate && candidate.includes("@")) return candidate;
+  return null;
+}
+
+async function resolveGoogleAccountEmail(
+  accessToken: string,
+  calendarId: string,
+  fetchFn: typeof fetch,
+  explicit?: string | null
+): Promise<string | null> {
+  const fromExplicit = explicit?.trim();
+  if (fromExplicit) return fromExplicit;
+
+  const fromUserinfo = await fetchGoogleAccountEmail(accessToken, fetchFn);
+  if (fromUserinfo) return fromUserinfo;
+
+  return fetchGoogleAccountEmailFromCalendar(accessToken, calendarId, fetchFn);
 }
 
 async function exchangeOAuthCode(
@@ -312,9 +364,12 @@ export async function completeGoogleCalendarOAuth(
   }
 
   const googleAccountEmail =
-    opts.googleAccountEmail?.trim() ??
-    (await fetchGoogleAccountEmail(tokenResponse.access_token, fetchFn)) ??
-    null;
+    (await resolveGoogleAccountEmail(
+      tokenResponse.access_token,
+      calendarId,
+      fetchFn,
+      opts.googleAccountEmail
+    )) ?? null;
 
   return storeGoogleCalendarCredentials(
     {
@@ -458,25 +513,50 @@ export async function validateGoogleCalendarConnection(
   const now = new Date().toISOString();
 
   if (!res.ok) {
+    const validationError = `Google Calendar validation failed (${res.status}).`;
     await supabase
       .from("fi_calendar_integrations")
-      .update({ status: "error", updated_at: now })
+      .update({
+        status: "error",
+        last_validated_at: now,
+        last_validation_status: "failed",
+        last_validation_error: validationError,
+        updated_at: now,
+      })
       .eq("id", integration.id)
       .eq("tenant_id", tenantId.trim());
-    return { ok: false, error: `Google Calendar validation failed (${res.status}).` };
+    return { ok: false, error: validationError };
   }
 
-  const json = (await res.json()) as { summary?: string };
+  const json = (await res.json()) as { summary?: string; id?: string };
+  const calendarEmail =
+    integration.googleAccountEmail?.trim() ||
+    (json.id?.includes("@") ? json.id.trim() : null);
+
   await supabase
     .from("fi_calendar_integrations")
-    .update({ status: "active", updated_at: now })
+    .update({
+      status: "active",
+      last_validated_at: now,
+      last_validation_status: "success",
+      last_validation_error: null,
+      ...(calendarEmail ? { google_account_email: calendarEmail } : {}),
+      updated_at: now,
+    })
     .eq("id", integration.id)
     .eq("tenant_id", tenantId.trim());
 
   return {
     ok: true,
     data: {
-      integration: { ...integration, status: "active" },
+      integration: {
+        ...integration,
+        status: "active",
+        googleAccountEmail: calendarEmail ?? integration.googleAccountEmail,
+        lastValidatedAt: now,
+        lastValidationStatus: "success",
+        lastValidationError: null,
+      },
       calendarTitle: json.summary?.trim() || undefined,
     },
   };

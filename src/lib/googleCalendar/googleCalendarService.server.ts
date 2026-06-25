@@ -29,12 +29,14 @@ import type {
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
 const SYNC_LOOKBACK_DAYS = 30;
-const SYNC_LOOKAHEAD_DAYS = 90;
+const SYNC_LOOKAHEAD_DAYS = 180;
 
 type ServerOpts = {
   supabaseClientForTests?: SupabaseClient;
   fetchOverride?: typeof fetch;
   integrationId?: string;
+  lookbackDays?: number;
+  lookaheadDays?: number;
 };
 
 type EventRow = {
@@ -500,8 +502,10 @@ export async function syncGoogleCalendarEvents(
 
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
   const now = Date.now();
-  const timeMin = new Date(now - SYNC_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  const timeMax = new Date(now + SYNC_LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const lookbackDays = opts.lookbackDays ?? SYNC_LOOKBACK_DAYS;
+  const lookaheadDays = opts.lookaheadDays ?? SYNC_LOOKAHEAD_DAYS;
+  const timeMin = new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
+  const timeMax = new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
 
   let discovered: GoogleCalendarApiEvent[];
   if (opts.fetchOverride) {

@@ -35,6 +35,10 @@
     {
       "path": "/api/cron/seo-indexnow",
       "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/google-calendar/sync",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

@@ -15,6 +15,12 @@ export type FiCalendarIntegrationStatus = (typeof FI_CALENDAR_INTEGRATION_STATUS
 export const FI_CALENDAR_PROVIDERS = ["google"] as const;
 export type FiCalendarProvider = (typeof FI_CALENDAR_PROVIDERS)[number];
 
+export const FI_CALENDAR_SYNC_STATUSES = ["never_synced", "success", "failed"] as const;
+export type FiCalendarSyncStatus = (typeof FI_CALENDAR_SYNC_STATUSES)[number];
+
+export const FI_CALENDAR_VALIDATION_STATUSES = ["success", "failed"] as const;
+export type FiCalendarValidationStatus = (typeof FI_CALENDAR_VALIDATION_STATUSES)[number];
+
 export type FiCalendarIntegration = {
   id: string;
   tenantId: string;
@@ -23,6 +29,13 @@ export type FiCalendarIntegration = {
   calendarId: string;
   tokenExpiresAt: string | null;
   status: FiCalendarIntegrationStatus;
+  lastSyncedAt: string | null;
+  lastSyncStatus: FiCalendarSyncStatus;
+  lastSyncError: string | null;
+  syncFailureCount: number;
+  lastValidatedAt: string | null;
+  lastValidationStatus: FiCalendarValidationStatus | null;
+  lastValidationError: string | null;
   createdAt: string;
   updatedAt: string;
 };

@@ -144,17 +144,36 @@ export async function handleGoogleCalendarValidate(
         status: status.status,
         google_account_email: status.google_account_email,
         calendar_id: status.calendar_id,
+        token_expires_at: status.token_expires_at,
+        last_synced_at: status.last_synced_at,
+        last_sync_status: status.last_sync_status,
+        sync_failure_count: status.sync_failure_count,
+        last_sync_error_summary: status.last_sync_error_summary,
+        last_validated_at: status.last_validated_at,
+        can_create_meet: status.can_create_meet,
+        sync_health_label: status.sync_health_label,
         error: validation.error,
       });
     }
 
-    const integration = validation.data!.integration;
+    const refreshed = await loadGoogleCalendarConnectionStatus(tenantId, {
+      supabaseClientForTests: opts.supabaseClientForTests,
+    });
+
     return NextResponse.json({
       success: true,
-      connected: integration.status === "active",
-      status: integration.status,
-      google_account_email: integration.googleAccountEmail,
-      calendar_id: integration.calendarId,
+      connected: refreshed.connected,
+      status: refreshed.status,
+      google_account_email: refreshed.google_account_email,
+      calendar_id: refreshed.calendar_id,
+      token_expires_at: refreshed.token_expires_at,
+      last_synced_at: refreshed.last_synced_at,
+      last_sync_status: refreshed.last_sync_status,
+      sync_failure_count: refreshed.sync_failure_count,
+      last_sync_error_summary: refreshed.last_sync_error_summary,
+      last_validated_at: refreshed.last_validated_at,
+      can_create_meet: refreshed.can_create_meet,
+      sync_health_label: refreshed.sync_health_label,
     });
   } catch (e) {
     if (e instanceof GoogleCalendarIntegrationAccessError) {
