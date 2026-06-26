@@ -1,16 +1,17 @@
 /**
- * Shared in-memory Supabase table mocks for CalendarOS GC-8 monitoring tables.
+ * Shared in-memory Supabase table mocks for CalendarOS GC-9 webhook / version tables.
  */
 import { randomUUID } from "node:crypto";
 
+import { createGc8MonitoringMockTables } from "./googleCalendarGc8MockTables";
+
 type Row = Record<string, unknown>;
 
-export function createGc8MonitoringMockTables() {
-  const syncHealth: Row[] = [];
-  const syncRuns: Row[] = [];
-  const adminNotifications: Row[] = [];
-  const reviewItems: Row[] = [];
+export function createGc9MockTables() {
+  const gc8 = createGc8MonitoringMockTables();
   const webhookSubscriptions: Row[] = [];
+  const eventVersions: Row[] = [];
+  const reconciliationLogs: Row[] = [];
 
   function applyEqFilters(rows: Row[], filters: Record<string, unknown>): Row[] {
     return rows.filter((row) =>
@@ -20,10 +21,12 @@ export function createGc8MonitoringMockTables() {
           if (isVal === null) return row[col] == null;
         }
         if (val && typeof val === "object" && "lt" in (val as Record<string, unknown>)) {
-          return String(row[col] ?? "") < String((val as { lt: unknown }).lt ?? "");
+          const ltVal = (val as { lt: unknown }).lt;
+          return String(row[col] ?? "") < String(ltVal ?? "");
         }
         if (val && typeof val === "object" && "lte" in (val as Record<string, unknown>)) {
-          return String(row[col] ?? "") <= String((val as { lte: unknown }).lte ?? "");
+          const lteVal = (val as { lte: unknown }).lte;
+          return String(row[col] ?? "") <= String(lteVal ?? "");
         }
         return row[col] === val;
       })
@@ -37,12 +40,6 @@ export function createGc8MonitoringMockTables() {
           maybeSingle: async () => {
             const matched = applyEqFilters(rows, filters).slice(0, n);
             return { data: matched[0] ?? null, error: null };
-          },
-          range(from: number, to: number) {
-            return Promise.resolve({
-              data: applyEqFilters(rows, filters).slice(from, to + 1),
-              error: null,
-            });
           },
         };
       },
@@ -83,20 +80,10 @@ export function createGc8MonitoringMockTables() {
           range(from: number, to: number) {
             return Promise.resolve({ data: sorted.slice(from, to + 1), error: null });
           },
-          then(
-            resolve: (v: { data: Row[]; error: null }) => void,
-            reject?: (e: unknown) => void
-          ) {
-            try {
-              resolve({ data: sorted, error: null });
-            } catch (e) {
-              reject?.(e);
-            }
-          },
         };
       },
       then(
-        resolve: (v: { data: Row[]; error: null; count?: number }) => void,
+        resolve: (v: { data: Row[]; error: null }) => void,
         reject?: (e: unknown) => void
       ) {
         try {
@@ -112,10 +99,6 @@ export function createGc8MonitoringMockTables() {
         filters[col] = val;
         return buildGenericChain(rows, filters);
       },
-      is(col: string, val: unknown) {
-        filters[col] = { is: val };
-        return buildGenericChain(rows, filters);
-      },
       lt(col: string, val: unknown) {
         filters[col] = { lt: val };
         return buildGenericChain(rows, filters);
@@ -124,26 +107,7 @@ export function createGc8MonitoringMockTables() {
         filters[col] = { lte: val };
         return buildGenericChain(rows, filters);
       },
-      select(_cols?: string, opts?: { count?: string; head?: boolean }) {
-        if (opts?.head) {
-          const countChain = (filters: Record<string, unknown> = {}) => ({
-            eq(col: string, val: unknown) {
-              filters[col] = val;
-              return countChain(filters);
-            },
-            then(
-              resolve: (v: { count: number; error: null }) => void,
-              reject?: (e: unknown) => void
-            ) {
-              try {
-                resolve({ count: applyEqFilters(rows, filters).length, error: null });
-              } catch (e) {
-                reject?.(e);
-              }
-            },
-          });
-          return countChain();
-        }
+      select(_cols?: string) {
         return buildGenericChain(rows, filters);
       },
       insert(row: Row | Row[]) {
@@ -152,15 +116,7 @@ export function createGc8MonitoringMockTables() {
         for (const item of rowsToInsert) {
           const full = {
             id: item.id ?? randomUUID(),
-            consecutive_failures: 0,
-            total_sync_runs: 0,
-            total_events_fetched: 0,
-            total_events_inserted: 0,
-            total_events_updated: 0,
-            total_events_skipped: 0,
-            total_review_items_created: 0,
-            health_score: 100,
-            health_status: "healthy",
+            failure_count: 0,
             metadata: {},
             ...item,
             created_at: item.created_at ?? new Date().toISOString(),
@@ -173,7 +129,10 @@ export function createGc8MonitoringMockTables() {
           error: null,
           select() {
             return {
-              single: async () => ({ data: inserted[0] ?? null, error: inserted[0] ? null : { message: "not found" } }),
+              single: async () => ({
+                data: inserted[0] ?? null,
+                error: inserted[0] ? null : { message: "not found" },
+              }),
             };
           },
         };
@@ -196,16 +155,6 @@ export function createGc8MonitoringMockTables() {
           },
         };
       },
-      delete() {
-        return {
-          in(col: string, vals: string[]) {
-            for (let i = rows.length - 1; i >= 0; i -= 1) {
-              if (vals.includes(String(rows[i][col]))) rows.splice(i, 1);
-            }
-            return Promise.resolve({ error: null });
-          },
-        };
-      },
       ...terminal,
     };
 
@@ -213,30 +162,17 @@ export function createGc8MonitoringMockTables() {
   }
 
   return {
-    syncHealth,
-    syncRuns,
-    adminNotifications,
-    reviewItems,
+    gc8,
     webhookSubscriptions,
+    eventVersions,
+    reconciliationLogs,
     tableHandler(table: string) {
-      if (table === "fi_calendar_sync_health") return buildGenericChain(syncHealth);
-      if (table === "fi_calendar_sync_runs") return buildGenericChain(syncRuns);
-      if (table === "fi_admin_notifications") return buildGenericChain(adminNotifications);
-      if (table === "fi_calendar_sync_review_items") return buildGenericChain(reviewItems);
       if (table === "fi_calendar_webhook_subscriptions") return buildGenericChain(webhookSubscriptions);
+      if (table === "fi_calendar_event_versions") return buildGenericChain(eventVersions);
+      if (table === "fi_calendar_reconciliation_logs") return buildGenericChain(reconciliationLogs);
+      const gc8Handler = gc8.tableHandler(table);
+      if (gc8Handler) return gc8Handler;
       return null;
     },
-  };
-}
-
-export function withGc8IntegrationDefaults(row: Record<string, unknown>): Record<string, unknown> {
-  return {
-    sync_enabled: true,
-    scheduled_sync_enabled: true,
-    sync_frequency_minutes: 15,
-    scheduled_sync_paused_at: null,
-    scheduled_sync_paused_reason: null,
-    realtime_sync_enabled: false,
-    ...row,
   };
 }

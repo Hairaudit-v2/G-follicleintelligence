@@ -37,10 +37,11 @@ function normalizeGoogleEvent(
   calendarId: string
 ): NormalizedCalendarEvent {
   const mapped = mapGoogleApiEventToFiFields(event, calendarId);
+  const etag = (event as GoogleCalendarApiEvent & { etag?: string }).etag?.trim() ?? null;
   return {
     ...mapped,
     externalEventId: mapped.externalEventId ?? "",
-    etag: event.etag?.trim() ?? null,
+    etag,
     updatedAt: event.updated?.trim() ?? null,
     status: event.status?.trim() ?? null,
     raw: event,

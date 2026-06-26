@@ -15,6 +15,8 @@ import {
   setGoogleCalendarSyncEnabled,
   setGoogleCalendarSyncFrequency,
   loadGoogleCalendarMonitoringPage,
+  enableGoogleCalendarRealtimeSync,
+  renewGoogleCalendarRealtimeSync,
 } from "@/src/lib/googleCalendar/googleCalendarMonitoring.server";
 import { createGoogleCalendarSyncAlertIfNeeded } from "@/src/lib/googleCalendar/googleCalendarSyncAlerts.server";
 
@@ -151,6 +153,38 @@ export async function setGoogleCalendarSyncEnabledAction(
     const result = await setGoogleCalendarSyncEnabled({
       tenantId: tenantId.trim(),
       enabled: parsed.enabled,
+    });
+    if (!result.ok) return result;
+    revalidateMonitoringSurfaces(tenantId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function enableGoogleCalendarRealtimeSyncAction(
+  tenantId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await assertGoogleCalendarTenantAdminAccess(tenantId);
+    const result = await enableGoogleCalendarRealtimeSync({ tenantId: tenantId.trim() });
+    if (!result.ok) return result;
+    revalidateMonitoringSurfaces(tenantId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+export async function renewGoogleCalendarRealtimeSyncAction(
+  tenantId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await assertGoogleCalendarTenantAdminAccess(tenantId);
+    const page = await loadGoogleCalendarMonitoringPage(tenantId.trim(), { canManage: true });
+    const result = await renewGoogleCalendarRealtimeSync({
+      tenantId: tenantId.trim(),
+      subscriptionId: page.webhook.subscriptionId ?? undefined,
     });
     if (!result.ok) return result;
     revalidateMonitoringSurfaces(tenantId);

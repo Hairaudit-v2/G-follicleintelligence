@@ -143,7 +143,7 @@ export const GOOGLE_MIRRORABLE_DISPLAY_FIELDS = [
 ] as const;
 
 export function isRiskyGoogleChangeForFiOwnedEvent(
-  local: Pick<FiCalendarEvent, "title" | "startTime" | "endTime" | "metadata">,
+  local: Pick<FiCalendarEvent, "title" | "startTime" | "endTime" | "metadata" | "patientId" | "leadId">,
   incoming: Pick<NormalizedCalendarEvent, "title" | "startTime" | "endTime">
 ): boolean {
   if (deriveCalendarEventOwnershipSource(local) !== "fi_system") return false;

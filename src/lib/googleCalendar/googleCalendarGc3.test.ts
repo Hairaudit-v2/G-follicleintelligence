@@ -459,7 +459,7 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-        runScheduledSync: async (input) => {
+        runScheduledSync: async (input = {}) => {
           capturedTenant = input.tenantId;
           return {
             success: true,
@@ -469,7 +469,7 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
             source: "scheduled" as const,
             tenants: [
               {
-                tenantId: input.tenantId!,
+                tenantId: input.tenantId ?? TENANT_A,
                 integrationId: "int-1",
                 outcome: "synced" as const,
                 result: { discovered: 0, created: 0, updated: 0, skipped: 0, deleted: 0 },

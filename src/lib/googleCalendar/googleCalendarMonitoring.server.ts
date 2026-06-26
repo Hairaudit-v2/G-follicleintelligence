@@ -36,7 +36,53 @@ type IntegrationRow = {
   sync_frequency_minutes: number;
   scheduled_sync_paused_at: string | null;
   scheduled_sync_paused_reason: string | null;
+  realtime_sync_enabled: boolean;
 };
+
+function deriveWebhookHealth(
+  integration: IntegrationRow | null,
+  subscription: WebhookSubscriptionRow | null,
+  nowMs: number = Date.now()
+): GoogleCalendarWebhookHealthModel {
+  if (!integration?.realtime_sync_enabled && !subscription) {
+    return {
+      realtimeSyncEnabled: false,
+      subscriptionStatus: "none",
+      subscriptionId: null,
+      lastNotificationAt: null,
+      expirationAt: null,
+      failureCount: 0,
+      syncMode: "disabled",
+    };
+  }
+
+  const status = (subscription?.status ?? "none") as GoogleCalendarWebhookHealthModel["subscriptionStatus"];
+  const expirationAt = subscription?.expiration_at ?? null;
+  const expMs = expirationAt ? Date.parse(expirationAt) : NaN;
+  const isExpiredByTime = Number.isFinite(expMs) && expMs <= nowMs;
+  const failureCount = subscription?.failure_count ?? 0;
+
+  let syncMode: GoogleCalendarWebhookHealthModel["syncMode"] = "fallback_polling";
+  if (status === "active" && !isExpiredByTime && failureCount < 3) {
+    syncMode = "realtime_active";
+  } else if (status === "expired" || isExpiredByTime) {
+    syncMode = "expired";
+  } else if (status === "failed" || failureCount >= 3) {
+    syncMode = "failed";
+  } else if (!integration?.realtime_sync_enabled) {
+    syncMode = "disabled";
+  }
+
+  return {
+    realtimeSyncEnabled: Boolean(integration?.realtime_sync_enabled),
+    subscriptionStatus: status === "none" ? "none" : status,
+    subscriptionId: subscription?.id ?? null,
+    lastNotificationAt: subscription?.last_notification_at ?? null,
+    expirationAt,
+    failureCount,
+    syncMode,
+  };
+}
 
 async function loadIntegrationRow(
   tenantId: string,
@@ -46,7 +92,7 @@ async function loadIntegrationRow(
   const { data, error } = await supabase
     .from("fi_calendar_integrations")
     .select(
-      "id, status, access_token_encrypted, sync_enabled, scheduled_sync_enabled, sync_frequency_minutes, scheduled_sync_paused_at, scheduled_sync_paused_reason"
+      "id, status, access_token_encrypted, sync_enabled, scheduled_sync_enabled, sync_frequency_minutes, scheduled_sync_paused_at, scheduled_sync_paused_reason, realtime_sync_enabled"
     )
     .eq("tenant_id", tenantId.trim())
     .neq("status", "disconnected")
@@ -105,9 +151,12 @@ export async function loadGoogleCalendarMonitoringPage(
       },
       recentRuns: [],
       openAlertCount: 0,
+      webhook: deriveWebhookHealth(integration, null),
     };
   }
 
+  const subscription = await loadActiveWebhookSubscriptionForTenant(tenantId, opts);
+  const webhook = deriveWebhookHealth(integration, subscription);
   const health = await loadGoogleCalendarSyncHealthRow(
     { tenantId, integrationId: integration.id },
     opts
@@ -151,6 +200,7 @@ export async function loadGoogleCalendarMonitoringPage(
     },
     recentRuns: runs.map(syncRunRowToClient),
     openAlertCount,
+    webhook,
   };
 }
 
@@ -292,5 +342,38 @@ export async function setGoogleCalendarSyncEnabled(
     .eq("tenant_id", input.tenantId.trim());
 
   if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+export async function enableGoogleCalendarRealtimeSync(
+  input: { tenantId: string },
+  opts: ServerOpts = {}
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { createGoogleCalendarWebhookSubscription } = await import(
+    "./googleCalendarWebhookSubscriptions.server"
+  );
+  const result = await createGoogleCalendarWebhookSubscription({ tenantId: input.tenantId }, opts);
+  if (!result.ok) return result;
+  return { ok: true };
+}
+
+export async function renewGoogleCalendarRealtimeSync(
+  input: { tenantId: string; subscriptionId?: string },
+  opts: ServerOpts = {}
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const subscription = await loadActiveWebhookSubscriptionForTenant(input.tenantId, opts);
+  const subscriptionId = input.subscriptionId ?? subscription?.id;
+  if (!subscriptionId) {
+    return enableGoogleCalendarRealtimeSync({ tenantId: input.tenantId }, opts);
+  }
+
+  const { renewGoogleCalendarWebhookSubscription } = await import(
+    "./googleCalendarWebhookSubscriptions.server"
+  );
+  const result = await renewGoogleCalendarWebhookSubscription(
+    { tenantId: input.tenantId, subscriptionId },
+    opts
+  );
+  if (!result.ok) return result;
   return { ok: true };
 }

@@ -9,12 +9,16 @@ import {
   resumeGoogleCalendarScheduledSyncAction,
   setGoogleCalendarScheduledSyncEnabledAction,
   setGoogleCalendarSyncFrequencyAction,
+  enableGoogleCalendarRealtimeSyncAction,
+  renewGoogleCalendarRealtimeSyncAction,
 } from "@/src/lib/actions/fi-google-calendar-monitoring-actions";
 import {
   formatDurationMs,
   formatHealthStatusLabel,
   formatRelativeTime,
   formatRunStatusLabel,
+  formatWebhookSyncModeLabel,
+  webhookSyncModeBadgeClass,
   type GoogleCalendarMonitoringPageModel,
 } from "@/src/lib/googleCalendar/googleCalendarMonitoringCore";
 import { formatSyncFrequencyLabel } from "@/src/lib/googleCalendar/googleCalendarSyncHealthCore";
@@ -84,14 +88,21 @@ export function GoogleCalendarMonitoringCard({
         <div>
           <h2 className="text-base font-semibold text-[#F8FAFC]">Google Calendar Monitoring</h2>
           <p className="mt-1 text-sm text-[#94A3B8]">
-            Automated background sync health, history, and scheduler controls.
+            Automated background sync health, real-time webhooks, history, and scheduler controls.
           </p>
         </div>
-        {pageModel.openAlertCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-medium ${webhookSyncModeBadgeClass(pageModel.webhook.syncMode)}`}
+          >
+            {formatWebhookSyncModeLabel(pageModel.webhook.syncMode)}
+          </span>
+          {pageModel.openAlertCount > 0 ? (
           <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-300">
             {pageModel.openAlertCount} open alert{pageModel.openAlertCount === 1 ? "" : "s"}
           </span>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       {message ? <p className="mt-3 text-sm text-emerald-300">{message}</p> : null}
@@ -121,6 +132,20 @@ export function GoogleCalendarMonitoringCard({
           <div className="mt-1 text-sm text-[#F8FAFC]">{formatSyncFrequencyLabel(pageModel.syncFrequencyMinutes)}</div>
           <div className="mt-1 text-xs text-[#94A3B8]">Success rate {pageModel.successRatePercent}%</div>
           <div className="mt-1 text-xs text-[#94A3B8]">Consecutive failures {pageModel.consecutiveFailures}</div>
+        </div>
+        <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
+          <div className="text-xs uppercase tracking-wide text-[#64748B]">Real-time webhook</div>
+          <div className="mt-1 text-sm text-[#F8FAFC] capitalize">
+            {pageModel.webhook.subscriptionStatus === "none"
+              ? "Not subscribed"
+              : pageModel.webhook.subscriptionStatus}
+          </div>
+          <div className="mt-1 text-xs text-[#94A3B8]">
+            Last notification {formatRelativeTime(pageModel.webhook.lastNotificationAt)}
+          </div>
+          <div className="mt-1 text-xs text-[#94A3B8]">
+            Expires {formatRelativeTime(pageModel.webhook.expirationAt)}
+          </div>
         </div>
       </div>
 
@@ -196,6 +221,35 @@ export function GoogleCalendarMonitoringCard({
               {formatSyncFrequencyLabel(minutes as 5 | 15 | 30 | 60)}
             </button>
           ))}
+          {pageModel.webhook.syncMode !== "realtime_active" ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() =>
+                runAction(
+                  () => enableGoogleCalendarRealtimeSyncAction(tenantId),
+                  "Real-time sync enabled."
+                )
+              }
+              className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-50"
+            >
+              Enable real-time sync
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() =>
+                runAction(
+                  () => renewGoogleCalendarRealtimeSyncAction(tenantId),
+                  "Webhook subscription renewed."
+                )
+              }
+              className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-medium text-sky-300 hover:bg-sky-500/20 disabled:opacity-50"
+            >
+              Renew subscription
+            </button>
+          )}
         </div>
       ) : null}
 
