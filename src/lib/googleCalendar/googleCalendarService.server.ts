@@ -6,7 +6,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logStructured } from "@/src/lib/server/structuredLog";
-import { fetchGoogleCalendarEventsReadOnly } from "@/src/lib/onboarding-os/googleCalendarConnector.server";
 import type { GoogleCalendarApiEvent } from "@/src/lib/onboarding-os/googleCalendarConnectorTypes";
 
 import {
@@ -32,6 +31,7 @@ import type {
   FiCalendarIntegration,
   GoogleCalendarApiEventWithConference,
   GoogleCalendarSyncResult,
+  GoogleCalendarSyncSkipBreakdown,
   UpdateGoogleCalendarEventInput,
 } from "./googleCalendarTypes";
 
@@ -173,6 +173,13 @@ async function fetchAllGoogleCalendarEventsForSync(
   let pageToken: string | undefined;
   let pages = 0;
 
+  logStructured("info", "google_calendar_sync_list_start", {
+    calendarId,
+    encodedCalendarId: encodedCalendar,
+    timeMin,
+    timeMax,
+  });
+
   while (pages < GOOGLE_CALENDAR_SYNC_MAX_PAGES) {
     const params = buildGoogleCalendarListQueryParams({ timeMin, timeMax, pageToken });
     const listUrl = `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodedCalendar}/events?${params.toString()}`;
@@ -194,11 +201,23 @@ async function fetchAllGoogleCalendarEventsForSync(
     }
 
     const { items, nextPageToken } = parseGoogleCalendarListResponse(await listRes.json());
+    logStructured("info", "google_calendar_sync_list_page", {
+      calendarId,
+      page: pages + 1,
+      eventsItemsLength: items.length,
+      hasNextPage: Boolean(nextPageToken),
+    });
     all.push(...items);
     pages += 1;
     if (!nextPageToken) break;
     pageToken = nextPageToken;
   }
+
+  logStructured("info", "google_calendar_sync_list_complete", {
+    calendarId,
+    pagesFetched: pages,
+    eventsFetched: all.length,
+  });
 
   return { ok: true, events: all };
 }
@@ -335,6 +354,27 @@ async function loadLocalEventsForDedup(
     .eq("calendar_id", calendarId);
   if (error) throw new Error(error.message);
   return ((data ?? []) as EventRow[]).map(mapEventRow);
+}
+
+/** Tenant-wide external id index — avoids missing rows when calendar_id differs from integration (e.g. email vs primary). */
+async function loadLocalEventsByExternalIdForSync(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<Map<string, FiCalendarEvent>> {
+  const { data, error } = await supabase
+    .from("fi_calendar_events")
+    .select("*")
+    .eq("tenant_id", tenantId.trim())
+    .not("external_event_id", "is", null);
+  if (error) throw new Error(error.message);
+
+  const byExternalId = new Map<string, FiCalendarEvent>();
+  for (const row of (data ?? []) as EventRow[]) {
+    const mapped = mapEventRow(row);
+    const ext = mapped.externalEventId?.trim();
+    if (ext) byExternalId.set(ext, mapped);
+  }
+  return byExternalId;
 }
 
 /** Create Google Calendar event + FI mirror record. */
@@ -601,41 +641,30 @@ export async function syncGoogleCalendarEvents(
     tenantId: tid,
     calendarId: ctx.calendarId,
     integrationId: ctx.integration.id,
+    googleAccountEmail: ctx.integration.googleAccountEmail ?? null,
     timeMin,
     timeMax,
     lookbackDays,
     lookaheadDays,
   });
 
-  let discovered: GoogleCalendarApiEvent[];
-  if (opts.fetchOverride) {
-    const fetchResult = await fetchAllGoogleCalendarEventsForSync(
-      ctx.calendarId,
-      ctx.accessToken,
-      timeMin,
-      timeMax,
-      opts
-    );
-    if (!fetchResult.ok) return fetchResult;
-    discovered = fetchResult.events;
-  } else {
-    discovered = await fetchGoogleCalendarEventsReadOnly(ctx.calendarId, ctx.accessToken, {
-      timeMin,
-      timeMax,
-    });
-  }
+  const fetchResult = await fetchAllGoogleCalendarEventsForSync(
+    ctx.calendarId,
+    ctx.accessToken,
+    timeMin,
+    timeMax,
+    opts
+  );
+  if (!fetchResult.ok) return fetchResult;
+  const discovered = fetchResult.events;
 
   const localRows = await loadLocalEventsForDedup(supabase, tid, ctx.calendarId);
-  const byExternalId = new Map<string, FiCalendarEvent>();
-  for (const row of localRows) {
-    const ext = row.externalEventId?.trim();
-    if (ext) byExternalId.set(ext, row);
-  }
+  const byExternalId = await loadLocalEventsByExternalIdForSync(supabase, tid);
 
   logStructured("info", "google_calendar_sync_fetched", {
     tenantId: tid,
     calendarId: ctx.calendarId,
-    eventsFetchedFromGoogle: discovered.length,
+    eventsFetched: discovered.length,
     localEventsForCalendar: localRows.length,
     localEventsWithExternalId: byExternalId.size,
     discoveredExternalIds: discovered
@@ -645,12 +674,22 @@ export async function syncGoogleCalendarEvents(
       .join(","),
   });
 
+  const skipBreakdown: GoogleCalendarSyncSkipBreakdown = {
+    noExternalId: 0,
+    cancelledNoLocal: 0,
+    duplicateTitleStart: 0,
+    uniqueViolation: 0,
+    noUpdateNeeded: 0,
+  };
+  const skippedSamples: Array<{ externalEventId: string; reason: string; title?: string }> = [];
+
   const result: GoogleCalendarSyncResult = {
     discovered: discovered.length,
     created: 0,
     updated: 0,
     skipped: 0,
     deleted: 0,
+    skipBreakdown,
   };
 
   const discoveredIds = new Set<string>();
@@ -660,6 +699,14 @@ export async function syncGoogleCalendarEvents(
     const extId = mapped.externalEventId;
     if (!extId) {
       result.skipped += 1;
+      skipBreakdown.noExternalId += 1;
+      if (skippedSamples.length < 10) {
+        skippedSamples.push({
+          externalEventId: "",
+          reason: "no_external_id",
+          title: raw.summary?.trim() || undefined,
+        });
+      }
       continue;
     }
     discoveredIds.add(extId);
@@ -679,6 +726,10 @@ export async function syncGoogleCalendarEvents(
         result.deleted += 1;
       } else {
         result.skipped += 1;
+        skipBreakdown.cancelledNoLocal += 1;
+        if (skippedSamples.length < 10) {
+          skippedSamples.push({ externalEventId: extId, reason: "cancelled_no_local" });
+        }
       }
       continue;
     }
@@ -691,6 +742,14 @@ export async function syncGoogleCalendarEvents(
         )
       ) {
         result.skipped += 1;
+        skipBreakdown.duplicateTitleStart += 1;
+        if (skippedSamples.length < 10) {
+          skippedSamples.push({
+            externalEventId: extId,
+            reason: "duplicate_title_start",
+            title: mapped.title,
+          });
+        }
         continue;
       }
 
@@ -716,6 +775,14 @@ export async function syncGoogleCalendarEvents(
       if (error) {
         if (error.code === "23505") {
           result.skipped += 1;
+          skipBreakdown.uniqueViolation += 1;
+          if (skippedSamples.length < 10) {
+            skippedSamples.push({
+              externalEventId: extId,
+              reason: "unique_violation_external_event_id",
+              title: mapped.title,
+            });
+          }
         } else {
           return { ok: false, error: error.message };
         }
@@ -727,6 +794,14 @@ export async function syncGoogleCalendarEvents(
 
     if (!shouldUpdateFiEventFromGoogle(existing, raw)) {
       result.skipped += 1;
+      skipBreakdown.noUpdateNeeded += 1;
+      if (skippedSamples.length < 10) {
+        skippedSamples.push({
+          externalEventId: extId,
+          reason: "no_update_needed",
+          title: mapped.title,
+        });
+      }
       continue;
     }
 
@@ -799,11 +874,13 @@ export async function syncGoogleCalendarEvents(
   logStructured("info", "google_calendar_sync_cycle_complete", {
     tenantId: tid,
     calendarId: ctx.calendarId,
-    eventsFetchedFromGoogle: discovered.length,
-    eventsCreated: result.created,
+    eventsFetched: discovered.length,
+    eventsInserted: result.created,
     eventsUpdated: result.updated,
     eventsSkipped: result.skipped,
     eventsMarkedDeleted: result.deleted,
+    skipBreakdown,
+    skippedSamples,
     deletedExternalIds: deletedExternalIds.slice(0, 50).join(","),
     processedExternalIds: Array.from(discoveredIds).slice(0, 50).join(","),
   });

@@ -112,12 +112,23 @@ export type GoogleCalendarApiEventWithConference = GoogleCalendarApiEvent & {
   conferenceData?: GoogleCalendarConferenceData;
 };
 
+/** Temporary GC-3 diagnostics — per-reason skip counts during inbound sync. */
+export type GoogleCalendarSyncSkipBreakdown = {
+  noExternalId: number;
+  cancelledNoLocal: number;
+  duplicateTitleStart: number;
+  uniqueViolation: number;
+  noUpdateNeeded: number;
+};
+
 export type GoogleCalendarSyncResult = {
   discovered: number;
   created: number;
   updated: number;
   skipped: number;
   deleted: number;
+  /** Temporary GC-3 diagnostics — why events were not inserted/updated. */
+  skipBreakdown?: GoogleCalendarSyncSkipBreakdown;
 };
 
 /** CalendarOS GC-4 — native FI appointment creation input. */

@@ -157,13 +157,24 @@ function createMockSupabase() {
       }
 
       if (table === "fi_calendar_events") {
-        const filterEvents = (filters: Record<string, string>) =>
-          events.filter((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
+        type EventFilters = { eq: Record<string, string>; notNull: string[] };
+        const filterEvents = (filters: EventFilters) =>
+          events.filter(
+            (r) =>
+              Object.entries(filters.eq).every(([k, v]) => r[k] === v) &&
+              filters.notNull.every((col) => r[col] != null && String(r[col]).trim() !== "")
+          );
 
-        const buildEventChain = (filters: Record<string, string>) => {
+        const buildEventChain = (filters: EventFilters = { eq: {}, notNull: [] }) => {
           const chain = {
             eq(col: string, val: string) {
-              filters[col] = val;
+              filters.eq[col] = val;
+              return chain;
+            },
+            not(col: string, op: string, val: unknown) {
+              if (op === "is" && val === null) {
+                filters.notNull.push(col);
+              }
               return chain;
             },
             gte() {
@@ -195,7 +206,7 @@ function createMockSupabase() {
 
         return {
           select() {
-            return buildEventChain({});
+            return buildEventChain();
           },
           insert(row: EventRow) {
             const full: EventRow = {
