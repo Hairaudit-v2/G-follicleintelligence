@@ -18,6 +18,18 @@ const brandingCorsHeaders = [
   { key: "Access-Control-Allow-Origin", value: "*" },
 ];
 
+// CalendarOS Google Calendar connector — explicit CSP allowlist (server OAuth/API
+// hosts plus any client-side OAuth frames or profile images). Supabase keeps
+// the existing https:/wss: connect-src and https: img-src wildcards.
+const googleCalendarCspOrigins = {
+  connectSrc: [
+    "https://www.googleapis.com",
+    "https://oauth2.googleapis.com",
+  ],
+  frameSrc: ["https://accounts.google.com"],
+  imgSrc: ["https://lh3.googleusercontent.com"],
+};
+
 // ---------------------------------------------------------------------------
 // Security headers applied to every page/API response.
 // CSP uses 'unsafe-inline' for script-src because Next.js App Router emits
@@ -47,12 +59,14 @@ const securityHeaders = [
       // unsafe-inline required for Tailwind CSS-in-JS class injection
       "style-src 'self' 'unsafe-inline'",
       // Supabase storage URLs are HTTPS; data:/blob: needed for canvas/previews
-      "img-src 'self' data: blob: https:",
+      `img-src 'self' data: blob: https: ${googleCalendarCspOrigins.imgSrc.join(" ")}`,
       "font-src 'self' data:",
-      // Supabase REST/Realtime and Vercel telemetry
-      "connect-src 'self' https: wss:",
+      // Supabase REST/Realtime, Vercel telemetry, and Google Calendar OAuth/API
+      `connect-src 'self' https: wss: ${googleCalendarCspOrigins.connectSrc.join(" ")}`,
       "media-src 'self' blob:",
       "worker-src 'self' blob:",
+      // Google OAuth consent may load in a nested frame during connect flows
+      `frame-src 'self' ${googleCalendarCspOrigins.frameSrc.join(" ")}`,
       // Equivalent to X-Frame-Options: DENY; allows only same-origin frames
       "frame-ancestors 'self'",
       // Prevent form submissions to external origins
