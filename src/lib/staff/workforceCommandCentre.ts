@@ -3,7 +3,6 @@
  * from existing staff directory data (no new DB tables).
  */
 
-import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import type { StaffDirectoryRowView } from "@/src/lib/staff/staffDirectoryFilters";
 import type { StaffComplianceStatus } from "@/src/lib/staffCompliance/staffComplianceTypes";
 import type { WorkforceReadinessBandId } from "@/src/lib/workforce-os/workforceReadinessBands";
