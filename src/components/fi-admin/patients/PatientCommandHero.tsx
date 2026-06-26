@@ -6,7 +6,8 @@ import type { PatientDetailNextAppointment } from "@/src/lib/patients/patientDet
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { PatientStatusBadge } from "@/src/components/fi/patients/PatientStatusBadge";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
-import { buildPatientImagingCaptureHref } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
+import { PatientQuickPhotoButton } from "@/src/components/fi/patients/PatientQuickPhotoButton";
+import { buildPatientImagingCaptureHref, PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { PatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStatus";
 import { pwsLabel } from "./patientWorkspaceStyles";
@@ -129,6 +130,12 @@ export function PatientCommandHero({
             patientId={patientId}
             className={chipViolet}
           />
+          <PatientQuickPhotoButton
+            tenantId={tenantId}
+            patientId={patientId}
+            canCapture={canCapturePhotos}
+            className={chipGhost}
+          />
           <Link href={`${base}/blood-request`} className={chipGhost}>
             <FlaskConical className="h-3.5 w-3.5 shrink-0" aria-hidden />
             Request blood tests
@@ -148,17 +155,35 @@ export function PatientCommandHero({
             <ScanLine className="h-3.5 w-3.5 shrink-0" aria-hidden />
             ImagingOS
           </Link>
-          {canCapturePhotos && (
-            <>
-              <Link href={uploadPhotoHref} className={chipGhost}>
-                <Upload className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                Upload photo
-              </Link>
-              <Link href={takePhotoHref} className={chipGhost}>
-                <Camera className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                Take photo
-              </Link>
-            </>
+          {canCapturePhotos ? (
+            <Link href={uploadPhotoHref} className={chipGhost}>
+              <Upload className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              Upload photo
+            </Link>
+          ) : (
+            <span
+              title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
+              aria-disabled="true"
+              className={`${chipGhost} cursor-not-allowed opacity-50`}
+            >
+              <Upload className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              Upload photo
+            </span>
+          )}
+          {canCapturePhotos ? (
+            <Link href={takePhotoHref} className={chipGhost}>
+              <Camera className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              Take photo
+            </Link>
+          ) : (
+            <span
+              title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
+              aria-disabled="true"
+              className={`${chipGhost} cursor-not-allowed opacity-50`}
+            >
+              <Camera className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              Take photo
+            </span>
           )}
         </div>
 
