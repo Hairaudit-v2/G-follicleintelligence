@@ -18,6 +18,8 @@ import type {
   SurgeryOsVieEvidenceSlotStatus,
   SurgeryOsViePhaseCaptureStatus,
 } from "./surgeryOsVieCapture.types";
+import type { VieComparisonPair } from "@/src/lib/vie/vieComparisonTypes";
+import { deriveSurgeryComparisonStatus } from "@/src/lib/vie/vieLongitudinalComparisonCore";
 
 const GRAFT_TRAY_SLOTS = ["graft_tray_overview", "graft_tray_close"] as const;
 const IMMEDIATE_POST_OP_REQUIRED_SLOTS = ["immediate_post_op_front", "immediate_post_op_close"] as const;
@@ -84,8 +86,6 @@ function evidenceGroupStatus(
 export function buildSurgeryOsViePhaseStatuses(progress: Record<string, unknown>): SurgeryOsViePhaseCaptureStatus[] {
   const protocol = getVieProtocol("surgery_day");
   if (!protocol) return [];
-
-  const meta = parseProgressMeta(progress);
 
   return groupSurgeryDaySlotsByPhase(protocol.slots).map(({ phase, label, slots }) => {
     const requiredSlots = slots.filter((s) => s.required !== false);
@@ -166,6 +166,7 @@ export function buildSurgeryOsVieCaptureSummary(input: {
   procedureDayId: string | null;
   sessionId: string | null;
   progress: Record<string, unknown>;
+  comparisonPairs?: VieComparisonPair[];
 }): SurgeryOsVieCaptureSummary {
   const sessions = [{ template_slug: "surgery_day", progress: input.progress }];
   const surgical = computeSurgicalDocumentationCompleteness(sessions);
@@ -193,6 +194,7 @@ export function buildSurgeryOsVieCaptureSummary(input: {
     warnings: deriveSurgeryOsVieWarnings(input.progress),
     nextRecommendedSlot: globalNextSlug,
     nextRecommendedSlotLabel: globalNextLabel,
+    comparisonStatus: deriveSurgeryComparisonStatus(input.comparisonPairs ?? []),
   };
 }
 

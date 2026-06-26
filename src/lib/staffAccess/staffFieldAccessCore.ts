@@ -30,7 +30,6 @@
  */
 
 import {
-  accessLevelRank,
   type StaffAccessLevel,
   type StaffAccessModuleKey,
 } from "./staffAccessRegistry";

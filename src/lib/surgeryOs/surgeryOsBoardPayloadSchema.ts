@@ -251,6 +251,12 @@ const vieCaptureWarningSchema = z.object({
   slotSlug: z.string().optional(),
 });
 
+const vieSurgeryComparisonStatusSchema = z.object({
+  donor_extraction_pair: z.enum(["ready", "partial", "missing"]),
+  graft_tray_pair: z.enum(["ready", "partial", "missing"]),
+  immediate_post_op_pair: z.enum(["ready", "partial", "missing"]),
+});
+
 const vieCaptureSummarySchema = z.object({
   surgeryId: z.string().uuid(),
   patientId: z.string().uuid(),
@@ -268,6 +274,7 @@ const vieCaptureSummarySchema = z.object({
   warnings: z.array(vieCaptureWarningSchema),
   nextRecommendedSlot: z.string().nullable(),
   nextRecommendedSlotLabel: z.string().nullable(),
+  comparisonStatus: vieSurgeryComparisonStatusSchema,
 });
 
 const intelligenceSchema = z.object({
