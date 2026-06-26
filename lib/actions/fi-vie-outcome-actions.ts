@@ -5,7 +5,6 @@ import { assertCrmTenantWriteAllowed, CrmAccessError } from "@/src/lib/crm/crmGa
 import {
   generateVieOutcomeSummaryForPatient,
   loadVieOutcomeSummaryForPatient,
-  regenerateVieOutcomeSummaryBestEffort,
 } from "@/src/lib/vie/vieOutcomeIntelligence.server";
 import type { VieOutcomeSummary, VieOutcomeSummaryRow } from "@/src/lib/vie/vieOutcomeTypes";
 
