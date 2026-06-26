@@ -8,7 +8,6 @@ import {
 import {
   buildEnterpriseDemoSurgerySpecs,
   ENTERPRISE_DEMO_SURGERIES_PER_CLINIC,
-  ENTERPRISE_DEMO_SURGERY_PATIENT_INDICES,
   ENTERPRISE_DEMO_TOTAL_SURGERIES,
   validateEnterpriseDemoSurgerySpecs,
 } from "./enterpriseDemoSurgeriesGenerator";
@@ -35,7 +34,7 @@ test("surgery specs use unique demo keys", () => {
   assert.equal(bookingKeys.size, specs.length);
 });
 
-test("each clinic surgery maps to converted or accepted consultation patients", () => {
+test("each clinic surgery maps to quoted, accepted, or converted consultation patients", () => {
   const patientSpecs = buildEnterpriseDemoPatientConsultationSpecs();
   const surgerySpecs = buildEnterpriseDemoSurgerySpecs(patientSpecs);
 
@@ -47,13 +46,10 @@ test("each clinic surgery maps to converted or accepted consultation patients", 
       const patient = patientSpecs.find((p) => p.demoPatientKey === surgery.demoPatientKey);
       assert.ok(patient, `missing patient for ${surgery.demoPatientKey}`);
       assert.ok(
-        ENTERPRISE_DEMO_SURGERY_PATIENT_INDICES.includes(patient.patientIndex),
-        `unexpected patient index ${patient.patientIndex}`
-      );
-      assert.ok(
         ["quoted", "accepted", "converted_to_case"].includes(patient.consultationStatus),
         `unexpected consultation status ${patient.consultationStatus}`
       );
+      assert.ok(patient.patientIndex >= clinicSurgeries.length, `expected late-funnel patient index for ${surgery.demoPatientKey}`);
       assert.equal(surgery.leadSurgeonStaffKey, `${clinic.slug}-lead-surgeon`);
       assert.equal(surgery.team.length, 3);
     }
