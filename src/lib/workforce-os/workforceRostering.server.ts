@@ -220,6 +220,38 @@ async function loadTemplatesForTenant(tenantId: string): Promise<FiClinicalStaff
   return (data ?? []).map((r) => mapTemplate(r as Record<string, unknown>));
 }
 
+type StaffSourceQueryRow = {
+  source_system: string;
+  source_url: string | null;
+  metadata: Record<string, unknown> | null;
+};
+
+export function buildWorkforceReadinessInputFromSourceRows(
+  staff: FiStaffRow,
+  sourceRows: StaffSourceQueryRow[]
+): WorkforceReadinessScoreInput {
+  const identityRows = sourceRows.map((row) => ({
+    source_system: row.source_system,
+    source_staff_id: "",
+    metadata: row.metadata,
+  }));
+
+  const hr = pickStaffHrNotificationFromSourceRows(sourceRows);
+  const compliance = buildStaffComplianceSummaryFromSourceRows(
+    sourceRows.map((row) => ({ source_system: row.source_system, metadata: row.metadata })),
+    { now: new Date() }
+  );
+
+  return {
+    is_active: staff.is_active,
+    staff_role: staff.staff_role,
+    working_hours: staff.working_hours,
+    hr,
+    identityRows,
+    compliance,
+  };
+}
+
 async function buildReadinessInputForStaff(
   tenantId: string,
   staff: FiStaffRow
@@ -244,26 +276,7 @@ async function buildReadinessInputForStaff(
     };
   });
 
-  const identityRows = srcRows.map((row) => ({
-    source_system: row.source_system,
-    source_staff_id: "",
-    metadata: row.metadata,
-  }));
-
-  const hr = pickStaffHrNotificationFromSourceRows(srcRows);
-  const compliance = buildStaffComplianceSummaryFromSourceRows(
-    srcRows.map((row) => ({ source_system: row.source_system, metadata: row.metadata })),
-    { now: new Date() }
-  );
-
-  return {
-    is_active: staff.is_active,
-    staff_role: staff.staff_role,
-    working_hours: staff.working_hours,
-    hr,
-    identityRows,
-    compliance,
-  };
+  return buildWorkforceReadinessInputFromSourceRows(staff, srcRows);
 }
 
 function startOfWeekUtc(ref: Date): Date {
@@ -788,6 +801,16 @@ export async function assignStaffToClinicalEventAction(input: {
   return assignment;
 }
 
+export type ClinicalEventStaffingStatusPreload = {
+  templates?: FiClinicalStaffingTemplateRow[];
+  privilegeRequirements?: Awaited<ReturnType<typeof loadAllProcedurePrivilegeRequirementsForTenant>>;
+  staffById?: Map<string, FiStaffRow>;
+  availabilityBlocksByStaffId?: Map<string, StaffAvailabilityBlockRecord[]>;
+  shiftsByStaffId?: Map<string, StaffShiftRecord[]>;
+  eventAssignmentsByStaffId?: Map<string, FiStaffEventAssignmentRow[]>;
+  readinessInputByStaffId?: Map<string, WorkforceReadinessScoreInput>;
+};
+
 export async function loadClinicalEventStaffingStatus(input: {
   tenantId: string;
   clinicId?: string | null;
@@ -795,17 +818,19 @@ export async function loadClinicalEventStaffingStatus(input: {
   startsAt: string;
   endsAt: string;
   candidateStaffIds: Array<{ staffId: string; assignedRole: string }>;
+  preload?: ClinicalEventStaffingStatusPreload;
 }): Promise<ValidateClinicalEventStaffingResult> {
   const tid = assertNonEmptyUuid(input.tenantId, "tenantId");
   const supabase = supabaseAdmin();
-  const templates = await loadTemplatesForTenant(tid);
+  const templates = input.preload?.templates ?? (await loadTemplatesForTenant(tid));
   const template = resolveClinicalStaffingTemplate({
     eventType: input.eventType,
     clinicId: input.clinicId,
     templates,
   });
   const requiredRoles = template?.required_roles ?? {};
-  const allPrivilegeRequirements = await loadAllProcedurePrivilegeRequirementsForTenant(tid);
+  const allPrivilegeRequirements =
+    input.preload?.privilegeRequirements ?? (await loadAllProcedurePrivilegeRequirementsForTenant(tid));
 
   const availabilityByStaff = new Map<
     string,
@@ -820,37 +845,49 @@ export async function loadClinicalEventStaffingStatus(input: {
   }> = [];
 
   for (const candidate of input.candidateStaffIds) {
-    const staff = await loadStaffMemberForTenant(tid, candidate.staffId);
+    const staff =
+      input.preload?.staffById?.get(candidate.staffId) ??
+      (await loadStaffMemberForTenant(tid, candidate.staffId));
     if (!staff) continue;
 
-    const [blocksRes, shiftsRes, assignmentsRes] = await Promise.all([
-      supabase
-        .from("fi_staff_availability_blocks")
-        .select("*")
-        .eq("tenant_id", tid)
-        .eq("staff_id", candidate.staffId)
-        .eq("status", "active"),
-      supabase
-        .from("fi_staff_shifts")
-        .select("*")
-        .eq("tenant_id", tid)
-        .eq("staff_id", candidate.staffId)
-        .neq("status", "cancelled"),
-      supabase
-        .from("fi_staff_event_assignments")
-        .select("*")
-        .eq("tenant_id", tid)
-        .eq("staff_id", candidate.staffId)
-        .neq("assignment_status", "cancelled"),
-    ]);
+    let blocks: StaffAvailabilityBlockRecord[];
+    let shifts: StaffShiftRecord[];
+    let assignments: FiStaffEventAssignmentRow[];
 
-    if (blocksRes.error) throw new Error(blocksRes.error.message);
-    if (shiftsRes.error) throw new Error(shiftsRes.error.message);
-    if (assignmentsRes.error) throw new Error(assignmentsRes.error.message);
+    if (input.preload?.availabilityBlocksByStaffId) {
+      blocks = input.preload.availabilityBlocksByStaffId.get(candidate.staffId) ?? [];
+      shifts = input.preload.shiftsByStaffId?.get(candidate.staffId) ?? [];
+      assignments = input.preload.eventAssignmentsByStaffId?.get(candidate.staffId) ?? [];
+    } else {
+      const [blocksRes, shiftsRes, assignmentsRes] = await Promise.all([
+        supabase
+          .from("fi_staff_availability_blocks")
+          .select("*")
+          .eq("tenant_id", tid)
+          .eq("staff_id", candidate.staffId)
+          .eq("status", "active"),
+        supabase
+          .from("fi_staff_shifts")
+          .select("*")
+          .eq("tenant_id", tid)
+          .eq("staff_id", candidate.staffId)
+          .neq("status", "cancelled"),
+        supabase
+          .from("fi_staff_event_assignments")
+          .select("*")
+          .eq("tenant_id", tid)
+          .eq("staff_id", candidate.staffId)
+          .neq("assignment_status", "cancelled"),
+      ]);
 
-    const blocks = (blocksRes.data ?? []).map((r) => mapAvailabilityBlock(r as Record<string, unknown>));
-    const shifts = (shiftsRes.data ?? []).map((r) => mapShift(r as Record<string, unknown>));
-    const assignments = (assignmentsRes.data ?? []).map((r) => mapAssignment(r as Record<string, unknown>));
+      if (blocksRes.error) throw new Error(blocksRes.error.message);
+      if (shiftsRes.error) throw new Error(shiftsRes.error.message);
+      if (assignmentsRes.error) throw new Error(assignmentsRes.error.message);
+
+      blocks = (blocksRes.data ?? []).map((r) => mapAvailabilityBlock(r as Record<string, unknown>));
+      shifts = (shiftsRes.data ?? []).map((r) => mapShift(r as Record<string, unknown>));
+      assignments = (assignmentsRes.data ?? []).map((r) => mapAssignment(r as Record<string, unknown>));
+    }
 
     availabilityByStaff.set(candidate.staffId, {
       staffId: candidate.staffId,
@@ -872,7 +909,9 @@ export async function loadClinicalEventStaffingStatus(input: {
     });
     conflictsByStaff.set(candidate.staffId, conflicts);
 
-    const readinessInput = await buildReadinessInputForStaff(tid, staff);
+    const readinessInput =
+      input.preload?.readinessInputByStaffId?.get(candidate.staffId) ??
+      (await buildReadinessInputForStaff(tid, staff));
     const privilegeEligibility = await evaluateStaffProcedurePrivilegeForEvent({
       tenantId: tid,
       staffId: candidate.staffId,

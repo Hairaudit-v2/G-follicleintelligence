@@ -5,6 +5,14 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
+import {
+  pwsCard,
+  pwsCardPad,
+  pwsDivider,
+  pwsLabel,
+  pwsValue,
+  pwsMeta,
+} from "./patientWorkspaceStyles";
 
 function fmtConsent(v: boolean | null): string {
   if (v === true) return "Yes";
@@ -21,17 +29,13 @@ function fmtPreferred(m: string | null): string {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <dt className="text-xs font-medium text-gray-500">{label}</dt>
-      <dd className="break-words text-sm text-gray-900">{value}</dd>
+      <dt className={pwsLabel}>{label}</dt>
+      <dd className={`mt-0.5 break-words ${pwsValue}`}>{value}</dd>
     </div>
   );
 }
 
-export function PatientDetailsSummary({
-  data,
-}: {
-  data: PatientProfileFoundationData;
-}) {
+export function PatientDetailsSummary({ data }: { data: PatientProfileFoundationData }) {
   const [expanded, setExpanded] = useState(false);
 
   const idc = derivePatientIdentityContact({
@@ -67,17 +71,17 @@ export function PatientDetailsSummary({
 
   return (
     <section
-      className="rounded border border-gray-200 bg-white p-4 shadow-sm"
+      className={`${pwsCard} ${pwsCardPad}`}
       aria-labelledby="patient-details-summary-heading"
     >
       <div className="flex items-center justify-between">
-        <h2 id="patient-details-summary-heading" className="text-sm font-semibold text-gray-900">
+        <h2 id="patient-details-summary-heading" className="text-sm font-semibold text-slate-100">
           Patient details
         </h2>
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-300"
           aria-expanded={expanded}
         >
           {expanded ? (
@@ -99,7 +103,7 @@ export function PatientDetailsSummary({
       </dl>
 
       {expanded && (
-        <div className="mt-4 space-y-4 border-t border-gray-100 pt-4">
+        <div className={`mt-4 space-y-4 ${pwsDivider} pt-4`}>
           <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {expandedFields.map((f) => (
               <Field key={f.label} label={f.label} value={f.value} />
@@ -108,10 +112,10 @@ export function PatientDetailsSummary({
 
           {hasSourceDetails && (
             <div>
-              <p className="mb-2 text-xs font-medium text-gray-500">
+              <p className={`mb-2 ${pwsMeta} font-medium text-slate-400`}>
                 Source details
                 {hasHubspotSlice && (
-                  <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-normal text-slate-600">
+                  <span className="ml-2 rounded border border-white/[0.08] bg-white/[0.06] px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-slate-400">
                     HubSpot
                   </span>
                 )}
@@ -121,7 +125,7 @@ export function PatientDetailsSummary({
                   <Field key={r.label} label={r.label} value={r.value} />
                 ))}
                 {sourceItems.length === 0 && (
-                  <p className="text-xs text-gray-500">No additional source fields.</p>
+                  <p className="text-xs text-slate-500">No additional source fields.</p>
                 )}
               </dl>
             </div>

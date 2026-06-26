@@ -7,17 +7,14 @@ import { PatientPhotoCaptureActions } from "../PatientPhotoCaptureActions";
 import { PatientCommandHero } from "@/src/components/fi-admin/patients/PatientCommandHero";
 import { PatientDetailsSummary } from "@/src/components/fi-admin/patients/PatientDetailsSummary";
 import { PatientCommandSummaryRow } from "@/src/components/fi-admin/patients/PatientCommandSummaryRow";
-import { PatientProfileSummaryCards } from "../PatientProfileSummaryCards";
 import { PatientClinicalDetailsCard } from "../PatientClinicalDetailsCard";
 import { PatientImagesCard } from "@/src/components/fi/patient-images/PatientImagesCard";
-import { PatientPersonDetailsCard } from "../PatientPersonDetailsCard";
 import { PatientCasesCard } from "../PatientCasesCard";
 import { PatientTreatmentTimelineCard } from "../timeline/PatientTreatmentTimelineCard";
 import { PatientDetailBreadcrumbs } from "./PatientDetailBreadcrumbs";
 import { PatientDetailTabNav } from "./PatientDetailTabNav";
 import { PatientDetailPreviewUrlSync } from "./PatientDetailPreviewUrlSync";
 import { PatientPhotoAddedFeedback } from "./PatientPhotoAddedFeedback";
-import { PatientNextAppointmentCard } from "./PatientNextAppointmentCard";
 import { PatientPersonLeadHistoryCard } from "../shared/PatientPersonLeadHistoryCard";
 import { PatientConsultationsCard } from "../shared/PatientConsultationsCard";
 import { PatientPreviousProceduresCard } from "./PatientPreviousProceduresCard";
@@ -26,9 +23,9 @@ import { PatientAppointmentsTab } from "./PatientAppointmentsTab";
 import { PatientDocumentsTab } from "./PatientDocumentsTab";
 import { PatientVoiceClinicalNotesCard } from "@/src/components/fi/clinical-notes/PatientVoiceClinicalNotesCard";
 import { PatientRevenueInvoicesPanel } from "@/src/components/fi-admin/revenue/PatientRevenueInvoicesPanel";
-import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 import type { PatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
+import { PatientOverviewTab } from "@/src/components/fi-admin/patients/PatientOverviewTab";
 
 export function PatientDetailPageView({
   tenantId,
@@ -93,33 +90,15 @@ export function PatientDetailPageView({
       </Suspense>
 
       {activeTab === "overview" ? (
-        <div className="space-y-4">
-          <PatientNextAppointmentCard tenantId={tenantId} patientId={patientId} payload={initialPayload} />
-          <PatientProfileSummaryCards data={profile} />
-          <PatientConsultationsCard tenantId={tenantId} consultations={initialPayload.consultations} compact />
-          <PatientPersonLeadHistoryCard
-            tenantId={tenantId}
-            currentPatientId={patientId}
-            items={initialPayload.personLeadHistory}
-            activity={initialPayload.personCrmActivity}
-            compact
-          />
-          <div className="grid gap-4 lg:grid-cols-2">
-            <PatientPersonDetailsCard data={profile} />
-            <PatientCasesCard tenantId={tenantId} data={profile} />
-          </div>
-          <div className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-            <PaymentRecordPanel
-              tenantId={tenantId}
-              todayYmd={operationalTodayYmd}
-              paymentContext="other"
-              patientId={patientId}
-              initialRows={initialPaymentRecords}
-              canMutate={canMutatePaymentRecords}
-              noManualPaymentRecordsCopy="No manual payment records linked to this patient yet."
-            />
-          </div>
-        </div>
+        <PatientOverviewTab
+          tenantId={tenantId}
+          patientId={patientId}
+          payload={initialPayload}
+          profile={profile}
+          operationalTodayYmd={operationalTodayYmd}
+          initialPaymentRecords={initialPaymentRecords}
+          canMutatePaymentRecords={canMutatePaymentRecords}
+        />
       ) : null}
 
       {activeTab === "clinical" ? (

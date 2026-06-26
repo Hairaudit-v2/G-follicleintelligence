@@ -137,6 +137,45 @@ export function buildStaffResourceColumns(
   }));
 }
 
+/** Ensure provider-linked staff appear as day-view columns even when role visibility would hide them. */
+export function appendProviderLinkedStaffColumns(
+  columns: OperationalCalendarResourceColumn[],
+  linkedStaffIds: Iterable<string>,
+  staffById: Map<string, ClinicalStaffPickerOption>
+): OperationalCalendarResourceColumn[] {
+  const existingStaffIds = new Set(
+    columns
+      .filter((c) => c.kind === "fi_staff")
+      .map((c) => (c.staffId ?? c.id.slice(2)).trim())
+      .filter(Boolean)
+  );
+
+  const added: OperationalCalendarResourceColumn[] = [];
+  for (const rawId of linkedStaffIds) {
+    const staffId = rawId.trim();
+    if (!staffId || existingStaffIds.has(staffId)) continue;
+    const staff = staffById.get(staffId);
+    if (!staff) continue;
+
+    added.push({
+      id: staffColumnId(staffId),
+      kind: "fi_staff",
+      label: staffOptionPrimaryLabel(staff),
+      subtitle: staffOptionSubtitle(staff),
+      staffId,
+      ...staffColumnReadinessMeta(staff),
+    });
+    existingStaffIds.add(staffId);
+  }
+
+  if (!added.length) return columns;
+
+  const unassigned = columns.find((c) => c.id === "unassigned");
+  const withoutUnassigned = columns.filter((c) => c.id !== "unassigned");
+  added.sort((a, b) => a.label.localeCompare(b.label));
+  return [...withoutUnassigned, ...added, ...(unassigned ? [unassigned] : [])];
+}
+
 export function buildLegacyUserResourceColumns(input: {
   userAssignees: CrmShellUserPickerOption[];
   staffIdByUserId: Map<string, string>;

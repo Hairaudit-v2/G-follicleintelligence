@@ -175,6 +175,22 @@ export function bookingConflictsForOperationalCalendar(
   return out;
 }
 
+/**
+ * Maps a booking to a visible resource column, falling back to `unassigned` when the ideal
+ * column is not rendered (e.g. provider-linked staff hidden from default calendar columns).
+ */
+export function resolveDisplayResourceColumnId(
+  b: FiBookingRow,
+  visibleColumnIds: ReadonlySet<string> | readonly string[],
+  opts?: { resourceView?: CalendarResourceView; staffIdByUserId?: Map<string, string> }
+): string {
+  const ideal = resourceColumnIdForBooking(b, opts);
+  const ids = visibleColumnIds instanceof Set ? visibleColumnIds : new Set(visibleColumnIds);
+  if (ids.has(ideal)) return ideal;
+  if (ids.has("unassigned")) return "unassigned";
+  return ideal;
+}
+
 /** Maps a booking to a resource column id for day view (`s:…`, `r:…`, `u:…`, `c:…`, or `unassigned`). */
 export function resourceColumnIdForBooking(
   b: FiBookingRow,

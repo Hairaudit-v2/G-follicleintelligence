@@ -61,7 +61,7 @@ import {
 import { calendarNavigationHelpers } from "@/src/lib/bookings/calendarView";
 import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { resourceColumnIdForBooking, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import { resolveDisplayResourceColumnId, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import { assigneeMetaFromResourceColumnId } from "@/src/lib/calendar/operationalCalendarColumns";
 import type {
   OperationalCalendarBookingDisplay,
@@ -502,7 +502,11 @@ function WeekViewInner({
       const dayBookings = buckets[lane.dayKey] ?? [];
       const colBookings = filterColBookingsByResource
         ? dayBookings.filter(
-            (b) => resourceColumnIdForBooking(b, { resourceView, staffIdByUserId }) === col.id
+            (b) =>
+              resolveDisplayResourceColumnId(b, resourceColumns.map((c) => c.id), {
+                resourceView,
+                staffIdByUserId,
+              }) === col.id
           )
         : dayBookings;
 

@@ -42,6 +42,7 @@ import {
   buildLegacyUserResourceColumns,
   buildStaffResourceColumns,
   buildStaffUserLinkIndex,
+  appendProviderLinkedStaffColumns,
   normalizeCalendarStaffFilter,
 } from "@/src/lib/calendar/operationalCalendarColumns";
 import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
@@ -71,6 +72,7 @@ import {
 import {
   calendarOsOverlapRowsForDisplayContext,
 } from "@/src/lib/calendar/calendarOsEventsCore";
+import { buildCalendarOsDisplayPipelineTrace } from "@/src/lib/calendar/calendarOsDisplayPipeline";
 import { loadActiveStaffCalendarLinkIndex } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 
 type ClinicalLite = {
@@ -93,6 +95,10 @@ const loadTenantStaffAndResourcesCached = cache(
 const resolveBookingMutationGateCached = cache((tenantId: string) => resolveBookingMutationGate(tenantId.trim()));
 
 const loadFiServicesForTenantCached = cache((tenantId: string) => loadFiServicesForTenant(tenantId.trim()));
+
+const loadClinicalStaffPickerOptionsCached = cache((tenantId: string) =>
+  loadClinicalStaffPickerOptions(tenantId.trim())
+);
 
 const loadTenantConfigRowCached = cache(async (tenantId: string) => {
   const { data, error } = await supabaseAdmin()
@@ -342,6 +348,58 @@ function staffIdsMatchingRoleBucket(
     }
   }
   return out;
+}
+
+async function augmentStaffResourceColumnsForProviderLinks(
+  tenantId: string,
+  resourceColumns: OperationalCalendarResourceColumn[],
+  resourceView: ParsedCalendarQuery["resourceView"],
+  staffCalendarLinkIndex: Map<string, import("@/src/lib/googleCalendar/googleCalendarProviderLinksCore").StaffCalendarLinkLookupRow>,
+  calendarOsBookings: FiBookingRow[],
+  calendarStaffDirectory: ClinicalStaffPickerOption[]
+): Promise<OperationalCalendarResourceColumn[]> {
+  if (resourceView !== "staff") return resourceColumns;
+
+  const linkedStaffIds = new Set<string>();
+  for (const link of staffCalendarLinkIndex.values()) {
+    const sid = link.staff_member_id?.trim();
+    if (sid) linkedStaffIds.add(sid);
+  }
+  for (const booking of calendarOsBookings) {
+    const sid = booking.assigned_staff_id?.trim();
+    if (sid) linkedStaffIds.add(sid);
+  }
+  if (!linkedStaffIds.size) return resourceColumns;
+
+  const staffById = new Map(calendarStaffDirectory.map((s) => [String(s.id), s]));
+  const missing = Array.from(linkedStaffIds).some((id) => !staffById.has(id));
+  if (missing) {
+    const allStaff = await loadClinicalStaffPickerOptionsCached(tenantId);
+    for (const staff of allStaff) {
+      if (!staffById.has(String(staff.id))) staffById.set(String(staff.id), staff);
+    }
+  }
+
+  return appendProviderLinkedStaffColumns(resourceColumns, linkedStaffIds, staffById);
+}
+
+function calendarOsBookingFilterExcludedIds(
+  mappedBookings: FiBookingRow[],
+  query: ParsedCalendarQuery,
+  staffUserByStaffId: Map<string, string | null>,
+  staffIdByUserId: Map<string, string>,
+  staffDirectory: ClinicalStaffPickerOption[]
+): Set<string> {
+  const kept = new Set(
+    applyStructuredFilters(mappedBookings, query, staffUserByStaffId, staffIdByUserId, staffDirectory).map(
+      (b) => b.id
+    )
+  );
+  const excluded = new Set<string>();
+  for (const row of mappedBookings) {
+    if (!kept.has(row.id)) excluded.add(row.id);
+  }
+  return excluded;
 }
 
 function humanizeBookingType(type: string): string {
@@ -604,7 +662,7 @@ export async function loadOperationalCalendarGridData(
   const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
   query = normalized.query;
 
-  const resourceColumns =
+  let resourceColumns =
     query.resourceView === "staff"
       ? appendLegacyUserColumns(resources.resourceColumns, {
           userAssignees: resources.assignees,
@@ -647,29 +705,44 @@ export async function loadOperationalCalendarGridData(
   });
 
   const tEnrichStart = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const [displayMaps, clinicalMap, assignmentMap, clinicalStaffingByBooking] = await Promise.all([
+  const [
+    [displayMaps, subMs_displayContextMaps],
+    [clinicalMap, subMs_clinicalDetailsMap],
+    [assignmentMap, subMs_resourceAssignmentsMap],
+    [clinicalStaffingByBooking, subMs_clinicalStaffingSummaries],
+  ] = await Promise.all([
     monthSummaryMode
-      ? Promise.resolve(emptyDisplayMaps)
-      : loadBookingDisplayContextMaps(tid, displayContextInput),
+      ? Promise.resolve([emptyDisplayMaps, 0] as const)
+      : measureAsync(() => loadBookingDisplayContextMaps(tid, displayContextInput)),
     monthSummaryMode
-      ? Promise.resolve(new Map<string, ClinicalLite>())
-      : loadClinicalDetailsMap(
-          tid,
-          structuredBookings.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()))
+      ? Promise.resolve([new Map<string, ClinicalLite>(), 0] as const)
+      : measureAsync(() =>
+          loadClinicalDetailsMap(
+            tid,
+            structuredBookings.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()))
+          )
         ),
-    assignmentMapPromise,
     monthSummaryMode
-      ? Promise.resolve(new Map())
-      : loadClinicalStaffingSummariesForBookings(tid, structuredBookings, {
-          syncExistingStaff: true,
-          preloadedResourceAssignments: assignmentMapPromise,
-        }),
+      ? Promise.resolve([new Map<string, FiBookingResourceAssignmentRow[]>(), 0] as const)
+      : measureAsync(() => assignmentMapPromise),
+    monthSummaryMode
+      ? Promise.resolve([new Map(), 0] as const)
+      : measureAsync(() =>
+          loadClinicalStaffingSummariesForBookings(tid, structuredBookings, {
+            syncExistingStaff: false,
+            preloadedResourceAssignments: assignmentMapPromise,
+          })
+        ),
   ]);
   const tEnrichEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
   logOperationalCalendarServerTiming({
     phase: "loadOperationalCalendarGridData.displayEnrichment.end",
     durationMs: Math.round(tEnrichEnd - tEnrichStart),
     subMs_displayEnrichment: Math.round(tEnrichEnd - tEnrichStart),
+    subMs_displayContextMaps,
+    subMs_clinicalDetailsMap,
+    subMs_resourceAssignmentsMap,
+    subMs_clinicalStaffingSummaries,
     view: query.view,
     dateAnchor: query.dateAnchor,
     monthSummaryMode,
@@ -694,13 +767,25 @@ export async function loadOperationalCalendarGridData(
   });
   const tMapEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
-  const structuredCalendarOs = applyStructuredFilters(
+  const bookingFilterExcludedIds = calendarOsBookingFilterExcludedIds(
     calendarOsMapped.bookings,
     query,
     resources.staffUserByStaffId,
     resources.staffIdByUserId,
     resources.staffDirectory
   );
+  /** CalendarOS rows bypass booking URL filters (status, staff, clinic, etc.); search applies later. */
+  const structuredCalendarOs = calendarOsMapped.bookings;
+
+  resourceColumns = await augmentStaffResourceColumnsForProviderLinks(
+    tid,
+    resourceColumns,
+    query.resourceView,
+    staffCalendarLinkIndex,
+    calendarOsMapped.bookings,
+    resources.staffDirectory
+  );
+
   const structured = [...structuredBookings, ...structuredCalendarOs];
 
   const staffNameById: Record<string, string> = {};
@@ -791,6 +876,24 @@ export async function loadOperationalCalendarGridData(
   }
   const tBucketEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
+  if (process.env.NODE_ENV === "development") {
+    const pipelineTrace = buildCalendarOsDisplayPipelineTrace({
+      rawRows: calendarOsEventRows,
+      mappedBookings: calendarOsMapped.bookings,
+      displayedCalendarOs: structuredCalendarOs,
+      bookingFilterExcludedIds,
+      mergedBookings: bookings,
+      buckets,
+      resourceColumns,
+      lanes,
+      staffIdByUserId: resources.staffIdByUserId,
+    });
+    logOperationalCalendarServerTiming({
+      phase: "loadOperationalCalendarGridData.calendarOsDisplayPipeline",
+      ...pipelineTrace,
+    });
+  }
+
   const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
 
   const patch: OperationalCalendarGridPatch = {
@@ -813,6 +916,10 @@ export async function loadOperationalCalendarGridData(
     subMs_fiCalendarEvents,
     subMs_providerLinks,
     subMs_displayEnrichment: Math.round(tEnrichEnd - tEnrichStart),
+    subMs_displayContextMaps,
+    subMs_clinicalDetailsMap,
+    subMs_resourceAssignmentsMap,
+    subMs_clinicalStaffingSummaries,
     subMs_calendarOsMapping: Math.round(tMapEnd - tMapStart),
     subMs_mergeBucketGrouping: Math.round(tBucketEnd - tBucketStart),
     view: query.view,
@@ -821,6 +928,7 @@ export async function loadOperationalCalendarGridData(
     rangeEndIso,
     rawBookingCount: rawBookings.length,
     rawCalendarOsEventCount: calendarOsEventRows.length,
+    mappedCalendarOsEventCount: calendarOsMapped.bookings.length,
     providerLinkCount: staffCalendarLinkIndex.size,
     filteredBookingCount: structured.length,
     returnedBookingCount: bookings.length,

@@ -9,7 +9,7 @@ import type { OperationalCalendarBookingDisplay, OperationalCalendarResourceColu
 import {
   businessGridBodyHeightPx,
   layoutBookingInBusinessDayUtc,
-  resourceColumnIdForBooking,
+  resolveDisplayResourceColumnId,
   slotCount,
   utcBusinessSlotIsoRange,
   type BusinessGridConfig,
@@ -145,7 +145,9 @@ export function CalendarWeekView({
         <TimeGutter gridConfig={gridConfig} />
         <div className="flex min-w-[720px] flex-1">
           {resourceColumns.map((col) => {
-            const colBookings = (buckets[dayKey] ?? []).filter((b) => resourceColumnIdForBooking(b) === col.id);
+            const colBookings = (buckets[dayKey] ?? []).filter(
+              (b) => resolveDisplayResourceColumnId(b, resourceColumns.map((c) => c.id)) === col.id
+            );
             return (
               <CalendarResourceColumn key={col.id} label={col.label} subtitle={col.subtitle} bodyMinHeightPx={bodyH}>
                 <SlotDropLayer

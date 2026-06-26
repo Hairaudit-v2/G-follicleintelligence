@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { logStructured } from "@/src/lib/server/structuredLog";
 import { fetchGoogleCalendarEventsReadOnly } from "@/src/lib/onboarding-os/googleCalendarConnector.server";
 import type { GoogleCalendarApiEvent } from "@/src/lib/onboarding-os/googleCalendarConnectorTypes";
 
@@ -507,6 +508,16 @@ export async function syncGoogleCalendarEvents(
   const timeMin = new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
   const timeMax = new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
 
+  logStructured("info", "google_calendar_sync_cycle_start", {
+    tenantId: tid,
+    calendarId: ctx.calendarId,
+    integrationId: ctx.integration.id,
+    timeMin,
+    timeMax,
+    lookbackDays,
+    lookaheadDays,
+  });
+
   let discovered: GoogleCalendarApiEvent[];
   if (opts.fetchOverride) {
     const encodedCalendar = encodeURIComponent(ctx.calendarId);
@@ -548,6 +559,19 @@ export async function syncGoogleCalendarEvents(
     const ext = row.externalEventId?.trim();
     if (ext) byExternalId.set(ext, row);
   }
+
+  logStructured("info", "google_calendar_sync_fetched", {
+    tenantId: tid,
+    calendarId: ctx.calendarId,
+    eventsFetchedFromGoogle: discovered.length,
+    localEventsForCalendar: localRows.length,
+    localEventsWithExternalId: byExternalId.size,
+    discoveredExternalIds: discovered
+      .map((e) => e.id?.trim())
+      .filter(Boolean)
+      .slice(0, 50)
+      .join(","),
+  });
 
   const result: GoogleCalendarSyncResult = {
     discovered: discovered.length,
@@ -645,9 +669,13 @@ export async function syncGoogleCalendarEvents(
   }
 
   const deletedLocalIds = detectDeletedExternalEvents(localRows, discoveredIds);
+  const deletedExternalIds: string[] = [];
   for (const localId of deletedLocalIds) {
     const local = localRows.find((r) => r.id === localId);
     if (!local) continue;
+
+    const extId = local.externalEventId?.trim();
+    if (extId) deletedExternalIds.push(extId);
 
     const deletedAt = new Date().toISOString();
     const { error } = await supabase
@@ -662,6 +690,18 @@ export async function syncGoogleCalendarEvents(
     if (error) return { ok: false, error: error.message };
     result.deleted += 1;
   }
+
+  logStructured("info", "google_calendar_sync_cycle_complete", {
+    tenantId: tid,
+    calendarId: ctx.calendarId,
+    eventsFetchedFromGoogle: discovered.length,
+    eventsCreated: result.created,
+    eventsUpdated: result.updated,
+    eventsSkipped: result.skipped,
+    eventsMarkedDeleted: result.deleted,
+    deletedExternalIds: deletedExternalIds.slice(0, 50).join(","),
+    processedExternalIds: Array.from(discoveredIds).slice(0, 50).join(","),
+  });
 
   return { ok: true, data: { result } };
 }

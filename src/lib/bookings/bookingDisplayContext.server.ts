@@ -54,48 +54,51 @@ export async function loadBookingDisplayContextMaps(
   const leadPersonByLeadId = new Map<string, string>();
   const personIds = new Set<string>(directPersonIds);
 
-  if (patientIds.length) {
-    const { data, error } = await supabaseAdmin()
-      .from("fi_patients")
-      .select("id, person_id, metadata")
-      .eq("tenant_id", tid)
-      .in("id", patientIds);
-    if (error) throw new Error(error.message);
-    for (const raw of data ?? []) {
-      const r = raw as { id: string; person_id: string | null; metadata: unknown };
-      const patientId = String(r.id);
-      const personId = r.person_id?.trim();
-      if (personId) {
-        personIds.add(personId);
-        patientPersonByPatientId.set(patientId, personId);
-      }
-      patients.set(patientId, {
-        patientMeta: asMeta(r.metadata),
-        personMeta: null,
-      });
+  const [patientsRes, leadsRes] = await Promise.all([
+    patientIds.length
+      ? supabaseAdmin()
+          .from("fi_patients")
+          .select("id, person_id, metadata")
+          .eq("tenant_id", tid)
+          .in("id", patientIds)
+      : Promise.resolve({ data: [], error: null }),
+    leadIds.length
+      ? supabaseAdmin()
+          .from("fi_crm_leads")
+          .select("id, summary, person_id")
+          .eq("tenant_id", tid)
+          .in("id", leadIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (patientsRes.error) throw new Error(patientsRes.error.message);
+  if (leadsRes.error) throw new Error(leadsRes.error.message);
+
+  for (const raw of patientsRes.data ?? []) {
+    const r = raw as { id: string; person_id: string | null; metadata: unknown };
+    const patientId = String(r.id);
+    const personId = r.person_id?.trim();
+    if (personId) {
+      personIds.add(personId);
+      patientPersonByPatientId.set(patientId, personId);
     }
+    patients.set(patientId, {
+      patientMeta: asMeta(r.metadata),
+      personMeta: null,
+    });
   }
 
-  if (leadIds.length) {
-    const { data, error } = await supabaseAdmin()
-      .from("fi_crm_leads")
-      .select("id, summary, person_id")
-      .eq("tenant_id", tid)
-      .in("id", leadIds);
-    if (error) throw new Error(error.message);
-    for (const raw of data ?? []) {
-      const r = raw as { id: string; summary: string | null; person_id: string | null };
-      const leadId = String(r.id);
-      const personId = r.person_id?.trim();
-      if (personId) {
-        personIds.add(personId);
-        leadPersonByLeadId.set(leadId, personId);
-      }
-      leads.set(leadId, {
-        summary: r.summary?.trim() || null,
-        personMeta: null,
-      });
+  for (const raw of leadsRes.data ?? []) {
+    const r = raw as { id: string; summary: string | null; person_id: string | null };
+    const leadId = String(r.id);
+    const personId = r.person_id?.trim();
+    if (personId) {
+      personIds.add(personId);
+      leadPersonByLeadId.set(leadId, personId);
     }
+    leads.set(leadId, {
+      summary: r.summary?.trim() || null,
+      personMeta: null,
+    });
   }
 
   const persons = await loadPersonMetaMap(tid, Array.from(personIds));

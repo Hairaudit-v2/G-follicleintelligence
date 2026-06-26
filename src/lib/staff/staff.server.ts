@@ -70,6 +70,27 @@ export async function assertFiStaffBelongsToTenant(
   return mapStaffRow(data as Record<string, unknown>);
 }
 
+/** Batch-load staff rows keyed by `fi_staff.id` (empty ids omitted). */
+export async function loadStaffMembersByIdForTenant(
+  tenantId: string,
+  staffIds: string[],
+  client?: SupabaseClient
+): Promise<Map<string, FiStaffRow>> {
+  const out = new Map<string, FiStaffRow>();
+  const ids = Array.from(new Set(staffIds.map((x) => x.trim()).filter(Boolean)));
+  if (!ids.length) return out;
+
+  const supabase = client ?? supabaseAdmin();
+  const tid = assertNonEmptyUuid(tenantId, "tenantId");
+  const { data, error } = await supabase.from("fi_staff").select("*").eq("tenant_id", tid).in("id", ids);
+  if (error) throw new Error(error.message);
+  for (const raw of data ?? []) {
+    const row = mapStaffRow(raw as Record<string, unknown>);
+    out.set(row.id, row);
+  }
+  return out;
+}
+
 export async function loadStaffMemberForTenant(
   tenantId: string,
   staffId: string,

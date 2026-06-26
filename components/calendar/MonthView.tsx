@@ -59,7 +59,7 @@ import {
 } from "@/src/lib/calendar/calendarTimezone";
 import { buildCalendarHref, mergeCalendarHrefQuery, type CalendarRoute, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import { buildCalendarMonth } from "@/src/lib/bookings/calendarView";
-import { resourceColumnIdForBooking, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
+import { resolveDisplayResourceColumnId, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type {
   OperationalCalendarBookingDisplay,
   OperationalCalendarResourceColumn,
@@ -280,7 +280,9 @@ function summarizeProvidersForDay(
   const counts = new Map<string, number>();
 
   for (const booking of dayBookings) {
-    const colId = resourceColumnIdForBooking(booking, { staffIdByUserId });
+    const colId = resolveDisplayResourceColumnId(booking, resourceColumns.map((c) => c.id), {
+      staffIdByUserId,
+    });
     counts.set(colId, (counts.get(colId) ?? 0) + 1);
   }
 

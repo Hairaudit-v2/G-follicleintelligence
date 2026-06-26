@@ -4,9 +4,9 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadBookingResourceAssignmentsForBookings } from "@/src/lib/calendar/bookingResourceRequirements.server";
 import type { FiBookingResourceAssignmentRow } from "@/src/lib/calendar/bookingResourceRequirements.server";
 import { assertNonEmptyUuid } from "@/src/lib/crm/validation";
-import { evaluateStaffProcedurePrivilegeForEvent } from "@/src/lib/academy-os/procedurePrivileges.server";
+import { evaluateStaffProcedurePrivilegeForEvent, loadAllProcedurePrivilegeRequirementsForTenant } from "@/src/lib/academy-os/procedurePrivileges.server";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
-import { loadStaffMemberForTenant } from "@/src/lib/staff/staff.server";
+import { loadStaffMemberForTenant, loadStaffMembersByIdForTenant } from "@/src/lib/staff/staff.server";
 import { toClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingStatusDisplay";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
 import {
@@ -28,9 +28,13 @@ import {
   type StaffShiftRecord,
 } from "@/src/lib/workforce-os/workforceRosteringEngine";
 import {
+  buildWorkforceReadinessInputFromSourceRows,
   loadClinicalEventStaffingStatus,
+  type ClinicalEventStaffingStatusPreload,
+  type FiClinicalStaffingTemplateRow,
   type FiStaffEventAssignmentRow,
 } from "@/src/lib/workforce-os/workforceRostering.server";
+import type { WorkforceReadinessScoreInput } from "@/src/lib/workforce-os/workforceReadinessEngine";
 
 export type EnsureBookingStaffingAssignmentInput = {
   tenantId: string;
@@ -161,6 +165,154 @@ async function loadTemplatesForTenant(tenantId: string) {
         : {},
     is_active: true,
   }));
+}
+
+function groupAvailabilityBlocksByStaffId(rows: Record<string, unknown>[]): Map<string, StaffAvailabilityBlockRecord[]> {
+  const out = new Map<string, StaffAvailabilityBlockRecord[]>();
+  for (const raw of rows) {
+    const sid = String(raw.staff_id ?? "").trim();
+    if (!sid) continue;
+    const list = out.get(sid) ?? [];
+    list.push(mapAvailabilityBlock(raw));
+    out.set(sid, list);
+  }
+  return out;
+}
+
+function groupShiftsByStaffId(rows: Record<string, unknown>[]): Map<string, StaffShiftRecord[]> {
+  const out = new Map<string, StaffShiftRecord[]>();
+  for (const raw of rows) {
+    const sid = String(raw.staff_id ?? "").trim();
+    if (!sid) continue;
+    const list = out.get(sid) ?? [];
+    list.push(mapShift(raw));
+    out.set(sid, list);
+  }
+  return out;
+}
+
+function groupEventAssignmentsByStaffId(rows: Record<string, unknown>[]): Map<string, FiStaffEventAssignmentRow[]> {
+  const out = new Map<string, FiStaffEventAssignmentRow[]>();
+  for (const raw of rows) {
+    const sid = String(raw.staff_id ?? "").trim();
+    if (!sid) continue;
+    const list = out.get(sid) ?? [];
+    list.push(mapAssignment(raw));
+    out.set(sid, list);
+  }
+  return out;
+}
+
+function collectStaffIdsForBookingStaffing(input: {
+  bookings: FiBookingRow[];
+  resourceMap: Map<string, FiBookingResourceAssignmentRow[]>;
+  existingByBooking: Map<string, FiStaffEventAssignmentRow[]>;
+}): string[] {
+  const ids = new Set<string>();
+  for (const booking of input.bookings) {
+    if (booking.assigned_staff_id?.trim()) ids.add(booking.assigned_staff_id.trim());
+    for (const ra of input.resourceMap.get(booking.id) ?? []) {
+      if (ra.resource_type === "staff" && ra.resource_id.trim()) ids.add(ra.resource_id.trim());
+    }
+    for (const row of input.existingByBooking.get(booking.id) ?? []) {
+      if (row.staff_id.trim()) ids.add(row.staff_id.trim());
+    }
+  }
+  return Array.from(ids);
+}
+
+async function loadClinicalStaffingStatusPreload(
+  tenantId: string,
+  staffIds: string[],
+  templates: Awaited<ReturnType<typeof loadTemplatesForTenant>>,
+  privilegeRequirements: Awaited<ReturnType<typeof loadAllProcedurePrivilegeRequirementsForTenant>>
+): Promise<ClinicalEventStaffingStatusPreload> {
+  const tid = tenantId.trim();
+  const ids = Array.from(new Set(staffIds.map((x) => x.trim()).filter(Boolean)));
+  if (!ids.length) {
+    return {
+      templates: templates as FiClinicalStaffingTemplateRow[],
+      privilegeRequirements,
+      staffById: new Map(),
+      availabilityBlocksByStaffId: new Map(),
+      shiftsByStaffId: new Map(),
+      eventAssignmentsByStaffId: new Map(),
+      readinessInputByStaffId: new Map(),
+    };
+  }
+
+  const supabase = supabaseAdmin();
+  const [staffById, blocksRes, shiftsRes, assignmentsRes, sourceRes] = await Promise.all([
+    loadStaffMembersByIdForTenant(tid, ids),
+    supabase
+      .from("fi_staff_availability_blocks")
+      .select("*")
+      .eq("tenant_id", tid)
+      .in("staff_id", ids)
+      .eq("status", "active"),
+    supabase.from("fi_staff_shifts").select("*").eq("tenant_id", tid).in("staff_id", ids).neq("status", "cancelled"),
+    supabase
+      .from("fi_staff_event_assignments")
+      .select("*")
+      .eq("tenant_id", tid)
+      .in("staff_id", ids)
+      .neq("assignment_status", "cancelled"),
+    supabase
+      .from("fi_staff_source_ids")
+      .select("staff_id, source_system, source_staff_id, source_url, metadata")
+      .eq("tenant_id", tid)
+      .in("staff_id", ids),
+  ]);
+
+  if (blocksRes.error) throw new Error(blocksRes.error.message);
+  if (shiftsRes.error) throw new Error(shiftsRes.error.message);
+  if (assignmentsRes.error) throw new Error(assignmentsRes.error.message);
+  if (sourceRes.error) throw new Error(sourceRes.error.message);
+
+  const sourceRowsByStaffId = new Map<
+    string,
+    Array<{ source_system: string; source_url: string | null; metadata: Record<string, unknown> | null }>
+  >();
+  for (const raw of sourceRes.data ?? []) {
+    const r = raw as {
+      staff_id: string;
+      source_system: string;
+      source_url: string | null;
+      metadata: unknown;
+    };
+    const sid = String(r.staff_id).trim();
+    if (!sid) continue;
+    const list = sourceRowsByStaffId.get(sid) ?? [];
+    list.push({
+      source_system: String(r.source_system),
+      source_url: r.source_url,
+      metadata:
+        r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata)
+          ? (r.metadata as Record<string, unknown>)
+          : null,
+    });
+    sourceRowsByStaffId.set(sid, list);
+  }
+
+  const readinessInputByStaffId = new Map<string, WorkforceReadinessScoreInput>();
+  for (const sid of ids) {
+    const staff = staffById.get(sid);
+    if (!staff) continue;
+    readinessInputByStaffId.set(
+      sid,
+      buildWorkforceReadinessInputFromSourceRows(staff, sourceRowsByStaffId.get(sid) ?? [])
+    );
+  }
+
+  return {
+    templates: templates as FiClinicalStaffingTemplateRow[],
+    privilegeRequirements,
+    staffById,
+    availabilityBlocksByStaffId: groupAvailabilityBlocksByStaffId((blocksRes.data ?? []) as Record<string, unknown>[]),
+    shiftsByStaffId: groupShiftsByStaffId((shiftsRes.data ?? []) as Record<string, unknown>[]),
+    eventAssignmentsByStaffId: groupEventAssignmentsByStaffId((assignmentsRes.data ?? []) as Record<string, unknown>[]),
+    readinessInputByStaffId,
+  };
 }
 
 async function buildReadinessInputForStaff(tenantId: string, staffId: string) {
@@ -376,8 +528,9 @@ export async function syncExistingAssignedStaffToWorkforceAssignments(
   for (const ra of resourceAssignments) {
     if (ra.resource_type === "staff" && ra.resource_id.trim()) staffIds.add(ra.resource_id.trim());
   }
+  const staffMembers = await loadStaffMembersByIdForTenant(tid, Array.from(staffIds));
   for (const sid of staffIds) {
-    const staff = await loadStaffMemberForTenant(tid, sid);
+    const staff = staffMembers.get(sid);
     if (staff) staffRoleById.set(sid, staff.staff_role);
   }
 
@@ -591,6 +744,10 @@ export async function loadClinicalStaffingSummariesForBookings(
 
   const activeBookings = bookings.filter((b) => isBookingActiveForStaffing(b));
   const bookingIds = activeBookings.map((b) => b.id);
+
+  const templatesPromise = loadTemplatesForTenant(tid);
+  const privilegeRequirementsPromise = loadAllProcedurePrivilegeRequirementsForTenant(tid);
+
   const resourceMap =
     options?.preloadedResourceAssignments != null
       ? await options.preloadedResourceAssignments
@@ -607,82 +764,94 @@ export async function loadClinicalStaffingSummariesForBookings(
     }
   }
 
+  const eventAssignmentsPromise =
+    bookingIds.length > 0
+      ? supabaseAdmin()
+          .from("fi_staff_event_assignments")
+          .select("*")
+          .eq("tenant_id", tid)
+          .eq("event_source", "booking")
+          .in("event_id", bookingIds)
+      : Promise.resolve({ data: [], error: null });
+
+  const [eventAssignmentsRes, templates, privilegeRequirements] = await Promise.all([
+    eventAssignmentsPromise,
+    templatesPromise,
+    privilegeRequirementsPromise,
+  ]);
+  if (eventAssignmentsRes.error) throw new Error(eventAssignmentsRes.error.message);
+
   const existingByBooking = new Map<string, FiStaffEventAssignmentRow[]>();
-  if (bookingIds.length) {
-    const supabase = supabaseAdmin();
-    const { data, error } = await supabase
-      .from("fi_staff_event_assignments")
-      .select("*")
-      .eq("tenant_id", tid)
-      .eq("event_source", "booking")
-      .in("event_id", bookingIds);
-    if (error) throw new Error(error.message);
-    for (const raw of data ?? []) {
-      const row = mapAssignment(raw as Record<string, unknown>);
-      const eid = row.event_id?.trim();
-      if (!eid) continue;
-      const list = existingByBooking.get(eid) ?? [];
-      list.push(row);
-      existingByBooking.set(eid, list);
-    }
+  for (const raw of eventAssignmentsRes.data ?? []) {
+    const row = mapAssignment(raw as Record<string, unknown>);
+    const eid = row.event_id?.trim();
+    if (!eid) continue;
+    const list = existingByBooking.get(eid) ?? [];
+    list.push(row);
+    existingByBooking.set(eid, list);
   }
 
-  const templates = await loadTemplatesForTenant(tid);
-  const staffRoleCache = new Map<string, string | null>();
-
-  async function staffRole(staffId: string): Promise<string | null> {
-    if (staffRoleCache.has(staffId)) return staffRoleCache.get(staffId) ?? null;
-    const member = await loadStaffMemberForTenant(tid, staffId);
-    const role = member?.staff_role ?? null;
-    staffRoleCache.set(staffId, role);
-    return role;
+  const staffIds = collectStaffIdsForBookingStaffing({ bookings: activeBookings, resourceMap, existingByBooking });
+  const staffingPreload = await loadClinicalStaffingStatusPreload(
+    tid,
+    staffIds,
+    templates,
+    privilegeRequirements
+  );
+  const staffRoleById = new Map<string, string | null>();
+  for (const sid of staffIds) {
+    staffRoleById.set(sid, staffingPreload.staffById?.get(sid)?.staff_role ?? null);
   }
 
-  for (const booking of activeBookings) {
-    const resourceAssignments = resourceMap.get(booking.id) ?? [];
-    const activeExisting = (existingByBooking.get(booking.id) ?? []).filter(
-      (row) => row.assignment_status !== "cancelled"
-    );
+  await Promise.all(
+    activeBookings.map(async (booking) => {
+      const resourceAssignments = resourceMap.get(booking.id) ?? [];
+      const activeExisting = (existingByBooking.get(booking.id) ?? []).filter(
+        (row) => row.assignment_status !== "cancelled"
+      );
 
-    const resourceStaff: Array<{ staffId: string; roleLabel?: string | null; staffRole?: string | null }> = [];
-    for (const ra of resourceAssignments.filter((r) => r.resource_type === "staff")) {
-      resourceStaff.push({
-        staffId: ra.resource_id,
-        roleLabel: ra.role_label,
-        staffRole: await staffRole(ra.resource_id),
+      const resourceStaff = resourceAssignments
+        .filter((r) => r.resource_type === "staff")
+        .map((ra) => ({
+          staffId: ra.resource_id,
+          roleLabel: ra.role_label,
+          staffRole: staffRoleById.get(ra.resource_id.trim()) ?? null,
+        }));
+
+      const candidates = buildWorkforceCandidateAssignments({
+        primaryStaffId: booking.assigned_staff_id,
+        primaryStaffRole: booking.assigned_staff_id
+          ? staffRoleById.get(booking.assigned_staff_id.trim()) ?? null
+          : null,
+        bookingType: booking.booking_type,
+        resourceStaff,
+        existingAssignments: activeExisting.map((row) => ({
+          staffId: row.staff_id,
+          assignedRole: row.assigned_role,
+        })),
       });
-    }
 
-    const candidates = buildWorkforceCandidateAssignments({
-      primaryStaffId: booking.assigned_staff_id,
-      primaryStaffRole: booking.assigned_staff_id ? await staffRole(booking.assigned_staff_id.trim()) : null,
-      bookingType: booking.booking_type,
-      resourceStaff,
-      existingAssignments: activeExisting.map((row) => ({
-        staffId: row.staff_id,
-        assignedRole: row.assigned_role,
-      })),
-    });
+      const eventType = resolveWorkforceEventTypeFromBooking(booking);
+      const template = resolveClinicalStaffingTemplate({
+        eventType,
+        clinicId: booking.clinic_id,
+        templates,
+      });
+      const window = getWorkforceEventWindow(booking);
 
-    const eventType = resolveWorkforceEventTypeFromBooking(booking);
-    const template = resolveClinicalStaffingTemplate({
-      eventType,
-      clinicId: booking.clinic_id,
-      templates,
-    });
-    const window = getWorkforceEventWindow(booking);
+      const status = await loadClinicalEventStaffingStatus({
+        tenantId: tid,
+        clinicId: booking.clinic_id,
+        eventType,
+        startsAt: window.startsAt,
+        endsAt: window.endsAt,
+        candidateStaffIds: candidates,
+        preload: staffingPreload,
+      });
 
-    const status = await loadClinicalEventStaffingStatus({
-      tenantId: tid,
-      clinicId: booking.clinic_id,
-      eventType,
-      startsAt: window.startsAt,
-      endsAt: window.endsAt,
-      candidateStaffIds: candidates,
-    });
-
-    out.set(booking.id, toClinicalStaffingSummaryDto(status, Boolean(template)));
-  }
+      out.set(booking.id, toClinicalStaffingSummaryDto(status, Boolean(template)));
+    })
+  );
 
   return out;
 }
