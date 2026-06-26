@@ -12,7 +12,9 @@ import {
   appendProviderLinkedStaffColumns,
   staffColumnId,
 } from "@/src/lib/calendar/operationalCalendarColumns";
+import { buildCalendarDay } from "@/src/lib/bookings/calendarView";
 import { resolveDisplayResourceColumnId } from "@/src/lib/calendar/operationalCalendarLayout";
+import { buildClinicalStaffPickerReadiness } from "@/src/lib/staff/clinicalStaffPicker";
 
 const STAFF_A = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
@@ -101,6 +103,12 @@ describe("CalendarOS display pipeline", () => {
             staff_role: "consultant",
             is_active: true,
             working_hours: {},
+            clinical_readiness: buildClinicalStaffPickerReadiness({
+              full_name: "Paul",
+              staff_role: "consultant",
+              is_active: true,
+              working_hours: {},
+            }),
           },
         ],
       ])
@@ -113,13 +121,7 @@ describe("CalendarOS display pipeline", () => {
   it("buildCalendarOsDisplayPipelineTrace reports mapping, merge, bucket, and filter flags", () => {
     const raw = sampleEventRow();
     const mapped = calendarOsBooking({ id: raw.id });
-    const lanes = [
-      {
-        dayKey: "2026-06-26",
-        startMs: Date.parse("2026-06-26T00:00:00.000Z"),
-        endMs: Date.parse("2026-06-27T00:00:00.000Z"),
-      },
-    ];
+    const lanes = buildCalendarDay("2026-06-26", "UTC");
     const resourceColumns = [
       { id: staffColumnId(STAFF_A), kind: "fi_staff" as const, label: "Paul", subtitle: "Consultant", staffId: STAFF_A },
       { id: "unassigned", kind: "unassigned" as const, label: "Unassigned", subtitle: "No staff column" },

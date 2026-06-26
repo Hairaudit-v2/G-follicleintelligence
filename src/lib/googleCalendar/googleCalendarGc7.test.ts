@@ -317,7 +317,7 @@ function createGc7MockSupabase() {
           },
           update(patch: Record<string, unknown>) {
             return {
-              eq(col: string, val: string) {
+              eq(_col: string, _val: string) {
                 return {
                   eq() {
                     return { select() { return { single: async () => ({ data: patch, error: null }) }; } };

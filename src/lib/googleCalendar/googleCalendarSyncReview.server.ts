@@ -14,7 +14,6 @@ import {
   incrementReviewCounter,
   reviewItemRowToClient,
   type DetectGoogleCalendarSyncConflictInput,
-  type GoogleCalendarSyncConflictDetection,
   type GoogleCalendarSyncReviewClientItem,
   type GoogleCalendarSyncReviewCounters,
   type GoogleCalendarSyncReviewPageModel,
