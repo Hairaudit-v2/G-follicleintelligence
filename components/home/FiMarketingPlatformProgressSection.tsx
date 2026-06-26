@@ -16,6 +16,8 @@ import {
   getLatestPlatformProgressChangelogEntry,
   getPlatformProgressHomepageDescription,
   getPlatformProgressSnapshot,
+  getPlatformInfrastructureDeploymentStatus,
+  isPlatformInfrastructureCoreSystem,
   PLATFORM_PROGRESS_MODULES,
   PLATFORM_PROGRESS_PAGE_CONTENT,
 } from "@/lib/marketing/platformProgressPageContent";
@@ -104,11 +106,11 @@ export function FiMarketingPlatformProgressSection() {
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Connected systems in the delivery registry</p>
           </GlassCard>
           <GlassCard className="border-white/[0.07] !p-5 sm:!p-6">
-            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">Last updated</p>
+            <p className="text-[10px] font-semibold uppercase leading-snug tracking-[0.22em] text-amber-200/70">Ecosystem completion</p>
             <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground sm:text-4xl">
-              {snapshot.lastUpdated}
+              {snapshot.fiOsCorePlatformPercent}%
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Public progress registry refresh date</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">FI OS core platform delivery rollup</p>
           </GlassCard>
         </div>
 
@@ -119,7 +121,11 @@ export function FiMarketingPlatformProgressSection() {
             Featured delivery surfaces
           </p>
           <ul className="mt-8 grid list-none gap-4 p-0 sm:grid-cols-2 lg:gap-5">
-            {featuredModules.map((mod, index) => (
+            {featuredModules.map((mod, index) => {
+              const hidePercent = isPlatformInfrastructureCoreSystem(mod.id);
+              const deploymentStatus = getPlatformInfrastructureDeploymentStatus(mod.id);
+
+              return (
               <li key={mod.id}>
                 <FadeIn delay={0.04 * index}>
                   <GlassCard variant="os" className="h-full border-white/[0.07] !p-5 sm:!p-6">
@@ -134,33 +140,45 @@ export function FiMarketingPlatformProgressSection() {
                       </div>
                       <PlatformProgressStatusBadge status={mod.status} label={mod.statusLabel} />
                     </div>
-                    <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                      <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">
-                        {mod.completionPercent}
-                        <span className="text-base text-muted-foreground">%</span>
-                      </p>
-                      <p className="max-w-none text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-amber-100/75 sm:max-w-[10rem] sm:text-right">
-                        {mod.stage}
-                      </p>
-                    </div>
-                    <div className="mt-3">
-                      <PlatformProgressAnimatedBar
-                        percent={mod.completionPercent}
-                        status={mod.status}
-                        delay={0.1 + index * 0.05}
-                      />
-                    </div>
+                    {hidePercent && deploymentStatus ? (
+                      <div className="mt-4">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Status</p>
+                        <p className="mt-2 font-display text-lg font-semibold tracking-tight text-foreground">
+                          {deploymentStatus}
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                          <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">
+                            {mod.completionPercent}
+                            <span className="text-base text-muted-foreground">%</span>
+                          </p>
+                          <p className="max-w-none text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-amber-100/75 sm:max-w-[10rem] sm:text-right">
+                            {mod.stage}
+                          </p>
+                        </div>
+                        <div className="mt-3">
+                          <PlatformProgressAnimatedBar
+                            percent={mod.completionPercent}
+                            status={mod.status}
+                            delay={0.1 + index * 0.05}
+                          />
+                        </div>
+                      </>
+                    )}
                     <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{mod.description}</p>
                   </GlassCard>
                 </FadeIn>
               </li>
-            ))}
+            );
+            })}
           </ul>
         </div>
 
         <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Full module grid, status filters, and engineering changelog on the platform progress page.
+            Full architecture stack, layered system registry, and engineering deployment log on the platform progress page.
           </p>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <Button asChild variant="outline" size="lg" className={cn(MARKETING_CTA_SECONDARY_CLASS, "w-full sm:w-auto sm:shrink-0")}>

@@ -125,7 +125,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     eyebrow: "Platform architecture",
     headline: "20 Interconnected Intelligence Systems",
     intro:
-      "Every layer of the hair restoration ecosystem connected into one continuously learning infrastructure network.",
+      "Organised across clinical, intelligence, operational, and infrastructure layers — one continuously learning network.",
   },
 
   modules: {
@@ -157,39 +157,81 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   intelligenceNetwork: {
     eyebrow: "Competitive moat",
     headline: "The Intelligence Network",
-    intro: "Every patient interaction contributes structured clinical intelligence.",
-    captureAreas: [
-      "Lead acquisition",
-      "Clinical diagnostics",
-      "Hair loss classification",
-      "Surgical planning",
-      "Procedure execution",
-      "Team performance",
-      "Long-term outcome tracking",
-      "Patient satisfaction",
-      "Recovery progression",
-      "Clinical education systems",
+    manifesto: [
+      "Every consultation.",
+      "Every scalp analysis.",
+      "Every medication protocol.",
+      "Every graft extracted.",
+      "Every transection rate.",
+      "Every implantation pattern.",
+      "Every surgical decision.",
+      "Every post-operative recovery pathway.",
+      "Every long-term patient outcome.",
+      "Continuously structured.",
+      "Continuously measured.",
+      "Continuously learning.",
     ] as const,
     closing:
-      "Over time this creates the world's largest structured dataset in hair restoration medicine. This is our long-term competitive moat.",
+      "At scale, this creates the world's first continuously evolving intelligence network dedicated entirely to hair restoration medicine.",
+    closingLine: "The software powers operations. The data becomes the asset.",
+  },
+
+  platformMetrics: {
+    eyebrow: "Platform scale",
+    headline: "Platform Intelligence Metrics",
+  },
+
+  platformArchitecture: {
+    eyebrow: "System architecture",
+    headline: "Platform Architecture",
+    intro: "Vertically integrated layers — from acquisition through clinical execution to intelligence and infrastructure.",
+  },
+
+  eventBus: {
+    eyebrow: "Core infrastructure",
+    headline: "Platform Event Bus",
+    subtitle:
+      "The asynchronous communication backbone connecting every system across the Follicle Intelligence ecosystem.",
+    capabilities: [
+      "Event publishing",
+      "Subscriber orchestration",
+      "Delivery retry framework",
+      "Idempotency protection",
+      "Service decoupling",
+      "Cross-platform communication architecture",
+      "Internal service routing",
+    ] as const,
+  },
+
+  defensibility: {
+    eyebrow: "Structural moat",
+    headline: "Why This Cannot Be Easily Replicated",
+    intro:
+      "Follicle Intelligence combines infrastructure layers no existing software provider currently connects.",
+    expertiseAreas: [
+      "Hair restoration medicine",
+      "Surgical workflow systems",
+      "Longitudinal outcome auditing",
+      "AI diagnostic modelling",
+      "Clinical imaging intelligence",
+      "Practitioner certification systems",
+      "Global treatment benchmarking",
+      "Multi-clinic healthcare operations",
+    ] as const,
+    closing:
+      "This creates structural defensibility that becomes stronger as adoption grows.",
   },
 
   closing: {
-    eyebrow: "Category infrastructure",
-    headline: "We Are Not Building Clinic Software",
+    eyebrow: "Founder conviction",
+    headline: "We Are Building The Future Infrastructure Of Hair Restoration",
     body: [
-      "Most software platforms improve operations.",
-      "Follicle Intelligence is engineering the infrastructure layer for an entire medical specialty.",
-      "Every consultation.",
-      "Every procedure.",
-      "Every outcome.",
-      "Every practitioner.",
-      "Every clinic.",
-      "Connected into one continuously learning intelligence network.",
+      "We believe the future of hair restoration will not be built around clinics.",
+      "It will be built around intelligence.",
+      "The clinics of the future will not simply perform procedures.",
+      "They will continuously learn from every patient, every treatment, every outcome, and every clinical decision.",
+      "Follicle Intelligence is building the infrastructure layer that makes that future possible.",
     ] as const,
-    closingLine: "The future of hair restoration will be data-driven. We are building that future.",
-    primaryCta: { label: "Explore platform architecture", href: "/platform" },
-    secondaryCta: { label: "Book enterprise briefing", href: "/demo" },
   },
 
   changelog: {
@@ -200,17 +242,17 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 
   homepage: {
     id: "platform-progress",
-    eyebrow: "Platform progress",
-    headline: "Built as a Living Operating System",
+    eyebrow: "Platform infrastructure",
+    headline: "Intelligence Infrastructure In Active Deployment",
     description:
-      "Enterprise medical infrastructure in active development.",
-    moduleCountLabel: "operating modules",
-    descriptionClosing: "Weekly deployment. Production architecture operational.",
+      "Twenty interconnected systems across clinical, intelligence, operational, and infrastructure layers.",
+    moduleCountLabel: "integrated systems",
+    descriptionClosing: "Live engineering registry. Category-defining platform architecture.",
     cta: { label: "View Live Platform Progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
-      title: "Latest platform update",
-      readFullLogLabel: "Read full progress log",
+      title: "Latest infrastructure deployment",
+      readFullLogLabel: "Read full deployment log",
       readFullLogHref: "/platform/progress#engineering-changelog",
     },
   },
@@ -546,6 +588,112 @@ export const PLATFORM_PROGRESS_INFRASTRUCTURE_LAYERS: PlatformProgressInfrastruc
   },
 ];
 
+export type PlatformSystemArchitectureGroup = {
+  id: string;
+  heading: string;
+  description: string;
+  moduleNames: readonly string[];
+};
+
+export type PlatformArchitectureStackLayer = {
+  id: string;
+  label: string;
+  systems: readonly string[];
+};
+
+export type PlatformProgressMetric = {
+  label: string;
+  value: string;
+};
+
+/** Core substrate systems — percentages preserved in registry but hidden in public UI. */
+export const PLATFORM_INFRASTRUCTURE_CORE_SYSTEM_IDS = [
+  "foundation-os",
+  "security-layer",
+  "event-bus",
+  "integration-layer",
+] as const;
+
+export type PlatformInfrastructureCoreSystemId = (typeof PLATFORM_INFRASTRUCTURE_CORE_SYSTEM_IDS)[number];
+
+/** Deployment status copy for infrastructure core systems (replaces visible completion %). */
+export const PLATFORM_INFRASTRUCTURE_DEPLOYMENT_STATUS: Record<PlatformInfrastructureCoreSystemId, string> = {
+  "foundation-os": "Core Platform Operational",
+  "security-layer": "Operational Security Architecture",
+  "event-bus": "Infrastructure Deployed",
+  "integration-layer": "Connector Framework Active",
+};
+
+export const PLATFORM_PROGRESS_METRICS: PlatformProgressMetric[] = [
+  { label: "Integrated Systems", value: "20" },
+  { label: "Ecosystem Completion", value: "81%" },
+  { label: "Clinical Data Fields", value: "250+" },
+  { label: "Procedure Variables Captured", value: "1000+" },
+  { label: "Outcome Tracking Horizon", value: "12 Months" },
+  { label: "Continuous Learning Potential", value: "Infinite" },
+];
+
+export const PLATFORM_ARCHITECTURE_STACK: PlatformArchitectureStackLayer[] = [
+  {
+    id: "acquisition",
+    label: "Acquisition Layer",
+    systems: ["LeadFlow", "External Integrations", "Referral Engine", "Communication Systems"],
+  },
+  {
+    id: "patient",
+    label: "Patient Layer",
+    systems: ["ConsultationOS", "PatientOS", "ClinicOS", "CalendarOS"],
+  },
+  {
+    id: "clinical",
+    label: "Clinical Layer",
+    systems: ["HairIntel", "ImagingOS", "VIE", "SurgeryOS"],
+  },
+  {
+    id: "intelligence",
+    label: "Intelligence Layer",
+    systems: ["AuditOS", "AnalyticsOS", "AI Intelligence Engine"],
+  },
+  {
+    id: "workforce",
+    label: "Workforce Layer",
+    systems: ["AcademyOS", "WorkforceOS", "Certification Engine"],
+  },
+  {
+    id: "infrastructure",
+    label: "Infrastructure Layer",
+    systems: ["FoundationOS", "Security Layer", "Event Bus", "Integration Layer", "OnboardingOS"],
+  },
+];
+
+export const PLATFORM_SYSTEM_ARCHITECTURE_GROUPS: PlatformSystemArchitectureGroup[] = [
+  {
+    id: "clinical",
+    heading: "Clinical Systems",
+    description: "Core systems supporting direct patient care and clinical workflows.",
+    moduleNames: ["ClinicOS", "ConsultationOS", "PatientOS", "ImagingOS", "SurgeryOS"],
+  },
+  {
+    id: "intelligence",
+    heading: "Intelligence Systems",
+    description:
+      "Systems responsible for diagnostics, pattern recognition, benchmarking, and outcome intelligence.",
+    moduleNames: ["HairIntel", "VIE", "AuditOS", "AnalyticsOS", "AI Intelligence Layer"],
+  },
+  {
+    id: "operational",
+    heading: "Operational Systems",
+    description: "Systems managing acquisition, operations, finance, and deployment.",
+    moduleNames: ["LeadFlow", "CalendarOS", "WorkforceOS", "FinancialOS", "OnboardingOS"],
+  },
+  {
+    id: "infrastructure",
+    heading: "Infrastructure Systems",
+    description: "Core architecture powering platform scalability.",
+    moduleNames: ["FoundationOS", "Security Layer", "Event Bus", "Integration Layer", "AcademyOS"],
+  },
+];
+
 export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
   "Longitudinal image comparison",
   "Same angle alignment engine",
@@ -877,4 +1025,39 @@ export function getLatestPlatformProgressChangelogEntry(
       return b.id.localeCompare(a.id);
     })[0] ?? null
   );
+}
+
+export function isPlatformInfrastructureCoreSystem(
+  moduleId: string
+): moduleId is PlatformInfrastructureCoreSystemId {
+  return (PLATFORM_INFRASTRUCTURE_CORE_SYSTEM_IDS as readonly string[]).includes(moduleId);
+}
+
+export function getPlatformInfrastructureDeploymentStatus(moduleId: string): string | null {
+  if (!isPlatformInfrastructureCoreSystem(moduleId)) return null;
+  return PLATFORM_INFRASTRUCTURE_DEPLOYMENT_STATUS[moduleId];
+}
+
+export function resolvePlatformProgressModulesByName(
+  names: readonly string[],
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): PlatformProgressModule[] {
+  return names
+    .map((name) => modules.find((mod) => mod.name === name))
+    .filter((mod): mod is PlatformProgressModule => mod != null);
+}
+
+export function getPlatformProgressMetrics(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): PlatformProgressMetric[] {
+  const snapshot = getPlatformProgressSnapshot(modules);
+  return PLATFORM_PROGRESS_METRICS.map((metric) => {
+    if (metric.label === "Integrated Systems") {
+      return { ...metric, value: String(snapshot.activeModuleCount) };
+    }
+    if (metric.label === "Ecosystem Completion") {
+      return { ...metric, value: `${snapshot.fiOsCorePlatformPercent}%` };
+    }
+    return metric;
+  });
 }
