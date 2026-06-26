@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { GoogleCalendarInboundScopeCard } from "@/src/components/fi-admin/settings/GoogleCalendarInboundScopeCard";
 import { GoogleCalendarIntegrationCard } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationCard";
 import { ProviderCalendarLinksCard } from "@/src/components/fi-admin/settings/ProviderCalendarLinksCard";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
@@ -12,6 +13,7 @@ import {
   assertGoogleCalendarTenantAdminAccess,
   GoogleCalendarIntegrationAccessError,
 } from "@/src/lib/googleCalendar/googleCalendarIntegrationAccess.server";
+import { loadGoogleCalendarInboundScopePage } from "@/src/lib/googleCalendar/googleCalendarInboundScope.server";
 import { loadProviderCalendarLinksPage } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
@@ -89,6 +91,10 @@ export default async function TenantIntegrationsSettingsPage({
     canManage: canManageCalendarLinks,
   });
 
+  const inboundScopePage = await loadGoogleCalendarInboundScopePage(tenantId, {
+    canManage: canManageCalendarLinks,
+  });
+
   return (
     <div className="space-y-4">
       <div>
@@ -112,6 +118,8 @@ export default async function TenantIntegrationsSettingsPage({
         connectedFlash={connectedFlash}
         errorFlash={errorFlash}
       />
+
+      <GoogleCalendarInboundScopeCard tenantId={tenantId} pageModel={inboundScopePage} />
 
       <ProviderCalendarLinksCard tenantId={tenantId} pageModel={providerCalendarLinksPage} />
 
