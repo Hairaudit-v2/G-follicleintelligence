@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { VieAlignmentCaptureInput, VieAlignmentReferenceCandidate } from "./vieAlignmentTypes";
+import type { VieAlignmentCaptureInput, VieAlignmentReferenceCandidate, VieAlignmentStatus } from "./vieAlignmentTypes";
 import {
   buildPatientTwinAlignmentSummary,
   evaluateSameAngleAlignment,
@@ -200,7 +200,11 @@ describe("VIE alignment server best-effort", () => {
 
 describe("VIE compare tab alignment filters", () => {
   it("high alignment and poor alignment filters partition pairs", () => {
-    const pairs = [
+    const pairs: Array<{
+      alignment_score: number;
+      alignment_status: VieAlignmentStatus;
+      is_standardized_evidence: boolean;
+    }> = [
       { alignment_score: 85, alignment_status: "excellent" as const, is_standardized_evidence: true },
       { alignment_score: 45, alignment_status: "retake_recommended" as const, is_standardized_evidence: false },
       { alignment_score: 72, alignment_status: "acceptable" as const, is_standardized_evidence: true },

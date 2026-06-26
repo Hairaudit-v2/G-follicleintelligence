@@ -285,7 +285,6 @@ describe("VIE outcome intelligence core", () => {
       alignment: {
         alignment_score: 82,
         alignment_status: "acceptable",
-        confidence_band: "high",
         is_standardized_evidence: true,
       },
     });

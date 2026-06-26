@@ -1111,55 +1111,80 @@ export type HomeV5SystemCard = {
   description: string;
 };
 
+export type HomeV5CredibilityCard = {
+  title: string;
+  description: string;
+};
+
 export const HOME_V5_CONTENT = {
   hero: {
     id: "hero",
     eyebrow: "Hair restoration operating system",
-    headline: "The Operating System Built Specifically For Hair Restoration Clinics",
+    headline: "Every Hair Restoration Clinic Runs On Systems Built For Everyone Else",
+    headlineLine2: "We Built One Specifically For You",
     subheadline:
-      "Manage consultations, surgery, patient intelligence, staff training, outcomes, analytics, and clinic operations inside one connected intelligence platform built exclusively for hair restoration medicine.",
+      "Most clinics operate across disconnected software never designed for hair restoration medicine.",
+    subheadline2:
+      "Follicle Intelligence connects consultations, surgery, patient intelligence, staff training, outcomes, analytics, and clinical operations into one purpose-built operating system.",
     metrics: [
       { value: "20", label: "Interconnected Systems" },
       { value: "81%", label: "Platform Deployment" },
       { value: "8+", label: "Replacing Disconnected Clinic Tools" },
       { label: "Built Exclusively For Hair Restoration Medicine" },
     ] satisfies readonly HomeV5MetricCard[],
-    primaryCta: { label: "Explore The Platform", href: "/platform" as const },
-    secondaryCta: { label: "See How Clinics Operate On FI", href: "/platform/ecosystem" as const },
+    primaryCta: { label: "Explore The Platform", href: "/#platform-systems" as const },
+    secondaryCta: { label: "See How Clinics Operate On FI", href: "/#hidden-cost" as const },
   },
 
   fragmentation: {
-    id: "industry-fragmentation",
+    id: "fragmentation",
     eyebrow: "Operational reality",
-    headline: "Most Hair Restoration Clinics Operate Across Fragmented Systems",
+    headline: "Your Clinic Is Probably Losing Revenue In Places You Cannot See",
     cards: [
       {
-        category: "CRM",
-        items: ["HubSpot", "Pabau", "Manual follow-up"],
+        category: "Lead Management",
+        items: ["Enquiries not followed up quickly enough", "Potential patients lost before consultation"],
       },
       {
-        category: "Scheduling",
-        items: ["Timely", "Cliniko", "Calendar fragmentation"],
+        category: "Consultation Process",
+        items: ["Manual workflows create inconsistency between consultants", "Reduced conversion opportunities"],
       },
       {
-        category: "Patient Records",
-        items: ["Scattered documents", "Disconnected systems", "Manual notes"],
+        category: "Surgical Performance",
+        items: ["No objective measurement of procedural quality", "No visibility into team performance"],
       },
       {
-        category: "Surgical Tracking",
-        items: ["Excel spreadsheets", "Manual graft counting", "No audit trail"],
+        category: "Patient Journey",
+        items: ["Photos, notes and treatment history scattered across systems", "No connected patient intelligence"],
       },
       {
-        category: "Staff Training",
-        items: ["Spreadsheets", "No competency tracking", "No readiness monitoring"],
+        category: "Staff Readiness",
+        items: ["Difficult to know who is truly procedure-ready", "Training accountability often unclear"],
       },
       {
-        category: "Outcome Monitoring",
-        items: ["No longitudinal tracking", "No objective quality scoring", "No procedural benchmarking"],
+        category: "Outcome Tracking",
+        items: ["No long-term procedural benchmarking", "No measurable quality feedback loop"],
       },
     ] satisfies readonly HomeV5FragmentationCard[],
-    closingStatement:
-      "Modern clinics are forced to operate across disconnected systems with no intelligence layer connecting the patient journey.",
+    closingStatement: "Operational inefficiency directly impacts clinic profitability",
+    closingSubtext:
+      "Small inefficiencies compound across every consultation, procedure and patient journey.",
+  },
+
+  hiddenCost: {
+    id: "hidden-cost",
+    eyebrow: "Revenue impact",
+    headline: "The Hidden Cost Of Running Disconnected Systems",
+    cascade: [
+      "Missed patient follow-up",
+      "Lower consultation conversion rates",
+      "Reduced surgery bookings",
+      "Inconsistent patient experience",
+      "Poor long-term outcomes",
+      "Reduced patient referrals",
+      "Slower clinic growth",
+    ] as const,
+    closingStatement: "Disconnected operational systems quietly reduce clinic profitability every day.",
   },
 
   platformSystems: {
@@ -1206,32 +1231,48 @@ export const HOME_V5_CONTENT = {
         "Longitudinal patient intelligence",
       ],
     },
-    closingStatement:
-      "Generic software manages appointments. Follicle Intelligence manages the entire clinical journey.",
+    closingStatementLines: [
+      "Generic Software Helps Run Clinics",
+      "Follicle Intelligence Helps Clinics Perform Better",
+    ] as const,
   },
 
   surgeryIntelligence: {
     id: "surgery-intelligence",
     eyebrow: "Surgical intelligence",
-    headline: "The First Surgical Intelligence System Built For Hair Restoration Medicine",
+    headline: "The World's First Surgical Intelligence Engine Built For Hair Restoration Clinics",
+    supportingCopy:
+      "For the first time clinics can objectively measure procedural quality at the level where outcomes are actually created.",
+    supportingPoints: [
+      "Every extraction.",
+      "Every graft.",
+      "Every team member.",
+      "Every surgical variable.",
+      "Measured continuously.",
+    ] as const,
     metrics: [
       "Grafts extracted",
       "Hair per graft ratio",
-      "Punch size",
+      "Punch size selection",
       "Extraction speed",
       "Transection rate",
-      "Team performance",
-      "Donor preservation",
-      "Recipient planning",
+      "Implantation speed",
+      "Donor preservation score",
+      "Recipient density planning",
       "Medication protocols",
+      "Assistant performance comparison",
+      "Team efficiency scoring",
+      "Procedure benchmarking",
     ] as const,
-    closingStatement: "Every procedure becomes measurable, trackable, and continuously optimised.",
+    closingStatement: "Every Procedure Becomes Measurable",
   },
 
   outcomeIntelligence: {
     id: "outcome-intelligence",
     eyebrow: "Outcome intelligence",
     headline: "Know Which Procedures Actually Produce Better Outcomes",
+    introCopy:
+      "Most clinics perform procedures every day without truly understanding which variables produce better long-term patient outcomes.",
     capabilities: [
       "12 month growth scoring",
       "Density progression",
@@ -1241,13 +1282,15 @@ export const HOME_V5_CONTENT = {
       "Surgeon performance benchmarking",
       "Technique comparison analysis",
     ] as const,
-    closingStatement: "For the first time clinics can objectively measure procedural quality over time.",
+    closingStatement: "The Clinics That Measure Outcomes Improve Faster Than The Clinics That Guess",
   },
 
   staffIntelligence: {
     id: "staff-intelligence",
     eyebrow: "Workforce intelligence",
     headline: "Build Better Teams Through Measurable Clinical Competency",
+    introCopy:
+      "High-performing clinics depend on high-performing teams. But most clinics have no objective system measuring workforce readiness, competency progression or procedural preparedness.",
     capabilities: [
       "Training assignments",
       "Certification management",
@@ -1257,15 +1300,49 @@ export const HOME_V5_CONTENT = {
       "Role-based permissions",
       "Compliance monitoring",
     ] as const,
-    closingStatement: "Operational excellence starts with measurable workforce readiness.",
+    closingStatement: "Better Teams Create Better Procedures",
+  },
+
+  credibility: {
+    id: "built-inside-clinics",
+    eyebrow: "Industry credibility",
+    headline: "Built Inside Real Hair Restoration Clinics",
+    cards: [
+      {
+        title: "Real Surgical Workflows",
+        description: "Designed around actual procedure-day operational demands",
+      },
+      {
+        title: "Real Consultation Processes",
+        description: "Built around actual patient conversion pathways used in clinics",
+      },
+      {
+        title: "Real Clinical Teams",
+        description: "Created around surgeons, nurses, consultants and technicians",
+      },
+      {
+        title: "Real Industry Expertise",
+        description:
+          "Built specifically for one medical specialty rather than adapted generic healthcare software",
+      },
+    ] satisfies readonly HomeV5CredibilityCard[],
+    closingStatement:
+      "This platform was not adapted for hair restoration clinics. It was built from inside them.",
   },
 
   futureVision: {
-    id: "future-infrastructure",
-    eyebrow: "Infrastructure vision",
-    headline: "Building The Future Infrastructure Of Hair Restoration Medicine",
-    body: "Every consultation, diagnosis, procedure, treatment protocol, and long-term patient outcome strengthens the intelligence network powering better decisions for clinics worldwide.",
-    footerLines: ["Infrastructure first.", "Intelligence first.", "Built exclusively for hair restoration medicine."] as const,
+    id: "future-clinics",
+    eyebrow: "The future",
+    headline: "The Future Of High Performance Hair Restoration Clinics",
+    bodyParagraphs: [
+      "The most successful clinics in the future will not simply attract more patients.",
+      "They will understand their operations better.",
+      "They will measure procedures more precisely.",
+      "They will train better teams.",
+      "They will improve outcomes more consistently.",
+      "And they will continuously learn from every patient interaction.",
+    ] as const,
+    footerLine: "Better systems create better clinics. Better clinics create better outcomes.",
   },
 } as const;
 

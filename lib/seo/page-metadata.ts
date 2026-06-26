@@ -14,6 +14,14 @@ export type PageMetadataInput = {
   robots?: Metadata["robots"];
   /** Optional SEO keywords for discoverability and AI indexing. */
   keywords?: string[];
+  /** Optional Open Graph title override (falls back to `title`). */
+  ogTitle?: string;
+  /** Optional Open Graph description override (falls back to `description`). */
+  ogDescription?: string;
+  /** Optional Twitter/X title override (falls back to `ogTitle` then `title`). */
+  twitterTitle?: string;
+  /** Optional Twitter/X description override (falls back to `ogDescription` then `description`). */
+  twitterDescription?: string;
 };
 
 function canonicalUrl(path: string): string {
@@ -29,6 +37,13 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
   const imageAltText = imageAlt ?? OG_IMAGE.alt;
   const canonical = path ? canonicalUrl(path) : undefined;
 
+  // OG / Twitter fall back through the chain so existing callers (title/description only)
+  // keep their current behaviour, while pages can opt into distinct social copy.
+  const ogTitle = input.ogTitle ?? title;
+  const ogDescription = input.ogDescription ?? description;
+  const twitterTitle = input.twitterTitle ?? ogTitle;
+  const twitterDescription = input.twitterDescription ?? ogDescription;
+
   return {
     title,
     description,
@@ -36,8 +51,8 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
     ...(canonical && { alternates: { canonical } }),
     ...(robots && { robots }),
     openGraph: {
-      title,
-      description,
+      title: ogTitle,
+      description: ogDescription,
       siteName: SITE_NAME,
       type: "website",
       ...(canonical && { url: canonical }),
@@ -52,8 +67,8 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: twitterTitle,
+      description: twitterDescription,
       images: [OG_IMAGE.path],
     },
   };
