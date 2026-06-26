@@ -13,6 +13,7 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
 import {
+  buildStaffCalendarLinkIndex,
   resolveCalendarEventStaffAssignment,
   type StaffCalendarLinkLookupRow,
 } from "@/src/lib/googleCalendar/googleCalendarProviderLinksCore";
@@ -41,6 +42,7 @@ export type FiCalendarEventOverlapRow = {
   provider: string;
   calendar_id: string;
   title: string;
+  description: string | null;
   location: string | null;
   start_time: string | null;
   end_time: string | null;
@@ -54,7 +56,10 @@ export type FiCalendarEventOverlapRow = {
 };
 
 export const FI_CALENDAR_EVENTS_OVERLAP_SELECT =
-  "id, tenant_id, external_event_id, provider, calendar_id, title, location, start_time, end_time, event_type, google_meet_url, patient_id, lead_id, metadata, created_at, updated_at";
+  "id, tenant_id, external_event_id, provider, calendar_id, title, description, location, start_time, end_time, event_type, google_meet_url, patient_id, lead_id, metadata, created_at, updated_at";
+
+/** Hard cap for CalendarOS overlap reads — month grid should stay well under this after range scoping. */
+export const CALENDAR_OS_EVENTS_OVERLAP_CAP = 1000;
 
 const TOKEN_KEY_PATTERN = /token|secret|credential|password|authorization|refresh_token|access_token/i;
 const RAW_GOOGLE_PAYLOAD_KEYS = new Set([
@@ -186,7 +191,7 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
     booking_type: eventType,
     booking_status: clientFields.calendarOsStatus ?? "scheduled",
     title: row.title?.trim() || "(Untitled event)",
-    description: null,
+    description: row.description?.trim() || null,
     start_at: startAt,
     end_at: endAt,
     timezone: calendarTimezone,
@@ -265,6 +270,47 @@ export function calendarOsBookingRowExposesSecrets(row: FiBookingRow): boolean {
   return /access_token|refresh_token|provider_payload/i.test(serialized);
 }
 
+/** Minimal booking stubs so display-context loaders can resolve patient/lead labels without full mapping. */
+export function calendarOsOverlapRowsForDisplayContext(rows: FiCalendarEventOverlapRow[]): FiBookingRow[] {
+  return rows.map((row) => ({
+    id: row.id,
+    tenant_id: row.tenant_id,
+    lead_id: row.lead_id,
+    person_id: null,
+    patient_id: row.patient_id,
+    case_id: null,
+    clinic_id: null,
+    room_id: null,
+    room_required: false,
+    assigned_staff_id: null,
+    assigned_user_id: null,
+    booking_type: row.event_type?.trim() || "event",
+    booking_status: "scheduled",
+    title: row.title,
+    description: row.description,
+    start_at: row.start_time ?? "",
+    end_at: row.end_time ?? "",
+    timezone: null,
+    location: row.location,
+    metadata: {},
+    cancelled_at: null,
+    cancelled_by_user_id: null,
+    cancellation_reason: null,
+    created_by_user_id: null,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }));
+}
+
+function resolveStaffCalendarLinkIndex(
+  links: StaffCalendarLinkLookupRow[] | Map<string, StaffCalendarLinkLookupRow> | undefined,
+  tenantId: string
+): Map<string, StaffCalendarLinkLookupRow> | undefined {
+  if (!links) return undefined;
+  if (links instanceof Map) return links;
+  return buildStaffCalendarLinkIndex(links, tenantId);
+}
+
 export function mapFiCalendarEventsToOperationalCalendar(
   rows: FiCalendarEventOverlapRow[],
   opts: {
@@ -277,12 +323,13 @@ export function mapFiCalendarEventsToOperationalCalendar(
 ): { bookings: FiBookingRow[]; bookingDisplay: Record<string, OperationalCalendarBookingDisplay> } {
   const bookings: FiBookingRow[] = [];
   const bookingDisplay: Record<string, OperationalCalendarBookingDisplay> = {};
+  const linkIndex = resolveStaffCalendarLinkIndex(opts.staffCalendarLinks, opts.tenantId);
 
   for (const row of rows) {
     if (row.tenant_id.trim() !== opts.tenantId.trim()) continue;
 
-    const assignment = opts.staffCalendarLinks
-      ? resolveCalendarEventStaffAssignment(row, opts.staffCalendarLinks, opts.tenantId)
+    const assignment = linkIndex
+      ? resolveCalendarEventStaffAssignment(row, linkIndex, opts.tenantId)
       : { staffMemberId: null, linkId: null };
 
     const mapped = mapFiCalendarEventOverlapRowToBookingRow(row, opts.calendarTimezone, {

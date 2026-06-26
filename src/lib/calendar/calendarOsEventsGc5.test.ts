@@ -27,6 +27,7 @@ function sampleEventRow(overrides: Partial<FiCalendarEventOverlapRow> = {}): FiC
     provider: "google",
     calendar_id: "primary",
     title: "Consultation — Jane Doe",
+    description: null,
     location: "Room 2",
     start_time: "2026-06-26T10:00:00.000Z",
     end_time: "2026-06-26T10:30:00.000Z",
@@ -180,8 +181,8 @@ describe("CalendarOS GC-5 — calendar event mapping", () => {
     assert.equal(mapped.bookings.length, 0);
   });
 
-  it("overlap select projection excludes description and token fields", () => {
-    assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("description"), false);
+  it("overlap select projection includes description and excludes token fields", () => {
+    assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("description"), true);
     assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("access_token"), false);
     assert.equal(FI_CALENDAR_EVENTS_OVERLAP_SELECT.includes("refresh_token"), false);
   });

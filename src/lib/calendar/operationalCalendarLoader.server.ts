@@ -66,9 +66,10 @@ import {
   loadFiCalendarEventsForOverlap,
   mapFiCalendarEventsToOperationalCalendar,
 } from "@/src/lib/calendar/calendarOsEvents.server";
-import { mapFiCalendarEventOverlapRowToBookingRow } from "@/src/lib/calendar/calendarOsEventsCore";
-import { loadStaffCalendarLinkLookups } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
-import { resolveCalendarEventStaffAssignment } from "@/src/lib/googleCalendar/googleCalendarProviderLinksCore";
+import {
+  calendarOsOverlapRowsForDisplayContext,
+} from "@/src/lib/calendar/calendarOsEventsCore";
+import { loadActiveStaffCalendarLinkIndex } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 
 type ClinicalLite = {
   norwood_scale: string | null;
@@ -385,6 +386,13 @@ async function resolveBookingMutationGate(tenantId: string): Promise<{
   };
 }
 
+async function measureAsync<T>(fn: () => Promise<T>): Promise<[T, number]> {
+  const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const result = await fn();
+  const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
+  return [result, Math.round(t1 - t0)];
+}
+
 async function loadCalendarOperatorPrimaryClinicId(
   tenantId: string,
   staffDirectory: ClinicalStaffPickerOption[]
@@ -529,31 +537,42 @@ export async function loadOperationalCalendarGridData(
   let query = parsed;
   const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
+  const monthSummaryMode = operationalCalendarSkipsHeavyEnrichment(query.view);
 
   const tOverlapStart = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const [rawBookings, calendarOsEventRows, resources, services, staffCalendarLinks] = await Promise.all([
-    loadBookingsForCalendarOverlap({
-      tenantId: tid,
-      rangeStartIso,
-      rangeEndIso,
-      status: query.status,
-      bookingType: query.bookingType,
-      assignedUserId: query.assignedUserId,
-      assignedStaffId: query.staffId,
-      clinicId: query.clinicId,
-      roomId: query.roomId,
-      includeCancelled: query.includeCancelled,
-      limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
-    }),
-    loadFiCalendarEventsForOverlap({
-      tenantId: tid,
-      rangeStartIso,
-      rangeEndIso,
-      limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
-    }),
+  const [
+    [rawBookings, subMs_fiBookings],
+    [calendarOsEventRows, subMs_fiCalendarEvents],
+    resources,
+    services,
+    [staffCalendarLinkIndex, subMs_providerLinks],
+  ] = await Promise.all([
+    measureAsync(() =>
+      loadBookingsForCalendarOverlap({
+        tenantId: tid,
+        rangeStartIso,
+        rangeEndIso,
+        status: query.status,
+        bookingType: query.bookingType,
+        assignedUserId: query.assignedUserId,
+        assignedStaffId: query.staffId,
+        clinicId: query.clinicId,
+        roomId: query.roomId,
+        includeCancelled: query.includeCancelled,
+        limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
+      })
+    ),
+    measureAsync(() =>
+      loadFiCalendarEventsForOverlap({
+        tenantId: tid,
+        rangeStartIso,
+        rangeEndIso,
+        limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
+      })
+    ),
     loadTenantStaffAndResourcesCached(tid, query.resourceView, query.clinicId?.trim() || null),
     loadFiServicesForTenantCached(tid),
-    loadStaffCalendarLinkLookups(tid),
+    measureAsync(() => loadActiveStaffCalendarLinkIndex(tid)),
   ]);
   const tOverlapEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
@@ -581,20 +600,13 @@ export async function loadOperationalCalendarGridData(
     resources.staffDirectory
   );
 
-  const calendarOsBookingCandidates = calendarOsEventRows
-    .map((row) => {
-      const assignment = resolveCalendarEventStaffAssignment(row, staffCalendarLinks, tid);
-      return mapFiCalendarEventOverlapRowToBookingRow(row, query.calendarTimezone, {
-        staffMemberId: assignment.staffMemberId,
-      });
-    })
-    .filter((row): row is FiBookingRow => row != null);
-
-  const monthSummaryMode = operationalCalendarSkipsHeavyEnrichment(query.view);
+  const displayContextInput = monthSummaryMode
+    ? structuredBookings
+    : [...structuredBookings, ...calendarOsOverlapRowsForDisplayContext(calendarOsEventRows)];
 
   const tEnrichStart = typeof performance !== "undefined" ? performance.now() : Date.now();
   const [displayMaps, clinicalMap, assignmentMap, clinicalStaffingByBooking] = await Promise.all([
-    loadBookingDisplayContextMaps(tid, [...structuredBookings, ...calendarOsBookingCandidates]),
+    loadBookingDisplayContextMaps(tid, displayContextInput),
     monthSummaryMode
       ? Promise.resolve(new Map<string, ClinicalLite>())
       : loadClinicalDetailsMap(
@@ -613,13 +625,18 @@ export async function loadOperationalCalendarGridData(
   ]);
   const tEnrichEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
+  const tMapStart = typeof performance !== "undefined" ? performance.now() : Date.now();
   const calendarOsMapped = mapFiCalendarEventsToOperationalCalendar(calendarOsEventRows, {
     tenantId: tid,
     calendarTimezone: query.calendarTimezone,
-    displayMaps,
+    displayMaps: monthSummaryMode
+      ? { patients: new Map(), leads: new Map(), persons: new Map() }
+      : displayMaps,
     services,
-    staffCalendarLinks,
+    staffCalendarLinks: staffCalendarLinkIndex,
   });
+  const tMapEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
+
   const structuredCalendarOs = applyStructuredFilters(
     calendarOsMapped.bookings,
     query,
@@ -704,11 +721,13 @@ export async function loadOperationalCalendarGridData(
   const listTruncated = hitOverlapDbCap;
   const bookings = searched.slice(0, CALENDAR_VIEW_BOOKINGS_LIMIT);
 
+  const tBucketStart = typeof performance !== "undefined" ? performance.now() : Date.now();
   const bucketsMap = bucketBookingsIntoCalendar(bookings, lanes);
   const buckets: Record<string, FiBookingRow[]> = {};
   for (const lane of lanes) {
     buckets[lane.dayKey] = bucketsMap.get(lane.dayKey) ?? [];
   }
+  const tBucketEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
   const rangeTitle = formatCalendarRangeTitle(query.view, lanes, query.calendarTimezone);
 
@@ -727,13 +746,19 @@ export async function loadOperationalCalendarGridData(
     phase: "loadOperationalCalendarGridData",
     durationMs: Math.round(t1 - t0),
     subMs_overlapBundle: Math.round(tOverlapEnd - tOverlapStart),
+    subMs_fiBookings,
+    subMs_fiCalendarEvents,
+    subMs_providerLinks,
     subMs_displayEnrichment: Math.round(tEnrichEnd - tEnrichStart),
+    subMs_calendarOsMapping: Math.round(tMapEnd - tMapStart),
+    subMs_mergeBucketGrouping: Math.round(tBucketEnd - tBucketStart),
     view: query.view,
     dateAnchor: query.dateAnchor,
     rangeStartIso,
     rangeEndIso,
     rawBookingCount: rawBookings.length,
     rawCalendarOsEventCount: calendarOsEventRows.length,
+    providerLinkCount: staffCalendarLinkIndex.size,
     filteredBookingCount: structured.length,
     returnedBookingCount: bookings.length,
     monthSummaryMode,

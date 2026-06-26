@@ -3,7 +3,9 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { logOperationalCalendarServerTiming } from "@/src/lib/calendar/calendarPerfDev";
 import {
+  CALENDAR_OS_EVENTS_OVERLAP_CAP,
   FI_CALENDAR_EVENTS_OVERLAP_SELECT,
   type FiCalendarEventOverlapRow,
 } from "@/src/lib/calendar/calendarOsEventsCore";
@@ -24,7 +26,7 @@ export async function loadFiCalendarEventsForOverlap(
   const rangeEnd = params.rangeEndIso.trim();
   if (!tid || !rangeStart || !rangeEnd) return [];
 
-  const limit = Math.min(Math.max(params.limit ?? 400, 1), 800);
+  const limit = Math.min(Math.max(params.limit ?? 400, 1), CALENDAR_OS_EVENTS_OVERLAP_CAP);
 
   const { data, error } = await (supabaseClientForTests ?? supabaseAdmin())
     .from("fi_calendar_events")
@@ -37,10 +39,24 @@ export async function loadFiCalendarEventsForOverlap(
 
   if (error) throw new Error(error.message);
 
-  return ((data ?? []) as FiCalendarEventOverlapRow[]).filter((row) => {
+  const rows = ((data ?? []) as FiCalendarEventOverlapRow[]).filter((row) => {
     const meta = row.metadata ?? {};
     return meta.deleted_from_provider !== true && meta.deleted_locally !== true;
   });
+
+  if (rows.length >= CALENDAR_OS_EVENTS_OVERLAP_CAP) {
+    logOperationalCalendarServerTiming({
+      phase: "loadFiCalendarEventsForOverlap.capWarning",
+      tenantId: tid,
+      rangeStartIso: rangeStart,
+      rangeEndIso: rangeEnd,
+      returnedCount: rows.length,
+      cap: CALENDAR_OS_EVENTS_OVERLAP_CAP,
+      message: "CalendarOS overlap query hit safety cap — month view may be truncated",
+    });
+  }
+
+  return rows;
 }
 
-export { mapFiCalendarEventsToOperationalCalendar } from "@/src/lib/calendar/calendarOsEventsCore";
+export { mapFiCalendarEventsToOperationalCalendar, CALENDAR_OS_EVENTS_OVERLAP_CAP } from "@/src/lib/calendar/calendarOsEventsCore";
