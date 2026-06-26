@@ -1,0 +1,40 @@
+---
+description: Supabase migration naming and version-prefix rules
+globs: supabase/migrations/**
+alwaysApply: false
+---
+
+# Supabase migration naming policy
+
+When adding or reviewing files in `supabase/migrations/`:
+
+## Format
+
+`YYYYMMDDMMMM_module_phase_description.sql`
+
+- 12-digit version prefix (`YYYYMMDD` + module block); **never reuse** a prefix.
+- Slug: lowercase underscores.
+
+## Reserved module blocks (digits 9–12)
+
+| Block | Module |
+|-------|--------|
+| `10xx` | platform / core |
+| `20xx` | calendar |
+| `30xx` | leadflow |
+| `40xx` | analytics |
+| `50xx` | workforce |
+| `60xx` | surgery |
+| `70xx` | audit |
+| `80xx` | academy |
+| `90xx` | onboarding / integrations |
+
+## Before creating a migration
+
+1. `ls supabase/migrations | sort`
+2. Check remote state (`npx supabase migration list --linked` or MCP)
+3. Pick the next unused prefix in the correct module block
+4. **Never rename** migrations already applied to remote
+5. Run `npm run check:migrations`
+
+Canonical policy: `docs/database/migration-policy.md` · Runbook: `docs/runbooks/supabase-migration-naming-policy.md`

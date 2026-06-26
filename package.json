@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
     "check:env": "node scripts/run-with-system-ca.mjs tsx scripts/check-fi-env.ts",
+    "check:migrations": "tsx scripts/check-migration-versions.ts",
     "check:env:production-rules": "tsx --test src/lib/env/fiEnv.server.test.ts",
     "smoke:prod": "tsx scripts/fi-production-smoke-test.ts",
     "smoke:reception-os": "tsx scripts/reception-os-smoke-test.ts",

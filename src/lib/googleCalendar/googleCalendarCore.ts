@@ -23,17 +23,24 @@ export const GOOGLE_CALENDAR_SYNC_PAGE_SIZE = 250;
 export const GOOGLE_CALENDAR_SYNC_MAX_PAGES = 20;
 
 export function buildGoogleCalendarListQueryParams(opts: {
-  timeMin: string;
-  timeMax: string;
+  timeMin?: string;
+  timeMax?: string;
   pageToken?: string;
+  syncToken?: string;
 }): URLSearchParams {
   const params = new URLSearchParams({
-    singleEvents: "true",
-    orderBy: "startTime",
-    timeMin: opts.timeMin,
-    timeMax: opts.timeMax,
     maxResults: String(GOOGLE_CALENDAR_SYNC_PAGE_SIZE),
   });
+
+  if (opts.syncToken?.trim()) {
+    params.set("syncToken", opts.syncToken.trim());
+  } else {
+    params.set("singleEvents", "true");
+    params.set("orderBy", "startTime");
+    if (opts.timeMin) params.set("timeMin", opts.timeMin);
+    if (opts.timeMax) params.set("timeMax", opts.timeMax);
+  }
+
   if (opts.pageToken?.trim()) {
     params.set("pageToken", opts.pageToken.trim());
   }

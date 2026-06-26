@@ -18,6 +18,7 @@ import {
   syncGoogleCalendarForAllTenants,
   syncGoogleCalendarForTenant,
 } from "./googleCalendarSync.server";
+import { createGc8MonitoringMockTables, withGc8IntegrationDefaults } from "./googleCalendarGc8MockTables";
 
 const TENANT_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const TENANT_INACTIVE = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
@@ -30,12 +31,17 @@ type IntegrationRow = Record<string, unknown>;
 type EventRow = Record<string, unknown>;
 
 function createGc3MockSupabase(seed?: IntegrationRow[]) {
-  const integrations: IntegrationRow[] = [...(seed ?? [])];
+  const integrations: IntegrationRow[] = [...(seed ?? [])].map((row) =>
+    withGc8IntegrationDefaults(row) as IntegrationRow
+  );
   const events: EventRow[] = [];
   const inboundCalendars: Record<string, unknown>[] = [];
+  const gc8 = createGc8MonitoringMockTables();
 
   const client = {
     from(table: string) {
+      const gc8Handler = gc8.tableHandler(table);
+      if (gc8Handler) return gc8Handler;
       if (table === "fi_calendar_inbound_sync_calendars") {
         const filterInbound = (filters: Record<string, string | boolean>) =>
           inboundCalendars.filter((r) =>
@@ -94,7 +100,7 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
               (r) => r.tenant_id === tenantId && r.calendar_id === calendarId
             );
             const id = idx >= 0 ? integrations[idx].id : randomUUID();
-            const full = {
+            const full = withGc8IntegrationDefaults({
               last_sync_status: "never_synced",
               sync_failure_count: 0,
               ...integrations[idx],
@@ -104,7 +110,7 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
               status: row.status ?? integrations[idx]?.status ?? "active",
               created_at: integrations[idx]?.created_at ?? new Date().toISOString(),
               updated_at: row.updated_at ?? new Date().toISOString(),
-            };
+            }) as IntegrationRow;
             if (idx >= 0) integrations[idx] = full;
             else integrations.push(full);
             return {
@@ -114,17 +120,25 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
             };
           },
           select(_cols?: string) {
-            const applyFilters = (rows: IntegrationRow[], filters: Record<string, string | { neq: string }>) =>
+            const applyFilters = (
+              rows: IntegrationRow[],
+              filters: Record<string, string | boolean | { neq: string } | { is: null }>
+            ) =>
               rows.filter((r) =>
                 Object.entries(filters).every(([col, val]) => {
                   if (typeof val === "object" && val !== null && "neq" in val) {
                     return r[col] !== val.neq;
                   }
+                  if (typeof val === "object" && val !== null && "is" in val) {
+                    return r[col] == null;
+                  }
                   return r[col] === val;
                 })
               );
 
-            const buildChain = (filters: Record<string, string | { neq: string }> = {}) => {
+            const buildChain = (
+              filters: Record<string, string | boolean | { neq: string } | { is: null }> = {}
+            ) => {
               const terminal = {
                 limit(n: number) {
                   return {
@@ -151,8 +165,12 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
               };
 
               const chain = {
-                eq(col: string, val: string) {
+                eq(col: string, val: string | boolean) {
                   filters[col] = val;
+                  return buildChain(filters);
+                },
+                is(col: string, val: null) {
+                  filters[col] = { is: val };
                   return buildChain(filters);
                 },
                 neq(col: string, val: string) {
@@ -312,6 +330,7 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
     integrations,
     events,
     inboundCalendars,
+    gc8,
   };
 }
 
@@ -379,7 +398,7 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
   it("rejects missing secret", async () => {
     const res = await handleGoogleCalendarSyncCronGet(new NextRequest(ROUTE, { method: "GET" }), {
       getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-      syncForAllTenants: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [] }),
+      runScheduledSync: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
     });
     assert.equal(res.status, 401);
     const json = (await res.json()) as { ok: boolean; error?: string };
@@ -395,7 +414,7 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-        syncForAllTenants: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [] }),
+        runScheduledSync: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
       }
     );
     assert.equal(res.status, 401);
@@ -409,7 +428,7 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-        syncForAllTenants: async () => ({ success: true, synced: 1, failed: 0, skipped: 0, tenants: [] }),
+        runScheduledSync: async () => ({ success: true, synced: 1, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
       }
     );
     assert.equal(res.status, 200);
@@ -425,7 +444,7 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ FI_GOOGLE_CALENDAR_CRON_SECRET: GC_SECRET }),
-        syncForAllTenants: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [] }),
+        runScheduledSync: async () => ({ success: true, synced: 0, failed: 0, skipped: 0, tenants: [], source: "scheduled" as const }),
       }
     );
     assert.equal(res.status, 200);
@@ -440,14 +459,22 @@ describe("CalendarOS GC-3 — sync cron auth", () => {
       }),
       {
         getEnv: envMap({ CRON_SECRET: CRON_SECRET }),
-        syncForTenant: async (input) => {
+        runScheduledSync: async (input) => {
           capturedTenant = input.tenantId;
           return {
-            tenantId: input.tenantId,
-            integrationId: "int-1",
-            calendarId: "primary",
-            outcome: "synced",
-            result: { discovered: 0, created: 0, updated: 0, skipped: 0, deleted: 0 },
+            success: true,
+            synced: 1,
+            failed: 0,
+            skipped: 0,
+            source: "scheduled" as const,
+            tenants: [
+              {
+                tenantId: input.tenantId!,
+                integrationId: "int-1",
+                outcome: "synced" as const,
+                result: { discovered: 0, created: 0, updated: 0, skipped: 0, deleted: 0 },
+              },
+            ],
           };
         },
       }

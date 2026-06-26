@@ -7,6 +7,10 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { syncGoogleCalendarEvents } from "./googleCalendarService.server";
+import {
+  beginGoogleCalendarSyncRun,
+  updateGoogleCalendarSyncHealth,
+} from "./googleCalendarSyncHealth.server";
 import type {
   FiCalendarSyncStatus,
   FiCalendarValidationStatus,
@@ -14,6 +18,7 @@ import type {
 } from "./googleCalendarTypes";
 import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
 import { logStructured } from "@/src/lib/server/structuredLog";
+import { runScheduledGoogleCalendarSync } from "./googleCalendarSyncScheduler.server";
 
 export const GOOGLE_CALENDAR_SYNC_MAX_TENANTS = 50;
 
@@ -38,6 +43,9 @@ type IntegrationSyncRow = {
   last_validated_at: string | null;
   last_validation_status: string | null;
   last_validation_error: string | null;
+  sync_enabled?: boolean;
+  scheduled_sync_enabled?: boolean;
+  scheduled_sync_paused_at?: string | null;
 };
 
 export type GoogleCalendarTenantSyncSummary = {
@@ -96,15 +104,20 @@ function summarizeError(message: string | null | undefined): string | null {
 
 async function loadActiveIntegrations(
   supabase: SupabaseClient,
-  tenantId?: string
+  tenantId?: string,
+  opts?: { requireSyncEnabled?: boolean }
 ): Promise<IntegrationSyncRow[]> {
   let query = supabase
     .from("fi_calendar_integrations")
     .select(
-      "id, tenant_id, calendar_id, status, google_account_email, token_expires_at, access_token_encrypted, refresh_token_encrypted, last_synced_at, last_sync_status, last_sync_error, sync_failure_count, last_validated_at, last_validation_status, last_validation_error"
+      "id, tenant_id, calendar_id, status, google_account_email, token_expires_at, access_token_encrypted, refresh_token_encrypted, last_synced_at, last_sync_status, last_sync_error, sync_failure_count, last_validated_at, last_validation_status, last_validation_error, sync_enabled, scheduled_sync_enabled, scheduled_sync_paused_at"
     )
     .eq("status", "active")
     .order("last_synced_at", { ascending: true, nullsFirst: true });
+
+  if (opts?.requireSyncEnabled) {
+    query = query.eq("sync_enabled", true);
+  }
 
   if (tenantId) {
     query = query.eq("tenant_id", tenantId.trim());
@@ -199,15 +212,18 @@ async function loadLatestIntegrationRow(
   return (data as IntegrationSyncRow | null) ?? null;
 }
 
+export type GoogleCalendarSyncSource = "scheduled" | "manual" | "cron" | "webhook";
+
 /** Sync Google Calendar events for a single tenant's active integration. */
 export async function syncGoogleCalendarForTenant(
-  input: { tenantId: string; limit?: number },
+  input: { tenantId: string; limit?: number; source?: GoogleCalendarSyncSource },
   opts: ServerOpts = {}
 ): Promise<GoogleCalendarTenantSyncSummary> {
   const tenantId = input.tenantId.trim();
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const source = input.source ?? "manual";
 
-  const integrations = await loadActiveIntegrations(supabase, tenantId);
+  const integrations = await loadActiveIntegrations(supabase, tenantId, { requireSyncEnabled: true });
   const integration = integrations[0];
 
   if (!integration) {
@@ -219,6 +235,44 @@ export async function syncGoogleCalendarForTenant(
       error: "No active Google Calendar integration.",
     };
   }
+
+  if (integration.sync_enabled === false) {
+    return {
+      tenantId,
+      integrationId: integration.id,
+      calendarId: integration.calendar_id,
+      outcome: "skipped",
+      error: "Google Calendar sync is disabled for this tenant.",
+    };
+  }
+
+  if (
+    source === "scheduled" &&
+    (integration.scheduled_sync_enabled === false || integration.scheduled_sync_paused_at)
+  ) {
+    return {
+      tenantId,
+      integrationId: integration.id,
+      calendarId: integration.calendar_id,
+      outcome: "skipped",
+      error: "Scheduled sync is paused or disabled.",
+    };
+  }
+
+  if (!integration.access_token_encrypted?.trim() && !integration.refresh_token_encrypted?.trim()) {
+    return {
+      tenantId,
+      integrationId: integration.id,
+      calendarId: integration.calendar_id,
+      outcome: "skipped",
+      error: "No valid OAuth tokens — reconnect Google Calendar.",
+    };
+  }
+
+  const { runId, startedAt } = await beginGoogleCalendarSyncRun(
+    { tenantId, integrationId: integration.id, source },
+    opts
+  );
 
   const syncResult = await syncGoogleCalendarEvents(tenantId, {
     supabaseClientForTests: opts.supabaseClientForTests,
@@ -236,6 +290,17 @@ export async function syncGoogleCalendarForTenant(
       integration.sync_failure_count ?? 0,
       syncResult.error
     );
+    await updateGoogleCalendarSyncHealth(
+      {
+        tenantId,
+        integrationId: integration.id,
+        runId,
+        startedAt,
+        ok: false,
+        error: syncResult.error,
+      },
+      opts
+    );
     return {
       tenantId,
       integrationId: integration.id,
@@ -248,6 +313,18 @@ export async function syncGoogleCalendarForTenant(
   await recordSyncSuccess(supabase, integration.id, tenantId);
 
   const syncResultData = syncResult.data.result;
+  await updateGoogleCalendarSyncHealth(
+    {
+      tenantId,
+      integrationId: integration.id,
+      runId,
+      startedAt,
+      ok: true,
+      result: syncResultData,
+    },
+    opts
+  );
+
   logStructured("info", "google_calendar_sync_tenant_complete", {
     tenantId,
     integrationId: integration.id,
@@ -355,6 +432,7 @@ export type GoogleCalendarSyncCronOptions = {
   getEnv?: (key: string) => string | undefined;
   syncForTenant?: typeof syncGoogleCalendarForTenant;
   syncForAllTenants?: typeof syncGoogleCalendarForAllTenants;
+  runScheduledSync?: typeof runScheduledGoogleCalendarSync;
 };
 
 function resolveGetEnv(opts?: GoogleCalendarSyncCronOptions): (key: string) => string | undefined {
@@ -416,30 +494,43 @@ export async function handleGoogleCalendarSyncCronGet(
   const parsed = parseCronQueryParams(req);
   if (parsed instanceof NextResponse) return parsed;
 
-  const syncForTenant = opts?.syncForTenant ?? syncGoogleCalendarForTenant;
-  const syncForAllTenants = opts?.syncForAllTenants ?? syncGoogleCalendarForAllTenants;
+  const runScheduledSync = opts?.runScheduledSync ?? runScheduledGoogleCalendarSync;
 
   try {
     if (parsed.tenantId) {
-      const summary = await syncForTenant({ tenantId: parsed.tenantId, limit: parsed.limit });
+      const scheduled = await runScheduledSync({ tenantId: parsed.tenantId, limit: parsed.limit });
       const body: GoogleCalendarSyncCronResponse = {
-        success: summary.outcome !== "failed",
-        synced: summary.outcome === "synced" ? 1 : 0,
-        failed: summary.outcome === "failed" ? 1 : 0,
-        skipped: summary.outcome === "skipped" ? 1 : 0,
-        tenants: [summary],
+        success: scheduled.success,
+        synced: scheduled.synced,
+        failed: scheduled.failed,
+        skipped: scheduled.skipped,
+        tenants: scheduled.tenants.map((row) => ({
+          tenantId: row.tenantId,
+          integrationId: row.integrationId,
+          calendarId: "",
+          outcome: row.outcome,
+          error: row.error ?? row.skipReason,
+          result: row.result,
+        })),
         source: "vercel_cron",
       };
       return NextResponse.json(body);
     }
 
-    const result = await syncForAllTenants({ limitPerTenant: parsed.limit });
+    const scheduled = await runScheduledSync({ limit: parsed.limit });
     const body: GoogleCalendarSyncCronResponse = {
-      success: result.success,
-      synced: result.synced,
-      failed: result.failed,
-      skipped: result.skipped,
-      tenants: result.tenants,
+      success: scheduled.success,
+      synced: scheduled.synced,
+      failed: scheduled.failed,
+      skipped: scheduled.skipped,
+      tenants: scheduled.tenants.map((row) => ({
+        tenantId: row.tenantId,
+        integrationId: row.integrationId,
+        calendarId: "",
+        outcome: row.outcome,
+        error: row.error ?? row.skipReason,
+        result: row.result,
+      })),
       source: "vercel_cron",
     };
     return NextResponse.json(body);

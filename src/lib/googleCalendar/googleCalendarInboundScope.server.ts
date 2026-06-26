@@ -264,7 +264,7 @@ export async function runGoogleCalendarInboundSyncNow(
   | { ok: false; outcome: "failed" | "skipped"; error: string; summary?: GoogleCalendarInboundSyncNowSummary }
 > {
   const tid = tenantId.trim();
-  const syncSummary = await syncGoogleCalendarForTenant({ tenantId: tid }, opts);
+  const syncSummary = await syncGoogleCalendarForTenant({ tenantId: tid, source: "manual" }, opts);
 
   logStructured("info", "google_calendar_inbound_sync_admin_triggered", {
     tenantId: tid,

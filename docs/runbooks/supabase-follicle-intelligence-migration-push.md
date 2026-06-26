@@ -2,6 +2,8 @@
 
 This runbook compares **hosted Supabase** project **Follicle Intelligence** (`project_ref` / `id`: `iqqvzgxoimxchhcnbzxl`, region `ap-south-1`) with migration files in `supabase/migrations/` as of the last MCP `list_migrations` snapshot taken in-repo.
 
+**Naming policy for new migrations:** [supabase-migration-naming-policy.md](./supabase-migration-naming-policy.md) — module blocks (`20xx` calendar, `30xx` leadflow, …), no reused version prefixes, never rename applied remote migrations.
+
 ## Summary
 
 | Item | Value |

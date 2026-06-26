@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const MIGRATION_FILE_RE = /^(\d{14})_(.+)\.sql$/;
+const MIGRATION_FILE_RE = /^(\d{12,14})_(.+)\.sql$/;
 
 /**
  * @returns {{ version: string, name: string, filename: string, sql: string }[]}
@@ -17,7 +17,7 @@ export function listLocalMigrationFiles(migrationsDir) {
   for (const filename of files) {
     const match = filename.match(MIGRATION_FILE_RE);
     if (!match) {
-      throw new Error(`Invalid migration filename (expected {14-digit-timestamp}_{name}.sql): ${filename}`);
+      throw new Error(`Invalid migration filename (expected {12-14-digit-version}_{name}.sql): ${filename}`);
     }
     const [, version, name] = match;
     versionCounts.set(version, (versionCounts.get(version) ?? 0) + 1);

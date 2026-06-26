@@ -27,6 +27,10 @@ import {
   parseGoogleCalendarListResponse,
   shouldUpdateFiEventFromGoogle,
 } from "./googleCalendarCore";
+import {
+  fetchGoogleCalendarWithRetry,
+  formatGoogleCalendarApiError,
+} from "./googleCalendarSyncRetryCore";
 import { resolveGoogleCalendarAccessToken } from "./googleCalendarAuth.server";
 import {
   getGoogleInboundCalendarScopesForIntegration,
@@ -147,7 +151,7 @@ async function callGoogleCalendarApi(
   const params = query ? `?${new URLSearchParams(query).toString()}` : "";
   const url = `${GOOGLE_CALENDAR_API_BASE}${path}${params}`;
 
-  const res = await fetchFn(url, {
+  const attempt = await fetchGoogleCalendarWithRetry(fetchFn, url, {
     method,
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -158,12 +162,11 @@ async function callGoogleCalendarApi(
     cache: "no-store",
   });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
+  if (!attempt.ok) {
     return {
       ok: false,
-      error: `Google Calendar API error (${res.status}): ${text.slice(0, 300)}`,
-      status: res.status,
+      error: formatGoogleCalendarApiError(attempt.status, attempt.text),
+      status: attempt.status,
     };
   }
 
@@ -171,7 +174,11 @@ async function callGoogleCalendarApi(
     return { ok: true, json: null };
   }
 
-  return { ok: true, json: await res.json() };
+  try {
+    return { ok: true, json: JSON.parse(attempt.text) };
+  } catch {
+    return { ok: true, json: null };
+  }
 }
 
 async function fetchAllGoogleCalendarEventsForSync(
@@ -197,7 +204,7 @@ async function fetchAllGoogleCalendarEventsForSync(
   while (pages < GOOGLE_CALENDAR_SYNC_MAX_PAGES) {
     const params = buildGoogleCalendarListQueryParams({ timeMin, timeMax, pageToken });
     const listUrl = `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodedCalendar}/events?${params.toString()}`;
-    const listRes = await fetchFn(listUrl, {
+    const listAttempt = await fetchGoogleCalendarWithRetry(fetchFn, listUrl, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -206,15 +213,21 @@ async function fetchAllGoogleCalendarEventsForSync(
       cache: "no-store",
     });
 
-    if (!listRes.ok) {
-      const body = await listRes.text().catch(() => "");
+    if (!listAttempt.ok) {
       return {
         ok: false,
-        error: `Google Calendar API error (${listRes.status}): ${body.slice(0, 300)}`,
+        error: formatGoogleCalendarApiError(listAttempt.status, listAttempt.text),
       };
     }
 
-    const { items, nextPageToken } = parseGoogleCalendarListResponse(await listRes.json());
+    let listJson: unknown = {};
+    try {
+      listJson = listAttempt.text ? JSON.parse(listAttempt.text) : {};
+    } catch {
+      listJson = {};
+    }
+
+    const { items, nextPageToken } = parseGoogleCalendarListResponse(listJson);
     logStructured("info", "google_calendar_sync_list_page", {
       calendarId,
       page: pages + 1,

@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { GoogleCalendarInboundScopeCard } from "@/src/components/fi-admin/settings/GoogleCalendarInboundScopeCard";
 import { GoogleCalendarIntegrationCard } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationCard";
+import { GoogleCalendarMonitoringCard } from "@/src/components/fi-admin/settings/GoogleCalendarMonitoringCard";
 import { GoogleCalendarSyncReviewCard } from "@/src/components/fi-admin/settings/GoogleCalendarSyncReviewCard";
 import { ProviderCalendarLinksCard } from "@/src/components/fi-admin/settings/ProviderCalendarLinksCard";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
@@ -15,6 +16,7 @@ import {
   GoogleCalendarIntegrationAccessError,
 } from "@/src/lib/googleCalendar/googleCalendarIntegrationAccess.server";
 import { loadGoogleCalendarInboundScopePage } from "@/src/lib/googleCalendar/googleCalendarInboundScope.server";
+import { loadGoogleCalendarMonitoringPage } from "@/src/lib/googleCalendar/googleCalendarMonitoring.server";
 import { loadGoogleCalendarSyncReviewPage } from "@/src/lib/googleCalendar/googleCalendarSyncReview.server";
 import { loadProviderCalendarLinksPage } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
@@ -103,6 +105,10 @@ export default async function TenantIntegrationsSettingsPage({
     integrationId: inboundScopePage.integrationId,
   });
 
+  const monitoringPage = await loadGoogleCalendarMonitoringPage(tenantId, {
+    canManage: canManageCalendarLinks,
+  });
+
   return (
     <div className="space-y-4">
       <div>
@@ -128,6 +134,8 @@ export default async function TenantIntegrationsSettingsPage({
       />
 
       <GoogleCalendarInboundScopeCard tenantId={tenantId} pageModel={inboundScopePage} />
+
+      <GoogleCalendarMonitoringCard tenantId={tenantId} pageModel={monitoringPage} />
 
       <GoogleCalendarSyncReviewCard tenantId={tenantId} pageModel={syncReviewPage} />
 
