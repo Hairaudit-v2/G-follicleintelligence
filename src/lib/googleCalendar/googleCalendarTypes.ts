@@ -119,3 +119,45 @@ export type GoogleCalendarSyncResult = {
   skipped: number;
   deleted: number;
 };
+
+/** CalendarOS GC-4 — native FI appointment creation input. */
+export type FiAppointmentInput = {
+  tenantId: string;
+  title: string;
+  description?: string | null;
+  location?: string | null;
+  startTime: string;
+  endTime: string;
+  eventType?: string | null;
+  patientId?: string | null;
+  leadId?: string | null;
+  addGoogleMeet?: boolean;
+  attendees?: string[];
+  metadata?: Record<string, unknown>;
+};
+
+export type NormalizedFiAppointmentInput = {
+  tenantId: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  startTime: string;
+  endTime: string;
+  eventType: string;
+  patientId: string | null;
+  leadId: string | null;
+  addGoogleMeet: boolean;
+  attendees: string[];
+  metadata: Record<string, unknown>;
+};
+
+/** Sanitized appointment payload returned by GC-4 API (no tokens or raw Google payloads). */
+export type SanitizedFiAppointment = {
+  id: string;
+  title: string;
+  start_time: string;
+  end_time: string;
+  google_meet_url: string | null;
+  external_event_id: string | null;
+  calendar_id: string;
+};
