@@ -71,6 +71,12 @@ export async function loadConsultationForTenant(
 
   if (error) throw new Error(error.message);
   if (!data || typeof data !== "object") return null;
+  // SA-2 field-level redaction (follow-up): redact clinical_notes / diagnosis / quote / consent /
+  // private_practitioner_notes for the current viewer via
+  // `redactConsultationForStaffAccess(tenantId, row)` from
+  // `@/src/lib/staffAccess/staffFieldAccess.server` before rendering the consultation detail.
+  // Apply at the consultation detail page/section boundary so masked/summary placeholders don't
+  // reach typed consumers. Field access is clamped to ConsultationOS module access by the engine.
   return mapFiConsultationRow(data as Record<string, unknown>);
 }
 

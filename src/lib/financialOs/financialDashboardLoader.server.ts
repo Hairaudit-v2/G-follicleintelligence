@@ -59,6 +59,12 @@ function sumBalances(rows: FiInvoiceRow[]): { cents: number; currency: string } 
 export async function loadFinancialOsDashboardMetrics(tenantId: string): Promise<FinancialOsDashboardMetrics> {
   const tid = tenantId.trim();
   const supabase = supabaseAdmin();
+  // SA-2 field-level redaction (follow-up): gate financial.revenue / financial.margin /
+  // financial.invoice / financial.payment_status before exposing this payload using
+  // `canViewStaffField` / `redactFinancialSummaryForStaffAccess` from
+  // `@/src/lib/staffAccess/staffFieldAccess.server`. e.g. a viewer without `financial.margin`
+  // read should see a summary/hidden value. Apply at the dashboard render boundary so numeric
+  // consumers aren't handed placeholders. Field access is clamped to FinancialOS module access.
 
   const { data: invRaw, error: ie } = await supabase
     .from("fi_invoices")

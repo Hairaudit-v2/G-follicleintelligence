@@ -245,6 +245,8 @@ const vieCaptureWarningSchema = z.object({
     "missing_graft_tray_close",
     "missing_immediate_post_op",
     "pending_low_quality",
+    "donor_alignment_inconsistent",
+    "immediate_post_op_alignment_inconsistent",
   ]),
   label: z.string(),
   severity: z.enum(["info", "warning", "critical"]),
@@ -256,6 +258,38 @@ const vieSurgeryComparisonStatusSchema = z.object({
   graft_tray_pair: z.enum(["ready", "partial", "missing"]),
   immediate_post_op_pair: z.enum(["ready", "partial", "missing"]),
 });
+
+const vieOutcomeStatusSchema = z.enum([
+  "insufficient_evidence",
+  "early_signal",
+  "monitoring",
+  "favourable",
+  "concern",
+  "audit_ready",
+]);
+
+const vieOutcomeReadinessSchema = z
+  .object({
+    overall_score: z.number().int().min(0).max(100),
+    confidence_band: z.enum(["high", "medium", "low"]),
+    audit_ready: z.boolean(),
+    clinical_review_recommended: z.boolean(),
+    surgical_healing: z.object({
+      score: z.number().int().min(0).max(100),
+      status: vieOutcomeStatusSchema,
+      evidence_count: z.number().int().min(0),
+    }),
+    donor_recovery: z.object({
+      score: z.number().int().min(0).max(100),
+      status: vieOutcomeStatusSchema,
+      evidence_count: z.number().int().min(0),
+    }),
+    documentation_readiness: z.object({
+      score: z.number().int().min(0).max(100),
+      status: vieOutcomeStatusSchema,
+    }),
+  })
+  .nullable();
 
 const vieCaptureSummarySchema = z.object({
   surgeryId: z.string().uuid(),
@@ -275,6 +309,7 @@ const vieCaptureSummarySchema = z.object({
   nextRecommendedSlot: z.string().nullable(),
   nextRecommendedSlotLabel: z.string().nullable(),
   comparisonStatus: vieSurgeryComparisonStatusSchema,
+  outcomeReadiness: vieOutcomeReadinessSchema,
 });
 
 const intelligenceSchema = z.object({

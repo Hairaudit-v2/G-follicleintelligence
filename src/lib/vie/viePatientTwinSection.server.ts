@@ -9,6 +9,8 @@ import type { VieInstantIntelligenceResult, ViePatientImagingCompleteness } from
 import { VIE_ENGINE_VERSION } from "./vieProtocolTypes";
 import { VIE_FUTURE_ARCHITECTURE } from "./vieFutureArchitecture";
 import { loadPatientTwinAlignmentSummary } from "./vieSameAngleAlignment.server";
+import { computeVieOutcomeSummaryForPatient } from "./vieOutcomeIntelligence.server";
+import type { VieOutcomeSummary } from "./vieOutcomeTypes";
 
 export type PatientTwinVieSection = {
   engine_version: typeof VIE_ENGINE_VERSION;
@@ -16,6 +18,7 @@ export type PatientTwinVieSection = {
   latest_intelligence: VieLatestIntelligenceRow[];
   comparison_readiness: VieComparisonReadinessSummary;
   alignment_summary: ViePatientTwinAlignmentSummary;
+  outcome_summary: VieOutcomeSummary;
   future_architecture: typeof VIE_FUTURE_ARCHITECTURE;
 };
 
@@ -82,6 +85,7 @@ export async function loadPatientTwinVieSection(
 
   const comparison_readiness = await loadVieComparisonReadinessForPatient(tenantId, patientId, null, supabase);
   const alignment_summary = await loadPatientTwinAlignmentSummary(tenantId, patientId, supabase);
+  const outcome_summary = await computeVieOutcomeSummaryForPatient(tenantId, patientId, { client: supabase });
 
   return {
     engine_version: VIE_ENGINE_VERSION,
@@ -89,6 +93,7 @@ export async function loadPatientTwinVieSection(
     latest_intelligence,
     comparison_readiness,
     alignment_summary,
+    outcome_summary,
     future_architecture: VIE_FUTURE_ARCHITECTURE,
   };
 }

@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
+import { FieldAccessSection } from "@/src/components/fi-admin/settings/FieldAccessSection";
 import { StaffAccessSection } from "@/src/components/fi-admin/settings/StaffAccessSection";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import {
@@ -15,6 +16,10 @@ import {
   loadTenantStaffForAccessAdmin,
 } from "@/src/lib/staffAccess/staffAccess.server";
 import { loadStaffAccessAuditHistory } from "@/src/lib/staffAccess/staffAccessAudit.server";
+import {
+  loadFieldAccessAdminState,
+  loadStaffFieldAccessAuditHistory,
+} from "@/src/lib/staffAccess/staffFieldAccess.server";
 import { computeEffectiveAccess } from "@/src/lib/staffAccess/staffAccessCore";
 import {
   normalizeStaffRoleKey,
@@ -83,14 +88,20 @@ export default async function StaffAccessSettingsPage({
   let roleRecord: Record<string, { level: string; scope: string }> | null = null;
   let grants: Awaited<ReturnType<typeof loadStaffAccessGrantRows>> = [];
   let audit: Awaited<ReturnType<typeof loadStaffAccessAuditHistory>> = [];
+  let fieldState: Awaited<ReturnType<typeof loadFieldAccessAdminState>> | null = null;
+  let fieldAudit: Awaited<ReturnType<typeof loadStaffFieldAccessAuditHistory>> = [];
 
   if (selected) {
     const roleKey = normalizeStaffRoleKey(selected.staffRole);
-    const [effective, grantRows, auditRows] = await Promise.all([
+    const [effective, grantRows, auditRows, fieldAdminState, fieldAuditRows] = await Promise.all([
       getStaffEffectiveAccessForStaffMember(tenantId, selected.id, selected.staffRole),
       loadStaffAccessGrantRows(tenantId, selected.id),
       loadStaffAccessAuditHistory(tenantId, selected.id, 50),
+      loadFieldAccessAdminState(tenantId, selected.id, selected.staffRole),
+      loadStaffFieldAccessAuditHistory(tenantId, selected.id, 50),
     ]);
+    fieldState = fieldAdminState;
+    fieldAudit = fieldAuditRows;
     const roleOnly = computeEffectiveAccess({ roleKey, grants: [] });
 
     effectiveRecord = {};
@@ -154,6 +165,28 @@ export default async function StaffAccessSettingsPage({
         grants={grants}
         audit={audit}
       />
+
+      {selected && fieldState ? (
+        <FieldAccessSection
+          tenantId={tenantId}
+          canManage={perm.canManage}
+          staffMemberId={selected.id}
+          staffName={selected.fullName || "this staff member"}
+          modules={modules.map((m) => ({ key: m.key, label: m.label }))}
+          clinics={clinics}
+          fieldsByModule={fieldState.fieldsByModule}
+          moduleLevels={fieldState.moduleLevels as Record<string, string>}
+          audit={fieldAudit.map((a) => ({
+            id: a.id,
+            moduleKey: a.moduleKey,
+            fieldKey: a.fieldKey,
+            previousPermission: a.previousPermission,
+            newPermission: a.newPermission,
+            reason: a.reason,
+            createdAt: a.createdAt,
+          }))}
+        />
+      ) : null}
     </div>
   );
 }

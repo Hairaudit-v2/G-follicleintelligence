@@ -32,12 +32,12 @@ export type VieSurgicalDocumentationContract = {
   status: "not_implemented";
 };
 
-/** Outcome intelligence — graft survival, density delta, patient-reported alignment. */
+/** Outcome intelligence — evidence readiness from comparisons, alignment, and documentation. */
 export type VieOutcomeIntelligenceContract = {
   engine: "vie_outcome_intelligence";
   version: typeof VIE_FUTURE_ENGINE_VERSION;
   inputs: ("comparison_engine" | "longitudinal_tracking" | "surgical_documentation")[];
-  status: "not_implemented";
+  status: "implemented";
 };
 
 export type VieFutureArchitecture = {
@@ -70,6 +70,6 @@ export const VIE_FUTURE_ARCHITECTURE: VieFutureArchitecture = {
     engine: "vie_outcome_intelligence",
     version: VIE_FUTURE_ENGINE_VERSION,
     inputs: ["comparison_engine", "longitudinal_tracking", "surgical_documentation"],
-    status: "not_implemented",
+    status: "implemented",
   },
 };

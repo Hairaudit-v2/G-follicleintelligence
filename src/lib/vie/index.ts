@@ -161,3 +161,37 @@ export {
   loadVieCaptureReferenceGuidance,
   previewVieSameAngleAlignment,
 } from "./vieSameAngleAlignment.server";
+
+export {
+  VIE_OUTCOME_DOMAINS,
+  VIE_OUTCOME_ENGINE_VERSION,
+  VIE_OUTCOME_STATUSES,
+} from "./vieOutcomeTypes";
+export type {
+  VieOutcomeConfidenceBand,
+  VieOutcomeDomain,
+  VieOutcomeDomainSummary,
+  VieOutcomeNextAction,
+  VieOutcomePairContribution,
+  VieOutcomeStatus,
+  VieOutcomeSummary,
+  VieOutcomeSummaryRow,
+} from "./vieOutcomeTypes";
+
+export {
+  buildOutcomeCompletenessInput,
+  buildVieOutcomeSummary,
+  isOutcomeEligiblePair,
+  mapComparisonPairToOutcomeInput,
+  outcomeDomainLabel,
+  outcomeStatusLabel,
+  pairContributesToOutcomeEvidence,
+  pickSurgeryOutcomeDomains,
+} from "./vieOutcomeIntelligenceCore";
+
+export {
+  computeVieOutcomeSummaryForPatient,
+  generateVieOutcomeSummaryForPatient,
+  loadVieOutcomeSummaryForPatient,
+  regenerateVieOutcomeSummaryBestEffort,
+} from "./vieOutcomeIntelligence.server";

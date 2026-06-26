@@ -20,6 +20,8 @@ import type {
 } from "./surgeryOsVieCapture.types";
 import type { VieComparisonPair } from "@/src/lib/vie/vieComparisonTypes";
 import type { VieAlignmentResultRow } from "@/src/lib/vie/vieAlignmentTypes";
+import type { VieOutcomeSummary } from "@/src/lib/vie/vieOutcomeTypes";
+import { pickSurgeryOutcomeDomains } from "@/src/lib/vie/vieOutcomeIntelligenceCore";
 import { deriveSurgeryComparisonStatus } from "@/src/lib/vie/vieLongitudinalComparisonCore";
 
 const GRAFT_TRAY_SLOTS = ["graft_tray_overview", "graft_tray_close"] as const;
@@ -214,6 +216,31 @@ export function deriveSurgeryOsVieWarnings(
   return warnings;
 }
 
+function mapSurgeryOutcomeReadiness(outcome: VieOutcomeSummary | null | undefined): SurgeryOsVieCaptureSummary["outcomeReadiness"] {
+  if (!outcome) return null;
+  const picked = pickSurgeryOutcomeDomains(outcome.domains);
+  return {
+    overall_score: outcome.overall_outcome_readiness_score,
+    confidence_band: outcome.confidence_band,
+    audit_ready: outcome.audit_ready,
+    clinical_review_recommended: outcome.clinical_review_recommended,
+    surgical_healing: {
+      score: picked.surgical_healing?.score ?? 0,
+      status: picked.surgical_healing?.status ?? "insufficient_evidence",
+      evidence_count: picked.surgical_healing?.evidence_count ?? 0,
+    },
+    donor_recovery: {
+      score: picked.donor_recovery?.score ?? 0,
+      status: picked.donor_recovery?.status ?? "insufficient_evidence",
+      evidence_count: picked.donor_recovery?.evidence_count ?? 0,
+    },
+    documentation_readiness: {
+      score: picked.documentation_readiness?.score ?? 0,
+      status: picked.documentation_readiness?.status ?? "insufficient_evidence",
+    },
+  };
+}
+
 export function buildSurgeryOsVieCaptureSummary(input: {
   surgeryId: string;
   patientId: string;
@@ -225,6 +252,7 @@ export function buildSurgeryOsVieCaptureSummary(input: {
   progress: Record<string, unknown>;
   comparisonPairs?: VieComparisonPair[];
   alignmentResults?: VieAlignmentResultRow[];
+  outcomeSummary?: VieOutcomeSummary | null;
 }): SurgeryOsVieCaptureSummary {
   const sessions = [{ template_slug: "surgery_day", progress: input.progress }];
   const surgical = computeSurgicalDocumentationCompleteness(sessions);
@@ -253,6 +281,7 @@ export function buildSurgeryOsVieCaptureSummary(input: {
     nextRecommendedSlot: globalNextSlug,
     nextRecommendedSlotLabel: globalNextLabel,
     comparisonStatus: deriveSurgeryComparisonStatus(input.comparisonPairs ?? []),
+    outcomeReadiness: mapSurgeryOutcomeReadiness(input.outcomeSummary),
   };
 }
 

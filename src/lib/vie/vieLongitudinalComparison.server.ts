@@ -338,6 +338,12 @@ export async function updateVieComparisonReviewStatus(params: {
     .eq("patient_id", params.patientId.trim())
     .eq("id", params.pairId.trim());
   if (error) throw new Error(error.message);
+
+  const { regenerateVieOutcomeSummaryBestEffort } = await import("./vieOutcomeIntelligence.server");
+  await regenerateVieOutcomeSummaryBestEffort({
+    tenantId: params.tenantId,
+    patientId: params.patientId,
+  });
 }
 
 /** Fire-and-forget helper for accept flow — never throws. */
@@ -348,6 +354,8 @@ export async function regenerateVieComparisonsBestEffort(params: {
 }): Promise<void> {
   try {
     await generateVieComparisonPairsForPatient(params);
+    const { regenerateVieOutcomeSummaryBestEffort } = await import("./vieOutcomeIntelligence.server");
+    await regenerateVieOutcomeSummaryBestEffort(params);
   } catch {
     // best-effort — must not block capture accept
   }

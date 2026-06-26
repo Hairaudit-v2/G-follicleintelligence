@@ -213,6 +213,12 @@ export async function loadSurgeryOsCommandCentrePayload(
 ): Promise<SurgeryOsCommandCentrePayload> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId").trim();
   const supabase = supabaseAdmin();
+  // SA-2 field-level redaction (follow-up): redact surgery.graft_count / hair_count / punch_size /
+  // transection_rate / complications / surgical_notes / medications for the current viewer via
+  // `redactSurgeryCaseForStaffAccess(tenantId, case)` from
+  // `@/src/lib/staffAccess/staffFieldAccess.server` before rendering case detail/readiness cards.
+  // Apply per-case at the render boundary so masked/summary placeholders don't reach numeric
+  // metric consumers. Field access is clamped to SurgeryOS module access by the engine.
 
   const [{ calendarTimezone }, viewer, tenantRes] = await Promise.all([
     loadTenantOperationalCalendarSettings(tid),

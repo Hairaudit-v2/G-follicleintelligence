@@ -169,6 +169,15 @@ export async function loadPatientDetailPayload(
   const previousProcedures = parsePreviousProceduresFromClinical(profile.clinicalDetails.row);
   const primaryLead = pickPrimaryLeadForPatient(personLeadHistory);
 
+  // SA-2 field-level redaction (follow-up): before returning, redact identity / contact /
+  // medical_history / financial_summary on `profile` for the current viewer using
+  // `redactPatientForStaffAccess(tenantId, profile)` from
+  // `@/src/lib/staffAccess/staffFieldAccess.server`. Deferred here because this payload feeds
+  // many render paths that assume concrete value types — wire at the page boundary
+  // (app/(fi-admin)/fi-admin/[tenantId]/patients/[patientId]/page.tsx) or per-section component
+  // so masked/summary placeholders don't reach numeric/date consumers. Field access is already
+  // clamped to PatientOS module access by the engine.
+
   return {
     profile,
     displayName: derivePatientIdentityContact({

@@ -353,6 +353,12 @@ export async function loadAnalyticsOsDashboard(
 ): Promise<AnalyticsOsDashboardPayload> {
   const tid = tenantId.trim();
   const base = `/fi-admin/${tid}`;
+  // SA-2 field-level redaction (follow-up): gate analytics.revenue / analytics.marketing_roi /
+  // analytics.clinical_outcomes and prefer investor-safe values (analytics.investor_summary,
+  // investor.deidentified_outcomes) for viewers without full read, via `getStaffFieldPermission`
+  // / `redactObjectForStaffAccess` from `@/src/lib/staffAccess/staffFieldAccess.server`. An
+  // investor sees the de-identified summary, never identifiable revenue detail. Apply at the
+  // dashboard render boundary. Field access is clamped to AnalyticsOS module access by the engine.
 
   const [operational, patient, surgery, audit, foundation] = await Promise.all([
     wrapLoad("clinicos", () => loadTenantOperationalDashboard(tid)),

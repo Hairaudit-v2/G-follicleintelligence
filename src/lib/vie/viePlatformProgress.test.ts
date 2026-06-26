@@ -16,13 +16,13 @@ describe("viePlatformProgress", () => {
     assert.equal(mod.latestMilestone, VIE_PLATFORM_PROGRESS.latestMilestone);
   });
 
-  it("tracks 78% with VIE-1 through VIE-6 completed", () => {
-    assert.equal(VIE_PLATFORM_PROGRESS.progressPercent, 78);
-    assert.equal(VIE_PLATFORM_PROGRESS.completedPhases.length, 6);
-    assert.equal(VIE_PLATFORM_PROGRESS.pendingPhases.length, 4);
-    assert.ok(VIE_PLATFORM_PROGRESS.completedPhases.some((p) => p.startsWith("VIE-6")));
-    assert.ok(VIE_PLATFORM_PROGRESS.pendingPhases.some((p) => p.startsWith("VIE-7")));
-    assert.equal(VIE_PLATFORM_PHASES.filter((p) => p.status === "completed").length, 6);
-    assert.equal(VIE_PLATFORM_PHASES.filter((p) => p.status === "pending").length, 4);
+  it("tracks 86% with VIE-1 through VIE-7 completed", () => {
+    assert.equal(VIE_PLATFORM_PROGRESS.progressPercent, 86);
+    assert.equal(VIE_PLATFORM_PROGRESS.completedPhases.length, 7);
+    assert.equal(VIE_PLATFORM_PROGRESS.pendingPhases.length, 3);
+    assert.ok(VIE_PLATFORM_PROGRESS.completedPhases.some((p) => p.startsWith("VIE-7")));
+    assert.ok(VIE_PLATFORM_PROGRESS.pendingPhases.some((p) => p.startsWith("VIE-8")));
+    assert.equal(VIE_PLATFORM_PHASES.filter((p) => p.status === "completed").length, 7);
+    assert.equal(VIE_PLATFORM_PHASES.filter((p) => p.status === "pending").length, 3);
   });
 });

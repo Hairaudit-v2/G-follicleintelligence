@@ -78,6 +78,7 @@ export async function updateVieComparisonReviewStatusAction(
     });
     revalidatePath(`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}/imaging`);
     revalidatePath(`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}/twin`);
+    revalidatePath(`/fi-admin/${tenantId.trim()}/surgery-os`);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: errMsg(e) };

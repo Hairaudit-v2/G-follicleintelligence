@@ -12,6 +12,10 @@ import {
 } from "@/src/lib/vie/vieComparisonTypes";
 import type { VieAlignmentStatus } from "@/src/lib/vie/vieAlignmentTypes";
 import { journeyStageLabel } from "@/src/lib/vie/vieLongitudinalComparisonCore";
+import {
+  mapComparisonPairToOutcomeInput,
+  pairContributesToOutcomeEvidence,
+} from "@/src/lib/vie/vieOutcomeIntelligenceCore";
 import type { PatientImageProfileTile } from "@/src/lib/patientImages/patientImageTypes";
 
 function confidenceClass(band: VieComparisonConfidenceBand): string {
@@ -178,6 +182,7 @@ export function VieComparisonSuggestionsPanel({
         {filtered.map((pair) => {
           const beforeTile = tilesById.get(pair.before_image_id);
           const afterTile = tilesById.get(pair.after_image_id);
+          const outcomeContribution = pairContributesToOutcomeEvidence(mapComparisonPairToOutcomeInput(pair));
           return (
             <li key={pair.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-2">
@@ -261,6 +266,15 @@ export function VieComparisonSuggestionsPanel({
                   Suggested use: {pair.recommended_use.map((u) => u.replace(/_/g, " ")).join(", ")}
                 </p>
               ) : null}
+
+              <p
+                className={`mt-2 text-xs ${outcomeContribution.contributes ? "text-emerald-700" : "text-gray-500"}`}
+              >
+                Outcome evidence:{" "}
+                {outcomeContribution.contributes
+                  ? `contributes (${outcomeContribution.domains.map((d) => d.replace(/_/g, " ")).join(", ")})`
+                  : (outcomeContribution.reason ?? "does not contribute")}
+              </p>
 
               {pair.warnings.length > 0 ? (
                 <ul className="mt-2 space-y-1 text-xs text-amber-700">

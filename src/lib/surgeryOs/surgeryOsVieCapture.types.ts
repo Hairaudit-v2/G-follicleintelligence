@@ -1,5 +1,27 @@
 import type { VieSurgeryPhase } from "@/src/lib/vie/vieProtocolTypes";
 import type { VieSurgeryComparisonStatus } from "@/src/lib/vie/vieComparisonTypes";
+import type { VieOutcomeStatus } from "@/src/lib/vie/vieOutcomeTypes";
+
+export type SurgeryOsVieOutcomeReadiness = {
+  overall_score: number;
+  confidence_band: "high" | "medium" | "low";
+  audit_ready: boolean;
+  clinical_review_recommended: boolean;
+  surgical_healing: {
+    score: number;
+    status: VieOutcomeStatus;
+    evidence_count: number;
+  };
+  donor_recovery: {
+    score: number;
+    status: VieOutcomeStatus;
+    evidence_count: number;
+  };
+  documentation_readiness: {
+    score: number;
+    status: VieOutcomeStatus;
+  };
+};
 
 export type SurgeryOsVieCaptureWarningKind =
   | "missing_donor_final_extraction"
@@ -48,6 +70,7 @@ export type SurgeryOsVieCaptureSummary = {
   nextRecommendedSlot: string | null;
   nextRecommendedSlotLabel: string | null;
   comparisonStatus: VieSurgeryComparisonStatus;
+  outcomeReadiness: SurgeryOsVieOutcomeReadiness | null;
 };
 
 export type VieSurgeryCaptureContext = {

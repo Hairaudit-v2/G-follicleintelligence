@@ -2,6 +2,15 @@ import Link from "next/link";
 
 import type { PatientTwinV1 } from "@/src/lib/patientTwin/patientTwinTypes";
 import type { VieImagingDomainCompleteness } from "@/src/lib/vie/vieProtocolTypes";
+import { outcomeDomainLabel, outcomeStatusLabel } from "@/src/lib/vie/vieOutcomeIntelligenceCore";
+import type { VieOutcomeStatus } from "@/src/lib/vie/vieOutcomeTypes";
+
+function outcomeStatusTone(status: VieOutcomeStatus): string {
+  if (status === "audit_ready" || status === "favourable") return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+  if (status === "monitoring" || status === "early_signal") return "text-cyan-300 bg-cyan-500/10 border-cyan-500/20";
+  if (status === "concern") return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+  return "text-slate-400 bg-white/[0.03] border-white/[0.08]";
+}
 
 function DomainMeter({ domain, accent }: { domain: VieImagingDomainCompleteness; accent: string }) {
   if (domain.required_total === 0) return null;
@@ -39,6 +48,7 @@ export function PatientTwinVieCard({
 
   const { imaging_completeness: ic } = vie;
   const latestQuality = ic.latest_capture_quality;
+  const outcome = vie.outcome_summary;
 
   return (
     <section className="rounded-lg border border-white/[0.08] bg-[#0b1220]/80 p-4">
@@ -135,6 +145,34 @@ export function PatientTwinVieCard({
           View comparisons
         </Link>
       </div>
+
+      {outcome ? (
+        <div className="mt-4 rounded-md bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06]">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">Outcome readiness</p>
+          <p className="mt-1 text-sm text-slate-200">
+            Evidence readiness {outcome.overall_outcome_readiness_score}%
+            <span className="text-slate-500"> · {outcome.confidence_band} confidence</span>
+            {outcome.audit_ready ? <span className="text-emerald-400"> · audit-ready signal</span> : null}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {outcome.domains.map((d) => (
+              <span
+                key={d.domain}
+                className={`rounded border px-1.5 py-0.5 text-[0.65rem] capitalize ${outcomeStatusTone(d.status)}`}
+                title={outcomeDomainLabel(d.domain)}
+              >
+                {d.domain.replace(/_/g, " ")}: {outcomeStatusLabel(d.status)}
+              </span>
+            ))}
+          </div>
+          {outcome.next_actions[0] ? (
+            <p className="mt-2 text-xs text-cyan-300/90">Next: {outcome.next_actions[0].label}</p>
+          ) : null}
+          {outcome.clinical_review_recommended ? (
+            <p className="mt-1 text-xs text-amber-400/90">Monitoring signal — clinician review recommended</p>
+          ) : null}
+        </div>
+      ) : null}
 
       {vie.latest_intelligence.length > 1 ? (
         <ul className="mt-3 space-y-1.5">

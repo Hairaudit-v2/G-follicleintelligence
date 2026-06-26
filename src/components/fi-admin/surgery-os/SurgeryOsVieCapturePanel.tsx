@@ -42,6 +42,13 @@ function comparisonPairClass(status: "ready" | "partial" | "missing"): string {
   return "text-rose-300";
 }
 
+function outcomeStatusClass(status: string): string {
+  if (status === "audit_ready" || status === "favourable") return "text-emerald-300";
+  if (status === "monitoring" || status === "early_signal") return "text-cyan-300";
+  if (status === "concern") return "text-amber-300";
+  return "text-slate-400";
+}
+
 export function SurgeryOsVieCapturePanel({
   tenantId,
   surgeries,
@@ -124,6 +131,43 @@ export function SurgeryOsVieCapturePanel({
               </p>
             </div>
           </div>
+
+          {capture.outcomeReadiness ? (
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-[#64748B]">Outcome readiness (evidence quality)</p>
+              <p className="mt-1 text-lg font-semibold text-[#F8FAFC]">
+                {capture.outcomeReadiness.overall_score}%
+                <span className="ml-2 text-sm font-normal text-[#94A3B8]">
+                  {capture.outcomeReadiness.confidence_band} confidence
+                </span>
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3 text-xs">
+                <p className="text-[#94A3B8]">
+                  Surgical healing:{" "}
+                  <span className={outcomeStatusClass(capture.outcomeReadiness.surgical_healing.status)}>
+                    {capture.outcomeReadiness.surgical_healing.status.replace(/_/g, " ")} (
+                    {capture.outcomeReadiness.surgical_healing.evidence_count} evidence)
+                  </span>
+                </p>
+                <p className="text-[#94A3B8]">
+                  Donor recovery:{" "}
+                  <span className={outcomeStatusClass(capture.outcomeReadiness.donor_recovery.status)}>
+                    {capture.outcomeReadiness.donor_recovery.status.replace(/_/g, " ")} (
+                    {capture.outcomeReadiness.donor_recovery.evidence_count} evidence)
+                  </span>
+                </p>
+                <p className="text-[#94A3B8]">
+                  Documentation:{" "}
+                  <span className={outcomeStatusClass(capture.outcomeReadiness.documentation_readiness.status)}>
+                    {capture.outcomeReadiness.documentation_readiness.status.replace(/_/g, " ")}
+                  </span>
+                </p>
+              </div>
+              {capture.outcomeReadiness.audit_ready ? (
+                <p className="mt-2 text-xs text-emerald-300">Audit-ready evidence signal — suitable for VIE-8 evidence packs</p>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="grid gap-2 sm:grid-cols-3 text-xs">
             <p className="rounded-lg border border-[#334155] px-3 py-2 text-[#94A3B8]">
