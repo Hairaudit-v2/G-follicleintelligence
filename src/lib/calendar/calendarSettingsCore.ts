@@ -149,11 +149,6 @@ function firstSearchParam(v: string | string[] | undefined): string {
   return Array.isArray(v) ? String(v[0] ?? "") : String(v);
 }
 
-function parseBoolParam(v: string | string[] | undefined): boolean {
-  const s = firstSearchParam(v).trim().toLowerCase();
-  return s === "1" || s === "true" || s === "yes";
-}
-
 /**
  * Applies tenant calendar settings when URL params are absent (default view, resource mode, cancelled visibility).
  */
