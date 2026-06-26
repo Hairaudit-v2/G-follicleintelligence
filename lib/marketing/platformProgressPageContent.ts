@@ -21,10 +21,29 @@ export type PlatformProgressModule = {
   id: string;
   name: string;
   completionPercent: number;
+  /** Infrastructure phase label shown on progress cards. */
   stage: string;
   description: string;
   status: PlatformProgressStatus;
+  /** Institutional status badge copy — falls back to `status` when omitted. */
+  statusLabel?: string;
+  /** Latest shipped milestone for the module registry. */
+  latestMilestone?: string;
   learnMoreHref?: string;
+};
+
+export type PlatformProgressInfrastructureLayer = {
+  id: string;
+  name: string;
+  tagline: string;
+  capabilities: readonly string[];
+};
+
+export type PlatformProgressDeploymentMilestone = {
+  id: string;
+  date: string;
+  title: string;
+  tag: string;
 };
 
 export type PlatformProgressChangelogEntry = {
@@ -54,8 +73,8 @@ export type FiEcosystemPlatformCompletion = {
 
 /** Manual ecosystem-wide completion rollup — edit as delivery advances. */
 export const FI_ECOSYSTEM_COMPLETION_SUMMARY = {
-  overallEcosystemPercent: 74,
-  fiOsCorePlatformPercent: 86,
+  overallEcosystemPercent: 78,
+  fiOsCorePlatformPercent: 81,
 } as const;
 
 /** Satellite and workforce platforms in the broader FI ecosystem. */
@@ -95,37 +114,88 @@ export const FI_ECOSYSTEM_PLATFORM_COMPLETION: FiEcosystemPlatformCompletion[] =
 
 export const PLATFORM_PROGRESS_PAGE_CONTENT = {
   hero: {
-    eyebrow: "Platform Progress",
-    headline: "Engineering the complete hair restoration operating system",
+    eyebrow: "Platform Infrastructure",
+    headline: "Building the Intelligence Infrastructure for Hair Restoration Medicine",
     subtext:
-      "Transparent delivery status across every Follicle Intelligence module — from infrastructure foundations through pilot-ready surfaces and production deployments.",
+      "Follicle Intelligence is engineering the world's first vertically integrated operating system connecting patient acquisition, clinical diagnostics, surgical execution, long-term outcome intelligence, practitioner certification, and global treatment intelligence into one unified platform.",
     lastUpdated: "2026-06-26",
   },
 
-  summary: {
-    eyebrow: "Delivery snapshot",
-    headline: "Built in the open. Shipped with discipline.",
+  intelligenceSystems: {
+    eyebrow: "Platform architecture",
+    headline: "20 Interconnected Intelligence Systems",
     intro:
-      "Percentages reflect functional completeness across the FI ecosystem — core OS modules, workforce infrastructure, and connected satellite platforms including HairAudit, IIOHR, and HLI.",
+      "Every layer of the hair restoration ecosystem connected into one continuously learning infrastructure network.",
   },
 
   modules: {
-    eyebrow: "Module grid",
-    headlineSuffix: "connected systems. One delivery spine.",
-    intro: "Filter by status or scan completion across the FI OS surface area.",
+    eyebrow: "Module registry",
+    headline: "Infrastructure delivery registry",
+    intro:
+      "Functional completeness across clinical, surgical, intelligence, workforce, and connector layers — updated as engineering milestones ship.",
+  },
+
+  infrastructureLayer: {
+    eyebrow: "Core substrate",
+    headline: "Core Infrastructure Layer",
+    intro: "Systems that power every module above — event-driven architecture, security, integrations, and learning engines.",
+  },
+
+  vie: {
+    eyebrow: "Visual intelligence",
+    headline: "VIE — Visual Intelligence Engine",
+    intro:
+      "A dedicated product layer for clinical photography intelligence — protocol capture, alignment, comparison, and surgical progress visualization across the FI ecosystem.",
+  },
+
+  milestones: {
+    eyebrow: "Deployment log",
+    headline: "Engineering deployment timeline",
+    intro: "Chronological record of infrastructure releases — migrations, engines, and integration contracts.",
+  },
+
+  intelligenceNetwork: {
+    eyebrow: "Competitive moat",
+    headline: "The Intelligence Network",
+    intro: "Every patient interaction contributes structured clinical intelligence.",
+    captureAreas: [
+      "Lead acquisition",
+      "Clinical diagnostics",
+      "Hair loss classification",
+      "Surgical planning",
+      "Procedure execution",
+      "Team performance",
+      "Long-term outcome tracking",
+      "Patient satisfaction",
+      "Recovery progression",
+      "Clinical education systems",
+    ] as const,
+    closing:
+      "Over time this creates the world's largest structured dataset in hair restoration medicine. This is our long-term competitive moat.",
+  },
+
+  closing: {
+    eyebrow: "Category infrastructure",
+    headline: "We Are Not Building Clinic Software",
+    body: [
+      "Most software platforms improve operations.",
+      "Follicle Intelligence is engineering the infrastructure layer for an entire medical specialty.",
+      "Every consultation.",
+      "Every procedure.",
+      "Every outcome.",
+      "Every practitioner.",
+      "Every clinic.",
+      "Connected into one continuously learning intelligence network.",
+    ] as const,
+    closingLine: "The future of hair restoration will be data-driven. We are building that future.",
+    primaryCta: { label: "Explore platform architecture", href: "/platform" },
+    secondaryCta: { label: "Book enterprise briefing", href: "/demo" },
   },
 
   changelog: {
-    eyebrow: "Engineering changelog",
-    headline: "Recent Infrastructure Milestones",
-    intro: "Public record of platform delivery — migrations, surfaces, and integration contracts.",
-  },
-
-  finalCta: {
-    eyebrow: "Partner access",
-    headline: "Deploy the operating system in your organisation",
-    primaryCta: { label: "Book enterprise demo", href: "/demo" },
-    secondaryCta: { label: "Explore platform architecture", href: "/platform" },
+    eyebrow: "Full engineering log",
+    headline: "Extended infrastructure changelog",
+    intro: "Detailed release notes for platform engineers and integration partners.",
   },
 
   homepage: {
@@ -156,22 +226,40 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
   {
-    id: "2026-06-26-vie-5-longitudinal-comparison",
-    title: "VIE-5 — Longitudinal Comparison Engine",
+    id: "2026-06-26-calendar-os-gc11",
+    title: "GC-11 — Calendar Settings Centre deployed",
+    module: "CalendarOS",
+    date: "2026-06-26",
+  },
+  {
+    id: "2026-06-26-vie-6-same-angle-alignment",
+    title: "VIE-6 — Same Angle Alignment Engine completed",
     module: "Visual Intelligence Engine (VIE)",
     date: "2026-06-26",
   },
   {
-    id: "2026-06-26-calendar-os-gc6b",
-    title: "CalendarOS GC-6B — Google inbound calendar scope admin",
-    module: "Google Calendar Integration",
-    date: "2026-06-26",
+    id: "2026-06-25-event-bus-gc10",
+    title: "GC-10 — Platform Event Bus architecture released",
+    module: "Event Bus",
+    date: "2026-06-25",
   },
   {
-    id: "2026-06-26-calendar-os-gc-csp",
-    title: "CalendarOS GC-CSP — Google Calendar CSP compatibility",
-    module: "Google Calendar Integration",
-    date: "2026-06-26",
+    id: "2026-06-24-security-sa2",
+    title: "SA-2 — Field Level Permission Engine completed",
+    module: "Security Layer",
+    date: "2026-06-24",
+  },
+  {
+    id: "2026-06-23-calendar-os-gc8",
+    title: "GC-8 — Scheduled background sync monitoring released",
+    module: "CalendarOS",
+    date: "2026-06-23",
+  },
+  {
+    id: "2026-06-22-calendar-os-gc7",
+    title: "GC-7 — Google sync conflict review queue deployed",
+    module: "CalendarOS",
+    date: "2026-06-22",
   },
   {
     id: "2026-06-22-onboarding-os-phase-f5",
@@ -180,70 +268,22 @@ export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
     date: "2026-06-22",
   },
   {
-    id: "2026-06-22-onboarding-os-phase-f3",
-    title: "OnboardingOS Phase F3 — Google Calendar Read-Only Connector",
-    module: "OnboardingOS",
-    date: "2026-06-22",
-  },
-  {
-    id: "2026-06-22-onboarding-os-phase-f2",
-    title: "OnboardingOS Phase F2 — Connector Auth & Verification",
-    module: "OnboardingOS",
-    date: "2026-06-22",
-  },
-  {
-    id: "2026-06-22-onboarding-os-phase-f1",
-    title: "OnboardingOS Phase F1 — Legacy System Connector Layer",
-    module: "OnboardingOS",
-    date: "2026-06-22",
-  },
-  {
-    id: "2026-06-22-onboarding-os-phase-e2",
-    title: "OnboardingOS Deployment Intelligence Command Centre",
-    module: "OnboardingOS",
-    date: "2026-06-22",
-  },
-  {
-    id: "2026-06-22-onboarding-os-phase-ab",
-    title: "OnboardingOS clinic deployment templates",
-    module: "OnboardingOS",
-    date: "2026-06-22",
-  },
-  {
-    id: "2026-06-22-workforce-roster-command-centre",
-    title: "WorkforceOS Roster Command Centre",
-    module: "WorkforceOS",
-    date: "2026-06-22",
-  },
-  {
-    id: "2026-06-21-workforce-onboarding-centre",
-    title: "WorkforceOS onboarding centre",
-    module: "WorkforceOS",
+    id: "2026-06-21-analytics-an-c",
+    title: "AN-C — Analytics publisher expansion completed",
+    module: "AnalyticsOS",
     date: "2026-06-21",
   },
   {
-    id: "2026-06-19-financial-executive-engine",
-    title: "FinancialOS executive finance engine",
-    module: "FinancialOS",
-    date: "2026-06-19",
-  },
-  {
-    id: "2026-06-19-surgery-graft-intelligence",
-    title: "SurgeryOS graft intelligence",
-    module: "SurgeryOS",
-    date: "2026-06-19",
-  },
-  {
-    id: "2026-06-20-imaging-ai-execution",
-    title: "ImagingOS AI execution framework",
-    module: "ImagingOS",
+    id: "2026-06-20-ha-guide-2b",
+    title: "HA-GUIDE-2B — Spanish multilingual patient education released",
+    module: "PatientOS",
     date: "2026-06-20",
   },
   {
-    id: "2026-06-15-consultation-workflow-engine",
-    title: "ConsultationOS workflow engine",
-    module: "ConsultationOS",
-    date: "2026-06-15",
+    id: "2026-06-26-vie-5-longitudinal-comparison",
+    title: "VIE-5 — Longitudinal Comparison Engine",
+    module: "Visual Intelligence Engine (VIE)",
+    date: "2026-06-19",
   },
 ];
 
@@ -283,129 +323,309 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "foundation-os",
     name: "FoundationOS",
-    completionPercent: 96,
-    stage: "Patient Twin · identity spine",
+    completionPercent: 90,
+    stage: "Phase 4 · identity spine",
     description:
       "Patient identity substrate, digital twin continuity, media timelines, and cross-module event spine for longitudinal intelligence.",
     status: "Infrastructure Complete",
+    statusLabel: "Operational Core",
+    latestMilestone: "Patient Twin identity spine operational",
     learnMoreHref: "/patient-twin",
-  },
-  {
-    id: "reception-os",
-    name: "ReceptionOS",
-    completionPercent: 94,
-    stage: "Phase 5 · front-desk command centre",
-    description: "Front-desk command centre — arrival board, task orchestration, outbound comms, and pilot metrics.",
-    status: "Production",
-    learnMoreHref: "/fi-admin",
-  },
-  {
-    id: "consultation-os",
-    name: "ConsultationOS",
-    completionPercent: 89,
-    stage: "Workflow engine · conversion pathways",
-    description: "Structured consultation forms, pathway launcher, quote acceptance, and conversion intelligence.",
-    status: "Production",
-  },
-  {
-    id: "financial-os",
-    name: "FinancialOS",
-    completionPercent: 88,
-    stage: "Executive finance intelligence",
-    description:
-      "Master ledger, surgery profitability, revenue attribution, accounts receivable, and executive forecasting — plus payment pathways and finance applications.",
-    status: "Production",
-    learnMoreHref: "/platform/progress#progress-financial-os",
-  },
-  {
-    id: "surgery-os",
-    name: "SurgeryOS",
-    completionPercent: 92,
-    stage: "Graft intelligence · procedure-day command",
-    description: "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
-    status: "Production",
-    learnMoreHref: "/platform/surgery-os",
-  },
-  {
-    id: "imaging-os",
-    name: "ImagingOS",
-    completionPercent: 80,
-    stage: "Live AI execution framework · VIE substrate",
-    description:
-      "Template-driven photography sessions, slot progress, AI execution framework, and surgical-domain progression assessments. Hosts the Visual Intelligence Engine (VIE) capture and comparison substrate.",
-    status: "Pilot Ready",
-    learnMoreHref: "/platform/imaging-os",
-  },
-  buildViePlatformProgressModule(),
-  {
-    id: "patient-os",
-    name: "PatientOS",
-    completionPercent: 78,
-    stage: "Records · timelines · Patient Twin",
-    description: "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
-    status: "Production",
-    learnMoreHref: "/platform/patient-os",
-  },
-  {
-    id: "audit-os",
-    name: "AuditOS",
-    completionPercent: 86,
-    stage: "HairAudit · patient exposure layer",
-    description: "Independent audit workflows, HairAudit patient exposure layer, report surfaces, and network integration contracts.",
-    status: "Pilot Ready",
-    learnMoreHref: "/audit-network",
-  },
-  {
-    id: "academy-os",
-    name: "AcademyOS",
-    completionPercent: 61,
-    stage: "Competency · curriculum spine",
-    description: "Training pathways, certification hooks, and institute-aligned competency tracking for clinical teams.",
-    status: "Active Development",
-    learnMoreHref: "/academy",
-  },
-  {
-    id: "analytics-os",
-    name: "AnalyticsOS",
-    completionPercent: 78,
-    stage: "Cross-platform intelligence event coverage",
-    description:
-      "Conversion, productivity, and cohort analytics across reception, consultation, and financial surfaces — plus deterministic executive health scoring from the AnalyticsOS event pipeline.",
-    status: "Infrastructure Complete",
-    learnMoreHref: "/platform/analytics-os",
   },
   {
     id: "clinic-os",
     name: "ClinicOS",
-    completionPercent: 84,
-    stage: "Operations centre · scheduling spine",
+    completionPercent: 91,
+    stage: "Phase 5 · operations centre",
     description: "Calendars, services, appointment lifecycle, and day-to-day clinic rhythm for multi-site operators.",
     status: "Production",
+    statusLabel: "Production Ready",
+    latestMilestone: "Multi-site scheduling spine in production",
     learnMoreHref: "/platform/clinic-os",
+  },
+  {
+    id: "consultation-os",
+    name: "ConsultationOS",
+    completionPercent: 72,
+    stage: "Phase 3 · workflow engine",
+    description: "Structured consultation forms, pathway launcher, quote acceptance, and conversion intelligence.",
+    status: "Active Development",
+    statusLabel: "Advanced Build",
+    latestMilestone: "Conversion pathway launcher shipped",
+  },
+  {
+    id: "patient-os",
+    name: "PatientOS",
+    completionPercent: 81,
+    stage: "Phase 4 · longitudinal records",
+    description: "Longitudinal patient records, portal surfaces, and intelligence substrate for cohort learning.",
+    status: "Production",
+    statusLabel: "Production Stable",
+    latestMilestone: "Patient Twin records integration live",
+    learnMoreHref: "/platform/patient-os",
+  },
+  {
+    id: "leadflow",
+    name: "LeadFlow",
+    completionPercent: 68,
+    stage: "Phase 2 · acquisition pipeline",
+    description: "Lead capture, attribution, HubSpot sync, and conversion funnel intelligence across acquisition surfaces.",
+    status: "Active Development",
+    statusLabel: "Scaling",
+    latestMilestone: "HubSpot acquisition pipeline wired",
+  },
+  {
+    id: "imaging-os",
+    name: "ImagingOS",
+    completionPercent: 88,
+    stage: "Phase 4 · AI execution framework",
+    description:
+      "Template-driven photography sessions, slot progress, AI execution framework, and surgical-domain progression assessments.",
+    status: "Operational beta",
+    statusLabel: "Operational Beta",
+    latestMilestone: "Live AI execution framework operational",
+    learnMoreHref: "/platform/imaging-os",
+  },
+  buildViePlatformProgressModule(),
+  {
+    id: "surgery-os",
+    name: "SurgeryOS",
+    completionPercent: 84,
+    stage: "Phase 3 · procedure-day command",
+    description: "Procedure-day command centre, live capture, graft intelligence foundation, and clinical safety guardrails.",
+    status: "Active Development",
+    statusLabel: "Advanced Build",
+    latestMilestone: "Graft intelligence procedure-day command",
+    learnMoreHref: "/platform/surgery-os",
+  },
+  {
+    id: "hair-intel",
+    name: "HairIntel",
+    completionPercent: 79,
+    stage: "Phase 2 · classification intelligence",
+    description: "Hair loss classification, progression velocity, treatment response modelling, and cohort intelligence.",
+    status: "Active Development",
+    statusLabel: "Intelligence Layer",
+    latestMilestone: "Multi-system classification engine live",
+  },
+  {
+    id: "audit-os",
+    name: "AuditOS",
+    completionPercent: 82,
+    stage: "Phase 3 · HairAudit exposure",
+    description: "Independent audit workflows, HairAudit patient exposure layer, report surfaces, and network integration contracts.",
+    status: "Production",
+    statusLabel: "Production Stable",
+    latestMilestone: "HairAudit patient exposure layer completed",
+    learnMoreHref: "/audit-network",
+  },
+  {
+    id: "analytics-os",
+    name: "AnalyticsOS",
+    completionPercent: 81,
+    stage: "Phase 3 · executive intelligence",
+    description:
+      "Conversion, productivity, and cohort analytics — plus deterministic executive health scoring from the AnalyticsOS event pipeline.",
+    status: "Infrastructure Complete",
+    statusLabel: "Executive Intelligence",
+    latestMilestone: "AN-C Analytics publisher expansion completed",
+    learnMoreHref: "/platform/analytics-os",
+  },
+  {
+    id: "academy-os",
+    name: "AcademyOS",
+    completionPercent: 76,
+    stage: "Phase 2 · certification spine",
+    description: "Training pathways, certification hooks, and institute-aligned competency tracking for clinical teams.",
+    status: "Active Development",
+    statusLabel: "Certification Engine",
+    latestMilestone: "Competency curriculum spine operational",
+    learnMoreHref: "/academy",
   },
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 85,
-    stage: "Roster Command Centre · assignment intelligence · ops integration",
+    completionPercent: 72,
+    stage: "Phase 2E · roster command centre",
     description:
-      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, Roster Command Centre assignment editor, and SurgeryOS / ClinicOS staffing orchestration.",
-    status: "Pilot Ready",
+      "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, and staffing orchestration.",
+    status: "Active Development",
+    statusLabel: "Operational Build",
+    latestMilestone: "Roster Command Centre assignment intelligence",
   },
   {
     id: "onboarding-os",
     name: "OnboardingOS",
-    completionPercent: 74,
-    stage: "Staged import engine",
+    completionPercent: 86,
+    stage: "Phase F5 · staged import engine",
     description:
-      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, Deployment Intelligence, and live read-only connectors. Phase F5 added a controlled staged import engine: approved HubSpot records can be reviewed, duplicate-checked, imported into FI, mapped to source records, and audited without write-back to HubSpot.",
-    status: "Active Development",
+      "Enterprise clinic deployment engine — tenant provisioning, deployment templates, Guided Assist, go-live readiness gates, and live connectors.",
+    status: "Pilot Ready",
+    statusLabel: "Deployment Engine",
+    latestMilestone: "ONB-F5 HubSpot staged import engine operational",
   },
   buildGoogleCalendarPlatformProgressModule(),
+  {
+    id: "financial-os",
+    name: "FinancialOS",
+    completionPercent: 64,
+    stage: "Phase 2 · executive finance",
+    description:
+      "Master ledger, surgery profitability, revenue attribution, accounts receivable, and executive forecasting.",
+    status: "Active Development",
+    statusLabel: "In Development",
+    latestMilestone: "Executive finance intelligence in build",
+    learnMoreHref: "/platform/progress#progress-financial-os",
+  },
+  {
+    id: "security-layer",
+    name: "Security Layer",
+    completionPercent: 85,
+    stage: "SA-2 · field permissions",
+    description: "Row-level security, tenant isolation, field-level permissions, and secret validation across the FI substrate.",
+    status: "Infrastructure Complete",
+    statusLabel: "Infrastructure Core",
+    latestMilestone: "SA-2 Field Level Permission Engine completed",
+  },
+  {
+    id: "event-bus",
+    name: "Event Bus",
+    completionPercent: 92,
+    stage: "GC-10 · platform event architecture",
+    description: "Event-driven architecture, subscriber framework, retry processing, and idempotency validation.",
+    status: "Infrastructure Complete",
+    statusLabel: "Core Infrastructure",
+    latestMilestone: "GC-10 Platform Event Bus architecture released",
+  },
+  {
+    id: "integration-layer",
+    name: "Integration Layer",
+    completionPercent: 80,
+    stage: "Phase F · connector framework",
+    description: "Google Calendar, HubSpot, Timely, Zapier, and API connector framework for enterprise clinic deployments.",
+    status: "Pilot Ready",
+    statusLabel: "Connector Framework",
+    latestMilestone: "Enterprise connector auth and verification layer",
+  },
+  {
+    id: "ai-intelligence-layer",
+    name: "AI Intelligence Layer",
+    completionPercent: 74,
+    stage: "Phase 2 · learning systems",
+    description: "Hair loss classification, surgical benchmarking, outcome learning, and pattern recognition engines.",
+    status: "Active Development",
+    statusLabel: "Learning Systems",
+    latestMilestone: "Deterministic clinical interpretation pipelines",
+  },
+];
+
+export const PLATFORM_PROGRESS_INFRASTRUCTURE_LAYERS: PlatformProgressInfrastructureLayer[] = [
+  {
+    id: "event-bus",
+    name: "Platform Event Bus",
+    tagline: "Event-driven architecture",
+    capabilities: ["Subscriber framework", "Retry processing", "Idempotency validation"],
+  },
+  {
+    id: "security",
+    name: "Security Architecture",
+    tagline: "Tenant-safe by design",
+    capabilities: ["Row-level security", "Tenant isolation", "Field-level permissions", "Secret validation"],
+  },
+  {
+    id: "integration",
+    name: "Integration Framework",
+    tagline: "Enterprise connector substrate",
+    capabilities: ["Google Calendar", "HubSpot", "Timely", "Zapier", "API connectors"],
+  },
+  {
+    id: "ai-engine",
+    name: "AI Intelligence Engine",
+    tagline: "Continuous learning systems",
+    capabilities: ["Hair loss classification", "Surgical benchmarking", "Outcome learning", "Pattern recognition"],
+  },
+];
+
+export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
+  "Longitudinal image comparison",
+  "Same angle alignment engine",
+  "Capture protocol validation",
+  "AI image classification",
+  "Photo metadata attribution",
+  "Marketing derivative generation",
+  "Surgical progress visualization",
+] as const;
+
+/** Chronological deployment feed — most recent first. */
+export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeploymentMilestone[] = [
+  { id: "gc-11", date: "2026-06-26", tag: "calendar-os", title: "GC-11 Calendar Settings Centre deployed" },
+  { id: "vie-6", date: "2026-06-26", tag: "vie", title: "VIE-6 Same Angle Alignment Engine completed" },
+  { id: "gc-10", date: "2026-06-25", tag: "event-bus", title: "GC-10 Platform Event Bus architecture released" },
+  { id: "sa-2", date: "2026-06-24", tag: "security", title: "SA-2 Field Level Permission Engine completed" },
+  { id: "gc-8", date: "2026-06-23", tag: "calendar-os", title: "GC-8 Scheduled background sync monitoring released" },
+  { id: "gc-7", date: "2026-06-22", tag: "calendar-os", title: "GC-7 Google sync conflict review queue deployed" },
+  { id: "onb-f5", date: "2026-06-22", tag: "onboarding-os", title: "ONB-F5 HubSpot staged import engine operational" },
+  { id: "an-c", date: "2026-06-21", tag: "analytics-os", title: "AN-C Analytics publisher expansion completed" },
+  { id: "ha-guide-2b", date: "2026-06-20", tag: "patient-os", title: "HA-GUIDE-2B Spanish multilingual patient education released" },
+  { id: "vie-5", date: "2026-06-19", tag: "vie", title: "VIE-5 Longitudinal Comparison Engine deployed" },
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-26-calendar-os-gc11",
+    date: "2026-06-26",
+    tag: "calendar-os",
+    title: "GC-11 — Calendar Settings Centre deployed",
+    summary:
+      "Tenant-scoped Calendar Settings Centre — Google Calendar connector configuration, sync health visibility, staff calendar links, and inbound scope management in a unified admin surface.",
+    modules: ["CalendarOS", "Integration Layer"],
+  },
+  {
+    id: "2026-06-26-vie-6-same-angle-alignment",
+    date: "2026-06-26",
+    tag: "vie",
+    title: "VIE-6 — Same Angle Alignment Engine completed",
+    summary:
+      "Visual Intelligence Engine Phase 6: deterministic same-angle alignment for longitudinal comparison pairs — metadata-driven pose matching, alignment confidence scoring, and comparison readiness gates before AI-assisted overlay.",
+    modules: ["Visual Intelligence Engine (VIE)", "ImagingOS"],
+  },
+  {
+    id: "2026-06-25-event-bus-gc10",
+    date: "2026-06-25",
+    tag: "event-bus",
+    title: "GC-10 — Platform Event Bus architecture released",
+    summary:
+      "Platform Event Bus substrate — subscriber framework, retry processing, idempotency validation, and cross-module event contracts for AnalyticsOS, CalendarOS, and deployment intelligence.",
+    modules: ["Event Bus", "AnalyticsOS", "CalendarOS"],
+  },
+  {
+    id: "2026-06-24-security-sa2",
+    date: "2026-06-24",
+    tag: "security",
+    title: "SA-2 — Field Level Permission Engine completed",
+    summary:
+      "Field-level permission engine — granular read/write gates on sensitive clinical and financial fields with tenant isolation, audit trails, and role-aligned policy enforcement.",
+    modules: ["Security Layer"],
+  },
+  {
+    id: "2026-06-23-calendar-os-gc8",
+    date: "2026-06-23",
+    tag: "calendar-os",
+    title: "GC-8 — Scheduled background sync monitoring released",
+    summary:
+      "Timed background sync scheduling with health monitoring, failure alerting, and per-calendar sync diagnostics for inbound Google Calendar integration.",
+    modules: ["CalendarOS", "Integration Layer"],
+  },
+  {
+    id: "2026-06-22-calendar-os-gc7",
+    date: "2026-06-22",
+    tag: "calendar-os",
+    title: "GC-7 — Google sync conflict review queue deployed",
+    summary:
+      "Conflict and duplicate review queue for inbound Google Calendar events — platform and tenant admin approve/reject workflow before FI booking import.",
+    modules: ["CalendarOS", "ClinicOS"],
+  },
   {
     id: "2026-06-26-vie-5-longitudinal-comparison",
     date: "2026-06-26",
@@ -636,7 +856,7 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
 export function getPlatformProgressModulesHeadline(
   modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
 ): string {
-  return `${modules.length} connected systems. One delivery spine.`;
+  return `${modules.length} Interconnected Intelligence Systems`;
 }
 
 export function getPlatformProgressHomepageDescription(

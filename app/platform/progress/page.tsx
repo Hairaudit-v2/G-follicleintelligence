@@ -3,11 +3,11 @@ import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { SITE_SEO_KEYWORDS } from "@/lib/structured-data";
 
 export const metadata = buildPageMetadata({
-  title: "Platform Progress | Live FI OS Delivery Status | Follicle Intelligence",
+  title: "Platform Progress | FI Intelligence Infrastructure | Follicle Intelligence",
   description:
-    "Live development progress across Follicle Intelligence modules — FoundationOS, ReceptionOS, ConsultationOS, FinancialOS, SurgeryOS, ImagingOS, PatientOS, AuditOS, AcademyOS, AnalyticsOS, ClinicOS, and WorkforceOS.",
+    "Live engineering progress across 20 interconnected Follicle Intelligence systems — FoundationOS, ClinicOS, VIE, SurgeryOS, CalendarOS, Event Bus, AI Intelligence Layer, and the infrastructure substrate for hair restoration medicine.",
   path: "/platform/progress",
-  keywords: [...SITE_SEO_KEYWORDS, "platform progress", "FI OS delivery status"],
+  keywords: [...SITE_SEO_KEYWORDS, "platform progress", "FI intelligence infrastructure", "hair restoration operating system"],
 });
 
 export default function PlatformProgressPage() {

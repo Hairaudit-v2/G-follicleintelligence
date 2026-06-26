@@ -41,7 +41,13 @@ export const PLATFORM_PROGRESS_STATUS_STYLES: Record<
   },
 };
 
-export function PlatformProgressStatusBadge({ status }: { status: PlatformProgressStatus }) {
+export function PlatformProgressStatusBadge({
+  status,
+  label,
+}: {
+  status: PlatformProgressStatus;
+  label?: string;
+}) {
   const styles = PLATFORM_PROGRESS_STATUS_STYLES[status];
   return (
     <span
@@ -51,7 +57,7 @@ export function PlatformProgressStatusBadge({ status }: { status: PlatformProgre
       )}
     >
       <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", styles.dot)} aria-hidden />
-      {status}
+      {label ?? status}
     </span>
   );
 }

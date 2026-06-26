@@ -19,6 +19,7 @@ import type {
   SurgeryOsViePhaseCaptureStatus,
 } from "./surgeryOsVieCapture.types";
 import type { VieComparisonPair } from "@/src/lib/vie/vieComparisonTypes";
+import type { VieAlignmentResultRow } from "@/src/lib/vie/vieAlignmentTypes";
 import { deriveSurgeryComparisonStatus } from "@/src/lib/vie/vieLongitudinalComparisonCore";
 
 const GRAFT_TRAY_SLOTS = ["graft_tray_overview", "graft_tray_close"] as const;
@@ -110,7 +111,61 @@ export function buildSurgeryOsViePhaseStatuses(progress: Record<string, unknown>
   });
 }
 
-export function deriveSurgeryOsVieWarnings(progress: Record<string, unknown>): SurgeryOsVieCaptureWarning[] {
+const DONOR_ALIGNMENT_SLOTS = ["donor_before_extraction", "donor_final_extraction"] as const;
+const IMMEDIATE_POST_OP_FRONT_SLOTS = ["immediate_post_op_front", "postop_front"] as const;
+
+function alignmentBySlotFromResults(
+  alignmentResults: VieAlignmentResultRow[],
+  slotSlug: string
+): VieAlignmentResultRow | null {
+  return (
+    alignmentResults.find((r) => {
+      const metaSlot = r.metadata.protocol_slot_slug;
+      return typeof metaSlot === "string" && metaSlot === slotSlug;
+    }) ?? null
+  );
+}
+
+export function deriveSurgeryAlignmentWarnings(
+  progress: Record<string, unknown>,
+  alignmentResults: VieAlignmentResultRow[] = []
+): SurgeryOsVieCaptureWarning[] {
+  const warnings: SurgeryOsVieCaptureWarning[] = [];
+  const poorStatuses = new Set(["poor", "retake_recommended"]);
+
+  for (const slotSlug of DONOR_ALIGNMENT_SLOTS) {
+    if (!slotAccepted(slotSlug, progress)) continue;
+    const alignment = alignmentBySlotFromResults(alignmentResults, slotSlug);
+    if (alignment && poorStatuses.has(alignment.alignment_status)) {
+      warnings.push({
+        kind: "donor_alignment_inconsistent",
+        label: `Donor documentation alignment inconsistent (${slotSlug.replace(/_/g, " ")} — ${alignment.alignment_score}%)`,
+        severity: "warning",
+        slotSlug,
+      });
+    }
+  }
+
+  for (const slotSlug of IMMEDIATE_POST_OP_FRONT_SLOTS) {
+    if (!slotAccepted(slotSlug, progress)) continue;
+    const alignment = alignmentBySlotFromResults(alignmentResults, slotSlug);
+    if (alignment && poorStatuses.has(alignment.alignment_status)) {
+      warnings.push({
+        kind: "immediate_post_op_alignment_inconsistent",
+        label: `Immediate post-op front alignment inconsistent (${alignment.alignment_score}%)`,
+        severity: "warning",
+        slotSlug,
+      });
+    }
+  }
+
+  return warnings;
+}
+
+export function deriveSurgeryOsVieWarnings(
+  progress: Record<string, unknown>,
+  alignmentResults: VieAlignmentResultRow[] = []
+): SurgeryOsVieCaptureWarning[] {
   const warnings: SurgeryOsVieCaptureWarning[] = [];
   const meta = parseProgressMeta(progress);
 
@@ -154,6 +209,8 @@ export function deriveSurgeryOsVieWarnings(progress: Record<string, unknown>): S
     }
   }
 
+  warnings.push(...deriveSurgeryAlignmentWarnings(progress, alignmentResults));
+
   return warnings;
 }
 
@@ -167,6 +224,7 @@ export function buildSurgeryOsVieCaptureSummary(input: {
   sessionId: string | null;
   progress: Record<string, unknown>;
   comparisonPairs?: VieComparisonPair[];
+  alignmentResults?: VieAlignmentResultRow[];
 }): SurgeryOsVieCaptureSummary {
   const sessions = [{ template_slug: "surgery_day", progress: input.progress }];
   const surgical = computeSurgicalDocumentationCompleteness(sessions);
@@ -191,7 +249,7 @@ export function buildSurgeryOsVieCaptureSummary(input: {
     graftTrayStatus: evidenceGroupStatus(GRAFT_TRAY_SLOTS, input.progress),
     immediatePostOpStatus: evidenceGroupStatus(IMMEDIATE_POST_OP_REQUIRED_SLOTS, input.progress),
     phases: buildSurgeryOsViePhaseStatuses(input.progress),
-    warnings: deriveSurgeryOsVieWarnings(input.progress),
+    warnings: deriveSurgeryOsVieWarnings(input.progress, input.alignmentResults ?? []),
     nextRecommendedSlot: globalNextSlug,
     nextRecommendedSlotLabel: globalNextLabel,
     comparisonStatus: deriveSurgeryComparisonStatus(input.comparisonPairs ?? []),

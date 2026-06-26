@@ -35,7 +35,7 @@ export function DashboardPlatformDevelopmentProgress() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-mono text-sm font-semibold tabular-nums text-cyan-300/90">{mod.completionPercent}%</span>
-                <PlatformProgressStatusBadge status={mod.status} />
+                <PlatformProgressStatusBadge status={mod.status} label={mod.statusLabel} />
               </div>
             </div>
             <div className="mt-2.5">

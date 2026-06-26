@@ -327,7 +327,7 @@ export function ImagingOsWorkspace({
           <div>
             <h2 className="text-sm font-semibold text-gray-900">Suggested comparison pairs</h2>
             <p className="mt-1 text-xs text-gray-600">
-              Auto-matched from accepted VIE protocol captures — metadata and quality heuristics only (angle alignment pending AI).
+              Auto-matched from accepted VIE protocol captures — metadata heuristics and same-angle alignment scoring (AI vision pending).
             </p>
             <div className="mt-4">
               <VieComparisonSuggestionsPanel

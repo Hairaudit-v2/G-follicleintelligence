@@ -16,6 +16,7 @@ import {
 } from "@/src/lib/vie/vieGuidedCapture.server";
 import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
 import { runVieInstantIntelligence } from "@/src/lib/vie/vieInstantIntelligence.server";
+import { previewVieSameAngleAlignment } from "@/src/lib/vie/vieSameAngleAlignment.server";
 import { buildVieSurgeryImageMetadata, isVieCaptureSource } from "@/src/lib/surgeryOs/surgeryOsVieCaptureCore";
 
 export const dynamic = "force-dynamic";
@@ -213,6 +214,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
         const policy = await loadVieCapturePolicyForTenant(tid);
         const vie_capture_review = buildCaptureReviewPayload(intel, policy);
+        try {
+          vie_capture_review.alignment_preview = await previewVieSameAngleAlignment({
+            tenantId: tid,
+            patientId: pid,
+            imageId: result.row.id,
+          });
+        } catch {
+          vie_capture_review.alignment_preview = null;
+        }
 
         revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
         revalidatePath(`/fi-admin/${tid}/patients/${pid}`);

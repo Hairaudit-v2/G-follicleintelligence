@@ -272,4 +272,6 @@ export type VieInstantIntelligenceResult = {
 export type VieCaptureReviewPayload = VieInstantIntelligenceResult & {
   review: VieCaptureReviewDecision;
   policy: VieCapturePolicySnapshot;
+  /** Phase 6 — same-angle alignment preview vs best historical reference (deterministic). */
+  alignment_preview?: import("./vieAlignmentTypes").VieSameAngleAlignmentResult | null;
 };

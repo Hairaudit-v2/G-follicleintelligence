@@ -16,6 +16,10 @@ import {
   buildVieProgressionTimeline,
   generateVieComparisonPairs,
 } from "./vieLongitudinalComparisonCore";
+import {
+  enrichComparisonPairWithAlignment,
+  loadAlignmentResultsByImageIds,
+} from "./vieSameAngleAlignment.server";
 
 function mapPairRow(row: Record<string, unknown>): VieComparisonPairRow {
   const metadata =
@@ -279,7 +283,15 @@ export async function loadVieComparisonPairsForPatient(
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row) => mapPairRow(row as Record<string, unknown>));
+  const rows = (data ?? []).map((row) => mapPairRow(row as Record<string, unknown>));
+
+  const imageIds = [...new Set(rows.flatMap((p) => [p.before_image_id, p.after_image_id]))];
+  const alignmentByImageId = await loadAlignmentResultsByImageIds(tenantId, imageIds, supabase);
+
+  return rows.map((pair) => ({
+    ...pair,
+    alignment: enrichComparisonPairWithAlignment(pair, alignmentByImageId),
+  }));
 }
 
 export async function loadVieComparisonTimelineForPatient(

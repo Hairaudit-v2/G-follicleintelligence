@@ -11,6 +11,7 @@ import type { SurgeryOsVieCaptureSummary } from "./surgeryOsVieCapture.types";
 import { generateVieComparisonPairs } from "@/src/lib/vie/vieLongitudinalComparisonCore";
 import { loadVieComparisonCaptureRecords } from "@/src/lib/vie/vieLongitudinalComparison.server";
 import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
+import { loadVieAlignmentResultsForPatient } from "@/src/lib/vie/vieSameAngleAlignment.server";
 
 type SessionRow = {
   id: string;
@@ -200,6 +201,7 @@ export async function loadSurgeryOsVieCaptureSummaries(
         const procedureDayId = surgery.caseId ? procedureDayByCase.get(surgery.caseId) ?? null : null;
 
         let comparisonPairs: Awaited<ReturnType<typeof generateVieComparisonPairs>> = [];
+        let alignmentResults: Awaited<ReturnType<typeof loadVieAlignmentResultsForPatient>> = [];
         try {
           const policy = await loadVieCapturePolicyForTenant(tid, supabase);
           const records = await loadVieComparisonCaptureRecords(
@@ -209,6 +211,7 @@ export async function loadSurgeryOsVieCaptureSummaries(
             supabase
           );
           comparisonPairs = generateVieComparisonPairs(records, policy.minimum_capture_quality_score);
+          alignmentResults = await loadVieAlignmentResultsForPatient(tid, surgery.patientId, supabase);
         } catch {
           // best-effort
         }
@@ -223,6 +226,7 @@ export async function loadSurgeryOsVieCaptureSummaries(
           sessionId: session?.id ?? null,
           progress,
           comparisonPairs,
+          alignmentResults,
         });
       })
   );

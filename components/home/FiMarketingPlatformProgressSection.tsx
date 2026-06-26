@@ -132,7 +132,7 @@ export function FiMarketingPlatformProgressSection() {
                           {mod.name}
                         </h3>
                       </div>
-                      <PlatformProgressStatusBadge status={mod.status} />
+                      <PlatformProgressStatusBadge status={mod.status} label={mod.statusLabel} />
                     </div>
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                       <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">

@@ -10,6 +10,7 @@ import {
   type VieComparisonPairRow,
   type VieComparisonRecommendedUse,
 } from "@/src/lib/vie/vieComparisonTypes";
+import type { VieAlignmentStatus } from "@/src/lib/vie/vieAlignmentTypes";
 import { journeyStageLabel } from "@/src/lib/vie/vieLongitudinalComparisonCore";
 import type { PatientImageProfileTile } from "@/src/lib/patientImages/patientImageTypes";
 
@@ -18,6 +19,16 @@ function confidenceClass(band: VieComparisonConfidenceBand): string {
   if (band === "medium") return "text-amber-800 bg-amber-50 border-amber-200";
   return "text-rose-700 bg-rose-50 border-rose-200";
 }
+
+function alignmentStatusClass(status: VieAlignmentStatus): string {
+  if (status === "excellent") return "text-emerald-700 bg-emerald-50 border-emerald-200";
+  if (status === "acceptable") return "text-cyan-800 bg-cyan-50 border-cyan-200";
+  if (status === "poor") return "text-amber-800 bg-amber-50 border-amber-200";
+  if (status === "retake_recommended") return "text-rose-700 bg-rose-50 border-rose-200";
+  return "text-gray-600 bg-gray-50 border-gray-200";
+}
+
+type AlignmentFilter = "" | "high_alignment" | "poor_alignment" | "standardized_evidence";
 
 function categoryLabel(cat: string): string {
   return cat.replace(/_/g, " ");
@@ -42,6 +53,7 @@ export function VieComparisonSuggestionsPanel({
   const [categoryFilter, setCategoryFilter] = useState("");
   const [useFilter, setUseFilter] = useState<VieComparisonRecommendedUse | "">("");
   const [confidenceFilter, setConfidenceFilter] = useState<VieComparisonConfidenceBand | "">("");
+  const [alignmentFilter, setAlignmentFilter] = useState<AlignmentFilter>("");
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -57,9 +69,18 @@ export function VieComparisonSuggestionsPanel({
       if (categoryFilter && p.comparison_category !== categoryFilter) return false;
       if (useFilter && !p.recommended_use.includes(useFilter)) return false;
       if (confidenceFilter && p.confidence_band !== confidenceFilter) return false;
+      if (alignmentFilter === "high_alignment") {
+        const score = p.alignment?.alignment_score;
+        if (score == null || score < 70) return false;
+      }
+      if (alignmentFilter === "poor_alignment") {
+        const status = p.alignment?.alignment_status;
+        if (status !== "poor" && status !== "retake_recommended") return false;
+      }
+      if (alignmentFilter === "standardized_evidence" && !p.alignment?.is_standardized_evidence) return false;
       return true;
     });
-  }, [pairs, regionFilter, categoryFilter, useFilter, confidenceFilter]);
+  }, [pairs, regionFilter, categoryFilter, useFilter, confidenceFilter, alignmentFilter]);
 
   const onReview = (pairId: string, reviewStatus: "accepted" | "dismissed") => {
     setMsg(null);
@@ -138,6 +159,17 @@ export function VieComparisonSuggestionsPanel({
           <option value="medium">Medium</option>
           <option value="low">Low</option>
         </select>
+        <select
+          className="rounded border border-gray-300 bg-white px-2 py-1 text-xs"
+          value={alignmentFilter}
+          onChange={(e) => setAlignmentFilter(e.target.value as AlignmentFilter)}
+          aria-label="Filter by alignment"
+        >
+          <option value="">All alignment</option>
+          <option value="high_alignment">High alignment only</option>
+          <option value="poor_alignment">Poor alignment only</option>
+          <option value="standardized_evidence">Standardized evidence only</option>
+        </select>
       </div>
 
       {msg ? <p className="text-xs text-red-600">{msg}</p> : null}
@@ -159,11 +191,22 @@ export function VieComparisonSuggestionsPanel({
                     {journeyStageLabel(pair.before_timepoint)} → {journeyStageLabel(pair.after_timepoint)}
                   </p>
                 </div>
-                <span
-                  className={`rounded border px-2 py-0.5 text-xs font-medium ${confidenceClass(pair.confidence_band)}`}
-                >
-                  {pair.confidence_band} confidence
-                </span>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded border px-2 py-0.5 text-xs font-medium ${confidenceClass(pair.confidence_band)}`}
+                    >
+                      {pair.confidence_band} confidence
+                    </span>
+                    {pair.alignment?.alignment_status ? (
+                      <span
+                        className={`rounded border px-2 py-0.5 text-xs font-medium capitalize ${alignmentStatusClass(pair.alignment.alignment_status)}`}
+                      >
+                        {pair.alignment.alignment_status.replace(/_/g, " ")}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
               </div>
 
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -194,6 +237,14 @@ export function VieComparisonSuggestionsPanel({
                 <div>
                   <dt className="font-medium text-gray-500">Quality match</dt>
                   <dd>{pair.quality_match_score}/100</dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-gray-500">Alignment score</dt>
+                  <dd>{pair.alignment?.alignment_score != null ? `${pair.alignment.alignment_score}%` : "—"}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-gray-500">Alignment confidence</dt>
+                  <dd>{pair.alignment?.confidence_band ?? "—"}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-500">Framing</dt>

@@ -203,7 +203,11 @@ export async function acceptVieProtocolCapture(params: {
   qualityOverride?: boolean;
   acceptedByUserId?: string | null;
   client?: SupabaseClient;
-}): Promise<{ guided_session: VieGuidedSessionApi; review: VieCaptureReviewPayload["review"] }> {
+}): Promise<{
+  guided_session: VieGuidedSessionApi;
+  review: VieCaptureReviewPayload["review"];
+  accepted_image_id?: string;
+}> {
   const supabase = params.client ?? supabaseAdmin();
   const tid = params.tenantId.trim();
   const pid = params.patientId.trim();
@@ -314,6 +318,7 @@ export async function acceptVieProtocolCapture(params: {
   return {
     guided_session: buildGuidedSessionApi(tpl.slots, next),
     review: { allowed: true, requires_override: review.requires_override, reason: null },
+    accepted_image_id: pending.patient_image_id,
   };
 }
 

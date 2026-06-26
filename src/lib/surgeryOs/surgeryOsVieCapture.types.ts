@@ -6,7 +6,9 @@ export type SurgeryOsVieCaptureWarningKind =
   | "missing_graft_tray_overview"
   | "missing_graft_tray_close"
   | "missing_immediate_post_op"
-  | "pending_low_quality";
+  | "pending_low_quality"
+  | "donor_alignment_inconsistent"
+  | "immediate_post_op_alignment_inconsistent";
 
 export type SurgeryOsVieCaptureWarning = {
   kind: SurgeryOsVieCaptureWarningKind;

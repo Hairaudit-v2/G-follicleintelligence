@@ -7,6 +7,7 @@ import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/
 import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 import { acceptVieProtocolCapture } from "@/src/lib/vie/vieGuidedCapture.server";
 import { regenerateVieComparisonsBestEffort } from "@/src/lib/vie/vieLongitudinalComparison.server";
+import { evaluateVieAlignmentBestEffort } from "@/src/lib/vie/vieSameAngleAlignment.server";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
     if (!result.review.allowed) {
       return crmJsonError(409, result.review.reason ?? "Capture cannot be accepted.");
+    }
+
+    if (result.accepted_image_id) {
+      await evaluateVieAlignmentBestEffort({
+        tenantId: tid,
+        patientId: pid,
+        imageId: result.accepted_image_id,
+      });
     }
 
     await regenerateVieComparisonsBestEffort({ tenantId: tid, patientId: pid });

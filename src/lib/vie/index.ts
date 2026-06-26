@@ -125,3 +125,39 @@ export {
   regenerateVieComparisonsBestEffort,
   updateVieComparisonReviewStatus,
 } from "./vieLongitudinalComparison.server";
+
+export {
+  VIE_ALIGNMENT_ENGINE_VERSION,
+  VIE_ALIGNMENT_STATUSES,
+} from "./vieAlignmentTypes";
+export type {
+  VieAlignmentResultRow,
+  VieAlignmentStatus,
+  VieCaptureReferenceGuidance,
+  VieCaptureStandardizationMetadata,
+  VieComparisonPairAlignment,
+  ViePatientTwinAlignmentSummary,
+  VieSameAngleAlignmentResult,
+} from "./vieAlignmentTypes";
+
+export {
+  buildCaptureReferenceGuidance,
+  buildCaptureStandardizationMetadata,
+  buildPatientTwinAlignmentSummary,
+  deriveCaptureOrientation,
+  evaluateSameAngleAlignment,
+  formatReferenceComparisonLabel,
+  isStandardizedEvidence,
+  selectBestReferenceImage,
+} from "./vieSameAngleAlignmentCore";
+
+export {
+  evaluateAndPersistVieAlignment,
+  evaluateVieAlignmentBestEffort,
+  loadAlignmentResultsByImageIds,
+  loadPatientTwinAlignmentSummary,
+  loadVieAlignmentResultForImage,
+  loadVieAlignmentResultsForPatient,
+  loadVieCaptureReferenceGuidance,
+  previewVieSameAngleAlignment,
+} from "./vieSameAngleAlignment.server";

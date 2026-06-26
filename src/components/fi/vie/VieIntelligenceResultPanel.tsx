@@ -2,7 +2,17 @@
 
 import { AlertTriangle, CheckCircle2, RotateCcw, XCircle } from "lucide-react";
 
+import type { VieSameAngleAlignmentResult } from "@/src/lib/vie/vieAlignmentTypes";
+import { formatReferenceComparisonLabel } from "@/src/lib/vie/vieSameAngleAlignmentCore";
 import type { VieCaptureReviewPayload } from "@/src/lib/vie/vieProtocolTypes";
+
+function alignmentStatusTone(status: VieSameAngleAlignmentResult["alignment_status"]): string {
+  if (status === "excellent") return "border-emerald-200 bg-emerald-50 text-emerald-900";
+  if (status === "acceptable") return "border-cyan-200 bg-cyan-50 text-cyan-900";
+  if (status === "poor") return "border-amber-200 bg-amber-50 text-amber-900";
+  if (status === "retake_recommended") return "border-red-200 bg-red-50 text-red-900";
+  return "border-gray-200 bg-gray-50 text-gray-700";
+}
 
 function statusTone(status: string): { className: string; icon: "pass" | "warn" | "fail" | "pending" } {
   if (status === "heuristic_pass" || status === "stub_pass" || status === "stub_match") {
@@ -88,6 +98,34 @@ export function VieIntelligenceResultPanel({
           message={review.lighting_verification.message}
         />
       </ul>
+
+      {review.alignment_preview && review.alignment_preview.reference_image_id ? (
+        <div className={`rounded-md border px-3 py-2 ${alignmentStatusTone(review.alignment_preview.alignment_status)}`}>
+          <p className="text-xs font-semibold uppercase tracking-wide">Reference comparison available</p>
+          <p className="mt-1 text-sm">
+            {formatReferenceComparisonLabel(
+              review.alignment_preview.reference_slot_label,
+              review.alignment_preview.days_since_reference
+            )}
+          </p>
+          <p className="mt-1 text-sm">
+            Alignment score: <span className="font-semibold tabular-nums">{review.alignment_preview.alignment_score}%</span>
+          </p>
+          <p className="text-sm capitalize">
+            Status: {review.alignment_preview.alignment_status.replace(/_/g, " ")}
+          </p>
+          {review.alignment_preview.warnings.length > 0 ? (
+            <div className="mt-2">
+              <p className="text-xs font-semibold uppercase tracking-wide">Warnings</p>
+              <ul className="mt-1 list-inside list-disc text-xs">
+                {review.alignment_preview.warnings.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {usability.warnings.length > 0 ? (
         <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2">

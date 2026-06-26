@@ -22,6 +22,7 @@ import type {
   VieProtocolSlotDef,
   VieSlotTier,
 } from "@/src/lib/vie/vieProtocolTypes";
+import type { VieCaptureReferenceGuidance } from "@/src/lib/vie/vieAlignmentTypes";
 import type { FiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionTypes";
 import { VieCaptureGuideOverlay } from "./VieCaptureGuideOverlay";
 import { VieIntelligenceResultPanel } from "./VieIntelligenceResultPanel";
@@ -184,6 +185,7 @@ export function VieCaptureWizard({
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [captureReview, setCaptureReview] = useState<VieCaptureReviewPayload | null>(null);
   const [reviewSlotSlug, setReviewSlotSlug] = useState<string | null>(null);
+  const [referenceGuidance, setReferenceGuidance] = useState<VieCaptureReferenceGuidance | null>(null);
   const camRef = useRef<HTMLInputElement>(null);
 
   const protocol = useMemo(() => getVieProtocol(templateSlug), [templateSlug]);
@@ -214,6 +216,40 @@ export function VieCaptureWizard({
   useEffect(() => {
     setProgress(initialProgress);
   }, [initialProgress]);
+
+  useEffect(() => {
+    if (!currentSlug || awaitingReview) {
+      setReferenceGuidance(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const params = new URLSearchParams({
+          protocol_template_slug: templateSlug,
+          protocol_slot_slug: currentSlug,
+        });
+        const res = await fetch(
+          `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/vie/capture/reference?${params}`,
+          { credentials: "include" }
+        );
+        const j = (await res.json().catch(() => ({}))) as {
+          ok?: boolean;
+          guidance?: VieCaptureReferenceGuidance;
+        };
+        if (!cancelled && res.ok && j.ok && j.guidance) {
+          setReferenceGuidance(j.guidance);
+        } else if (!cancelled) {
+          setReferenceGuidance(null);
+        }
+      } catch {
+        if (!cancelled) setReferenceGuidance(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [awaitingReview, currentSlug, patientId, templateSlug, tenantId]);
 
   const syncProgressFromServer = useCallback((nextProgress: SlotProgress, g?: GuidedApi) => {
     setProgress(nextProgress);
@@ -437,6 +473,23 @@ export function VieCaptureWizard({
             {currentSlot.framing === "close_up" ? "Close-up" : "Overview"} · {currentSlot.capture_distance_hint}
             {currentSlot.suggested_timing ? ` · ${currentSlot.suggested_timing}` : null}
           </p>
+          {referenceGuidance?.has_reference ? (
+            <div className="mt-3 rounded-md border border-cyan-500/30 bg-cyan-950/40 px-3 py-2 text-left">
+              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">Try to match prior image</p>
+              {referenceGuidance.reference_slot_label && referenceGuidance.days_since_reference != null ? (
+                <p className="mt-1 text-xs text-cyan-100/90">
+                  Reference: {referenceGuidance.reference_slot_label} ({referenceGuidance.days_since_reference} day
+                  {referenceGuidance.days_since_reference === 1 ? "" : "s"} ago)
+                </p>
+              ) : null}
+              <ul className="mt-2 list-inside list-disc text-xs text-slate-300">
+                <li>Same distance</li>
+                <li>Same framing</li>
+                <li>Same patient head angle</li>
+                <li>Same camera height</li>
+              </ul>
+            </div>
+          ) : null}
           <div className="mt-4">
             <VieCaptureGuideOverlay guide={captureGuide} />
           </div>

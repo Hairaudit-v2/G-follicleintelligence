@@ -87,6 +87,28 @@ export function PatientTwinVieCard({
       )}
 
       <div className="mt-4 rounded-md bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06]">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">Alignment consistency</p>
+        <p className="mt-1 text-sm text-slate-200">
+          Score {vie.alignment_summary.alignment_consistency_score}%
+          {vie.alignment_summary.standardized_evidence_coverage_percent > 0
+            ? ` · ${vie.alignment_summary.standardized_evidence_coverage_percent}% standardized evidence`
+            : ""}
+        </p>
+        {vie.alignment_summary.regions_with_poor_consistency.length > 0 ? (
+          <p className="mt-1 text-xs text-amber-400">
+            Poor consistency: {vie.alignment_summary.regions_with_poor_consistency.map((r) => r.replace(/_/g, " ")).join(", ")}
+          </p>
+        ) : (
+          <p className="mt-1 text-xs text-slate-500">No regions flagged for poor alignment consistency</p>
+        )}
+        {vie.alignment_summary.next_recommended_standardized_recapture.slot_label ? (
+          <p className="mt-1 text-xs text-cyan-300/90">
+            Recapture: {vie.alignment_summary.next_recommended_standardized_recapture.slot_label}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-4 rounded-md bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06]">
         <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">Comparison readiness</p>
         <p className="mt-1 text-sm text-slate-200">
           {vie.comparison_readiness.suggested_pairs_count} suggested pair

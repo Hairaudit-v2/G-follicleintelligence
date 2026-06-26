@@ -48,7 +48,7 @@ export const VIE_COMPARISON_CONFIDENCE_BANDS = ["high", "medium", "low"] as cons
 
 export type VieComparisonConfidenceBand = (typeof VIE_COMPARISON_CONFIDENCE_BANDS)[number];
 
-export type VieAngleMatchStatus = "pending_ai";
+export type VieAngleMatchStatus = "pending_ai" | "pending_ai_vision";
 
 export type VieFramingMatchStatus = "match" | "mismatch" | "unknown";
 
@@ -143,7 +143,6 @@ export type VieSurgeryComparisonStatus = {
   immediate_post_op_pair: "ready" | "partial" | "missing";
 };
 
-/** Persisted row shape (DB + loader). */
 export type VieComparisonPairRow = VieComparisonPair & {
   id: string;
   tenant_id: string;
@@ -151,4 +150,6 @@ export type VieComparisonPairRow = VieComparisonPair & {
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+  /** Phase 6 — alignment enrichment for after image vs before reference. */
+  alignment?: import("./vieAlignmentTypes").VieComparisonPairAlignment;
 };
