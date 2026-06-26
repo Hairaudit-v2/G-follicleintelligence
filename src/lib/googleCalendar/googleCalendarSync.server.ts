@@ -377,6 +377,19 @@ export async function handleGoogleCalendarSyncCronGet(
   );
   if (auth) return auth;
 
+  if (getEnv("FI_GOOGLE_CALENDAR_SYNC_CRON_DISABLED") === "1") {
+    logStructured("warn", "google_calendar_sync_cron_disabled", { reason: "FI_GOOGLE_CALENDAR_SYNC_CRON_DISABLED" });
+    const body: GoogleCalendarSyncCronResponse = {
+      success: true,
+      synced: 0,
+      failed: 0,
+      skipped: 0,
+      tenants: [],
+      source: "vercel_cron",
+    };
+    return NextResponse.json(body);
+  }
+
   const parsed = parseCronQueryParams(req);
   if (parsed instanceof NextResponse) return parsed;
 
