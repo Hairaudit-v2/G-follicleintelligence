@@ -369,6 +369,11 @@ export async function loadPatientOsOverview(
   const nowIso = now.toISOString();
   const todayYmd = dashboardTodayYmd(now);
   const thirtyAgo = new Date(now.getTime() - 30 * MS_DAY).toISOString();
+  // SA-2 field-level redaction (follow-up): for any patient rows surfaced in the overview that
+  // carry identity / contact / financial_summary, redact with `redactPatientForStaffAccess`
+  // from `@/src/lib/staffAccess/staffFieldAccess.server` for the current viewer before render.
+  // Apply at the render boundary so masked/summary placeholders don't reach typed consumers.
+  // Field access is clamped to PatientOS module access by the engine.
 
   const summaryPromise = opts?.summary ? Promise.resolve(opts.summary) : loadPatientDirectorySummary(tid);
 
