@@ -17,20 +17,38 @@ import { ArrowRight, ChevronRight, GitBranch } from "lucide-react";
 const c = ECOSYSTEM_ARCHITECTURE_PAGE_CONTENT;
 const ecosystemLayers = HOME_PAGE_CONTENT.onePlatform.layers;
 
+/**
+ * Stable anchor id for an OS module card, e.g. `PatientOS` → `patient-os`, `LeadFlow` → `leadflow`.
+ * These are the link targets used by the homepage platform-system cards
+ * (`/platform/ecosystem#<id>`).
+ */
+function moduleAnchorId(name: string): string {
+  const trimmed = name.trim();
+  if (/OS$/.test(trimmed)) return `${trimmed.slice(0, -2).toLowerCase()}-os`;
+  return trimmed
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function OsModuleCard({ index, name, description }: { index: number; name: string; description: string }) {
   return (
-    <GlassCard variant="os" className="group flex h-full min-h-[10.5rem] flex-col sm:min-h-[11.5rem]">
-      <div className="flex items-center border-b border-white/[0.07] pb-3">
-        <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
-      </div>
-      <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
-        {name}
-      </p>
-      <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
-    </GlassCard>
+    // Wrapper carries the stable anchor id + scroll offset so deep links from the homepage land
+    // below the sticky header without overlap (scroll-margin causes no layout shift).
+    <div id={moduleAnchorId(name)} className="h-full scroll-mt-28">
+      <GlassCard variant="os" className="group flex h-full min-h-[10.5rem] flex-col sm:min-h-[11.5rem]">
+        <div className="flex items-center border-b border-white/[0.07] pb-3">
+          <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/55">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span className="ml-auto h-px w-12 bg-gradient-to-r from-amber-400/45 to-transparent" aria-hidden />
+        </div>
+        <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-amber-100/95 transition-colors group-hover:text-amber-50">
+          {name}
+        </p>
+        <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
+      </GlassCard>
+    </div>
   );
 }
 

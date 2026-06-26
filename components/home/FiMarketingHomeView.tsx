@@ -13,6 +13,22 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 
 const c = HOME_V5_CONTENT;
 
+/**
+ * Maps each homepage platform-system card to its anchored section on the ecosystem page
+ * (`/platform/ecosystem#<id>`). Anchors are defined on the corresponding module cards in
+ * `EcosystemArchitectureView`. Names not present here render as a non-linked card.
+ */
+const PLATFORM_SYSTEM_ECOSYSTEM_ANCHOR: Record<string, string> = {
+  LeadFlow: "leadflow",
+  PatientOS: "patient-os",
+  ConsultationOS: "consultation-os",
+  SurgeryOS: "surgery-os",
+  ImagingOS: "imaging-os",
+  WorkforceOS: "workforce-os",
+  AnalyticsOS: "analytics-os",
+  AuditOS: "audit-os",
+};
+
 function HeroMetricsRow() {
   return (
     <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -77,20 +93,43 @@ function PlatformSystemCard({
   system: (typeof c.platformSystems.systems)[number];
   index: number;
 }) {
+  const anchor = PLATFORM_SYSTEM_ECOSYSTEM_ANCHOR[system.name];
+  const href = anchor ? `/platform/ecosystem#${anchor}` : null;
+
+  const card = (
+    <GlassCard
+      variant="os"
+      className={cn(
+        "group flex h-full flex-col border-white/[0.06] p-6 transition-[border-color,transform,box-shadow] duration-300 sm:p-7",
+        // Subtle hover affordance, consistent with the progress-page system:
+        // border brightening + slight background lift, no loud animation.
+        "hover:border-amber-400/20",
+        href && "group-hover/card:border-amber-400/20 group-hover/card:bg-white/[0.015]"
+      )}
+    >
+      <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/45">
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+        {system.name}
+      </h3>
+      <p className="mt-4 flex-1 text-sm leading-[1.7] text-muted-foreground">{system.description}</p>
+    </GlassCard>
+  );
+
   return (
     <FadeIn delay={0.02 * (index % 8)}>
-      <GlassCard
-        variant="os"
-        className="group flex h-full flex-col border-white/[0.06] p-6 transition-[border-color,transform,box-shadow] duration-300 hover:border-amber-400/20 sm:p-7"
-      >
-        <span className="font-mono text-[10px] font-semibold uppercase tabular-nums tracking-[0.22em] text-amber-200/45">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl">
-          {system.name}
-        </h3>
-        <p className="mt-4 flex-1 text-sm leading-[1.7] text-muted-foreground">{system.description}</p>
-      </GlassCard>
+      {href ? (
+        <Link
+          href={href}
+          aria-label={`Explore ${system.name} in the Follicle Intelligence ecosystem`}
+          className="group/card block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          {card}
+        </Link>
+      ) : (
+        card
+      )}
     </FadeIn>
   );
 }
@@ -465,7 +504,7 @@ export function FiMarketingHomeView() {
       {/* Section 8 — Staff intelligence */}
       <Section
         id={c.staffIntelligence.id}
-        className="border-b border-border/40 bg-background py-24 sm:py-28 md:py-32"
+        className="scroll-mt-24 border-b border-border/40 bg-background py-24 sm:py-28 md:py-32"
         aria-labelledby={`${c.staffIntelligence.id}-heading`}
       >
         <FadeIn>
@@ -489,7 +528,7 @@ export function FiMarketingHomeView() {
       {/* Section 9 — Credibility */}
       <Section
         id={c.credibility.id}
-        className="border-b border-border/40 bg-muted/[0.04] py-24 sm:py-28 md:py-32"
+        className="scroll-mt-24 border-b border-border/40 bg-muted/[0.04] py-24 sm:py-28 md:py-32"
         aria-labelledby={`${c.credibility.id}-heading`}
       >
         <FadeIn>
@@ -510,7 +549,7 @@ export function FiMarketingHomeView() {
       {/* Section 10 — Future vision */}
       <section
         id={c.futureVision.id}
-        className="relative overflow-hidden bg-[#040810] py-28 sm:py-36 md:py-44"
+        className="relative scroll-mt-24 overflow-hidden bg-[#040810] py-28 sm:py-36 md:py-44"
         aria-labelledby={`${c.futureVision.id}-heading`}
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgb(212_175_55_/0.1),transparent_55%)]" />
