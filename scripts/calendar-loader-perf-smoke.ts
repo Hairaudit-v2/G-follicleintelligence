@@ -65,7 +65,10 @@ async function run(): Promise<void> {
   }
 
   console.info(
-    "\nEach scenario prints one [fi-calendar/server] line from the loader (duration, returnedBookingCount, listTruncated, hitOverlapDbCap, monthSummaryMode).\n" +
+    "\nEach scenario prints [fi-calendar/server] lines from the loader:\n" +
+      "  durationMs, subMs_fiBookings, subMs_fiCalendarEvents, subMs_providerLinks,\n" +
+      "  subMs_calendarOsMapping, subMs_mergeBucketGrouping, subMs_displayEnrichment,\n" +
+      "  rawCalendarOsEventCount, providerLinkCount, monthSummaryMode.\n" +
       "Browser manual pass: NEXT_PUBLIC_FI_CALENDAR_PERF=1 — count [fi-calendar/client:calendar-hydrate] on navigation only; drawer/panel toggles should not add hydrates."
   );
 }

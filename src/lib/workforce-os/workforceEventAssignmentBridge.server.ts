@@ -576,7 +576,14 @@ export async function loadEventStaffingSummary(input: LoadEventStaffingSummaryIn
 export async function loadClinicalStaffingSummariesForBookings(
   tenantId: string,
   bookings: FiBookingRow[],
-  options?: { syncExistingStaff?: boolean; allowBlockedDraft?: boolean }
+  options?: {
+    syncExistingStaff?: boolean;
+    allowBlockedDraft?: boolean;
+    /** When provided, skips the fi_booking_resource_assignments fetch (same map may be shared with display enrichment). */
+    preloadedResourceAssignments?:
+      | Map<string, FiBookingResourceAssignmentRow[]>
+      | Promise<Map<string, FiBookingResourceAssignmentRow[]>>;
+  }
 ): Promise<Map<string, ClinicalStaffingSummaryDto>> {
   const tid = assertNonEmptyUuid(tenantId, "tenantId");
   const out = new Map<string, ClinicalStaffingSummaryDto>();
@@ -584,7 +591,10 @@ export async function loadClinicalStaffingSummariesForBookings(
 
   const activeBookings = bookings.filter((b) => isBookingActiveForStaffing(b));
   const bookingIds = activeBookings.map((b) => b.id);
-  const resourceMap = await loadBookingResourceAssignmentsForBookings({ tenantId: tid, bookingIds });
+  const resourceMap =
+    options?.preloadedResourceAssignments != null
+      ? await options.preloadedResourceAssignments
+      : await loadBookingResourceAssignmentsForBookings({ tenantId: tid, bookingIds });
 
   if (options?.syncExistingStaff) {
     for (const booking of activeBookings) {
