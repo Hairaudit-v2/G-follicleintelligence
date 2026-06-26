@@ -51,6 +51,10 @@ export type GoogleCalendarInboundSyncNowSummary = {
   updated: number;
   skipped: number;
   failed: number;
+  reviewItemsCreated?: number;
+  reviewItemsUpdated?: number;
+  conflictsDetected?: number;
+  conflictsByType?: Record<string, number>;
   perCalendar: Array<{
     calendarId: string;
     calendarSummary: string | null;

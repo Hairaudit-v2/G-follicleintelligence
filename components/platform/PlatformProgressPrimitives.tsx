@@ -24,6 +24,11 @@ export const PLATFORM_PROGRESS_STATUS_STYLES: Record<
     dot: "bg-violet-400 shadow-[0_0_10px_rgb(167_139_250_/0.45)]",
     bar: "from-violet-400/85 via-fuchsia-400/55 to-violet-300/60",
   },
+  "Operational beta": {
+    badge: "border-sky-400/30 bg-sky-950/35 text-sky-100/95 shadow-[0_0_20px_rgb(56_189_248_/0.1)]",
+    dot: "bg-sky-400 shadow-[0_0_10px_rgb(56_189_248_/0.45)]",
+    bar: "from-sky-400/85 via-cyan-400/55 to-sky-300/60",
+  },
   "Active Development": {
     badge: "border-cyan-400/30 bg-cyan-950/30 text-cyan-100/95 shadow-[0_0_20px_rgb(34_211_238_/0.08)]",
     dot: "bg-cyan-400 shadow-[0_0_10px_rgb(34_211_238_/0.45)]",

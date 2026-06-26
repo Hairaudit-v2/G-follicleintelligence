@@ -32,13 +32,14 @@ function SyncNowSummaryPanel({ summary }: { summary: GoogleCalendarInboundSyncNo
   return (
     <div className="mt-3 space-y-3 rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
       <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Sync summary</p>
-      <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-7">
         {[
           { label: "Calendars scanned", value: summary.calendarsScanned },
           { label: "Fetched", value: summary.fetched },
           { label: "Inserted", value: summary.inserted },
           { label: "Updated", value: summary.updated },
           { label: "Skipped", value: summary.skipped },
+          { label: "Review staged", value: summary.conflictsDetected ?? 0 },
           { label: "Failed", value: summary.failed },
         ].map((item) => (
           <div key={item.label} className="rounded-lg border border-white/[0.04] px-2 py-1.5">

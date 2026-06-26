@@ -33,6 +33,11 @@ import {
   touchInboundSyncCalendarLastSynced,
   type GoogleInboundCalendarScope,
 } from "./googleCalendarInboundSyncData.server";
+import {
+  emptyReviewSyncCounters,
+  stageGoogleCalendarSyncReviewIfConflict,
+  type GoogleCalendarSyncReviewCounters,
+} from "./googleCalendarSyncReview.server";
 import type {
   CreateGoogleCalendarEventInput,
   FiCalendarEvent,
@@ -366,6 +371,18 @@ async function loadLocalEventsForDedup(
 }
 
 /** Tenant-wide external id index — avoids missing rows when calendar_id differs from integration (e.g. email vs primary). */
+async function loadLocalEventsForReview(
+  supabase: SupabaseClient,
+  tenantId: string
+): Promise<FiCalendarEvent[]> {
+  const { data, error } = await supabase
+    .from("fi_calendar_events")
+    .select("*")
+    .eq("tenant_id", tenantId.trim());
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as EventRow[]).map(mapEventRow);
+}
+
 async function loadLocalEventsByExternalIdForSync(
   supabase: SupabaseClient,
   tenantId: string
@@ -659,6 +676,8 @@ type SyncCalendarContext = {
   timeMin: string;
   timeMax: string;
   byExternalId: Map<string, FiCalendarEvent>;
+  tenantLocalEvents: FiCalendarEvent[];
+  reviewCounters: GoogleCalendarSyncReviewCounters;
 };
 
 /** Reconcile Google events for a single inbound calendar scope. */
@@ -669,7 +688,17 @@ async function syncGoogleCalendarEventsForCalendar(
   | { ok: true; result: GoogleCalendarSyncPerCalendarResult; skipBreakdown: GoogleCalendarSyncSkipBreakdown }
   | { ok: false; error: string }
 > {
-  const { tenantId: tid, integration, accessToken, calendarScope, timeMin, timeMax, byExternalId } = ctx;
+  const {
+    tenantId: tid,
+    integration,
+    accessToken,
+    calendarScope,
+    timeMin,
+    timeMax,
+    byExternalId,
+    tenantLocalEvents,
+    reviewCounters,
+  } = ctx;
   const calendarId = calendarScope.calendarId;
   const calendarSummary = calendarScope.summary;
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
@@ -770,6 +799,56 @@ async function syncGoogleCalendarEventsForCalendar(
     }
 
     const extId = mapped.externalEventId;
+    const existing = extId ? byExternalId.get(extId) : undefined;
+    const syncNow = new Date().toISOString();
+
+    const stagedForReview = await stageGoogleCalendarSyncReviewIfConflict(
+      {
+        tenantId: tid,
+        integrationId: integration.id,
+        googleCalendarId: calendarId,
+        googleCalendarSummary: calendarSummary,
+        googleEvent: raw,
+        existingByExternalId: existing,
+        localEvents: tenantLocalEvents,
+        counters: reviewCounters,
+      },
+      opts
+    );
+    if (stagedForReview) {
+      calendarResult.eventsSkipped += 1;
+      if (!extId) skipBreakdown.noExternalId += 1;
+      else if (isGoogleEventCancelled(raw) && !existing) skipBreakdown.cancelledNoLocal += 1;
+      else if (
+        !existing &&
+        isDuplicateFiCalendarEvent(
+          { externalEventId: extId ?? null, title: mapped.title, startTime: mapped.startTime },
+          localRows
+        )
+      ) {
+        skipBreakdown.duplicateTitleStart += 1;
+      }
+      logStructured("info", "google_calendar_sync_skip", {
+        tenantId: tid,
+        calendarId,
+        calendarSummary,
+        skipReason: "stagedForReview",
+        eventIndex,
+        eventId: raw.id ?? null,
+        externalEventId: extId ?? null,
+        eventSummary: raw.summary ?? null,
+      });
+      if (skippedSamples.length < 10) {
+        skippedSamples.push({
+          externalEventId: extId ?? "",
+          reason: "staged_for_review",
+          title: raw.summary?.trim() || mapped.title,
+        });
+      }
+      if (extId) discoveredIds.add(extId);
+      continue;
+    }
+
     if (!extId) {
       calendarResult.eventsSkipped += 1;
       skipBreakdown.noExternalId += 1;
@@ -792,9 +871,6 @@ async function syncGoogleCalendarEventsForCalendar(
       continue;
     }
     discoveredIds.add(extId);
-
-    const existing = byExternalId.get(extId);
-    const syncNow = new Date().toISOString();
 
     if (isGoogleEventCancelled(raw)) {
       if (existing && !existing.metadata?.deleted_from_provider) {
@@ -1093,7 +1169,9 @@ export async function syncGoogleCalendarEvents(
   });
 
   const byExternalId = await loadLocalEventsByExternalIdForSync(supabase, tid);
+  const tenantLocalEvents = await loadLocalEventsForReview(supabase, tid);
   const skipBreakdown = emptySkipBreakdown();
+  const reviewCounters = emptyReviewSyncCounters();
   const perCalendar: GoogleCalendarSyncPerCalendarResult[] = [];
   const failedCalendars: Array<{ calendarId: string; error: string }> = [];
 
@@ -1111,6 +1189,7 @@ export async function syncGoogleCalendarEvents(
     eventsSkippedTotal: 0,
     perCalendar,
     failedCalendars,
+    reviewSummary: reviewCounters,
   };
 
   for (const calendarScope of calendarScopes) {
@@ -1123,6 +1202,8 @@ export async function syncGoogleCalendarEvents(
         timeMin,
         timeMax,
         byExternalId,
+        tenantLocalEvents,
+        reviewCounters,
       },
       opts
     );
@@ -1193,6 +1274,10 @@ export async function syncGoogleCalendarEvents(
     skipUniqueViolation: skipBreakdown.uniqueViolation,
     skipNoUpdateNeeded: skipBreakdown.noUpdateNeeded,
     skipCancelledNoLocal: skipBreakdown.cancelledNoLocal,
+    reviewItemsCreated: reviewCounters.reviewItemsCreated,
+    reviewItemsUpdated: reviewCounters.reviewItemsUpdated,
+    conflictsDetected: reviewCounters.conflictsDetected,
+    conflictsByTypeJson: JSON.stringify(reviewCounters.conflictsByType),
   });
 
   if (failedCalendars.length > 0 && (result.calendarsScanned ?? 0) === 0) {

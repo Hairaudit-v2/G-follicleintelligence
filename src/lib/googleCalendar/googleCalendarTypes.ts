@@ -160,6 +160,25 @@ export type GoogleCalendarSyncPerCalendarResult = {
   error?: string;
 };
 
+/** GC-7 — inbound sync review queue counters. */
+export type GoogleCalendarSyncReviewSummary = {
+  reviewItemsCreated: number;
+  reviewItemsUpdated: number;
+  conflictsDetected: number;
+  conflictsByType: Partial<
+    Record<
+      | "possible_duplicate"
+      | "time_overlap"
+      | "missing_required_fields"
+      | "unsupported_event_type"
+      | "cancelled_unmatched"
+      | "update_conflict"
+      | "permission_or_scope_warning",
+      number
+    >
+  >;
+};
+
 export type GoogleCalendarSyncResult = {
   discovered: number;
   created: number;
@@ -176,6 +195,8 @@ export type GoogleCalendarSyncResult = {
   eventsSkippedTotal?: number;
   perCalendar?: GoogleCalendarSyncPerCalendarResult[];
   failedCalendars?: Array<{ calendarId: string; error: string }>;
+  /** GC-7 — review queue staging during inbound sync. */
+  reviewSummary?: GoogleCalendarSyncReviewSummary;
 };
 
 /** CalendarOS GC-4 — native FI appointment creation input. */

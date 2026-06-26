@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useState, type ReactNode } from "react";
 
+import { GoogleCalendarIntegrationProgressSection } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationProgressSection";
+
 import type { GoogleCalendarConnectionStatus } from "@/src/lib/googleCalendar/googleCalendarConnectionStatus.server";
 
 function formatTokenExpiry(tokenExpiresAt: string | null): string {
@@ -420,6 +422,8 @@ export function GoogleCalendarIntegrationCard({
       {validateMessage ? (
         <p className="mt-3 text-sm text-[#94A3B8]">{validateMessage}</p>
       ) : null}
+
+      <GoogleCalendarIntegrationProgressSection />
 
       <CreateTestAppointmentPanel tenantId={tenantId} connected={status.connected} />
     </section>

@@ -239,6 +239,8 @@ function mapSyncResultToAdminSummary(result: GoogleCalendarSyncResult): GoogleCa
     error: row.error ?? null,
   }));
 
+  const review = result.reviewSummary;
+
   return {
     calendarsScanned: result.calendarsScanned ?? perCalendar.length,
     fetched: result.eventsFetchedTotal ?? result.discovered,
@@ -246,6 +248,10 @@ function mapSyncResultToAdminSummary(result: GoogleCalendarSyncResult): GoogleCa
     updated: result.eventsUpdatedTotal ?? result.updated,
     skipped: result.eventsSkippedTotal ?? result.skipped,
     failed: result.failedCalendars?.length ?? perCalendar.filter((r) => r.failed).length,
+    reviewItemsCreated: review?.reviewItemsCreated ?? 0,
+    reviewItemsUpdated: review?.reviewItemsUpdated ?? 0,
+    conflictsDetected: review?.conflictsDetected ?? 0,
+    conflictsByType: review?.conflictsByType as Record<string, number> | undefined,
     perCalendar,
   };
 }

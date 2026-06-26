@@ -48,9 +48,97 @@ function createMockSupabase() {
   const integrations: IntegrationRow[] = [];
   const events: EventRow[] = [];
   const inboundCalendars: Record<string, unknown>[] = [];
+  const reviewItems: Record<string, unknown>[] = [];
 
   const client = {
     from(table: string) {
+      if (table === "fi_calendar_sync_review_items") {
+        const filterReview = (filters: Record<string, string>) =>
+          reviewItems.filter((r) => Object.entries(filters).every(([k, v]) => r[k] === v));
+
+        const buildReviewChain = (filters: Record<string, string> = {}) => {
+          const chain = {
+            eq(col: string, val: string) {
+              filters[col] = val;
+              return chain;
+            },
+            order() {
+              return chain;
+            },
+            limit() {
+              return chain;
+            },
+            maybeSingle: async () => {
+              const row = filterReview(filters)[0];
+              return { data: row ?? null, error: null };
+            },
+            single: async () => {
+              const row = filterReview(filters)[0];
+              if (!row) return { data: null, error: { message: "not found" } };
+              return { data: row, error: null };
+            },
+            then(
+              resolve: (v: { data: Record<string, unknown>[]; error: null }) => void,
+              reject?: (e: unknown) => void
+            ) {
+              try {
+                resolve({ data: filterReview(filters), error: null });
+              } catch (e) {
+                reject?.(e);
+              }
+            },
+          };
+          return chain;
+        };
+
+        return {
+          select() {
+            return buildReviewChain();
+          },
+          insert(row: Record<string, unknown>) {
+            const full = { id: randomUUID(), status: "open", ...row };
+            reviewItems.push(full);
+            return {
+              select() {
+                return { single: async () => ({ data: full, error: null }) };
+              },
+            };
+          },
+          update(patch: Record<string, unknown>) {
+            return {
+              eq(col: string, val: string) {
+                return {
+                  eq(col2: string, val2: string) {
+                    return {
+                      select() {
+                        return {
+                          single: async () => {
+                            const row = reviewItems.find((r) => r[col] === val && r[col2] === val2);
+                            if (!row) return { data: null, error: { message: "not found" } };
+                            Object.assign(row, patch);
+                            return { data: row, error: null };
+                          },
+                        };
+                      },
+                    };
+                  },
+                  select() {
+                    return {
+                      single: async () => {
+                        const row = reviewItems.find((r) => r[col] === val);
+                        if (!row) return { data: null, error: { message: "not found" } };
+                        Object.assign(row, patch);
+                        return { data: row, error: null };
+                      },
+                    };
+                  },
+                };
+              },
+            };
+          },
+        };
+      }
+
       if (table === "fi_calendar_inbound_sync_calendars") {
         const filterInbound = (filters: Record<string, string | boolean>) =>
           inboundCalendars.filter((r) =>
@@ -344,6 +432,7 @@ function createMockSupabase() {
     integrations,
     events,
     inboundCalendars,
+    reviewItems,
   };
 }
 
@@ -1162,7 +1251,7 @@ describe("CalendarOS GC-3 — sync reconciliation", () => {
     assert.equal((row!.metadata as Record<string, unknown>).source, "google_sync");
   });
 
-  it("updates GC-4 event sync_status without losing appointment_activity", async () => {
+  it("stages risky GC-4 Google title updates for admin review instead of overwriting", async () => {
     seedEvent({
       external_event_id: "gc4-existing",
       start_time: "2026-06-22T10:00:00.000Z",
@@ -1194,14 +1283,16 @@ describe("CalendarOS GC-3 — sync reconciliation", () => {
 
     assert.equal(result.ok, true);
     if (!result.ok) return;
-    assert.equal(result.data.result.updated, 1);
+    assert.equal(result.data.result.updated, 0);
+    assert.ok((result.data.result.reviewSummary?.conflictsDetected ?? 0) >= 1);
     const row = mock.events.find((e) => e.external_event_id === "gc4-existing");
     const meta = row!.metadata as Record<string, unknown>;
     assert.equal(meta.source, "fi_appointment_create");
-    assert.equal(meta.sync_status, "synced");
+    assert.equal(meta.sync_status, undefined);
     assert.deepEqual(meta.appointment_activity, [
       { action: "created", at: "2026-06-01T00:00:00.000Z" },
     ]);
+    assert.ok(mock.reviewItems.some((r) => r.external_event_id === "gc4-existing"));
   });
 
   it("soft-deletes fi_appointment_create when direct lookup returns 404", async () => {
@@ -1261,6 +1352,7 @@ describe("CalendarOS GC-3 — sync reconciliation", () => {
     seedEvent({
       external_event_id: "fi-outbound-primary",
       start_time: "2026-06-22T10:00:00.000Z",
+      title: "FI outbound event",
       metadata: { source: "fi_calendar_create" },
     });
 

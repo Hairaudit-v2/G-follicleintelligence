@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { GoogleCalendarInboundScopeCard } from "@/src/components/fi-admin/settings/GoogleCalendarInboundScopeCard";
 import { GoogleCalendarIntegrationCard } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationCard";
+import { GoogleCalendarSyncReviewCard } from "@/src/components/fi-admin/settings/GoogleCalendarSyncReviewCard";
 import { ProviderCalendarLinksCard } from "@/src/components/fi-admin/settings/ProviderCalendarLinksCard";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadGoogleCalendarConnectionStatus } from "@/src/lib/googleCalendar/googleCalendarConnectionStatus.server";
@@ -14,6 +15,7 @@ import {
   GoogleCalendarIntegrationAccessError,
 } from "@/src/lib/googleCalendar/googleCalendarIntegrationAccess.server";
 import { loadGoogleCalendarInboundScopePage } from "@/src/lib/googleCalendar/googleCalendarInboundScope.server";
+import { loadGoogleCalendarSyncReviewPage } from "@/src/lib/googleCalendar/googleCalendarSyncReview.server";
 import { loadProviderCalendarLinksPage } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
@@ -95,6 +97,12 @@ export default async function TenantIntegrationsSettingsPage({
     canManage: canManageCalendarLinks,
   });
 
+  const syncReviewPage = await loadGoogleCalendarSyncReviewPage(tenantId, {
+    canManage: canManageCalendarLinks,
+    connected: inboundScopePage.connected,
+    integrationId: inboundScopePage.integrationId,
+  });
+
   return (
     <div className="space-y-4">
       <div>
@@ -120,6 +128,8 @@ export default async function TenantIntegrationsSettingsPage({
       />
 
       <GoogleCalendarInboundScopeCard tenantId={tenantId} pageModel={inboundScopePage} />
+
+      <GoogleCalendarSyncReviewCard tenantId={tenantId} pageModel={syncReviewPage} />
 
       <ProviderCalendarLinksCard tenantId={tenantId} pageModel={providerCalendarLinksPage} />
 
