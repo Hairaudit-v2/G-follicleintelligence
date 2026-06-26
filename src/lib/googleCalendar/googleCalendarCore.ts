@@ -167,6 +167,33 @@ export function mapGoogleApiEventToFiFields(
   };
 }
 
+export type GoogleApiEventMappingDiagnostics = {
+  /** Always populated — mapGoogleApiEventToFiFields never returns null. */
+  mapped: ReturnType<typeof mapGoogleApiEventToFiFields>;
+  /** True when mapping lacks fields required for inbound insert. */
+  mappingFailed: boolean;
+  /** Human-readable reason when mappingFailed is true. */
+  failureReason: string | null;
+};
+
+/** Diagnostic wrapper for inbound sync — surfaces null-equivalent mapping failures. */
+export function diagnoseGoogleApiEventMapping(
+  event: GoogleCalendarApiEvent,
+  calendarId: string
+): GoogleApiEventMappingDiagnostics {
+  const mapped = mapGoogleApiEventToFiFields(event, calendarId);
+  if (!mapped.externalEventId) {
+    return { mapped, mappingFailed: true, failureReason: "missing_event_id" };
+  }
+  if (!mapped.startTime) {
+    return { mapped, mappingFailed: true, failureReason: "missing_or_unparseable_start" };
+  }
+  if (!mapped.endTime) {
+    return { mapped, mappingFailed: true, failureReason: "missing_or_unparseable_end" };
+  }
+  return { mapped, mappingFailed: false, failureReason: null };
+}
+
 /** Detect duplicate FI calendar event before create (external id or title+start). */
 export function isDuplicateFiCalendarEvent(
   candidate: Pick<FiCalendarEvent, "externalEventId" | "title" | "startTime">,

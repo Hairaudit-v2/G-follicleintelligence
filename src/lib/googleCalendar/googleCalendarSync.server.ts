@@ -247,12 +247,30 @@ export async function syncGoogleCalendarForTenant(
 
   await recordSyncSuccess(supabase, integration.id, tenantId);
 
+  const syncResultData = syncResult.data.result;
+  logStructured("info", "google_calendar_sync_tenant_complete", {
+    tenantId,
+    integrationId: integration.id,
+    calendarId: integration.calendar_id,
+    googleAccountEmail: integration.google_account_email ?? null,
+    eventsFetched: syncResultData.discovered,
+    eventsInserted: syncResultData.created,
+    eventsUpdated: syncResultData.updated,
+    eventsSkipped: syncResultData.skipped,
+    eventsMarkedDeleted: syncResultData.deleted,
+    skipNoExternalId: syncResultData.skipBreakdown.noExternalId,
+    skipDuplicateTitleStart: syncResultData.skipBreakdown.duplicateTitleStart,
+    skipUniqueViolation: syncResultData.skipBreakdown.uniqueViolation,
+    skipNoUpdateNeeded: syncResultData.skipBreakdown.noUpdateNeeded,
+    skipCancelledNoLocal: syncResultData.skipBreakdown.cancelledNoLocal,
+  });
+
   return {
     tenantId,
     integrationId: integration.id,
     calendarId: integration.calendar_id,
     outcome: "synced",
-    result: syncResult.data.result,
+    result: syncResultData,
   };
 }
 
