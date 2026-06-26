@@ -87,11 +87,14 @@ test("command centre payload requires graftSummary array", () => {
     ...base,
     graftSummary: [],
     graftEvents: [],
+    vieCapture: [],
   });
   assert.ok(Array.isArray(payload.graftSummary));
   assert.ok(Array.isArray(payload.graftEvents));
+  assert.ok(Array.isArray(payload.vieCapture));
   assert.equal(surgeryOsCommandCentrePayloadSchema.safeParse({ ...base, graftSummary: undefined }).success, false);
   assert.equal(surgeryOsCommandCentrePayloadSchema.safeParse({ ...base, graftEvents: undefined }).success, false);
+  assert.equal(surgeryOsCommandCentrePayloadSchema.safeParse({ ...base, vieCapture: undefined }).success, false);
 });
 
 test("assertSurgeryOsTenantRowScope rejects cross-tenant rows", () => {

@@ -15,6 +15,7 @@ export const VIE_PROTOCOL_REQUIRED_CAPTURE_SOURCES = [
   "patient_slide_over",
   "profile_upload_form",
   "vie_capture_wizard",
+  "surgery_os",
 ] as const;
 
 export type VieProtocolRequiredCaptureSource = (typeof VIE_PROTOCOL_REQUIRED_CAPTURE_SOURCES)[number];

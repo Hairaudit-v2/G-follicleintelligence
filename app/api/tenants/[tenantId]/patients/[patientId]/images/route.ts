@@ -16,6 +16,7 @@ import {
 } from "@/src/lib/vie/vieGuidedCapture.server";
 import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
 import { runVieInstantIntelligence } from "@/src/lib/vie/vieInstantIntelligence.server";
+import { buildVieSurgeryImageMetadata, isVieCaptureSource } from "@/src/lib/surgeryOs/surgeryOsVieCaptureCore";
 
 export const dynamic = "force-dynamic";
 
@@ -103,6 +104,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         return crmJsonError(400, "metadata must be valid JSON.");
       }
     }
+
+    const captureSourceNormalized = normalizeCaptureSource(captureSourceStr);
+    const procedureDayIdRaw = form.get("procedure_day_id");
+    if (captureSourceNormalized === "surgery_os" && slotSlugStr) {
+      const surgeryMeta = buildVieSurgeryImageMetadata({
+        caseId: caseId == null ? null : String(caseId),
+        bookingId: bookingId == null ? null : String(bookingId),
+        procedureDayId: procedureDayIdRaw == null ? null : String(procedureDayIdRaw),
+        slotSlug: slotSlugStr,
+        protocolSlug: templateSlugStr ?? "surgery_day",
+      });
+      metadata =
+        metadata && typeof metadata === "object" && !Array.isArray(metadata)
+          ? { ...(metadata as Record<string, unknown>), ...surgeryMeta }
+          : surgeryMeta;
+    }
     const actingUserId = await tryResolveFiUserIdForTenant(tid, req);
 
     const parseDim = (raw: FormDataEntryValue | null): number | null => {
@@ -159,7 +176,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         guidedReplaceRaw === "1" ||
         guidedReplaceRaw === "true" ||
         String(guidedReplaceRaw ?? "").toLowerCase() === "on";
-      const isVieWizard = normalizeCaptureSource(captureSourceStr) === "vie_capture_wizard";
+      const isVieWizard = isVieCaptureSource(captureSourceNormalized);
 
       if (isVieWizard && templateSlugStr && isVieProtocolSlug(templateSlugStr)) {
         const protocol = getVieProtocol(templateSlugStr);
@@ -200,6 +217,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
         revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
         revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+        revalidatePath(`/fi-admin/${tid}/surgery-os`);
 
         return crmJsonOk({
           image: result.row,
@@ -250,7 +268,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       slotSlugStr &&
       isVieProtocolSlug(templateSlugStr) &&
       guided_session &&
-      normalizeCaptureSource(captureSourceStr) !== "vie_capture_wizard"
+      normalizeCaptureSource(captureSourceStr) !== "vie_capture_wizard" &&
+      normalizeCaptureSource(captureSourceStr) !== "surgery_os"
     ) {
       const protocol = getVieProtocol(templateSlugStr);
       const requiredTotal = protocol?.slots.filter((s) => s.required).length ?? 0;

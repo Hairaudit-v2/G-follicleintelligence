@@ -11,6 +11,7 @@ import {
 import { PROGRESS_META_KEY } from "@/src/lib/imagingOs/imagingOsProtocol";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { publishImagingEvent } from "@/src/lib/analytics-os/analyticsModulePublishers";
+import { loadOrCreateSurgeryDayVieSession } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 
 function errMsg(e: unknown): string {
   if (e instanceof ZodError) return e.errors[0]?.message ?? "Invalid input.";
@@ -162,6 +163,9 @@ const protocolSessionBodySchema = z
     templateSlug: z.string().min(1).max(128),
     caseId: z.string().uuid().nullable().optional(),
     consultationId: z.string().uuid().nullable().optional(),
+    bookingId: z.string().uuid().nullable().optional(),
+    procedureDayId: z.string().uuid().nullable().optional(),
+    surgeryId: z.string().uuid().nullable().optional(),
   })
   .strict();
 
@@ -177,8 +181,15 @@ export async function createImagingProtocolSessionAction(
     const tid = tenantId.trim();
     const pid = patientId.trim();
     const now = new Date().toISOString();
-    // `fi_imaging_protocol_sessions` has no top-level `status` column; session state lives in `progress` jsonb
-    // (including per-step status under PROGRESS_META_KEY).
+    const progressMeta: Record<string, unknown> = { status: "active" as const };
+    if (parsed.bookingId || parsed.procedureDayId || parsed.surgeryId) {
+      progressMeta.surgery_context = {
+        booking_id: parsed.bookingId ?? null,
+        procedure_day_id: parsed.procedureDayId ?? null,
+        surgery_id: parsed.surgeryId ?? null,
+        capture_surface: parsed.surgeryId ? "surgery_os" : null,
+      };
+    }
     const { data: ins, error } = await supabase
       .from("fi_imaging_protocol_sessions")
       .insert({
@@ -187,7 +198,7 @@ export async function createImagingProtocolSessionAction(
         case_id: parsed.caseId ?? null,
         consultation_id: parsed.consultationId ?? null,
         template_slug: parsed.templateSlug.trim(),
-        progress: { [PROGRESS_META_KEY]: { status: "active" as const } },
+        progress: { [PROGRESS_META_KEY]: progressMeta },
         created_at: now,
         updated_at: now,
       })
@@ -212,7 +223,50 @@ export async function createImagingProtocolSessionAction(
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+    revalidatePath(`/fi-admin/${tid}/surgery-os`);
     return { ok: true, sessionId };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
+}
+
+const surgeryOsVieSessionBodySchema = z
+  .object({
+    adminKey: z.string().optional(),
+    caseId: z.string().uuid().nullable().optional(),
+    bookingId: z.string().uuid().nullable().optional(),
+    procedureDayId: z.string().uuid().nullable().optional(),
+    surgeryId: z.string().uuid().nullable().optional(),
+  })
+  .strict();
+
+/** Load active Surgery Day VIE session or create one for SurgeryOS embedded capture. */
+export async function loadOrCreateSurgeryDayVieSessionAction(
+  tenantId: string,
+  patientId: string,
+  body: unknown
+): Promise<
+  | { ok: true; sessionId: string; progress: Record<string, unknown>; created: boolean }
+  | { ok: false; error: string }
+> {
+  try {
+    const parsed = surgeryOsVieSessionBodySchema.parse(body);
+    await assertCrmTenantWriteAllowed({ tenantId, adminKey: parsed.adminKey, request: undefined });
+    const result = await loadOrCreateSurgeryDayVieSession({
+      tenantId,
+      patientId,
+      caseId: parsed.caseId ?? null,
+      bookingId: parsed.bookingId ?? null,
+      procedureDayId: parsed.procedureDayId ?? null,
+      surgeryId: parsed.surgeryId ?? null,
+    });
+    const tid = tenantId.trim();
+    const pid = patientId.trim();
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+    revalidatePath(`/fi-admin/${tid}/surgery-os`);
+    return { ok: true, ...result };
   } catch (e) {
     return { ok: false, error: errMsg(e) };
   }

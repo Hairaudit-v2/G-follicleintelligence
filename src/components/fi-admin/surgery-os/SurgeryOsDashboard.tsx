@@ -24,6 +24,7 @@ import { SurgeryOsNotesEventsWidget } from "@/src/components/fi-admin/surgery-os
 import { SurgeryOsGraftIntelligenceWidget } from "@/src/components/fi-admin/surgery-os/widgets/SurgeryOsGraftIntelligence";
 import { SurgeryOsLiveActions } from "@/src/components/fi-admin/surgery-os/SurgeryOsLiveActions";
 import { SurgeryOsGraftActions } from "@/src/components/fi-admin/surgery-os/SurgeryOsGraftActions";
+import { SurgeryOsVieCapturePanel } from "@/src/components/fi-admin/surgery-os/SurgeryOsVieCapturePanel";
 
 function formatRefreshTime(d: Date | null): string {
   if (!d) return "—";
@@ -104,6 +105,13 @@ export function SurgeryOsDashboard({ data: initialData }: { data: SurgeryOsComma
         staffRole={data.viewer.staffRole}
         surgeries={data.liveSurgeries}
         graftSummary={data.graftSummary}
+        onMutated={() => void refresh()}
+      />
+
+      <SurgeryOsVieCapturePanel
+        tenantId={data.tenantId}
+        surgeries={data.liveSurgeries}
+        vieCapture={data.vieCapture}
         onMutated={() => void refresh()}
       />
 

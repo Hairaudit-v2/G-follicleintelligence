@@ -21,8 +21,10 @@ export function CalendarSettingsSection(props: {
   clinics: ClinicOption[];
   initialSettings: FiCalendarSettingsDocument;
   canEdit: boolean;
+  /** When set, clinic scope changes navigate here instead of the standalone settings route. */
+  scopeHrefForClinicId?: (clinicId: string | null) => string;
 }) {
-  const { tenantId, clinics, canEdit } = props;
+  const { tenantId, clinics, canEdit, scopeHrefForClinicId } = props;
   const router = useRouter();
   const [settings, setSettings] = useState(props.initialSettings);
   const [msg, setMsg] = useState<string | null>(null);
@@ -32,6 +34,10 @@ export function CalendarSettingsSection(props: {
   const clinicId = props.clinicId;
 
   function onClinicScopeChange(nextClinicId: string) {
+    if (scopeHrefForClinicId) {
+      router.push(scopeHrefForClinicId(nextClinicId.trim() ? nextClinicId.trim() : null));
+      return;
+    }
     const q = nextClinicId === "" ? "" : `?clinicId=${encodeURIComponent(nextClinicId)}`;
     router.push(`/fi-admin/${tenantId}/settings/calendar${q}`);
   }

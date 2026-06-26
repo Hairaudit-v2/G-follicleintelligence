@@ -1,0 +1,184 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { AlertTriangle, CheckCircle2, Circle } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { DashboardCard, SectionHeader } from "@/src/components/fi-admin/dashboard-ui";
+import { surgeryLinkButtonClass } from "@/src/lib/fiAdmin/surgeryPresentation";
+import type { SurgeryOsLiveSurgery } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
+import type { SurgeryOsVieCaptureSummary } from "@/src/lib/surgeryOs/surgeryOsVieCapture.types";
+import { SurgeryOsCaptureEvidenceButton } from "./SurgeryOsCaptureEvidenceButton";
+
+function statusLabel(status: SurgeryOsVieCaptureSummary["graftTrayStatus"]): string {
+  if (status === "complete") return "Complete";
+  if (status === "pending_review") return "Pending review";
+  if (status === "partial") return "Partial";
+  return "Missing";
+}
+
+function statusClass(status: SurgeryOsVieCaptureSummary["graftTrayStatus"]): string {
+  if (status === "complete") return "text-emerald-300";
+  if (status === "pending_review") return "text-amber-300";
+  if (status === "partial") return "text-amber-200";
+  return "text-rose-300";
+}
+
+function percentClass(percent: number): string {
+  if (percent >= 100) return "text-emerald-300";
+  if (percent >= 50) return "text-amber-200";
+  return "text-rose-300";
+}
+
+export function SurgeryOsVieCapturePanel({
+  tenantId,
+  surgeries,
+  vieCapture,
+  onMutated,
+}: {
+  tenantId: string;
+  surgeries: SurgeryOsLiveSurgery[];
+  vieCapture: SurgeryOsVieCaptureSummary[];
+  onMutated: () => void;
+}) {
+  const [surgeryId, setSurgeryId] = useState("");
+  const captureBySurgery = useMemo(
+    () => new Map(vieCapture.map((c) => [c.surgeryId, c])),
+    [vieCapture]
+  );
+
+  const selectedSurgery = surgeries.find((s) => s.id === surgeryId) ?? surgeries[0] ?? null;
+  const capture = selectedSurgery ? captureBySurgery.get(selectedSurgery.id) ?? null : null;
+
+  if (surgeries.length === 0) return null;
+
+  return (
+    <DashboardCard className="p-5 sm:p-6" role="region" aria-labelledby="so-vie-capture-heading">
+      <SectionHeader
+        id="so-vie-capture-heading"
+        kicker="VIE"
+        title="Surgical evidence capture"
+        description="Guided Surgery Day protocol capture — required operative documentation without leaving the theatre workflow."
+        className="mb-4"
+      />
+
+      {surgeries.length > 1 ? (
+        <div className="mb-4">
+          <label htmlFor="so-vie-surgery-select" className="text-xs font-medium text-[#94A3B8]">
+            Active procedure
+          </label>
+          <select
+            id="so-vie-surgery-select"
+            value={selectedSurgery?.id ?? ""}
+            onChange={(e) => setSurgeryId(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-[#334155] bg-[#0F172A] px-3 py-2 text-sm text-[#F8FAFC]"
+          >
+            {surgeries.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.patientLabel} · {s.procedurePhaseLabel}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
+
+      {!capture ? (
+        <p className="text-sm text-[#94A3B8]">Select an active procedure to view capture status.</p>
+      ) : (
+        <div className="space-y-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-[#64748B]">Surgical documentation</p>
+              <p className={cn("mt-1 text-2xl font-semibold", percentClass(capture.surgicalDocumentationPercent))}>
+                {capture.surgicalDocumentationPercent}%
+              </p>
+            </div>
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-[#64748B]">Donor documentation</p>
+              <p className={cn("mt-1 text-2xl font-semibold", percentClass(capture.donorDocumentationPercent))}>
+                {capture.donorDocumentationPercent}%
+              </p>
+            </div>
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-[#64748B]">Graft tray evidence</p>
+              <p className={cn("mt-1 text-lg font-semibold", statusClass(capture.graftTrayStatus))}>
+                {statusLabel(capture.graftTrayStatus)}
+              </p>
+            </div>
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-[#64748B]">Immediate post-op</p>
+              <p className={cn("mt-1 text-lg font-semibold", statusClass(capture.immediatePostOpStatus))}>
+                {statusLabel(capture.immediatePostOpStatus)}
+              </p>
+            </div>
+          </div>
+
+          {capture.warnings.length > 0 ? (
+            <ul className="space-y-2">
+              {capture.warnings.map((w) => (
+                <li
+                  key={`${w.kind}-${w.slotSlug ?? w.label}`}
+                  className={cn(
+                    "flex items-start gap-2 rounded-lg border px-3 py-2 text-sm",
+                    w.severity === "critical"
+                      ? "border-rose-500/30 bg-rose-500/10 text-rose-200"
+                      : "border-amber-500/25 bg-amber-500/10 text-amber-100"
+                  )}
+                >
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                  {w.label}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+              <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
+              No critical capture warnings for this procedure.
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {capture.phases.map((phase) => (
+              <div key={phase.phase} className="rounded-xl border border-[#334155] px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-semibold text-[#F8FAFC]">{phase.label}</p>
+                  <p className="text-xs text-[#94A3B8]">
+                    {phase.acceptedCount}/{phase.requiredTotal} accepted
+                    {phase.pendingReviewCount > 0 ? ` · ${phase.pendingReviewCount} pending review` : null}
+                    {phase.latestQualityScore != null ? ` · Q${Math.round(phase.latestQualityScore)}` : null}
+                  </p>
+                </div>
+                {phase.nextRecommendedSlotLabel ? (
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-[#64748B]">
+                    <Circle className="h-3 w-3 text-cyan-400" aria-hidden />
+                    Next: {phase.nextRecommendedSlotLabel}
+                  </p>
+                ) : phase.acceptedCount >= phase.requiredTotal && phase.requiredTotal > 0 ? (
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-emerald-400">
+                    <CheckCircle2 className="h-3 w-3" aria-hidden />
+                    Phase complete
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <SurgeryOsCaptureEvidenceButton
+              tenantId={tenantId}
+              capture={capture}
+              className={surgeryLinkButtonClass}
+              onClosed={onMutated}
+            />
+            {capture.nextRecommendedSlotLabel ? (
+              <p className="text-xs text-[#64748B]">
+                Recommended next capture:{" "}
+                <span className="text-[#CBD5E1]">{capture.nextRecommendedSlotLabel}</span>
+              </p>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </DashboardCard>
+  );
+}

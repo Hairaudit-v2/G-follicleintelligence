@@ -12,6 +12,7 @@ import type {
   SurgeryOsViewerRole,
   SurgeryOsWidgetKey,
 } from "@/src/lib/surgeryOs/surgeryOsBoardModel";
+import type { SurgeryOsVieCaptureSummary } from "@/src/lib/surgeryOs/surgeryOsVieCapture.types";
 import type {
   SurgeryOsGraftCountEventType,
   SurgeryOsGraftCountSessionLock,
@@ -28,7 +29,10 @@ export type SurgeryOsReadinessItem = {
 
 export type SurgeryOsLiveSurgery = {
   id: string;
+  patientId: string | null;
   patientLabel: string;
+  caseId: string | null;
+  bookingId: string | null;
   surgeonLabel: string | null;
   assignedTeamSummary: string | null;
   targetGrafts: number | null;
@@ -185,6 +189,7 @@ export type SurgeryOsCommandCentrePayload = {
   operationalNotes: SurgeryOsOperationalNote[];
   graftSummary: SurgeryOsGraftSummary[];
   graftEvents: SurgeryOsGraftCountEvent[];
+  vieCapture: SurgeryOsVieCaptureSummary[];
   intelligence: {
     policy: {
       canExportCompetencyData: boolean;

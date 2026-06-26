@@ -36,6 +36,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
 
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
+    revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+    revalidatePath(`/fi-admin/${tid}/surgery-os`);
 
     return crmJsonOk({ guided_session });
   } catch (e) {

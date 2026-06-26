@@ -22,6 +22,7 @@ import {
   SURGERY_OS_GRAFT_RECONCILIATION_STATUSES,
   SURGERY_OS_GRAFT_SESSION_PHASES,
 } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
+import { VIE_SURGERY_PHASE_GROUPS } from "@/src/lib/vie/vieProtocolTypes";
 import type { SurgeryOsCommandCentrePayload } from "@/src/lib/surgeryOs/surgeryOsBoardModel.types";
 
 export type {
@@ -53,7 +54,10 @@ const recordHrefsSchema = z.object({
 
 const liveSurgerySchema = z.object({
   id: z.string().uuid(),
+  patientId: z.string().uuid().nullable(),
   patientLabel: z.string(),
+  caseId: z.string().uuid().nullable(),
+  bookingId: z.string().uuid().nullable(),
   surgeonLabel: z.string().nullable(),
   assignedTeamSummary: z.string().nullable(),
   targetGrafts: z.number().int().nullable(),
@@ -216,6 +220,56 @@ const operationalNoteSchema = z.object({
   recordedByLabel: z.string().nullable(),
 });
 
+const vieSurgeryPhaseSchema = z.enum(
+  VIE_SURGERY_PHASE_GROUPS.map((g) => g.phase) as [
+    (typeof VIE_SURGERY_PHASE_GROUPS)[number]["phase"],
+    ...(typeof VIE_SURGERY_PHASE_GROUPS)[number]["phase"][],
+  ]
+);
+
+const vieCapturePhaseSchema = z.object({
+  phase: vieSurgeryPhaseSchema,
+  label: z.string(),
+  requiredTotal: z.number().int().min(0),
+  acceptedCount: z.number().int().min(0),
+  pendingReviewCount: z.number().int().min(0),
+  latestQualityScore: z.number().nullable(),
+  nextRecommendedSlot: z.string().nullable(),
+  nextRecommendedSlotLabel: z.string().nullable(),
+});
+
+const vieCaptureWarningSchema = z.object({
+  kind: z.enum([
+    "missing_donor_final_extraction",
+    "missing_graft_tray_overview",
+    "missing_graft_tray_close",
+    "missing_immediate_post_op",
+    "pending_low_quality",
+  ]),
+  label: z.string(),
+  severity: z.enum(["info", "warning", "critical"]),
+  slotSlug: z.string().optional(),
+});
+
+const vieCaptureSummarySchema = z.object({
+  surgeryId: z.string().uuid(),
+  patientId: z.string().uuid(),
+  patientLabel: z.string(),
+  caseId: z.string().uuid().nullable(),
+  bookingId: z.string().uuid().nullable(),
+  procedureDayId: z.string().uuid().nullable(),
+  sessionId: z.string().uuid().nullable(),
+  protocolSlug: z.literal("surgery_day"),
+  surgicalDocumentationPercent: z.number().int().min(0).max(100),
+  donorDocumentationPercent: z.number().int().min(0).max(100),
+  graftTrayStatus: z.enum(["complete", "partial", "missing", "pending_review"]),
+  immediatePostOpStatus: z.enum(["complete", "partial", "missing", "pending_review"]),
+  phases: z.array(vieCapturePhaseSchema),
+  warnings: z.array(vieCaptureWarningSchema),
+  nextRecommendedSlot: z.string().nullable(),
+  nextRecommendedSlotLabel: z.string().nullable(),
+});
+
 const intelligenceSchema = z.object({
   policy: z.object({
     canExportCompetencyData: z.boolean(),
@@ -256,6 +310,7 @@ export const surgeryOsCommandCentrePayloadSchema = z.object({
   operationalNotes: z.array(operationalNoteSchema),
   graftSummary: z.array(graftSummarySchema),
   graftEvents: z.array(graftCountEventSchema),
+  vieCapture: z.array(vieCaptureSummarySchema),
   intelligence: intelligenceSchema,
 });
 
@@ -271,4 +326,5 @@ export {
   alertSchema,
   operationalNoteSchema,
   graftSummarySchema,
+  vieCaptureSummarySchema,
 };

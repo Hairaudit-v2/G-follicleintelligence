@@ -79,3 +79,16 @@ Fails CI/local checks if two files share the same version prefix (`scripts/check
 ## Legacy migrations
 
 Many existing files use 14-digit `…120001`-style timestamps. Leave them as-is once applied. New work uses the 12-digit module blocks above.
+
+## Reordered migrations (remote history preserved)
+
+Four early migrations referenced tables created later in the chain. They were split for local `supabase db reset`:
+
+| Original (no-op stub, remote applied) | Correct-order DDL file |
+|---------------------------------------|---------------------------|
+| `20260616204324_fi_financial_os_phase1` | `20260727120002_fi_financial_os_phase1` |
+| `20260616204444_fi_crm_import_patch2` | `20260720120002_fi_crm_import_patch2` |
+| `20260616204529_fi_financial_os_phase2_payment_pathways` | `20260728120002_fi_financial_os_phase2_payment_pathways` |
+| `20260622120014_onboarding_os_phase_f5_staged_import_engine` | `20260922120014_onboarding_os_phase_f5_staged_import_engine` |
+
+After pulling this change, run `npx supabase db push` on remote to record the four new version rows (DDL is idempotent).

@@ -114,3 +114,36 @@ export async function loadClinicsForCalendarSettings(tenantId: string): Promise<
     displayName: String((r as { display_name: string }).display_name ?? ""),
   }));
 }
+
+export type CalendarSettingsSectionData = {
+  clinicId: string | null;
+  clinics: { id: string; displayName: string }[];
+  initialSettings: FiCalendarSettingsDocument;
+  canEdit: boolean;
+};
+
+function resolveCalendarSettingsClinicId(
+  clinicIdParam: string | null,
+  clinics: { id: string; displayName: string }[]
+): string | null {
+  if (!clinicIdParam?.trim()) return null;
+  const cid = clinicIdParam.trim();
+  return clinics.some((c) => c.id === cid) ? cid : null;
+}
+
+/** Shared loader for standalone calendar settings route and Configuration → Calendar tab. */
+export async function loadCalendarSettingsSectionData(
+  tenantId: string,
+  clinicIdParam: string | null,
+  access: { canEdit: boolean }
+): Promise<CalendarSettingsSectionData> {
+  const clinics = await loadClinicsForCalendarSettings(tenantId);
+  const clinicId = resolveCalendarSettingsClinicId(clinicIdParam, clinics);
+  const initialSettings = await getCalendarSettingsForTenant(tenantId, clinicId);
+  return {
+    clinicId,
+    clinics,
+    initialSettings,
+    canEdit: access.canEdit,
+  };
+}

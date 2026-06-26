@@ -59,6 +59,7 @@ import {
 } from "@/src/lib/surgeryOs/surgeryOsGraftModel";
 import { graftSessionToTotals, loadGraftCountEventsForSurgeries, loadGraftSessionsForSurgeries } from "@/src/lib/surgeryOs/surgeryGraftMutations.server";
 import { surgeryOsCommandCentrePayloadSchema } from "@/src/lib/surgeryOs/surgeryOsBoardPayloadSchema";
+import { loadSurgeryOsVieCaptureSummaries } from "@/src/lib/surgeryOs/surgeryOsVieCapture.server";
 import {
   emptySurgeryOsIntelligence,
   isMissingDatabaseRelationError,
@@ -355,7 +356,10 @@ export async function loadSurgeryOsCommandCentrePayload(
 
     liveSurgeries.push({
       id: row.id,
+      patientId: row.patient_id,
       patientLabel,
+      caseId: row.case_id,
+      bookingId: row.booking_id,
       surgeonLabel,
       assignedTeamSummary,
       targetGrafts: row.target_grafts,
@@ -642,6 +646,23 @@ export async function loadSurgeryOsCommandCentrePayload(
     }
   }
 
+  const vieCaptureInputs = surgeries
+    .filter((row) => row.patient_id?.trim())
+    .map((row) => ({
+      surgeryId: row.id,
+      patientId: row.patient_id!.trim(),
+      patientLabel: row.patient_id ? patientLabels.get(row.patient_id) ?? "Patient" : "Patient",
+      caseId: row.case_id,
+      bookingId: row.booking_id,
+    }));
+
+  let vieCapture: Awaited<ReturnType<typeof loadSurgeryOsVieCaptureSummaries>> = [];
+  try {
+    vieCapture = await loadSurgeryOsVieCaptureSummaries(tid, vieCaptureInputs, supabase);
+  } catch (e) {
+    if (!isMissingDatabaseRelationError(e)) throw e;
+  }
+
   const payload: SurgeryOsCommandCentrePayload = {
     tenantId: tid,
     tenantName,
@@ -665,6 +686,7 @@ export async function loadSurgeryOsCommandCentrePayload(
     operationalNotes,
     graftSummary,
     graftEvents,
+    vieCapture,
     intelligence: emptySurgeryOsIntelligence(),
   };
 

@@ -75,6 +75,7 @@ export function emptySurgeryOsCommandCentrePayload(input: {
     operationalNotes: [],
     graftSummary: [],
     graftEvents: [],
+    vieCapture: [],
     intelligence: emptySurgeryOsIntelligence(),
   };
 }

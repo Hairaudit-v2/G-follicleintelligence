@@ -22,6 +22,7 @@ import type {
   VieProtocolSlotDef,
   VieSlotTier,
 } from "@/src/lib/vie/vieProtocolTypes";
+import type { FiImageCaptureSource } from "@/src/lib/patientImages/fiImageAttributionTypes";
 import { VieCaptureGuideOverlay } from "./VieCaptureGuideOverlay";
 import { VieIntelligenceResultPanel } from "./VieIntelligenceResultPanel";
 
@@ -159,6 +160,8 @@ export function VieCaptureWizard({
   templateSlug,
   initialProgress = {},
   onClose,
+  captureSource = "vie_capture_wizard",
+  surgeryContext,
 }: {
   tenantId: string;
   patientId: string;
@@ -166,6 +169,12 @@ export function VieCaptureWizard({
   templateSlug: VieProtocolSlug;
   initialProgress?: SlotProgress;
   onClose: () => void;
+  captureSource?: Extract<FiImageCaptureSource, "vie_capture_wizard" | "surgery_os">;
+  surgeryContext?: {
+    caseId: string | null;
+    bookingId: string | null;
+    procedureDayId: string | null;
+  };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -332,7 +341,10 @@ export function VieCaptureWizard({
           if (fields.anatomical_region) fd.set("anatomical_region", fields.anatomical_region);
           fd.set("device_type", fields.device_type);
           fd.set("capture_type", "camera");
-          fd.set("capture_source", "vie_capture_wizard");
+          fd.set("capture_source", captureSource);
+          if (surgeryContext?.caseId) fd.set("case_id", surgeryContext.caseId);
+          if (surgeryContext?.bookingId) fd.set("booking_id", surgeryContext.bookingId);
+          if (surgeryContext?.procedureDayId) fd.set("procedure_day_id", surgeryContext.procedureDayId);
           if (dims.width) fd.set("image_width", String(dims.width));
           if (dims.height) fd.set("image_height", String(dims.height));
           if (hasAccepted || hasPending) fd.set("guided_replace", "1");
@@ -382,7 +394,7 @@ export function VieCaptureWizard({
         }
       });
     },
-    [awaitingReview, currentSlot, currentSlug, patientId, progress, router, sessionId, templateSlug, tenantId]
+    [awaitingReview, captureSource, currentSlot, currentSlug, patientId, progress, router, sessionId, surgeryContext, templateSlug, tenantId]
   );
 
   if (!protocol || !currentSlot) {

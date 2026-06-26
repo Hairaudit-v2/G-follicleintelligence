@@ -590,6 +590,29 @@ export function buildSurgeryOsAttentionItems(
 ): SurgicalPriorityItem[] {
   const items: SurgicalPriorityItem[] = [];
 
+  for (const capture of payload.vieCapture ?? []) {
+    for (const warning of capture.warnings) {
+      items.push({
+        id: `so-vie-${capture.surgeryId}-${warning.kind}-${warning.slotSlug ?? "general"}`,
+        headline: warning.label,
+        detail: `${capture.patientLabel} · ${capture.surgicalDocumentationPercent}% surgical documentation`,
+        href: `${base}/surgery-os`,
+        severity: warning.severity === "critical" ? "critical" : "warning",
+        priorityScore: warning.severity === "critical" ? 28 : 16,
+      });
+    }
+    if (capture.graftTrayStatus === "missing" || capture.graftTrayStatus === "partial") {
+      items.push({
+        id: `so-vie-graft-tray-${capture.surgeryId}`,
+        headline: "Graft tray evidence incomplete",
+        detail: capture.patientLabel,
+        href: `${base}/surgery-os`,
+        severity: "warning",
+        priorityScore: 24,
+      });
+    }
+  }
+
   for (const g of payload.graftSummary) {
     if (g.reconciliationStatus === "pending" || g.reconciliationStatus === "mismatch") {
       items.push({

@@ -7,10 +7,7 @@ import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { CalendarSettingsSection } from "@/src/components/fi-admin/settings/CalendarSettingsSection";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { getCalendarSettingsAccess } from "@/src/lib/calendar/calendarSettingsAccess.server";
-import {
-  getCalendarSettingsForTenant,
-  loadClinicsForCalendarSettings,
-} from "@/src/lib/calendar/calendarSettings.server";
+import { loadCalendarSettingsSectionData } from "@/src/lib/calendar/calendarSettings.server";
 
 export const metadata = {
   title: "Calendar Settings",
@@ -51,13 +48,7 @@ export default async function CalendarSettingsPage({
   const rawClinic = sp.clinicId;
   const clinicIdParam = typeof rawClinic === "string" && rawClinic.trim() ? rawClinic.trim() : null;
 
-  const clinics = await loadClinicsForCalendarSettings(tenantId);
-  let resolvedClinicId: string | null = null;
-  if (clinicIdParam && clinics.some((c) => c.id === clinicIdParam)) {
-    resolvedClinicId = clinicIdParam;
-  }
-
-  const initialSettings = await getCalendarSettingsForTenant(tenantId, resolvedClinicId);
+  const sectionData = await loadCalendarSettingsSectionData(tenantId, clinicIdParam, access);
 
   return (
     <div className="space-y-4">
@@ -71,15 +62,19 @@ export default async function CalendarSettingsPage({
         <h1 className="mt-2 text-xl font-semibold tracking-tight text-[#F8FAFC] sm:text-2xl">Calendar settings</h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#94A3B8]">
           Configure visible hours, slot size, default view, and display options for the operational calendar. Tenant defaults
-          apply when no clinic override exists.
+          apply when no clinic override exists. You can also manage these from{" "}
+          <Link href={`/fi-admin/${tenantId}/configuration?tab=calendar`} className="text-[#22C1FF] hover:underline">
+            Configuration → Calendar
+          </Link>
+          .
         </p>
       </div>
       <CalendarSettingsSection
         tenantId={tenantId}
-        clinicId={resolvedClinicId}
-        clinics={clinics}
-        initialSettings={initialSettings}
-        canEdit={access.canEdit}
+        clinicId={sectionData.clinicId}
+        clinics={sectionData.clinics}
+        initialSettings={sectionData.initialSettings}
+        canEdit={sectionData.canEdit}
       />
     </div>
   );
