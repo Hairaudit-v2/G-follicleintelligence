@@ -3,7 +3,6 @@
  * Pure helpers (no server-only) for loader + unit tests.
  */
 
-import type { FiCalendarEvent } from "@/src/lib/googleCalendar/googleCalendarTypes";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import {
   anchorLabelForBookingRow,
@@ -113,20 +112,21 @@ export function sanitizeCalendarOsMetadataForClient(
   return out;
 }
 
+export type CalendarOsEventFieldSource = {
+  provider?: string;
+  metadata?: Record<string, unknown> | null;
+  calendar_id?: string;
+  calendarId?: string;
+  google_meet_url?: string | null;
+  googleMeetUrl?: string | null;
+  external_event_id?: string | null;
+  externalEventId?: string | null;
+  event_type?: string | null;
+  eventType?: string | null;
+};
+
 export function calendarOsClientFieldsFromEvent(
-  event: Pick<
-    FiCalendarEvent | FiCalendarEventOverlapRow,
-    | "provider"
-    | "calendar_id"
-    | "calendarId"
-    | "google_meet_url"
-    | "googleMeetUrl"
-    | "external_event_id"
-    | "externalEventId"
-    | "event_type"
-    | "eventType"
-    | "metadata"
-  >
+  event: CalendarOsEventFieldSource
 ): CalendarOsEventClientFields {
   const metadata = (event.metadata ?? {}) as Record<string, unknown>;
   const providerKind = resolveCalendarOsProviderKind(metadata);

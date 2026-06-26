@@ -112,7 +112,7 @@ function createMockSupabase() {
               },
             };
           },
-          select(cols?: string) {
+          select(_cols?: string) {
             return {
               eq(col: string, val: string) {
                 const chain = {
@@ -417,7 +417,6 @@ describe("CalendarOS GC-6 — staff calendar links service", () => {
 
 describe("CalendarOS GC-6 — loader staff column assignment", () => {
   it("places linked CalendarOS events into staff column", () => {
-    const links = [sampleLink()];
     const booking = mapFiCalendarEventOverlapRowToBookingRow(sampleEventRow(), "UTC", {
       staffMemberId: STAFF_A,
     });
