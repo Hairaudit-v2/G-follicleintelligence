@@ -14,6 +14,11 @@ import { calendarRangeIsoForQuery, parseCalendarSearchParams, type CalendarRoute
 import { buildCalendarHref, mergeCalendarHrefQuery } from "@/src/lib/bookings/calendarQuery";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import { loadTenantOperationalCalendarSettings } from "@/src/lib/calendar/tenantOperationalCalendarSettings.server";
+import {
+  applyCalendarSettingsToQuery,
+  calendarSettingsRedirectNeeded,
+  filterCalendarLanesForWeekends,
+} from "@/src/lib/calendar/calendarSettingsCore";
 
 import type {
   OperationalCalendarBookingDisplay,
@@ -82,7 +87,44 @@ type ClinicalLite = {
   primary_concern: string | null;
 };
 
-const loadTenantCalendarSettingsCached = cache((tenantId: string) => loadTenantOperationalCalendarSettings(tenantId.trim()));
+const loadTenantCalendarSettingsCached = cache((tenantId: string, clinicId: string | null) =>
+  loadTenantOperationalCalendarSettings(tenantId.trim(), clinicId?.trim() || null)
+);
+
+function clinicIdFromSearchParams(
+  searchParams: Record<string, string | string[] | undefined>
+): string | null {
+  const raw = searchParams.clinicId;
+  const s = (Array.isArray(raw) ? String(raw[0] ?? "") : String(raw ?? "")).trim();
+  return /^[0-9a-f-]{36}$/i.test(s) ? s : null;
+}
+
+function resolveCalendarQueryFromSettings(
+  tenantId: string,
+  searchParams: Record<string, string | string[] | undefined>,
+  route: CalendarRoute,
+  calendarSettings: Awaited<ReturnType<typeof loadTenantOperationalCalendarSettings>>
+): {
+  query: ParsedCalendarQuery;
+  lanes: ReturnType<typeof buildCalendarLanesForView>;
+  settingsRedirectHref: string | null;
+} {
+  const parsed = parseCalendarSearchParams(searchParams, new Date(), {
+    calendarTimezone: calendarSettings.calendarTimezone,
+  });
+  const withSettings = applyCalendarSettingsToQuery(parsed, calendarSettings.settings, searchParams);
+  const lanes = filterCalendarLanesForWeekends(
+    buildCalendarLanesForView(withSettings.view, withSettings.dateAnchor, withSettings.calendarTimezone),
+    withSettings.view,
+    calendarSettings.settings.showWeekends
+  );
+
+  const settingsRedirectHref = calendarSettingsRedirectNeeded(parsed, withSettings)
+    ? buildCalendarHref(tenantId.trim(), mergeCalendarHrefQuery(withSettings, {}), { route })
+    : null;
+
+  return { query: withSettings, lanes, settingsRedirectHref };
+}
 
 const loadTenantStaffAndResourcesCached = cache(
   (tenantId: string, resourceView: ParsedCalendarQuery["resourceView"], clinicId: string | null) =>
@@ -486,12 +528,14 @@ export async function loadOperationalCalendarShellData(
   const route = opts?.route ?? "fi-admin";
   const tid = tenantId.trim();
   const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const calendarSettings = await loadTenantCalendarSettingsCached(tid);
-  const parsed = parseCalendarSearchParams(searchParams, new Date(), {
-    calendarTimezone: calendarSettings.calendarTimezone,
-  });
-  let query = parsed;
-  const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
+  const calendarSettings = await loadTenantCalendarSettingsCached(tid, clinicIdFromSearchParams(searchParams));
+  const { query: resolvedQuery, lanes, settingsRedirectHref } = resolveCalendarQueryFromSettings(
+    tid,
+    searchParams,
+    route,
+    calendarSettings
+  );
+  let query = resolvedQuery;
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
   const [resources, mutationGate, services, tenantMetaRow] = await Promise.all([
@@ -507,9 +551,10 @@ export async function loadOperationalCalendarShellData(
 
   const normalized = normalizeCalendarStaffFilter(query, resources.staffIdByUserId);
   query = normalized.query;
-  const canonicalRedirectHref = normalized.shouldCanonicalizeToStaffId
+  const staffCanonicalHref = normalized.shouldCanonicalizeToStaffId
     ? buildCalendarHref(tid, mergeCalendarHrefQuery(query, {}), { route })
     : null;
+  const canonicalRedirectHref = settingsRedirectHref ?? staffCanonicalHref;
 
   const resourceColumns =
     query.resourceView === "staff"
@@ -517,7 +562,7 @@ export async function loadOperationalCalendarShellData(
           userAssignees: resources.assignees,
           staffIdByUserId: resources.staffIdByUserId,
           bookings: [],
-          filterUserId: parsed.assignedUserId,
+          filterUserId: query.assignedUserId,
         })
       : resources.resourceColumns;
   const { canMutateBookings, bookingMutationBlockedReason } = mutationGate;
@@ -567,6 +612,7 @@ export async function loadOperationalCalendarShellData(
     roomDisplayById: resources.roomDisplayById,
     resourceColumns,
     gridConfig,
+    calendarSettings: calendarSettings.settings,
     listTruncated: false,
     canMutateBookings,
     bookingMutationBlockedReason,
@@ -587,15 +633,17 @@ export async function loadOperationalCalendarGridData(
   searchParams: Record<string, string | string[] | undefined>,
   opts?: { route?: CalendarRoute }
 ): Promise<OperationalCalendarGridPatch> {
-  void opts;
   const tid = tenantId.trim();
+  const route = opts?.route ?? "fi-admin";
   const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const calendarSettings = await loadTenantCalendarSettingsCached(tid);
-  const parsed = parseCalendarSearchParams(searchParams, new Date(), {
-    calendarTimezone: calendarSettings.calendarTimezone,
-  });
-  let query = parsed;
-  const lanes = buildCalendarLanesForView(query.view, query.dateAnchor, query.calendarTimezone);
+  const calendarSettings = await loadTenantCalendarSettingsCached(tid, clinicIdFromSearchParams(searchParams));
+  const { query: resolvedQuery, lanes } = resolveCalendarQueryFromSettings(
+    tid,
+    searchParams,
+    route,
+    calendarSettings
+  );
+  let query = resolvedQuery;
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
   const monthSummaryMode = operationalCalendarSkipsHeavyEnrichment(query.view);
 
@@ -668,7 +716,7 @@ export async function loadOperationalCalendarGridData(
           userAssignees: resources.assignees,
           staffIdByUserId: resources.staffIdByUserId,
           bookings: rawBookings,
-          filterUserId: parsed.assignedUserId,
+          filterUserId: query.assignedUserId,
         })
       : resources.resourceColumns;
 

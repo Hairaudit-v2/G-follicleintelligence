@@ -208,6 +208,7 @@ export function useCalendarAppointments(
           ignoreBookingId: b.id,
           sameResourceColumnOverlapConflicts: useSamples,
           staffIdToUserId,
+          bufferMinutes: data.calendarSettings.bufferMinutes,
         }
       );
       if (conflicts.length) {

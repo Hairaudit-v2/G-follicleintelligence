@@ -302,6 +302,13 @@ export const CLINIC_OS_SHELL_NAV_MODULES: ClinicOsShellNavModuleDefinition[] = [
           "Manage non-clinical platform access for trusted administrators, finance teams, owners, auditors, and operational staff.",
       },
       {
+        id: "calendar-settings",
+        label: "Calendar",
+        path: "settings/calendar",
+        permissionHint: {},
+        description: "Visible hours, slot size, default view, and calendar display options.",
+      },
+      {
         id: "tax-localisation",
         label: "Tax & Localisation",
         path: "settings/tax-localisation",

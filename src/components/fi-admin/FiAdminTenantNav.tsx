@@ -252,6 +252,11 @@ function buildNavGroups(base: string, showCrmNav: boolean, showBookingsBoard: bo
       title: "Settings — reminder templates.",
     },
     {
+      href: `${base}/settings/calendar`,
+      label: "Calendar",
+      title: "Settings — calendar visible hours, slots, and display defaults.",
+    },
+    {
       href: `${base}/settings/tax-localisation`,
       label: "Tax & Localisation",
       title: "Settings — tax, currency, invoice, and regional business settings.",

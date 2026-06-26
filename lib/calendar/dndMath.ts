@@ -17,12 +17,13 @@ export function minutesUtcFromEpoch(ms: number): number {
 }
 
 export function snapCalendarMinutes(minutes: number, cfg: BusinessGridConfig): number {
+  const snap = cfg.slotMinutes;
   const gridStart = cfg.dayStartHourUtc * 60;
   const gridEnd = cfg.dayEndHourUtc * 60;
-  const clamped = Math.min(Math.max(minutes, gridStart), gridEnd - CALENDAR_SNAP_MINUTES);
+  const clamped = Math.min(Math.max(minutes, gridStart), gridEnd - snap);
   const rel = clamped - gridStart;
-  const snapped = Math.round(rel / CALENDAR_SNAP_MINUTES) * CALENDAR_SNAP_MINUTES + gridStart;
-  return Math.min(snapped, gridEnd - CALENDAR_SNAP_MINUTES);
+  const snapped = Math.round(rel / snap) * snap + gridStart;
+  return Math.min(snapped, gridEnd - snap);
 }
 
 export function snapDurationMinutes(minutes: number): number {

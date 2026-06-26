@@ -405,6 +405,7 @@ function CalendarPageImpl({
                 tenantId={data.tenantId}
                 query={data.query}
                 calendarRoute={route}
+                showWeekends={data.calendarSettings.showWeekends}
                 calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                 fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
                 onEmptyDayQuickCreate={quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined}
@@ -462,6 +463,7 @@ function CalendarPageImpl({
                     tenantId={data.tenantId}
                     query={data.query}
                     calendarRoute={route}
+                showWeekends={data.calendarSettings.showWeekends}
                     calendarShellMode={isFiOsWorkspace ? "fiOs" : "default"}
                     fiOsDrawerDismiss={isFiOsWorkspace ? dismissFiOsCalendarDrawers : undefined}
                     onEmptyDayQuickCreate={quickCreateEnabled ? openQuickCreateFromMonthEmptyDay : undefined}

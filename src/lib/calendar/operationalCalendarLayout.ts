@@ -25,15 +25,15 @@ export type BusinessGridConfig = {
   /** Clinic-local business day end hour (exclusive). */
   dayEndHourUtc: number;
   /** Vertical resolution for drag snap + grid lines. */
-  slotMinutes: 30 | 60;
+  slotMinutes: 15 | 30 | 60;
   /** IANA timezone for grid hours and layout. */
   timeZone: string;
 };
 
 export const DEFAULT_BUSINESS_GRID: BusinessGridConfig = {
-  dayStartHourUtc: 8,
-  dayEndHourUtc: 18,
-  slotMinutes: 30,
+  dayStartHourUtc: 6,
+  dayEndHourUtc: 19,
+  slotMinutes: 15,
   timeZone: "UTC",
 };
 

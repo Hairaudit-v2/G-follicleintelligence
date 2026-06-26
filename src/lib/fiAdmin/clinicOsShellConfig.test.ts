@@ -12,6 +12,13 @@ import {
 const EVOLVED_LIKE_TENANT = "a0000000-0000-4000-8000-0000000000e1";
 const base = `/fi-admin/${EVOLVED_LIKE_TENANT}`;
 
+test("GC-11 calendar settings page exists at app router path", () => {
+  assert.ok(
+    existsSync("app/(fi-admin)/fi-admin/[tenantId]/settings/calendar/page.tsx"),
+    "Calendar settings page must exist at app/(fi-admin)/fi-admin/[tenantId]/settings/calendar/page.tsx"
+  );
+});
+
 test("GC-2 integrations page exists at app router path", () => {
   assert.ok(
     existsSync("app/(fi-admin)/fi-admin/[tenantId]/settings/integrations/page.tsx"),
@@ -57,6 +64,10 @@ test("resolveClinicOsShellNavItems: core routes href under tenant base", () => {
   assert.ok(taxLoc);
   assert.equal(taxLoc!.disabled, false);
   assert.equal(taxLoc!.href, `${base}/settings/tax-localisation`);
+  const calendarSettings = items.find((i) => i.id === "calendar-settings");
+  assert.ok(calendarSettings);
+  assert.equal(calendarSettings!.disabled, false);
+  assert.equal(calendarSettings!.href, `${base}/settings/calendar`);
   const integrations = items.find((i) => i.id === "integrations");
   assert.ok(integrations);
   assert.equal(integrations!.disabled, false);

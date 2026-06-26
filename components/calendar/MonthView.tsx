@@ -59,6 +59,7 @@ import {
 } from "@/src/lib/calendar/calendarTimezone";
 import { buildCalendarHref, mergeCalendarHrefQuery, type CalendarRoute, type ParsedCalendarQuery } from "@/src/lib/bookings/calendarQuery";
 import { buildCalendarMonth } from "@/src/lib/bookings/calendarView";
+import { filterMonthCellsForWeekends } from "@/src/lib/calendar/calendarSettingsCore";
 import { resolveDisplayResourceColumnId, type BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type {
   OperationalCalendarBookingDisplay,
@@ -145,6 +146,8 @@ export type MonthViewProps = {
    * (day number + “Open · click to schedule” targets).
    */
   onEmptyDayQuickCreate?: (dayKey: string) => void;
+  /** GC-11: when false, Sat/Sun columns are hidden (default true for backwards compat). */
+  showWeekends?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -548,6 +551,7 @@ function MonthViewInner({
   calendarShellMode = "default",
   fiOsDrawerDismiss,
   onEmptyDayQuickCreate,
+  showWeekends = true,
 }: MonthViewProps) {
   const router = useRouter();
   const { success, error: toastError } = useCalendarToast();
@@ -558,10 +562,10 @@ function MonthViewInner({
     useSensor(TouchSensor, calendarTouchSensorOptions())
   );
 
-  const cells = useMemo(
-    () => buildMonthGridCells(monthAnchor, gridConfig.timeZone),
-    [monthAnchor, gridConfig.timeZone]
-  );
+  const cells = useMemo(() => {
+    const all = buildMonthGridCells(monthAnchor, gridConfig.timeZone);
+    return filterMonthCellsForWeekends(all, showWeekends);
+  }, [monthAnchor, gridConfig.timeZone, showWeekends]);
   const { rows: bookingsForBuckets, fingerprint: monthBookingsKey } = useBookingsStableByFingerprint(bookings);
   const bucketGroupingPerfRef = useRef<{ groupingMs: number; bookingCount: number } | null>(null);
   const buckets = useMemo(() => {
@@ -772,8 +776,13 @@ function MonthViewInner({
         </div>
       </header>
 
-      <div className="grid grid-cols-7 border-b border-[color:var(--fi-cal-ws-shell-border,#1e2937)] bg-[var(--fi-cal-ws-controls-inset-bg,#0b1220)]/60">
-        {MONTH_WEEKDAY_LABELS.map((label) => (
+      <div
+        className={cn(
+          "grid border-b border-[color:var(--fi-cal-ws-shell-border,#1e2937)] bg-[var(--fi-cal-ws-controls-inset-bg,#0b1220)]/60",
+          showWeekends ? "grid-cols-7" : "grid-cols-5"
+        )}
+      >
+        {(showWeekends ? MONTH_WEEKDAY_LABELS : MONTH_WEEKDAY_LABELS.slice(0, 5)).map((label) => (
           <div
             key={label}
             className={cn(
@@ -785,7 +794,14 @@ function MonthViewInner({
         ))}
       </div>
 
-      <div className="grid min-h-0 flex-1 auto-rows-fr overflow-y-auto overscroll-y-contain [grid-template-columns:repeat(7,minmax(0,1fr))]">
+      <div
+        className={cn(
+          "grid min-h-0 flex-1 auto-rows-fr overflow-y-auto overscroll-y-contain",
+          showWeekends
+            ? "[grid-template-columns:repeat(7,minmax(0,1fr))]"
+            : "[grid-template-columns:repeat(5,minmax(0,1fr))]"
+        )}
+      >
         {cells.map((cell) => (
           <MonthDayCell
             key={cell.dayKey}

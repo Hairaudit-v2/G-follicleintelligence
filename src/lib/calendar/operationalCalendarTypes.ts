@@ -4,6 +4,7 @@ import type { CalendarDayLane } from "@/src/lib/bookings/calendarView";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
 import type { CrmShellClinicOption, CrmShellUserPickerOption } from "@/src/lib/crm/types";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
+import type { FiCalendarSettingsDocument } from "@/src/lib/calendar/calendarSettingsCore";
 import type { BusinessGridConfig } from "@/src/lib/calendar/operationalCalendarLayout";
 import type { FiReminderJobWithTemplate } from "@/src/lib/reminders/reminderTypes";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
@@ -77,6 +78,8 @@ export type OperationalCalendarPageData = {
   roomDisplayById: Record<string, string>;
   resourceColumns: OperationalCalendarResourceColumn[];
   gridConfig: BusinessGridConfig;
+  /** GC-11 tenant/clinic calendar display settings (hours, weekends, buffer, defaults). */
+  calendarSettings: FiCalendarSettingsDocument;
   listTruncated: boolean;
   canMutateBookings: boolean;
   /**
