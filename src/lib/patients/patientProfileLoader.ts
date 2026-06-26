@@ -17,6 +17,8 @@ import type { PatientClinicalDetailsRow } from "./clinicalDetailsServer";
 import { loadPatientClinicalDetails } from "./clinicalDetailsServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
+import { loadViePatientImagingCompleteness } from "@/src/lib/vie/vieCompleteness.server";
+import type { ViePatientImagingCompleteness } from "@/src/lib/vie/vieProtocolTypes";
 import { buildPatientTimeline, mapActivityRowForTimeline } from "@/src/lib/patients/timeline/patientTimelineBuild";
 import type { PatientTimelineBuildResult } from "@/src/lib/patients/timeline/patientTimelineTypes";
 
@@ -91,6 +93,7 @@ export type PatientProfileFoundationData = {
   person: PatientProfilePerson;
   clinicalDetails: PatientClinicalDetailsProfileView;
   patientImages: PatientImagesProfileBundle;
+  vieImagingCompleteness: ViePatientImagingCompleteness;
   leads: PatientProfileLeadCard[];
   cases: PatientProfileCaseCard[];
   bookings: { upcoming: PatientProfileBookingCard[]; past: PatientProfileBookingCard[] };
@@ -210,6 +213,7 @@ export async function loadPatientProfile(
 
   const clinicalRow = await loadPatientClinicalDetails(tid, foundationPatientId, supabase);
   const patientImages = await loadPatientImagesProfileBundle(tid, foundationPatientId, supabase);
+  const vieImagingCompleteness = await loadViePatientImagingCompleteness(tid, foundationPatientId, supabase);
   let clinicalDetailsUpdatedByLabel: string | null = null;
   if (clinicalRow?.updated_by_user_id) {
     const { data: updater, error: ueUp } = await supabase
@@ -474,6 +478,7 @@ export async function loadPatientProfile(
       person,
       clinicalDetails: { row: clinicalRow, updatedByLabel: clinicalDetailsUpdatedByLabel },
       patientImages,
+      vieImagingCompleteness,
       leads,
       cases,
       bookings: split,

@@ -10,6 +10,7 @@ import { canViewDashboardSystemDiagnostics } from "@/src/lib/fi-os/dashboardSyst
 import { loadConsultationDashboardPayload } from "@/src/lib/fiAdmin/consultationDashboardLoader.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {
   title: "Consultations",
@@ -46,6 +47,7 @@ export default async function ConsultationsIndexRoutePage({
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
+  await assertStaffModuleAccess(tenantId, "consultation_os", "read");
 
   const tid = tenantId.trim();
   const sp = (await searchParams) ?? {};

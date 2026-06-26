@@ -24,6 +24,7 @@ import {
 } from "@/src/lib/medicationOs/medicationOsLoaders.server";
 import { normalizeImagingLibraryAxis } from "@/src/lib/patientImages/patientImagePolicy";
 import { loadPatientTwinPhotoProtocolSection } from "@/src/lib/hair-intelligence/photoProtocols/photoProtocolLoader.server";
+import { loadPatientTwinVieSection } from "@/src/lib/vie/viePatientTwinSection.server";
 import { loadPatientTwinImagingGallerySection } from "@/src/lib/patientTwin/patientTwinImagingGallery.server";
 import { loadPatientTwinDonorSection } from "@/src/lib/patientTwin/patientTwinDonorIntelligence.server";
 import { loadPatientTwinHairLossSection } from "@/src/lib/patientTwin/patientTwinHairLossClassification.server";
@@ -91,6 +92,7 @@ const SOURCE_TABLES_USED = [
   "hli_photo_protocol_slots",
   "hli_photo_protocol_sessions",
   "hli_photo_protocol_session_slots",
+  "fi_vie_capture_intelligence",
   "fi_medication_os_canonical",
   "fi_patient_therapy_plans",
   "fi_patient_therapy_plan_items",
@@ -677,6 +679,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
   }
 
   let photo_protocol: PatientTwinV1["photo_protocol"] = null;
+  let vie: PatientTwinV1["vie"] = null;
   try {
     photo_protocol = await loadPatientTwinPhotoProtocolSection({
       tenantId: tid,
@@ -687,6 +690,15 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     const msg = e instanceof Error ? e.message : String(e);
     if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
       pushWarning(warnings, "generic", `Photo protocol section skipped: ${msg}`);
+    }
+  }
+
+  try {
+    vie = await loadPatientTwinVieSection(tid, primaryFoundation, supabase);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("does not exist") && !msg.includes("schema cache")) {
+      pushWarning(warnings, "generic", `VIE section skipped: ${msg}`);
     }
   }
 
@@ -986,6 +998,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
     media,
     imaging,
     photo_protocol,
+    vie,
     pathology,
     timeline: {
       order: "newest_first",

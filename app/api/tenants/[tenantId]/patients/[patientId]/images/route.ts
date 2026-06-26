@@ -8,6 +8,14 @@ import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError }
 import { assertGuidedSessionUploadPreconditions } from "@/src/lib/imagingOs/imagingOsGuidedFields";
 import { applyGuidedCaptureToSession } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
 import { createPatientImageRecord } from "@/src/lib/patientImages/patientImagesServer";
+import { assertVieProtocolCapturePolicy, normalizeCaptureSource } from "@/src/lib/vie/vieCapturePolicy.server";
+import { isVieProtocolSlug, getVieProtocol } from "@/src/lib/vie/vieProtocolCatalog";
+import {
+  buildCaptureReviewPayload,
+  stageVieProtocolCapture,
+} from "@/src/lib/vie/vieGuidedCapture.server";
+import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
+import { runVieInstantIntelligence } from "@/src/lib/vie/vieInstantIntelligence.server";
 
 export const dynamic = "force-dynamic";
 
@@ -56,8 +64,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     const metadataRaw = form.get("metadata");
 
     const protocolSessionId = protocolSessionIdRaw != null ? String(protocolSessionIdRaw).trim() : "";
+    const captureSourceStr = captureSource == null ? null : String(captureSource);
+    const templateSlugStr = imagingProtocolTemplateSlug != null ? String(imagingProtocolTemplateSlug).trim() : null;
+    const slotSlugStr = imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : null;
+
+    try {
+      assertVieProtocolCapturePolicy({
+        captureSource: captureSourceStr,
+        protocolSessionId: protocolSessionId || null,
+        protocolTemplateSlug: templateSlugStr,
+        protocolSlotSlug: slotSlugStr,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Protocol capture required.";
+      return crmJsonError(400, msg);
+    }
+
     if (protocolSessionId) {
-      const slotForGuided = imagingProtocolSlotSlug != null ? String(imagingProtocolSlotSlug).trim() : "";
+      const slotForGuided = slotSlugStr ?? "";
       try {
         assertGuidedSessionUploadPreconditions({
           tenantId: tid,
@@ -115,6 +139,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
       imageHeight: parseDim(imageHeightRaw),
     });
 
+    const qualityAlert = result.attribution?.quality?.alert_message;
+    if (qualityAlert) {
+      return crmJsonError(400, qualityAlert);
+    }
+
     let guided_session:
       | {
           completionPercent: number;
@@ -130,6 +159,67 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         guidedReplaceRaw === "1" ||
         guidedReplaceRaw === "true" ||
         String(guidedReplaceRaw ?? "").toLowerCase() === "on";
+      const isVieWizard = normalizeCaptureSource(captureSourceStr) === "vie_capture_wizard";
+
+      if (isVieWizard && templateSlugStr && isVieProtocolSlug(templateSlugStr)) {
+        const protocol = getVieProtocol(templateSlugStr);
+        const requiredTotal = protocol?.slots.filter((s) => s.required).length ?? 0;
+        const intel = await runVieInstantIntelligence({
+          tenantId: tid,
+          patientId: pid,
+          patientImageId: result.row.id,
+          protocolSessionId,
+          protocolTemplateSlug: templateSlugStr,
+          protocolSlotSlug: slotSlugStr ?? slotSlug,
+          contentType: result.row.content_type ?? file.type,
+          fileSizeBytes: file.size,
+          imageWidth: parseDim(imageWidthRaw),
+          imageHeight: parseDim(imageHeightRaw),
+          protocolCompletion: {
+            required_complete: 0,
+            required_total: requiredTotal,
+            percent: 0,
+            complete: false,
+          },
+        });
+
+        guided_session = await stageVieProtocolCapture({
+          tenantId: tid,
+          patientId: pid,
+          sessionId: protocolSessionId,
+          slotSlug,
+          newImageId: result.row.id,
+          intelligence: intel,
+          intelligenceId: intel.intelligence_id,
+          replacePrevious,
+        });
+
+        const policy = await loadVieCapturePolicyForTenant(tid);
+        const vie_capture_review = buildCaptureReviewPayload(intel, policy);
+
+        revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
+        revalidatePath(`/fi-admin/${tid}/patients/${pid}`);
+        revalidatePath(`/fi-admin/${tid}/patients/${pid}/twin`);
+
+        return crmJsonOk({
+          image: result.row,
+          changed_keys: result.changed_keys,
+          ...(result.attribution
+            ? {
+                attribution: {
+                  quality: result.attribution.quality,
+                  classification: result.attribution.classification,
+                  timeline_entry: result.attribution.timeline_entry,
+                  watermark_applied: result.attribution.watermark_applied,
+                  marketing_version_created: result.attribution.marketing_version_created,
+                },
+              }
+            : {}),
+          guided_session,
+          vie_capture_review,
+        });
+      }
+
       guided_session = await applyGuidedCaptureToSession({
         tenantId: tid,
         patientId: pid,
@@ -139,6 +229,55 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
         replacePrevious,
         templateSlugFromImageRow: result.row.imaging_protocol_template_slug,
       });
+    }
+
+    let vie_intelligence:
+      | {
+          quality_score: number;
+          quality_band: string;
+          protocol_completion: {
+            required_complete: number;
+            required_total: number;
+            percent: number;
+            complete: boolean;
+          };
+        }
+      | undefined;
+
+    if (
+      protocolSessionId &&
+      templateSlugStr &&
+      slotSlugStr &&
+      isVieProtocolSlug(templateSlugStr) &&
+      guided_session &&
+      normalizeCaptureSource(captureSourceStr) !== "vie_capture_wizard"
+    ) {
+      const protocol = getVieProtocol(templateSlugStr);
+      const requiredTotal = protocol?.slots.filter((s) => s.required).length ?? 0;
+      const requiredComplete = Math.round((guided_session.completionPercent / 100) * requiredTotal);
+      const intel = await runVieInstantIntelligence({
+        tenantId: tid,
+        patientId: pid,
+        patientImageId: result.row.id,
+        protocolSessionId,
+        protocolTemplateSlug: templateSlugStr,
+        protocolSlotSlug: slotSlugStr,
+        contentType: result.row.content_type ?? file.type,
+        fileSizeBytes: file.size,
+        imageWidth: parseDim(imageWidthRaw),
+        imageHeight: parseDim(imageHeightRaw),
+        protocolCompletion: {
+          required_complete: requiredComplete,
+          required_total: requiredTotal,
+          percent: guided_session.completionPercent,
+          complete: guided_session.sessionCompleted,
+        },
+      });
+      vie_intelligence = {
+        quality_score: intel.quality_score,
+        quality_band: intel.quality_band,
+        protocol_completion: intel.protocol_completion,
+      };
     }
 
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
@@ -160,6 +299,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
           }
         : {}),
       ...(guided_session ? { guided_session } : {}),
+      ...(vie_intelligence ? { vie_intelligence } : {}),
     });
   } catch (e) {
     return mapCrmRouteError(e);

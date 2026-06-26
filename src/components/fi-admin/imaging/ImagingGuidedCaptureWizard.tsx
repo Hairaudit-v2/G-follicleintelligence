@@ -17,6 +17,7 @@ import {
   isSessionMarkedComplete,
   missingRequiredSlotSlugs,
   nextRecommendedSlotSlug,
+  parseProgressMeta,
   slotIsSatisfied,
   type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
@@ -554,6 +555,16 @@ export function ImagingGuidedCaptureWizard({
                 {slots.map((s) => {
                   const ok = slotIsSatisfied(s, progress);
                   const active = s.slug === currentSlug;
+                  const slotMeta = parseProgressMeta(progress);
+                  const pending = slotMeta.vie_pending?.[s.slug];
+                  const quality = slotMeta.vie_slot_quality?.[s.slug];
+                  const statusLabel = pending
+                    ? "Review pending"
+                    : ok
+                      ? quality
+                        ? `${quality.quality_score}/100${quality.clinically_usable ? "" : " ⚠"}`
+                        : "Done"
+                      : "Open";
                   return (
                     <li key={s.slug}>
                       <button
@@ -561,11 +572,11 @@ export function ImagingGuidedCaptureWizard({
                         disabled={sessionComplete}
                         onClick={() => setSlotOverride(s.slug)}
                         className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left ${
-                          active ? "bg-gray-900 text-white" : ok ? "bg-emerald-50 text-emerald-900" : "bg-gray-50 hover:bg-gray-100"
+                          active ? "bg-gray-900 text-white" : ok ? "bg-emerald-50 text-emerald-900" : pending ? "bg-amber-50 text-amber-900" : "bg-gray-50 hover:bg-gray-100"
                         }`}
                       >
                         <span className="pr-2">{s.label}</span>
-                        <span className="shrink-0 text-xs font-medium">{ok ? "Done" : "Open"}</span>
+                        <span className="shrink-0 text-xs font-medium">{statusLabel}</span>
                       </button>
                     </li>
                   );

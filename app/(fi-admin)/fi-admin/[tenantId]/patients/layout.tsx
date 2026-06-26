@@ -7,6 +7,7 @@ import { loadClinicalStaffPickerOptions } from "@/src/lib/staff/clinicalStaffPic
 import { getClinicFloorPageSession } from "@/src/lib/staffPin/clinicFloorAccess";
 import { loadFiServicesForTenant } from "@/src/lib/services/fiServices.server";
 import { getPatientImagingCaptureCapability } from "@/src/lib/patientImages/patientImagingCaptureAccess.server";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ type PatientsShellLayoutProps = {
 export default async function PatientsShellLayout({ children, params }: PatientsShellLayoutProps) {
   const { tenantId } = await params;
   const session = await getClinicFloorPageSession(tenantId);
+  await assertStaffModuleAccess(tenantId, "patient_os", "read");
   const [assignees, scope, calendarSettings, services, imagingCaptureCap] = await Promise.all([
     loadClinicalStaffPickerOptions(tenantId),
     loadCrmShellScopePickerOptions(tenantId),

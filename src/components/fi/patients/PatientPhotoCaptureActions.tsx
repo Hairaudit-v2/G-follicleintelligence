@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { Camera, Upload } from "lucide-react";
+import { Camera } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
+import { StartCaptureProtocolButton } from "@/src/components/fi/vie/StartCaptureProtocolButton";
 import {
-  buildPatientImagingCaptureHref,
   PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP,
   type PatientPhotoQuickActionSource,
 } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
@@ -17,59 +16,22 @@ type Props = {
   patientId: string;
   canCapture: boolean;
   source: PatientPhotoQuickActionSource;
-  /** Header row beside patient name (desktop + mobile). */
   variant?: "header" | "mobile-bar";
   className?: string;
   onNavigate?: () => void;
 };
 
-function CaptureLink({
-  href,
-  enabled,
-  label,
-  icon,
-  className,
-  onNavigate,
-}: {
-  href: string;
-  enabled: boolean;
-  label: string;
-  icon: ReactNode;
-  className?: string;
-  onNavigate?: () => void;
-}) {
-  if (enabled) {
-    return (
-      <Link href={href} className={className} onClick={onNavigate}>
-        {icon}
-        {label}
-      </Link>
-    );
-  }
-
-  return (
-    <span
-      title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
-      aria-disabled="true"
-      className={cn(className, "cursor-not-allowed opacity-50")}
-    >
-      {icon}
-      {label}
-    </span>
-  );
-}
-
 export function PatientPhotoCaptureActions({
   tenantId,
   patientId,
   canCapture,
-  source,
+  source: _source,
   variant = "header",
   className,
   onNavigate,
 }: Props) {
-  const takePhotoHref = buildPatientImagingCaptureHref(tenantId, patientId, "camera", source);
-  const uploadPhotoHref = buildPatientImagingCaptureHref(tenantId, patientId, "library", source);
+  const chip =
+    "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium";
 
   if (variant === "mobile-bar") {
     return (
@@ -82,22 +44,24 @@ export function PatientPhotoCaptureActions({
         aria-label="Patient quick actions"
       >
         <div className="mx-auto flex max-w-6xl items-stretch gap-2">
-          <CaptureLink
-            href={takePhotoHref}
-            enabled={canCapture}
-            label="Take Photo"
-            icon={<Camera className="h-4 w-4 shrink-0" aria-hidden />}
-            onNavigate={onNavigate}
-            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-gray-900 px-3 text-xs font-semibold text-white"
-          />
-          <CaptureLink
-            href={uploadPhotoHref}
-            enabled={canCapture}
-            label="Upload Photo"
-            icon={<Upload className="h-4 w-4 shrink-0" aria-hidden />}
-            onNavigate={onNavigate}
-            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-xs font-semibold text-gray-900"
-          />
+          {canCapture ? (
+            <StartCaptureProtocolButton
+              tenantId={tenantId}
+              patientId={patientId}
+              canCapture
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-gray-900 px-3 text-xs font-semibold text-white"
+              label="Start Capture Protocol"
+            />
+          ) : (
+            <span
+              title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
+              aria-disabled="true"
+              className="inline-flex min-h-[44px] flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-gray-200 px-3 text-xs font-semibold text-gray-500 opacity-50"
+            >
+              <Camera className="h-4 w-4 shrink-0" aria-hidden />
+              Start Capture Protocol
+            </span>
+          )}
           <div className="flex min-h-[44px] flex-1 items-center justify-center [&_button]:min-h-[44px] [&_button]:w-full [&_button]:justify-center">
             <VoiceNoteEntryButton
               tenantId={tenantId}
@@ -112,23 +76,23 @@ export function PatientPhotoCaptureActions({
   }
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)} role="group" aria-label="Patient photo capture">
-      <CaptureLink
-        href={takePhotoHref}
-        enabled={canCapture}
-        label="Take Photo"
-        icon={<Camera className="h-4 w-4 shrink-0" aria-hidden />}
-        onNavigate={onNavigate}
-        className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800"
+    <div className={cn("flex flex-wrap items-center gap-2", className)} role="group" aria-label="Protocol capture">
+      <StartCaptureProtocolButton
+        tenantId={tenantId}
+        patientId={patientId}
+        canCapture={canCapture}
+        className={`${chip} bg-gray-900 text-sm font-semibold text-white shadow-sm hover:bg-gray-800`}
+        label="Start Capture Protocol"
       />
-      <CaptureLink
-        href={uploadPhotoHref}
-        enabled={canCapture}
-        label="Upload Photo"
-        icon={<Upload className="h-4 w-4 shrink-0" aria-hidden />}
-        onNavigate={onNavigate}
-        className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-      />
+      {onNavigate ? (
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}/imaging`}
+          className={`${chip} border border-gray-300 bg-white text-gray-900 hover:bg-gray-50`}
+          onClick={onNavigate}
+        >
+          ImagingOS
+        </Link>
+      ) : null}
     </div>
   );
 }

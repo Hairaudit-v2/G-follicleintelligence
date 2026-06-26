@@ -5,6 +5,7 @@ import { StaffDirectoryClient } from "@/src/components/fi/staff/StaffDirectoryCl
 import { getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { parseStaffDirectoryFiltersFromSearchParams } from "@/src/lib/staff/staffDirectoryFilters";
 import { loadStaffDirectoryPage } from "@/src/lib/staff/staffDirectoryLoader.server";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {
   title: "Staff",
@@ -24,6 +25,7 @@ export default async function StaffDirectoryRoutePage({
   const { tenantId } = await params;
   const sp = await searchParams;
   if (!tenantId?.trim()) notFound();
+  await assertStaffModuleAccess(tenantId, "workforce_os", "read");
 
   const initialFilters = parseStaffDirectoryFiltersFromSearchParams(sp);
 

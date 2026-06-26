@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FinancialOsModuleSwitcher } from "@/src/components/fi-admin/financial-os/FinancialOsModuleSwitcher";
 import { financialOsClasses } from "@/src/components/fi-admin/financial-os/financialOsUi";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export default async function FinancialOsLayout({
   children,
@@ -15,6 +16,7 @@ export default async function FinancialOsLayout({
   const tid = tenantId?.trim();
   if (!tid) notFound();
   await assertFiTenantPortalAccess(tid);
+  await assertStaffModuleAccess(tid, "financial_os", "read");
   const base = `/fi-admin/${tid}/financial`;
 
   return (

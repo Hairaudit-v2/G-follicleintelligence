@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { Camera, Upload, Brain, Activity, FlaskConical, ScanLine } from "lucide-react";
+import { Brain, Activity, FlaskConical, ScanLine } from "lucide-react";
 
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import type { PatientDetailNextAppointment } from "@/src/lib/patients/patientDetailLoader";
 import { derivePatientIdentityContact } from "@/src/lib/patients/patientIdentityContact";
 import { PatientStatusBadge } from "@/src/components/fi/patients/PatientStatusBadge";
 import { VoiceNoteEntryButton } from "@/src/components/fi/clinical-notes/VoiceNoteEntryButton";
-import { PatientQuickPhotoButton } from "@/src/components/fi/patients/PatientQuickPhotoButton";
-import { buildPatientImagingCaptureHref, PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
+import { StartCaptureProtocolButton } from "@/src/components/fi/vie/StartCaptureProtocolButton";
+import { PatientImagingCompletenessSummary } from "@/src/components/fi/vie/PatientImagingCompletenessSummary";
 import { bookingTypeLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import type { PatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStatus";
 import { pwsLabel } from "./patientWorkspaceStyles";
@@ -27,13 +27,11 @@ function fmtAppt(appt: PatientDetailNextAppointment): string {
   }
 }
 
-// Chip variants
 const chip =
   "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors";
 const chipGhost = `${chip} bg-white/[0.05] text-slate-400 ring-1 ring-white/[0.08] hover:bg-white/[0.09] hover:text-slate-200`;
 const chipIndigo = `${chip} bg-indigo-950/60 text-indigo-300 ring-1 ring-indigo-500/25 hover:bg-indigo-900/70`;
 const chipViolet = `${chip} bg-violet-950/60 text-violet-300 ring-1 ring-violet-500/25 hover:bg-violet-900/70`;
-// Patient Twin — primary intelligence action, slightly elevated
 const chipCyanPrimary =
   `${chip} bg-cyan-600/20 text-cyan-300 ring-1 ring-cyan-400/40 hover:bg-cyan-600/30 font-semibold`;
 
@@ -62,15 +60,11 @@ export function PatientCommandHero({
   });
 
   const base = `/fi-admin/${tenantId}/patients/${patientId}`;
-  const takePhotoHref = buildPatientImagingCaptureHref(tenantId, patientId, "camera", "patient_profile");
-  const uploadPhotoHref = buildPatientImagingCaptureHref(tenantId, patientId, "library", "patient_profile");
 
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/90 p-5 shadow-xl shadow-black/50 backdrop-blur-md sm:p-6">
 
-      {/* ── Identity + operational summary ───────────────────────── */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        {/* Left: name, demographics, contact */}
         <div className="min-w-0 space-y-1.5">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-xl font-bold tracking-tight text-[#F8FAFC] sm:text-2xl">
@@ -100,7 +94,6 @@ export function PatientCommandHero({
           </p>
         </div>
 
-        {/* Right: appointment + plan blurbs */}
         <div className="flex shrink-0 flex-col gap-2 sm:items-end">
           <div className="sm:text-right">
             <p className={pwsLabel}>Next appointment</p>
@@ -114,13 +107,14 @@ export function PatientCommandHero({
               {treatmentPlanSummary ?? "Not documented yet."}
             </p>
           </div>
+          <div className="w-full min-w-[12rem] sm:w-56">
+            <PatientImagingCompletenessSummary completeness={data.vieImagingCompleteness} variant="dark" />
+          </div>
         </div>
       </div>
 
-      {/* ── Grouped action strip ─────────────────────────────────── */}
       <div className="mt-5 space-y-2 border-t border-white/[0.06] pt-4">
 
-        {/* Clinical */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-600">
             Clinical
@@ -130,7 +124,7 @@ export function PatientCommandHero({
             patientId={patientId}
             className={chipViolet}
           />
-          <PatientQuickPhotoButton
+          <StartCaptureProtocolButton
             tenantId={tenantId}
             patientId={patientId}
             canCapture={canCapturePhotos}
@@ -146,7 +140,6 @@ export function PatientCommandHero({
           </Link>
         </div>
 
-        {/* Imaging */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-600">
             Imaging
@@ -155,39 +148,8 @@ export function PatientCommandHero({
             <ScanLine className="h-3.5 w-3.5 shrink-0" aria-hidden />
             ImagingOS
           </Link>
-          {canCapturePhotos ? (
-            <Link href={uploadPhotoHref} className={chipGhost}>
-              <Upload className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Upload photo
-            </Link>
-          ) : (
-            <span
-              title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
-              aria-disabled="true"
-              className={`${chipGhost} cursor-not-allowed opacity-50`}
-            >
-              <Upload className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Upload photo
-            </span>
-          )}
-          {canCapturePhotos ? (
-            <Link href={takePhotoHref} className={chipGhost}>
-              <Camera className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Take photo
-            </Link>
-          ) : (
-            <span
-              title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
-              aria-disabled="true"
-              className={`${chipGhost} cursor-not-allowed opacity-50`}
-            >
-              <Camera className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Take photo
-            </span>
-          )}
         </div>
 
-        {/* Intelligence — Patient Twin is visually primary */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-600">
             Intelligence

@@ -12,6 +12,7 @@ import {
 import { buildCasesWorklistQueryString, casesWorklistHref, parseCasesIndexQuery } from "@/src/lib/cases/casesIndexFilters";
 import { loadCasesIndexExtensionBundle } from "@/src/lib/cases/casesIndexLoaders";
 import { loadCasesIndexForTenant } from "@/src/lib/cases/caseLoaders";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {
   title: "SurgeryOS",
@@ -28,6 +29,7 @@ export default async function CasesIndexRoutePage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tenantId } = await params;
+  await assertStaffModuleAccess(tenantId, "surgery_os", "read");
   const sp = (await searchParams) ?? {};
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {

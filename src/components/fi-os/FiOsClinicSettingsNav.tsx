@@ -125,6 +125,15 @@ export function FiOsClinicSettingsNav({
             Admin Users
           </Link>
         ) : null}
+        {showAdminUsers ? (
+          <Link
+            href={`${base}/settings/staff-access`}
+            className={linkCls(`${base}/settings/staff-access`)}
+            title="Adaptive staff access: role templates plus optional module/tab grants (SA-1 entitlements engine)."
+          >
+            Staff Access
+          </Link>
+        ) : null}
         {showHubspot ? (
           <Link href={`${base}/settings/imports/hubspot`} className={linkCls(`${base}/settings/imports/hubspot`)}>
             HubSpot import

@@ -479,6 +479,8 @@ export type PatientTwinV1 = {
   imaging: PatientTwinImagingSection;
   /** Stage 8B — Smart Clinical Photography Protocol (HLI) read model for Twin. */
   photo_protocol: PatientTwinPhotoProtocolSection | null;
+  /** VIE Phase 1 — protocol-driven imaging completeness + capture intelligence stubs. */
+  vie: import("@/src/lib/vie/viePatientTwinSection.server").PatientTwinVieSection | null;
   pathology: PatientTwinPathologySection;
   timeline: PatientTwinTimelineSection;
   clinical: PatientTwinClinicalSection;

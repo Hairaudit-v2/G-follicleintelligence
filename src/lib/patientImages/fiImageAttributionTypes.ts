@@ -7,6 +7,7 @@ export const FI_IMAGE_CAPTURE_SOURCES = [
   "patient_profile",
   "patient_slide_over",
   "imaging_os_wizard",
+  "vie_capture_wizard",
   "profile_upload_form",
   "unknown",
 ] as const;

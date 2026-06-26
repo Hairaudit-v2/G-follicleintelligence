@@ -492,6 +492,15 @@ export const patientTwinV1Schema = z.object({
   media: patientTwinMediaSectionSchema,
   imaging: patientTwinImagingSectionSchema,
   photo_protocol: patientTwinPhotoProtocolSectionSchema.nullable(),
+  vie: z
+    .object({
+      engine_version: z.string(),
+      imaging_completeness: z.object({ headline: z.object({}).passthrough() }).passthrough(),
+      latest_intelligence: z.array(z.object({}).passthrough()),
+      future_architecture: z.record(z.unknown()),
+    })
+    .passthrough()
+    .nullable(),
   pathology: patientTwinPathologySectionSchema,
   timeline: patientTwinTimelineSectionSchema,
   clinical: patientTwinClinicalSectionSchema,

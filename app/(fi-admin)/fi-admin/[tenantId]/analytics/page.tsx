@@ -9,6 +9,7 @@ import { isFiOsPlatformAdminFullSessionBypass, resolveAuthUserId } from "@/src/l
 import { getBookingsBoardNavAllowed, getCrmShellNavAllowed } from "@/src/lib/crm/crmShellAccess";
 import { loadAnalyticsOsDashboard } from "@/src/lib/fiAdmin/analyticsOsDashboardRead.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { normalizeFiOsRole } from "@/src/lib/fiOs/fiOsRoles";
 
@@ -48,6 +49,7 @@ export default async function AnalyticsOsPage({ params }: { params: Promise<{ te
   if (!tenantId?.trim()) notFound();
 
   await assertFiTenantPortalAccess(tenantId);
+  await assertStaffModuleAccess(tenantId, "analytics_os", "read");
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     return (

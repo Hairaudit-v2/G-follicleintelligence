@@ -20,6 +20,7 @@ import { isStaffPinRestrictedRoute } from "@/src/lib/staffPin/staffPinPermission
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
 import type { FiFeatureKey } from "@/src/config/fiFeatureAccessRegistry";
 import { loadFiOsFeatureAccessMapOrNullForViewer } from "@/src/lib/fi-os/featureAccess.server";
+import { getStaffAccessNavFeatureOverrides } from "@/src/lib/staffAccess/staffAccess.server";
 import { enforceFiFeatureRouteOrRedirect } from "@/src/lib/fi-os/featureRouteGuard.server";
 import { loadWorkspaceProfileKeyForViewer } from "@/src/lib/fi-os/workspaceProfile.server";
 import { loadHrOsNavVisibleForViewer } from "@/src/lib/platform/entitlements/hrOsRouteGate.server";
@@ -142,10 +143,22 @@ export default async function TenantAdminLayout({
   const tenantBackendAdminRole = pinFloorMode ? null : adminProf?.adminRole ?? null;
   const showStaffAndServicesNav = pinFloorMode ? false : showCrmNav || showBookingsBoard;
 
-  const featureAccessRecord =
+  let featureAccessRecord =
     pinFloorMode || !featureAccessMap
       ? null
       : (Object.fromEntries(featureAccessMap) as Record<FiFeatureKey, boolean>);
+
+  // SA-1: overlay adaptive staff entitlements onto nav visibility (server-resolved). Blocked
+  // modules are also excluded from navigation; route guards remain the authoritative enforcement.
+  if (!pinFloorMode) {
+    const staffNavOverrides = await getStaffAccessNavFeatureOverrides(tenantId);
+    if (staffNavOverrides) {
+      featureAccessRecord = {
+        ...(featureAccessRecord ?? {}),
+        ...(staffNavOverrides as Partial<Record<FiFeatureKey, boolean>>),
+      } as Record<FiFeatureKey, boolean>;
+    }
+  }
 
   let effective: EffectiveBranding = NEUTRAL_EFFECTIVE;
   try {

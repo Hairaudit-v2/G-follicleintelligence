@@ -11,12 +11,35 @@ export type ProtocolSlotDef = {
 /** Reserved progress key for session lifecycle + optional slot skips. */
 export const PROGRESS_META_KEY = "__meta__" as const;
 
+export type ViePendingCaptureMeta = {
+  patient_image_id: string;
+  intelligence_id: string | null;
+  captured_at: string;
+  quality_score: number;
+  quality_band: string;
+  clinically_usable: boolean;
+};
+
+export type VieAcceptedSlotQualityMeta = {
+  patient_image_id: string;
+  intelligence_id: string | null;
+  quality_score: number;
+  quality_band: string;
+  clinically_usable: boolean;
+  accepted_at: string;
+  quality_override?: boolean;
+};
+
 export type ProgressMeta = {
   status?: "active" | "completed";
   completed_at?: string;
   /** Operator ended session early (optional slots may be empty). */
   finished_at?: string;
   skips?: Record<string, { reason: string; skipped_at: string }>;
+  /** VIE Phase 2 — capture awaiting accept / retake decision. */
+  vie_pending?: Record<string, ViePendingCaptureMeta>;
+  /** VIE Phase 2 — accepted slot quality snapshot for session UI. */
+  vie_slot_quality?: Record<string, VieAcceptedSlotQualityMeta>;
 };
 
 export function parseProtocolSlots(slotsJson: unknown): ProtocolSlotDef[] {
@@ -65,12 +88,60 @@ export function parseProgressMeta(progress: Record<string, unknown>): ProgressMe
       }
     }
   }
+
+  const vie_pending = parseViePendingMap(m.vie_pending);
+  const vie_slot_quality = parseVieSlotQualityMap(m.vie_slot_quality);
+
   return {
     status,
     completed_at: typeof m.completed_at === "string" ? m.completed_at : undefined,
     finished_at: typeof m.finished_at === "string" ? m.finished_at : undefined,
     skips,
+    vie_pending,
+    vie_slot_quality,
   };
+}
+
+function parseViePendingMap(raw: unknown): ProgressMeta["vie_pending"] {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const out: NonNullable<ProgressMeta["vie_pending"]> = {};
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!v || typeof v !== "object" || Array.isArray(v)) continue;
+    const o = v as Record<string, unknown>;
+    const patient_image_id = typeof o.patient_image_id === "string" ? o.patient_image_id.trim() : "";
+    if (!patient_image_id) continue;
+    out[k] = {
+      patient_image_id,
+      intelligence_id: typeof o.intelligence_id === "string" ? o.intelligence_id.trim() : null,
+      captured_at: typeof o.captured_at === "string" ? o.captured_at : new Date().toISOString(),
+      quality_score: Number(o.quality_score ?? 0),
+      quality_band: typeof o.quality_band === "string" ? o.quality_band : "acceptable",
+      clinically_usable: o.clinically_usable !== false,
+    };
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+function parseVieSlotQualityMap(raw: unknown): ProgressMeta["vie_slot_quality"] {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const out: NonNullable<ProgressMeta["vie_slot_quality"]> = {};
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!v || typeof v !== "object" || Array.isArray(v)) continue;
+    const o = v as Record<string, unknown>;
+    const patient_image_id = typeof o.patient_image_id === "string" ? o.patient_image_id.trim() : "";
+    const accepted_at = typeof o.accepted_at === "string" ? o.accepted_at : "";
+    if (!patient_image_id || !accepted_at) continue;
+    out[k] = {
+      patient_image_id,
+      intelligence_id: typeof o.intelligence_id === "string" ? o.intelligence_id.trim() : null,
+      quality_score: Number(o.quality_score ?? 0),
+      quality_band: typeof o.quality_band === "string" ? o.quality_band : "acceptable",
+      clinically_usable: o.clinically_usable !== false,
+      accepted_at,
+      quality_override: o.quality_override === true ? true : undefined,
+    };
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 export function isSessionMarkedComplete(progress: Record<string, unknown>): boolean {

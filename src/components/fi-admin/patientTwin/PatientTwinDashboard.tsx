@@ -20,6 +20,7 @@ import { PatientTwinHeader } from "./PatientTwinHeader";
 import { PatientTwinIdentityCard } from "./PatientTwinIdentityCard";
 import { PatientTwinImagingCard } from "./PatientTwinImagingCard";
 import { PatientTwinPhotoProtocolCard } from "./PatientTwinPhotoProtocolCard";
+import { PatientTwinVieCard } from "./PatientTwinVieCard";
 import { PatientTwinMediaCard } from "./PatientTwinMediaCard";
 import { PatientTwinTimelineCard } from "./PatientTwinTimelineCard";
 import { PatientTwinWarningsCard } from "./PatientTwinWarningsCard";
@@ -78,6 +79,8 @@ export function PatientTwinDashboard({ tenantId, patientId, twin, clinicalIntel,
       <PatientTwinPathologyCard tenantId={tenantId} patientId={patientId} twin={twin} />
 
       <PatientTwinImagingCard tenantId={tenantId} patientId={patientId} twin={twin} />
+
+      <PatientTwinVieCard tenantId={tenantId} patientId={patientId} twin={twin} />
 
       <PatientTwinPhotoProtocolCard tenantId={tenantId} patientId={patientId} twin={twin} />
 

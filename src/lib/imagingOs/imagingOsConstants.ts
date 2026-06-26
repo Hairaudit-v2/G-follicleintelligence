@@ -41,10 +41,16 @@ export type ImagingAiAnalysisKind = (typeof IMAGING_AI_ANALYSIS_KINDS)[number];
 /** Map seeded protocol template slug → fi_patient_images.imaging_library_axis */
 export function mapTemplateSlugToImagingLibraryAxis(templateSlug: string): ImagingLibraryAxis {
   const s = templateSlug.trim();
-  if (s === "surgery_day") return "surgery";
+  if (s === "surgery_day" || s === "post_op_review" || s === "repair_surgery_review") return "surgery";
   if (s === "follow_up_review") return "follow_up";
   if (s === "trichoscopy_review") return "trichoscopy";
-  if (s === "hair_loss_consultation" || s === "hair_transplant_planning") return "consultation";
+  if (
+    s === "hair_loss_consultation" ||
+    s === "hair_transplant_planning" ||
+    s === "baseline_consultation"
+  ) {
+    return "consultation";
+  }
   return "general_clinical";
 }
 

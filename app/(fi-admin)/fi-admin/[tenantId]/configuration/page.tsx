@@ -19,6 +19,7 @@ import { canViewTenantDeploymentIntelligence } from "@/src/lib/onboarding-os/dep
 import { canViewGuidedAssistUsageSummary } from "@/src/lib/onboarding-os/guidedAssist.server";
 import { canViewTenantGoLiveReadiness } from "@/src/lib/onboarding-os/goLiveReadiness.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
+import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ export default async function TenantConfigurationPage({
   if (!(await canViewTenantConfigurationHub(tenantId))) {
     notFound();
   }
+  await assertStaffModuleAccess(tenantId, "settings", "read");
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return (
