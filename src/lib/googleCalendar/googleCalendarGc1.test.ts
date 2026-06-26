@@ -14,10 +14,12 @@ import {
   buildDeletedFromProviderMetadata,
   buildGoogleMeetConferenceRequest,
   buildGoogleOAuthAuthorizeUrl,
+  buildGoogleSyncUpdateMetadata,
   detectDeletedExternalEvents,
   extractGoogleMeetUrl,
   isAccessTokenExpired,
   isDuplicateFiCalendarEvent,
+  isGoogleEventCancelled,
   mapGoogleApiEventToFiFields,
   shouldUpdateFiEventFromGoogle,
 } from "@/src/lib/googleCalendar/googleCalendarCore";
@@ -391,12 +393,73 @@ describe("CalendarOS GC-1 — deduplication and sync detection", () => {
     );
   });
 
-  it("detectDeletedExternalEvents finds missing provider events", () => {
+  it("detectDeletedExternalEvents finds missing provider events within sync window", () => {
+    const timeMin = "2026-06-01T00:00:00.000Z";
+    const timeMax = "2026-06-30T23:59:59.999Z";
     const deleted = detectDeletedExternalEvents(
       [baseEvent, { ...baseEvent, id: "2", externalEventId: "ext-2", metadata: {} }],
-      new Set(["ext-1"])
+      new Set(["ext-1"]),
+      { timeMin, timeMax }
     );
     assert.deepEqual(deleted, ["2"]);
+  });
+
+  it("detectDeletedExternalEvents skips out-of-window local events", () => {
+    const deleted = detectDeletedExternalEvents(
+      [
+        baseEvent,
+        {
+          ...baseEvent,
+          id: "out-of-window",
+          externalEventId: "ext-old",
+          startTime: "2020-01-01T10:00:00.000Z",
+          metadata: { source: "google_sync" },
+        },
+      ],
+      new Set(["ext-1"]),
+      {
+        timeMin: "2026-06-01T00:00:00.000Z",
+        timeMax: "2026-06-30T23:59:59.999Z",
+      }
+    );
+    assert.deepEqual(deleted, []);
+  });
+
+  it("detectDeletedExternalEvents skips fi_appointment_create rows", () => {
+    const deleted = detectDeletedExternalEvents(
+      [
+        {
+          ...baseEvent,
+          id: "fi-appt",
+          externalEventId: "ext-fi",
+          metadata: { source: "fi_appointment_create" },
+        },
+      ],
+      new Set<string>(),
+      {
+        timeMin: "2026-06-01T00:00:00.000Z",
+        timeMax: "2026-06-30T23:59:59.999Z",
+      }
+    );
+    assert.deepEqual(deleted, []);
+  });
+
+  it("isGoogleEventCancelled detects cancelled provider status", () => {
+    assert.equal(isGoogleEventCancelled({ id: "x", status: "cancelled" }), true);
+    assert.equal(isGoogleEventCancelled({ id: "x", status: "confirmed" }), false);
+  });
+
+  it("buildGoogleSyncUpdateMetadata preserves GC-4 appointment_activity", () => {
+    const meta = buildGoogleSyncUpdateMetadata(
+      {
+        source: "fi_appointment_create",
+        appointment_activity: [{ action: "created" }],
+      },
+      "2026-06-22T12:00:00.000Z"
+    );
+    assert.equal(meta.source, "fi_appointment_create");
+    assert.deepEqual(meta.appointment_activity, [{ action: "created" }]);
+    assert.equal(meta.sync_status, "synced");
   });
 
   it("buildDeletedFromProviderMetadata marks sync_status deleted_external", () => {
@@ -790,5 +853,305 @@ describe("CalendarOS GC-1 — event CRUD via service layer", () => {
     const deletedRow = mock.events.find((e) => e.external_event_id === "sync-deleted");
     assert.ok(deletedRow);
     assert.equal((deletedRow!.metadata as Record<string, unknown>).deleted_from_provider, true);
+  });
+});
+
+describe("CalendarOS GC-3 — sync reconciliation", () => {
+  const origEnv = { ...process.env };
+  let mock: ReturnType<typeof createMockSupabase>;
+
+  beforeEach(async () => {
+    process.env.FI_EXTERNAL_CONNECTOR_MASTER_KEY = MASTER_KEY;
+    mock = createMockSupabase();
+    await storeGoogleCalendarCredentials(
+      {
+        tenantId: TENANT,
+        calendarId: CALENDAR,
+        accessToken: "live-access",
+        refreshToken: "live-refresh",
+        expiresInSeconds: 3600,
+      },
+      { supabaseClientForTests: mock.client }
+    );
+  });
+
+  afterEach(() => {
+    process.env = { ...origEnv };
+  });
+
+  function googleSyncFetchHandler(config: {
+    listPages?: Array<{ items: unknown[]; nextPageToken?: string }>;
+    lookupById?: Record<string, "found" | "not_found">;
+  }): typeof fetch {
+    let listCall = 0;
+    return async (url, init) => {
+      const method = init?.method ?? "GET";
+      const parsed = new URL(String(url));
+      const path = parsed.pathname;
+
+      if (String(url).includes("oauth2.googleapis.com/token")) {
+        return new Response(
+          JSON.stringify({ access_token: "live-access", expires_in: 3600 }),
+          { status: 200 }
+        );
+      }
+
+      if (method === "GET" && /\/events\/[^/]+$/.test(path) && !path.endsWith("/events")) {
+        const eventId = decodeURIComponent(path.split("/").pop() ?? "");
+        const lookup = config.lookupById?.[eventId] ?? "found";
+        if (lookup === "not_found") {
+          return new Response(JSON.stringify({ error: "Not Found" }), { status: 404 });
+        }
+        return new Response(
+          JSON.stringify({
+            id: eventId,
+            summary: "Lookup event",
+            start: { dateTime: "2026-06-22T10:00:00Z" },
+            end: { dateTime: "2026-06-22T11:00:00Z" },
+            updated: "2026-06-22T10:00:00.000Z",
+          }),
+          { status: 200 }
+        );
+      }
+
+      if (method === "GET" && path.endsWith("/events")) {
+        const page = config.listPages?.[listCall] ?? { items: [] };
+        listCall += 1;
+        return new Response(
+          JSON.stringify({
+            items: page.items,
+            ...(page.nextPageToken ? { nextPageToken: page.nextPageToken } : {}),
+          }),
+          { status: 200 }
+        );
+      }
+
+      return new Response("unexpected", { status: 500 });
+    };
+  }
+
+  function seedEvent(row: Partial<EventRow> & { external_event_id: string; start_time: string }) {
+    mock.events.push({
+      id: randomUUID(),
+      tenant_id: TENANT,
+      provider: "google",
+      calendar_id: CALENDAR,
+      title: row.title ?? "Seeded event",
+      description: null,
+      location: null,
+      end_time: row.end_time ?? "2026-06-22T11:00:00.000Z",
+      event_type: "consultation",
+      google_meet_url: null,
+      patient_id: null,
+      lead_id: null,
+      created_at: "2026-06-01T00:00:00.000Z",
+      updated_at: "2026-06-01T00:00:00.000Z",
+      metadata: row.metadata ?? { source: "google_sync" },
+      ...row,
+    });
+  }
+
+  it("does not mark out-of-window local events deleted", async () => {
+    seedEvent({
+      external_event_id: "old-missing",
+      start_time: "2020-01-01T10:00:00.000Z",
+      metadata: { source: "google_sync" },
+    });
+
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride: googleSyncFetchHandler({ listPages: [{ items: [] }] }),
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.deleted, 0);
+    const row = mock.events.find((e) => e.external_event_id === "old-missing");
+    assert.notEqual((row!.metadata as Record<string, unknown>).deleted_from_provider, true);
+  });
+
+  it("imports all paginated Google events", async () => {
+    const pageOneItems = Array.from({ length: 250 }, (_, i) => ({
+      id: `page-one-${i}`,
+      summary: `Paged event ${i}`,
+      start: { dateTime: "2026-06-22T10:00:00Z" },
+      end: { dateTime: "2026-06-22T11:00:00Z" },
+      updated: "2026-06-22T10:00:00.000Z",
+    }));
+
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride: googleSyncFetchHandler({
+        listPages: [
+          { items: pageOneItems, nextPageToken: "page-2" },
+          {
+            items: [
+              {
+                id: "page-two-final",
+                summary: "Final paginated event",
+                start: { dateTime: "2026-06-23T10:00:00Z" },
+                end: { dateTime: "2026-06-23T11:00:00Z" },
+                updated: "2026-06-23T10:00:00.000Z",
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.created, 251);
+    const imported = mock.events.find((e) => e.external_event_id === "page-two-final");
+    assert.ok(imported);
+    assert.equal((imported!.metadata as Record<string, unknown>).source, "google_sync");
+  });
+
+  it("does not soft-delete fi_appointment_create on bounded fetch miss", async () => {
+    seedEvent({
+      external_event_id: "fi-appt-missing",
+      start_time: "2026-06-22T10:00:00.000Z",
+      metadata: { source: "fi_appointment_create" },
+    });
+
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride: googleSyncFetchHandler({
+        listPages: [{ items: [] }],
+        lookupById: { "fi-appt-missing": "found" },
+      }),
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.deleted, 0);
+    const row = mock.events.find((e) => e.external_event_id === "fi-appt-missing");
+    assert.notEqual((row!.metadata as Record<string, unknown>).deleted_from_provider, true);
+  });
+
+  it("soft-deletes cancelled Google events", async () => {
+    seedEvent({
+      external_event_id: "cancelled-ext",
+      start_time: "2026-06-22T10:00:00.000Z",
+      metadata: { source: "google_sync" },
+    });
+
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride: googleSyncFetchHandler({
+        listPages: [
+          {
+            items: [
+              {
+                id: "cancelled-ext",
+                summary: "Cancelled consult",
+                status: "cancelled",
+                start: { dateTime: "2026-06-22T10:00:00Z" },
+                end: { dateTime: "2026-06-22T11:00:00Z" },
+                updated: "2026-06-22T10:00:00.000Z",
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.deleted, 1);
+    const row = mock.events.find((e) => e.external_event_id === "cancelled-ext");
+    assert.equal((row!.metadata as Record<string, unknown>).deleted_from_provider, true);
+  });
+
+  it("creates google_sync row for Google-native events", async () => {
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride: googleSyncFetchHandler({
+        listPages: [
+          {
+            items: [
+              {
+                id: "native-google-evt",
+                summary: "Native Google meeting",
+                start: { dateTime: "2026-06-24T10:00:00Z" },
+                end: { dateTime: "2026-06-24T11:00:00Z" },
+                updated: "2026-06-24T00:00:00.000Z",
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.created, 1);
+    const row = mock.events.find((e) => e.external_event_id === "native-google-evt");
+    assert.ok(row);
+    assert.equal((row!.metadata as Record<string, unknown>).source, "google_sync");
+  });
+
+  it("updates GC-4 event sync_status without losing appointment_activity", async () => {
+    seedEvent({
+      external_event_id: "gc4-existing",
+      start_time: "2026-06-22T10:00:00.000Z",
+      title: "GC-4 appointment",
+      metadata: {
+        source: "fi_appointment_create",
+        appointment_activity: [{ action: "created", at: "2026-06-01T00:00:00.000Z" }],
+      },
+    });
+
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride: googleSyncFetchHandler({
+        listPages: [
+          {
+            items: [
+              {
+                id: "gc4-existing",
+                summary: "GC-4 appointment updated",
+                start: { dateTime: "2026-06-22T10:00:00Z" },
+                end: { dateTime: "2026-06-22T11:00:00Z" },
+                updated: "2026-06-25T00:00:00.000Z",
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.updated, 1);
+    const row = mock.events.find((e) => e.external_event_id === "gc4-existing");
+    const meta = row!.metadata as Record<string, unknown>;
+    assert.equal(meta.source, "fi_appointment_create");
+    assert.equal(meta.sync_status, "synced");
+    assert.deepEqual(meta.appointment_activity, [
+      { action: "created", at: "2026-06-01T00:00:00.000Z" },
+    ]);
+  });
+
+  it("soft-deletes fi_appointment_create when direct lookup returns 404", async () => {
+    seedEvent({
+      external_event_id: "fi-appt-gone",
+      start_time: "2026-06-22T10:00:00.000Z",
+      metadata: { source: "fi_appointment_create" },
+    });
+
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride: googleSyncFetchHandler({
+        listPages: [{ items: [] }],
+        lookupById: { "fi-appt-gone": "not_found" },
+      }),
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.deleted, 1);
+    const row = mock.events.find((e) => e.external_event_id === "fi-appt-gone");
+    assert.equal((row!.metadata as Record<string, unknown>).deleted_from_provider, true);
   });
 });

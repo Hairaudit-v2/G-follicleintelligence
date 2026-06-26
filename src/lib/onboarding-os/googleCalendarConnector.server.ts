@@ -18,6 +18,11 @@ import {
   normalizeGoogleCalendarEvent,
   resolveCalendarImportStatus,
 } from "./googleCalendarConnectorCore";
+import {
+  buildGoogleCalendarListQueryParams,
+  GOOGLE_CALENDAR_SYNC_MAX_PAGES,
+  parseGoogleCalendarListResponse,
+} from "@/src/lib/googleCalendar/googleCalendarCore";
 import type {
   ExternalCalendarImportAuditAction,
   ExternalCalendarStagingEvent,
@@ -336,31 +341,35 @@ export async function fetchGoogleCalendarEventsReadOnly(
     opts?.timeMax ?? new Date(now + SYNC_LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
   const encodedCalendarId = encodeURIComponent(calendarId);
-  const params = new URLSearchParams({
-    singleEvents: "true",
-    orderBy: "startTime",
-    timeMin,
-    timeMax,
-    maxResults: "250",
-  });
+  const all: GoogleCalendarApiEvent[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
 
-  const url = `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodedCalendarId}/events?${params.toString()}`;
-  const res = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: "application/json",
-    },
-    cache: "no-store",
-  });
+  while (pages < GOOGLE_CALENDAR_SYNC_MAX_PAGES) {
+    const params = buildGoogleCalendarListQueryParams({ timeMin, timeMax, pageToken });
+    const url = `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodedCalendarId}/events?${params.toString()}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Google Calendar API error (${res.status}): ${body.slice(0, 300)}`);
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Google Calendar API error (${res.status}): ${body.slice(0, 300)}`);
+    }
+
+    const { items, nextPageToken } = parseGoogleCalendarListResponse(await res.json());
+    all.push(...items);
+    pages += 1;
+    if (!nextPageToken) break;
+    pageToken = nextPageToken;
   }
 
-  const json = (await res.json()) as { items?: GoogleCalendarApiEvent[] };
-  return json.items ?? [];
+  return all;
 }
 
 async function appendCalendarImportAudit(

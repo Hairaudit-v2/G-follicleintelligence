@@ -15,6 +15,63 @@ const GOOGLE_OAUTH_SCOPES = [
   "https://www.googleapis.com/auth/calendar.events",
 ] as const;
 
+/** Google Calendar events.list page size (API max 2500; 250 is a stable default). */
+export const GOOGLE_CALENDAR_SYNC_PAGE_SIZE = 250;
+
+/** Safety cap on paginated list requests during sync (250 × 20 = 5000 events). */
+export const GOOGLE_CALENDAR_SYNC_MAX_PAGES = 20;
+
+export function buildGoogleCalendarListQueryParams(opts: {
+  timeMin: string;
+  timeMax: string;
+  pageToken?: string;
+}): URLSearchParams {
+  const params = new URLSearchParams({
+    singleEvents: "true",
+    orderBy: "startTime",
+    timeMin: opts.timeMin,
+    timeMax: opts.timeMax,
+    maxResults: String(GOOGLE_CALENDAR_SYNC_PAGE_SIZE),
+  });
+  if (opts.pageToken?.trim()) {
+    params.set("pageToken", opts.pageToken.trim());
+  }
+  return params;
+}
+
+export function parseGoogleCalendarListResponse(json: unknown): {
+  items: GoogleCalendarApiEvent[];
+  nextPageToken?: string;
+} {
+  const body = json as { items?: GoogleCalendarApiEvent[]; nextPageToken?: string };
+  return {
+    items: body.items ?? [],
+    nextPageToken: body.nextPageToken?.trim() || undefined,
+  };
+}
+
+export function isFiCreatedCalendarSource(source: unknown): boolean {
+  const normalized = String(source ?? "").trim();
+  return normalized === "fi_appointment_create" || normalized === "fi_calendar_create";
+}
+
+export function isEventStartInSyncWindow(
+  startTime: string | null | undefined,
+  timeMin: string,
+  timeMax: string
+): boolean {
+  if (!startTime) return false;
+  const startMs = Date.parse(startTime);
+  const minMs = Date.parse(timeMin);
+  const maxMs = Date.parse(timeMax);
+  if (Number.isNaN(startMs) || Number.isNaN(minMs) || Number.isNaN(maxMs)) return false;
+  return startMs >= minMs && startMs <= maxMs;
+}
+
+export function isGoogleEventCancelled(event: GoogleCalendarApiEvent): boolean {
+  return String(event.status ?? "").trim().toLowerCase() === "cancelled";
+}
+
 export function buildGoogleCalendarOAuthScopes(): string {
   return GOOGLE_OAUTH_SCOPES.join(" ");
 }
@@ -156,21 +213,43 @@ export function shouldUpdateFiEventFromGoogle(
   return googleMs > localMs;
 }
 
-/** Detect Google events removed since last sync — local external ids not in discovered set. */
+/**
+ * Detect Google events removed since last sync — local external ids not in discovered set.
+ * Scoped to the sync time window; FI-created rows require explicit provider confirmation.
+ */
 export function detectDeletedExternalEvents(
-  localEvents: ReadonlyArray<Pick<FiCalendarEvent, "id" | "externalEventId" | "metadata">>,
-  discoveredExternalIds: ReadonlySet<string>
+  localEvents: ReadonlyArray<
+    Pick<FiCalendarEvent, "id" | "externalEventId" | "startTime" | "metadata">
+  >,
+  discoveredExternalIds: ReadonlySet<string>,
+  opts: { timeMin: string; timeMax: string }
 ): string[] {
   const deletedIds: string[] = [];
   for (const row of localEvents) {
     const extId = row.externalEventId?.trim();
     if (!extId) continue;
     if (row.metadata?.deleted_from_provider) continue;
+    if (!isEventStartInSyncWindow(row.startTime, opts.timeMin, opts.timeMax)) continue;
+    if (isFiCreatedCalendarSource(row.metadata?.source)) continue;
     if (!discoveredExternalIds.has(extId)) {
       deletedIds.push(row.id);
     }
   }
   return deletedIds;
+}
+
+/** Merge Google sync fields into local metadata without clobbering GC-4 appointment fields. */
+export function buildGoogleSyncUpdateMetadata(
+  existing: Record<string, unknown>,
+  syncNow: string
+): Record<string, unknown> {
+  return {
+    ...existing,
+    deleted_from_provider: false,
+    deleted_at: null,
+    sync_status: "synced",
+    last_synced_at: syncNow,
+  };
 }
 
 export function buildDeletedFromProviderMetadata(

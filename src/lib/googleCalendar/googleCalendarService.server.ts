@@ -11,11 +11,18 @@ import type { GoogleCalendarApiEvent } from "@/src/lib/onboarding-os/googleCalen
 
 import {
   buildDeletedFromProviderMetadata,
+  buildGoogleCalendarListQueryParams,
   buildGoogleMeetConferenceRequest,
+  buildGoogleSyncUpdateMetadata,
   detectDeletedExternalEvents,
   extractGoogleMeetUrl,
+  GOOGLE_CALENDAR_SYNC_MAX_PAGES,
   isDuplicateFiCalendarEvent,
+  isEventStartInSyncWindow,
+  isFiCreatedCalendarSource,
+  isGoogleEventCancelled,
   mapGoogleApiEventToFiFields,
+  parseGoogleCalendarListResponse,
   shouldUpdateFiEventFromGoogle,
 } from "./googleCalendarCore";
 import { resolveGoogleCalendarAccessToken } from "./googleCalendarAuth.server";
@@ -151,6 +158,88 @@ async function callGoogleCalendarApi(
   }
 
   return { ok: true, json: await res.json() };
+}
+
+async function fetchAllGoogleCalendarEventsForSync(
+  calendarId: string,
+  accessToken: string,
+  timeMin: string,
+  timeMax: string,
+  opts: ServerOpts
+): Promise<{ ok: true; events: GoogleCalendarApiEvent[] } | { ok: false; error: string }> {
+  const fetchFn = opts.fetchOverride ?? fetch;
+  const encodedCalendar = encodeURIComponent(calendarId);
+  const all: GoogleCalendarApiEvent[] = [];
+  let pageToken: string | undefined;
+  let pages = 0;
+
+  while (pages < GOOGLE_CALENDAR_SYNC_MAX_PAGES) {
+    const params = buildGoogleCalendarListQueryParams({ timeMin, timeMax, pageToken });
+    const listUrl = `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodedCalendar}/events?${params.toString()}`;
+    const listRes = await fetchFn(listUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!listRes.ok) {
+      const body = await listRes.text().catch(() => "");
+      return {
+        ok: false,
+        error: `Google Calendar API error (${listRes.status}): ${body.slice(0, 300)}`,
+      };
+    }
+
+    const { items, nextPageToken } = parseGoogleCalendarListResponse(await listRes.json());
+    all.push(...items);
+    pages += 1;
+    if (!nextPageToken) break;
+    pageToken = nextPageToken;
+  }
+
+  return { ok: true, events: all };
+}
+
+async function lookupGoogleCalendarEventById(
+  calendarId: string,
+  externalEventId: string,
+  accessToken: string,
+  opts: ServerOpts
+): Promise<"found" | "not_found" | "error"> {
+  const encodedCalendar = encodeURIComponent(calendarId);
+  const encodedEvent = encodeURIComponent(externalEventId);
+  const apiResult = await callGoogleCalendarApi(
+    "GET",
+    `/calendars/${encodedCalendar}/events/${encodedEvent}`,
+    accessToken,
+    opts
+  );
+  if (apiResult.ok) return "found";
+  if (apiResult.status === 404) return "not_found";
+  return "error";
+}
+
+async function markLocalEventDeletedFromProvider(
+  supabase: SupabaseClient,
+  tenantId: string,
+  localId: string,
+  existingMetadata: Record<string, unknown>
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const deletedAt = new Date().toISOString();
+  const { error } = await supabase
+    .from("fi_calendar_events")
+    .update({
+      metadata: buildDeletedFromProviderMetadata(existingMetadata, deletedAt),
+      updated_at: deletedAt,
+    })
+    .eq("id", localId)
+    .eq("tenant_id", tenantId);
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
 }
 
 function buildGoogleEventBody(input: {
@@ -520,32 +609,15 @@ export async function syncGoogleCalendarEvents(
 
   let discovered: GoogleCalendarApiEvent[];
   if (opts.fetchOverride) {
-    const encodedCalendar = encodeURIComponent(ctx.calendarId);
-    const params = new URLSearchParams({
-      singleEvents: "true",
-      orderBy: "startTime",
+    const fetchResult = await fetchAllGoogleCalendarEventsForSync(
+      ctx.calendarId,
+      ctx.accessToken,
       timeMin,
       timeMax,
-      maxResults: "250",
-    });
-    const listUrl = `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodedCalendar}/events?${params.toString()}`;
-    const listRes = await opts.fetchOverride(listUrl, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${ctx.accessToken}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-    if (!listRes.ok) {
-      const body = await listRes.text().catch(() => "");
-      return {
-        ok: false,
-        error: `Google Calendar API error (${listRes.status}): ${body.slice(0, 300)}`,
-      };
-    }
-    const listJson = (await listRes.json()) as { items?: GoogleCalendarApiEvent[] };
-    discovered = listJson.items ?? [];
+      opts
+    );
+    if (!fetchResult.ok) return fetchResult;
+    discovered = fetchResult.events;
   } else {
     discovered = await fetchGoogleCalendarEventsReadOnly(ctx.calendarId, ctx.accessToken, {
       timeMin,
@@ -594,6 +666,22 @@ export async function syncGoogleCalendarEvents(
 
     const existing = byExternalId.get(extId);
     const syncNow = new Date().toISOString();
+
+    if (isGoogleEventCancelled(raw)) {
+      if (existing && !existing.metadata?.deleted_from_provider) {
+        const markResult = await markLocalEventDeletedFromProvider(
+          supabase,
+          tid,
+          existing.id,
+          existing.metadata ?? {}
+        );
+        if (!markResult.ok) return markResult;
+        result.deleted += 1;
+      } else {
+        result.skipped += 1;
+      }
+      continue;
+    }
 
     if (!existing) {
       if (
@@ -652,13 +740,7 @@ export async function syncGoogleCalendarEvents(
         end_time: mapped.endTime,
         event_type: mapped.eventType,
         google_meet_url: mapped.googleMeetUrl ?? existing.googleMeetUrl,
-        metadata: {
-          ...existing.metadata,
-          deleted_from_provider: false,
-          deleted_at: null,
-          sync_status: "synced",
-          last_synced_at: syncNow,
-        },
+        metadata: buildGoogleSyncUpdateMetadata(existing.metadata ?? {}, syncNow),
         updated_at: syncNow,
       })
       .eq("id", existing.id)
@@ -668,7 +750,7 @@ export async function syncGoogleCalendarEvents(
     result.updated += 1;
   }
 
-  const deletedLocalIds = detectDeletedExternalEvents(localRows, discoveredIds);
+  const deletedLocalIds = detectDeletedExternalEvents(localRows, discoveredIds, { timeMin, timeMax });
   const deletedExternalIds: string[] = [];
   for (const localId of deletedLocalIds) {
     const local = localRows.find((r) => r.id === localId);
@@ -677,18 +759,41 @@ export async function syncGoogleCalendarEvents(
     const extId = local.externalEventId?.trim();
     if (extId) deletedExternalIds.push(extId);
 
-    const deletedAt = new Date().toISOString();
-    const { error } = await supabase
-      .from("fi_calendar_events")
-      .update({
-        metadata: buildDeletedFromProviderMetadata(local.metadata ?? {}, deletedAt),
-        updated_at: deletedAt,
-      })
-      .eq("id", localId)
-      .eq("tenant_id", tid);
-
-    if (error) return { ok: false, error: error.message };
+    const markResult = await markLocalEventDeletedFromProvider(
+      supabase,
+      tid,
+      localId,
+      local.metadata ?? {}
+    );
+    if (!markResult.ok) return markResult;
     result.deleted += 1;
+  }
+
+  for (const local of localRows) {
+    const extId = local.externalEventId?.trim();
+    if (!extId) continue;
+    if (local.metadata?.deleted_from_provider) continue;
+    if (!isFiCreatedCalendarSource(local.metadata?.source)) continue;
+    if (!isEventStartInSyncWindow(local.startTime, timeMin, timeMax)) continue;
+    if (discoveredIds.has(extId)) continue;
+
+    const lookup = await lookupGoogleCalendarEventById(
+      ctx.calendarId,
+      extId,
+      ctx.accessToken,
+      opts
+    );
+    if (lookup === "not_found") {
+      deletedExternalIds.push(extId);
+      const markResult = await markLocalEventDeletedFromProvider(
+        supabase,
+        tid,
+        local.id,
+        local.metadata ?? {}
+      );
+      if (!markResult.ok) return markResult;
+      result.deleted += 1;
+    }
   }
 
   logStructured("info", "google_calendar_sync_cycle_complete", {
