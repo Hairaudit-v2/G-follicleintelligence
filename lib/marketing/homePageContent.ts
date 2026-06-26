@@ -1093,3 +1093,180 @@ Follicle Intelligence exists to change that—not for a single operator, but as 
 } as const;
 
 export type HomePageContent = typeof HOME_PAGE_CONTENT;
+
+/** V5 homepage repositioning — clinic-owner focused, progress-page visual language. */
+export type HomeV5MetricCard = {
+  /** Omitted for statement-only metric cards (e.g. exclusivity positioning). */
+  value?: string;
+  label: string;
+};
+
+export type HomeV5FragmentationCard = {
+  category: string;
+  items: readonly string[];
+};
+
+export type HomeV5SystemCard = {
+  name: string;
+  description: string;
+};
+
+export const HOME_V5_CONTENT = {
+  hero: {
+    id: "hero",
+    eyebrow: "Hair restoration operating system",
+    headline: "The Operating System Built Specifically For Hair Restoration Clinics",
+    subheadline:
+      "Manage consultations, surgery, patient intelligence, staff training, outcomes, analytics, and clinic operations inside one connected intelligence platform built exclusively for hair restoration medicine.",
+    metrics: [
+      { value: "20", label: "Interconnected Systems" },
+      { value: "81%", label: "Platform Deployment" },
+      { value: "8+", label: "Replacing Disconnected Clinic Tools" },
+      { label: "Built Exclusively For Hair Restoration Medicine" },
+    ] satisfies readonly HomeV5MetricCard[],
+    primaryCta: { label: "Explore The Platform", href: "/platform" as const },
+    secondaryCta: { label: "See How Clinics Operate On FI", href: "/platform/ecosystem" as const },
+  },
+
+  fragmentation: {
+    id: "industry-fragmentation",
+    eyebrow: "Operational reality",
+    headline: "Most Hair Restoration Clinics Operate Across Fragmented Systems",
+    cards: [
+      {
+        category: "CRM",
+        items: ["HubSpot", "Pabau", "Manual follow-up"],
+      },
+      {
+        category: "Scheduling",
+        items: ["Timely", "Cliniko", "Calendar fragmentation"],
+      },
+      {
+        category: "Patient Records",
+        items: ["Scattered documents", "Disconnected systems", "Manual notes"],
+      },
+      {
+        category: "Surgical Tracking",
+        items: ["Excel spreadsheets", "Manual graft counting", "No audit trail"],
+      },
+      {
+        category: "Staff Training",
+        items: ["Spreadsheets", "No competency tracking", "No readiness monitoring"],
+      },
+      {
+        category: "Outcome Monitoring",
+        items: ["No longitudinal tracking", "No objective quality scoring", "No procedural benchmarking"],
+      },
+    ] satisfies readonly HomeV5FragmentationCard[],
+    closingStatement:
+      "Modern clinics are forced to operate across disconnected systems with no intelligence layer connecting the patient journey.",
+  },
+
+  platformSystems: {
+    id: "platform-systems",
+    eyebrow: "Connected infrastructure",
+    headline: "One Connected Platform Managing The Entire Clinic",
+    systems: [
+      { name: "LeadFlow", description: "Never lose another enquiry." },
+      { name: "PatientOS", description: "Complete patient intelligence tracking." },
+      { name: "ConsultationOS", description: "Standardised clinical consultation workflows." },
+      { name: "SurgeryOS", description: "Track every procedure with surgical precision." },
+      { name: "ImagingOS", description: "Clinical imaging, documentation, and AI capture." },
+      { name: "WorkforceOS", description: "Know exactly which staff are surgery-ready." },
+      { name: "AnalyticsOS", description: "See performance across every operational layer." },
+      { name: "AuditOS", description: "Measure procedural quality and long-term outcomes." },
+    ] satisfies readonly HomeV5SystemCard[],
+  },
+
+  differentiation: {
+    id: "differentiation",
+    eyebrow: "Category distinction",
+    headline: "Traditional CRM Systems Stop Where Clinical Intelligence Begins",
+    genericSoftware: {
+      title: "Generic Clinic Software",
+      items: [
+        "Lead management",
+        "Appointment booking",
+        "Contact records",
+        "Communication tracking",
+        "Basic pipeline management",
+      ],
+    },
+    follicleIntelligence: {
+      title: "Follicle Intelligence",
+      items: [
+        "Lead management",
+        "Clinical diagnostics",
+        "Consultation intelligence",
+        "Surgical intelligence",
+        "Graft analytics",
+        "Staff competency tracking",
+        "Procedure quality scoring",
+        "Outcome verification",
+        "Longitudinal patient intelligence",
+      ],
+    },
+    closingStatement:
+      "Generic software manages appointments. Follicle Intelligence manages the entire clinical journey.",
+  },
+
+  surgeryIntelligence: {
+    id: "surgery-intelligence",
+    eyebrow: "Surgical intelligence",
+    headline: "The First Surgical Intelligence System Built For Hair Restoration Medicine",
+    metrics: [
+      "Grafts extracted",
+      "Hair per graft ratio",
+      "Punch size",
+      "Extraction speed",
+      "Transection rate",
+      "Team performance",
+      "Donor preservation",
+      "Recipient planning",
+      "Medication protocols",
+    ] as const,
+    closingStatement: "Every procedure becomes measurable, trackable, and continuously optimised.",
+  },
+
+  outcomeIntelligence: {
+    id: "outcome-intelligence",
+    eyebrow: "Outcome intelligence",
+    headline: "Know Which Procedures Actually Produce Better Outcomes",
+    capabilities: [
+      "12 month growth scoring",
+      "Density progression",
+      "Donor recovery monitoring",
+      "Hairline design scoring",
+      "Patient satisfaction tracking",
+      "Surgeon performance benchmarking",
+      "Technique comparison analysis",
+    ] as const,
+    closingStatement: "For the first time clinics can objectively measure procedural quality over time.",
+  },
+
+  staffIntelligence: {
+    id: "staff-intelligence",
+    eyebrow: "Workforce intelligence",
+    headline: "Build Better Teams Through Measurable Clinical Competency",
+    capabilities: [
+      "Training assignments",
+      "Certification management",
+      "Clinical readiness scoring",
+      "SOP completion",
+      "Competency verification",
+      "Role-based permissions",
+      "Compliance monitoring",
+    ] as const,
+    closingStatement: "Operational excellence starts with measurable workforce readiness.",
+  },
+
+  futureVision: {
+    id: "future-infrastructure",
+    eyebrow: "Infrastructure vision",
+    headline: "Building The Future Infrastructure Of Hair Restoration Medicine",
+    body: "Every consultation, diagnosis, procedure, treatment protocol, and long-term patient outcome strengthens the intelligence network powering better decisions for clinics worldwide.",
+    footerLines: ["Infrastructure first.", "Intelligence first.", "Built exclusively for hair restoration medicine."] as const,
+  },
+} as const;
+
+export type HomeV5Content = typeof HOME_V5_CONTENT;
