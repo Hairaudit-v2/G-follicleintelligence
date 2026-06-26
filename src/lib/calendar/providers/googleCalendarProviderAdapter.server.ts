@@ -16,7 +16,6 @@ import {
   fetchGoogleCalendarWithRetry,
   formatGoogleCalendarApiError,
 } from "@/src/lib/googleCalendar/googleCalendarSyncRetryCore";
-import type { GoogleCalendarApiEventWithConference } from "@/src/lib/googleCalendar/googleCalendarTypes";
 
 import type {
   CalendarProviderAdapter,

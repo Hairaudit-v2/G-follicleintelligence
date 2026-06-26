@@ -123,7 +123,7 @@ function createGc9MockSupabase() {
               filters[col] = { is: val };
               return buildChain(filters);
             },
-            neq(col: string, val: string) {
+            neq(_col: string, _val: string) {
               return buildChain(filters);
             },
             order() {
