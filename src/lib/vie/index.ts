@@ -79,3 +79,39 @@ export type { VieFutureArchitecture } from "./vieFutureArchitecture";
 
 export { loadPatientTwinVieSection } from "./viePatientTwinSection.server";
 export type { PatientTwinVieSection, VieLatestIntelligenceRow } from "./viePatientTwinSection.server";
+
+export type {
+  VieComparisonCategory,
+  VieComparisonConfidenceBand,
+  VieComparisonPair,
+  VieComparisonPairRow,
+  VieComparisonReadinessSummary,
+  VieComparisonRecommendedUse,
+  VieComparisonReviewStatus,
+  VieJourneyStage,
+  VieProgressionTimeline,
+  VieSurgeryComparisonStatus,
+} from "./vieComparisonTypes";
+export { VIE_COMPARISON_CATEGORIES, VIE_COMPARISON_ENGINE_VERSION } from "./vieComparisonTypes";
+
+export {
+  buildComparisonCaptureRecord,
+  buildComparisonReadinessSummary,
+  buildVieProgressionTimeline,
+  computeConfidenceBand,
+  computeQualityMatchScore,
+  deriveSlotFamily,
+  deriveSlotFraming,
+  deriveJourneyStage,
+  generateVieComparisonPairs,
+} from "./vieLongitudinalComparisonCore";
+
+export {
+  generateVieComparisonPairsForPatient,
+  loadVieComparisonCaptureRecords,
+  loadVieComparisonPairsForPatient,
+  loadVieComparisonReadinessForPatient,
+  loadVieComparisonTimelineForPatient,
+  regenerateVieComparisonsBestEffort,
+  updateVieComparisonReviewStatus,
+} from "./vieLongitudinalComparison.server";

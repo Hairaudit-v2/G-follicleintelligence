@@ -86,6 +86,34 @@ export function PatientTwinVieCard({
         <p className="mt-4 text-xs text-slate-500">No protocol captures yet — start initial / baseline consultation.</p>
       )}
 
+      <div className="mt-4 rounded-md bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06]">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">Comparison readiness</p>
+        <p className="mt-1 text-sm text-slate-200">
+          {vie.comparison_readiness.suggested_pairs_count} suggested pair
+          {vie.comparison_readiness.suggested_pairs_count === 1 ? "" : "s"}
+          {vie.comparison_readiness.audit_ready_pairs_count > 0
+            ? ` · ${vie.comparison_readiness.audit_ready_pairs_count} audit-ready`
+            : ""}
+        </p>
+        <p className="mt-1 text-xs text-slate-500">
+          Follow-up coverage {vie.comparison_readiness.follow_up_progression_coverage}%
+          {vie.comparison_readiness.regions_without_comparison.length > 0
+            ? ` · ${vie.comparison_readiness.regions_without_comparison.length} region(s) without comparison`
+            : ""}
+        </p>
+        {vie.comparison_readiness.next_recommended_capture.label ? (
+          <p className="mt-1 text-xs text-cyan-300/90">
+            Next capture: {vie.comparison_readiness.next_recommended_capture.label}
+          </p>
+        ) : null}
+        <Link
+          href={`/fi-admin/${tenantId}/patients/${patientId}/imaging?tab=compare`}
+          className="mt-2 inline-block text-xs font-medium text-cyan-300 hover:underline"
+        >
+          View comparisons
+        </Link>
+      </div>
+
       {vie.latest_intelligence.length > 1 ? (
         <ul className="mt-3 space-y-1.5">
           {vie.latest_intelligence.slice(1, 4).map((row) => (

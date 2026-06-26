@@ -11,6 +11,9 @@ export const PATIENT_PHOTO_QUICK_ACTION_SOURCE_PARAM = "source";
 export const PATIENT_PHOTO_ADDED_TOAST_MESSAGE = "Photo added to patient record.";
 
 const TAB_CAPTURE = "capture";
+const TAB_COMPARE = "compare";
+
+export type ImagingWorkspaceTab = "capture" | "compare";
 
 function patientProfileBasePath(tenantId: string, patientId: string): string {
   return `/fi-admin/${encodeURIComponent(tenantId.trim())}/patients/${encodeURIComponent(patientId.trim())}`;
@@ -48,8 +51,11 @@ export function buildPatientImagingCaptureHref(
   return `${imagingBasePath(tenantId, patientId)}?${params.toString()}`;
 }
 
-export function parseImagingWorkspaceTab(value: string | null | undefined): "capture" | null {
-  return value?.trim().toLowerCase() === TAB_CAPTURE ? "capture" : null;
+export function parseImagingWorkspaceTab(value: string | null | undefined): ImagingWorkspaceTab | null {
+  const v = value?.trim().toLowerCase();
+  if (v === TAB_CAPTURE) return "capture";
+  if (v === TAB_COMPARE) return "compare";
+  return null;
 }
 
 export function parseImagingCaptureIntent(value: string | null | undefined): PatientImagingCaptureIntent | null {

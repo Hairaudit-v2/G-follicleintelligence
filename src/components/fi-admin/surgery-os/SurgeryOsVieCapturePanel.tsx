@@ -30,6 +30,18 @@ function percentClass(percent: number): string {
   return "text-rose-300";
 }
 
+function comparisonPairLabel(status: "ready" | "partial" | "missing"): string {
+  if (status === "ready") return "Pair ready";
+  if (status === "partial") return "Partial";
+  return "Missing";
+}
+
+function comparisonPairClass(status: "ready" | "partial" | "missing"): string {
+  if (status === "ready") return "text-emerald-300";
+  if (status === "partial") return "text-amber-200";
+  return "text-rose-300";
+}
+
 export function SurgeryOsVieCapturePanel({
   tenantId,
   surgeries,
@@ -111,6 +123,27 @@ export function SurgeryOsVieCapturePanel({
                 {statusLabel(capture.immediatePostOpStatus)}
               </p>
             </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3 text-xs">
+            <p className="rounded-lg border border-[#334155] px-3 py-2 text-[#94A3B8]">
+              Donor extraction pair:{" "}
+              <span className={comparisonPairClass(capture.comparisonStatus.donor_extraction_pair)}>
+                {comparisonPairLabel(capture.comparisonStatus.donor_extraction_pair)}
+              </span>
+            </p>
+            <p className="rounded-lg border border-[#334155] px-3 py-2 text-[#94A3B8]">
+              Graft tray compare:{" "}
+              <span className={comparisonPairClass(capture.comparisonStatus.graft_tray_pair)}>
+                {comparisonPairLabel(capture.comparisonStatus.graft_tray_pair)}
+              </span>
+            </p>
+            <p className="rounded-lg border border-[#334155] px-3 py-2 text-[#94A3B8]">
+              Pre/post-op pair:{" "}
+              <span className={comparisonPairClass(capture.comparisonStatus.immediate_post_op_pair)}>
+                {comparisonPairLabel(capture.comparisonStatus.immediate_post_op_pair)}
+              </span>
+            </p>
           </div>
 
           {capture.warnings.length > 0 ? (

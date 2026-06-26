@@ -13,7 +13,7 @@ export type VieComparisonEngineContract = {
   version: typeof VIE_FUTURE_ENGINE_VERSION;
   /** Pair images by protocol slot across sessions. */
   match_strategy: "protocol_slot" | "anatomical_region" | "ai_alignment";
-  status: "not_implemented";
+  status: "implemented";
 };
 
 /** Longitudinal hair progression tracking across follow-up protocols. */
@@ -21,7 +21,7 @@ export type VieLongitudinalTrackingContract = {
   engine: "vie_longitudinal";
   version: typeof VIE_FUTURE_ENGINE_VERSION;
   timepoint_sources: ("baseline_consultation" | "follow_up_review" | "post_op_review")[];
-  status: "not_implemented";
+  status: "implemented";
 };
 
 /** Surgical documentation — links surgery_day + post_op_review into a case bundle. */
@@ -52,13 +52,13 @@ export const VIE_FUTURE_ARCHITECTURE: VieFutureArchitecture = {
     engine: "vie_comparison",
     version: VIE_FUTURE_ENGINE_VERSION,
     match_strategy: "protocol_slot",
-    status: "not_implemented",
+    status: "implemented",
   },
   longitudinal_tracking: {
     engine: "vie_longitudinal",
     version: VIE_FUTURE_ENGINE_VERSION,
     timepoint_sources: ["baseline_consultation", "follow_up_review", "post_op_review"],
-    status: "not_implemented",
+    status: "implemented",
   },
   surgical_documentation: {
     engine: "vie_surgical_documentation",

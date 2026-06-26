@@ -11,6 +11,7 @@ import {
   saveImagingScalpMapAction,
 } from "@/lib/actions/fi-imaging-actions";
 import { ImagingGuidedCaptureWizard } from "@/src/components/fi-admin/imaging/ImagingGuidedCaptureWizard";
+import { VieComparisonSuggestionsPanel } from "@/src/components/fi-admin/imaging/VieComparisonSuggestionsPanel";
 import { IMAGING_AI_ANALYSIS_KINDS, IMAGING_COMPARE_PRESETS, IMAGING_LIBRARY_AXES } from "@/src/lib/imagingOs/imagingOsConstants";
 import type { ImagingOsPatientPayload } from "@/src/lib/imagingOs/imagingOsLoad.server";
 import type { PatientImageProfileTile } from "@/src/lib/patientImages/patientImageTypes";
@@ -42,7 +43,9 @@ export function ImagingOsWorkspace({
   const urlTab = parseImagingWorkspaceTab(searchParams.get("tab"));
   const captureIntent = parseImagingCaptureIntent(searchParams.get("intent"));
   const captureSource = parsePatientPhotoQuickActionSource(searchParams.get("source"));
-  const [tab, setTab] = useState<TabId>(() => (urlTab === "capture" ? "capture" : "gallery"));
+  const [tab, setTab] = useState<TabId>(() =>
+    urlTab === "capture" ? "capture" : urlTab === "compare" ? "compare" : "gallery"
+  );
   const [axisFilter, setAxisFilter] = useState<string>("");
   const [adminKey, setAdminKey] = useState("");
   const [pending, startTransition] = useTransition();
@@ -50,6 +53,7 @@ export function ImagingOsWorkspace({
 
   useEffect(() => {
     if (urlTab === "capture") setTab("capture");
+    if (urlTab === "compare") setTab("compare");
   }, [urlTab]);
 
   const [compareLeft, setCompareLeft] = useState("");
@@ -110,6 +114,11 @@ export function ImagingOsWorkspace({
 
   const leftTile = tiles.find((t) => t.image.id === compareLeft) ?? tiles[0] ?? null;
   const rightTile = tiles.find((t) => t.image.id === compareRight) ?? tiles[1] ?? tiles[0] ?? null;
+
+  const tilesById = useMemo(
+    () => new Map(initial.bundle.activeWithSignedUrls.map((t) => [t.image.id, t])),
+    [initial.bundle.activeWithSignedUrls]
+  );
 
   const onSaveScalp = useCallback(() => {
     setMsg(null);
@@ -314,9 +323,28 @@ export function ImagingOsWorkspace({
       ) : null}
 
       {tab === "compare" ? (
-        <section className="space-y-4">
-          <p className="text-xs text-gray-600">{IMAGING_COMPARE_PRESETS.map((p) => p.label).join(" · ")} — pick any two active images.</p>
-          <div className="grid gap-3 sm:grid-cols-2">
+        <section className="space-y-8">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">Suggested comparison pairs</h2>
+            <p className="mt-1 text-xs text-gray-600">
+              Auto-matched from accepted VIE protocol captures — metadata and quality heuristics only (angle alignment pending AI).
+            </p>
+            <div className="mt-4">
+              <VieComparisonSuggestionsPanel
+                tenantId={tenantId}
+                patientId={patientId}
+                pairs={initial.comparisonPairs}
+                tilesById={tilesById}
+                adminKey={adminKey}
+                onReviewUpdated={() => router.refresh()}
+              />
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6">
+            <h2 className="text-sm font-semibold text-gray-900">Manual compare</h2>
+            <p className="mt-1 text-xs text-gray-600">{IMAGING_COMPARE_PRESETS.map((p) => p.label).join(" · ")} — pick any two active images.</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block text-xs font-medium text-gray-700">
               Left / baseline
               <select
@@ -396,6 +424,7 @@ export function ImagingOsWorkspace({
           ) : (
             <p className="text-sm text-gray-600">Select two different images to compare.</p>
           )}
+          </div>
         </section>
       ) : null}
 

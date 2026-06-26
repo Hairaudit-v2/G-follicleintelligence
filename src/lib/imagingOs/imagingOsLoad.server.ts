@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { loadPatientImagesProfileBundle } from "@/src/lib/patientImages/patientImagesServer";
 import type { PatientImagesProfileBundle } from "@/src/lib/patientImages/patientImageTypes";
 import { parseProtocolSlots, protocolRequiredCompletionPercent, type ProtocolSlotDef } from "./imagingOsProtocol";
+import type { VieComparisonPairRow } from "@/src/lib/vie/vieComparisonTypes";
 
 export type ImagingProtocolTemplateRow = {
   id: string;
@@ -53,6 +54,7 @@ export type ImagingOsPatientPayload = {
   protocolSessions: ImagingProtocolSessionRow[];
   scalpMaps: ImagingScalpMapRow[];
   annotationsByImageId: Record<string, ImagingAnnotationRow>;
+  comparisonPairs: VieComparisonPairRow[];
 };
 
 function mapTemplate(r: Record<string, unknown>): ImagingProtocolTemplateRow {
@@ -175,5 +177,16 @@ export async function loadImagingOsPatientPayload(
     }
   }
 
-  return { bundle, protocolTemplates, protocolSessions, scalpMaps, annotationsByImageId };
+  let comparisonPairs: VieComparisonPairRow[] = [];
+  try {
+    const { generateVieComparisonPairsForPatient, loadVieComparisonPairsForPatient } = await import(
+      "@/src/lib/vie/vieLongitudinalComparison.server"
+    );
+    await generateVieComparisonPairsForPatient({ tenantId: tid, patientId: pid, client: supabase });
+    comparisonPairs = await loadVieComparisonPairsForPatient(tid, pid, { client: supabase });
+  } catch {
+    // best-effort — table may be unavailable during migration rollout
+  }
+
+  return { bundle, protocolTemplates, protocolSessions, scalpMaps, annotationsByImageId, comparisonPairs };
 }

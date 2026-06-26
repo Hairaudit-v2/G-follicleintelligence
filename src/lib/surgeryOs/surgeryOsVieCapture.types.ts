@@ -1,4 +1,5 @@
 import type { VieSurgeryPhase } from "@/src/lib/vie/vieProtocolTypes";
+import type { VieSurgeryComparisonStatus } from "@/src/lib/vie/vieComparisonTypes";
 
 export type SurgeryOsVieCaptureWarningKind =
   | "missing_donor_final_extraction"
@@ -44,6 +45,7 @@ export type SurgeryOsVieCaptureSummary = {
   warnings: SurgeryOsVieCaptureWarning[];
   nextRecommendedSlot: string | null;
   nextRecommendedSlotLabel: string | null;
+  comparisonStatus: VieSurgeryComparisonStatus;
 };
 
 export type VieSurgeryCaptureContext = {

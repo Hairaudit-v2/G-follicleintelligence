@@ -26,15 +26,22 @@ create index if not exists idx_fi_crm_leads_primary_owner
   on fi_crm_leads (primary_owner_user_id)
   where primary_owner_user_id is not null;
 
-alter table fi_crm_leads
-  add constraint fi_crm_leads_primary_owner_fk
-  foreign key (primary_owner_user_id)
-  references fi_users (id)
-  on delete set null
-  not valid;
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'fi_crm_leads_primary_owner_fk'
+  ) then
+    alter table fi_crm_leads
+      add constraint fi_crm_leads_primary_owner_fk
+      foreign key (primary_owner_user_id)
+      references fi_users (id)
+      on delete set null
+      not valid;
 
-alter table fi_crm_leads
-  validate constraint fi_crm_leads_primary_owner_fk;
+    alter table fi_crm_leads
+      validate constraint fi_crm_leads_primary_owner_fk;
+  end if;
+end $$;
 
 comment on column fi_crm_leads.primary_owner_user_id is
   'fi_users.id of the assigned CRM owner. On user deletion, set to null (lead preserved). '

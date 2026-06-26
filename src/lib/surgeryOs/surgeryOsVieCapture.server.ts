@@ -8,6 +8,9 @@ import { parseProgressMeta } from "@/src/lib/imagingOs/imagingOsProtocol";
 
 import { buildSurgeryOsVieCaptureSummary } from "./surgeryOsVieCaptureCore";
 import type { SurgeryOsVieCaptureSummary } from "./surgeryOsVieCapture.types";
+import { generateVieComparisonPairs } from "@/src/lib/vie/vieLongitudinalComparisonCore";
+import { loadVieComparisonCaptureRecords } from "@/src/lib/vie/vieLongitudinalComparison.server";
+import { loadVieCapturePolicyForTenant } from "@/src/lib/vie/vieCapturePolicy.server";
 
 type SessionRow = {
   id: string;
@@ -188,22 +191,39 @@ export async function loadSurgeryOsVieCaptureSummaries(
     });
   }
 
-  return surgeries
-    .filter((s) => s.patientId?.trim())
-    .map((surgery) => {
-      const session = sessionByPatient.get(surgery.patientId);
-      const progress = session?.progress ?? {};
-      const procedureDayId = surgery.caseId ? procedureDayByCase.get(surgery.caseId) ?? null : null;
+  return Promise.all(
+    surgeries
+      .filter((s) => s.patientId?.trim())
+      .map(async (surgery) => {
+        const session = sessionByPatient.get(surgery.patientId);
+        const progress = session?.progress ?? {};
+        const procedureDayId = surgery.caseId ? procedureDayByCase.get(surgery.caseId) ?? null : null;
 
-      return buildSurgeryOsVieCaptureSummary({
-        surgeryId: surgery.surgeryId,
-        patientId: surgery.patientId,
-        patientLabel: surgery.patientLabel,
-        caseId: surgery.caseId,
-        bookingId: surgery.bookingId,
-        procedureDayId,
-        sessionId: session?.id ?? null,
-        progress,
-      });
-    });
+        let comparisonPairs: Awaited<ReturnType<typeof generateVieComparisonPairs>> = [];
+        try {
+          const policy = await loadVieCapturePolicyForTenant(tid, supabase);
+          const records = await loadVieComparisonCaptureRecords(
+            tid,
+            surgery.patientId,
+            surgery.caseId,
+            supabase
+          );
+          comparisonPairs = generateVieComparisonPairs(records, policy.minimum_capture_quality_score);
+        } catch {
+          // best-effort
+        }
+
+        return buildSurgeryOsVieCaptureSummary({
+          surgeryId: surgery.surgeryId,
+          patientId: surgery.patientId,
+          patientLabel: surgery.patientLabel,
+          caseId: surgery.caseId,
+          bookingId: surgery.bookingId,
+          procedureDayId,
+          sessionId: session?.id ?? null,
+          progress,
+          comparisonPairs,
+        });
+      })
+  );
 }

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { assertCrmTenantWriteAllowed, tryResolveFiUserIdForTenant } from "@/src/lib/crm/crmGate";
 import { crmJsonError, crmJsonOk, extractAdminKeyFromRequest, mapCrmRouteError } from "@/src/lib/crm/crmHttp";
 import { acceptVieProtocolCapture } from "@/src/lib/vie/vieGuidedCapture.server";
+import { regenerateVieComparisonsBestEffort } from "@/src/lib/vie/vieLongitudinalComparison.server";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ tenantI
     if (!result.review.allowed) {
       return crmJsonError(409, result.review.reason ?? "Capture cannot be accepted.");
     }
+
+    await regenerateVieComparisonsBestEffort({ tenantId: tid, patientId: pid });
 
     revalidatePath(`/fi-admin/${tid}/patients/${pid}/imaging`);
     revalidatePath(`/fi-admin/${tid}/patients/${pid}`);

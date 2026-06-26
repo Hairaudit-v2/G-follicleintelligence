@@ -2,6 +2,8 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { loadViePatientImagingCompleteness } from "./vieCompleteness.server";
+import { loadVieComparisonReadinessForPatient } from "./vieLongitudinalComparison.server";
+import type { VieComparisonReadinessSummary } from "./vieComparisonTypes";
 import type { VieInstantIntelligenceResult, ViePatientImagingCompleteness } from "./vieProtocolTypes";
 import { VIE_ENGINE_VERSION } from "./vieProtocolTypes";
 import { VIE_FUTURE_ARCHITECTURE } from "./vieFutureArchitecture";
@@ -10,6 +12,7 @@ export type PatientTwinVieSection = {
   engine_version: typeof VIE_ENGINE_VERSION;
   imaging_completeness: ViePatientImagingCompleteness;
   latest_intelligence: VieLatestIntelligenceRow[];
+  comparison_readiness: VieComparisonReadinessSummary;
   future_architecture: typeof VIE_FUTURE_ARCHITECTURE;
 };
 
@@ -74,10 +77,13 @@ export async function loadPatientTwinVieSection(
     };
   }
 
+  const comparison_readiness = await loadVieComparisonReadinessForPatient(tenantId, patientId, null, supabase);
+
   return {
     engine_version: VIE_ENGINE_VERSION,
     imaging_completeness,
     latest_intelligence,
+    comparison_readiness,
     future_architecture: VIE_FUTURE_ARCHITECTURE,
   };
 }
