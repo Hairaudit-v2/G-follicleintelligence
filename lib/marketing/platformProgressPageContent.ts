@@ -3,10 +3,13 @@
  * Update percentages, stages, and status badges here — no layout changes required.
  */
 
+import { buildGoogleCalendarPlatformProgressModule } from "@/src/lib/googleCalendar/googleCalendarIntegrationProgress";
+
 export const PLATFORM_PROGRESS_STATUSES = [
   "Live",
   "Production",
   "Pilot Ready",
+  "Operational beta",
   "Active Development",
   "Infrastructure Complete",
 ] as const;
@@ -95,7 +98,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     headline: "Engineering the complete hair restoration operating system",
     subtext:
       "Transparent delivery status across every Follicle Intelligence module — from infrastructure foundations through pilot-ready surfaces and production deployments.",
-    lastUpdated: "2026-06-22",
+    lastUpdated: "2026-06-26",
   },
 
   summary: {
@@ -107,7 +110,7 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
 
   modules: {
     eyebrow: "Module grid",
-    headline: "Thirteen connected systems. One delivery spine.",
+    headlineSuffix: "connected systems. One delivery spine.",
     intro: "Filter by status or scan completion across the FI OS surface area.",
   },
 
@@ -129,7 +132,9 @@ export const PLATFORM_PROGRESS_PAGE_CONTENT = {
     eyebrow: "Platform progress",
     headline: "Built as a Living Operating System",
     description:
-      "Enterprise medical infrastructure in active development. 12 operating modules. Weekly deployment. Production architecture operational.",
+      "Enterprise medical infrastructure in active development.",
+    moduleCountLabel: "operating modules",
+    descriptionClosing: "Weekly deployment. Production architecture operational.",
     cta: { label: "View Live Platform Progress", href: "/platform/progress" },
     secondaryCta: { label: "See how the ecosystem connects", href: "/platform/ecosystem" },
     latestUpdate: {
@@ -149,6 +154,18 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-26-calendar-os-gc6b",
+    title: "CalendarOS GC-6B — Google inbound calendar scope admin",
+    module: "Google Calendar Integration",
+    date: "2026-06-26",
+  },
+  {
+    id: "2026-06-26-calendar-os-gc-csp",
+    title: "CalendarOS GC-CSP — Google Calendar CSP compatibility",
+    module: "Google Calendar Integration",
+    date: "2026-06-26",
+  },
   {
     id: "2026-06-22-onboarding-os-phase-f5",
     title: "OnboardingOS Phase F5 — Staged Import Engine",
@@ -375,10 +392,29 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
       "Enterprise clinic deployment engine — tenant provisioning, deployment templates, sandbox training, Guided Assist, go-live readiness gates, Deployment Intelligence, and live read-only connectors. Phase F5 added a controlled staged import engine: approved HubSpot records can be reviewed, duplicate-checked, imported into FI, mapped to source records, and audited without write-back to HubSpot.",
     status: "Active Development",
   },
+  buildGoogleCalendarPlatformProgressModule(),
 ];
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-26-calendar-os-gc-csp",
+    date: "2026-06-26",
+    tag: "calendar-os",
+    title: "CalendarOS GC-CSP — Google Calendar CSP compatibility fixed",
+    summary:
+      "Global CSP in next.config.mjs now includes a focused Google Calendar/Auth allowlist: connect-src for www.googleapis.com and oauth2.googleapis.com, frame-src for accounts.google.com OAuth iframes, and img-src for lh3.googleusercontent.com profile images. No broad loosening or new script-src permissions. Calendar page verified without securitypolicyviolation events.",
+    modules: ["Google Calendar Integration", "ClinicOS"],
+  },
+  {
+    id: "2026-06-26-calendar-os-gc6b",
+    date: "2026-06-26",
+    tag: "calendar-os",
+    title: "CalendarOS GC-6B — Google inbound calendar scope admin",
+    summary:
+      "FI Admin inbound Google Calendar scope manager: discover calendars from OAuth calendarList, toggle per-calendar inbound sync, refresh scopes without losing choices, run sync now with per-calendar diagnostics, and tenant-safe admin permissions. Outbound appointment creation unchanged.",
+    modules: ["Google Calendar Integration", "ClinicOS"],
+  },
   {
     id: "2026-06-22-onboarding-os-phase-f5",
     date: "2026-06-22",
@@ -579,9 +615,28 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
   },
 ];
 
+export function getPlatformProgressModulesHeadline(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): string {
+  return `${modules.length} connected systems. One delivery spine.`;
+}
+
+export function getPlatformProgressHomepageDescription(
+  modules: readonly PlatformProgressModule[] = PLATFORM_PROGRESS_MODULES
+): string {
+  const c = PLATFORM_PROGRESS_PAGE_CONTENT.homepage;
+  return `${c.description} ${modules.length} ${c.moduleCountLabel}. ${c.descriptionClosing}`;
+}
+
 export function getLatestPlatformProgressChangelogEntry(
   entries: readonly PlatformProgressChangelogEntry[] = PLATFORM_PROGRESS_CHANGELOG
 ): PlatformProgressChangelogEntry | null {
   if (entries.length === 0) return null;
-  return [...entries].sort((a, b) => b.date.localeCompare(a.date))[0] ?? null;
+  return (
+    [...entries].sort((a, b) => {
+      const dateCmp = b.date.localeCompare(a.date);
+      if (dateCmp !== 0) return dateCmp;
+      return b.id.localeCompare(a.id);
+    })[0] ?? null
+  );
 }

@@ -13,6 +13,7 @@ import { Section } from "@/components/layout/section";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/fade-in";
 import {
+  getPlatformProgressModulesHeadline,
   getPlatformProgressSnapshot,
   PLATFORM_PROGRESS_CHANGELOG,
   PLATFORM_PROGRESS_MODULES,
@@ -299,7 +300,7 @@ export function PlatformProgressView() {
           <SectionHeading
             id="module-grid-heading"
             eyebrow={c.modules.eyebrow}
-            title={c.modules.headline}
+            title={getPlatformProgressModulesHeadline()}
             description={c.modules.intro}
           />
           <StatusFilterBar active={statusFilter} onChange={setStatusFilter} counts={filterCounts} />

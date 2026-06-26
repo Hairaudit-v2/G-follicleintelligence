@@ -14,6 +14,7 @@ import { FadeIn } from "@/components/ui/fade-in";
 import {
   getFeaturedPlatformProgressModules,
   getLatestPlatformProgressChangelogEntry,
+  getPlatformProgressHomepageDescription,
   getPlatformProgressSnapshot,
   PLATFORM_PROGRESS_MODULES,
   PLATFORM_PROGRESS_PAGE_CONTENT,
@@ -90,7 +91,7 @@ export function FiMarketingPlatformProgressSection() {
       aria-labelledby={`${c.id}-heading`}
     >
       <FadeIn>
-        <SectionHeading id={`${c.id}-heading`} eyebrow={c.eyebrow} title={c.headline} description={c.description} />
+        <SectionHeading id={`${c.id}-heading`} eyebrow={c.eyebrow} title={c.headline} description={getPlatformProgressHomepageDescription()} />
 
         <EcosystemCompletionSnapshot variant="marketing" className="mt-10" />
 
