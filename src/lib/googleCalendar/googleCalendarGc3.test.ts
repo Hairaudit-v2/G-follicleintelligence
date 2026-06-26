@@ -32,9 +32,59 @@ type EventRow = Record<string, unknown>;
 function createGc3MockSupabase(seed?: IntegrationRow[]) {
   const integrations: IntegrationRow[] = [...(seed ?? [])];
   const events: EventRow[] = [];
+  const inboundCalendars: Record<string, unknown>[] = [];
 
   const client = {
     from(table: string) {
+      if (table === "fi_calendar_inbound_sync_calendars") {
+        const filterInbound = (filters: Record<string, string | boolean>) =>
+          inboundCalendars.filter((r) =>
+            Object.entries(filters).every(([k, v]) => r[k] === v)
+          );
+
+        const buildInboundChain = (filters: Record<string, string | boolean> = {}) => {
+          const chain = {
+            eq(col: string, val: string | boolean) {
+              filters[col] = val;
+              return chain;
+            },
+            order(_col: string, _opts?: { ascending?: boolean; nullsFirst?: boolean }) {
+              return chain;
+            },
+            then(
+              resolve: (v: { data: Record<string, unknown>[]; error: null }) => void,
+              reject?: (e: unknown) => void
+            ) {
+              try {
+                resolve({ data: filterInbound(filters), error: null });
+              } catch (e) {
+                reject?.(e);
+              }
+            },
+          };
+          return chain;
+        };
+
+        return {
+          select() {
+            return buildInboundChain();
+          },
+          update(patch: Record<string, unknown>) {
+            return {
+              eq(col: string, val: string) {
+                return {
+                  eq(col2: string, val2: string) {
+                    const row = inboundCalendars.find((r) => r[col] === val && r[col2] === val2);
+                    if (row) Object.assign(row, patch);
+                    return Promise.resolve({ error: null });
+                  },
+                };
+              },
+            };
+          },
+        };
+      }
+
       if (table === "fi_calendar_integrations") {
         return {
           upsert(row: IntegrationRow) {
@@ -261,6 +311,7 @@ function createGc3MockSupabase(seed?: IntegrationRow[]) {
     client: client as unknown as SupabaseClient,
     integrations,
     events,
+    inboundCalendars,
   };
 }
 

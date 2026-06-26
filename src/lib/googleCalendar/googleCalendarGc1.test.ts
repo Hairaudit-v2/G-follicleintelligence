@@ -47,9 +47,68 @@ type EventRow = Record<string, unknown>;
 function createMockSupabase() {
   const integrations: IntegrationRow[] = [];
   const events: EventRow[] = [];
+  const inboundCalendars: Record<string, unknown>[] = [];
 
   const client = {
     from(table: string) {
+      if (table === "fi_calendar_inbound_sync_calendars") {
+        const filterInbound = (filters: Record<string, string | boolean>) =>
+          inboundCalendars.filter((r) =>
+            Object.entries(filters).every(([k, v]) => r[k] === v)
+          );
+
+        const buildInboundChain = (filters: Record<string, string | boolean> = {}) => {
+          const chain = {
+            eq(col: string, val: string | boolean) {
+              filters[col] = val;
+              return chain;
+            },
+            order(_col: string, _opts?: { ascending?: boolean; nullsFirst?: boolean }) {
+              return chain;
+            },
+            then(
+              resolve: (v: { data: Record<string, unknown>[]; error: null }) => void,
+              reject?: (e: unknown) => void
+            ) {
+              try {
+                resolve({ data: filterInbound(filters), error: null });
+              } catch (e) {
+                reject?.(e);
+              }
+            },
+          };
+          return chain;
+        };
+
+        return {
+          select() {
+            return buildInboundChain();
+          },
+          insert(row: Record<string, unknown>) {
+            const full = { id: randomUUID(), ...row };
+            inboundCalendars.push(full);
+            return {
+              select() {
+                return { single: async () => ({ data: full, error: null }) };
+              },
+            };
+          },
+          update(patch: Record<string, unknown>) {
+            return {
+              eq(col: string, val: string) {
+                return {
+                  eq(col2: string, val2: string) {
+                    const row = inboundCalendars.find((r) => r[col] === val && r[col2] === val2);
+                    if (row) Object.assign(row, patch);
+                    return Promise.resolve({ error: null });
+                  },
+                };
+              },
+            };
+          },
+        };
+      }
+
       if (table === "fi_calendar_integrations") {
         return {
           upsert(row: IntegrationRow, _opts?: { onConflict?: string }) {
@@ -284,6 +343,7 @@ function createMockSupabase() {
     client: client as unknown as SupabaseClient,
     integrations,
     events,
+    inboundCalendars,
   };
 }
 
@@ -1164,5 +1224,108 @@ describe("CalendarOS GC-3 — sync reconciliation", () => {
     assert.equal(result.data.result.deleted, 1);
     const row = mock.events.find((e) => e.external_event_id === "fi-appt-gone");
     assert.equal((row!.metadata as Record<string, unknown>).deleted_from_provider, true);
+  });
+
+  it("GC-5 syncs multiple inbound calendars and aggregates per-calendar results", async () => {
+    const integrationId = mock.integrations[0]?.id as string;
+    mock.inboundCalendars.push(
+      {
+        id: randomUUID(),
+        tenant_id: TENANT,
+        integration_id: integrationId,
+        google_calendar_id: "primary",
+        google_calendar_summary: "Primary",
+        is_enabled: true,
+        is_primary: true,
+      },
+      {
+        id: randomUUID(),
+        tenant_id: TENANT,
+        integration_id: integrationId,
+        google_calendar_id: "consultations@follicleintelligence.ai",
+        google_calendar_summary: "FI OS Consultations",
+        is_enabled: true,
+        is_primary: false,
+      },
+      {
+        id: randomUUID(),
+        tenant_id: TENANT,
+        integration_id: integrationId,
+        google_calendar_id: "support@follicleintelligence.ai",
+        google_calendar_summary: "support@follicleintelligence.ai",
+        is_enabled: true,
+        is_primary: false,
+      }
+    );
+
+    seedEvent({
+      external_event_id: "fi-outbound-primary",
+      start_time: "2026-06-22T10:00:00.000Z",
+      metadata: { source: "fi_calendar_create" },
+    });
+
+    const fetchOverride = googleSyncFetchHandler({
+      listPages: [
+        {
+          items: [
+            {
+              id: "fi-outbound-primary",
+              summary: "FI outbound event",
+              start: { dateTime: "2026-06-22T10:00:00Z" },
+              end: { dateTime: "2026-06-22T11:00:00Z" },
+              updated: "2026-06-01T00:00:00.000Z",
+            },
+          ],
+        },
+        {
+          items: [
+            {
+              id: "native-consultations",
+              summary: "Consultation native",
+              start: { dateTime: "2026-06-24T10:00:00Z" },
+              end: { dateTime: "2026-06-24T11:00:00Z" },
+              updated: "2026-06-24T00:00:00.000Z",
+            },
+          ],
+        },
+        {
+          items: [
+            {
+              id: "native-support",
+              summary: "Support native",
+              start: { dateTime: "2026-06-25T10:00:00Z" },
+              end: { dateTime: "2026-06-25T11:00:00Z" },
+              updated: "2026-06-25T00:00:00.000Z",
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = await syncGoogleCalendarEvents(TENANT, {
+      supabaseClientForTests: mock.client,
+      fetchOverride,
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.data.result.calendarsScanned, 3);
+    assert.equal(result.data.result.created, 2);
+    assert.equal(result.data.result.perCalendar?.length, 3);
+
+    const consultationsRow = mock.events.find((e) => e.external_event_id === "native-consultations");
+    assert.ok(consultationsRow);
+    assert.equal(consultationsRow!.calendar_id, "consultations@follicleintelligence.ai");
+    const consultMeta = consultationsRow!.metadata as Record<string, unknown>;
+    assert.equal(consultMeta.source, "google_sync");
+    assert.equal(consultMeta.google_calendar_id, "consultations@follicleintelligence.ai");
+    assert.equal(consultMeta.google_calendar_summary, "FI OS Consultations");
+
+    const supportRow = mock.events.find((e) => e.external_event_id === "native-support");
+    assert.ok(supportRow);
+    assert.equal(supportRow!.calendar_id, "support@follicleintelligence.ai");
+
+    const fiRow = mock.events.find((e) => e.external_event_id === "fi-outbound-primary");
+    assert.equal((fiRow!.metadata as Record<string, unknown>).source, "fi_calendar_create");
   });
 });

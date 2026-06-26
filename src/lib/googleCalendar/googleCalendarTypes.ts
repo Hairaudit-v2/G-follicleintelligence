@@ -121,6 +121,18 @@ export type GoogleCalendarSyncSkipBreakdown = {
   noUpdateNeeded: number;
 };
 
+export type GoogleCalendarSyncPerCalendarResult = {
+  calendarId: string;
+  calendarSummary: string | null;
+  eventsFetched: number;
+  eventsInserted: number;
+  eventsUpdated: number;
+  eventsSkipped: number;
+  eventsMarkedDeleted: number;
+  failed?: boolean;
+  error?: string;
+};
+
 export type GoogleCalendarSyncResult = {
   discovered: number;
   created: number;
@@ -129,6 +141,14 @@ export type GoogleCalendarSyncResult = {
   deleted: number;
   /** Temporary GC-3 diagnostics — why events were not inserted/updated. */
   skipBreakdown?: GoogleCalendarSyncSkipBreakdown;
+  /** GC-5 — multi-calendar inbound sync aggregates. */
+  calendarsScanned?: number;
+  eventsFetchedTotal?: number;
+  eventsInsertedTotal?: number;
+  eventsUpdatedTotal?: number;
+  eventsSkippedTotal?: number;
+  perCalendar?: GoogleCalendarSyncPerCalendarResult[];
+  failedCalendars?: Array<{ calendarId: string; error: string }>;
 };
 
 /** CalendarOS GC-4 — native FI appointment creation input. */

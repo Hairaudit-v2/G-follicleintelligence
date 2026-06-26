@@ -268,7 +268,8 @@ export function detectDeletedExternalEvents(
 /** Merge Google sync fields into local metadata without clobbering GC-4 appointment fields. */
 export function buildGoogleSyncUpdateMetadata(
   existing: Record<string, unknown>,
-  syncNow: string
+  syncNow: string,
+  sourceCalendar?: { calendarId: string; summary: string | null }
 ): Record<string, unknown> {
   return {
     ...existing,
@@ -276,7 +277,40 @@ export function buildGoogleSyncUpdateMetadata(
     deleted_at: null,
     sync_status: "synced",
     last_synced_at: syncNow,
+    ...(sourceCalendar
+      ? {
+          google_calendar_id: sourceCalendar.calendarId,
+          ...(sourceCalendar.summary ? { google_calendar_summary: sourceCalendar.summary } : {}),
+        }
+      : {}),
   };
+}
+
+/** Metadata for inbound Google-native events inserted during sync. */
+export function buildGoogleSyncInsertMetadata(
+  integrationId: string,
+  syncNow: string,
+  sourceCalendar: { calendarId: string; summary: string | null }
+): Record<string, unknown> {
+  return {
+    source: "google_sync",
+    integration_id: integrationId,
+    last_synced_at: syncNow,
+    google_calendar_id: sourceCalendar.calendarId,
+    ...(sourceCalendar.summary ? { google_calendar_summary: sourceCalendar.summary } : {}),
+  };
+}
+
+/** True when a Google Calendar API error indicates auth/token failure affecting all calendars. */
+export function isGoogleCalendarAuthFailure(error: string): boolean {
+  const normalized = error.trim().toLowerCase();
+  return (
+    normalized.includes("(401)") ||
+    normalized.includes("(403)") ||
+    normalized.includes("invalid_grant") ||
+    normalized.includes("invalid_credentials") ||
+    normalized.includes("token has been expired or revoked")
+  );
 }
 
 export function buildDeletedFromProviderMetadata(

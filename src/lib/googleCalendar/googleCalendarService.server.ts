@@ -12,6 +12,7 @@ import {
   buildDeletedFromProviderMetadata,
   buildGoogleCalendarListQueryParams,
   buildGoogleMeetConferenceRequest,
+  buildGoogleSyncInsertMetadata,
   buildGoogleSyncUpdateMetadata,
   detectDeletedExternalEvents,
   diagnoseGoogleApiEventMapping,
@@ -20,17 +21,24 @@ import {
   isDuplicateFiCalendarEvent,
   isEventStartInSyncWindow,
   isFiCreatedCalendarSource,
+  isGoogleCalendarAuthFailure,
   isGoogleEventCancelled,
   mapGoogleApiEventToFiFields,
   parseGoogleCalendarListResponse,
   shouldUpdateFiEventFromGoogle,
 } from "./googleCalendarCore";
 import { resolveGoogleCalendarAccessToken } from "./googleCalendarAuth.server";
+import {
+  getGoogleInboundCalendarScopesForIntegration,
+  touchInboundSyncCalendarLastSynced,
+  type GoogleInboundCalendarScope,
+} from "./googleCalendarInboundSyncData.server";
 import type {
   CreateGoogleCalendarEventInput,
   FiCalendarEvent,
   FiCalendarIntegration,
   GoogleCalendarApiEventWithConference,
+  GoogleCalendarSyncPerCalendarResult,
   GoogleCalendarSyncResult,
   GoogleCalendarSyncSkipBreakdown,
   UpdateGoogleCalendarEventInput,
@@ -622,49 +630,83 @@ export async function getGoogleCalendarEvents(
   return { ok: true, data: { events } };
 }
 
-/** Pull recent Google events and reconcile FI mirror (dedup, updates, deletions). */
-export async function syncGoogleCalendarEvents(
-  tenantId: string,
-  opts: ServerOpts = {}
-): Promise<GoogleCalendarServiceResult<{ result: GoogleCalendarSyncResult }>> {
-  const tid = tenantId.trim();
-  const ctx = await resolveIntegrationContext(tid, opts);
-  if (!ctx.ok) return ctx;
+function emptySkipBreakdown(): GoogleCalendarSyncSkipBreakdown {
+  return {
+    noExternalId: 0,
+    cancelledNoLocal: 0,
+    duplicateTitleStart: 0,
+    uniqueViolation: 0,
+    noUpdateNeeded: 0,
+  };
+}
 
+function mergeSkipBreakdown(
+  target: GoogleCalendarSyncSkipBreakdown,
+  source: GoogleCalendarSyncSkipBreakdown
+): void {
+  target.noExternalId += source.noExternalId;
+  target.cancelledNoLocal += source.cancelledNoLocal;
+  target.duplicateTitleStart += source.duplicateTitleStart;
+  target.uniqueViolation += source.uniqueViolation;
+  target.noUpdateNeeded += source.noUpdateNeeded;
+}
+
+type SyncCalendarContext = {
+  tenantId: string;
+  integration: FiCalendarIntegration;
+  accessToken: string;
+  calendarScope: GoogleInboundCalendarScope;
+  timeMin: string;
+  timeMax: string;
+  byExternalId: Map<string, FiCalendarEvent>;
+};
+
+/** Reconcile Google events for a single inbound calendar scope. */
+async function syncGoogleCalendarEventsForCalendar(
+  ctx: SyncCalendarContext,
+  opts: ServerOpts
+): Promise<
+  | { ok: true; result: GoogleCalendarSyncPerCalendarResult; skipBreakdown: GoogleCalendarSyncSkipBreakdown }
+  | { ok: false; error: string }
+> {
+  const { tenantId: tid, integration, accessToken, calendarScope, timeMin, timeMax, byExternalId } = ctx;
+  const calendarId = calendarScope.calendarId;
+  const calendarSummary = calendarScope.summary;
   const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
-  const now = Date.now();
-  const lookbackDays = opts.lookbackDays ?? SYNC_LOOKBACK_DAYS;
-  const lookaheadDays = opts.lookaheadDays ?? SYNC_LOOKAHEAD_DAYS;
-  const timeMin = new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
-  const timeMax = new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
 
-  logStructured("info", "google_calendar_sync_cycle_start", {
+  logStructured("info", "google_calendar_sync_calendar_start", {
     tenantId: tid,
-    calendarId: ctx.calendarId,
-    integrationId: ctx.integration.id,
-    googleAccountEmail: ctx.integration.googleAccountEmail ?? null,
+    integrationId: integration.id,
+    calendarId,
+    calendarSummary,
     timeMin,
     timeMax,
-    lookbackDays,
-    lookaheadDays,
   });
 
   const fetchResult = await fetchAllGoogleCalendarEventsForSync(
-    ctx.calendarId,
-    ctx.accessToken,
+    calendarId,
+    accessToken,
     timeMin,
     timeMax,
     opts
   );
-  if (!fetchResult.ok) return fetchResult;
+  if (!fetchResult.ok) {
+    logStructured("error", "google_calendar_sync_calendar_failed", {
+      tenantId: tid,
+      calendarId,
+      calendarSummary,
+      error: fetchResult.error,
+    });
+    return { ok: false, error: fetchResult.error };
+  }
   const discovered = fetchResult.events;
 
-  const localRows = await loadLocalEventsForDedup(supabase, tid, ctx.calendarId);
-  const byExternalId = await loadLocalEventsByExternalIdForSync(supabase, tid);
+  const localRows = await loadLocalEventsForDedup(supabase, tid, calendarId);
 
   logStructured("info", "google_calendar_sync_fetched", {
     tenantId: tid,
-    calendarId: ctx.calendarId,
+    calendarId,
+    calendarSummary,
     eventsFetched: discovered.length,
     localEventsForCalendar: localRows.length,
     localEventsWithExternalId: byExternalId.size,
@@ -675,36 +717,33 @@ export async function syncGoogleCalendarEvents(
       .join(","),
   });
 
-  const skipBreakdown: GoogleCalendarSyncSkipBreakdown = {
-    noExternalId: 0,
-    cancelledNoLocal: 0,
-    duplicateTitleStart: 0,
-    uniqueViolation: 0,
-    noUpdateNeeded: 0,
-  };
+  const skipBreakdown = emptySkipBreakdown();
   const skippedSamples: Array<{ externalEventId: string; reason: string; title?: string }> = [];
   const insertedExternalIds: string[] = [];
 
-  const result: GoogleCalendarSyncResult = {
-    discovered: discovered.length,
-    created: 0,
-    updated: 0,
-    skipped: 0,
-    deleted: 0,
-    skipBreakdown,
+  const calendarResult: GoogleCalendarSyncPerCalendarResult = {
+    calendarId,
+    calendarSummary,
+    eventsFetched: discovered.length,
+    eventsInserted: 0,
+    eventsUpdated: 0,
+    eventsSkipped: 0,
+    eventsMarkedDeleted: 0,
   };
 
   const discoveredIds = new Set<string>();
+  const sourceCalendar = { calendarId, summary: calendarSummary };
 
   for (let eventIndex = 0; eventIndex < discovered.length; eventIndex += 1) {
     const raw = discovered[eventIndex]!;
     const startDateTime = raw.start?.dateTime ?? raw.start?.date ?? null;
-    const mappingDiag = diagnoseGoogleApiEventMapping(raw, ctx.calendarId);
+    const mappingDiag = diagnoseGoogleApiEventMapping(raw, calendarId);
     const mapped = mappingDiag.mapped;
 
     logStructured("info", "google_calendar_sync_event", {
       tenantId: tid,
-      calendarId: ctx.calendarId,
+      calendarId,
+      calendarSummary,
       eventIndex,
       eventId: raw.id ?? null,
       eventSummary: raw.summary ?? null,
@@ -719,7 +758,8 @@ export async function syncGoogleCalendarEvents(
     if (mappingDiag.mappingFailed) {
       logStructured("warn", "google_calendar_sync_map_failed", {
         tenantId: tid,
-        calendarId: ctx.calendarId,
+        calendarId,
+        calendarSummary,
         eventIndex,
         eventId: raw.id ?? null,
         eventSummary: raw.summary ?? null,
@@ -731,10 +771,12 @@ export async function syncGoogleCalendarEvents(
 
     const extId = mapped.externalEventId;
     if (!extId) {
-      result.skipped += 1;
+      calendarResult.eventsSkipped += 1;
       skipBreakdown.noExternalId += 1;
       logStructured("info", "google_calendar_sync_skip", {
         tenantId: tid,
+        calendarId,
+        calendarSummary,
         skipReason: "noExternalId",
         eventIndex,
         eventId: raw.id ?? null,
@@ -762,13 +804,15 @@ export async function syncGoogleCalendarEvents(
           existing.id,
           existing.metadata ?? {}
         );
-        if (!markResult.ok) return markResult;
-        result.deleted += 1;
+        if (!markResult.ok) return { ok: false, error: markResult.error };
+        calendarResult.eventsMarkedDeleted += 1;
       } else {
-        result.skipped += 1;
+        calendarResult.eventsSkipped += 1;
         skipBreakdown.cancelledNoLocal += 1;
         logStructured("info", "google_calendar_sync_skip", {
           tenantId: tid,
+          calendarId,
+          calendarSummary,
           skipReason: "cancelledNoLocal",
           eventIndex,
           externalEventId: extId,
@@ -789,10 +833,12 @@ export async function syncGoogleCalendarEvents(
           localRows
         )
       ) {
-        result.skipped += 1;
+        calendarResult.eventsSkipped += 1;
         skipBreakdown.duplicateTitleStart += 1;
         logStructured("info", "google_calendar_sync_skip", {
           tenantId: tid,
+          calendarId,
+          calendarSummary,
           skipReason: "duplicateTitleStart",
           eventIndex,
           externalEventId: extId,
@@ -811,7 +857,8 @@ export async function syncGoogleCalendarEvents(
 
       logStructured("info", "google_calendar_sync_insert_attempt", {
         tenantId: tid,
-        calendarId: ctx.calendarId,
+        calendarId,
+        calendarSummary,
         eventIndex,
         externalEventId: extId,
         title: mapped.title,
@@ -823,7 +870,7 @@ export async function syncGoogleCalendarEvents(
         tenant_id: tid,
         external_event_id: extId,
         provider: "google",
-        calendar_id: ctx.calendarId,
+        calendar_id: calendarId,
         title: mapped.title,
         description: mapped.description,
         location: mapped.location,
@@ -831,19 +878,17 @@ export async function syncGoogleCalendarEvents(
         end_time: mapped.endTime,
         event_type: mapped.eventType,
         google_meet_url: mapped.googleMeetUrl,
-        metadata: {
-          source: "google_sync",
-          integration_id: ctx.integration.id,
-          last_synced_at: syncNow,
-        },
+        metadata: buildGoogleSyncInsertMetadata(integration.id, syncNow, sourceCalendar),
       });
 
       if (error) {
         if (error.code === "23505") {
-          result.skipped += 1;
+          calendarResult.eventsSkipped += 1;
           skipBreakdown.uniqueViolation += 1;
           logStructured("info", "google_calendar_sync_skip", {
             tenantId: tid,
+            calendarId,
+            calendarSummary,
             skipReason: "uniqueViolation",
             eventIndex,
             externalEventId: extId,
@@ -861,11 +906,31 @@ export async function syncGoogleCalendarEvents(
           return { ok: false, error: error.message };
         }
       } else {
-        result.created += 1;
+        calendarResult.eventsInserted += 1;
         insertedExternalIds.push(extId);
+        byExternalId.set(extId, {
+          id: "",
+          tenantId: tid,
+          externalEventId: extId,
+          provider: "google",
+          calendarId,
+          title: mapped.title,
+          description: mapped.description,
+          location: mapped.location,
+          startTime: mapped.startTime,
+          endTime: mapped.endTime,
+          eventType: mapped.eventType,
+          googleMeetUrl: mapped.googleMeetUrl,
+          patientId: null,
+          leadId: null,
+          metadata: buildGoogleSyncInsertMetadata(integration.id, syncNow, sourceCalendar),
+          createdAt: syncNow,
+          updatedAt: syncNow,
+        });
         logStructured("info", "google_calendar_sync_inserted", {
           tenantId: tid,
-          calendarId: ctx.calendarId,
+          calendarId,
+          calendarSummary,
           eventIndex,
           externalEventId: extId,
           title: mapped.title,
@@ -875,10 +940,12 @@ export async function syncGoogleCalendarEvents(
     }
 
     if (!shouldUpdateFiEventFromGoogle(existing, raw)) {
-      result.skipped += 1;
+      calendarResult.eventsSkipped += 1;
       skipBreakdown.noUpdateNeeded += 1;
       logStructured("info", "google_calendar_sync_skip", {
         tenantId: tid,
+        calendarId,
+        calendarSummary,
         skipReason: "noUpdateNeeded",
         eventIndex,
         externalEventId: extId,
@@ -907,14 +974,15 @@ export async function syncGoogleCalendarEvents(
         end_time: mapped.endTime,
         event_type: mapped.eventType,
         google_meet_url: mapped.googleMeetUrl ?? existing.googleMeetUrl,
-        metadata: buildGoogleSyncUpdateMetadata(existing.metadata ?? {}, syncNow),
+        calendar_id: calendarId,
+        metadata: buildGoogleSyncUpdateMetadata(existing.metadata ?? {}, syncNow, sourceCalendar),
         updated_at: syncNow,
       })
       .eq("id", existing.id)
       .eq("tenant_id", tid);
 
     if (error) return { ok: false, error: error.message };
-    result.updated += 1;
+    calendarResult.eventsUpdated += 1;
   }
 
   const deletedLocalIds = detectDeletedExternalEvents(localRows, discoveredIds, { timeMin, timeMax });
@@ -932,8 +1000,8 @@ export async function syncGoogleCalendarEvents(
       localId,
       local.metadata ?? {}
     );
-    if (!markResult.ok) return markResult;
-    result.deleted += 1;
+    if (!markResult.ok) return { ok: false, error: markResult.error };
+    calendarResult.eventsMarkedDeleted += 1;
   }
 
   for (const local of localRows) {
@@ -944,12 +1012,7 @@ export async function syncGoogleCalendarEvents(
     if (!isEventStartInSyncWindow(local.startTime, timeMin, timeMax)) continue;
     if (discoveredIds.has(extId)) continue;
 
-    const lookup = await lookupGoogleCalendarEventById(
-      ctx.calendarId,
-      extId,
-      ctx.accessToken,
-      opts
-    );
+    const lookup = await lookupGoogleCalendarEventById(calendarId, extId, accessToken, opts);
     if (lookup === "not_found") {
       deletedExternalIds.push(extId);
       const markResult = await markLocalEventDeletedFromProvider(
@@ -958,19 +1021,20 @@ export async function syncGoogleCalendarEvents(
         local.id,
         local.metadata ?? {}
       );
-      if (!markResult.ok) return markResult;
-      result.deleted += 1;
+      if (!markResult.ok) return { ok: false, error: markResult.error };
+      calendarResult.eventsMarkedDeleted += 1;
     }
   }
 
-  logStructured("info", "google_calendar_sync_cycle_complete", {
+  logStructured("info", "google_calendar_sync_calendar_complete", {
     tenantId: tid,
-    calendarId: ctx.calendarId,
-    eventsFetched: discovered.length,
-    eventsInserted: result.created,
-    eventsUpdated: result.updated,
-    eventsSkipped: result.skipped,
-    eventsMarkedDeleted: result.deleted,
+    calendarId,
+    calendarSummary,
+    eventsFetched: calendarResult.eventsFetched,
+    eventsInserted: calendarResult.eventsInserted,
+    eventsUpdated: calendarResult.eventsUpdated,
+    eventsSkipped: calendarResult.eventsSkipped,
+    eventsMarkedDeleted: calendarResult.eventsMarkedDeleted,
     skipNoExternalId: skipBreakdown.noExternalId,
     skipDuplicateTitleStart: skipBreakdown.duplicateTitleStart,
     skipUniqueViolation: skipBreakdown.uniqueViolation,
@@ -984,10 +1048,155 @@ export async function syncGoogleCalendarEvents(
   if (skippedSamples.length > 0) {
     logStructured("info", "google_calendar_sync_skipped_samples", {
       tenantId: tid,
-      calendarId: ctx.calendarId,
+      calendarId,
+      calendarSummary,
       sampleCount: skippedSamples.length,
       samplesJson: JSON.stringify(skippedSamples),
     });
+  }
+
+  if (calendarScope.inboundRowId) {
+    await touchInboundSyncCalendarLastSynced(calendarScope.inboundRowId, tid, opts);
+  }
+
+  return { ok: true, result: calendarResult, skipBreakdown };
+}
+
+/** Pull recent Google events and reconcile FI mirror (dedup, updates, deletions). */
+export async function syncGoogleCalendarEvents(
+  tenantId: string,
+  opts: ServerOpts = {}
+): Promise<GoogleCalendarServiceResult<{ result: GoogleCalendarSyncResult }>> {
+  const tid = tenantId.trim();
+  const ctx = await resolveIntegrationContext(tid, opts);
+  if (!ctx.ok) return ctx;
+
+  const supabase = opts.supabaseClientForTests ?? supabaseAdmin();
+  const now = Date.now();
+  const lookbackDays = opts.lookbackDays ?? SYNC_LOOKBACK_DAYS;
+  const lookaheadDays = opts.lookaheadDays ?? SYNC_LOOKAHEAD_DAYS;
+  const timeMin = new Date(now - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
+  const timeMax = new Date(now + lookaheadDays * 24 * 60 * 60 * 1000).toISOString();
+
+  const calendarScopes = await getGoogleInboundCalendarScopesForIntegration(ctx.integration, opts);
+
+  logStructured("info", "google_calendar_sync_cycle_start", {
+    tenantId: tid,
+    integrationId: ctx.integration.id,
+    googleAccountEmail: ctx.integration.googleAccountEmail ?? null,
+    calendarCount: calendarScopes.length,
+    calendarIds: calendarScopes.map((c) => c.calendarId).join(","),
+    timeMin,
+    timeMax,
+    lookbackDays,
+    lookaheadDays,
+  });
+
+  const byExternalId = await loadLocalEventsByExternalIdForSync(supabase, tid);
+  const skipBreakdown = emptySkipBreakdown();
+  const perCalendar: GoogleCalendarSyncPerCalendarResult[] = [];
+  const failedCalendars: Array<{ calendarId: string; error: string }> = [];
+
+  const result: GoogleCalendarSyncResult = {
+    discovered: 0,
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    deleted: 0,
+    skipBreakdown,
+    calendarsScanned: 0,
+    eventsFetchedTotal: 0,
+    eventsInsertedTotal: 0,
+    eventsUpdatedTotal: 0,
+    eventsSkippedTotal: 0,
+    perCalendar,
+    failedCalendars,
+  };
+
+  for (const calendarScope of calendarScopes) {
+    const calendarOutcome = await syncGoogleCalendarEventsForCalendar(
+      {
+        tenantId: tid,
+        integration: ctx.integration,
+        accessToken: ctx.accessToken,
+        calendarScope,
+        timeMin,
+        timeMax,
+        byExternalId,
+      },
+      opts
+    );
+
+    if (!calendarOutcome.ok) {
+      failedCalendars.push({
+        calendarId: calendarScope.calendarId,
+        error: calendarOutcome.error,
+      });
+      perCalendar.push({
+        calendarId: calendarScope.calendarId,
+        calendarSummary: calendarScope.summary,
+        eventsFetched: 0,
+        eventsInserted: 0,
+        eventsUpdated: 0,
+        eventsSkipped: 0,
+        eventsMarkedDeleted: 0,
+        failed: true,
+        error: calendarOutcome.error,
+      });
+
+      if (isGoogleCalendarAuthFailure(calendarOutcome.error)) {
+        return { ok: false, error: calendarOutcome.error };
+      }
+      continue;
+    }
+
+    const cal = calendarOutcome.result;
+    perCalendar.push(cal);
+    result.calendarsScanned = (result.calendarsScanned ?? 0) + 1;
+    result.discovered += cal.eventsFetched;
+    result.created += cal.eventsInserted;
+    result.updated += cal.eventsUpdated;
+    result.skipped += cal.eventsSkipped;
+    result.deleted += cal.eventsMarkedDeleted;
+    result.eventsFetchedTotal = (result.eventsFetchedTotal ?? 0) + cal.eventsFetched;
+    result.eventsInsertedTotal = (result.eventsInsertedTotal ?? 0) + cal.eventsInserted;
+    result.eventsUpdatedTotal = (result.eventsUpdatedTotal ?? 0) + cal.eventsUpdated;
+    result.eventsSkippedTotal = (result.eventsSkippedTotal ?? 0) + cal.eventsSkipped;
+    mergeSkipBreakdown(skipBreakdown, calendarOutcome.skipBreakdown);
+  }
+
+  logStructured("info", "google_calendar_sync_cycle_complete", {
+    tenantId: tid,
+    integrationId: ctx.integration.id,
+    calendarsScanned: result.calendarsScanned,
+    eventsFetchedTotal: result.eventsFetchedTotal,
+    eventsInsertedTotal: result.eventsInsertedTotal,
+    eventsUpdatedTotal: result.eventsUpdatedTotal,
+    eventsSkippedTotal: result.eventsSkippedTotal,
+    eventsMarkedDeletedTotal: result.deleted,
+    failedCalendarCount: failedCalendars.length,
+    failedCalendarsJson: failedCalendars.length ? JSON.stringify(failedCalendars) : null,
+    perCalendarJson: JSON.stringify(
+      perCalendar.map((c) => ({
+        calendarId: c.calendarId,
+        calendarSummary: c.calendarSummary,
+        eventsFetched: c.eventsFetched,
+        eventsInserted: c.eventsInserted,
+        eventsUpdated: c.eventsUpdated,
+        eventsSkipped: c.eventsSkipped,
+        eventsMarkedDeleted: c.eventsMarkedDeleted,
+        failed: c.failed ?? false,
+      }))
+    ),
+    skipNoExternalId: skipBreakdown.noExternalId,
+    skipDuplicateTitleStart: skipBreakdown.duplicateTitleStart,
+    skipUniqueViolation: skipBreakdown.uniqueViolation,
+    skipNoUpdateNeeded: skipBreakdown.noUpdateNeeded,
+    skipCancelledNoLocal: skipBreakdown.cancelledNoLocal,
+  });
+
+  if (failedCalendars.length > 0 && (result.calendarsScanned ?? 0) === 0) {
+    return { ok: false, error: failedCalendars[0]!.error };
   }
 
   return { ok: true, data: { result } };

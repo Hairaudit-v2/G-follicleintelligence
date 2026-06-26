@@ -253,16 +253,21 @@ export async function syncGoogleCalendarForTenant(
     integrationId: integration.id,
     calendarId: integration.calendar_id,
     googleAccountEmail: integration.google_account_email ?? null,
-    eventsFetched: syncResultData.discovered,
-    eventsInserted: syncResultData.created,
-    eventsUpdated: syncResultData.updated,
-    eventsSkipped: syncResultData.skipped,
+    calendarsScanned: syncResultData.calendarsScanned ?? 1,
+    eventsFetched: syncResultData.eventsFetchedTotal ?? syncResultData.discovered,
+    eventsInserted: syncResultData.eventsInsertedTotal ?? syncResultData.created,
+    eventsUpdated: syncResultData.eventsUpdatedTotal ?? syncResultData.updated,
+    eventsSkipped: syncResultData.eventsSkippedTotal ?? syncResultData.skipped,
     eventsMarkedDeleted: syncResultData.deleted,
-    skipNoExternalId: syncResultData.skipBreakdown.noExternalId,
-    skipDuplicateTitleStart: syncResultData.skipBreakdown.duplicateTitleStart,
-    skipUniqueViolation: syncResultData.skipBreakdown.uniqueViolation,
-    skipNoUpdateNeeded: syncResultData.skipBreakdown.noUpdateNeeded,
-    skipCancelledNoLocal: syncResultData.skipBreakdown.cancelledNoLocal,
+    failedCalendarCount: syncResultData.failedCalendars?.length ?? 0,
+    perCalendarJson: syncResultData.perCalendar
+      ? JSON.stringify(syncResultData.perCalendar)
+      : null,
+    skipNoExternalId: syncResultData.skipBreakdown?.noExternalId,
+    skipDuplicateTitleStart: syncResultData.skipBreakdown?.duplicateTitleStart,
+    skipUniqueViolation: syncResultData.skipBreakdown?.uniqueViolation,
+    skipNoUpdateNeeded: syncResultData.skipBreakdown?.noUpdateNeeded,
+    skipCancelledNoLocal: syncResultData.skipBreakdown?.cancelledNoLocal,
   });
 
   return {
