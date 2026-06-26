@@ -21,6 +21,10 @@ import { loadHrNotificationByStaffId } from "@/src/lib/staff/staffHrNotification
 import type { StaffHrNotificationSummary } from "@/src/lib/staff/staffHrNotificationSummary";
 import { EVOLVED_PAYROLL_SOURCE_SYSTEM } from "@/src/lib/staffImport/evolvedPayrollStaffImportConstants";
 import { normalizeFiStaffSourceSystem } from "@/src/lib/staff/staffSourceIdsNormalize";
+import {
+  loadWorkforceCommandCentreIntelligence,
+  type WorkforceCommandCentreIntelligence,
+} from "@/src/lib/staff/workforceCommandCentre.server";
 
 export type StaffDirectoryClinicOption = {
   id: string;
@@ -48,6 +52,8 @@ export type StaffDirectoryPageResult = {
   payrollByStaffId: Record<string, StaffPayrollSourceDisplay | null>;
   hrNotificationByStaffId: Record<string, StaffHrNotificationSummary>;
   clinics: StaffDirectoryClinicOption[];
+  /** Workforce Command Centre v1 — derived readiness, compliance, and shift intelligence. */
+  workforceIntelligence: WorkforceCommandCentreIntelligence;
 };
 
 async function loadFiUserRow(
@@ -209,6 +215,16 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     loadHrNotificationByStaffId(tid, staffIds),
   ]);
 
+  let workforceIntelligence: WorkforceCommandCentreIntelligence = {
+    perStaff: {},
+    tenantOverview: null,
+  };
+  try {
+    workforceIntelligence = await loadWorkforceCommandCentreIntelligence(tid, staffRes, hrNotificationByStaffId);
+  } catch {
+    workforceIntelligence = { perStaff: {}, tenantOverview: null };
+  }
+
   return {
     staff: staffRes,
     canManageStaff,
@@ -224,5 +240,6 @@ export async function loadStaffDirectoryPage(tenantId: string): Promise<StaffDir
     payrollByStaffId,
     hrNotificationByStaffId,
     clinics,
+    workforceIntelligence,
   };
 }

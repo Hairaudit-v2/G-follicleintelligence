@@ -8,7 +8,7 @@ import { loadStaffDirectoryPage } from "@/src/lib/staff/staffDirectoryLoader.ser
 import { assertStaffModuleAccess } from "@/src/lib/staffAccess/staffAccessGuards.server";
 
 export const metadata = {
-  title: "Staff",
+  title: "Workforce Command Centre",
   robots: { index: false, follow: false },
 };
 

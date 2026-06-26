@@ -487,13 +487,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
   {
     id: "workforce-os",
     name: "WorkforceOS",
-    completionPercent: 72,
-    stage: "Phase 2E · roster command centre",
+    completionPercent: 76,
+    stage: "Phase 2F · workforce command centre",
     description:
       "Healthcare workforce infrastructure, onboarding, compliance, readiness scoring, clinical rostering, and staffing orchestration.",
     status: "Active Development",
-    statusLabel: "Operational Build",
-    latestMilestone: "Roster Command Centre assignment intelligence",
+    statusLabel: "Operational Beta",
+    latestMilestone: "Workforce Command Centre v1",
   },
   {
     id: "onboarding-os",
@@ -889,6 +889,15 @@ export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
     summary:
       "OnboardingOS Phase A–B foundations added: tenant provisioning sessions, deployment templates, module bundle activation planning, role packs, service workflow templates, and sandbox seed planning.",
     modules: ["OnboardingOS"],
+  },
+  {
+    id: "2026-06-26-workforce-command-centre-v1",
+    date: "2026-06-26",
+    tag: "workforce-os",
+    title: "WorkforceOS Workforce Command Centre v1 shipped",
+    summary:
+      "Staff directory redesigned as an intelligence-first Workforce Command Centre — readiness metrics, compliance attention queue, role segmentation, and card-based directory while preserving add/edit staff flows.",
+    modules: ["WorkforceOS"],
   },
   {
     id: "2026-06-22-workforce-roster-command-centre",
