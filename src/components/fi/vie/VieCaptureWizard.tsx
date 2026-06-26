@@ -13,9 +13,15 @@ import {
   slotIsSatisfied,
   type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
-import { getVieProtocol } from "@/src/lib/vie/vieProtocolCatalog";
+import { getVieProtocol, groupSurgeryDaySlotsByPhase } from "@/src/lib/vie/vieProtocolCatalog";
 import type { VieProtocolSlug } from "@/src/lib/vie/vieProtocolTypes";
-import type { VieCaptureGuideKind, VieCaptureReviewPayload, VieProtocolSlotDef, VieSlotTier } from "@/src/lib/vie/vieProtocolTypes";
+import type {
+  VieCaptureFraming,
+  VieCaptureGuideKind,
+  VieCaptureReviewPayload,
+  VieProtocolSlotDef,
+  VieSlotTier,
+} from "@/src/lib/vie/vieProtocolTypes";
 import { VieCaptureGuideOverlay } from "./VieCaptureGuideOverlay";
 import { VieIntelligenceResultPanel } from "./VieIntelligenceResultPanel";
 
@@ -43,7 +49,12 @@ type GuidedApi = {
   nextSlotSlug: string | null;
 };
 
-type WizardSlot = ProtocolSlotDef & { slot_tier: VieSlotTier };
+type WizardSlot = ProtocolSlotDef & {
+  slot_tier: VieSlotTier;
+  capture_distance_hint: string;
+  framing: VieCaptureFraming;
+  suggested_timing?: string;
+};
 
 function parseSlotProgress(raw: SlotProgress, slots: ProtocolSlotDef[]) {
   const required = slots.filter((s) => s.required !== false);
@@ -67,6 +78,20 @@ function slotCaption(slot: WizardSlot, requiredComplete: number, requiredTotal: 
   if (slot.required === false) return "Optional view — skipping does not affect protocol completeness";
   if (slot.slot_tier === "addon") return "Required add-on view";
   return `Required primary view · ${Math.min(requiredComplete + 1, requiredTotal)} of ${requiredTotal}`;
+}
+
+function wizardSlotFromDef(s: VieProtocolSlotDef): WizardSlot {
+  return {
+    slug: s.slug,
+    label: s.label,
+    required: s.required,
+    slot_tier: s.slot_tier,
+    suggested_region: s.suggested_region,
+    instruction: s.instruction,
+    capture_distance_hint: s.capture_distance_hint,
+    framing: s.framing,
+    suggested_timing: s.suggested_timing,
+  };
 }
 
 function groupSlots(slots: WizardSlot[]) {
@@ -155,18 +180,15 @@ export function VieCaptureWizard({
   const protocol = useMemo(() => getVieProtocol(templateSlug), [templateSlug]);
   const slots = useMemo(
     (): WizardSlot[] =>
-      (protocol?.slots ?? []).map((s: VieProtocolSlotDef) => ({
-        slug: s.slug,
-        label: s.label,
-        required: s.required,
-        slot_tier: s.slot_tier,
-        suggested_region: s.suggested_region,
-        instruction: s.instruction,
-      })),
+      (protocol?.slots ?? []).map((s: VieProtocolSlotDef) => wizardSlotFromDef(s)),
     [protocol]
   );
 
   const grouped = useMemo(() => groupSlots(slots), [slots]);
+  const surgeryPhaseGroups = useMemo(
+    () => (templateSlug === "surgery_day" && protocol ? groupSurgeryDaySlotsByPhase(protocol.slots) : []),
+    [protocol, templateSlug]
+  );
   const meta = useMemo(() => parseProgressMeta(progress), [progress]);
   const computedNext = useMemo(() => nextRecommendedSlotSlug(slots, progress), [slots, progress]);
   const pendingSlotSlug = Object.keys(meta.vie_pending ?? {})[0] ?? null;
@@ -399,6 +421,10 @@ export function VieCaptureWizard({
           <p className="mt-1 text-center text-xs text-slate-400">
             {slotCaption(currentSlot, requiredComplete, requiredTotal)}
           </p>
+          <p className="mt-1 text-center text-[0.65rem] text-slate-500">
+            {currentSlot.framing === "close_up" ? "Close-up" : "Overview"} · {currentSlot.capture_distance_hint}
+            {currentSlot.suggested_timing ? ` · ${currentSlot.suggested_timing}` : null}
+          </p>
           <div className="mt-4">
             <VieCaptureGuideOverlay guide={captureGuide} />
           </div>
@@ -419,9 +445,33 @@ export function VieCaptureWizard({
       ) : null}
 
       <div className="space-y-3">
-        <SlotChecklist title="Required primary views" slots={grouped.primary} progress={progress} currentSlug={currentSlug} />
-        <SlotChecklist title="Required add-on views" slots={grouped.addon} progress={progress} currentSlug={currentSlug} />
-        <SlotChecklist title="Optional views" slots={grouped.optional} progress={progress} currentSlug={currentSlug} />
+        {surgeryPhaseGroups.length > 0 ? (
+          surgeryPhaseGroups.map((phaseGroup) => (
+            <SlotChecklist
+              key={phaseGroup.phase}
+              title={phaseGroup.label}
+              slots={phaseGroup.slots.map((s) => wizardSlotFromDef(s))}
+              progress={progress}
+              currentSlug={currentSlug}
+            />
+          ))
+        ) : (
+          <>
+            <SlotChecklist
+              title="Required primary views"
+              slots={grouped.primary}
+              progress={progress}
+              currentSlug={currentSlug}
+            />
+            <SlotChecklist
+              title="Required add-on views (donor)"
+              slots={grouped.addon}
+              progress={progress}
+              currentSlug={currentSlug}
+            />
+            <SlotChecklist title="Optional views" slots={grouped.optional} progress={progress} currentSlug={currentSlug} />
+          </>
+        )}
       </div>
 
       {!awaitingReview ? (

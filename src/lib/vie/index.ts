@@ -9,8 +9,11 @@ export type {
   VieProtocolCompleteness,
   VieProtocolDef,
   VieProtocolSlug,
+  VieProtocolPickerCategory,
   VieProtocolSlotDef,
   VieSlotTier,
+  VieSurgeryPhase,
+  VieSurgeryPhaseCompleteness,
 } from "./vieProtocolTypes";
 
 export {
@@ -30,16 +33,25 @@ export {
   VIE_PROTOCOL_CATALOG,
   VIE_PROTOCOL_SLUGS,
   countRequiredProtocolSlots,
+  getProtocolsByPickerCategory,
   getVieProtocol,
   getVieProtocolOrThrow,
+  groupSurgeryDaySlotsByPhase,
   isDonorDocumentationSlot,
   isVieProtocolSlug,
   vieProtocolCatalogForDbSeed,
 } from "./vieProtocolCatalog";
 
 export {
+  VIE_PROTOCOL_PICKER_GROUPS,
+  VIE_SURGERY_PHASE_GROUPS,
+} from "./vieProtocolTypes";
+
+export {
   computeConsultationCompleteness,
   computeDonorDocumentationCompleteness,
+  computeFullHeadSeriesCompleteness,
+  computeSurgeryPhaseCompleteness,
   computeSurgicalDocumentationCompleteness,
   enrichPatientImagingCompleteness,
   formatDomainCompletenessDisplay,

@@ -115,6 +115,21 @@ async function loadTemplateSlots(
   client: SupabaseClient
 ): Promise<{ name: string; slots: ProtocolSlotDef[] }> {
   const catalog = getVieProtocol(templateSlug);
+
+  // TypeScript catalog is canonical for VIE protocols (Phase 3 expanded catalog).
+  if (catalog) {
+    return {
+      name: catalog.name,
+      slots: catalog.slots.map((s) => ({
+        slug: s.slug,
+        label: s.label,
+        required: s.required,
+        suggested_region: s.suggested_region,
+        instruction: s.instruction,
+      })),
+    };
+  }
+
   const { data, error } = await client
     .from("fi_imaging_protocol_templates")
     .select("name, slots")
@@ -127,21 +142,8 @@ async function loadTemplateSlots(
   if (data) {
     const r = data as Record<string, unknown>;
     return {
-      name: String(r.name ?? catalog?.name ?? templateSlug),
+      name: String(r.name ?? templateSlug),
       slots: parseProtocolSlots(r.slots),
-    };
-  }
-
-  if (catalog) {
-    return {
-      name: catalog.name,
-      slots: catalog.slots.map((s) => ({
-        slug: s.slug,
-        label: s.label,
-        required: s.required,
-        suggested_region: s.suggested_region,
-        instruction: s.instruction,
-      })),
     };
   }
 

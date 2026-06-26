@@ -7,8 +7,21 @@ import { cn } from "@/lib/utils";
 import { createImagingProtocolSessionAction } from "@/lib/actions/fi-imaging-actions";
 import { PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
 import { VIE_PROTOCOL_CATALOG } from "@/src/lib/vie/vieProtocolCatalog";
+import { VIE_PROTOCOL_PICKER_GROUPS } from "@/src/lib/vie/vieProtocolTypes";
 import type { VieProtocolSlug } from "@/src/lib/vie/vieProtocolTypes";
 import { VieCaptureWizard } from "./VieCaptureWizard";
+
+function protocolSlotSummary(slug: VieProtocolSlug): string {
+  const p = VIE_PROTOCOL_CATALOG.find((x) => x.slug === slug);
+  if (!p) return "";
+  const required = p.slots.filter((s) => s.required).length;
+  const addon = p.slots.filter((s) => s.slot_tier === "addon" && s.required).length;
+  const optional = p.slots.filter((s) => !s.required).length;
+  const parts = [`${required} required`];
+  if (addon > 0) parts.push(`${addon} donor add-on${addon === 1 ? "" : "s"}`);
+  if (optional > 0) parts.push(`${optional} optional`);
+  return parts.join(" · ");
+}
 
 export function StartCaptureProtocolButton({
   tenantId,
@@ -113,27 +126,35 @@ export function StartCaptureProtocolButton({
                   </button>
                 </div>
 
-                <ul className="mt-4 space-y-2">
-                  {VIE_PROTOCOL_CATALOG.map((p) => (
-                    <li key={p.slug}>
-                      <button
-                        type="button"
-                        disabled={pending}
-                        onClick={() => startProtocol(p.slug)}
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-left hover:border-cyan-400 hover:bg-cyan-50/50 disabled:opacity-50"
-                      >
-                        <span className="block text-sm font-semibold text-gray-900">{p.name}</span>
-                        <span className="mt-0.5 block text-xs text-gray-600">
-                          {p.slots.filter((s) => s.required).length} required
-                          {p.slots.some((s) => s.slot_tier === "addon") ? " incl. add-ons" : ""}
-                          {p.slots.some((s) => !s.required) ? ` · ${p.slots.filter((s) => !s.required).length} optional` : ""}
-                          {" · "}
-                          {p.description}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-4 space-y-5">
+                  {VIE_PROTOCOL_PICKER_GROUPS.map((group) => {
+                    const protocols = VIE_PROTOCOL_CATALOG.filter((p) => p.picker_category === group.category);
+                    if (protocols.length === 0) return null;
+                    return (
+                      <section key={group.category}>
+                        <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-800">{group.label}</h3>
+                        <p className="mt-0.5 text-[0.65rem] text-gray-500">{group.hint}</p>
+                        <ul className="mt-2 space-y-2">
+                          {protocols.map((p) => (
+                            <li key={p.slug}>
+                              <button
+                                type="button"
+                                disabled={pending}
+                                onClick={() => startProtocol(p.slug)}
+                                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-left hover:border-cyan-400 hover:bg-cyan-50/50 disabled:opacity-50"
+                              >
+                                <span className="block text-sm font-semibold text-gray-900">{p.name}</span>
+                                <span className="mt-0.5 block text-xs text-gray-600">
+                                  {protocolSlotSummary(p.slug)} · {p.description}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    );
+                  })}
+                </div>
 
                 {pending ? <p className="mt-3 text-sm text-gray-600">Starting protocol…</p> : null}
                 {err ? (

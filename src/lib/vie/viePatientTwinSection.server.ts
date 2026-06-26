@@ -57,7 +57,8 @@ export async function loadPatientTwinVieSection(
     };
   });
 
-  const latestRow = latest_intelligence[0];
+  const latestAccepted = latest_intelligence.find((row) => row.acceptance_status === "accepted");
+  const latestRow = latestAccepted ?? latest_intelligence[0];
   if (latestRow) {
     imaging_completeness = {
       ...imaging_completeness,

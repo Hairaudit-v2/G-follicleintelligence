@@ -41,8 +41,9 @@ export function PatientImagingCompletenessSummary({
       </div>
       <div className="mt-2 grid gap-1 text-[0.65rem]">
         <p className={textClass}>Consultation: {completeness.consultation.display}</p>
-        <p className={textClass}>Surgical docs: {completeness.surgical_documentation.display}</p>
+        <p className={textClass}>Full head series: {completeness.full_head_series.display}</p>
         <p className={textClass}>Donor docs: {completeness.donor_documentation.display}</p>
+        <p className={textClass}>Surgical docs: {completeness.surgical_documentation.display}</p>
       </div>
     </div>
   );
