@@ -80,6 +80,16 @@ export type { VieFutureArchitecture } from "./vieFutureArchitecture";
 export { loadPatientTwinVieSection } from "./viePatientTwinSection.server";
 export type { PatientTwinVieSection, VieLatestIntelligenceRow } from "./viePatientTwinSection.server";
 
+export {
+  VIE_PLATFORM_CHANGELOG_IDS,
+  VIE_PLATFORM_LATEST_RELEASE_DATE,
+  VIE_PLATFORM_PHASES,
+  VIE_PLATFORM_PROGRESS,
+  buildViePlatformProgressModule,
+  listViePhasesByStatus,
+} from "./viePlatformProgress";
+export type { ViePlatformPhase, ViePlatformPhaseStatus, ViePlatformProgress } from "./viePlatformProgress";
+
 export type {
   VieComparisonCategory,
   VieComparisonConfidenceBand,

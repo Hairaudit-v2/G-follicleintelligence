@@ -4,6 +4,7 @@
  */
 
 import { buildGoogleCalendarPlatformProgressModule } from "@/src/lib/googleCalendar/googleCalendarIntegrationProgress";
+import { buildViePlatformProgressModule } from "@/src/lib/vie/viePlatformProgress";
 
 export const PLATFORM_PROGRESS_STATUSES = [
   "Live",
@@ -154,6 +155,12 @@ export const PLATFORM_PROGRESS_HOMEPAGE_FEATURED_MODULE_IDS = [
 
 /** Latest infrastructure deployments for internal FI Admin dashboard. */
 export const PLATFORM_RECENT_RELEASES: PlatformRecentRelease[] = [
+  {
+    id: "2026-06-26-vie-5-longitudinal-comparison",
+    title: "VIE-5 — Longitudinal Comparison Engine",
+    module: "Visual Intelligence Engine (VIE)",
+    date: "2026-06-26",
+  },
   {
     id: "2026-06-26-calendar-os-gc6b",
     title: "CalendarOS GC-6B — Google inbound calendar scope admin",
@@ -323,11 +330,13 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
     id: "imaging-os",
     name: "ImagingOS",
     completionPercent: 80,
-    stage: "Live AI execution framework",
-    description: "Template-driven photography sessions, slot progress, AI execution framework, and surgical-domain progression assessments.",
+    stage: "Live AI execution framework · VIE substrate",
+    description:
+      "Template-driven photography sessions, slot progress, AI execution framework, and surgical-domain progression assessments. Hosts the Visual Intelligence Engine (VIE) capture and comparison substrate.",
     status: "Pilot Ready",
     learnMoreHref: "/platform/imaging-os",
   },
+  buildViePlatformProgressModule(),
   {
     id: "patient-os",
     name: "PatientOS",
@@ -397,6 +406,15 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-26-vie-5-longitudinal-comparison",
+    date: "2026-06-26",
+    tag: "vie",
+    title: "VIE-5 — Longitudinal Comparison Engine completed",
+    summary:
+      "Visual Intelligence Engine Phase 5: accepted protocol captures now generate metadata-driven before/after comparison pairs and patient progression timelines — baseline vs follow-up, pre/post-op, donor extraction, graft tray, and repair review categories with confidence scoring, review accept/dismiss, ImagingOS Compare tab integration, Patient Twin readiness summary, and SurgeryOS operative pair status. Deterministic heuristics only; same-angle AI alignment deferred to VIE-6.",
+    modules: ["Visual Intelligence Engine (VIE)", "ImagingOS", "SurgeryOS", "Patient Twin"],
+  },
   {
     id: "2026-06-26-calendar-os-gc-csp",
     date: "2026-06-26",
