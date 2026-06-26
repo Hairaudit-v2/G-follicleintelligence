@@ -3,7 +3,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { motion } from "framer-motion";
-import { Clock, DoorOpen, GripVertical, Loader2, UserRound } from "lucide-react";
+import { Clock, DoorOpen, GripVertical, Loader2, UserRound, Video } from "lucide-react";
 import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { bookingStatusLabel } from "@/src/lib/bookings/operatorBookingLabels";
 import { isBookingCancelled } from "@/src/lib/bookings";
 import type { FiBookingRow } from "@/src/lib/bookings/types";
+import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
 import { parseAppointmentInvoicePreview } from "@/src/lib/bookings/appointmentInvoicePreview";
 import {
   addUtcMinutesToIso,
@@ -54,6 +55,11 @@ export type AppointmentCardData = {
   avatarUrl?: string | null;
   /** Hex from `fi_services` for calendar chip tint. */
   procedureCatalogColor?: string | null;
+  /** CalendarOS GC-5 — subtle source badges on grid chips. */
+  calendarOsSourceLabel?: string | null;
+  calendarOsProvider?: "google" | "fi" | null;
+  googleMeetUrl?: string | null;
+  calendarOsEventTypeLabel?: string | null;
 };
 
 export type AppointmentCardLayout = {
@@ -156,11 +162,17 @@ export function appointmentCardDataFromBooking(
     procedureCatalogName?: string | null;
     procedureCatalogHex?: string | null;
     suggestedPrice?: number | null;
+    calendarOsSourceLabel?: string | null;
+    calendarOsProvider?: "google" | "fi" | null;
+    googleMeetUrl?: string | null;
+    calendarOsEventTypeLabel?: string | null;
   }
 ): AppointmentCardData {
   const invoice = parseAppointmentInvoicePreview(booking);
   const meta = booking.metadata ?? {};
-  const isVirtual = Boolean(meta.is_virtual ?? meta.virtual ?? meta.zoom);
+  const isVirtual = Boolean(
+    meta.is_virtual ?? meta.virtual ?? meta.zoom ?? (typeof meta.google_meet_url === "string" && meta.google_meet_url)
+  );
 
   return {
     id: booking.id,
@@ -176,8 +188,18 @@ export function appointmentCardDataFromBooking(
     status: booking.booking_status,
     isVirtual,
     avatarUrl: typeof meta.avatar_url === "string" ? meta.avatar_url : null,
-    procedureLabel: display?.procedureCatalogName?.trim() || undefined,
+    procedureLabel:
+      display?.calendarOsEventTypeLabel?.trim() ||
+      display?.procedureCatalogName?.trim() ||
+      undefined,
     procedureCatalogColor: display?.procedureCatalogHex?.trim() || null,
+    calendarOsSourceLabel: display?.calendarOsSourceLabel ?? null,
+    calendarOsProvider: display?.calendarOsProvider ?? null,
+    googleMeetUrl:
+      display?.googleMeetUrl?.trim() ||
+      (typeof meta.google_meet_url === "string" ? meta.google_meet_url.trim() : null) ||
+      null,
+    calendarOsEventTypeLabel: display?.calendarOsEventTypeLabel ?? null,
   };
 }
 
@@ -295,6 +317,50 @@ function StatusBadge({ status, compact }: { status: string; compact?: boolean })
     >
       {bookingStatusLabel(status)}
     </Badge>
+  );
+}
+
+function CalendarOsSourceBadge({
+  label,
+  compact,
+}: {
+  label: string;
+  compact?: boolean;
+}) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "shrink-0 border-sky-500/35 bg-sky-950/40 font-medium text-sky-100",
+        compact ? "px-1.5 py-0 text-[9px]" : "px-2 py-0.5 text-[10px]"
+      )}
+    >
+      {label}
+    </Badge>
+  );
+}
+
+function GoogleMeetBadge({
+  meetUrl,
+  compact,
+}: {
+  meetUrl: string;
+  compact?: boolean;
+}) {
+  return (
+    <a
+      href={meetUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-0.5 rounded-md border border-emerald-500/35 bg-emerald-950/40 font-medium text-emerald-100 transition hover:bg-emerald-900/50",
+        compact ? "px-1.5 py-0 text-[9px]" : "px-2 py-0.5 text-[10px]"
+      )}
+    >
+      <Video className={cn(compact ? "h-2.5 w-2.5" : "h-3 w-3")} aria-hidden />
+      Meet
+    </a>
   );
 }
 
@@ -573,12 +639,30 @@ function AppointmentCardInner({
 
           {/* Price + status badges */}
           {showFooter ? (
-            <div className="mt-1.5 flex items-center justify-between gap-2">
-              {priceLabel ? <PriceBadge label={priceLabel} compact={Boolean(layout || isMedium)} /> : <span />}
+            <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-1">
+                {priceLabel ? <PriceBadge label={priceLabel} compact={Boolean(layout || isMedium)} /> : null}
+                {appointment.calendarOsSourceLabel ? (
+                  <CalendarOsSourceBadge label={appointment.calendarOsSourceLabel} compact={Boolean(layout || isMedium)} />
+                ) : null}
+                {appointment.googleMeetUrl ? (
+                  <GoogleMeetBadge meetUrl={appointment.googleMeetUrl} compact={Boolean(layout || isMedium)} />
+                ) : null}
+              </div>
               {layout || isMedium ? (
                 <StatusBadge status={appointment.status} compact />
               ) : !priceLabel ? (
                 <StatusBadge status={appointment.status} />
+              ) : null}
+            </div>
+          ) : null}
+          {!showFooter && (appointment.calendarOsSourceLabel || appointment.googleMeetUrl) ? (
+            <div className="mt-1 flex flex-wrap items-center gap-1">
+              {appointment.calendarOsSourceLabel ? (
+                <CalendarOsSourceBadge label={appointment.calendarOsSourceLabel} compact />
+              ) : null}
+              {appointment.googleMeetUrl ? (
+                <GoogleMeetBadge meetUrl={appointment.googleMeetUrl} compact />
               ) : null}
             </div>
           ) : null}
@@ -627,6 +711,10 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
     procedureCatalogName?: string | null;
     procedureCatalogHex?: string | null;
     suggestedPrice?: number | null;
+    calendarOsSourceLabel?: string | null;
+    calendarOsProvider?: "google" | "fi" | null;
+    googleMeetUrl?: string | null;
+    calendarOsEventTypeLabel?: string | null;
   };
   layout?: AppointmentCardLayout;
   draggable?: boolean;
@@ -645,13 +733,14 @@ export const AppointmentCardFromBooking = React.memo(function AppointmentCardFro
   const appointment = appointmentCardDataFromBooking(booking, display);
   const cancelled = isBookingCancelled(booking);
   const dimTerminal = cancelled || booking.booking_status === "completed";
+  const readOnlyCalendarOs = isCalendarOsEventRow(booking);
 
   return (
     <AppointmentCard
       appointment={appointment}
       layout={layout}
-      draggable={draggable && !dimTerminal}
-      resizable={resizable && !dimTerminal}
+      draggable={draggable && !dimTerminal && !readOnlyCalendarOs}
+      resizable={resizable && !dimTerminal && !readOnlyCalendarOs}
       onResizeEnd={onResizeEnd}
       onClick={onClick}
       className={className}

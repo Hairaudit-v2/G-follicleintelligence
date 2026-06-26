@@ -15,6 +15,7 @@ import { normalizeCalendarTimezone } from "@/src/lib/calendar/calendarTimezone";
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import { ClinicalStaffingStatusCard } from "@/src/components/fi/workforce/ClinicalStaffingStatusCard";
 import type { ClinicalStaffingSummaryDto } from "@/src/lib/workforce-os/clinicalStaffingSummary.types";
+import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
 
 function clinicName(clinics: CrmShellClinicOption[], row: FiBookingRow): string {
   if (row.clinic_id) {
@@ -116,6 +117,12 @@ export function BookingCalendarDrawer({
   patientContactPhone,
   clinicalStaffing,
   onBookingUpdated,
+  calendarOsSourceLabel,
+  googleMeetUrl,
+  calendarOsCalendarId,
+  calendarOsEventTypeLabel,
+  calendarOsExternalEventId,
+  calendarOsStatus,
 }: {
   tenantId: string;
   booking: FiBookingRow | null;
@@ -140,6 +147,12 @@ export function BookingCalendarDrawer({
   patientContactPhone?: string | null;
   clinicalStaffing?: ClinicalStaffingSummaryDto | null;
   onBookingUpdated?: (b: FiBookingRow) => void;
+  calendarOsSourceLabel?: string | null;
+  googleMeetUrl?: string | null;
+  calendarOsCalendarId?: string | null;
+  calendarOsEventTypeLabel?: string | null;
+  calendarOsExternalEventId?: string | null;
+  calendarOsStatus?: string | null;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -163,6 +176,7 @@ export function BookingCalendarDrawer({
   if (!booking) return null;
 
   const row = booking;
+  const calendarOsEvent = isCalendarOsEventRow(row);
 
   const cancelled = isBookingCancelled(row);
   const completed = row.booking_status === "completed";
@@ -180,8 +194,12 @@ export function BookingCalendarDrawer({
   const providerLabel = assignment.summaryLine;
   const clinicLabel = clinicName(clinics, row);
   const roomLabel = row.location?.trim() || "—";
-  const typeLabel = procedureLabel?.trim() || humanizeBookingType(row.booking_type);
+  const typeLabel =
+    calendarOsEventTypeLabel?.trim() || procedureLabel?.trim() || humanizeBookingType(row.booking_type);
   const headerName = patientSummary?.trim() || row.title?.trim() || typeLabel;
+  const locationLabel = row.location?.trim() || "—";
+  const sourceLabel = calendarOsSourceLabel?.trim() || "—";
+  const eventStatusLabel = calendarOsStatus?.trim() || row.booking_status;
 
   async function onComplete() {
     setBusy(true);
@@ -307,6 +325,13 @@ export function BookingCalendarDrawer({
             </header>
 
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+              {calendarOsEvent ? (
+                <p className="mb-3 rounded-md border border-cyan-500/20 bg-cyan-950/30 px-2.5 py-2 text-[11px] leading-snug text-cyan-100/90">
+                  CalendarOS event — read-only in this phase. Edit in Google Calendar or the CalendarOS test panel.
+                </p>
+              ) : null}
+
+              {!calendarOsEvent ? (
               <div className="grid grid-cols-2 gap-2">
                 {row.patient_id ? (
                   <Link href={`/fi-admin/${tenantId}/patients/${row.patient_id}`} className={osActionClass}>
@@ -376,12 +401,64 @@ export function BookingCalendarDrawer({
                   Cancel booking
                 </button>
               </div>
+              ) : null}
 
               <dl className="mt-4 space-y-2.5 border-t border-white/[0.06] pt-3 text-xs">
+                {calendarOsEvent ? (
+                  <>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Source</dt>
+                      <dd className="min-w-0 text-slate-200">{sourceLabel}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Event type</dt>
+                      <dd className="min-w-0 text-slate-200">{typeLabel}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Location</dt>
+                      <dd className="min-w-0 text-slate-200">{locationLabel}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Status</dt>
+                      <dd className="min-w-0 text-slate-200">{eventStatusLabel}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Calendar id</dt>
+                      <dd className="min-w-0 break-all font-mono text-[11px] text-slate-300">
+                        {calendarOsCalendarId?.trim() || "—"}
+                      </dd>
+                    </div>
+                    {googleMeetUrl?.trim() ? (
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 text-slate-500">Google Meet</dt>
+                        <dd className="min-w-0 break-all">
+                          <a
+                            href={googleMeetUrl.trim()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-cyan-300 hover:underline"
+                          >
+                            Join meeting
+                          </a>
+                        </dd>
+                      </div>
+                    ) : null}
+                    {calendarOsExternalEventId?.trim() ? (
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 text-slate-500">External id</dt>
+                        <dd className="min-w-0 break-all font-mono text-[10px] text-slate-500" title="Diagnostic only">
+                          {shortId(calendarOsExternalEventId.trim())}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
                 <div className="flex gap-2">
                   <dt className="w-24 shrink-0 text-slate-500">Clinic</dt>
-                  <dd className="min-w-0 text-slate-200">{clinicLabel}</dd>
+                  <dd className="min-w-0 text-slate-200">{calendarOsEvent ? "—" : clinicLabel}</dd>
                 </div>
+                {!calendarOsEvent ? (
+                <>
                 <div className="flex gap-2">
                   <dt className="w-24 shrink-0 text-slate-500">Provider</dt>
                   <dd className="min-w-0 text-slate-200">{providerLabel}</dd>
@@ -402,6 +479,8 @@ export function BookingCalendarDrawer({
                   <dt className="w-24 shrink-0 text-slate-500">Notes</dt>
                   <dd className="min-w-0 whitespace-pre-wrap text-slate-300">{row.description?.trim() || "—"}</dd>
                 </div>
+                </>
+                ) : null}
                 {row.patient_id ? (
                   <div className="flex gap-2">
                     <dt className="w-24 shrink-0 text-slate-500">Patient id</dt>
@@ -439,7 +518,7 @@ export function BookingCalendarDrawer({
                   </div>
                 ) : null}
               </dl>
-              {clinicalStaffing ? (
+              {clinicalStaffing && !calendarOsEvent ? (
                 <div className="mt-4">
                   <ClinicalStaffingStatusCard
                     tenantId={tenantId}
@@ -478,6 +557,64 @@ export function BookingCalendarDrawer({
             </div>
 
             <div className="space-y-4 p-4 text-sm text-gray-800">
+              {calendarOsEvent ? (
+                <>
+                  <p className="rounded border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+                    CalendarOS event — read-only display. No edits from the calendar UI in this phase.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <BookingTypeBadge type={row.booking_type} />
+                    <BookingStatusBadge status={row.booking_status} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Title</p>
+                    <p className="mt-1 text-base font-medium text-gray-900">{headerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">When</p>
+                    <p className="mt-1">{range}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Event type</p>
+                    <p className="mt-1">{typeLabel}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Location</p>
+                    <p className="mt-1">{locationLabel}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Source</p>
+                    <p className="mt-1">{sourceLabel}</p>
+                  </div>
+                  {googleMeetUrl?.trim() ? (
+                    <div>
+                      <p className="text-xs font-medium uppercase text-gray-500">Google Meet</p>
+                      <p className="mt-1">
+                        <a href={googleMeetUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          Join meeting
+                        </a>
+                      </p>
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Linked</p>
+                    <div className="mt-1">{anchorSummary(tenantId, row, variant)}</div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-gray-500">Calendar id</p>
+                    <p className="mt-1 font-mono text-xs text-gray-700">{calendarOsCalendarId?.trim() || "—"}</p>
+                  </div>
+                  {calendarOsExternalEventId?.trim() ? (
+                    <div>
+                      <p className="text-xs font-medium uppercase text-gray-500">External id</p>
+                      <p className="mt-1 font-mono text-[11px] text-gray-500" title="Diagnostic only">
+                        {shortId(calendarOsExternalEventId.trim())}
+                      </p>
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <>
               <div className="flex flex-wrap gap-2">
                 <BookingTypeBadge type={row.booking_type} />
                 <BookingStatusBadge status={row.booking_status} />
@@ -560,6 +697,8 @@ export function BookingCalendarDrawer({
                 )}
               </div>
               {feedback ? <p className="text-sm text-red-600">{feedback}</p> : null}
+                </>
+              )}
             </div>
           </>
         )}

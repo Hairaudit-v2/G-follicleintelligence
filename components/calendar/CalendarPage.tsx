@@ -581,6 +581,12 @@ function CalendarPageImpl({
         patientContactEmail={drawer ? data.bookingDisplay[drawer.id]?.patientEmail ?? null : null}
         patientContactPhone={drawer ? data.bookingDisplay[drawer.id]?.patientPhone ?? null : null}
         clinicalStaffing={drawer ? data.bookingDisplay[drawer.id]?.clinicalStaffing ?? null : null}
+        calendarOsSourceLabel={drawer ? data.bookingDisplay[drawer.id]?.calendarOsSourceLabel ?? null : null}
+        googleMeetUrl={drawer ? data.bookingDisplay[drawer.id]?.googleMeetUrl ?? null : null}
+        calendarOsCalendarId={drawer ? data.bookingDisplay[drawer.id]?.calendarOsCalendarId ?? null : null}
+        calendarOsEventTypeLabel={drawer ? data.bookingDisplay[drawer.id]?.calendarOsEventTypeLabel ?? null : null}
+        calendarOsExternalEventId={drawer ? data.bookingDisplay[drawer.id]?.calendarOsExternalEventId ?? null : null}
+        calendarOsStatus={drawer ? data.bookingDisplay[drawer.id]?.calendarOsStatus ?? null : null}
         onBookingUpdated={(b) => {
           upsertBooking(b);
           setDrawer(b);

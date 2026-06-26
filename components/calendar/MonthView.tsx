@@ -24,6 +24,7 @@ import {
   appointmentCardDataFromBooking,
   type AppointmentCardData,
 } from "@/components/calendar/AppointmentCard";
+import { isCalendarOsEventRow } from "@/src/lib/calendar/calendarOsEventsCore";
 import { CalendarToastProvider, useCalendarToast } from "@/components/calendar/CalendarToast";
 import { parseWaitlistDragId } from "@/components/calendar/SidebarAgenda";
 import { snapCalendarMinutes } from "@/lib/calendar/dndMath";
@@ -322,6 +323,7 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
 }) {
   const meta = booking.metadata ?? {};
   const isVirtual = Boolean(meta.is_virtual ?? meta.virtual ?? meta.zoom);
+  const readOnlyCalendarOs = isCalendarOsEventRow(booking);
   const appointmentStyle = getAppointmentStyle({
     procedureType: booking.booking_type,
     status: booking.booking_status,
@@ -332,7 +334,7 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: booking.id,
-    disabled: !draggable || isPendingSave,
+    disabled: !draggable || isPendingSave || readOnlyCalendarOs,
     data: {
       type: "appointment",
       appointment: appointmentCardDataFromBooking(booking, { anchorLabel: label }),
@@ -344,7 +346,7 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
       ref={setNodeRef}
       type="button"
       aria-busy={isPendingSave || undefined}
-      {...(draggable && !isPendingSave ? { ...listeners, ...attributes } : {})}
+      {...(draggable && !isPendingSave && !readOnlyCalendarOs ? { ...listeners, ...attributes } : {})}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -371,6 +373,11 @@ const MonthAppointmentPill = memo(function MonthAppointmentPill({
         <span className={cn("ml-1 text-[10px] font-semibold text-slate-200", appointmentStyle.textColor)}>
           {label}
         </span>
+        {readOnlyCalendarOs && meta.calendar_os_source_label ? (
+          <span className="ml-1 shrink-0 rounded border border-sky-500/30 px-1 text-[8px] font-semibold uppercase tracking-wide text-sky-300">
+            {String(meta.calendar_os_source_label).includes("Google") ? "GCal" : "FI"}
+          </span>
+        ) : null}
       </span>
     </button>
   );

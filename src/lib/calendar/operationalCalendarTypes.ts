@@ -30,6 +30,15 @@ export type OperationalCalendarBookingDisplay = {
   resourceTeamLine?: string | null;
   /** WorkforceOS Phase 2D — staffing readiness badge data. */
   clinicalStaffing?: ClinicalStaffingSummaryDto | null;
+  /** CalendarOS GC-5 — mirrored `fi_calendar_events` source label. */
+  calendarOsSourceLabel?: string | null;
+  calendarOsProvider?: "google" | "fi" | null;
+  googleMeetUrl?: string | null;
+  calendarOsCalendarId?: string | null;
+  calendarOsEventTypeLabel?: string | null;
+  /** Diagnostic-only — shown in read-only event drawer, not on grid chips. */
+  calendarOsExternalEventId?: string | null;
+  calendarOsStatus?: string | null;
 };
 
 export type OperationalCalendarResourceColumn = {

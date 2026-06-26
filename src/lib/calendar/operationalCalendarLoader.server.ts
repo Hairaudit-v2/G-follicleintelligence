@@ -62,6 +62,11 @@ import {
 } from "@/src/lib/calendar/bookingResourceRequirements.server";
 import { logOperationalCalendarServerTiming } from "@/src/lib/calendar/calendarPerfDev";
 import { operationalCalendarSkipsHeavyEnrichment } from "@/src/lib/calendar/operationalCalendarEnrichmentPolicy";
+import {
+  loadFiCalendarEventsForOverlap,
+  mapFiCalendarEventsToOperationalCalendar,
+} from "@/src/lib/calendar/calendarOsEvents.server";
+import { mapFiCalendarEventOverlapRowToBookingRow } from "@/src/lib/calendar/calendarOsEventsCore";
 
 type ClinicalLite = {
   norwood_scale: string | null;
@@ -524,7 +529,7 @@ export async function loadOperationalCalendarGridData(
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
   const tOverlapStart = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const [rawBookings, resources, services] = await Promise.all([
+  const [rawBookings, calendarOsEventRows, resources, services] = await Promise.all([
     loadBookingsForCalendarOverlap({
       tenantId: tid,
       rangeStartIso,
@@ -536,6 +541,12 @@ export async function loadOperationalCalendarGridData(
       clinicId: query.clinicId,
       roomId: query.roomId,
       includeCancelled: query.includeCancelled,
+      limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
+    }),
+    loadFiCalendarEventsForOverlap({
+      tenantId: tid,
+      rangeStartIso,
+      rangeEndIso,
       limit: CALENDAR_VIEW_BOOKINGS_LIMIT,
     }),
     loadTenantStaffAndResourcesCached(tid, query.resourceView, query.clinicId?.trim() || null),
@@ -559,7 +570,7 @@ export async function loadOperationalCalendarGridData(
         })
       : resources.resourceColumns;
 
-  const structured = applyStructuredFilters(
+  const structuredBookings = applyStructuredFilters(
     rawBookings,
     query,
     resources.staffUserByStaffId,
@@ -567,28 +578,47 @@ export async function loadOperationalCalendarGridData(
     resources.staffDirectory
   );
 
+  const calendarOsBookingCandidates = calendarOsEventRows
+    .map((row) => mapFiCalendarEventOverlapRowToBookingRow(row, query.calendarTimezone))
+    .filter((row): row is FiBookingRow => row != null);
+
   const monthSummaryMode = operationalCalendarSkipsHeavyEnrichment(query.view);
 
   const tEnrichStart = typeof performance !== "undefined" ? performance.now() : Date.now();
   const [displayMaps, clinicalMap, assignmentMap, clinicalStaffingByBooking] = await Promise.all([
-    loadBookingDisplayContextMaps(tid, structured),
+    loadBookingDisplayContextMaps(tid, [...structuredBookings, ...calendarOsBookingCandidates]),
     monthSummaryMode
       ? Promise.resolve(new Map<string, ClinicalLite>())
       : loadClinicalDetailsMap(
           tid,
-          structured.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()))
+          structuredBookings.map((b) => b.patient_id).filter((x): x is string => Boolean(x?.trim()))
         ),
     monthSummaryMode
       ? Promise.resolve(new Map<string, FiBookingResourceAssignmentRow[]>())
       : loadBookingResourceAssignmentsForBookings({
           tenantId: tid,
-          bookingIds: structured.map((b) => b.id),
+          bookingIds: structuredBookings.map((b) => b.id),
         }),
     monthSummaryMode
       ? Promise.resolve(new Map())
-      : loadClinicalStaffingSummariesForBookings(tid, structured, { syncExistingStaff: true }),
+      : loadClinicalStaffingSummariesForBookings(tid, structuredBookings, { syncExistingStaff: true }),
   ]);
   const tEnrichEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
+
+  const calendarOsMapped = mapFiCalendarEventsToOperationalCalendar(calendarOsEventRows, {
+    tenantId: tid,
+    calendarTimezone: query.calendarTimezone,
+    displayMaps,
+    services,
+  });
+  const structuredCalendarOs = applyStructuredFilters(
+    calendarOsMapped.bookings,
+    query,
+    resources.staffUserByStaffId,
+    resources.staffIdByUserId,
+    resources.staffDirectory
+  );
+  const structured = [...structuredBookings, ...structuredCalendarOs];
 
   const staffNameById: Record<string, string> = {};
   for (const s of resources.staffDirectory) {
@@ -596,7 +626,11 @@ export async function loadOperationalCalendarGridData(
   }
 
   const bookingDisplay: Record<string, OperationalCalendarBookingDisplay> = {};
-  for (const row of structured) {
+  for (const row of structuredCalendarOs) {
+    const d = calendarOsMapped.bookingDisplay[row.id];
+    if (d) bookingDisplay[row.id] = d;
+  }
+  for (const row of structuredBookings) {
     const startMs = Date.parse(row.start_at);
     const endMs = Date.parse(row.end_at);
     const durationMin =
@@ -690,6 +724,7 @@ export async function loadOperationalCalendarGridData(
     rangeStartIso,
     rangeEndIso,
     rawBookingCount: rawBookings.length,
+    rawCalendarOsEventCount: calendarOsEventRows.length,
     filteredBookingCount: structured.length,
     returnedBookingCount: bookings.length,
     monthSummaryMode,

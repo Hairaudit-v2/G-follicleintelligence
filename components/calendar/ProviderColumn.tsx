@@ -533,6 +533,10 @@ export function ProviderColumn({
                   procedureCatalogName: d?.procedureCatalogName,
                   procedureCatalogHex: d?.procedureCatalogHex,
                   suggestedPrice: d?.suggestedPrice,
+                  calendarOsSourceLabel: d?.calendarOsSourceLabel,
+                  calendarOsProvider: d?.calendarOsProvider,
+                  googleMeetUrl: d?.googleMeetUrl,
+                  calendarOsEventTypeLabel: d?.calendarOsEventTypeLabel,
                 }}
                 layout={layout}
                 draggable={draggable}
