@@ -8,6 +8,7 @@ import type { GoogleCalendarApiEvent } from "@/src/lib/onboarding-os/googleCalen
 import type {
   FiCalendarEvent,
   GoogleCalendarApiEventWithConference,
+  GoogleCalendarListEntry,
 } from "./googleCalendarTypes";
 
 const GOOGLE_OAUTH_SCOPES = [
@@ -323,4 +324,62 @@ export function buildDeletedFromProviderMetadata(
     deleted_at: deletedAt,
     sync_status: "deleted_external",
   };
+}
+
+export function parseGoogleCalendarListEntriesResponse(json: unknown): GoogleCalendarListEntry[] {
+  const body = json as { items?: GoogleCalendarListEntry[] };
+  return body.items ?? [];
+}
+
+export function resolveGoogleInboundCalendarSummary(entry: GoogleCalendarListEntry): string | null {
+  const summary = entry.summaryOverride?.trim() || entry.summary?.trim();
+  return summary || entry.id?.trim() || null;
+}
+
+export function buildGoogleInboundCalendarScopeMetadata(
+  entry: GoogleCalendarListEntry
+): Record<string, unknown> {
+  const metadata: Record<string, unknown> = {};
+  if (entry.accessRole?.trim()) metadata.accessRole = entry.accessRole.trim();
+  if (entry.backgroundColor?.trim()) metadata.backgroundColor = entry.backgroundColor.trim();
+  if (entry.foregroundColor?.trim()) metadata.foregroundColor = entry.foregroundColor.trim();
+  if (entry.selected !== undefined) metadata.selected = entry.selected;
+  if (entry.timeZone?.trim()) metadata.timeZone = entry.timeZone.trim();
+  if (entry.primary !== undefined) metadata.primary = entry.primary;
+  if (entry.description?.trim()) metadata.description = entry.description.trim();
+  if (entry.summaryOverride?.trim()) metadata.summaryOverride = entry.summaryOverride.trim();
+  return metadata;
+}
+
+/** Default inbound enablement for newly discovered Google calendars (GC-6A). */
+export function shouldEnableGoogleInboundCalendarByDefault(
+  calendar: GoogleCalendarListEntry,
+  googleAccountEmail: string | null | undefined
+): boolean {
+  if (calendar.primary) return true;
+
+  const summary = (calendar.summaryOverride ?? calendar.summary ?? "").trim();
+  const summaryLower = summary.toLowerCase();
+  const idLower = (calendar.id ?? "").trim().toLowerCase();
+  const emailLower = (googleAccountEmail ?? "").trim().toLowerCase();
+
+  if (summaryLower.includes("fi os")) return true;
+  if (summaryLower.includes("consultations")) return true;
+  if (summaryLower.includes("appointment")) return true;
+
+  if (emailLower) {
+    if (summaryLower === emailLower || summaryLower.includes(emailLower)) return true;
+    if (idLower === emailLower || idLower.includes(emailLower)) return true;
+  }
+
+  return false;
+}
+
+export function resolveGoogleInboundCalendarIsPrimary(
+  entry: GoogleCalendarListEntry,
+  defaultCalendarId: string
+): boolean {
+  const id = entry.id?.trim() ?? "";
+  const defaultId = defaultCalendarId.trim() || "primary";
+  return Boolean(entry.primary) || id === defaultId;
 }

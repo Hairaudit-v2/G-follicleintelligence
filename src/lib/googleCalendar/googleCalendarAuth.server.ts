@@ -14,6 +14,7 @@ import {
   computeTokenExpiresAt,
   isAccessTokenExpired,
 } from "./googleCalendarCore";
+import { seedGoogleInboundCalendarScopesFromCalendarList } from "./googleCalendarInboundSyncData.server";
 import {
   resolveGoogleCalendarOAuthStateSecret,
   signGoogleCalendarOAuthState,
@@ -371,7 +372,7 @@ export async function completeGoogleCalendarOAuth(
       opts.googleAccountEmail
     )) ?? null;
 
-  return storeGoogleCalendarCredentials(
+  const stored = await storeGoogleCalendarCredentials(
     {
       tenantId,
       calendarId,
@@ -382,6 +383,21 @@ export async function completeGoogleCalendarOAuth(
     },
     opts
   );
+
+  if (!stored.ok) return stored;
+
+  await seedGoogleInboundCalendarScopesFromCalendarList(
+    {
+      tenantId,
+      integrationId: stored.data!.integration.id,
+      googleAccountEmail,
+      accessToken: tokenResponse.access_token,
+      defaultCalendarId: calendarId,
+    },
+    opts
+  );
+
+  return stored;
 }
 
 /** Refresh Google Calendar access token using stored refresh token. */

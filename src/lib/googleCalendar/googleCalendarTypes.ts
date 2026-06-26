@@ -95,6 +95,33 @@ export type GoogleCalendarOAuthTokenResponse = {
   scope?: string;
 };
 
+/** Google Calendar API calendarList entry (subset used for GC-6A inbound scope seeding). */
+export type GoogleCalendarListEntry = {
+  id?: string;
+  summary?: string;
+  summaryOverride?: string;
+  description?: string;
+  primary?: boolean;
+  accessRole?: string;
+  backgroundColor?: string;
+  foregroundColor?: string;
+  selected?: boolean;
+  timeZone?: string;
+};
+
+export type GoogleInboundScopeSeedCounts = {
+  calendarsDiscovered: number;
+  inserted: number;
+  updated: number;
+  preservedEnabledState: number;
+  enabledByDefault: number;
+  disabledByDefault: number;
+};
+
+export type GoogleInboundScopeSeedResult =
+  | ({ ok: true } & GoogleInboundScopeSeedCounts)
+  | { ok: false; error: string };
+
 export type GoogleCalendarConferenceData = {
   createRequest?: {
     requestId: string;
