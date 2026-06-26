@@ -46,6 +46,7 @@ export async function saveCalendarSettingsAction(body: unknown): Promise<Calenda
     await upsertCalendarSettings({ tenantId: tid, clinicId: cid, document: validated.document });
 
     revalidatePath(`/fi-admin/${tid}/settings/calendar`);
+    revalidatePath(`/fi-admin/${tid}/configuration`);
     revalidatePath(`/fi-admin/${tid}/calendar`);
     return { ok: true };
   } catch (e) {
