@@ -26,6 +26,7 @@ import { PatientRevenueInvoicesPanel } from "@/src/components/fi-admin/revenue/P
 import type { PatientInvoiceSummary } from "@/src/lib/revenueOs/revenueInvoiceLoaders.server";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
 import { PatientOverviewTab } from "@/src/components/fi-admin/patients/PatientOverviewTab";
+import { derivePatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStatus";
 
 export function PatientDetailPageView({
   tenantId,
@@ -55,6 +56,16 @@ export function PatientDetailPageView({
 }) {
   const { profile } = initialPayload;
 
+  const journeyStatus = derivePatientJourneyStatus({
+    totalLeads: profile.summary.totalLeads,
+    consultations: initialPayload.consultations,
+    nextAppointment: initialPayload.nextAppointment,
+    treatmentPlanSummary: initialPayload.treatmentPlanSummary,
+    previousProcedures: initialPayload.previousProcedures,
+    upcomingBookings: profile.summary.upcomingBookings,
+    completedBookings: profile.summary.completedBookings,
+  });
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6 pb-24 md:pb-6">
       <PatientDetailBreadcrumbs tenantId={tenantId} patientName={initialPayload.displayName} />
@@ -65,6 +76,7 @@ export function PatientDetailPageView({
         data={profile}
         nextAppointment={initialPayload.nextAppointment}
         treatmentPlanSummary={initialPayload.treatmentPlanSummary}
+        journeyStatus={journeyStatus}
         canCapturePhotos={canCapturePatientPhotos}
       />
 
@@ -75,6 +87,7 @@ export function PatientDetailPageView({
         patientId={patientId}
         nextAppointment={initialPayload.nextAppointment}
         treatmentPlanSummary={initialPayload.treatmentPlanSummary}
+        journeyStatus={journeyStatus}
       />
 
       <Suspense fallback={null}>
@@ -95,6 +108,7 @@ export function PatientDetailPageView({
           patientId={patientId}
           payload={initialPayload}
           profile={profile}
+          journeyStatus={journeyStatus}
           operationalTodayYmd={operationalTodayYmd}
           initialPaymentRecords={initialPaymentRecords}
           canMutatePaymentRecords={canMutatePaymentRecords}

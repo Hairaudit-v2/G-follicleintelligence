@@ -33,7 +33,7 @@ export function PatientDetailTabNav({
 
   return (
     <div
-      className="flex flex-wrap gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm"
+      className="flex flex-wrap gap-1 overflow-x-auto rounded-xl border border-white/[0.07] bg-[#0c1220]/80 p-1 shadow-lg shadow-black/30"
       role="tablist"
       aria-label="Patient sections"
     >
@@ -45,8 +45,10 @@ export function PatientDetailTabNav({
             href={hrefFor(tab)}
             role="tab"
             aria-selected={active}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-              active ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50"
+            className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              active
+                ? "bg-white/[0.12] text-slate-100 shadow-sm"
+                : "text-slate-500 hover:bg-white/[0.06] hover:text-slate-300"
             }`}
           >
             {PATIENT_DETAIL_TAB_LABELS[tab]}

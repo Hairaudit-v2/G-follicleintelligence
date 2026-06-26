@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Brain, CreditCard, Users, Activity } from "lucide-react";
+import { CreditCard, Users, Activity } from "lucide-react";
 
 import type { PatientDetailPayload } from "@/src/lib/patients/patientDetailLoader";
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import type { PatientTimelineItem } from "@/src/lib/patients/timeline/patientTimelineTypes";
 import type { PaymentRecordRow } from "@/src/lib/payments/paymentRecordModel";
-import { formatClinicalScalesSummary } from "@/src/lib/patients/hairLossScales";
+import type { PatientJourneyStatus } from "@/src/lib/fiAdmin/patientJourneyStatus";
+import { PatientIntelligenceSummary } from "./PatientIntelligenceSummary";
 
 import { PatientBookNextAppointmentCard } from "@/src/components/fi/patients/shared/PatientBookNextAppointmentCard";
 import { PatientConsultationsCard } from "@/src/components/fi/patients/shared/PatientConsultationsCard";
@@ -16,22 +17,48 @@ import { PatientPersonDetailsCard } from "@/src/components/fi/patients/PatientPe
 import { PatientCasesCard } from "@/src/components/fi/patients/PatientCasesCard";
 import { PaymentRecordPanel } from "@/src/components/fi-admin/payments/PaymentRecordPanel";
 
-// ─── shared card shell ──────────────────────────────────────────────────────
+import {
+  pwsCard,
+  pwsCardFull,
+  pwsCardPad,
+  pwsLegacyCard,
+  pwsTitle,
+  pwsMeta,
+  pwsLabel,
+  pwsValue,
+  pwsDivider,
+  pwsEmpty,
+  pwsCta,
+} from "./patientWorkspaceStyles";
 
-function Card({ children, className }: { children: React.ReactNode; className?: string }) {
+// ─── Workspace card header ───────────────────────────────────────────────────
+
+function CardHeader({
+  icon,
+  title,
+  meta,
+  cta,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  meta?: string;
+  cta?: React.ReactNode;
+}) {
   return (
-    <section className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm ${className ?? ""}`}>
-      {children}
-    </section>
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        {icon && (
+          <div className="mb-1 flex items-center gap-1.5">
+            {icon}
+            <span className={pwsLabel}>{title}</span>
+          </div>
+        )}
+        {!icon && <h2 className={pwsTitle}>{title}</h2>}
+        {meta && <p className={pwsMeta}>{meta}</p>}
+      </div>
+      {cta}
+    </div>
   );
-}
-
-function CardTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-sm font-semibold text-gray-900">{children}</h2>;
-}
-
-function CardMeta({ children }: { children: React.ReactNode }) {
-  return <p className="mt-0.5 text-xs text-gray-500">{children}</p>;
 }
 
 // ─── Treatment plan card ─────────────────────────────────────────────────────
@@ -48,51 +75,48 @@ function TreatmentPlanCard({
   const latest = consultations[0] ?? null;
 
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <CardTitle>Treatment plan</CardTitle>
-          <CardMeta>Current clinical direction and consultation status</CardMeta>
-        </div>
-        <Link
-          href={`/fi-admin/${tenantId}/consultations/new`}
-          className="shrink-0 rounded border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100"
-        >
-          New consultation
-        </Link>
-      </div>
+    <section className={pwsCardFull}>
+      <CardHeader
+        title="Treatment plan"
+        meta="Current clinical direction and consultation status."
+        cta={
+          <Link href={`/fi-admin/${tenantId}/consultations/new`} className={pwsCta}>
+            New consultation
+          </Link>
+        }
+      />
 
-      <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+      <dl className={`mt-4 grid gap-4 text-sm sm:grid-cols-2 ${pwsDivider} pt-4`}>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-gray-400">Plan summary</dt>
-          <dd className="mt-1 font-medium text-gray-900">{treatmentPlanSummary ?? "Not documented yet"}</dd>
+          <dt className={pwsLabel}>Plan summary</dt>
+          <dd className={`mt-1 ${pwsValue}`}>{treatmentPlanSummary ?? "Not documented yet."}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium uppercase tracking-wide text-gray-400">Latest consultation</dt>
-          <dd className="mt-1 text-gray-800">
+          <dt className={pwsLabel}>Latest consultation</dt>
+          <dd className="mt-1">
             {latest ? (
               <Link
                 href={`/fi-admin/${tenantId}/consultations/${latest.id}`}
-                className="font-medium text-blue-700 hover:underline"
+                className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
               >
                 {latest.consultation_type_label}
               </Link>
             ) : (
-              "No consultations yet"
+              <span className={pwsEmpty}>No consultations recorded.</span>
             )}
-            {latest?.status ? (
-              <span className="ml-1.5 text-xs text-gray-500">· {latest.status}</span>
-            ) : null}
+            {latest?.status && (
+              <span className="ml-1.5 text-xs text-slate-500">· {latest.status}</span>
+            )}
           </dd>
         </div>
       </dl>
-    </Card>
+    </section>
   );
 }
 
 // ─── Timeline preview card ────────────────────────────────────────────────────
 
-function timelineItemIcon(type: PatientTimelineItem["item_type"]): string {
+function timelineIcon(type: PatientTimelineItem["item_type"]): string {
   switch (type) {
     case "booking_scheduled":
     case "booking_completed":
@@ -115,124 +139,42 @@ function TimelinePreviewCard({ items }: { items: PatientTimelineItem[] }) {
   const preview = items.slice(0, 5);
 
   return (
-    <Card>
-      <CardTitle>Recent activity</CardTitle>
+    <section className={pwsCardFull}>
+      <h2 className={pwsTitle}>Recent activity</h2>
       {preview.length === 0 ? (
-        <p className="mt-3 text-sm text-gray-500">No recent activity yet.</p>
+        <p className={`mt-3 ${pwsEmpty}`}>No activity recorded yet.</p>
       ) : (
-        <ul className="mt-3 divide-y divide-gray-100">
+        <ul className={`mt-3 divide-y ${pwsDivider.replace("border-t ", "divide-")}`}>
           {preview.map((item) => (
             <li key={item.id} className="flex items-start gap-2.5 py-2.5">
-              <span className="mt-0.5 shrink-0 text-sm" aria-hidden>
-                {timelineItemIcon(item.item_type)}
+              <span className="mt-0.5 shrink-0 text-sm leading-none" aria-hidden>
+                {timelineIcon(item.item_type)}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                   {item.href ? (
-                    <Link href={item.href} className="text-sm font-medium text-blue-700 hover:underline">
+                    <Link
+                      href={item.href}
+                      className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+                    >
                       {item.title}
                     </Link>
                   ) : (
-                    <span className="text-sm font-medium text-gray-900">{item.title}</span>
+                    <span className={`text-sm font-medium ${pwsValue}`}>{item.title}</span>
                   )}
-                  <time className="shrink-0 text-xs text-gray-400" dateTime={item.occurred_at}>
+                  <time className="shrink-0 text-xs text-slate-500" dateTime={item.occurred_at}>
                     {item.occurred_at.slice(0, 10)}
                   </time>
                 </div>
-                {item.subtitle && <p className="text-xs text-gray-500">{item.subtitle}</p>}
+                {item.subtitle && (
+                  <p className="mt-0.5 text-xs text-slate-500">{item.subtitle}</p>
+                )}
               </div>
             </li>
           ))}
         </ul>
       )}
-    </Card>
-  );
-}
-
-// ─── Patient intelligence card ────────────────────────────────────────────────
-
-function PatientIntelligenceCard({
-  tenantId,
-  patientId,
-  profile,
-}: {
-  tenantId: string;
-  patientId: string;
-  profile: PatientProfileFoundationData;
-}) {
-  const s = profile.summary;
-  const clinical = profile.clinicalDetails.row;
-  const patternLine = clinical
-    ? formatClinicalScalesSummary({
-        norwood_scale: clinical.norwood_scale,
-        ludwig_scale: clinical.ludwig_scale,
-        hairline_pattern: clinical.hairline_pattern,
-        primary_concern: clinical.primary_concern,
-      })
-    : null;
-
-  const base = `/fi-admin/${tenantId}/patients/${patientId}`;
-
-  return (
-    <Card>
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="flex items-center gap-1.5">
-            <Brain className="h-3.5 w-3.5 text-cyan-700" aria-hidden />
-            <CardTitle>Patient intelligence</CardTitle>
-          </div>
-          <CardMeta>FI OS signals for this patient</CardMeta>
-        </div>
-        <Link
-          href={`${base}/twin`}
-          className="shrink-0 rounded border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs font-medium text-cyan-800 hover:bg-cyan-100"
-        >
-          Open Twin
-        </Link>
-      </div>
-
-      <dl className="mt-3 grid grid-cols-2 gap-2.5">
-        <Metric label="Linked leads" value={String(s.totalLeads)} />
-        <Metric label="Clinical patients" value={String(s.totalCases)} />
-        <Metric label="Upcoming visits" value={String(s.upcomingBookings)} />
-        <Metric label="Completed visits" value={String(s.completedBookings)} />
-      </dl>
-
-      {patternLine ? (
-        <div className="mt-3 rounded-md border border-indigo-200 bg-indigo-50/80 p-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-indigo-700">Hair loss pattern</p>
-          <p className="mt-0.5 text-sm font-medium text-indigo-950">{patternLine}</p>
-        </div>
-      ) : (
-        <div className="mt-3 rounded-md border border-gray-100 bg-gray-50 p-2.5">
-          <p className="text-xs text-gray-400">Hair loss assessment not documented yet.</p>
-        </div>
-      )}
-
-      <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3">
-        <Link
-          href={`${base}/twin`}
-          className="flex-1 rounded border border-gray-200 bg-gray-50 py-1.5 text-center text-xs font-medium text-gray-700 hover:bg-gray-100"
-        >
-          Patient Twin
-        </Link>
-        <Link
-          href={`/fi-admin/${tenantId}/surgery-readiness`}
-          className="flex-1 rounded border border-gray-200 bg-gray-50 py-1.5 text-center text-xs font-medium text-gray-700 hover:bg-gray-100"
-        >
-          Surgery readiness
-        </Link>
-      </div>
-    </Card>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded border border-gray-100 bg-gray-50 p-2">
-      <dt className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{label}</dt>
-      <dd className="mt-0.5 text-lg font-semibold tabular-nums text-gray-900">{value}</dd>
-    </div>
+    </section>
   );
 }
 
@@ -253,28 +195,29 @@ function LeadHistoryCompactCard({
   const prior = items.filter((i) => !i.linkedToThisPatient).length;
 
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="flex items-center gap-1.5">
-            <Users className="h-3.5 w-3.5 text-gray-500" aria-hidden />
-            <CardTitle>Enquiries</CardTitle>
-          </div>
-          <CardMeta>
-            {items.length === 0
-              ? "No CRM enquiries linked yet."
-              : `${linked} linked · ${prior} prior enquiry${prior !== 1 ? "s" : ""}`}
-          </CardMeta>
-        </div>
-        <Link href={`/fi-admin/${tenantId}/crm`} className="text-xs text-blue-600 hover:underline">
-          CRM →
-        </Link>
+    <section className={pwsCard}>
+      <div className={`${pwsCardPad} pb-0`}>
+        <CardHeader
+          icon={<Users className="h-3.5 w-3.5 text-slate-400" aria-hidden />}
+          title="Enquiries"
+          meta={
+            items.length === 0
+              ? "No enquiries linked yet."
+              : `${linked} linked · ${prior} prior enquir${prior !== 1 ? "ies" : "y"}`
+          }
+          cta={
+            <Link href={`/fi-admin/${tenantId}/crm`} className="text-xs text-cyan-400 hover:text-cyan-300">
+              CRM →
+            </Link>
+          }
+        />
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-3 text-sm text-gray-400">No enquiries recorded yet.</p>
+        <p className={`${pwsCardPad} pt-2 ${pwsEmpty}`}>No enquiries recorded yet.</p>
       ) : (
-        <div className="mt-3">
+        <div className="mt-2">
+          {/* Legacy white card — contained within the dark shell */}
           <PatientPersonLeadHistoryCard
             tenantId={tenantId}
             currentPatientId={patientId}
@@ -284,7 +227,7 @@ function LeadHistoryCompactCard({
           />
         </div>
       )}
-    </Card>
+    </section>
   );
 }
 
@@ -304,12 +247,14 @@ function PaymentSnapshotCard({
   canMutatePaymentRecords: boolean;
 }) {
   return (
-    <Card>
-      <div className="flex items-center gap-1.5">
-        <CreditCard className="h-3.5 w-3.5 text-gray-500" aria-hidden />
-        <CardTitle>Payment records</CardTitle>
+    <section className={pwsCard}>
+      <div className={`${pwsCardPad} pb-0`}>
+        <CardHeader
+          icon={<CreditCard className="h-3.5 w-3.5 text-slate-400" aria-hidden />}
+          title="Payment records"
+        />
       </div>
-      <div className="mt-3">
+      <div className="mt-2">
         <PaymentRecordPanel
           tenantId={tenantId}
           todayYmd={operationalTodayYmd}
@@ -317,10 +262,10 @@ function PaymentSnapshotCard({
           patientId={patientId}
           initialRows={initialPaymentRecords}
           canMutate={canMutatePaymentRecords}
-          noManualPaymentRecordsCopy="No manual payment records linked to this patient yet."
+          noManualPaymentRecordsCopy="No payment records added yet."
         />
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -334,22 +279,34 @@ function TechnicalDetailsAccordion({
   profile: PatientProfileFoundationData;
 }) {
   return (
-    <details className="group rounded-lg border border-gray-200 bg-white shadow-sm">
-      <summary className="flex cursor-pointer select-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-gray-600 outline-none hover:bg-gray-50">
+    <details className={`group ${pwsLegacyCard}`}>
+      <summary
+        className={`flex cursor-pointer select-none items-center justify-between gap-2 ${pwsCardPad} py-3 text-sm font-medium text-slate-400 outline-none transition-colors hover:text-slate-200`}
+      >
         <div className="flex items-center gap-1.5">
           <Activity className="h-3.5 w-3.5" aria-hidden />
           More records
         </div>
-        <span className="text-xs text-gray-400">Person record · Clinical patients</span>
+        <span className="text-xs text-slate-600">Person record · Clinical patients</span>
       </summary>
-      <div className="space-y-4 border-t border-gray-100 px-4 pb-4 pt-3">
-        <p className="text-xs text-gray-400">
-          Raw person and clinical patient records. For diagnostics and data reconciliation.
+      <div className={`space-y-4 border-t border-white/[0.05] px-4 pb-4 pt-3`}>
+        <p className="text-xs text-slate-600">
+          Raw person and clinical patient records — for diagnostics and data reconciliation.
         </p>
         <PatientPersonDetailsCard data={profile} />
         <PatientCasesCard tenantId={tenantId} data={profile} />
       </div>
     </details>
+  );
+}
+
+// ─── Legacy card wrapper (for embedded white components in left column) ───────
+
+function LegacyCardShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={`overflow-hidden ${pwsLegacyCard}`}>
+      {children}
+    </div>
   );
 }
 
@@ -360,6 +317,7 @@ export function PatientOverviewTab({
   patientId,
   payload,
   profile,
+  journeyStatus,
   operationalTodayYmd,
   initialPaymentRecords,
   canMutatePaymentRecords,
@@ -368,6 +326,7 @@ export function PatientOverviewTab({
   patientId: string;
   payload: PatientDetailPayload;
   profile: PatientProfileFoundationData;
+  journeyStatus: PatientJourneyStatus;
   operationalTodayYmd: string;
   initialPaymentRecords: PaymentRecordRow[];
   canMutatePaymentRecords: boolean;
@@ -377,18 +336,20 @@ export function PatientOverviewTab({
 
   return (
     <div className="grid gap-4 lg:grid-cols-12">
-      {/* ── Left: Active patient journey ── */}
+      {/* ── Left: Active patient journey ─────────────────────────── */}
       <div className="space-y-4 lg:col-span-7">
-        {/* 1. Book next appointment */}
-        <PatientBookNextAppointmentCard
-          tenantId={tenantId}
-          patientId={patientId}
-          personId={payload.personId}
-          displayName={payload.displayName}
-          primaryLead={payload.primaryLead}
-          bookings={payload.bookingRows}
-          groupingNowIso={payload.groupingNowIso}
-        />
+        {/* 1. Book next appointment — legacy white component, contained */}
+        <LegacyCardShell>
+          <PatientBookNextAppointmentCard
+            tenantId={tenantId}
+            patientId={patientId}
+            personId={payload.personId}
+            displayName={payload.displayName}
+            primaryLead={payload.primaryLead}
+            bookings={payload.bookingRows}
+            groupingNowIso={payload.groupingNowIso}
+          />
+        </LegacyCardShell>
 
         {/* 2. Treatment plan */}
         <TreatmentPlanCard
@@ -397,19 +358,31 @@ export function PatientOverviewTab({
           consultations={consultations}
         />
 
-        {/* 3. Consultations */}
-        <PatientConsultationsCard tenantId={tenantId} consultations={consultations} compact />
+        {/* 3. Consultations — legacy white component, contained */}
+        <LegacyCardShell>
+          <PatientConsultationsCard tenantId={tenantId} consultations={consultations} compact />
+        </LegacyCardShell>
 
         {/* 4. Recent activity */}
         <TimelinePreviewCard items={timelineItems} />
       </div>
 
-      {/* ── Right: Intelligence & admin ── */}
+      {/* ── Right: Intelligence & admin ───────────────────────────── */}
       <div className="space-y-4 lg:col-span-5">
         {/* 1. Patient intelligence */}
-        <PatientIntelligenceCard tenantId={tenantId} patientId={patientId} profile={profile} />
+        <PatientIntelligenceSummary
+          tenantId={tenantId}
+          patientId={patientId}
+          journeyStatus={journeyStatus}
+          clinical={profile.clinicalDetails.row}
+          consultations={consultations}
+          totalLeads={profile.summary.totalLeads}
+          upcomingBookings={profile.summary.upcomingBookings}
+          completedBookings={profile.summary.completedBookings}
+          imageCount={profile.patientImages.counts.total}
+        />
 
-        {/* 2. Enquiry & lead history */}
+        {/* 2. Enquiry history */}
         <LeadHistoryCompactCard
           tenantId={tenantId}
           patientId={patientId}
@@ -426,7 +399,7 @@ export function PatientOverviewTab({
           canMutatePaymentRecords={canMutatePaymentRecords}
         />
 
-        {/* 4. Technical details (collapsed) */}
+        {/* 4. Technical details — collapsed by default */}
         <TechnicalDetailsAccordion tenantId={tenantId} profile={profile} />
       </div>
     </div>
