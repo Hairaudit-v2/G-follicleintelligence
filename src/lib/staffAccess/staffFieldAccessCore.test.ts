@@ -56,7 +56,7 @@ const ROLE_MODULE_LEVELS: Record<string, Partial<Record<StaffAccessModuleKey, St
   reception: {
     clinic_os: "edit",
     lead_flow: "edit",
-    patient_os: "read",
+    patient_os: "edit",
     consultation_os: "read",
     financial_os: "read",
   },
@@ -151,12 +151,16 @@ test("doctor can read clinical patient fields but NOT the financial summary by d
   assert.equal(canViewField(levelOf(access, "patient.financial_summary")), false);
 });
 
-test("receptionist can read contact details but not medical history", () => {
+test("receptionist can edit contact details but not medical history (SA-2B calibrated)", () => {
   const access = fieldAccessForRole("reception");
-  assert.equal(canViewField(levelOf(access, "patient.contact_details")), true);
+  const contact = getFieldPermission(access, "patient.contact_details");
+  assert.equal(contact.level, "edit");
+  assert.equal(canEditField(contact.level), true);
+  assert.equal(contact.moduleLevel, "edit");
+  assert.equal(contact.clamped, false);
   assert.equal(levelOf(access, "patient.medical_history"), "hidden");
   assert.equal(canViewField(levelOf(access, "patient.medical_history")), false);
-  // Example C: financial.payment_status read, financial.margin hidden.
+  // financial.payment_status read (consultation_os module), financial.margin hidden (no financial_os).
   assert.equal(canViewField(levelOf(access, "financial.payment_status")), true);
   assert.equal(levelOf(access, "financial.margin"), "hidden");
 });
@@ -209,8 +213,10 @@ test("field grant cannot exceed blocked module access (clamped to hidden)", () =
 });
 
 test("field grant is clamped down to the module ceiling (read module → read field max)", () => {
-  // Reception has patient_os = read. An edit grant on contact details clamps to read.
-  const access = fieldAccessForRole("reception", {
+  // Simulate a lower module ceiling than the role template / grant requests.
+  const access = computeEffectiveFieldAccess({
+    moduleLevels: { patient_os: "read" },
+    roleTemplate: STAFF_ROLE_FIELD_TEMPLATE_DEFAULTS.reception as RoleFieldTemplateMap,
     grants: [grant({ fieldKey: "patient.contact_details", permissionLevel: "edit" })],
   });
   const perm = getFieldPermission(access, "patient.contact_details");
@@ -361,4 +367,73 @@ test("Example B: doctor + investor grants keep clinical access, add investor rea
   // Identity is still gated: investor.* fields never expose patient identity, and the patient
   // identity field has no read in the investor dashboard surface.
   assert.equal(levelOf(access, "patient.financial_summary"), "hidden");
+});
+
+// ---------------------------------------------------------------------------
+// SA-2B: Reception operational access calibration regression matrix
+// ---------------------------------------------------------------------------
+
+test("SA-2B Test A: reception can edit patient contact details", () => {
+  const access = fieldAccessForRole("reception");
+  const perm = getFieldPermission(access, "patient.contact_details");
+  assert.equal(perm.moduleLevel, "edit");
+  assert.equal(perm.requestedLevel, "edit");
+  assert.equal(perm.level, "edit");
+  assert.equal(perm.clamped, false);
+  assert.equal(canEditField(perm.level), true);
+});
+
+test("SA-2B Test B: reception cannot access medical history", () => {
+  const access = fieldAccessForRole("reception");
+  assert.equal(levelOf(access, "patient.medical_history"), "hidden");
+  assert.equal(canViewField(levelOf(access, "patient.medical_history")), false);
+});
+
+test("SA-2B Test C: reception cannot access medications", () => {
+  const access = fieldAccessForRole("reception");
+  assert.equal(levelOf(access, "patient.medications"), "hidden");
+  assert.equal(canViewField(levelOf(access, "patient.medications")), false);
+});
+
+test("SA-2B Test D: reception cannot access financial summary", () => {
+  const access = fieldAccessForRole("reception");
+  assert.equal(levelOf(access, "patient.financial_summary"), "hidden");
+  assert.equal(canViewField(levelOf(access, "patient.financial_summary")), false);
+});
+
+test("SA-2B Test E: reception cannot access internal notes", () => {
+  const access = fieldAccessForRole("reception");
+  assert.equal(levelOf(access, "patient.internal_notes"), "hidden");
+  assert.equal(canViewField(levelOf(access, "patient.internal_notes")), false);
+});
+
+test("SA-2B Test F: reception can read patient photos", () => {
+  const access = fieldAccessForRole("reception");
+  assert.equal(levelOf(access, "patient.photos"), "read");
+  assert.equal(canViewField(levelOf(access, "patient.photos")), true);
+  assert.equal(canEditField(levelOf(access, "patient.photos")), false);
+});
+
+test("SA-2B Test G: reception can read patient documents", () => {
+  const access = fieldAccessForRole("reception");
+  assert.equal(levelOf(access, "patient.documents"), "read");
+  assert.equal(canViewField(levelOf(access, "patient.documents")), true);
+});
+
+test("SA-2B Test H: explicit financial_summary grant is clamped when module access is restricted", () => {
+  // Baseline: financial summary stays hidden without any grant.
+  const baseline = fieldAccessForRole("reception");
+  assert.equal(levelOf(baseline, "patient.financial_summary"), "hidden");
+
+  // Explicit edit grant cannot exceed a read module ceiling (field permission <= module permission).
+  const clamped = computeEffectiveFieldAccess({
+    moduleLevels: { patient_os: "read" },
+    roleTemplate: STAFF_ROLE_FIELD_TEMPLATE_DEFAULTS.reception as RoleFieldTemplateMap,
+    grants: [grant({ fieldKey: "patient.financial_summary", permissionLevel: "edit" })],
+  });
+  const perm = getFieldPermission(clamped, "patient.financial_summary");
+  assert.equal(perm.requestedLevel, "edit");
+  assert.equal(perm.level, "read");
+  assert.equal(perm.clamped, true);
+  assert.equal(canEditField(perm.level), false);
 });

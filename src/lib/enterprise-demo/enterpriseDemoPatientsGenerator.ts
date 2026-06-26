@@ -1,6 +1,10 @@
 import type { ConsultationStatus, ConsultationTypeId } from "@/src/lib/consultations/consultationTypes";
 import type { LudwigScaleValue, NorwoodScaleValue } from "@/src/lib/patients/hairLossScales";
 import { ENTERPRISE_DEMO_CLINICS } from "./enterpriseDemoConstants";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 
 export const ENTERPRISE_DEMO_PATIENTS_PER_CLINIC = 30;
 export const ENTERPRISE_DEMO_PATIENT_EMAIL_DOMAIN = "follicleintelligence.local";
@@ -57,6 +61,25 @@ export const ENTERPRISE_DEMO_CONVERSION_OUTCOMES = [
 
 export type EnterpriseDemoConversionOutcome = (typeof ENTERPRISE_DEMO_CONVERSION_OUTCOMES)[number];
 
+export const ENTERPRISE_DEMO_JOURNEY_ARCHETYPES = [
+  "new_lead",
+  "booked_consult",
+  "completed_consult",
+  "surgery_booked",
+  "surgery_completed",
+  "follow_up_3_month",
+  "follow_up_6_month",
+  "follow_up_9_month",
+  "follow_up_12_month",
+  "repair_assessment",
+  "poor_donor_candidate",
+  "excellent_candidate",
+  "prp_only",
+  "medical_therapy_monitoring",
+] as const;
+
+export type EnterpriseDemoJourneyArchetype = (typeof ENTERPRISE_DEMO_JOURNEY_ARCHETYPES)[number];
+
 export type EnterpriseDemoPatientConsultationSpec = {
   demoPatientKey: string;
   demoConsultationKey: string;
@@ -80,6 +103,7 @@ export type EnterpriseDemoPatientConsultationSpec = {
   consultantStaffKey: string;
   consultationDate: string;
   timezone: string;
+  journeyArchetype: EnterpriseDemoJourneyArchetype;
 };
 
 const MALE_FIRST_NAMES = [
@@ -330,10 +354,41 @@ function consultantStaffKey(clinicSlug: string, index: number): string {
     : `${clinicSlug}-senior-consultant`;
 }
 
+function journeyArchetypeForIndex(index: number, patientsPerClinic: number): EnterpriseDemoJourneyArchetype {
+  const archetypes = ENTERPRISE_DEMO_JOURNEY_ARCHETYPES;
+  const slot = Math.min(index - 1, patientsPerClinic - 1);
+  const bucket = Math.floor((slot / Math.max(patientsPerClinic, 1)) * archetypes.length);
+  return archetypes[Math.min(bucket, archetypes.length - 1)];
+}
+
+function consultationStatusForIndex(
+  index: number,
+  patientsPerClinic: number,
+  surgeriesPerClinic: number
+): ConsultationStatus {
+  const surgeryBandStart = Math.max(1, patientsPerClinic - surgeriesPerClinic + 1);
+  if (index >= surgeryBandStart) {
+    const offset = index - surgeryBandStart;
+    const quotedCount = Math.max(1, Math.floor(surgeriesPerClinic * 0.35));
+    const acceptedCount = Math.max(1, Math.floor(surgeriesPerClinic * 0.35));
+    if (offset < quotedCount) return "quoted";
+    if (offset < quotedCount + acceptedCount) return "accepted";
+    return "converted_to_case";
+  }
+
+  const earlySlot = index - 1;
+  const third = Math.max(2, Math.floor(patientsPerClinic / 3));
+  if (earlySlot < 2) return "draft";
+  if (earlySlot < third) return "in_progress";
+  if (earlySlot < third * 2) return "completed";
+  return "quoted";
+}
+
 function buildPatientSpec(
   clinicSlug: string,
   clinicTimezone: string,
-  index: number
+  index: number,
+  volume: EnterpriseDemoVolumeOptions
 ): EnterpriseDemoPatientConsultationSpec {
   const demoPatientKey = buildDemoPatientKey(clinicSlug, index);
   const demoConsultationKey = `${demoPatientKey}-consultation`;
@@ -345,7 +400,12 @@ function buildPatientSpec(
   const lastName = pick(LAST_NAMES, demoPatientKey, "last");
   const displayName = `${firstName} ${lastName}`;
   const ageBand = pick(ENTERPRISE_DEMO_AGE_BANDS, demoPatientKey, "age");
-  const consultationStatus = CONSULTATION_STATUS_TEMPLATE[index - 1];
+  const consultationStatus = consultationStatusForIndex(
+    index,
+    volume.patientsPerClinic,
+    volume.surgeriesPerClinic
+  );
+  const journeyArchetype = journeyArchetypeForIndex(index, volume.patientsPerClinic);
   const quotedTreatment =
     consultationStatus === "draft" || consultationStatus === "in_progress"
       ? null
@@ -400,24 +460,28 @@ function buildPatientSpec(
     consultantStaffKey: consultantStaffKey(clinicSlug, index),
     consultationDate: consultationDateForKey(demoConsultationKey, clinicTimezone),
     timezone: clinicTimezone,
+    journeyArchetype,
   };
 }
 
 /**
- * Pure generator: 30 synthetic patient + consultation specs per demo clinic (240 total).
+ * Pure generator: synthetic patient + consultation specs per demo clinic.
  */
-export function buildEnterpriseDemoPatientConsultationSpecs(): EnterpriseDemoPatientConsultationSpec[] {
+export function buildEnterpriseDemoPatientConsultationSpecs(
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
+): EnterpriseDemoPatientConsultationSpec[] {
   const specs: EnterpriseDemoPatientConsultationSpec[] = [];
   for (const clinic of ENTERPRISE_DEMO_CLINICS) {
-    for (let i = 1; i <= ENTERPRISE_DEMO_PATIENTS_PER_CLINIC; i++) {
-      specs.push(buildPatientSpec(clinic.slug, clinic.timezone, i));
+    for (let i = 1; i <= volume.patientsPerClinic; i++) {
+      specs.push(buildPatientSpec(clinic.slug, clinic.timezone, i, volume));
     }
   }
   return specs;
 }
 
 export function validateEnterpriseDemoPatientConsultationSpecs(
-  specs: EnterpriseDemoPatientConsultationSpec[]
+  specs: EnterpriseDemoPatientConsultationSpec[],
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): { ok: true } | { ok: false; reason: string } {
   const patientKeys = new Set(specs.map((s) => s.demoPatientKey));
   const consultationKeys = new Set(specs.map((s) => s.demoConsultationKey));
@@ -429,7 +493,7 @@ export function validateEnterpriseDemoPatientConsultationSpecs(
     return { ok: false, reason: "Duplicate demo_consultation_key values detected." };
   }
 
-  const expectedTotal = ENTERPRISE_DEMO_CLINICS.length * ENTERPRISE_DEMO_PATIENTS_PER_CLINIC;
+  const expectedTotal = ENTERPRISE_DEMO_CLINICS.length * volume.patientsPerClinic;
   if (specs.length !== expectedTotal) {
     return {
       ok: false,
@@ -439,10 +503,10 @@ export function validateEnterpriseDemoPatientConsultationSpecs(
 
   for (const clinic of ENTERPRISE_DEMO_CLINICS) {
     const clinicSpecs = specs.filter((s) => s.clinicSlug === clinic.slug);
-    if (clinicSpecs.length !== ENTERPRISE_DEMO_PATIENTS_PER_CLINIC) {
+    if (clinicSpecs.length !== volume.patientsPerClinic) {
       return {
         ok: false,
-        reason: `Clinic "${clinic.slug}" expected ${ENTERPRISE_DEMO_PATIENTS_PER_CLINIC} specs.`,
+        reason: `Clinic "${clinic.slug}" expected ${volume.patientsPerClinic} specs.`,
       };
     }
   }

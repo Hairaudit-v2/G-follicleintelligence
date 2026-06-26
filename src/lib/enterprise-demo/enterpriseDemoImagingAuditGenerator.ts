@@ -9,6 +9,13 @@ import {
   type EnterpriseDemoSurgerySpec,
   type EnterpriseDemoSurgeryStatus,
 } from "./enterpriseDemoSurgeriesGenerator";
+import {
+  ENTERPRISE_DEMO_CLINICS,
+} from "./enterpriseDemoConstants";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 
 /** Canonical TITAN surgery-outcome imaging slots (metadata-only demo capture). */
 export const ENTERPRISE_DEMO_IMAGING_PROTOCOL_SLOTS = [
@@ -480,9 +487,10 @@ function buildOutcomeAuditsForSurgery(
  * Pure generator: synthetic ImagingOS + AuditOS bundle per demo surgery (96 total).
  */
 export function buildEnterpriseDemoImagingAuditBundles(
-  surgerySpecs?: EnterpriseDemoSurgerySpec[]
+  surgerySpecs?: EnterpriseDemoSurgerySpec[],
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): EnterpriseDemoImagingAuditBundleSpec[] {
-  const surgeries = surgerySpecs ?? buildEnterpriseDemoSurgerySpecs();
+  const surgeries = surgerySpecs ?? buildEnterpriseDemoSurgerySpecs(undefined, volume);
 
   return surgeries.map((surgery) => {
     const imagingProfile = imagingProfileForClinic(surgery.clinicSlug);
@@ -568,10 +576,12 @@ export function buildEnterpriseDemoImagingAuditBundles(
 }
 
 export function validateEnterpriseDemoImagingAuditBundles(
-  bundles: EnterpriseDemoImagingAuditBundleSpec[]
+  bundles: EnterpriseDemoImagingAuditBundleSpec[],
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): { ok: true } | { ok: false; reason: string } {
-  if (bundles.length !== 96) {
-    return { ok: false, reason: `Expected 96 imaging/audit bundles, got ${bundles.length}.` };
+  const expectedTotal = ENTERPRISE_DEMO_CLINICS.length * volume.surgeriesPerClinic;
+  if (bundles.length !== expectedTotal) {
+    return { ok: false, reason: `Expected ${expectedTotal} imaging/audit bundles, got ${bundles.length}.` };
   }
 
   const imageKeys = new Set<string>();

@@ -255,10 +255,19 @@ export const STAFF_ROLE_TEMPLATE_DEFAULTS: Record<
     imaging_os: { level: "edit", scope: "assigned" },
     academy_os: { level: "read", scope: "tenant" },
   },
+  /**
+   * Reception — operational front-desk staff (SA-2B calibrated).
+   *
+   * Reception requires administrative access to patient records for workflow continuity
+   * (contact updates, document intake, identity verification). Module access provides the
+   * operational ceiling (`patient_os` → edit). Field permissions (SA-2) enforce protected-data
+   * boundaries — reception must never access clinical decision data, financial summaries, or
+   * internal practitioner notes even though the module ceiling is edit.
+   */
   reception: {
     clinic_os: { level: "edit", scope: "tenant" },
     lead_flow: { level: "edit", scope: "tenant" },
-    patient_os: { level: "read", scope: "tenant" },
+    patient_os: { level: "edit", scope: "tenant" },
     consultation_os: { level: "read", scope: "tenant" },
     academy_os: { level: "read", scope: "tenant" },
   },

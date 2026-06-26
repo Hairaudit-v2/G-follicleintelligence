@@ -19,6 +19,10 @@ import {
   type EnterpriseDemoSurgeryFinancialBundle,
 } from "./enterpriseDemoFinancialGenerator";
 import { ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA } from "./enterpriseDemoPatientsSeed.server";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 
 export const ENTERPRISE_DEMO_INVOICE_METADATA_FLAG = "enterprise_demo_invoice";
 export const ENTERPRISE_DEMO_PAYMENT_METADATA_FLAG = "enterprise_demo_payment";
@@ -881,7 +885,8 @@ async function seedSurgeryBundle(
 
 export async function seedEnterpriseDemoFinancialOs(
   supabase: SupabaseClient,
-  tenantId: string
+  tenantId: string,
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): Promise<EnterpriseDemoFinancialSeedResult> {
   const warnings: string[] = [];
   const counters: EnterpriseDemoFinancialSeedResult = {
@@ -899,8 +904,8 @@ export async function seedEnterpriseDemoFinancialOs(
     warnings,
   };
 
-  const bundles = buildEnterpriseDemoFinancialBundles();
-  const validation = validateEnterpriseDemoFinancialBundles(bundles);
+  const bundles = buildEnterpriseDemoFinancialBundles(undefined, undefined, volume);
+  const validation = validateEnterpriseDemoFinancialBundles(bundles, volume);
   if (!validation.ok) {
     warnings.push(validation.reason);
     return counters;

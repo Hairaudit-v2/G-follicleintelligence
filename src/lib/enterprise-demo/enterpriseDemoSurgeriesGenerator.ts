@@ -10,6 +10,10 @@ import {
   buildEnterpriseDemoPatientConsultationSpecs,
   type EnterpriseDemoPatientConsultationSpec,
 } from "./enterpriseDemoPatientsGenerator";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 
 export const ENTERPRISE_DEMO_SURGERIES_PER_CLINIC = 12;
 export const ENTERPRISE_DEMO_TOTAL_SURGERIES =
@@ -536,21 +540,28 @@ function buildSurgerySpecFromPatient(
 }
 
 /**
- * Pure generator: 12 synthetic surgery specs per demo clinic (96 total).
+ * Pure generator: synthetic surgery specs per demo clinic.
  */
 export function buildEnterpriseDemoSurgerySpecs(
-  patientSpecs?: EnterpriseDemoPatientConsultationSpec[]
+  patientSpecs?: EnterpriseDemoPatientConsultationSpec[],
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): EnterpriseDemoSurgerySpec[] {
-  const allPatients = patientSpecs ?? buildEnterpriseDemoPatientConsultationSpecs();
+  const allPatients = patientSpecs ?? buildEnterpriseDemoPatientConsultationSpecs(volume);
   const specs: EnterpriseDemoSurgerySpec[] = [];
 
   for (const clinic of ENTERPRISE_DEMO_CLINICS) {
-    const clinicPatients = allPatients.filter((p) => p.clinicSlug === clinic.slug);
-    for (let i = 0; i < ENTERPRISE_DEMO_SURGERY_PATIENT_INDICES.length; i++) {
-      const patientIndex = ENTERPRISE_DEMO_SURGERY_PATIENT_INDICES[i];
-      const patientSpec = clinicPatients.find((p) => p.patientIndex === patientIndex);
-      if (!patientSpec) continue;
-      const surgeryStatus = SURGERY_STATUS_TEMPLATE[i];
+    const clinicPatients = allPatients
+      .filter((p) => p.clinicSlug === clinic.slug)
+      .sort((a, b) => a.patientIndex - b.patientIndex);
+    const surgeryCandidates = clinicPatients
+      .filter((p) =>
+        ["quoted", "accepted", "converted_to_case"].includes(p.consultationStatus)
+      )
+      .slice(-volume.surgeriesPerClinic);
+
+    for (let i = 0; i < surgeryCandidates.length; i++) {
+      const patientSpec = surgeryCandidates[i];
+      const surgeryStatus = SURGERY_STATUS_TEMPLATE[Math.min(i, SURGERY_STATUS_TEMPLATE.length - 1)];
       specs.push(buildSurgerySpecFromPatient(patientSpec, surgeryStatus, i));
     }
   }
@@ -559,12 +570,14 @@ export function buildEnterpriseDemoSurgerySpecs(
 }
 
 export function validateEnterpriseDemoSurgerySpecs(
-  specs: EnterpriseDemoSurgerySpec[]
+  specs: EnterpriseDemoSurgerySpec[],
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): { ok: true } | { ok: false; reason: string } {
-  if (specs.length !== ENTERPRISE_DEMO_TOTAL_SURGERIES) {
+  const expectedTotal = ENTERPRISE_DEMO_CLINICS.length * volume.surgeriesPerClinic;
+  if (specs.length !== expectedTotal) {
     return {
       ok: false,
-      reason: `Expected ${ENTERPRISE_DEMO_TOTAL_SURGERIES} surgery specs, got ${specs.length}.`,
+      reason: `Expected ${expectedTotal} surgery specs, got ${specs.length}.`,
     };
   }
 
@@ -584,10 +597,10 @@ export function validateEnterpriseDemoSurgerySpecs(
 
   for (const clinic of ENTERPRISE_DEMO_CLINICS) {
     const clinicSpecs = specs.filter((s) => s.clinicSlug === clinic.slug);
-    if (clinicSpecs.length !== ENTERPRISE_DEMO_SURGERIES_PER_CLINIC) {
+    if (clinicSpecs.length !== volume.surgeriesPerClinic) {
       return {
         ok: false,
-        reason: `Clinic "${clinic.slug}" expected ${ENTERPRISE_DEMO_SURGERIES_PER_CLINIC} surgery specs.`,
+        reason: `Clinic "${clinic.slug}" expected ${volume.surgeriesPerClinic} surgery specs.`,
       };
     }
   }

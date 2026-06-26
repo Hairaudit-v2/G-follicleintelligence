@@ -67,13 +67,14 @@ test("nurse assigned-case-only scope", () => {
   assert.equal(canViewModule(access, "financial_os"), false);
 });
 
-test("receptionist has no financial access", () => {
+test("receptionist has no financial module access but can edit patient_os (SA-2B)", () => {
   const access = computeEffectiveAccess({ roleKey: "reception", grants: [] });
   assert.equal(canViewModule(access, "financial_os"), false);
   assert.equal(canViewModule(access, "investor_dashboard"), false);
   // Reception still operates the front desk.
   assert.equal(canEditModule(access, "lead_flow"), true);
   assert.equal(canEditModule(access, "clinic_os"), true);
+  assert.equal(canEditModule(access, "patient_os"), true);
 });
 
 test("owner has full tenant access", () => {

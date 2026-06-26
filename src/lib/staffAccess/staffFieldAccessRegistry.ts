@@ -627,13 +627,24 @@ export const STAFF_ROLE_FIELD_TEMPLATE_DEFAULTS: Record<string, RoleFieldTemplat
     "surgery.complications": "read",
     "surgery.outcome_metrics": "read",
   },
+  /**
+   * Reception — operational front-desk field boundaries (SA-2B calibrated).
+   *
+   * Module ceiling is `patient_os` → edit (SA-1). Field grants here define what reception may
+   * actually touch inside PatientOS: contact details and documents for intake, identity for
+   * verification, photos for check-in — while clinical, financial, and governance fields stay
+   * hidden. Field access never exceeds module access; these entries sit below the edit ceiling.
+   */
   reception: {
     "patient.identity": "read",
     "patient.contact_details": "edit",
+    "patient.photos": "read",
     "patient.documents": "read",
+    "patient.audit_reports": "hidden",
+    // patient.medical_history, patient.medications, patient.financial_summary,
+    // patient.internal_notes omitted → hidden by default (clinical / financial / governance).
     "consultation.quote": "read",
     "financial.payment_status": "read",
-    // patient.medical_history, financial.margin omitted → hidden by default.
   },
   consultant: {
     "patient.identity": "read",

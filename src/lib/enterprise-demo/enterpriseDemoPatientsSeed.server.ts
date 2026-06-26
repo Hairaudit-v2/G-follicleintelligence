@@ -6,6 +6,10 @@ import {
   type EnterpriseDemoPatientConsultationSpec,
   validateEnterpriseDemoPatientConsultationSpecs,
 } from "./enterpriseDemoPatientsGenerator";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 
 export const ENTERPRISE_DEMO_PATIENT_METADATA_FLAG = "enterprise_demo_patient";
 export const ENTERPRISE_DEMO_PATIENT_KEY_METADATA = "demo_patient_key";
@@ -101,6 +105,7 @@ function buildPatientMetadata(spec: EnterpriseDemoPatientConsultationSpec): Reco
     ludwig_scale: spec.ludwigScale,
     savin_scale: spec.savinScale,
     diagnosis_summary: spec.diagnosis,
+    journey_archetype: spec.journeyArchetype,
   };
 }
 
@@ -122,6 +127,7 @@ function buildConsultationStructuredData(
     ludwig_scale: spec.ludwigScale,
     savin_scale: spec.savinScale,
     quoted_treatment: spec.quotedTreatment,
+    journey_archetype: spec.journeyArchetype,
     assessment: {
       pattern_summary: spec.diagnosis,
       norwood_scale: spec.norwoodScale,
@@ -276,7 +282,8 @@ function findConsultationByDemoKey(rows: ConsultationRow[], key: string): Consul
 
 export async function seedEnterpriseDemoPatientsAndConsultations(
   supabase: SupabaseClient,
-  tenantId: string
+  tenantId: string,
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): Promise<EnterpriseDemoPatientsSeedResult> {
   const warnings: string[] = [];
   let createdPatients = 0;
@@ -286,8 +293,8 @@ export async function seedEnterpriseDemoPatientsAndConsultations(
   let createdClinicalDetails = 0;
   let existingClinicalDetails = 0;
 
-  const specs = buildEnterpriseDemoPatientConsultationSpecs();
-  const validation = validateEnterpriseDemoPatientConsultationSpecs(specs);
+  const specs = buildEnterpriseDemoPatientConsultationSpecs(volume);
+  const validation = validateEnterpriseDemoPatientConsultationSpecs(specs, volume);
   if (!validation.ok) {
     throw new Error(validation.reason);
   }
@@ -411,6 +418,14 @@ export async function seedEnterpriseDemoPatientsAndConsultations(
           demo_patient_key: spec.demoPatientKey,
           savin_scale: spec.savinScale,
           lead_source: spec.leadSource,
+          journey_archetype: spec.journeyArchetype,
+          donor_assessment:
+            spec.journeyArchetype === "poor_donor_candidate"
+              ? { density_band: "limited", suitability: "cautious_review" }
+              : spec.journeyArchetype === "excellent_candidate"
+                ? { density_band: "favourable", suitability: "surgical_candidate" }
+                : { density_band: "moderate", suitability: "individual_assessment" },
+          treatment_plan_summary: spec.quotedTreatment ?? "Assessment in progress",
         },
         created_at: now,
         updated_at: now,

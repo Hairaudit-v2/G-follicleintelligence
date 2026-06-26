@@ -504,7 +504,7 @@ export const PLATFORM_PROGRESS_MODULES: PlatformProgressModule[] = [
       "Enterprise clinic deployment engine — tenant provisioning, deployment templates, Guided Assist, go-live readiness gates, and live connectors.",
     status: "Pilot Ready",
     statusLabel: "Deployment Engine",
-    latestMilestone: "ONB-F5 HubSpot staged import engine operational",
+    latestMilestone: "IHRG-DEMO-1 Demo Data Expansion Pack shipped",
   },
   buildGoogleCalendarPlatformProgressModule(),
   {
@@ -706,6 +706,12 @@ export const PLATFORM_PROGRESS_VIE_CAPABILITIES = [
 
 /** Chronological deployment feed — most recent first. */
 export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeploymentMilestone[] = [
+  {
+    id: "ihrg-demo-1",
+    date: "2026-06-26",
+    tag: "onboarding-os",
+    title: "IHRG-DEMO-1 Demo Data Expansion Pack shipped",
+  },
   { id: "gc-11", date: "2026-06-26", tag: "calendar-os", title: "GC-11 Calendar Settings Centre deployed" },
   { id: "vie-6", date: "2026-06-26", tag: "vie", title: "VIE-6 Same Angle Alignment Engine completed" },
   { id: "gc-10", date: "2026-06-25", tag: "event-bus", title: "GC-10 Platform Event Bus architecture released" },
@@ -720,6 +726,26 @@ export const PLATFORM_PROGRESS_DEPLOYMENT_MILESTONES: PlatformProgressDeployment
 
 /** Public engineering changelog — append entries as milestones ship. */
 export const PLATFORM_PROGRESS_CHANGELOG: PlatformProgressChangelogEntry[] = [
+  {
+    id: "2026-06-26-ihrg-demo-1",
+    date: "2026-06-26",
+    tag: "onboarding-os",
+    title: "IHRG-DEMO-1 — Demo Data Expansion Pack",
+    summary:
+      "Profile-scaled, idempotent IHRG demo seeding across the full FI operating system — LeadFlow, CRM, CalendarOS, SurgeryOS, ImagingOS, AcademyOS, PaymentsOS, ReceptionOS, and AnalyticsOS. Supports light, standard, alive (default), and enterprise profiles via scripts/seed-ihrg-demo-data.ts.",
+    modules: [
+      "LeadFlowOS",
+      "PatientOS",
+      "ConsultationOS",
+      "SurgeryOS",
+      "ImagingOS",
+      "AcademyOS",
+      "CalendarOS",
+      "PaymentsOS",
+      "AnalyticsOS",
+      "ClinicOS",
+    ],
+  },
   {
     id: "2026-06-26-calendar-os-gc11",
     date: "2026-06-26",

@@ -11,6 +11,13 @@ import {
   buildEnterpriseDemoSurgerySpecs,
   type EnterpriseDemoSurgerySpec,
 } from "./enterpriseDemoSurgeriesGenerator";
+import {
+  ENTERPRISE_DEMO_CLINICS,
+} from "./enterpriseDemoConstants";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 import type { FiGatewayPaymentStatus, FiInvoiceKind, FiInvoiceStatus, FiPaymentRequestStatus } from "@/src/lib/revenueOs/revenueInvoiceModel";
 
 export const ENTERPRISE_DEMO_CONSULTATION_QUOTE_INVOICES = 240;
@@ -764,10 +771,11 @@ function buildSurgeryBundle(
 
 export function buildEnterpriseDemoFinancialBundles(
   patientSpecs?: EnterpriseDemoPatientConsultationSpec[],
-  surgerySpecs?: EnterpriseDemoSurgerySpec[]
+  surgerySpecs?: EnterpriseDemoSurgerySpec[],
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): EnterpriseDemoFinancialBundleSpec {
-  const consultations = patientSpecs ?? buildEnterpriseDemoPatientConsultationSpecs();
-  const surgeries = surgerySpecs ?? buildEnterpriseDemoSurgerySpecs(consultations);
+  const consultations = patientSpecs ?? buildEnterpriseDemoPatientConsultationSpecs(volume);
+  const surgeries = surgerySpecs ?? buildEnterpriseDemoSurgerySpecs(consultations, volume);
 
   const consultationBundles = consultations.map(buildConsultationBundle);
 
@@ -781,19 +789,23 @@ export function buildEnterpriseDemoFinancialBundles(
 }
 
 export function validateEnterpriseDemoFinancialBundles(
-  bundles: EnterpriseDemoFinancialBundleSpec
+  bundles: EnterpriseDemoFinancialBundleSpec,
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): { ok: true } | { ok: false; reason: string } {
-  if (bundles.consultationBundles.length !== ENTERPRISE_DEMO_CONSULTATION_QUOTE_INVOICES) {
+  const expectedConsultations = ENTERPRISE_DEMO_CLINICS.length * volume.patientsPerClinic;
+  const expectedSurgeries = ENTERPRISE_DEMO_CLINICS.length * volume.surgeriesPerClinic;
+
+  if (bundles.consultationBundles.length !== expectedConsultations) {
     return {
       ok: false,
-      reason: `Expected ${ENTERPRISE_DEMO_CONSULTATION_QUOTE_INVOICES} consultation financial bundles, got ${bundles.consultationBundles.length}.`,
+      reason: `Expected ${expectedConsultations} consultation financial bundles, got ${bundles.consultationBundles.length}.`,
     };
   }
 
-  if (bundles.surgeryBundles.length !== ENTERPRISE_DEMO_SURGERY_FINANCIAL_BUNDLES) {
+  if (bundles.surgeryBundles.length !== expectedSurgeries) {
     return {
       ok: false,
-      reason: `Expected ${ENTERPRISE_DEMO_SURGERY_FINANCIAL_BUNDLES} surgery financial bundles, got ${bundles.surgeryBundles.length}.`,
+      reason: `Expected ${expectedSurgeries} surgery financial bundles, got ${bundles.surgeryBundles.length}.`,
     };
   }
 

@@ -17,6 +17,10 @@ import {
   type EnterpriseDemoProtocolSessionSpec,
 } from "./enterpriseDemoImagingAuditGenerator";
 import { ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA } from "./enterpriseDemoPatientsSeed.server";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 
 export const ENTERPRISE_DEMO_IMAGE_METADATA_FLAG = "enterprise_demo_image";
 export const ENTERPRISE_DEMO_AUDIT_METADATA_FLAG = "enterprise_demo_audit";
@@ -313,7 +317,8 @@ function buildOutcomeMetadata(audit: EnterpriseDemoOutcomeAuditSpec): Record<str
 
 export async function seedEnterpriseDemoImagingAndAudit(
   supabase: SupabaseClient,
-  tenantId: string
+  tenantId: string,
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): Promise<EnterpriseDemoImagingAuditSeedResult> {
   const warnings: string[] = [];
   let createdImages = 0;
@@ -323,8 +328,8 @@ export async function seedEnterpriseDemoImagingAndAudit(
   let createdOutcomeAudits = 0;
   let existingOutcomeAudits = 0;
 
-  const bundles = buildEnterpriseDemoImagingAuditBundles();
-  const validation = validateEnterpriseDemoImagingAuditBundles(bundles);
+  const bundles = buildEnterpriseDemoImagingAuditBundles(undefined, volume);
+  const validation = validateEnterpriseDemoImagingAuditBundles(bundles, volume);
   if (!validation.ok) {
     throw new Error(validation.reason);
   }

@@ -14,6 +14,10 @@ import { seedEnterpriseDemoPatientsAndConsultations } from "./enterpriseDemoPati
 import { seedEnterpriseDemoSurgeries } from "./enterpriseDemoSurgeriesSeed.server";
 import { seedEnterpriseDemoImagingAndAudit } from "./enterpriseDemoImagingAuditSeed.server";
 import { seedEnterpriseDemoFinancialOs } from "./enterpriseDemoFinancialSeed.server";
+import {
+  ENTERPRISE_DEMO_DEFAULT_VOLUME,
+  type EnterpriseDemoVolumeOptions,
+} from "./enterpriseDemoVolumeOptions";
 
 export type EnterpriseDemoSeedResult = {
   ok: boolean;
@@ -279,9 +283,14 @@ async function seedDemoClinics(
 }
 
 export async function seedEnterpriseDemoTenant(
-  opts?: { supabase?: SupabaseClient; env?: NodeJS.ProcessEnv }
+  opts?: {
+    supabase?: SupabaseClient;
+    env?: NodeJS.ProcessEnv;
+    volume?: EnterpriseDemoVolumeOptions;
+  }
 ): Promise<EnterpriseDemoSeedResult> {
   const env = opts?.env ?? process.env;
+  const volume: EnterpriseDemoVolumeOptions = opts?.volume ?? ENTERPRISE_DEMO_DEFAULT_VOLUME;
   const warnings: string[] = [];
 
   const guard = assertEnterpriseDemoSeedAllowed(env);
@@ -400,20 +409,22 @@ export async function seedEnterpriseDemoTenant(
 
     const patientsResult = await seedEnterpriseDemoPatientsAndConsultations(
       supabase,
-      tenantResult.tenantId
+      tenantResult.tenantId,
+      volume
     );
     warnings.push(...patientsResult.warnings);
 
-    const surgeriesResult = await seedEnterpriseDemoSurgeries(supabase, tenantResult.tenantId);
+    const surgeriesResult = await seedEnterpriseDemoSurgeries(supabase, tenantResult.tenantId, volume);
     warnings.push(...surgeriesResult.warnings);
 
     const imagingAuditResult = await seedEnterpriseDemoImagingAndAudit(
       supabase,
-      tenantResult.tenantId
+      tenantResult.tenantId,
+      volume
     );
     warnings.push(...imagingAuditResult.warnings);
 
-    const financialResult = await seedEnterpriseDemoFinancialOs(supabase, tenantResult.tenantId);
+    const financialResult = await seedEnterpriseDemoFinancialOs(supabase, tenantResult.tenantId, volume);
     warnings.push(...financialResult.warnings);
 
     return {

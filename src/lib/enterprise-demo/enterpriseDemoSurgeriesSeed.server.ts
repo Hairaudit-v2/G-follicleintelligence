@@ -10,6 +10,7 @@ import {
   validateEnterpriseDemoSurgerySpecs,
   type EnterpriseDemoSurgerySpec,
 } from "./enterpriseDemoSurgeriesGenerator";
+import { ENTERPRISE_DEMO_DEFAULT_VOLUME, type EnterpriseDemoVolumeOptions } from "./enterpriseDemoVolumeOptions";
 import { ENTERPRISE_DEMO_CONSULTATION_KEY_METADATA } from "./enterpriseDemoPatientsSeed.server";
 
 export const ENTERPRISE_DEMO_SURGERY_METADATA_FLAG = "enterprise_demo_surgery";
@@ -436,7 +437,8 @@ function bookingStatusForSurgery(spec: EnterpriseDemoSurgerySpec): string {
 
 export async function seedEnterpriseDemoSurgeries(
   supabase: SupabaseClient,
-  tenantId: string
+  tenantId: string,
+  volume: EnterpriseDemoVolumeOptions = ENTERPRISE_DEMO_DEFAULT_VOLUME
 ): Promise<EnterpriseDemoSurgeriesSeedResult> {
   const warnings: string[] = [];
   let createdCases = 0;
@@ -454,8 +456,8 @@ export async function seedEnterpriseDemoSurgeries(
   let linkedConsultations = 0;
   let createdDemoUsers = 0;
 
-  const specs = buildEnterpriseDemoSurgerySpecs();
-  const validation = validateEnterpriseDemoSurgerySpecs(specs);
+  const specs = buildEnterpriseDemoSurgerySpecs(undefined, volume);
+  const validation = validateEnterpriseDemoSurgerySpecs(specs, volume);
   if (!validation.ok) {
     throw new Error(validation.reason);
   }
