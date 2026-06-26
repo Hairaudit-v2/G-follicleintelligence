@@ -46,9 +46,11 @@ function consultation(
     created_at: "2026-07-01T00:00:00.000Z",
     updated_at: "2026-07-01T00:00:00.000Z",
     archived_at: null,
-    subject_line: "Initial consultation · Jane Doe",
+    subject_line: "Scalp hair transplant · Jane Doe",
     patient_display_name: "Jane Doe",
     lead_display_name: null,
+    link_headline: "Scalp hair transplant · Jane Doe",
+    consultant_display_name: null,
     scalesSyncedToPatient: false,
     ...overrides,
   };
