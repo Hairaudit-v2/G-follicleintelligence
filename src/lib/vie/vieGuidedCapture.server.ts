@@ -20,7 +20,7 @@ import {
   loadProtocolTemplateBySlug,
 } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
 import { loadVieCapturePolicyForTenant } from "./vieCapturePolicy.server";
-import { canAcceptVieCapture, deriveClinicalUsability } from "./vieQualityGate";
+import { canAcceptVieCapture } from "./vieQualityGate";
 import type { VieCaptureReviewPayload, VieInstantIntelligenceResult } from "./vieProtocolTypes";
 
 export type VieGuidedSessionApi = {

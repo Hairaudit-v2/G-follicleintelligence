@@ -6,6 +6,7 @@ import {
 } from "@/src/lib/hair-intelligence/photoProtocols/types";
 import { PATIENT_TWIN_VERSION } from "./patientTwinTypes";
 import { patientTwinHairProgressionSectionSchema } from "./patientTwinHairProgressionSchema";
+import { VIE_ENGINE_VERSION } from "@/src/lib/vie/vieProtocolTypes";
 
 const hliPhotoProtocolClinicalContextSchema: z.ZodType<HliPhotoProtocolClinicalContext> = z.custom<HliPhotoProtocolClinicalContext>(
   (val): val is HliPhotoProtocolClinicalContext =>
@@ -494,7 +495,7 @@ export const patientTwinV1Schema = z.object({
   photo_protocol: patientTwinPhotoProtocolSectionSchema.nullable(),
   vie: z
     .object({
-      engine_version: z.string(),
+      engine_version: z.literal(VIE_ENGINE_VERSION),
       imaging_completeness: z.object({ headline: z.object({}).passthrough() }).passthrough(),
       latest_intelligence: z.array(z.object({}).passthrough()),
       future_architecture: z.record(z.unknown()),

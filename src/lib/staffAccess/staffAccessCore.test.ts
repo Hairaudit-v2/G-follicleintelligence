@@ -78,9 +78,9 @@ test("receptionist has no financial access", () => {
 
 test("owner has full tenant access", () => {
   const access = computeEffectiveAccess({ roleKey: "owner", grants: [] });
-  for (const module of STAFF_ACCESS_MODULE_KEYS) {
-    assert.equal(canViewModule(access, module), true, `owner should view ${module}`);
-    assert.equal(canApproveModule(access, module), true, `owner should approve ${module}`);
+  for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
+    assert.equal(canViewModule(access, moduleKey), true, `owner should view ${moduleKey}`);
+    assert.equal(canApproveModule(access, moduleKey), true, `owner should approve ${moduleKey}`);
   }
 });
 
@@ -137,8 +137,8 @@ test("admin override grants everything regardless of role/grants", () => {
     grants: [grant({ moduleKey: "patient_os", accessLevel: "none" })],
     isAdminOverride: true,
   });
-  for (const module of STAFF_ACCESS_MODULE_KEYS) {
-    assert.equal(canApproveModule(access, module), true, `override should approve ${module}`);
+  for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
+    assert.equal(canApproveModule(access, moduleKey), true, `override should approve ${moduleKey}`);
   }
   assert.equal(getModuleAccess(access, "patient_os").source, "override");
 });

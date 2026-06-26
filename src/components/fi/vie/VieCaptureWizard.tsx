@@ -13,7 +13,8 @@ import {
   slotIsSatisfied,
   type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
-import { getVieProtocol, type VieProtocolSlug } from "@/src/lib/vie";
+import { getVieProtocol } from "@/src/lib/vie/vieProtocolCatalog";
+import type { VieProtocolSlug } from "@/src/lib/vie/vieProtocolTypes";
 import type { VieCaptureGuideKind, VieCaptureReviewPayload, VieProtocolSlotDef, VieSlotTier } from "@/src/lib/vie/vieProtocolTypes";
 import { VieCaptureGuideOverlay } from "./VieCaptureGuideOverlay";
 import { VieIntelligenceResultPanel } from "./VieIntelligenceResultPanel";

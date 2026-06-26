@@ -1046,7 +1046,7 @@ export async function loadPatientTwinV1(params: LoadPatientTwinV1Params): Promis
   if (!parsed.success) {
     throw new Error(`PatientTwin V1 schema validation failed: ${parsed.error.message}`);
   }
-  return parsed.data;
+  return twin;
 }
 
 function dedupeWarnings(w: PatientTwinWarning[]): PatientTwinWarning[] {

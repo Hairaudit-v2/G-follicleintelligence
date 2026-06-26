@@ -199,16 +199,16 @@ export async function loadRoleTemplateFromDb(
     return at - bt;
   });
   for (const r of rows) {
-    const module = String(r.module_key ?? "");
+    const moduleKey = String(r.module_key ?? "");
     const level = String(r.access_level ?? "none");
     const scope = String(r.scope ?? "tenant");
-    if (!isStaffAccessModuleKey(module) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
+    if (!isStaffAccessModuleKey(moduleKey) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
       continue;
     if (level === "none") {
-      delete out[module];
+      delete out[moduleKey];
       continue;
     }
-    out[module] = { level, scope };
+    out[moduleKey] = { level, scope };
   }
   return out;
 }
@@ -230,13 +230,13 @@ export async function loadStaffAccessGrants(
   if (error || !data) return [];
   const out: StaffAccessGrantInput[] = [];
   for (const r of data as Array<Record<string, unknown>>) {
-    const module = String(r.module_key ?? "");
+    const moduleKey = String(r.module_key ?? "");
     const level = String(r.access_level ?? "none");
     const scope = String(r.scope ?? "tenant");
-    if (!isStaffAccessModuleKey(module) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
+    if (!isStaffAccessModuleKey(moduleKey) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
       continue;
     out.push({
-      moduleKey: module,
+      moduleKey: moduleKey,
       tabKey: r.tab_key ? String(r.tab_key) : null,
       accessLevel: level,
       scope,
@@ -363,10 +363,10 @@ export async function getStaffAccessNavFeatureOverrides(
   }
   const managed = new Set<string>();
   const visible = new Set<string>();
-  for (const module of Object.keys(STAFF_MODULE_TO_FEATURE_KEYS) as StaffAccessModuleKey[]) {
-    const keys = STAFF_MODULE_TO_FEATURE_KEYS[module] ?? [];
+  for (const moduleKey of Object.keys(STAFF_MODULE_TO_FEATURE_KEYS) as StaffAccessModuleKey[]) {
+    const keys = STAFF_MODULE_TO_FEATURE_KEYS[moduleKey] ?? [];
     keys.forEach((k) => managed.add(k));
-    if (coreCanViewModule(access, module)) keys.forEach((k) => visible.add(k));
+    if (coreCanViewModule(access, moduleKey)) keys.forEach((k) => visible.add(k));
   }
   const overrides: Record<string, boolean> = {};
   for (const k of managed) {
@@ -472,15 +472,15 @@ export async function loadStaffAccessGrantRows(
   if (error || !data) return [];
   const out: StaffAccessGrantRow[] = [];
   for (const r of data as Array<Record<string, unknown>>) {
-    const module = String(r.module_key ?? "");
+    const moduleKey = String(r.module_key ?? "");
     const level = String(r.access_level ?? "none");
     const scope = String(r.scope ?? "tenant");
-    if (!isStaffAccessModuleKey(module) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
+    if (!isStaffAccessModuleKey(moduleKey) || !isStaffAccessLevel(level) || !isStaffAccessScope(scope))
       continue;
     out.push({
       id: String(r.id),
       clinicId: r.clinic_id ? String(r.clinic_id) : null,
-      moduleKey: module,
+      moduleKey: moduleKey,
       tabKey: r.tab_key ? String(r.tab_key) : null,
       accessLevel: level,
       scope,

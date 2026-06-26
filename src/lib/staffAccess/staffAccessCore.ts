@@ -88,19 +88,19 @@ export function computeEffectiveAccess(input: ComputeEffectiveAccessInput): Effe
   const template = resolveRoleTemplate(input.roleKey ?? null, input.roleTemplate);
 
   const map = {} as EffectiveAccessMap;
-  for (const module of STAFF_ACCESS_MODULE_KEYS) {
-    const fromRole = template[module];
-    map[module] = fromRole
-      ? { module, level: fromRole.level, scope: fromRole.scope, source: "role", tabs: {} }
-      : emptyModuleAccess(module);
+  for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
+    const fromRole = template[moduleKey];
+    map[moduleKey] = fromRole
+      ? { module: moduleKey, level: fromRole.level, scope: fromRole.scope, source: "role", tabs: {} }
+      : emptyModuleAccess(moduleKey);
   }
 
   // Apply explicit grants (skip revoked). Grants override the template value directly.
   for (const grant of input.grants) {
     if (grant.revokedAt) continue;
     if (!isStaffAccessModuleKey(grant.moduleKey)) continue;
-    const module = grant.moduleKey;
-    const entry = map[module];
+    const moduleKey = grant.moduleKey;
+    const entry = map[moduleKey];
 
     if (grant.tabKey && grant.tabKey.trim()) {
       entry.tabs[grant.tabKey.trim()] = {
@@ -127,8 +127,8 @@ export function computeEffectiveAccess(input: ComputeEffectiveAccessInput): Effe
 
   // Admin override wins over everything.
   if (input.isAdminOverride) {
-    for (const module of STAFF_ACCESS_MODULE_KEYS) {
-      map[module] = { module, level: "admin", scope: "tenant", source: "override", tabs: {} };
+    for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
+      map[moduleKey] = { module: moduleKey, level: "admin", scope: "tenant", source: "override", tabs: {} };
     }
   }
 
@@ -195,10 +195,10 @@ export type StaffNavModule = {
  */
 export function getVisibleStaffNavigation(access: EffectiveAccessMap): StaffNavModule[] {
   const out: StaffNavModule[] = [];
-  for (const module of STAFF_ACCESS_MODULE_KEYS) {
-    const entry = getModuleAccess(access, module);
+  for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
+    const entry = getModuleAccess(access, moduleKey);
     if (accessLevelSatisfies(entry.level, "read")) {
-      out.push({ module, level: entry.level, scope: entry.scope });
+      out.push({ module: moduleKey, level: entry.level, scope: entry.scope });
     }
   }
   return out;
@@ -215,9 +215,9 @@ export function summariseEffectiveAccess(
     string,
     { level: StaffAccessLevel; scope: StaffAccessScope; source: EffectiveAccessSource }
   > = {};
-  for (const module of STAFF_ACCESS_MODULE_KEYS) {
-    const e = getModuleAccess(access, module);
-    if (e.level !== "none") out[module] = { level: e.level, scope: e.scope, source: e.source };
+  for (const moduleKey of STAFF_ACCESS_MODULE_KEYS) {
+    const e = getModuleAccess(access, moduleKey);
+    if (e.level !== "none") out[moduleKey] = { level: e.level, scope: e.scope, source: e.source };
   }
   return out;
 }

@@ -6,7 +6,8 @@ import { Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createImagingProtocolSessionAction } from "@/lib/actions/fi-imaging-actions";
 import { PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
-import { VIE_PROTOCOL_CATALOG, type VieProtocolSlug } from "@/src/lib/vie";
+import { VIE_PROTOCOL_CATALOG } from "@/src/lib/vie/vieProtocolCatalog";
+import type { VieProtocolSlug } from "@/src/lib/vie/vieProtocolTypes";
 import { VieCaptureWizard } from "./VieCaptureWizard";
 
 export function StartCaptureProtocolButton({
