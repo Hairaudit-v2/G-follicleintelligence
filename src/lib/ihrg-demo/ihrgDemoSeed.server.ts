@@ -54,7 +54,6 @@ export async function seedIhrgDemoData(opts?: IhrgDemoSeedOptions): Promise<Ihrg
   const env = opts?.env ?? process.env;
   const profile = opts?.profile ?? IHRG_DEMO_DEFAULT_PROFILE;
   const profileConfig = ihrgDemoProfileConfig(profile);
-  const tenantSlug = resolveIhrgDemoTenantSlug(opts?.tenantSlug ?? "ihrg-demo");
 
   const guard = assertEnterpriseDemoSeedAllowed(env);
   if (!guard.ok) {
