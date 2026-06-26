@@ -1,124 +1,143 @@
-# FI OS Playwright foundation
+# FI OS Playwright E2E
 
-Minimal e2e foundation (Patch 7). Currently covers **unauthenticated
-security smoke tests only** — see [security/unauthenticated-access.spec.ts](security/unauthenticated-access.spec.ts).
-No login, no patient/booking/payment workflow, no data mutation.
+Browser e2e suite for Follicle Intelligence OS. Tests are grouped by business
+value and tagged for selective execution.
 
-## One-time setup (do this in a clean network environment)
+**Full strategy:** [docs/testing/e2e-strategy.md](../docs/testing/e2e-strategy.md)
 
-`@playwright/test` is declared in `package.json` but the browser binaries
-are not committed. Install both where TLS is **not** intercepted by a
-corporate proxy/AV (see the TLS note below):
+## Test tiers
 
-```
-npm install                  # resolves @playwright/test from the registry
-npx playwright install chromium
-```
+| Tag | Scope | Credentials | CI |
+|-----|-------|-------------|-----|
+| `@security` | Unauthenticated fail-closed (admin shell, tenant dashboard, API) | None | `e2e-security.yml` (Chromium) |
+| `@smoke` | Public business surfaces (marketing, login, payment link) | None | `e2e-smoke.yml` (cross-browser) |
+| `@a11y` | Keyboard + semantic markup on public pages | None | Included in smoke CI |
+| `@authenticated` | Tenant admin login → dashboard, cross-tenant, staff PIN | Demo env secrets | Optional job when secrets configured |
+| `@mutation` | Patient create (demo tenant, opt-in) | `FI_E2E_ALLOW_MUTATIONS=1` | Optional |
 
-> **TLS-interception note:** on some managed Windows machines the
-> `playwright` npm tarball fails to download with
-> `UNABLE_TO_VERIFY_LEAF_SIGNATURE`, and the failed install rolls back and
-> corrupts `node_modules`. If you hit this, do the `npm install` on a
-> network without TLS interception (or point Node at the corporate root CA
-> via `NODE_EXTRA_CA_CERTS`) — do **not** repeatedly retry the install on the
-> intercepting network. The rest of the app installs fine; only the
-> Playwright tarball is affected.
+Critical revenue path (lead → case → consultation → payment) remains in the
+[clinic readiness runbook](../docs/smoke/fi-os-clinic-readiness-runbook.md) for
+manual verification until a dedicated demo tenant supports safe mutation tests.
 
-## Typechecking
+## Design principles
 
-The main app typecheck (`npm run typecheck`) **intentionally excludes**
-`e2e/**` and `playwright.config.ts` (see the `exclude` list in
-[tsconfig.json](../tsconfig.json)). This keeps `npm run typecheck` green even
-when `@playwright/test` is not installed locally — for example on the
-TLS-intercepted machine described below, where the Playwright tarball can't be
-downloaded. Without this exclusion, every typecheck would fail on the missing
-`@playwright/test` types.
+- **Role/label selectors** over CSS classes — see `e2e/pages/` page objects.
+- **Shared assertions** in `e2e/helpers/` to avoid duplicated brittle checks.
+- **No committed secrets** — credentials via `FI_E2E_DEMO_ADMIN_*` env only.
+- **Production-mode host** — auth middleware fail-closed only activates when
+  `NODE_ENV=production`; use `npm run build && npm run start`, not `next dev`.
 
-The e2e suite is still fully typechecked, just under its own config:
+## One-time setup
 
 ```
-npm run typecheck:e2e        # uses tsconfig.e2e.json
+npm install
+npx playwright install chromium          # security / local dev
+npx playwright install --with-deps       # full cross-browser matrix
 ```
 
-[tsconfig.e2e.json](../tsconfig.e2e.json) extends the main config, re-includes
-`e2e/**/*.ts` + `playwright.config.ts`, and uses Node-compatible compiler
-settings. It **requires `@playwright/test` to be installed**, so
-`typecheck:e2e` will fail until you run `npm install` in a clean network
-environment (see the one-time setup above). That's expected — run it in CI or
-on an unintercepted network, not on the TLS-intercepted machine.
+> **TLS note:** on some managed Windows networks the Playwright tarball fails
+> with `UNABLE_TO_VERIFY_LEAF_SIGNATURE`. Install on a clean network or set
+> `NODE_EXTRA_CA_CERTS` — see prior README notes.
+
+## Environment variables
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `FI_E2E_BASE_URL` | Yes | Host under test (`http://localhost:3000` or staging URL) |
+| `FI_E2E_TENANT_ID` | For `@authenticated` | Demo tenant UUID |
+| `FI_E2E_DEMO_ADMIN_EMAIL` | For `@authenticated` | Throwaway tenant admin email |
+| `FI_E2E_DEMO_ADMIN_PASSWORD` | For `@authenticated` | Throwaway tenant admin password |
+| `FI_E2E_OTHER_TENANT_ID` | Optional | Second tenant for cross-tenant isolation |
+| `FI_E2E_STAFF_ID` | Staff PIN tests | Staff record UUID on demo tenant |
+| `FI_E2E_STAFF_PIN` | Staff PIN tests | 4-digit floor PIN |
+| `FI_E2E_ALLOW_MUTATIONS` | Mutation tests | Must be `1` — demo tenant only |
+| `FI_E2E_PERF_BUDGET_MS` | Optional | Page load budget (default 8000) |
+| `FI_E2E_BROWSERS` | Optional | Limit browsers, e.g. `chromium,firefox` |
 
 ## Running
 
-**Security only (FI-LAUNCH-035)** — against an already-running production server:
+**Security only (fast, Chromium):**
 
 ```
 npm run build && npm run start
 FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e:security
 ```
 
-**One command** (build → start → security suite → shutdown):
+**One command (build → start → security → shutdown):**
 
 ```
 npm run test:e2e:security:production
 ```
 
-Full suite (all e2e specs):
+**Public smoke (cross-browser + mobile viewports):**
+
+```
+FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e:smoke
+FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e:cross-browser
+npm run test:e2e:smoke:production
+```
+
+**Authenticated journeys (requires demo credentials):**
+
+```
+FI_E2E_BASE_URL=https://<staging> \
+FI_E2E_TENANT_ID=<uuid> \
+FI_E2E_DEMO_ADMIN_EMAIL=tester+smoketest@yourdomain.test \
+FI_E2E_DEMO_ADMIN_PASSWORD=<secret> \
+npm run test:e2e:authenticated
+```
+
+**Full suite:**
 
 ```
 FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e
-FI_E2E_BASE_URL=http://localhost:3000 npm run test:e2e:headed
 ```
-
-`FI_E2E_BASE_URL` is required — the suite throws a clear error if it's
-unset (see [fixtures/baseUrl.ts](fixtures/baseUrl.ts)). Point it at:
-
-- a local production build: `npm run build && npm run start` (defaults to
-  `http://localhost:3000`), **not** `next dev` — the auth fail-closed
-  behavior in `middleware.ts` only activates when `NODE_ENV=production`; or
-- a staging deployment URL.
-
-Optional `FI_E2E_TENANT_ID` supplies a real tenant UUID for routes that need
-one; without it, tests fall back to a syntactically valid placeholder UUID
-(fine for "access denied" assertions, since no tenant data is read).
-
-## Node TLS on managed Windows (Supabase scripts / `npm run dev`)
-
-On some corporate networks, Node’s default CA store fails Supabase HTTPS with
-`UNABLE_TO_VERIFY_LEAF_SIGNATURE` while browsers and the Supabase MCP plugin
-still work.
-
-- **`npm run dev`** — runs Next with `node --use-system-ca`.
-- **`npm run check:env`**, **`npm run seed:enterprise-demo`**, **`npm run validate:titan-global-command-centre`** — run via `scripts/run-with-system-ca.mjs`, which uses `node --use-system-ca --import tsx` (the `tsx` CLI re-execs Node without the flag).
-- Do **not** set `NODE_OPTIONS=--use-system-ca` — Node rejects that flag in
-  `NODE_OPTIONS` on some builds. Clear it with `Remove-Item Env:NODE_OPTIONS`
-  (PowerShell) if present.
-- Alternative: point Node at your corporate root CA with `NODE_EXTRA_CA_CERTS`.
 
 ## Layout
 
 ```
 e2e/
   fixtures/
-    baseUrl.ts   — FI_E2E_BASE_URL / FI_E2E_TENANT_ID resolution
-    auth.ts      — documented placeholder for a future authenticated-session
-                   fixture; not wired up yet (see comments in the file for why)
+    auth.ts          — base test + authenticatedTest (worker-scoped session)
+    baseUrl.ts       — FI_E2E_BASE_URL / tenant ID resolution
+  helpers/
+    access-denied.ts — shared fail-closed assertions
+    credentials.ts   — env-gated demo credential checks
+    test-data.ts       — SMOKETEST- data factories
+    performance.ts     — soft load-time budgets
+  pages/
+    login.page.ts
+    marketing.page.ts
+    financial-dashboard.page.ts
+    staff-pin-login.page.ts
+    patient-create.page.ts
+    public-pay.page.ts
   security/
-    unauthenticated-access.spec.ts
+    unauthenticated-access.spec.ts   @security
+  journeys/
+    public-surfaces.spec.ts          @smoke
+    navigation-routing.spec.ts       @smoke
+    accessibility-smoke.spec.ts      @smoke @a11y
+    performance-smoke.spec.ts        @smoke
+    tenant-admin-access.spec.ts      @authenticated
+    cross-tenant-isolation.spec.ts   @authenticated
+    staff-pin-access.spec.ts         @authenticated
+    clinic-workflow.spec.ts          @authenticated @mutation
 ```
 
-## What's deliberately out of scope (Patch 7)
+## Typechecking
 
-- Authenticated flows (platform admin, tenant admin, staff PIN session) —
-  blocked on having a safe, non-secret way to provision demo credentials
-  for CI. See `e2e/fixtures/auth.ts` for the intended fixture shape once
-  that exists.
-- The full patient/lead/booking/payment workflow — see
-  [docs/smoke/fi-os-clinic-readiness-runbook.md](../docs/smoke/fi-os-clinic-readiness-runbook.md)
-  for the manual checklist that covers this today.
+```
+npm run typecheck:e2e
+```
+
+Main `npm run typecheck` excludes `e2e/**` so the app typechecks without
+Playwright installed locally.
 
 ## Adding new specs
 
-- Keep unauthenticated, read-only checks in `e2e/security/`.
-- Anything that needs a session should import `test`/`expect` from
-  `e2e/fixtures/auth.ts` (not directly from `@playwright/test`) so it picks
-  up the auth fixture once it exists, without every spec needing an edit.
+1. Pick the right tag: `@security` (read-only, no session), `@smoke` (public),
+   or `@authenticated` (needs demo tenant).
+2. Import from `e2e/fixtures/auth.ts` — use `authenticatedTest` for session specs.
+3. Add page interactions to `e2e/pages/` when a surface is reused across specs.
+4. Prefer `getByRole`, `getByLabel`, and stable element ids over layout classes.

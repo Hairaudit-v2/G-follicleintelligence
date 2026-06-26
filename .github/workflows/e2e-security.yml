@@ -20,6 +20,7 @@ jobs:
       NODE_ENV: production
       SKIP_ENV_VALIDATION: "1"
       FI_E2E_BASE_URL: http://127.0.0.1:3000
+      FI_E2E_BROWSERS: chromium
       NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-placeholder-anon
       SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-placeholder-service-role-key

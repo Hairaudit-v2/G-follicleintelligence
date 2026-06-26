@@ -34,3 +34,11 @@ export function requireE2eBaseUrl(): string {
 export function e2eTenantId(): string {
   return process.env.FI_E2E_TENANT_ID?.trim() || "00000000-0000-4000-8000-000000000000";
 }
+
+/**
+ * Second tenant UUID for cross-tenant isolation checks (Tenant A session
+ * must not reach Tenant B routes). Optional — cross-tenant specs skip when unset.
+ */
+export function e2eOtherTenantId(): string | null {
+  return process.env.FI_E2E_OTHER_TENANT_ID?.trim() || null;
+}

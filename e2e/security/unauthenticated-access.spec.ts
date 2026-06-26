@@ -1,86 +1,39 @@
 import { test, expect } from "../fixtures/auth";
+import { expectProtectedRouteFailsClosed } from "../helpers/access-denied";
 import { e2eTenantId, requireE2eBaseUrl } from "../fixtures/baseUrl";
 
 /**
- * Unauthenticated security smoke tests (Patch 7).
+ * Unauthenticated security smoke tests.
+ *
+ * @security — run on every browser in CI smoke workflow; chromium-only in
+ * the dedicated security workflow for speed.
  *
  * Scope: confirm protected surfaces fail closed with no session, and the
- * public login surface still loads. No login, no data mutation, no
- * patient/booking/payment workflow — see e2e/fixtures/auth.ts for the
- * planned follow-up once a safe demo-credential pattern exists.
+ * public login surface still loads. No login, no data mutation.
  *
- * Requires FI_E2E_BASE_URL (see e2e/fixtures/baseUrl.ts for the error you'll
- * get if it's missing). Optional FI_E2E_TENANT_ID for a real tenant UUID;
- * falls back to a syntactically valid placeholder since these checks only
- * assert "access denied," not "this tenant's data is correct".
+ * Requires FI_E2E_BASE_URL. Optional FI_E2E_TENANT_ID for route construction.
  *
- * Note: the auth guard in middleware.ts only activates when
- * NODE_ENV=production. Run these against `next build && next start` (or a
- * deployed staging host), not `next dev` — against dev, 1.x/H/I below will
- * not exercise the fail-closed path and may render 200.
+ * Note: middleware auth guard only activates when NODE_ENV=production. Run
+ * against `next build && next start` or staging — not `next dev`.
  */
 
 test.beforeAll(() => {
-  // Fail fast with a clear message instead of every test failing on a
-  // missing/garbage baseURL.
   requireE2eBaseUrl();
 });
 
-test.describe("unauthenticated access — fails closed", () => {
+test.describe("unauthenticated access — fails closed @security", () => {
   test("platform admin shell (/fi-admin/system) is not reachable without a session", async ({
     page,
   }) => {
     const response = await page.goto("/fi-admin/system", { waitUntil: "domcontentloaded" });
-    expect(response, "expected a response").toBeTruthy();
-
-    const status = response!.status();
-    const finalUrl = page.url();
-
-    // Next.js server redirects often surface as a 200 navigation response in
-    // Playwright while the final URL is the login page — assert on URL/content,
-    // not raw status alone.
-    const stillOnProtectedShell = finalUrl.includes("/fi-admin/system");
-    const onLoginSurface =
-      /\/follicle-intelligence\/login/.test(finalUrl) ||
-      (await page.getByRole("button", { name: /sign in to os/i }).count()) > 0;
-    const failedClosed =
-      !stillOnProtectedShell || onLoginSurface || status === 401 || status === 403;
-
-    expect(
-      failedClosed,
-      `expected redirect to login or 401/403 for unauthenticated /fi-admin/system, got status ${status} at ${finalUrl}`,
-    ).toBe(true);
-    expect(
-      stillOnProtectedShell,
-      `admin shell must not render without a session (landed at ${finalUrl})`,
-    ).toBe(false);
+    await expectProtectedRouteFailsClosed(page, response, "/fi-admin/system");
   });
 
   test("tenant clinic dashboard is not reachable without a session", async ({ page }) => {
     const tenantId = e2eTenantId();
     const protectedPath = `/fi-admin/${tenantId}/financial/dashboard`;
-    const response = await page.goto(protectedPath, {
-      waitUntil: "domcontentloaded",
-    });
-    expect(response, "expected a response").toBeTruthy();
-
-    const status = response!.status();
-    const finalUrl = page.url();
-    const stillOnProtectedDashboard = finalUrl.includes(protectedPath);
-    const onLoginSurface =
-      /\/follicle-intelligence\/login/.test(finalUrl) ||
-      (await page.getByRole("button", { name: /sign in to os/i }).count()) > 0;
-    const failedClosed =
-      !stillOnProtectedDashboard || onLoginSurface || status === 401 || status === 403;
-
-    expect(
-      failedClosed,
-      `expected redirect to login or 401/403 for unauthenticated tenant dashboard, got status ${status} at ${finalUrl}`,
-    ).toBe(true);
-    expect(
-      stillOnProtectedDashboard,
-      `tenant dashboard must not render without a session (landed at ${finalUrl})`,
-    ).toBe(false);
+    const response = await page.goto(protectedPath, { waitUntil: "domcontentloaded" });
+    await expectProtectedRouteFailsClosed(page, response, protectedPath);
   });
 
   test("protected tenant API route (cases list) fails closed without a session", async ({
@@ -103,10 +56,6 @@ test.describe("unauthenticated access — fails closed", () => {
   test("public login route still loads", async ({ page }) => {
     const response = await page.goto("/fi-login", { waitUntil: "domcontentloaded" });
     expect(response, "expected a response").toBeTruthy();
-
-    // /fi-login redirects to /follicle-intelligence/login (see
-    // app/fi-login/page.tsx) — following that redirect to a 200 is the
-    // success case here; the login page must remain publicly reachable.
     expect(response!.status(), "public login route must not fail closed").toBeLessThan(400);
     await expect(page).toHaveURL(/\/follicle-intelligence\/login/);
   });

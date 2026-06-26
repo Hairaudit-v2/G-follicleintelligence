@@ -1,35 +1,84 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/test";
+
+import { hasDemoCredentials } from "./e2e/helpers/credentials";
 
 /**
- * Minimal Playwright foundation for FI OS readiness checks.
+ * Playwright config for FI OS e2e journeys.
  *
- * Scope (Patch 7): unauthenticated security smoke tests only. This config
- * deliberately does NOT start a dev/build server itself — tests run against
- * whatever host FI_E2E_BASE_URL points at (a local `next start` production
- * build, or a staging deployment). That keeps this suite safe to point at a
- * real staging clinic without ever risking a `next dev` run with relaxed
- * behavior, and avoids the harness silently spinning up a server that
- * doesn't reflect production auth behavior (see middleware.ts — the auth
- * guard only activates when NODE_ENV=production).
+ * Test tiers (grep tags):
+ *   @security      — unauthenticated fail-closed checks (CI security workflow)
+ *   @smoke         — public read-only business surfaces (cross-browser CI)
+ *   @authenticated — tenant-admin journeys (requires demo credentials env)
  *
- * Required env: FI_E2E_BASE_URL (e.g. http://localhost:3000 or
- * https://<staging-host>). Tests fail with a clear message if it's missing
- * — see e2e/fixtures/baseUrl.ts.
+ * Does NOT start a dev/build server — tests run against FI_E2E_BASE_URL
+ * (local `next start` production build or staging). Auth middleware only
+ * activates when NODE_ENV=production (see middleware.ts).
  */
+
+const BROWSER_MATRIX = [
+  { name: "chromium", use: devices["Desktop Chrome"] },
+  { name: "firefox", use: devices["Desktop Firefox"] },
+  { name: "webkit", use: devices["Desktop Safari"] },
+  { name: "mobile-chrome", use: devices["Pixel 5"] },
+  { name: "mobile-safari", use: devices["iPhone 13"] },
+] as const;
+
+function isLocalE2eHost(): boolean {
+  const base = process.env.FI_E2E_BASE_URL?.trim() ?? "";
+  return /localhost|127\.0\.0\.1/i.test(base);
+}
+
+/** Limit browsers locally/CI via FI_E2E_BROWSERS=chromium,firefox */
+function activeBrowsers(): typeof BROWSER_MATRIX[number][] {
+  const filter = process.env.FI_E2E_BROWSERS?.trim();
+  if (!filter) return [...BROWSER_MATRIX];
+  const allowed = new Set(
+    filter
+      .split(",")
+      .map((b) => b.trim().toLowerCase())
+      .filter(Boolean),
+  );
+  const selected = BROWSER_MATRIX.filter((b) => allowed.has(b.name));
+  if (selected.length === 0) {
+    throw new Error(
+      `FI_E2E_BROWSERS=${filter} matched no projects. Valid: ${BROWSER_MATRIX.map((b) => b.name).join(", ")}`,
+    );
+  }
+  return selected;
+}
+
+const publicProjects: PlaywrightTestConfig["projects"] = activeBrowsers().flatMap((browser) => [
+  {
+    name: browser.name,
+    use: { ...browser.use },
+    grep: /@security|@smoke|@a11y/,
+  },
+]);
+
+const authenticatedProjects: PlaywrightTestConfig["projects"] = hasDemoCredentials()
+  ? activeBrowsers().map((browser) => ({
+      name: `${browser.name}-authenticated`,
+      use: { ...browser.use },
+      grep: /@authenticated|@mutation/,
+      testMatch: /journeys\/.*\.spec\.ts/,
+    }))
+  : [];
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  // Local `next start` cannot serve 8 parallel browser sessions reliably.
+  workers: isLocalE2eHost() ? 2 : undefined,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? "dot" : "list",
+  reporter: process.env.CI ? [["dot"], ["html", { open: "never" }]] : "list",
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
   use: {
     baseURL: process.env.FI_E2E_BASE_URL,
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: process.env.CI ? "retain-on-failure" : "off",
   },
-  projects: [
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-  ],
+  projects: [...publicProjects, ...authenticatedProjects],
 });
