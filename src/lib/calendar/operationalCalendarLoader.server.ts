@@ -67,6 +67,8 @@ import {
   mapFiCalendarEventsToOperationalCalendar,
 } from "@/src/lib/calendar/calendarOsEvents.server";
 import { mapFiCalendarEventOverlapRowToBookingRow } from "@/src/lib/calendar/calendarOsEventsCore";
+import { loadStaffCalendarLinkLookups } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
+import { resolveCalendarEventStaffAssignment } from "@/src/lib/googleCalendar/googleCalendarProviderLinksCore";
 
 type ClinicalLite = {
   norwood_scale: string | null;
@@ -529,7 +531,7 @@ export async function loadOperationalCalendarGridData(
   const { rangeStartIso, rangeEndIso } = calendarRangeIsoForQuery(query);
 
   const tOverlapStart = typeof performance !== "undefined" ? performance.now() : Date.now();
-  const [rawBookings, calendarOsEventRows, resources, services] = await Promise.all([
+  const [rawBookings, calendarOsEventRows, resources, services, staffCalendarLinks] = await Promise.all([
     loadBookingsForCalendarOverlap({
       tenantId: tid,
       rangeStartIso,
@@ -551,6 +553,7 @@ export async function loadOperationalCalendarGridData(
     }),
     loadTenantStaffAndResourcesCached(tid, query.resourceView, query.clinicId?.trim() || null),
     loadFiServicesForTenantCached(tid),
+    loadStaffCalendarLinkLookups(tid),
   ]);
   const tOverlapEnd = typeof performance !== "undefined" ? performance.now() : Date.now();
 
@@ -579,7 +582,12 @@ export async function loadOperationalCalendarGridData(
   );
 
   const calendarOsBookingCandidates = calendarOsEventRows
-    .map((row) => mapFiCalendarEventOverlapRowToBookingRow(row, query.calendarTimezone))
+    .map((row) => {
+      const assignment = resolveCalendarEventStaffAssignment(row, staffCalendarLinks, tid);
+      return mapFiCalendarEventOverlapRowToBookingRow(row, query.calendarTimezone, {
+        staffMemberId: assignment.staffMemberId,
+      });
+    })
     .filter((row): row is FiBookingRow => row != null);
 
   const monthSummaryMode = operationalCalendarSkipsHeavyEnrichment(query.view);
@@ -610,6 +618,7 @@ export async function loadOperationalCalendarGridData(
     calendarTimezone: query.calendarTimezone,
     displayMaps,
     services,
+    staffCalendarLinks,
   });
   const structuredCalendarOs = applyStructuredFilters(
     calendarOsMapped.bookings,

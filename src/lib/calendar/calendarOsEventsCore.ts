@@ -13,6 +13,10 @@ import { serviceForBookingType } from "@/src/lib/bookings/servicesCatalog";
 import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 
 import type { OperationalCalendarBookingDisplay } from "@/src/lib/calendar/operationalCalendarTypes";
+import {
+  resolveCalendarEventStaffAssignment,
+  type StaffCalendarLinkLookupRow,
+} from "@/src/lib/googleCalendar/googleCalendarProviderLinksCore";
 
 export const CALENDAR_OS_EVENT_META_FLAG = "calendar_os_event" as const;
 
@@ -152,7 +156,8 @@ export function calendarOsClientFieldsFromEvent(
 
 export function mapFiCalendarEventOverlapRowToBookingRow(
   row: FiCalendarEventOverlapRow,
-  calendarTimezone: string
+  calendarTimezone: string,
+  staffAssignment?: { staffMemberId: string | null }
 ): FiBookingRow | null {
   const startAt = row.start_time?.trim();
   const endAt = row.end_time?.trim();
@@ -176,7 +181,7 @@ export function mapFiCalendarEventOverlapRowToBookingRow(
     clinic_id: null,
     room_id: null,
     room_required: false,
-    assigned_staff_id: null,
+    assigned_staff_id: staffAssignment?.staffMemberId?.trim() || null,
     assigned_user_id: null,
     booking_type: eventType,
     booking_status: clientFields.calendarOsStatus ?? "scheduled",
@@ -267,6 +272,7 @@ export function mapFiCalendarEventsToOperationalCalendar(
     calendarTimezone: string;
     displayMaps: BookingDisplayContextMaps;
     services: FiServiceRow[];
+    staffCalendarLinks?: StaffCalendarLinkLookupRow[] | Map<string, StaffCalendarLinkLookupRow>;
   }
 ): { bookings: FiBookingRow[]; bookingDisplay: Record<string, OperationalCalendarBookingDisplay> } {
   const bookings: FiBookingRow[] = [];
@@ -275,7 +281,13 @@ export function mapFiCalendarEventsToOperationalCalendar(
   for (const row of rows) {
     if (row.tenant_id.trim() !== opts.tenantId.trim()) continue;
 
-    const mapped = mapFiCalendarEventOverlapRowToBookingRow(row, opts.calendarTimezone);
+    const assignment = opts.staffCalendarLinks
+      ? resolveCalendarEventStaffAssignment(row, opts.staffCalendarLinks, opts.tenantId)
+      : { staffMemberId: null, linkId: null };
+
+    const mapped = mapFiCalendarEventOverlapRowToBookingRow(row, opts.calendarTimezone, {
+      staffMemberId: assignment.staffMemberId,
+    });
     if (!mapped) continue;
 
     const cat = serviceForBookingType(opts.services, mapped.booking_type);

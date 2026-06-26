@@ -5,8 +5,14 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { InfoNotice } from "@/src/components/fi-admin/dashboard-ui";
 import { GoogleCalendarIntegrationCard } from "@/src/components/fi-admin/settings/GoogleCalendarIntegrationCard";
+import { ProviderCalendarLinksCard } from "@/src/components/fi-admin/settings/ProviderCalendarLinksCard";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
 import { loadGoogleCalendarConnectionStatus } from "@/src/lib/googleCalendar/googleCalendarConnectionStatus.server";
+import {
+  assertGoogleCalendarTenantAdminAccess,
+  GoogleCalendarIntegrationAccessError,
+} from "@/src/lib/googleCalendar/googleCalendarIntegrationAccess.server";
+import { loadProviderCalendarLinksPage } from "@/src/lib/googleCalendar/googleCalendarProviderLinks.server";
 import { canViewTenantConfigurationHub } from "@/src/lib/tenantAdmin/tenantAdminProfile.server";
 
 export const metadata = {
@@ -71,6 +77,18 @@ export default async function TenantIntegrationsSettingsPage({
   const googleCalendarStatus = await loadGoogleCalendarConnectionStatus(tenantId);
   const oauthConfigured = isGoogleCalendarOAuthConfigured();
 
+  let canManageCalendarLinks = false;
+  try {
+    await assertGoogleCalendarTenantAdminAccess(tenantId);
+    canManageCalendarLinks = true;
+  } catch (e) {
+    if (!(e instanceof GoogleCalendarIntegrationAccessError)) throw e;
+  }
+
+  const providerCalendarLinksPage = await loadProviderCalendarLinksPage(tenantId, {
+    canManage: canManageCalendarLinks,
+  });
+
   return (
     <div className="space-y-4">
       <div>
@@ -94,6 +112,8 @@ export default async function TenantIntegrationsSettingsPage({
         connectedFlash={connectedFlash}
         errorFlash={errorFlash}
       />
+
+      <ProviderCalendarLinksCard tenantId={tenantId} pageModel={providerCalendarLinksPage} />
 
       <section className="rounded-xl border border-white/[0.08] bg-[#0a1424]/40 p-4 sm:p-5">
         <h2 className="text-base font-semibold text-[#F8FAFC]">Other integrations</h2>
