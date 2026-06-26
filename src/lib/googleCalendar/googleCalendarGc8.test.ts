@@ -22,6 +22,10 @@ import {
 } from "./googleCalendarSyncHealthCore";
 import { createGc8MonitoringMockTables, withGc8IntegrationDefaults } from "./googleCalendarGc8MockTables";
 import {
+  attachFiEventBusMockToClient,
+  createFiEventBusMockTables,
+} from "@/src/lib/events/fiEventBusMockTables";
+import {
   beginGoogleCalendarSyncRun,
   loadGoogleCalendarSyncRunHistory,
   updateGoogleCalendarSyncHealth,
@@ -278,7 +282,11 @@ function createGc8MockSupabase(seed?: IntegrationRow) {
     },
   };
 
-  return { client: client as unknown as SupabaseClient, integrations, events, gc8 };
+  const eventBus = createFiEventBusMockTables();
+  const clientWithBus = client as unknown as SupabaseClient;
+  attachFiEventBusMockToClient(clientWithBus, eventBus);
+
+  return { client: clientWithBus, integrations, events, gc8, eventBus };
 }
 
 function successFetch(): typeof fetch {

@@ -2,6 +2,7 @@
  * CalendarOS GC-8 — Google Calendar monitoring dashboard types (client-safe).
  */
 
+import type { FiEventBusHealthClientModel } from "@/src/lib/events/fiEventBusHealthCore";
 import type { FiCalendarSyncFrequencyMinutes, FiCalendarSyncHealthStatus } from "./googleCalendarSyncHealthCore";
 
 export type GoogleCalendarSyncRunClientRow = {
@@ -56,6 +57,7 @@ export type GoogleCalendarMonitoringPageModel = {
   recentRuns: GoogleCalendarSyncRunClientRow[];
   openAlertCount: number;
   webhook: GoogleCalendarWebhookHealthModel;
+  eventBus: FiEventBusHealthClientModel;
 };
 
 export function formatHealthStatusLabel(status: FiCalendarSyncHealthStatus): string {

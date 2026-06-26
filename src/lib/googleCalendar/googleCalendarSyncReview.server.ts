@@ -20,6 +20,7 @@ import {
   type GoogleCalendarSyncReviewUpsertInput,
   type ReviewItemDbRow,
 } from "./googleCalendarSyncReviewCore";
+import { emitCalendarReviewItemCreated } from "@/src/lib/events/fiCalendarEventBus.server";
 import type { FiCalendarEvent } from "./googleCalendarTypes";
 
 type ServerOpts = {
@@ -120,6 +121,17 @@ export async function upsertGoogleCalendarSyncReviewItem(
     externalEventId: input.externalEventId,
     conflictType: input.detection.conflictType,
   });
+
+  await emitCalendarReviewItemCreated(
+    {
+      tenantId: input.tenantId,
+      integrationId: input.integrationId,
+      reviewItemId: (inserted as ReviewItemDbRow).id,
+      externalEventId: input.externalEventId,
+      conflictType: input.detection.conflictType,
+    },
+    opts
+  );
 
   return { ok: true, created: true, item: reviewItemRowToClient(inserted as ReviewItemDbRow) };
 }

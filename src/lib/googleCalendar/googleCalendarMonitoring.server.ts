@@ -22,6 +22,7 @@ import {
   type WebhookSubscriptionRow,
 } from "./googleCalendarWebhookSubscriptions.server";
 import type { GoogleCalendarWebhookHealthModel } from "./googleCalendarMonitoringCore";
+import { loadFiEventBusHealthForTenant } from "@/src/lib/events/fiEventBusHealth.server";
 
 type ServerOpts = {
   supabaseClientForTests?: SupabaseClient;
@@ -152,6 +153,7 @@ export async function loadGoogleCalendarMonitoringPage(
       recentRuns: [],
       openAlertCount: 0,
       webhook: deriveWebhookHealth(integration, null),
+      eventBus: await loadFiEventBusHealthForTenant(tenantId, opts),
     };
   }
 
@@ -201,6 +203,7 @@ export async function loadGoogleCalendarMonitoringPage(
     recentRuns: runs.map(syncRunRowToClient),
     openAlertCount,
     webhook,
+    eventBus: await loadFiEventBusHealthForTenant(tenantId, opts),
   };
 }
 

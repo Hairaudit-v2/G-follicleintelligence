@@ -48,6 +48,10 @@ None (root layer). Consumed by all OS modules.
 - `fi_integration_webhook_events`
 - `fi_machine_ingest_hmac` (HMAC verification config)
 
+**Platform Event Bus (GC-10)**
+
+- `fi_platform_events`, `fi_platform_event_subscribers`, `fi_platform_event_deliveries`
+
 **Migration block:** `10xx`
 
 ## External Integrations

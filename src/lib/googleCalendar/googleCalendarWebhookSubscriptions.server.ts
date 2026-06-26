@@ -11,6 +11,12 @@ import { shouldSkipDuplicateWebhookNotification } from "@/src/lib/calendar/provi
 
 import { syncGoogleCalendarIncrementalForWebhook } from "./googleCalendarIncrementalSync.server";
 import { createGoogleCalendarWebhookAlertIfNeeded } from "./googleCalendarWebhookAlerts.server";
+import {
+  emitCalendarWebhookReceived,
+  emitCalendarWebhookSubscriptionCreated,
+  emitCalendarWebhookSubscriptionExpired,
+  emitCalendarWebhookSubscriptionRenewed,
+} from "@/src/lib/events/fiCalendarEventBus.server";
 
 type ServerOpts = {
   supabaseClientForTests?: SupabaseClient;
@@ -195,6 +201,16 @@ export async function createGoogleCalendarWebhookSubscription(
     expirationAt: watchResult.subscription.expirationAt,
   });
 
+  await emitCalendarWebhookSubscriptionCreated(
+    {
+      tenantId,
+      integrationId: integration.id,
+      subscriptionId,
+      googleCalendarId,
+    },
+    opts
+  );
+
   return { ok: true, subscription: data as WebhookSubscriptionRow };
 }
 
@@ -216,10 +232,24 @@ export async function renewGoogleCalendarWebhookSubscription(
   if (!existing) return { ok: false, error: "Webhook subscription not found." };
 
   const row = existing as WebhookSubscriptionRow;
-  return createGoogleCalendarWebhookSubscription(
+  const result = await createGoogleCalendarWebhookSubscription(
     { tenantId: input.tenantId, googleCalendarId: row.google_calendar_id, integrationId: row.integration_id },
     opts
   );
+
+  if (result.ok) {
+    await emitCalendarWebhookSubscriptionRenewed(
+      {
+        tenantId: input.tenantId,
+        integrationId: row.integration_id,
+        subscriptionId: result.subscription.id,
+        googleCalendarId: row.google_calendar_id,
+      },
+      opts
+    );
+  }
+
+  return result;
 }
 
 /** Stop a Google Calendar webhook subscription. */
@@ -423,6 +453,18 @@ export async function handleGoogleCalendarWebhookNotification(
     messageNumber: input.messageNumber ?? null,
   });
 
+  await emitCalendarWebhookReceived(
+    {
+      tenantId: row.tenant_id,
+      integrationId: row.integration_id,
+      channelId,
+      resourceState,
+      googleCalendarId: row.google_calendar_id,
+      messageNumber: input.messageNumber,
+    },
+    opts
+  );
+
   return { ok: true, status: 200, outcome: resourceState === "sync" ? "sync_triggered" : "accepted" };
 }
 
@@ -495,6 +537,16 @@ export async function markExpiredGoogleCalendarWebhookSubscriptions(
         message: "Real-time sync fell back to scheduled polling until renewed.",
         idempotencyKey: `gcal-webhook-expired:${row.id}`,
         metadata: { subscriptionId: row.id, googleCalendarId: row.google_calendar_id },
+      },
+      opts
+    );
+
+    await emitCalendarWebhookSubscriptionExpired(
+      {
+        tenantId: row.tenant_id,
+        integrationId: row.integration_id,
+        subscriptionId: row.id,
+        googleCalendarId: row.google_calendar_id,
       },
       opts
     );

@@ -21,6 +21,10 @@ import {
   webhookSyncModeBadgeClass,
   type GoogleCalendarMonitoringPageModel,
 } from "@/src/lib/googleCalendar/googleCalendarMonitoringCore";
+import {
+  fiEventBusHealthBadgeClass,
+  formatFiEventBusHealthLabel,
+} from "@/src/lib/events/fiEventBusHealthCore";
 import { formatSyncFrequencyLabel } from "@/src/lib/googleCalendar/googleCalendarSyncHealthCore";
 
 function healthBadgeClass(status: string): string {
@@ -252,6 +256,54 @@ export function GoogleCalendarMonitoringCard({
           )}
         </div>
       ) : null}
+
+      <div className="mt-5 overflow-x-auto">
+        <details className="rounded-lg border border-white/[0.06] bg-[#060d18]/40 p-3">
+          <summary className="cursor-pointer text-sm font-medium text-[#CBD5E1]">
+            Platform Events diagnostics
+          </summary>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">Event bus health</div>
+              <div
+                className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-sm font-medium ${fiEventBusHealthBadgeClass(pageModel.eventBus.healthStatus)}`}
+              >
+                {formatFiEventBusHealthLabel(pageModel.eventBus.healthStatus)}
+              </div>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">Emitted (24h)</div>
+              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">{pageModel.eventBus.emittedLast24h}</div>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">Pending deliveries</div>
+              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">{pageModel.eventBus.pendingDeliveries}</div>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">Failed deliveries</div>
+              <div className="mt-1 text-sm text-[#F8FAFC] tabular-nums">{pageModel.eventBus.failedDeliveries}</div>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">Last emitted event</div>
+              <div className="mt-1 text-sm text-[#F8FAFC]">{pageModel.eventBus.lastEventName ?? "—"}</div>
+              <div className="mt-1 text-xs text-[#94A3B8]">{formatRelativeTime(pageModel.eventBus.lastEventAt)}</div>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-[#060d18]/60 p-3">
+              <div className="text-xs uppercase tracking-wide text-[#64748B]">Last failed event</div>
+              {pageModel.eventBus.lastFailure ? (
+                <>
+                  <div className="mt-1 text-sm text-[#F8FAFC]">{pageModel.eventBus.lastFailure.eventName}</div>
+                  <div className="mt-1 text-xs text-red-300/80 truncate" title={pageModel.eventBus.lastFailure.error ?? undefined}>
+                    {pageModel.eventBus.lastFailure.error ?? "Unknown error"}
+                  </div>
+                </>
+              ) : (
+                <div className="mt-1 text-sm text-[#64748B]">None</div>
+              )}
+            </div>
+          </div>
+        </details>
+      </div>
 
       <div className="mt-5 overflow-x-auto">
         <h3 className="mb-2 text-sm font-medium text-[#CBD5E1]">Recent sync history</h3>

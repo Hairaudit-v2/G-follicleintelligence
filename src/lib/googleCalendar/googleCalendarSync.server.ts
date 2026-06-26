@@ -19,6 +19,11 @@ import type {
 import { assertCronAuthorized } from "@/src/lib/server/cronAuth";
 import { logStructured } from "@/src/lib/server/structuredLog";
 import { runScheduledGoogleCalendarSync } from "./googleCalendarSyncScheduler.server";
+import {
+  emitCalendarSyncCompleted,
+  emitCalendarSyncFailed,
+  emitCalendarSyncStarted,
+} from "@/src/lib/events/fiCalendarEventBus.server";
 
 export const GOOGLE_CALENDAR_SYNC_MAX_TENANTS = 50;
 
@@ -274,6 +279,16 @@ export async function syncGoogleCalendarForTenant(
     opts
   );
 
+  await emitCalendarSyncStarted(
+    {
+      tenantId,
+      integrationId: integration.id,
+      source,
+      correlationId: runId,
+    },
+    opts
+  );
+
   const syncResult = await syncGoogleCalendarEvents(tenantId, {
     supabaseClientForTests: opts.supabaseClientForTests,
     fetchOverride: opts.fetchOverride,
@@ -301,6 +316,16 @@ export async function syncGoogleCalendarForTenant(
       },
       opts
     );
+    await emitCalendarSyncFailed(
+      {
+        tenantId,
+        integrationId: integration.id,
+        source,
+        correlationId: runId,
+        error: syncResult.error,
+      },
+      opts
+    );
     return {
       tenantId,
       integrationId: integration.id,
@@ -321,6 +346,22 @@ export async function syncGoogleCalendarForTenant(
       startedAt,
       ok: true,
       result: syncResultData,
+    },
+    opts
+  );
+
+  await emitCalendarSyncCompleted(
+    {
+      tenantId,
+      integrationId: integration.id,
+      source,
+      correlationId: runId,
+      result: {
+        eventsFetched: syncResultData.eventsFetchedTotal ?? syncResultData.discovered,
+        eventsInserted: syncResultData.eventsInsertedTotal ?? syncResultData.created,
+        eventsUpdated: syncResultData.eventsUpdatedTotal ?? syncResultData.updated,
+        eventsSkipped: syncResultData.eventsSkippedTotal ?? syncResultData.skipped,
+      },
     },
     opts
   );

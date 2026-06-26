@@ -18,6 +18,11 @@ import type { FiCalendarEvent } from "@/src/lib/googleCalendar/googleCalendarTyp
 
 import { createGoogleCalendarWebhookAlertIfNeeded } from "./googleCalendarWebhookAlerts.server";
 import {
+  emitCalendarEventCancelled,
+  emitCalendarEventUpdated,
+  emitCalendarReconciliationConflict,
+} from "@/src/lib/events/fiCalendarEventBus.server";
+import {
   shouldProcessEventVersion,
   upsertCalendarEventVersion,
   type EventVersionRow,
@@ -91,6 +96,17 @@ async function logReconciliationDecision(
       },
       opts
     );
+
+    await emitCalendarReconciliationConflict(
+      {
+        tenantId: input.tenantId,
+        integrationId: input.integrationId,
+        externalEventId: input.googleEvent.externalEventId,
+        conflictType: (extra?.conflictType as string | undefined) ?? decision,
+        decision,
+      },
+      opts
+    );
   }
 }
 
@@ -133,6 +149,25 @@ export async function reconcileGoogleCalendarEventChange(
       await logReconciliationDecision(input, "staged_cancelled_unmatched", ownership, opts, {
         conflictType: "cancelled_unmatched",
       });
+      await emitCalendarEventCancelled(
+        {
+          tenantId,
+          integrationId,
+          externalEventId: extId,
+          decision: "staged_cancelled_unmatched",
+        },
+        opts
+      );
+      await emitCalendarReconciliationConflict(
+        {
+          tenantId,
+          integrationId,
+          externalEventId: extId,
+          conflictType: "cancelled_unmatched",
+          decision: "staged_cancelled_unmatched",
+        },
+        opts
+      );
       await upsertCalendarEventVersion(
         {
           tenantId,
@@ -263,6 +298,16 @@ export async function reconcileGoogleCalendarEventChange(
       opts
     );
     await logReconciliationDecision(input, "updated_allowed_fields", ownership, opts);
+    await emitCalendarEventUpdated(
+      {
+        tenantId,
+        integrationId,
+        localEventId: localEvent.id,
+        externalEventId: extId,
+        decision: "updated_allowed_fields",
+      },
+      opts
+    );
     return { decision: "updated_allowed_fields", versionStatus: "synced" };
   }
 
@@ -301,6 +346,16 @@ export async function reconcileGoogleCalendarEventChange(
       opts
     );
     await logReconciliationDecision(input, "mirrored_google_owned", ownership, opts);
+    await emitCalendarEventUpdated(
+      {
+        tenantId,
+        integrationId,
+        localEventId: localEvent.id,
+        externalEventId: extId,
+        decision: "mirrored_google_owned",
+      },
+      opts
+    );
     return { decision: "mirrored_google_owned", versionStatus: "synced" };
   }
 
