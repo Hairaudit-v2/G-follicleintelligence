@@ -270,6 +270,7 @@ export async function seedIhrgDemoExpansion(
   const stageIdBySlug = new Map(stages.map((s) => [s.slug, s.id]));
 
   const clinics = await loadClinics(supabase, tenantId);
+  console.log("[ihrg-demo] Clinics loaded:", clinics.length);
   const clinicIdBySlug = new Map<string, string>();
   for (const clinic of clinics) {
     const slug = clinicSlug(clinic);
@@ -278,6 +279,7 @@ export async function seedIhrgDemoExpansion(
 
   const persons = await loadPersons(supabase, tenantId);
   const patients = await loadPatients(supabase, tenantId);
+  console.log("[ihrg-demo] Patients loaded:", patients.length, "(persons:", persons.length, ")");
   const personIdByPatientKey = new Map<string, string>();
   const patientIdByKey = new Map<string, string>();
 

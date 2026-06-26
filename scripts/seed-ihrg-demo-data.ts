@@ -65,6 +65,9 @@ function printResult(result: Awaited<ReturnType<typeof seedIhrgDemoData>>): void
   console.log(`Patients target: ${result.patientsTarget} (created ${result.createdPatients}, existing ${result.existingPatients})`);
   console.log(`Surgeries target: ${result.surgeriesTarget} (created ${result.createdSurgeries}, existing ${result.existingSurgeries})`);
   console.log(`OK: ${result.ok}`);
+  if (result.error) {
+    console.log(`Error: ${result.error}`);
+  }
 
   printSection("Core OS", [
     ["Clinics created", result.createdClinics],
@@ -108,11 +111,15 @@ async function main(): Promise<void> {
   printResult(result);
 
   if (!result.ok) {
+    console.error("\nSeed failed");
+    console.error(JSON.stringify(result, null, 2));
     process.exit(1);
   }
 }
 
 main().catch((e) => {
+  console.error("Seed failed with exception:");
   console.error(e instanceof Error ? e.message : e);
+  if (e instanceof Error && e.stack) console.error(e.stack);
   process.exit(1);
 });

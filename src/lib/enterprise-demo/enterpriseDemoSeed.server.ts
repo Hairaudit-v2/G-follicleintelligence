@@ -21,6 +21,8 @@ import {
 
 export type EnterpriseDemoSeedResult = {
   ok: boolean;
+  /** Primary failure reason when `ok` is false (guard, tenant refusal, or thrown error message). */
+  error?: string;
   tenantSlug: string;
   tenantId?: string;
   createdTenant: boolean;
@@ -295,8 +297,10 @@ export async function seedEnterpriseDemoTenant(
 
   const guard = assertEnterpriseDemoSeedAllowed(env);
   if (!guard.ok) {
+    console.error("[enterprise-demo] Seed blocked:", guard.reason);
     return {
       ok: false,
+      error: guard.reason,
       tenantSlug: ENTERPRISE_DEMO_TENANT_SLUG,
       createdTenant: false,
       createdClinics: 0,
@@ -347,10 +351,13 @@ export async function seedEnterpriseDemoTenant(
   const supabase = opts?.supabase ?? supabaseAdmin();
 
   try {
+    console.log("[enterprise-demo] Resolving demo tenant...");
     const tenantResult = await findOrCreateDemoTenant(supabase);
     if (!tenantResult.ok) {
+      console.error("[enterprise-demo] Tenant resolution failed:", tenantResult.reason);
       return {
         ok: false,
+        error: tenantResult.reason,
         tenantSlug: ENTERPRISE_DEMO_TENANT_SLUG,
         tenantId: tenantResult.tenantId,
         createdTenant: false,
@@ -400,23 +407,50 @@ export async function seedEnterpriseDemoTenant(
     }
 
     await bumpDemoTenantVersionMetadata(supabase, tenantResult.tenantId);
+    console.log("[enterprise-demo] Tenant ready:", tenantResult.tenantId);
 
+    console.log("[enterprise-demo] Seeding clinics...");
     const clinicResult = await seedDemoClinics(supabase, tenantResult.tenantId);
+    console.log(
+      "[enterprise-demo] Clinics:",
+      clinicResult.createdClinics,
+      "created,",
+      clinicResult.existingClinics,
+      "existing"
+    );
     warnings.push(...clinicResult.warnings);
 
+    console.log("[enterprise-demo] Seeding staff hierarchy...");
     const staffResult = await seedEnterpriseDemoStaffHierarchy(supabase, tenantResult.tenantId);
+    console.log(
+      "[enterprise-demo] Staff:",
+      staffResult.createdStaff,
+      "created,",
+      staffResult.existingStaff,
+      "existing"
+    );
     warnings.push(...staffResult.warnings);
 
+    console.log("[enterprise-demo] Seeding patients and consultations...");
     const patientsResult = await seedEnterpriseDemoPatientsAndConsultations(
       supabase,
       tenantResult.tenantId,
       volume
     );
+    console.log(
+      "[enterprise-demo] Patients:",
+      patientsResult.createdPatients,
+      "created,",
+      patientsResult.existingPatients,
+      "existing"
+    );
     warnings.push(...patientsResult.warnings);
 
+    console.log("[enterprise-demo] Seeding surgeries...");
     const surgeriesResult = await seedEnterpriseDemoSurgeries(supabase, tenantResult.tenantId, volume);
     warnings.push(...surgeriesResult.warnings);
 
+    console.log("[enterprise-demo] Seeding imaging and audit...");
     const imagingAuditResult = await seedEnterpriseDemoImagingAndAudit(
       supabase,
       tenantResult.tenantId,
@@ -424,8 +458,10 @@ export async function seedEnterpriseDemoTenant(
     );
     warnings.push(...imagingAuditResult.warnings);
 
+    console.log("[enterprise-demo] Seeding financial OS...");
     const financialResult = await seedEnterpriseDemoFinancialOs(supabase, tenantResult.tenantId, volume);
     warnings.push(...financialResult.warnings);
+    console.log("[enterprise-demo] Core seed completed successfully");
 
     return {
       ok: true,
@@ -477,52 +513,8 @@ export async function seedEnterpriseDemoTenant(
     };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return {
-      ok: false,
-      tenantSlug: ENTERPRISE_DEMO_TENANT_SLUG,
-      createdTenant: false,
-      createdClinics: 0,
-      existingClinics: 0,
-      createdStaff: 0,
-      existingStaff: 0,
-      updatedStaffLinks: 0,
-      createdPatients: 0,
-      existingPatients: 0,
-      createdConsultations: 0,
-      existingConsultations: 0,
-      createdClinicalDetails: 0,
-      existingClinicalDetails: 0,
-      createdCases: 0,
-      existingCases: 0,
-      createdBookings: 0,
-      existingBookings: 0,
-      createdSurgeries: 0,
-      existingSurgeries: 0,
-      createdTeamAssignments: 0,
-      existingTeamAssignments: 0,
-      createdGraftSessions: 0,
-      existingGraftSessions: 0,
-      createdGraftEvents: 0,
-      existingGraftEvents: 0,
-      createdImages: 0,
-      existingImages: 0,
-      createdProtocolSessions: 0,
-      existingProtocolSessions: 0,
-      createdOutcomeAudits: 0,
-      existingOutcomeAudits: 0,
-      createdInvoices: 0,
-      existingInvoices: 0,
-      createdInvoiceItems: 0,
-      createdPaymentRequests: 0,
-      existingPaymentRequests: 0,
-      createdPayments: 0,
-      existingPayments: 0,
-      updatedCaseFranchiseRisk: 0,
-      existingCaseFranchiseRisk: 0,
-      updatedBookingFinancialStatus: 0,
-      linkedConsultations: 0,
-      createdDemoUsers: 0,
-      warnings: [message],
-    };
+    console.error("[enterprise-demo] Seed failed:", message);
+    if (e instanceof Error && e.stack) console.error(e.stack);
+    throw e;
   }
 }
