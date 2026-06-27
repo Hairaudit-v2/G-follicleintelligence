@@ -4,6 +4,8 @@
 
 This directory documents each FI OS module at system scale: purpose, dependencies, event contracts, data ownership, security boundaries, and failure modes. It complements marketing architecture diagrams (`components/platform/PlatformArchitectureMap.tsx`) with engineering truth.
 
+**Architecture diagrams:** [platform-diagrams.md](./platform-diagrams.md) — platform overview, module tree, multi-tenant hierarchy, data schema groups, and external integration flow.
+
 ## Governance
 
 | Concern | Document |

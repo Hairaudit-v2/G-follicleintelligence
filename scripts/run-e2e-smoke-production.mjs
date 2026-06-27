@@ -12,11 +12,16 @@
  *   FI_E2E_BASE_URL — defaults to http://127.0.0.1:<port>
  *   FI_E2E_BROWSERS — comma-separated project names (default: all five)
  */
-import { spawn, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  resolveListeningPort,
+  shutdownProductionServer,
+  startNextProductionServer,
+  waitForProductionServer,
+} from "./lib/e2e-production-server.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -26,15 +31,17 @@ const args = process.argv.slice(2);
 const skipBuild = args.includes("--skip-build");
 const portArg = args.find((a) => a.startsWith("--port="));
 const browsersArg = args.find((a) => a.startsWith("--browsers="));
-const port = portArg ? Number(portArg.split("=")[1]) : 3000;
+const preferredPort = portArg ? Number(portArg.split("=")[1]) : 3000;
 
-if (!Number.isFinite(port) || port < 1 || port > 65535) {
+if (!Number.isFinite(preferredPort) || preferredPort < 1 || preferredPort > 65535) {
   console.error("Invalid --port value.");
   process.exit(1);
 }
 
-const baseUrl = (process.env.FI_E2E_BASE_URL ?? `http://127.0.0.1:${port}`).replace(/\/$/, "");
 const browsers = browsersArg?.split("=")[1] ?? process.env.FI_E2E_BROWSERS;
+const host = (process.env.FI_E2E_BASE_URL ?? "http://127.0.0.1").includes("127.0.0.1")
+  ? "127.0.0.1"
+  : "localhost";
 
 function run(cmd, cmdArgs, opts = {}) {
   // Only npm needs shell on Windows (npm.cmd). spawn with shell:true breaks
@@ -52,28 +59,6 @@ function run(cmd, cmdArgs, opts = {}) {
   }
 }
 
-function waitForPort(host, targetPort, timeoutMs = 120_000) {
-  const started = Date.now();
-  return new Promise((resolve, reject) => {
-    const tick = () => {
-      if (Date.now() - started > timeoutMs) {
-        reject(new Error(`Timed out waiting for ${host}:${targetPort}`));
-        return;
-      }
-      const socket = createConnection({ host, port: targetPort });
-      socket.once("connect", () => {
-        socket.end();
-        resolve();
-      });
-      socket.once("error", () => {
-        socket.destroy();
-        setTimeout(tick, 500);
-      });
-    };
-    tick();
-  });
-}
-
 if (!skipBuild) {
   run("npm", ["run", "build"], { env: { NODE_ENV: "production" } });
 } else if (!existsSync(join(root, ".next", "BUILD_ID"))) {
@@ -81,33 +66,20 @@ if (!skipBuild) {
   process.exit(1);
 }
 
-console.log(`→ Starting production server at ${baseUrl} …`);
-const server = spawn("npm", ["run", "start", "--", "-p", String(port)], {
-  cwd: root,
-  stdio: "inherit",
-  shell: process.platform === "win32",
-  env: { ...process.env, NODE_ENV: "production", PORT: String(port) },
-});
+const port = await resolveListeningPort(host, preferredPort);
+const baseUrl = `http://${host}:${port}`.replace(/\/$/, "");
 
-let serverExited = false;
-let shuttingDown = false;
+console.log(`→ Starting production server at ${baseUrl} …`);
+const { server, state } = startNextProductionServer({ root, port });
+const shuttingDown = { value: false };
+
 server.on("exit", (code) => {
-  serverExited = true;
-  if (!shuttingDown && code && code !== 0) {
+  if (!shuttingDown.value && code && code !== 0) {
     console.error(`next start exited with code ${code}`);
   }
 });
 
-const shutdown = () => {
-  shuttingDown = true;
-  if (!serverExited && server.pid) {
-    if (process.platform === "win32") {
-      spawnSync("taskkill", ["/pid", String(server.pid), "/f", "/t"], { stdio: "ignore" });
-    } else {
-      server.kill("SIGTERM");
-    }
-  }
-};
+const shutdown = () => shutdownProductionServer(server, shuttingDown);
 
 process.on("SIGINT", () => {
   shutdown();
@@ -119,8 +91,7 @@ process.on("SIGTERM", () => {
 });
 
 try {
-  const host = baseUrl.includes("127.0.0.1") ? "127.0.0.1" : "localhost";
-  await waitForPort(host, port);
+  await waitForProductionServer(host, port, state);
   console.log("→ Server ready. Running Playwright smoke + security suite…");
   // Project grep in playwright.config.ts already limits to @security|@smoke|@a11y.
   // Invoke the Playwright CLI via node (npx + shell:false breaks on Windows).
