@@ -3,7 +3,8 @@
 **Sprint:** FI-PH1 — Production Hardening  
 **Production tenant:** Evolved Hair Restoration (Perth)  
 **Target score:** **95 / 100** required for production readiness sign-off  
-**Status:** Template — scores To verify until validation runs complete
+**Status:** Task 6 assessed — **48 / 100** (below target; **NO-GO** for deployment)  
+**Assessment basis:** Engineering validation (Tasks 4–5) + absence of production operator evidence
 
 **Related docs**
 
@@ -43,7 +44,45 @@
 
 ---
 
-## Scorecard template
+## Scorecard (Task 6 assessment)
+
+**Assessed by:** FI-PH1 Task 6 execution (documentation closure)  
+**Date:** 2026-06-27  
+**Environment:** Engineering validation only — **production operator evidence not captured**  
+**Tenant:** `EVOLVED_PERTH_TENANT_ID` (confirm UUID in Vercel — do not paste here)
+
+| Category | Weight | Score | Max | Notes / evidence |
+|----------|-------:|------:|----:|------------------|
+| CRM / LeadFlow | 15 | 7 | 15 | Code paths + checklist documented (Tasks 4–5); [smoketest step 1](./evolved-smoketest-journey.md) **not executed** |
+| Calendar | 15 | 10 | 15 | FI-native booking core validated in code; BLK-CAL-01 mitigation documented; no production booking smoke |
+| Patient | 10 | 5 | 10 | Schema/RLS documented; no production patient workflow smoke |
+| Consultation | 10 | 5 | 10 | ConsultationOS paths documented; forms not production-tested |
+| Surgery | 15 | 8 | 15 | Readiness board + confirmation guard unit-tested (Task 5); procedure day not production-tested |
+| Financial | 15 | 10 | 15 | Guard + SOP authored (Task 5); **BLK-FIN-01/02** staff sign-off pending |
+| Security | 10 | 0 | 10 | **Open P0:** BLK-SEC-01, BLK-SEC-02, BLK-SEC-05, BLK-LEG-01 env proof — rubric: open P0 = 0 |
+| Performance | 5 | 0 | 5 | Not assessed — no production load sign-off |
+| Monitoring | 5 | 3 | 5 | Local `check:env` pass (Task 5); **no** `smoke:prod` against production URL |
+| **Total** | **100** | **48** | **100** | **Target: ≥ 95 — NOT MET** |
+
+### Score gap analysis (47 points to target)
+
+| Gap | Points lost | Blocker / action |
+|-----|------------:|------------------|
+| Security (open P0) | 10 | BLK-SEC-01, BLK-SEC-02, BLK-SEC-05, BLK-LEG-01 |
+| CRM / LeadFlow | 8 | Execute smoketest step 1 with real staff |
+| Calendar | 5 | Production booking smoke + sync health review |
+| Patient | 5 | Production patient profile smoke |
+| Consultation | 5 | Production consult completion smoke |
+| Surgery | 7 | Procedure day production dry-run |
+| Financial | 5 | SOP sign-off + guard staging test (E-FIN-01–03) |
+| Performance | 5 | Staff latency sign-off |
+| Monitoring | 2 | Production `smoke:prod` green |
+
+**Primary blockers preventing ≥ 95:** All six P0 blockers remain open with zero production deployment evidence in [production-evidence-registry.md](./production-evidence-registry.md).
+
+---
+
+## Scorecard template (historical)
 
 **Assessed by:** To verify  
 **Date:** To verify  

@@ -4,8 +4,8 @@
 **Production tenant:** Evolved Hair Restoration (Perth)  
 **Purpose:** Single end-to-end SMOKETEST journey template — lead through analytics closure  
 **Convention:** Prefix all test records with `SMOKETEST-` per [clinic readiness runbook](../smoke/fi-os-clinic-readiness-runbook.md)  
-**Status:** Template — do not mark Pass without evidence  
-**Last updated:** To verify
+**Status:** Task 6 — **Not executed** (blocked on BLK-SEC-05 real staff auth + operator assignment)  
+**Last updated:** 2026-06-27
 
 **Related docs**
 
@@ -13,6 +13,46 @@
 - [Operational validation framework](./evolved-operational-validation.md) — per-OS steps
 - [Production blockers](./evolved-production-blockers.md)
 - [Go/no-go checklist](./evolved-go-no-go-checklist.md)
+- [Final P0 execution dashboard](./final-p0-execution-dashboard.md)
+- [Production evidence registry](./production-evidence-registry.md)
+
+---
+
+## Task 6 — Full journey execution status
+
+```
+Lead Created
+    ↓
+Consultation Booked
+    ↓
+Consultation Completed
+    ↓
+Patient Created
+    ↓
+Images Uploaded
+    ↓
+Treatment Plan Created
+    ↓
+Deposit Recorded
+    ↓
+Surgery Booked
+    ↓
+Procedure Day Executed
+    ↓
+Post-op Review Completed
+    ↓
+HairAudit Linked
+    ↓
+Analytics Updated
+```
+
+| Field | Value |
+|-------|-------|
+| **Execution attempted** | No |
+| **Blocking reason** | BLK-SEC-05 — no real Evolved `auth.users` ↔ `fi_users` production session; operator not assigned |
+| **Prerequisite** | Complete [P0 operator checklist](./evolved-p0-operator-execution-checklist.md) §7–8 before re-run |
+| **Overall completed** | **No** (0 / 12 steps) |
+| **Evidence package** | None attached |
 
 ---
 
@@ -26,7 +66,7 @@
 | **Environment URL** | To verify |
 | **Tenant ID** | `EVOLVED_PERTH_TENANT_ID` (confirm in Vercel — do not paste UUID here) |
 | **Staff session** | To verify (real `fi_users` row) |
-| **Overall result** | ☐ Pass · ☐ Fail · ☐ Partial (Accepted risk) |
+| **Overall result** | ☐ Pass · ☑ Fail · ☐ Partial (Accepted risk) |
 
 **Linked records (fill as journey progresses):**
 
@@ -54,8 +94,10 @@
 | **DB evidence** | `fi_crm_leads` (and/or `fi_leads` — **To verify** which Evolved uses); `fi_crm_lead_stage_history`; `fi_crm_activity_events` (`lead.created`, `lead.updated`); optional `fi_crm_notes`, `fi_crm_tasks` |
 | **UI evidence** | Screenshot: lead detail + pipeline stage + activity feed |
 | **External integration evidence** | HubSpot: N/A or dry-run only (BLK-X-01); reminder cron: `fi_reminder_jobs` if `lead.created` triggers — **To verify** |
-| **Pass / Fail** | To verify |
-| **Notes** | BLK-X-03: confirm which lead model is SoR for Evolved |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Journey not started — requires authenticated production session (BLK-SEC-05). BLK-X-03: confirm which lead model is SoR for Evolved before execution. |
 
 ---
 
@@ -70,8 +112,10 @@
 | **DB evidence** | `fi_bookings`; optional `fi_booking_resource_requirements`; `fi_crm_activity_events` (`booking.created`) |
 | **UI evidence** | Screenshot: calendar + booking detail |
 | **External integration evidence** | If Google connected: `fi_calendar_sync_health`, staged queue — approve must **not** create `fi_bookings` (BLK-CAL-01); Timely N/A or webhook secret verified |
-| **Pass / Fail** | To verify |
-| **Notes** | Manual FI booking is source of record |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — step 1 not completed. BLK-CAL-01: manual FI booking remains SoR. |
 
 ---
 
@@ -86,8 +130,10 @@
 | **DB evidence** | `fi_consultations`; consultation form instance tables; `fi_crm_activity_events` |
 | **UI evidence** | Screenshot: completed consultation + forms |
 | **External integration evidence** | OpenAI checklist AI — N/A unless enabled (**To verify**) |
-| **Pass / Fail** | To verify |
-| **Notes** | Workflow engine v1 handlers are placeholders (BLK-X-02) |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-X-02: workflow engine v1 handlers are placeholders. |
 
 ---
 
@@ -102,8 +148,10 @@
 | **DB evidence** | `fi_persons`, `fi_person_roles`, `fi_patients`, `fi_patient_clinical_details`, `fi_patient_source_ids`, `fi_timeline_events`, `fi_crm_activity_events` |
 | **UI evidence** | Screenshot: patient profile |
 | **External integration evidence** | HLI ingest via `/api/fi/events` only if BLK-LEG-01 decision enables legacy API |
-| **Pass / Fail** | To verify |
-| **Notes** | Cross-tenant visibility = **P0 stop** |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. Cross-tenant denial test (E-ID-02) must run with non-member auth user. BLK-LEG-01: legacy API remains OFF. |
 
 ---
 
@@ -118,8 +166,10 @@
 | **DB evidence** | `fi_patient_images`; Supabase Storage object path |
 | **UI evidence** | Screenshot: uploaded image in patient record |
 | **External integration evidence** | HairAudit classify endpoint — only if explicitly tested; IM-1 stub by default |
-| **Pass / Fail** | To verify |
-| **Notes** | Do not expect live AI classification unless IM-12 activated |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-SEC-01: storage restore not verified — image DR posture unconfirmed. |
 
 ---
 
@@ -134,8 +184,10 @@
 | **DB evidence** | `fi_case_surgery_plans`, `fi_cases`, optional `fi_crm_quotes` |
 | **UI evidence** | Screenshot: case + surgery plan |
 | **External integration evidence** | None required |
-| **Pass / Fail** | To verify |
-| **Notes** | Surgery plan may not appear on patient timeline feed (BLK-X-04) |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-X-04: surgery plan may not appear on patient timeline feed. |
 
 ---
 
@@ -150,8 +202,10 @@
 | **DB evidence** | `fi_payment_records`; optional `fi_financial_transactions`, `fi_revenue_pipeline` |
 | **UI evidence** | Screenshot: payment record create flow |
 | **External integration evidence** | Stripe webhook — **off** for FI-PH1 unless BLK-FIN-03 validated |
-| **Pass / Fail** | To verify |
-| **Notes** | BLK-FIN-01: manual tracking only |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-FIN-01: SOP staff acknowledgement pending (E-FIN-01). Manual records only — not Stripe proof. |
 
 ---
 
@@ -166,8 +220,10 @@
 | **DB evidence** | `fi_bookings` (surgery service type); `fi_cases`, `fi_case_procedures`; `fi_crm_activity_events` |
 | **UI evidence** | Screenshot: surgery booking + clearance note |
 | **External integration evidence** | Google mirror optional — FI booking remains SoR |
-| **Pass / Fail** | To verify |
-| **Notes** | Automated deposit gate not enforced — manual SOP required |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-FIN-02: guard blocks confirm when `not_ready` within 14d (E-FIN-03 staging test pending); manual SOP sign-off pending. |
 
 ---
 
@@ -182,8 +238,10 @@
 | **DB evidence** | `fi_case_procedures`, `fi_surgery_graft_sessions`, `fi_surgery_graft_count_events`, `fi_staff_event_assignments` |
 | **UI evidence** | Screenshot: procedure day view |
 | **External integration evidence** | None required for core path |
-| **Pass / Fail** | To verify |
-| **Notes** | BLK-ACA-01: manual privilege verification; migration `20260718120002_fi_case_procedures_v11_team_milestones.sql` required |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-ACA-01: manual privilege verification required. Confirm migration `20260718120002_fi_case_procedures_v11_team_milestones.sql` applied in production. |
 
 ---
 
@@ -198,8 +256,10 @@
 | **DB evidence** | `fi_case_post_op_tracking`; optional `fi_patient_images`, `fi_patient_therapy_plans` (MedicationOS partial) |
 | **UI evidence** | Screenshot: post-op review |
 | **External integration evidence** | ReceptionOS follow-up — dry-run only for FI-PH1 (BLK-REC-01) |
-| **Pass / Fail** | To verify |
-| **Notes** | MedicationOS therapy timeline partial (BLK-MED-01) |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-REC-01: ReceptionOS live-send not validated. BLK-MED-01: MedicationOS partial. |
 
 ---
 
@@ -214,8 +274,10 @@
 | **DB evidence** | `fi_events`, `fi_event_links`, `fi_cases`, optional `fi_media_assets`, `fi_timeline_events`, `fi_scorecards`, `fi_reports` |
 | **UI evidence** | Screenshot: case audit / timeline linkage |
 | **External integration evidence** | `POST /api/fi/events` with HairAudit events — **only if** legacy API enabled per go/no-go |
-| **Pass / Fail** | To verify |
-| **Notes** | High risk if legacy API enabled without rotation (BLK-LEG-01) |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. Document **N/A** at execution if HairAudit ingest deferred; legacy API remains OFF per BLK-LEG-01 decision. |
 
 ---
 
@@ -230,27 +292,29 @@
 | **DB evidence** | `fi_analytics_events` filtered by tenant + SMOKETEST- window; parallel `fi_crm_activity_events` |
 | **UI evidence** | Screenshot: analytics dashboard if available |
 | **External integration evidence** | Intelligence Bus — **off** in production (BLK-INT-01); no `fi_intelligence_event_logs` persistence expected |
-| **Pass / Fail** | To verify |
-| **Notes** | Acknowledge incomplete module publishers |
+| **Pass / Fail** | Fail (not executed) |
+| **Completed** | **No** |
+| **Evidence captured** | **No** |
+| **Failure notes** | Blocked — prior steps not completed. BLK-INT-01: Intelligence Bus off in production. BLK-X-05: partial analytics publishers — document emitted vs skipped at execution. |
 
 ---
 
 ## Journey summary
 
-| Step | Test record ID | Pass / Fail | Blocker refs | Evidence attached |
-|------|----------------|:-----------:|--------------|:-----------------:|
-| 1 Lead Created | SMOKETEST-LEAD-001 | To verify | BLK-X-03 | ☐ |
-| 2 Consultation Booked | SMOKETEST-BOOK-CONSULT-001 | To verify | BLK-CAL-01 | ☐ |
-| 3 Consultation Completed | SMOKETEST-CONSULT-001 | To verify | BLK-X-02 | ☐ |
-| 4 Patient Created | SMOKETEST-PATIENT-001 | To verify | BLK-LEG-01 | ☐ |
-| 5 Images Uploaded | SMOKETEST-IMG-001 | To verify | — | ☐ |
-| 6 Treatment Plan Created | SMOKETEST-PLAN-001 | To verify | BLK-X-04 | ☐ |
-| 7 Deposit Recorded | SMOKETEST-DEPOSIT-001 | To verify | BLK-FIN-01 | ☐ |
-| 8 Surgery Booked | SMOKETEST-BOOK-SURG-001 | To verify | BLK-FIN-02 | ☐ |
-| 9 Procedure Day Executed | SMOKETEST-PROC-001 | To verify | BLK-ACA-01 | ☐ |
-| 10 Post-op Review Completed | SMOKETEST-POSTOP-001 | To verify | BLK-MED-01, BLK-REC-01 | ☐ |
-| 11 HairAudit / Outcome Linked | SMOKETEST-HAIRAUDIT-001 | To verify | BLK-LEG-01 | ☐ |
-| 12 Analytics Updated | SMOKETEST-ANALYTICS-001 | To verify | BLK-INT-01, BLK-X-05 | ☐ |
+| Step | Test record ID | Completed | Evidence | Pass / Fail | Blocker refs | Failure notes |
+|------|----------------|:---------:|:--------:|:-----------:|--------------|---------------|
+| 1 Lead Created | SMOKETEST-LEAD-001 | No | No | Fail | BLK-SEC-05, BLK-X-03 | Not started — no prod auth session |
+| 2 Consultation Booked | SMOKETEST-BOOK-CONSULT-001 | No | No | Fail | BLK-CAL-01 | Blocked on step 1 |
+| 3 Consultation Completed | SMOKETEST-CONSULT-001 | No | No | Fail | BLK-X-02 | Blocked on step 1 |
+| 4 Patient Created | SMOKETEST-PATIENT-001 | No | No | Fail | BLK-SEC-05 | Blocked on step 1 |
+| 5 Images Uploaded | SMOKETEST-IMG-001 | No | No | Fail | BLK-SEC-01 | Blocked on step 1 |
+| 6 Treatment Plan Created | SMOKETEST-PLAN-001 | No | No | Fail | BLK-X-04 | Blocked on step 1 |
+| 7 Deposit Recorded | SMOKETEST-DEPOSIT-001 | No | No | Fail | BLK-FIN-01 | Blocked on step 1 |
+| 8 Surgery Booked | SMOKETEST-BOOK-SURG-001 | No | No | Fail | BLK-FIN-02 | Blocked on step 1 |
+| 9 Procedure Day Executed | SMOKETEST-PROC-001 | No | No | Fail | BLK-ACA-01 | Blocked on step 1 |
+| 10 Post-op Review Completed | SMOKETEST-POSTOP-001 | No | No | Fail | BLK-MED-01, BLK-REC-01 | Blocked on step 1 |
+| 11 HairAudit / Outcome Linked | SMOKETEST-HAIRAUDIT-001 | No | No | Fail | BLK-LEG-01 | Blocked on step 1 |
+| 12 Analytics Updated | SMOKETEST-ANALYTICS-001 | No | No | Fail | BLK-INT-01, BLK-X-05 | Blocked on step 1 |
 
 ---
 
@@ -268,4 +332,5 @@
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-06-27 | FI-PH1 Task 6 — journey execution status recorded (not executed) | FI-PH1 execution |
 | To verify | FI-PH1 Task 3 — smoketest journey template created | — |
