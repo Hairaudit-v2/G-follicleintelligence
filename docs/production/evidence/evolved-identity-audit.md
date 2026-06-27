@@ -169,3 +169,27 @@ No provisioning scripts executed against production (no deploy / no destructive 
 | Validated | Yes — paths exist; prod proof absent |
 | Resolved automatically | **No** |
 | Still blocking production | **Yes** until real identity smoke passes |
+| Task 5 disposition | **Still blocking** — operator checklist §7–8; prod Auth + fi_users pending |
+
+---
+
+## Evidence Closure Checklist
+
+| # | Evidence item | Artifact placeholder | Owner | Target date | Status |
+|---|---------------|----------------------|-------|-------------|--------|
+| E1 | `EVOLVED_PERTH_TENANT_ID` matches production `fi_tenants.id` | Redacted env + SQL read-only UUID | Platform | | ☐ |
+| E2 | ≥2 real operators: Auth + `fi_users.auth_user_id` | Redacted UUID table below | Evolved clinic lead | | ☐ |
+| E3 | Payroll import commit or IIOHR cron verified | Import/cron log | Clinical ops | | ☐ |
+| E4 | Staff ↔ fi_users link for calendar operators | Admin screenshot | Clinical ops | | ☐ |
+| E5 | Authenticated smoketest journey complete | [smoketest journey](../evolved-smoketest-journey.md) | Sprint lead | | ☐ |
+| E6 | Cross-tenant denial verified | E2E or manual test note | Security | | ☐ |
+| E7 | Seed `@follicleintelligence.local` users disabled in prod (if present) | Note below | Platform | | ☐ |
+
+### Provisioned identities (redacted template)
+
+| Role | fi_users.id | auth.users linked (Y/N) | Date provisioned | Verifier |
+|------|-------------|-------------------------|------------------|----------|
+| Admin | | | | |
+| Consultant | | | | |
+
+**Closure rule:** BLK-SEC-05 → **Complete** when E2 + E5 + E6 Complete.

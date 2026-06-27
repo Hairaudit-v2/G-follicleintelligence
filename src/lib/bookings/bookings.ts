@@ -46,6 +46,7 @@ import {
 } from "@/src/lib/calendar/bookingResourceRequirements.server";
 import { loadClinicRoomForTenant, resolveServiceIdForBookingType } from "@/src/lib/rooms/fiClinicRooms.server";
 import { parseUtcCalendarDateString } from "./calendarQuery";
+import { assertSurgeryBookingConfirmationFinancialClearance } from "@/src/lib/bookings/bookingSurgeryFinancialClearanceGuard.server";
 import { sortBookingsByStartAt } from "./bookingTime";
 import {
   CALENDAR_VIEW_BOOKINGS_LIMIT,
@@ -1095,6 +1096,12 @@ export async function updateBooking(params: UpdateBookingParams, client?: Supaba
       if (roomLabel) next = { ...next, location: roomLabel };
     }
   }
+
+  await assertSurgeryBookingConfirmationFinancialClearance({
+    tenantId: tid,
+    existing,
+    next,
+  });
 
   const nowIso = new Date().toISOString();
   const afterSnap = bookingDetailSnapshotFromRowLike(next);

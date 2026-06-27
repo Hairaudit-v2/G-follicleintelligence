@@ -175,3 +175,31 @@ Smoke script: `pnpm run smoke:prod` (requires `FI_BASE_URL`, optional secrets) �
 | Validated | Yes — code auth strong; ops evidence missing |
 | Resolved automatically | **No** |
 | Still blocking production | **Yes** (rotation + cron 200 logs) |
+| Task 5 disposition | **Still blocking** — operator checklist §4–5; rotation log pending |
+
+---
+
+## Evidence Closure Checklist
+
+| # | Evidence item | Artifact placeholder | Owner | Target date | Status |
+|---|---------------|----------------------|-------|-------------|--------|
+| E1 | Production `CRON_SECRET` confirmed (≥16 chars) | Redacted Vercel export | Platform / infra | | ☐ |
+| E2 | `FI_REMINDER_CRON_SECRET` aligned with cron auth | Redacted Vercel export | Platform / infra | | ☐ |
+| E3 | Secret rotation log (service role, cron, webhooks) | Change log with dates | Security | | ☐ |
+| E4 | Cron 200 — fi-reminder-jobs | `attachments/blk-sec-02-cron-reminder-<date>` | Platform / infra | | ☐ |
+| E5 | Cron 200 — iiohr-hr-perth-staff-sync | `attachments/blk-sec-02-cron-hr-<date>` | Platform / infra | | ☐ |
+| E6 | Cron 200 — financial-os automation + clearance-snapshots | `attachments/blk-sec-02-cron-financial-<date>` | Platform / infra | | ☐ |
+| E7 | `pnpm run smoke:prod` against production | `attachments/smoke-prod-<date>.txt` | Platform / infra | | ☐ |
+| E8 | Single reminder worker confirmed (Edge vs Vercel) | Note in this doc | Platform / infra | | ☐ |
+| E9 | Decision on `/api/cron/fi-payments/reminders` schedule | Row below | Product / platform | | ☐ |
+
+### Secret rotation log (template)
+
+| Secret | Rotated (Y/N) | Date (UTC) | Operator | Ticket ref |
+|--------|---------------|------------|----------|------------|
+| `CRON_SECRET` | | | | |
+| `SUPABASE_SERVICE_ROLE_KEY` | | | | |
+| `FI_REMINDER_CRON_SECRET` | | | | |
+| `IIOHR_HR_SYNC_SECRET` | | | | |
+
+**Closure rule:** BLK-SEC-02 → **Complete** when E1–E8 Complete; E9 may be **Accepted risk** if Stripe invoices not live at go-live.

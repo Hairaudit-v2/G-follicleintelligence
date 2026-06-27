@@ -120,3 +120,42 @@ No destructive or production restore operations were run.
 | Validated | Yes — gap confirmed against runbooks + checklist |
 | Resolved automatically | **No** — requires Supabase/Vercel operator access |
 | Still blocking production | **Yes** |
+| Task 5 disposition | **Still blocking** — operator checklist §1–3; evidence attachments pending |
+
+---
+
+## Evidence Closure Checklist
+
+Complete each item; attach artifacts under `docs/production/evidence/attachments/` or linked runbook. Mark **Complete**, **Accepted risk**, or **Still blocking**.
+
+| # | Evidence item | Artifact placeholder | Owner | Target date | Status |
+|---|---------------|----------------------|-------|-------------|--------|
+| E1 | PITR enabled screenshot (retention window visible) | `attachments/blk-sec-01-pitr-<YYYY-MM-DD>.png` | Platform / infra | | ☐ |
+| E2 | Daily backup success (7-day view) | `attachments/blk-sec-01-daily-backups-<date>` | Platform / infra | | ☐ |
+| E3 | RPO/RTO signed by clinical + ops | Row in this doc § RPO/RTO | Sprint lead | | ☐ |
+| E4 | DB restore drill log (isolated staging) | § Restore drill log below | Platform / infra | | ☐ |
+| E5 | Storage restore + signed URL test | § Storage drill log below | Platform / infra | | ☐ |
+| E6 | Master hardening checklist backup items ticked | Link to signed checklist export | Platform / infra | | ☐ |
+
+### Restore drill log (template)
+
+| Field | Value |
+|-------|-------|
+| Operator | |
+| Date (UTC) | |
+| Environment | Isolated staging only |
+| Source backup timestamp | |
+| DB restore result | ☐ Pass / ☐ Fail |
+| Row count / checksum sample | |
+| Storage bucket restored | |
+| Signed URL read test | ☐ Pass / ☐ Fail |
+| Verifier | |
+
+### RPO / RTO (template)
+
+| Metric | Target | Signed by | Date |
+|--------|--------|-----------|------|
+| RPO | | | |
+| RTO | | | |
+
+**Closure rule:** BLK-SEC-01 → **Complete** when E1–E6 are Complete with verifier initials, or **Accepted risk** with clinic lead + dated mitigation.

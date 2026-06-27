@@ -167,4 +167,46 @@ Stripe path writes **`fi_payments`** / invoice state — **separate** from `fi_p
 | Blocker | Validated | Auto-resolved | Still blocking |
 |---------|-----------|---------------|----------------|
 | BLK-FIN-01 | Yes | No | **Yes** (ops/training + dual-truth risk) |
-| BLK-FIN-02 | Yes | No | **Yes** (no hard gate; P1 in register) |
+| BLK-FIN-02 | Yes | Partial (guard) | **Yes** (SOP + guard; untracked payments remain ops risk) |
+| Task 5 disposition | **Partial** — code guard implemented; SOP + training sign-off pending |
+
+---
+
+## Task 5 — Minimal code guard (implemented)
+
+**Central mutation point:** `updateBooking` in `src/lib/bookings/bookings.ts` — all surgery booking status changes flow through this function (server actions, tenant PATCH API, reception board).
+
+**Guard modules:**
+
+| File | Role |
+|------|------|
+| `src/lib/bookings/bookingSurgeryFinancialClearanceGuardCore.ts` | Pure transition/window/block logic (unit tested) |
+| `src/lib/bookings/bookingSurgeryFinancialClearanceGuard.server.ts` | Loads FinancialOS clearance via `resolveFinancialClearanceForBooking` |
+
+**Behaviour:**
+
+- Blocks only when transitioning **surgery** booking to **`confirmed`**
+- Procedure within tenant **14-day** window (same window as surgery readiness board)
+- FinancialOS clearance state is explicitly **`not_ready`**
+- Does **not** block: `unavailable`, `attention_required`, other states, or surgeries outside 14 days
+- Does **not** block when no payment record exists (clearance stays `unavailable` or non-blocking states)
+- Error message: operational text directing staff to FinancialOS or finance admin sign-off
+
+**Deferred (not in scope):** Hard gate on `arrived`/`completed`, Stripe→manual sync, require payment record before confirm.
+
+---
+
+## Evidence Closure Checklist
+
+| # | Evidence item | Artifact placeholder | Owner | Target date | Status |
+|---|---------------|----------------------|-------|-------------|--------|
+| E1 | Financial SOP signed ([evolved-financial-clearance-sop.md](../evolved-financial-clearance-sop.md)) | SOP §6 sign-off table | Financial ops | | ☐ |
+| E2 | Staff training ack: manual records ≠ Stripe proof | SOP §6 training table | Financial ops | | ☐ |
+| E3 | Procedure-day checklist assigned (reception + finance) | SOP §5 + named contacts | Clinical ops | | ☐ |
+| E4 | Guard behaviour verified in staging (confirm blocked when `not_ready` within 14d) | Test note / screenshot | Engineering | | ☐ |
+| E5 | Finance admin acknowledges dual-truth if invoices enabled later | SOP or change log | Financial ops | | ☐ |
+
+**Closure rule:**
+
+- **BLK-FIN-01** → **Complete** when E1 + E2 signed
+- **BLK-FIN-02** → **Complete** when E1 + E3 + E4; guard reduces but does not eliminate untracked-payment risk (accepted only with SOP)

@@ -128,3 +128,23 @@ FI_LEGACY_FI_API_SECRET=<unset>  (rotate only if ever enabled)
 | Validated | Yes — code paths + dependency scan |
 | Resolved automatically | **Partial** — decision recorded; Vercel env proof still needed |
 | Still blocking production | **Until** Vercel env evidence + ops sign-off captured |
+| Task 5 disposition | **Partial** — decision GO (keep OFF); Vercel screenshot + sign-off pending |
+
+---
+
+## Evidence Closure Checklist
+
+| # | Evidence item | Artifact placeholder | Owner | Target date | Status |
+|---|---------------|----------------------|-------|-------------|--------|
+| E1 | Vercel screenshot: `FI_LEGACY_FI_API_ENABLED` false or unset | `attachments/blk-leg-01-legacy-flag-<date>` | Security / platform | | ☐ |
+| E2 | Evolved ops: no production caller needs `/api/fi/events` | Sign-off below | Evolved ops | | ☐ |
+| E3 | Product owner: HLI/HairAudit ingest deferred or alternate path | Sign-off below | Product | | ☐ |
+| E4 | `POST /api/fi/events` returns 404 in production smoke | smoke-prod log excerpt | Platform | | ☐ |
+
+### Sign-off (complete for closure)
+
+- [ ] **Evolved ops** — Name: __________ Date: __________ Ticket: __________
+- [ ] **Product owner** — Name: __________ Date: __________ Ticket: __________
+- [ ] **Security** — Name: __________ Date: __________ Ticket: __________
+
+**Closure rule:** BLK-LEG-01 → **Complete** when E1 + E2 + E3 signed; E4 recommended.
