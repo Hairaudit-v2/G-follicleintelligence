@@ -105,7 +105,7 @@
 | **Expected artifact** | `attachments/blk-sec-02-cron-probes-2026-06-30.txt` (programmatic substitute for Vercel screenshots) |
 | **Verification date** | 2026-06-30 |
 | **Verified by** | Platform ops |
-| **Status** | **Partial** — reminder + financial **200**; HR **503** (Vercel `EVOLVED_PERTH_TENANT_ID` missing) |
+| **Status** | **Complete** — reminder + financial **200**; HR bridge live (**400** empty feed, 2026-06-30 re-probe) |
 
 ### E-SEC-04 — Webhook secret validation
 

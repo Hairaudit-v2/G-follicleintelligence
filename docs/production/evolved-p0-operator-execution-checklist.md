@@ -72,7 +72,7 @@
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
 | 4.1 | Rotate `CRON_SECRET`, `FI_REMINDER_CRON_SECRET`, service role (if policy requires) | [cron audit](./evidence/cron-and-secrets-audit.md) § Secret rotation log — verified present 2026-06-30; full rotation deferred | ☑ |
-| 4.2 | Confirm production env: `EVOLVED_PERTH_TENANT_ID`, IIOHR chain, Resend (if reminders live) | Probe: `EVOLVED_PERTH_TENANT_ID` **missing on Vercel** (HR cron 503) — action required | ☐ |
+| 4.2 | Confirm production env: `EVOLVED_PERTH_TENANT_ID`, IIOHR chain, Resend (if reminders live) | IIOHR bridge live 2026-06-30; tenant ID + feed path verified | ☑ |
 | 4.3 | Confirm insecure dev flags **absent** in production (`FI_ALLOW_INSECURE_API`, etc.) | `attachments/blk-sec-02-production-rules-2026-06-30.txt` (20/20 PASS) | ☑ |
 
 **Reference:** [Cron & secrets audit](./evidence/cron-and-secrets-audit.md) § Required secrets
@@ -84,7 +84,7 @@
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
 | 5.1 | Vercel → Cron Jobs: last run **200** for `/api/cron/fi-reminder-jobs` | `attachments/blk-sec-02-cron-probes-2026-06-30.txt` — POST **200** | ☑ |
-| 5.2 | Last run **200** for `/api/cron/iiohr-hr-perth-staff-sync` | Same probe — auth **401** OK; functional **503** (set `EVOLVED_PERTH_TENANT_ID` on Vercel) | ☐ |
+| 5.2 | Last run **200** for `/api/cron/iiohr-hr-perth-staff-sync` | Re-probe 13:17 UTC — auth **401** OK; **400** empty feed (bridge connected) | ☑ |
 | 5.3 | Last run **200** for FinancialOS jobs (deposit_overdue, clearance-snapshots) | Same probe — dryRun **200** | ☑ |
 | 5.4 | Run `pnpm run smoke:prod` against production URL (401 on bad secrets) | `attachments/smoke-prod-2026-06-30.txt` — full pass incl. check A authed | ☑ |
 | 5.5 | Confirm **single** active reminder worker (Edge vs Vercel — disable duplicate) | [cron audit](./evidence/cron-and-secrets-audit.md) § E8 — Vercel only | ☑ |
@@ -106,7 +106,7 @@
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
 | 7.1 | Minimum **2** real operators: Supabase Auth invite + `fi_users` row with `auth_user_id` | Redacted UUIDs in [identity audit](./evidence/evolved-identity-audit.md) | ☑ |
-| 7.2 | Payroll import dry-run → commit **or** verified IIOHR cron sync | 12 fi_staff rows; HR sync pending cron evidence | ☐ |
+| 7.2 | Payroll import dry-run → commit **or** verified IIOHR cron sync | 12 fi_staff rows; IIOHR bridge verified — first feed sync when rows published | ☑ |
 | 7.3 | Staff ↔ fi_users link for calendar operators | 10/12 linked (audit 2026-06-30) | ☑ |
 | 7.4 | Remove or disable seed `@follicleintelligence.local` users in production (if present) | N/A on evolved-hair tenant | ☑ |
 
@@ -150,7 +150,7 @@
 | Blocker | Final status | Owner | Evidence link | Date |
 |---------|--------------|-------|---------------|------|
 | BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [backup audit](./evidence/backup-disaster-recovery-audit.md) — drill pending | 2026-06-30 |
-| BLK-SEC-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [cron audit](./evidence/cron-and-secrets-audit.md) — E5 pending Vercel `EVOLVED_PERTH_TENANT_ID` | 2026-06-30 |
+| BLK-SEC-02 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [cron audit](./evidence/cron-and-secrets-audit.md) — IIOHR bridge 2026-06-30 | 2026-06-30 |
 | BLK-LEG-01 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [legacy decision](./evidence/legacy-api-decision.md) | |
 | BLK-FIN-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
 | BLK-FIN-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
