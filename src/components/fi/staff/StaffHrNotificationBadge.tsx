@@ -8,15 +8,15 @@ function badgeClass(variant: StaffHrNotificationSummary["variant"], compact: boo
     : "inline-flex max-w-full items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
   switch (variant) {
     case "no_link":
-      return `${base} border-gray-300 bg-gray-100 text-gray-600`;
+      return `${base} border-slate-700 bg-white/[0.06] text-slate-400`;
     case "outstanding":
-      return `${base} border-amber-400/60 bg-amber-100 text-amber-900`;
+      return `${base} border-amber-400/60 bg-amber-400/15 text-amber-200`;
     case "complete":
-      return `${base} border-emerald-400/50 bg-emerald-50 text-emerald-800`;
+      return `${base} border-emerald-400/50 bg-emerald-500/10 text-emerald-300`;
     case "stale":
-      return `${base} border-slate-400/50 bg-slate-100 text-slate-700`;
+      return `${base} border-slate-400/50 bg-white/[0.06] text-slate-300`;
     default:
-      return `${base} border-gray-300 bg-gray-100 text-gray-600`;
+      return `${base} border-slate-700 bg-white/[0.06] text-slate-400`;
   }
 }
 
@@ -56,7 +56,7 @@ export function StaffHrNotificationBadge({
       </span>
       {showStaleHint && summary.hasHrLink && summary.isSyncStale ? (
         <span
-          className={`${compact ? "text-[9px]" : "text-[10px]"} font-medium ${compact ? "text-amber-700" : "text-amber-600/90"}`}
+          className={`${compact ? "text-[9px]" : "text-[10px]"} font-medium ${compact ? "text-amber-300" : "text-amber-300"}`}
         >
           HR sync stale
         </span>
@@ -75,13 +75,13 @@ export function StaffHrNotificationDetailCard({
 }) {
   const isDark = variant === "dark";
   const label = isDark ? "text-[#64748B]" : "text-gray-500";
-  const value = isDark ? "text-[#E2E8F0]" : "text-gray-900";
-  const muted = isDark ? "text-[#94A3B8]" : "text-gray-600";
+  const value = isDark ? "text-[#E2E8F0]" : "text-slate-100";
+  const muted = isDark ? "text-[#94A3B8]" : "text-slate-400";
 
   if (!summary.hasHrLink) {
     return (
       <>
-        <h2 className={`text-lg font-semibold ${isDark ? "text-[#F8FAFC]" : "text-gray-900"}`}>
+        <h2 className={`text-lg font-semibold ${isDark ? "text-[#F8FAFC]" : "text-slate-100"}`}>
           IIOHR HR &amp; Training
         </h2>
         <p className={`mt-1 text-sm ${muted}`}>
@@ -100,7 +100,7 @@ export function StaffHrNotificationDetailCard({
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className={`text-lg font-semibold ${isDark ? "text-[#F8FAFC]" : "text-gray-900"}`}>
+          <h2 className={`text-lg font-semibold ${isDark ? "text-[#F8FAFC]" : "text-slate-100"}`}>
             IIOHR HR &amp; Training
           </h2>
           <p className={`mt-1 text-sm ${muted}`}>
@@ -111,7 +111,7 @@ export function StaffHrNotificationDetailCard({
       </div>
 
       {summary.isSyncStale ? (
-        <p className={`text-xs ${isDark ? "text-amber-200/90" : "text-amber-700"}`}>
+        <p className={`text-xs ${isDark ? "text-amber-200/90" : "text-amber-300"}`}>
           HR sync stale — last snapshot may be out of date. Open IIOHR HR for the latest status.
         </p>
       ) : null}
@@ -158,7 +158,7 @@ export function StaffHrNotificationDetailCard({
           target="_blank"
           rel="noopener noreferrer"
           className={`inline-flex items-center gap-1.5 text-sm font-medium underline-offset-2 hover:underline ${
-            isDark ? "text-[#22C1FF]" : "text-blue-600"
+            isDark ? "text-[#22C1FF]" : "text-blue-300"
           }`}
         >
           Open IIOHR HR portal

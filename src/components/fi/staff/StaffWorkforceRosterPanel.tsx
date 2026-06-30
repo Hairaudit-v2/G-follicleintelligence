@@ -25,7 +25,7 @@ export function StaffWorkforceRosterPanel({
 }) {
   const textMuted = variant === "dark" ? "text-[#94A3B8]" : "text-slate-500";
   const textMain = variant === "dark" ? "text-[#E2E8F0]" : "text-slate-200";
-  const border = variant === "dark" ? "border-white/10 bg-white/[0.03]" : "border-slate-200 bg-slate-50";
+  const border = variant === "dark" ? "border-white/10 bg-white/[0.03]" : "border-white/[0.08] bg-white/[0.03]";
 
   return (
     <DashboardCard className="p-6 sm:p-8">

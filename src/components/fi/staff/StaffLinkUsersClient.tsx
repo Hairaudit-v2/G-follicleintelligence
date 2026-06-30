@@ -81,42 +81,42 @@ export function StaffLinkUsersClient({
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       <header className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Settings · Staff</p>
-        <h1 className="text-xl font-semibold text-slate-900">Link staff to login users</h1>
-        <p className="max-w-2xl text-sm text-slate-600">
+        <h1 className="text-xl font-semibold text-slate-100">Link staff to login users</h1>
+        <p className="max-w-2xl text-sm text-slate-400">
           Repair staff profiles that have an email but no linked fi_user. Matches existing tenant users by email or
           creates a safe member login row when none exists — never duplicates users for the same email.
         </p>
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href={`${base}/staff`} className="font-medium text-sky-700 underline hover:text-sky-900">
+          <Link href={`${base}/staff`} className="font-medium text-cyan-300 underline hover:text-cyan-200">
             Staff directory
           </Link>
-          <Link href={`${base}/hr/staff-readiness`} className="font-medium text-sky-700 underline hover:text-sky-900">
+          <Link href={`${base}/hr/staff-readiness`} className="font-medium text-cyan-300 underline hover:text-cyan-200">
             Staff readiness
           </Link>
         </div>
       </header>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-slate-500">Unlinked (with email)</p>
-          <p className="mt-1 flex items-center gap-2 text-2xl font-semibold text-slate-900">
+          <p className="mt-1 flex items-center gap-2 text-2xl font-semibold text-slate-100">
             <Users className="h-5 w-5 text-slate-400" aria-hidden />
             {pageModel.unlinkedBefore}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-slate-500">Selected for repair</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">{selected.size}</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">{selected.size}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-slate-500">After last run</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">{result ? result.unlinkedAfter : "—"}</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">{result ? result.unlinkedAfter : "—"}</p>
         </div>
       </div>
 
       {result ? (
         <div
-          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950"
+          className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200"
           role="status"
         >
           Linked {result.linkedCount} staff profile{result.linkedCount === 1 ? "" : "s"}
@@ -128,16 +128,16 @@ export function StaffLinkUsersClient({
       ) : null}
 
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300" role="alert">
           {error}
         </div>
       ) : null}
 
-      <label className="block max-w-md text-xs text-slate-600">
+      <label className="block max-w-md text-xs text-slate-400">
         FI Admin key (optional — when your session cannot manage staff)
         <input
           type="password"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm"
+          className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 font-mono text-sm"
           value={adminKey}
           onChange={(e) => setAdminKey(e.target.value)}
           autoComplete="off"
@@ -145,14 +145,14 @@ export function StaffLinkUsersClient({
       </label>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-600">
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-8 text-center text-sm text-slate-400">
           All staff with emails already have linked login users.
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+              <thead className="border-b border-white/[0.08] bg-white/[0.03] text-xs uppercase text-slate-500">
                 <tr>
                   <th className="px-3 py-2">
                     <input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Select all" />
@@ -164,7 +164,7 @@ export function StaffLinkUsersClient({
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.staffId} className="border-b border-slate-100 last:border-0">
+                  <tr key={row.staffId} className="border-b border-white/[0.06] last:border-0">
                     <td className="px-3 py-2 align-top">
                       <input
                         type="checkbox"
@@ -173,9 +173,9 @@ export function StaffLinkUsersClient({
                         aria-label={`Select ${row.fullName}`}
                       />
                     </td>
-                    <td className="px-3 py-2 align-top font-medium text-slate-900">{row.fullName}</td>
-                    <td className="px-3 py-2 align-top text-slate-700">{row.email}</td>
-                    <td className="px-3 py-2 align-top text-slate-600">
+                    <td className="px-3 py-2 align-top font-medium text-slate-100">{row.fullName}</td>
+                    <td className="px-3 py-2 align-top text-slate-300">{row.email}</td>
+                    <td className="px-3 py-2 align-top text-slate-400">
                       <span className="inline-flex items-center gap-1.5">
                         <Link2 className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />
                         {actionLabel(row.action)}

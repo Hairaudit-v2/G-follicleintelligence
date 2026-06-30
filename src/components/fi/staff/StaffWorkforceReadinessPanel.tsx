@@ -120,19 +120,19 @@ export function StaffWorkforceReadinessPanel({
           className={
             variant === "dark"
               ? "mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3"
-              : "mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3"
+              : "mt-6 rounded-lg border border-amber-400/20 bg-amber-400/10 px-4 py-3"
           }
         >
           <div className="flex items-start gap-2">
             <AlertTriangle
-              className={variant === "dark" ? "mt-0.5 h-4 w-4 shrink-0 text-amber-300" : "mt-0.5 h-4 w-4 shrink-0 text-amber-700"}
+              className={variant === "dark" ? "mt-0.5 h-4 w-4 shrink-0 text-amber-300" : "mt-0.5 h-4 w-4 shrink-0 text-amber-300"}
               aria-hidden
             />
             <div>
-              <p className={variant === "dark" ? "text-sm font-medium text-amber-100" : "text-sm font-medium text-amber-950"}>
+              <p className={variant === "dark" ? "text-sm font-medium text-amber-100" : "text-sm font-medium text-amber-200"}>
                 Warnings
               </p>
-              <ul className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-amber-100/90" : "text-amber-900"}`}>
+              <ul className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-amber-100/90" : "text-amber-200"}`}>
                 {readiness.warnings.map((w) => (
                   <li key={w}>• {WORKFORCE_READINESS_WARNING_LABELS[w]}</li>
                 ))}
@@ -147,19 +147,19 @@ export function StaffWorkforceReadinessPanel({
           className={
             variant === "dark"
               ? "mt-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3"
-              : "mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3"
+              : "mt-4 rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3"
           }
         >
           <div className="flex items-start gap-2">
             <Ban
-              className={variant === "dark" ? "mt-0.5 h-4 w-4 shrink-0 text-rose-300" : "mt-0.5 h-4 w-4 shrink-0 text-rose-700"}
+              className={variant === "dark" ? "mt-0.5 h-4 w-4 shrink-0 text-rose-300" : "mt-0.5 h-4 w-4 shrink-0 text-rose-300"}
               aria-hidden
             />
             <div>
-              <p className={variant === "dark" ? "text-sm font-medium text-rose-100" : "text-sm font-medium text-rose-950"}>
+              <p className={variant === "dark" ? "text-sm font-medium text-rose-100" : "text-sm font-medium text-rose-200"}>
                 Blocking issues — cannot assign to surgery
               </p>
-              <ul className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-rose-100/90" : "text-rose-900"}`}>
+              <ul className={`mt-2 space-y-1 text-sm ${variant === "dark" ? "text-rose-100/90" : "text-rose-300"}`}>
                 {readiness.blocking_issues.map((b) => (
                   <li key={b}>• {WORKFORCE_READINESS_BLOCKING_LABELS[b]}</li>
                 ))}

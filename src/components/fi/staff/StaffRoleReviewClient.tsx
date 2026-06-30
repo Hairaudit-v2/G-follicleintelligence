@@ -136,14 +136,14 @@ export function StaffRoleReviewClient({
   if (initialRows.length === 0) {
     return (
       <div className="mx-auto max-w-3xl space-y-6 py-8 px-4">
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-8 text-center">
-          <h1 className="text-xl font-semibold text-emerald-950">All staff roles assigned</h1>
-          <p className="mt-2 text-sm text-emerald-900/90">
-            No active staff remain with role <code className="rounded bg-emerald-100 px-1 text-xs">needs_review</code>.
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-6 py-8 text-center">
+          <h1 className="text-xl font-semibold text-emerald-200">All staff roles assigned</h1>
+          <p className="mt-2 text-sm text-emerald-300">
+            No active staff remain with role <code className="rounded bg-emerald-500/15 px-1 text-xs">needs_review</code>.
             Payroll-imported staff can now appear in clinical booking pickers once their assigned roles are saved.
           </p>
           <p className="mt-6">
-            <Link href={`${base}/staff`} className="font-medium text-emerald-800 underline-offset-2 hover:underline">
+            <Link href={`${base}/staff`} className="font-medium text-emerald-300 underline-offset-2 hover:underline">
               Back to Staff directory
             </Link>
           </p>
@@ -155,49 +155,49 @@ export function StaffRoleReviewClient({
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-wide text-amber-700">Payroll follow-up</p>
-        <h1 className="text-2xl font-semibold text-gray-900">Assign staff roles</h1>
-        <p className="max-w-3xl text-sm text-gray-600">
+        <p className="text-sm font-semibold uppercase tracking-wide text-amber-300">Payroll follow-up</p>
+        <h1 className="text-2xl font-semibold text-slate-100">Assign staff roles</h1>
+        <p className="max-w-3xl text-sm text-slate-400">
           Review payroll-imported team members and assign operational roles before they can be used on the calendar or as
           clinical providers. Payroll metadata below is read-only.
         </p>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span className="rounded-full bg-amber-100 px-3 py-1 font-semibold text-amber-900">
+          <span className="rounded-full bg-amber-400/15 px-3 py-1 font-semibold text-amber-200">
             {progress.assigned} of {progress.total} staff roles assigned
           </span>
           {progress.isComplete ? (
-            <span className="text-emerald-700">Ready to save all — every row has an operational role.</span>
+            <span className="text-emerald-300">Ready to save all — every row has an operational role.</span>
           ) : (
             <span className="text-gray-500">{progress.remaining} remaining with needs_review</span>
           )}
-          <Link href={`${base}/staff`} className="text-blue-600 hover:underline">
+          <Link href={`${base}/staff`} className="text-blue-300 hover:underline">
             Staff directory
           </Link>
           <span className="text-gray-300">·</span>
-          <Link href={`${base}/hr/sync-health`} className="text-blue-600 hover:underline">
+          <Link href={`${base}/hr/sync-health`} className="text-blue-300 hover:underline">
             HR sync health
           </Link>
           <span className="text-gray-300">·</span>
-          <Link href={`${base}/hr/staff-readiness`} className="text-blue-600 hover:underline">
+          <Link href={`${base}/hr/staff-readiness`} className="text-blue-300 hover:underline">
             Staff readiness
           </Link>
         </div>
       </header>
 
       {error ? (
-        <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+        <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
           {error}
         </div>
       ) : null}
 
-      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-900">Bulk tools</h2>
+      <section className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+        <h2 className="text-sm font-semibold text-slate-100">Bulk tools</h2>
         <p className="mt-1 text-xs text-gray-500">Select rows below, apply bulk changes, then save each row or save all.</p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
-          <label className="block text-xs font-medium text-gray-700">
+          <label className="block text-xs font-medium text-slate-300">
             Primary clinic
             <select
-              className="mt-1 block rounded border border-gray-300 px-2 py-1.5 text-sm"
+              className="mt-1 block rounded border border-slate-700 px-2 py-1.5 text-sm"
               value={bulkClinicId}
               onChange={(e) => setBulkClinicId(e.target.value)}
             >
@@ -221,9 +221,9 @@ export function StaffRoleReviewClient({
         </div>
       </section>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+          <thead className="bg-white/[0.03] text-left text-xs font-medium uppercase tracking-wide text-gray-500">
             <tr>
               <th className="px-3 py-2">
                 <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} aria-label="Select all" />
@@ -234,7 +234,7 @@ export function StaffRoleReviewClient({
               <th className="px-3 py-2">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-white/[0.06]">
             {rows.map((row) => {
               const rowErr = rowMessage[row.staffId];
               const hoursOpen = expandedHours.has(row.staffId);
@@ -249,22 +249,22 @@ export function StaffRoleReviewClient({
                     />
                   </td>
                   <td className="px-3 py-3">
-                    <p className="font-medium text-gray-900">{row.full_name}</p>
-                    <p className="text-xs text-gray-600">{row.email ?? "—"}</p>
+                    <p className="font-medium text-slate-100">{row.full_name}</p>
+                    <p className="text-xs text-slate-400">{row.email ?? "—"}</p>
                     {row.mobile ? <p className="text-xs text-gray-500">{row.mobile}</p> : null}
                     {row.payroll ? (
-                      <span className="mt-1 inline-block rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-sky-800">
+                      <span className="mt-1 inline-block rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-cyan-200">
                         Payroll
                       </span>
                     ) : null}
                     {row.position_title ? (
-                      <p className="mt-1 text-xs text-gray-600">Title: {row.position_title}</p>
+                      <p className="mt-1 text-xs text-slate-400">Title: {row.position_title}</p>
                     ) : null}
                     <div className="mt-2">
                       <StaffHrNotificationBadge summary={row.hrNotification} compact />
                     </div>
                   </td>
-                  <td className="max-w-xs px-3 py-3 text-xs text-gray-700">
+                  <td className="max-w-xs px-3 py-3 text-xs text-slate-300">
                     {row.payroll ? (
                       <dl className="space-y-1">
                         <div>
@@ -286,10 +286,10 @@ export function StaffRoleReviewClient({
                   </td>
                   <td className="px-3 py-3">
                     <div className="grid max-w-md gap-2">
-                      <label className="block text-xs font-medium text-gray-700">
+                      <label className="block text-xs font-medium text-slate-300">
                         Role
                         <select
-                          className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm capitalize"
+                          className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm capitalize"
                           value={row.staff_role}
                           onChange={(e) => patchRow(row.staffId, { staff_role: e.target.value })}
                         >
@@ -301,18 +301,18 @@ export function StaffRoleReviewClient({
                           ))}
                         </select>
                       </label>
-                      <label className="block text-xs font-medium text-gray-700">
+                      <label className="block text-xs font-medium text-slate-300">
                         Position / title
                         <input
-                          className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                          className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                           value={row.position_title ?? ""}
                           onChange={(e) => patchRow(row.staffId, { position_title: e.target.value || null })}
                         />
                       </label>
-                      <label className="block text-xs font-medium text-gray-700">
+                      <label className="block text-xs font-medium text-slate-300">
                         Primary clinic
                         <select
-                          className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                          className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                           value={row.primary_clinic_id ?? ""}
                           onChange={(e) => patchRow(row.staffId, { primary_clinic_id: e.target.value || null })}
                         >
@@ -324,7 +324,7 @@ export function StaffRoleReviewClient({
                           ))}
                         </select>
                       </label>
-                      <label className="flex items-center gap-2 text-xs text-gray-800">
+                      <label className="flex items-center gap-2 text-xs text-slate-200">
                         <input
                           type="checkbox"
                           checked={row.is_active}
@@ -334,7 +334,7 @@ export function StaffRoleReviewClient({
                       </label>
                       <button
                         type="button"
-                        className="text-left text-xs font-medium text-blue-600 hover:underline"
+                        className="text-left text-xs font-medium text-blue-300 hover:underline"
                         onClick={() =>
                           setExpandedHours((prev) => {
                             const next = new Set(prev);
@@ -358,7 +358,7 @@ export function StaffRoleReviewClient({
                     <Button type="button" size="sm" disabled={pending} onClick={() => saveOne(row)}>
                       Save
                     </Button>
-                    {rowErr ? <p className="mt-2 text-xs text-red-600">{rowErr}</p> : null}
+                    {rowErr ? <p className="mt-2 text-xs text-rose-300">{rowErr}</p> : null}
                   </td>
                 </tr>
               );
@@ -368,8 +368,8 @@ export function StaffRoleReviewClient({
       </div>
 
       {rows.some((r) => r.payroll) ? (
-        <details className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <summary className="cursor-pointer text-sm font-medium text-gray-800">Sample payroll metadata panel (read-only)</summary>
+        <details className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-4">
+          <summary className="cursor-pointer text-sm font-medium text-slate-200">Sample payroll metadata panel (read-only)</summary>
           <div className="mt-4 max-w-2xl">
             {rows.find((r) => r.payroll)?.payroll ? (
               <StaffPayrollMetadataPanel payroll={rows.find((r) => r.payroll)!.payroll!} variant="light" />

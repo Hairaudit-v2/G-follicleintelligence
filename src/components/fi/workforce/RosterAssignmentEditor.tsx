@@ -55,7 +55,7 @@ export function RosterAssignmentEditor({
   }
 
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 p-4">
+    <div className="rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-slate-100">Assign staff</h3>

@@ -14,30 +14,30 @@ export function StaffOrganisationalIntelligencePanel(props: { intel: StaffIntell
   const profileLabel = FI_WORKSPACE_PROFILES[intel.workspaceProfileHint]?.label ?? intel.workspaceProfileHint;
 
   return (
-    <div className="mt-6 border-t border-gray-200 pt-4">
-      <h3 className="text-sm font-semibold text-gray-900">Organisational intelligence</h3>
-      <p className="mt-1 text-xs text-gray-600">
+    <div className="mt-6 border-t border-white/[0.08] pt-4">
+      <h3 className="text-sm font-semibold text-slate-100">Organisational intelligence</h3>
+      <p className="mt-1 text-xs text-slate-400">
         Support-oriented signals for managers. This view does not change permissions, workspace layout, or feature access.
       </p>
 
-      <dl className="mt-3 grid gap-2 text-xs text-gray-700 sm:grid-cols-2">
+      <dl className="mt-3 grid gap-2 text-xs text-slate-300 sm:grid-cols-2">
         <div>
           <dt className="font-medium text-gray-500">Workspace profile (hint)</dt>
-          <dd className="text-gray-900">{profileLabel}</dd>
+          <dd className="text-slate-100">{profileLabel}</dd>
         </div>
         <div>
           <dt className="font-medium text-gray-500">Position type</dt>
-          <dd className="text-gray-900">
+          <dd className="text-slate-100">
             {intel.positionTypeTitle ? `${intel.positionTypeTitle} (${intel.positionTypeCode ?? "—"})` : "—"}
           </dd>
         </div>
         <div>
           <dt className="font-medium text-gray-500">Feature template</dt>
-          <dd className="text-gray-900">{intel.featureTemplateKey ?? "—"}</dd>
+          <dd className="text-slate-100">{intel.featureTemplateKey ?? "—"}</dd>
         </div>
         <div>
           <dt className="font-medium text-gray-500">Last profile snapshot</dt>
-          <dd className="text-gray-900">
+          <dd className="text-slate-100">
             {intel.latestProfile
               ? `${new Date(intel.latestProfile.computed_at).toLocaleString()} (${intel.latestProfile.visibility_scope})`
               : "No saved profile row yet"}
@@ -69,9 +69,9 @@ export function StaffOrganisationalIntelligencePanel(props: { intel: StaffIntell
       ) : (
         <ul className="mt-2 space-y-2">
           {intel.recommendations.map((r) => (
-            <li key={r.id} className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-800">
-              <p className="font-semibold text-gray-900">{r.title}</p>
-              <p className="mt-1 text-gray-700">{r.body}</p>
+            <li key={r.id} className="rounded border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-200">
+              <p className="font-semibold text-slate-100">{r.title}</p>
+              <p className="mt-1 text-slate-300">{r.body}</p>
             </li>
           ))}
         </ul>

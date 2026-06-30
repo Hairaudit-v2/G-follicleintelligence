@@ -17,11 +17,11 @@ export function StaffPayrollMetadataPanel({
   variant?: "light" | "dark";
 }) {
   const label = variant === "dark" ? "text-[#64748B]" : "text-gray-500";
-  const value = variant === "dark" ? "text-[#E2E8F0]" : "text-gray-900";
+  const value = variant === "dark" ? "text-[#E2E8F0]" : "text-slate-100";
   const box =
     variant === "dark"
       ? "rounded-lg border border-white/10 bg-white/[0.03] p-4"
-      : "rounded-lg border border-amber-200 bg-amber-50/80 p-4";
+      : "rounded-lg border border-amber-400/20 bg-amber-400/10 p-4";
 
   return (
     <div className={box}>

@@ -46,7 +46,7 @@ export function StaffWeeklyHoursEditor({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-medium text-gray-700">Weekly schedule (local wall times)</p>
+        <p className="text-xs font-medium text-slate-300">Weekly schedule (local wall times)</p>
         <Button
           type="button"
           variant="outline"
@@ -59,11 +59,11 @@ export function StaffWeeklyHoursEditor({
       </div>
       <p className="text-[11px] leading-snug text-gray-500">
         Interpreted in this staff member&apos;s <strong>default timezone</strong> (below); if blank,{" "}
-        <code className="rounded bg-gray-100 px-0.5">Australia/Perth</code> is used for hints in booking forms.
+        <code className="rounded bg-white/[0.06] px-0.5">Australia/Perth</code> is used for hints in booking forms.
       </p>
-      <div className="overflow-x-auto rounded border border-gray-200">
+      <div className="overflow-x-auto rounded border border-white/[0.08]">
         <table className="min-w-full text-xs">
-          <thead className="bg-gray-50 text-left text-[11px] font-medium uppercase tracking-wide text-gray-500">
+          <thead className="bg-white/[0.03] text-left text-[11px] font-medium uppercase tracking-wide text-gray-500">
             <tr>
               <th className="px-2 py-1.5">Day</th>
               <th className="px-2 py-1.5">Open</th>
@@ -71,12 +71,12 @@ export function StaffWeeklyHoursEditor({
               <th className="px-2 py-1.5">End</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-white/[0.06]">
             {STAFF_WEEKDAY_KEYS.map((key) => {
               const d = normaliseDay(value[key]);
               return (
                 <tr key={key}>
-                  <td className="whitespace-nowrap px-2 py-1.5 text-gray-800">{DAY_LABEL[key]}</td>
+                  <td className="whitespace-nowrap px-2 py-1.5 text-slate-200">{DAY_LABEL[key]}</td>
                   <td className="px-2 py-1.5">
                     <input
                       type="checkbox"
@@ -88,7 +88,7 @@ export function StaffWeeklyHoursEditor({
                   <td className="px-2 py-1.5">
                     <input
                       type="time"
-                      className="w-full min-w-[6.5rem] rounded border border-gray-200 px-1 py-0.5 font-mono text-xs"
+                      className="w-full min-w-[6.5rem] rounded border border-white/[0.08] px-1 py-0.5 font-mono text-xs"
                       value={d.start ?? "09:00"}
                       disabled={!d.enabled}
                       onChange={(e) => patchDay(key, { start: e.target.value })}
@@ -97,7 +97,7 @@ export function StaffWeeklyHoursEditor({
                   <td className="px-2 py-1.5">
                     <input
                       type="time"
-                      className="w-full min-w-[6.5rem] rounded border border-gray-200 px-1 py-0.5 font-mono text-xs"
+                      className="w-full min-w-[6.5rem] rounded border border-white/[0.08] px-1 py-0.5 font-mono text-xs"
                       value={d.end ?? "17:00"}
                       disabled={!d.enabled}
                       onChange={(e) => patchDay(key, { end: e.target.value })}

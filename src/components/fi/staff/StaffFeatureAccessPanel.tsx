@@ -179,17 +179,17 @@ export function StaffFeatureAccessPanel(props: {
   };
 
   return (
-    <div className="mt-6 border-t border-gray-200 pt-4">
-      <h3 className="text-sm font-semibold text-gray-900">Position type (FI OS Stage 3.5)</h3>
-      <p className="mt-1 text-xs text-gray-600">
+    <div className="mt-6 border-t border-white/[0.08] pt-4">
+      <h3 className="text-sm font-semibold text-slate-100">Position type (FI OS Stage 3.5)</h3>
+      <p className="mt-1 text-xs text-slate-400">
         Position type sets default workspace and feature visibility templates. Manual feature toggles below override those
         defaults; per-staff feature access rows always win.
       </p>
       <div className="mt-3 flex flex-wrap items-end gap-3">
         <label className="block min-w-[14rem]">
-          <span className="text-xs font-medium text-gray-700">Position type</span>
+          <span className="text-xs font-medium text-slate-300">Position type</span>
           <select
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             value={positionTypeSelection}
             disabled={positionPending}
             onChange={(e) => setPositionTypeSelection(e.target.value)}
@@ -213,10 +213,10 @@ export function StaffFeatureAccessPanel(props: {
         </button>
       </div>
       {selectedPosition ? (
-        <ul className="mt-2 list-inside list-disc text-xs text-gray-600">
+        <ul className="mt-2 list-inside list-disc text-xs text-slate-400">
           <li>
             Default workspace profile from position:{" "}
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-slate-200">
               {inheritedWorkspaceFromPosition
                 ? FI_WORKSPACE_PROFILES[inheritedWorkspaceFromPosition].label
                 : "(not set on position type)"}
@@ -224,7 +224,7 @@ export function StaffFeatureAccessPanel(props: {
           </li>
           <li>
             Default feature template:{" "}
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-slate-200">
               {selectedPosition.default_feature_template_key?.trim() || "(none)"}
             </span>
           </li>
@@ -234,33 +234,33 @@ export function StaffFeatureAccessPanel(props: {
       )}
       {positionMessage ? (
         <p
-          className={positionMessage.kind === "ok" ? "mt-2 text-xs text-green-700" : "mt-2 text-xs text-red-700"}
+          className={positionMessage.kind === "ok" ? "mt-2 text-xs text-emerald-300" : "mt-2 text-xs text-rose-300"}
           role="status"
         >
           {positionMessage.text}
         </p>
       ) : null}
 
-      <h3 className="mt-8 text-sm font-semibold text-gray-900">Workspace profile (FI OS)</h3>
-      <p className="mt-1 text-xs text-gray-600">
+      <h3 className="mt-8 text-sm font-semibold text-slate-100">Workspace profile (FI OS)</h3>
+      <p className="mt-1 text-xs text-slate-400">
         Suggests home layout and quick-action order. When set, this manual profile overrides automatic layout (including
         position-type defaults). Stage 2 feature access overrides still apply — disabled modules stay hidden.
       </p>
       {initialExplicitWorkspaceProfile ? (
-        <p className="mt-1 text-xs font-medium text-amber-800">
+        <p className="mt-1 text-xs font-medium text-amber-300">
           Manual workspace override active: {FI_WORKSPACE_PROFILES[initialExplicitWorkspaceProfile].label}
         </p>
       ) : inheritedWorkspaceFromPosition && selectedPosition ? (
-        <p className="mt-1 text-xs text-gray-600">
+        <p className="mt-1 text-xs text-slate-400">
           Inherited layout persona from position (until you choose a manual workspace below):{" "}
-          <span className="font-medium text-gray-800">{FI_WORKSPACE_PROFILES[inheritedWorkspaceFromPosition].label}</span>
+          <span className="font-medium text-slate-200">{FI_WORKSPACE_PROFILES[inheritedWorkspaceFromPosition].label}</span>
         </p>
       ) : null}
       <div className="mt-3 flex flex-wrap items-end gap-3">
         <label className="block min-w-[12rem]">
-          <span className="text-xs font-medium text-gray-700">Workspace</span>
+          <span className="text-xs font-medium text-slate-300">Workspace</span>
           <select
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             value={workspaceSelection}
             disabled={workspacePending}
             onChange={(e) => setWorkspaceSelection(e.target.value as FiWorkspaceProfileKey)}
@@ -284,28 +284,28 @@ export function StaffFeatureAccessPanel(props: {
       </div>
       {workspaceMessage ? (
         <p
-          className={workspaceMessage.kind === "ok" ? "mt-2 text-xs text-green-700" : "mt-2 text-xs text-red-700"}
+          className={workspaceMessage.kind === "ok" ? "mt-2 text-xs text-emerald-300" : "mt-2 text-xs text-rose-300"}
           role="status"
         >
           {workspaceMessage.text}
         </p>
       ) : null}
 
-      <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50/90 p-3">
-        <h3 className="text-sm font-semibold text-gray-900">Preview experience</h3>
-        <p className="mt-1 text-xs text-gray-600">
+      <div className="mt-8 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
+        <h3 className="text-sm font-semibold text-slate-100">Preview experience</h3>
+        <p className="mt-1 text-xs text-slate-400">
           How the FI OS shell will feel with the toggles above — layout order is suggestive; Stage 2 and route guards still
           apply.
         </p>
-        <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-gray-800">
+        <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-slate-200">
           {experiencePreviewLines.map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
       </div>
 
-      <h3 className="mt-8 text-sm font-semibold text-gray-900">Feature access (FI OS)</h3>
-      <p className="mt-1 text-xs text-gray-600">
+      <h3 className="mt-8 text-sm font-semibold text-slate-100">Feature access (FI OS)</h3>
+      <p className="mt-1 text-xs text-slate-400">
         Position type sets defaults; manual toggles override defaults. This is visibility only — route permissions are
         unchanged.
       </p>
@@ -325,7 +325,7 @@ export function StaffFeatureAccessPanel(props: {
                   return (
                     <label
                       key={key}
-                      className="flex cursor-pointer items-start gap-2 rounded border border-gray-100 bg-gray-50/80 px-2 py-2"
+                      className="flex cursor-pointer items-start gap-2 rounded border border-white/[0.06] bg-white/[0.03] px-2 py-2"
                     >
                       <input
                         type="checkbox"
@@ -335,8 +335,8 @@ export function StaffFeatureAccessPanel(props: {
                         onChange={(e) => onToggle(key, e.target.checked)}
                       />
                       <span>
-                        <span className="text-sm font-medium text-gray-900">{meta.label}</span>
-                        <span className="mt-0.5 block text-xs text-gray-600">{meta.description}</span>
+                        <span className="text-sm font-medium text-slate-100">{meta.label}</span>
+                        <span className="mt-0.5 block text-xs text-slate-400">{meta.description}</span>
                       </span>
                     </label>
                   );
@@ -356,7 +356,7 @@ export function StaffFeatureAccessPanel(props: {
           {pending ? "Saving…" : "Save feature access"}
         </button>
         {message ? (
-          <span className={message.kind === "ok" ? "text-xs text-green-700" : "text-xs text-red-700"} role="status">
+          <span className={message.kind === "ok" ? "text-xs text-emerald-300" : "text-xs text-rose-300"} role="status">
             {message.text}
           </span>
         ) : null}

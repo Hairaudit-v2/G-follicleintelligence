@@ -23,7 +23,7 @@ export function StaffClinicalSelect({
   onChange,
   allowEmpty = true,
   emptyLabel = "Unassigned",
-  className = "mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm",
+  className = "mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm",
   id,
   disabled,
 }: {
@@ -76,9 +76,9 @@ export function StaffReadinessPickerWarning({
 }) {
   if (!blockReason?.trim()) return null;
   return (
-    <p className="mt-1 text-[11px] leading-snug text-amber-800">
+    <p className="mt-1 text-[11px] leading-snug text-amber-300">
       {blockReason}.{" "}
-      <Link href={staffReadinessDashboardPath(tenantId)} className="font-medium text-amber-900 underline">
+      <Link href={staffReadinessDashboardPath(tenantId)} className="font-medium text-amber-200 underline">
         Open readiness dashboard
       </Link>
     </p>
@@ -93,7 +93,7 @@ export function ProcedureTeamSelect({
   slot,
   allowEmpty = true,
   emptyLabel = "—",
-  className = "mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm",
+  className = "mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm",
   id,
 }: {
   tenantId: string;
