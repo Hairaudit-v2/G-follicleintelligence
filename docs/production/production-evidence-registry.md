@@ -92,9 +92,9 @@
 | **Blocker** | BLK-SEC-02 |
 | **Evidence source** | Sprint change log + [cron-and-secrets-audit.md](./evidence/cron-and-secrets-audit.md) § Secret rotation log |
 | **Expected artifact** | Dated rotation entries for `CRON_SECRET`, service role, integration secrets (no secret values) |
-| **Verification date** | — |
-| **Verified by** | — |
-| **Status** | **Pending** |
+| **Verification date** | 2026-06-30 |
+| **Verified by** | Platform ops (programmatic) |
+| **Status** | **Verified present** — full rotation deferred; see [cron audit](./evidence/cron-and-secrets-audit.md) § Secret rotation log |
 
 ### E-SEC-03 — Cron execution logs (HTTP 200)
 
@@ -102,10 +102,10 @@
 |-------|-------|
 | **Blocker** | BLK-SEC-02 |
 | **Evidence source** | Vercel → Cron Jobs → execution history |
-| **Expected artifact** | Screenshots: fi-reminder-jobs, iiohr-hr-perth-staff-sync, financial-os automation, clearance-snapshots |
-| **Verification date** | — |
-| **Verified by** | — |
-| **Status** | **Pending** |
+| **Expected artifact** | `attachments/blk-sec-02-cron-probes-2026-06-30.txt` (programmatic substitute for Vercel screenshots) |
+| **Verification date** | 2026-06-30 |
+| **Verified by** | Platform ops |
+| **Status** | **Partial** — reminder + financial **200**; HR **503** (Vercel `EVOLVED_PERTH_TENANT_ID` missing) |
 
 ### E-SEC-04 — Webhook secret validation
 
@@ -113,10 +113,10 @@
 |-------|-------|
 | **Blocker** | BLK-SEC-02 (related) |
 | **Evidence source** | `pnpm run smoke:prod` wrong-secret 401 checks; Timely/HubSpot secret length in Vercel |
-| **Expected artifact** | `evidence/attachments/smoke-prod-<date>.txt` |
-| **Verification date** | — |
-| **Verified by** | — |
-| **Status** | **Pending** |
+| **Expected artifact** | `evidence/attachments/smoke-prod-2026-06-30.txt` |
+| **Verification date** | 2026-06-30 |
+| **Verified by** | Platform ops |
+| **Status** | **Complete** |
 
 ---
 

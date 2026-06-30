@@ -23,8 +23,8 @@
 | Total P0 blockers | 6 |
 | Complete | 2 |
 | Accepted risk | 0 |
-| In progress | 1 |
-| Open / blocking | 3 |
+| In progress | 2 |
+| Open / blocking | 2 |
 | Engineering deliverables | Complete |
 | Production go-live | **Blocked** |
 
@@ -54,15 +54,15 @@
 
 | Field | Value |
 |-------|-------|
-| Current status | In progress |
+| **Current status** | **In progress** (E5 HR cron — set `EVOLVED_PERTH_TENANT_ID` on Vercel) |
 | Final production status | Allow with mitigation |
 | **Assigned owner** | Paul Green (Platform Infrastructure Owner) |
-| **Target completion date** | To verify |
+| **Target completion date** | 2026-06-30 |
 | **Completion date** | — |
 | **Evidence required** | Secret rotation log; Vercel env verification (redacted); cron 200 logs (reminder, HR, financial-os); `smoke:prod` against production; single reminder worker confirmation |
-| **Evidence location** | [cron-and-secrets-audit.md](./evidence/cron-and-secrets-audit.md); [production-evidence-registry.md](./production-evidence-registry.md) § Security |
-| **Engineering note** | Cron auth patterns validated in code (Task 4); local `check:env` + production-rules 17/17 pass — **does not prove production Vercel env** |
-| **Next action** | Execute operator checklist §4–5 |
+| **Evidence location** | [cron-and-secrets-audit.md](./evidence/cron-and-secrets-audit.md); `attachments/blk-sec-02-cron-probes-2026-06-30.txt`, `smoke-prod-2026-06-30.txt` |
+| **Engineering note** | Reminder + FinancialOS cron **200** (2026-06-30 probes); smoke **full pass**; HR cron **503** — production missing `EVOLVED_PERTH_TENANT_ID` |
+| **Next action** | Vercel production env → `EVOLVED_PERTH_TENANT_ID=c2615b95-b707-4485-aa5f-be8f78ec868a`; re-probe HR cron for 200 |
 
 ---
 
@@ -135,7 +135,7 @@
 | Phase | Blockers | Status | Owner |
 |-------|----------|--------|-------|
 | 1 — Infrastructure & DR | BLK-SEC-01 | Open | Paul Green |
-| 2 — Secrets & cron | BLK-SEC-02 | Open | Paul Green |
+| 2 — Secrets & cron | BLK-SEC-02 | In progress | Paul Green |
 | 3 — Identity | BLK-SEC-05 | Open | Paul Green |
 | 4 — Legacy API env | BLK-LEG-01 | Open | Paul Green |
 | 5 — Financial SOP | BLK-FIN-01, BLK-FIN-02 | Open | Paul Green |

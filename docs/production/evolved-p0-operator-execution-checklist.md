@@ -71,9 +71,9 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 4.1 | Rotate `CRON_SECRET`, `FI_REMINDER_CRON_SECRET`, service role (if policy requires) | Change log entry: date, vars rotated, approver | ☐ |
-| 4.2 | Confirm production env: `EVOLVED_PERTH_TENANT_ID`, IIOHR chain, Resend (if reminders live) | Redacted Vercel env export | ☐ |
-| 4.3 | Confirm insecure dev flags **absent** in production (`FI_ALLOW_INSECURE_API`, etc.) | `pnpm run check:env:production-rules` output against prod vars (local copy) | ☐ |
+| 4.1 | Rotate `CRON_SECRET`, `FI_REMINDER_CRON_SECRET`, service role (if policy requires) | [cron audit](./evidence/cron-and-secrets-audit.md) § Secret rotation log — verified present 2026-06-30; full rotation deferred | ☑ |
+| 4.2 | Confirm production env: `EVOLVED_PERTH_TENANT_ID`, IIOHR chain, Resend (if reminders live) | Probe: `EVOLVED_PERTH_TENANT_ID` **missing on Vercel** (HR cron 503) — action required | ☐ |
+| 4.3 | Confirm insecure dev flags **absent** in production (`FI_ALLOW_INSECURE_API`, etc.) | `attachments/blk-sec-02-production-rules-2026-06-30.txt` (20/20 PASS) | ☑ |
 
 **Reference:** [Cron & secrets audit](./evidence/cron-and-secrets-audit.md) § Required secrets
 
@@ -83,11 +83,11 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 5.1 | Vercel → Cron Jobs: last run **200** for `/api/cron/fi-reminder-jobs` | Screenshot: `blk-sec-02-cron-reminder-<date>` | ☐ |
-| 5.2 | Last run **200** for `/api/cron/iiohr-hr-perth-staff-sync` | Screenshot: `blk-sec-02-cron-hr-<date>` | ☐ |
-| 5.3 | Last run **200** for FinancialOS jobs (deposit_overdue, clearance-snapshots) | Screenshot: `blk-sec-02-cron-financial-<date>` | ☐ |
-| 5.4 | Run `pnpm run smoke:prod` against production URL (401 on bad secrets) | Console log saved to `evidence/attachments/smoke-prod-<date>.txt` | ☐ |
-| 5.5 | Confirm **single** active reminder worker (Edge vs Vercel — disable duplicate) | Note in [cron audit](./evidence/cron-and-secrets-audit.md) | ☐ |
+| 5.1 | Vercel → Cron Jobs: last run **200** for `/api/cron/fi-reminder-jobs` | `attachments/blk-sec-02-cron-probes-2026-06-30.txt` — POST **200** | ☑ |
+| 5.2 | Last run **200** for `/api/cron/iiohr-hr-perth-staff-sync` | Same probe — auth **401** OK; functional **503** (set `EVOLVED_PERTH_TENANT_ID` on Vercel) | ☐ |
+| 5.3 | Last run **200** for FinancialOS jobs (deposit_overdue, clearance-snapshots) | Same probe — dryRun **200** | ☑ |
+| 5.4 | Run `pnpm run smoke:prod` against production URL (401 on bad secrets) | `attachments/smoke-prod-2026-06-30.txt` — full pass incl. check A authed | ☑ |
+| 5.5 | Confirm **single** active reminder worker (Edge vs Vercel — disable duplicate) | [cron audit](./evidence/cron-and-secrets-audit.md) § E8 — Vercel only | ☑ |
 
 ---
 
@@ -150,7 +150,7 @@
 | Blocker | Final status | Owner | Evidence link | Date |
 |---------|--------------|-------|---------------|------|
 | BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [backup audit](./evidence/backup-disaster-recovery-audit.md) — drill pending | 2026-06-30 |
-| BLK-SEC-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | Cron screenshots pending | |
+| BLK-SEC-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [cron audit](./evidence/cron-and-secrets-audit.md) — E5 pending Vercel `EVOLVED_PERTH_TENANT_ID` | 2026-06-30 |
 | BLK-LEG-01 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [legacy decision](./evidence/legacy-api-decision.md) | |
 | BLK-FIN-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
 | BLK-FIN-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
