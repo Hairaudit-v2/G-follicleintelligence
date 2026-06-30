@@ -139,7 +139,7 @@ export function CrmKanbanBoard({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-400">
           Showing <strong>{cards.length}</strong> of <strong>{total}</strong> matching leads
           {truncated ? <span className="text-amber-700"> (board cap reached — narrow filters)</span> : null}.
         </p>
@@ -158,7 +158,7 @@ export function CrmKanbanBoard({
             type="button"
             disabled={isPending}
             onClick={() => syncFromServer()}
-            className="inline-flex items-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-sm font-medium text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`} aria-hidden />
             Refresh
@@ -167,7 +167,7 @@ export function CrmKanbanBoard({
       </div>
 
       {!canMutate ? (
-        <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
           Your role can view the board but not move cards. Ask an FI admin or CRM operator to update stages.
         </p>
       ) : null}
@@ -178,7 +178,7 @@ export function CrmKanbanBoard({
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
+            className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
           >
             {bannerError}
             <button type="button" className="ml-2 underline" onClick={() => setBannerError(null)}>

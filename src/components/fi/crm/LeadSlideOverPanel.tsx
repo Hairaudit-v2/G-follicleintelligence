@@ -361,30 +361,30 @@ export function LeadSlideOverPanel({
       }}
     >
       <aside
-        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-gray-200 bg-white shadow-xl sm:max-w-lg"
+        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-xl sm:max-w-lg"
         role="dialog"
         aria-modal="true"
         aria-label="Lead preview"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 px-4 py-3">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-gray-900">Lead preview</h2>
+            <h2 className="truncate text-sm font-semibold text-slate-100">Lead preview</h2>
             {lead ? (
               <Link href={href} className="text-xs text-blue-600 hover:underline" onClick={() => onClose()}>
                 Open full page →
               </Link>
             ) : null}
           </div>
-          <button type="button" className="shrink-0 text-sm text-gray-600 hover:text-gray-900" onClick={onClose}>
+          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
             Close
           </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 text-sm">
-          {loading ? <p className="text-gray-600">Loading…</p> : null}
+          {loading ? <p className="text-slate-400">Loading…</p> : null}
           {loadError ? (
-            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900" role="alert">
+            <div className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300" role="alert">
               {loadError}
             </div>
           ) : null}
@@ -461,7 +461,7 @@ export function LeadSlideOverPanel({
               {payload.detail.conversionState && !lead.converted_at ? (
                 <section className={crmLeadCardClass}>
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Convert to patient</h3>
-                  <p className="mb-2 text-xs text-gray-600">
+                  <p className="mb-2 text-xs text-slate-400">
                     Creates the patient foundation from this lead when not yet converted.
                   </p>
                   {canMutate ? (
@@ -470,7 +470,7 @@ export function LeadSlideOverPanel({
                         <input type="checkbox" checked={seedCase} onChange={(e) => setSeedCase(e.target.checked)} />
                         Seed a case when converting
                       </label>
-                      {convErr ? <p className="text-xs text-red-700">{convErr}</p> : null}
+                      {convErr ? <p className="text-xs text-rose-300">{convErr}</p> : null}
                       <button
                         type="submit"
                         disabled={convBusy}

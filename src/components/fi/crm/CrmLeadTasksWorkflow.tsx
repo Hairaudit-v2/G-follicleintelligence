@@ -49,7 +49,7 @@ function statusesWithFallback(current: string): string[] {
   return Array.from(u);
 }
 
-const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
+const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function CrmLeadTasksWorkflow({
   tenantId,
@@ -207,32 +207,32 @@ export function CrmLeadTasksWorkflow({
     return (
       <li
         key={t.id}
-        className={`rounded border p-2 text-sm ${isDone ? "border-gray-100 bg-gray-50 text-gray-600" : "border-gray-200 bg-white"}`}
+        className={`rounded border p-2 text-sm ${isDone ? "border-white/[0.06] bg-white/[0.03] text-slate-400" : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"}`}
       >
         {editing ? (
           <div className="space-y-2">
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="w-full rounded border border-gray-300 px-2 py-1"
+              className="w-full rounded border border-slate-700 px-2 py-1"
               placeholder="Title"
             />
             <textarea
               value={editDesc}
               onChange={(e) => setEditDesc(e.target.value)}
               rows={2}
-              className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+              className="w-full rounded border border-slate-700 px-2 py-1 text-xs"
               placeholder="Detail"
             />
             <div className="flex flex-wrap gap-2">
-              <select value={editType} onChange={(e) => setEditType(e.target.value)} className="rounded border border-gray-300 px-2 py-1 text-xs">
+              <select value={editType} onChange={(e) => setEditType(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
                 {typesWithFallback(editType).map((v) => (
                   <option key={v} value={v}>
                     {v}
                   </option>
                 ))}
               </select>
-              <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="rounded border border-gray-300 px-2 py-1 text-xs">
+              <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
                 {statusesWithFallback(editStatus).map((v) => (
                   <option key={v} value={v}>
                     {v}
@@ -244,9 +244,9 @@ export function CrmLeadTasksWorkflow({
               type="datetime-local"
               value={editDue}
               onChange={(e) => setEditDue(e.target.value)}
-              className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+              className="w-full rounded border border-slate-700 px-2 py-1 text-xs"
             />
-            <select value={editAssignee} onChange={(e) => setEditAssignee(e.target.value)} className="w-full rounded border border-gray-300 px-2 py-1 text-xs">
+            <select value={editAssignee} onChange={(e) => setEditAssignee(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1 text-xs">
               <option value="">Unassigned</option>
               {assigneeOptions.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -258,7 +258,7 @@ export function CrmLeadTasksWorkflow({
               <button type="button" disabled={busy} onClick={() => onSaveEdit(t.id)} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
                 Save
               </button>
-              <button type="button" disabled={busy} onClick={cancelEdit} className="rounded border border-gray-300 px-2 py-1 text-xs disabled:opacity-50">
+              <button type="button" disabled={busy} onClick={cancelEdit} className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-50">
                 Cancel
               </button>
             </div>
@@ -267,18 +267,18 @@ export function CrmLeadTasksWorkflow({
           <>
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
-                <span className={`font-medium text-gray-900 ${isDone ? "line-through" : ""}`}>{t.title}</span>
+                <span className={`font-medium text-slate-100 ${isDone ? "line-through" : ""}`}>{t.title}</span>
                 <p className="text-xs text-gray-500">
                   {t.task_type} · {t.status}
                   {t.due_at ? ` · due ${t.due_at}` : ""}
                 </p>
                 <p className="text-xs text-gray-500">Assignee: {assigneeLabel(assigneeOptions, t.assignee_user_id)}</p>
-                {t.description ? <p className="mt-1 whitespace-pre-wrap text-xs text-gray-700">{t.description}</p> : null}
+                {t.description ? <p className="mt-1 whitespace-pre-wrap text-xs text-slate-300">{t.description}</p> : null}
               </div>
               <div className="flex flex-shrink-0 flex-col gap-1">
                 {!isDone ? (
                   <>
-                    <button type="button" disabled={busy} onClick={() => startEdit(t)} className="rounded border border-gray-300 px-2 py-0.5 text-xs disabled:opacity-50">
+                    <button type="button" disabled={busy} onClick={() => startEdit(t)} className="rounded border border-slate-700 px-2 py-0.5 text-xs disabled:opacity-50">
                       Edit
                     </button>
                     <button type="button" disabled={busy} onClick={() => onComplete(t.id)} className="rounded bg-emerald-800 px-2 py-0.5 text-xs text-white disabled:opacity-50">
@@ -286,7 +286,7 @@ export function CrmLeadTasksWorkflow({
                     </button>
                   </>
                 ) : (
-                  <button type="button" disabled={busy} onClick={() => onReopen(t.id)} className="rounded border border-amber-600 px-2 py-0.5 text-xs text-amber-900 disabled:opacity-50">
+                  <button type="button" disabled={busy} onClick={() => onReopen(t.id)} className="rounded border border-amber-600 px-2 py-0.5 text-xs text-amber-200 disabled:opacity-50">
                     Reopen
                   </button>
                 )}
@@ -308,32 +308,32 @@ export function CrmLeadTasksWorkflow({
 
   return (
     <section className={card}>
-      <h2 className="mb-3 text-sm font-semibold text-gray-900">Tasks</h2>
+      <h2 className="mb-3 text-sm font-semibold text-slate-100">Tasks</h2>
 
-      <label className="mb-3 block text-xs text-gray-600">
+      <label className="mb-3 block text-xs text-slate-400">
         FI admin key (optional)
-        <input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1" />
+        <input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1" />
       </label>
 
-      <form onSubmit={onCreate} className="mb-6 space-y-2 rounded border border-gray-100 bg-gray-50/80 p-3 text-sm">
-        <h3 className="text-xs font-semibold text-gray-800">New task</h3>
+      <form onSubmit={onCreate} className="mb-6 space-y-2 rounded border border-white/[0.06] bg-white/[0.03] p-3 text-sm">
+        <h3 className="text-xs font-semibold text-slate-200">New task</h3>
         <input
           value={createTitle}
           onChange={(e) => setCreateTitle(e.target.value)}
-          className="w-full rounded border border-gray-300 px-2 py-1"
+          className="w-full rounded border border-slate-700 px-2 py-1"
           placeholder="Title (required)"
           required
         />
-        <textarea value={createDesc} onChange={(e) => setCreateDesc(e.target.value)} rows={2} className="w-full rounded border border-gray-300 px-2 py-1 text-xs" placeholder="Detail" />
+        <textarea value={createDesc} onChange={(e) => setCreateDesc(e.target.value)} rows={2} className="w-full rounded border border-slate-700 px-2 py-1 text-xs" placeholder="Detail" />
         <div className="flex flex-wrap gap-2">
-          <select value={createType} onChange={(e) => setCreateType(e.target.value)} className="rounded border border-gray-300 px-2 py-1 text-xs">
+          <select value={createType} onChange={(e) => setCreateType(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
             {CRM_TASK_TYPE_VALUES.map((v) => (
               <option key={v} value={v}>
                 {v}
               </option>
             ))}
           </select>
-          <select value={createStatus} onChange={(e) => setCreateStatus(e.target.value)} className="rounded border border-gray-300 px-2 py-1 text-xs">
+          <select value={createStatus} onChange={(e) => setCreateStatus(e.target.value)} className="rounded border border-slate-700 px-2 py-1 text-xs">
             {CRM_TASK_ACTIVE_STATUS_VALUES.map((v) => (
               <option key={v} value={v}>
                 {v}
@@ -341,8 +341,8 @@ export function CrmLeadTasksWorkflow({
             ))}
           </select>
         </div>
-        <input type="datetime-local" value={createDue} onChange={(e) => setCreateDue(e.target.value)} className="w-full rounded border border-gray-300 px-2 py-1 text-xs" />
-        <select value={createAssignee} onChange={(e) => setCreateAssignee(e.target.value)} className="w-full rounded border border-gray-300 px-2 py-1 text-xs">
+        <input type="datetime-local" value={createDue} onChange={(e) => setCreateDue(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1 text-xs" />
+        <select value={createAssignee} onChange={(e) => setCreateAssignee(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1 text-xs">
           <option value="">Unassigned</option>
           {assigneeOptions.map((o) => (
             <option key={o.id} value={o.id}>
@@ -355,7 +355,7 @@ export function CrmLeadTasksWorkflow({
         </button>
       </form>
 
-      {tasks.length === 0 ? <p className="text-sm text-gray-600">No tasks yet.</p> : null}
+      {tasks.length === 0 ? <p className="text-sm text-slate-400">No tasks yet.</p> : null}
 
       <div className="space-y-5">
         {sections.map(({ key, label }) => {
@@ -370,7 +370,7 @@ export function CrmLeadTasksWorkflow({
         })}
       </div>
 
-      {feedback ? <p className="mt-3 text-sm text-gray-800">{feedback}</p> : null}
+      {feedback ? <p className="mt-3 text-sm text-slate-200">{feedback}</p> : null}
     </section>
   );
 }

@@ -71,13 +71,13 @@ export function LeadRemindersSection({
 
       <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">Upcoming (pending)</h4>
       {upcomingReminders.length === 0 ? (
-        <p className="text-xs text-gray-600">{emptyMessage}</p>
+        <p className="text-xs text-slate-400">{emptyMessage}</p>
       ) : (
         <ul className="mb-4 space-y-2 text-xs">
           {upcomingReminders.map((j) => (
-            <li key={j.id} className="flex flex-col rounded border border-gray-100 p-2">
-              <span className="font-medium text-gray-900">{j.template_name || "Reminder"}</span>
-              <span className="text-gray-600">
+            <li key={j.id} className="flex flex-col rounded border border-white/[0.06] p-2">
+              <span className="font-medium text-slate-100">{j.template_name || "Reminder"}</span>
+              <span className="text-slate-400">
                 {j.scheduled_at} · <span className="font-mono text-[10px]">{j.template_trigger_event}</span>
               </span>
             </li>
@@ -90,9 +90,9 @@ export function LeadRemindersSection({
           <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-rose-600">Failed</h4>
           <ul className="mb-4 space-y-2 text-xs">
             {recentFailed.map((j) => (
-              <li key={j.id} className="flex flex-col rounded border border-rose-100 bg-rose-50/40 p-2">
-                <span className="font-medium text-gray-900">{j.template_name || "Reminder"}</span>
-                <span className="text-gray-600">{j.scheduled_at}</span>
+              <li key={j.id} className="flex flex-col rounded border border-rose-100 bg-rose-500/10 p-2">
+                <span className="font-medium text-slate-100">{j.template_name || "Reminder"}</span>
+                <span className="text-slate-400">{j.scheduled_at}</span>
                 {j.error_log ? <span className="mt-1 font-mono text-[10px] text-rose-800">{j.error_log}</span> : null}
               </li>
             ))}
@@ -103,10 +103,10 @@ export function LeadRemindersSection({
       {recentOther.length > 0 ? (
         <>
           <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">Recent sent / cancelled</h4>
-          <ul className="space-y-1.5 text-[11px] text-gray-600">
+          <ul className="space-y-1.5 text-[11px] text-slate-400">
             {recentOther.map((j) => (
               <li key={j.id} className="flex justify-between gap-2 border-b border-gray-50 pb-1 last:border-0">
-                <span className="min-w-0 truncate font-medium text-gray-800">{j.template_name}</span>
+                <span className="min-w-0 truncate font-medium text-slate-200">{j.template_name}</span>
                 <span className="shrink-0 text-gray-500">
                   {j.status} · {j.delivered_at ? String(j.delivered_at).slice(0, 10) : j.updated_at.slice(0, 10)}
                 </span>

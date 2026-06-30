@@ -20,14 +20,14 @@ export function LeadActivityFeed({
     <section className={crmLeadCardClass}>
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Activity</h3>
       {items.length === 0 ? (
-        <p className="text-xs text-gray-600">{emptyMessage}</p>
+        <p className="text-xs text-slate-400">{emptyMessage}</p>
       ) : (
         <ul className="max-h-48 space-y-2 overflow-y-auto text-xs">
           {items.map((ev) => (
-            <li key={ev.id} className="border-l-2 border-gray-100 pl-2">
+            <li key={ev.id} className="border-l-2 border-white/[0.06] pl-2">
               <span className="text-gray-500">{ev.occurred_at}</span>{" "}
-              <span className="font-mono text-gray-600">{ev.activity_kind}</span>
-              {ev.title ? <p className="font-medium text-gray-900">{ev.title}</p> : null}
+              <span className="font-mono text-slate-400">{ev.activity_kind}</span>
+              {ev.title ? <p className="font-medium text-slate-100">{ev.title}</p> : null}
             </li>
           ))}
         </ul>

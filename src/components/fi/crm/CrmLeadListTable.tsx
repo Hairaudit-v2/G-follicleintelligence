@@ -21,28 +21,28 @@ export function CrmLeadListTable({
 }) {
   const slide = useCrmLeadSlideOverOptional();
   return (
-    <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
+      <table className="min-w-full divide-y divide-white/[0.08] text-sm">
+        <thead className="bg-white/[0.03]">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Lead</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Person / patient</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Stage</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Priority</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Owner</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Updated</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Created</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Lead</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Person / patient</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Stage</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Status</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Priority</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Owner</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Updated</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Created</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-white/[0.06]">
           {items.map((row) => {
             const href = `/fi-admin/${tenantId}/crm/leads/${row.lead.id}`;
             const personLabel = row.person ? personMetadataDisplayLabel(row.person.metadata) : "—";
             const patientBit = row.patient ? ` · Patient ${row.patient.id.slice(0, 8)}…` : "";
             const title = leadTitleFromRow(row.lead.summary, row.lead.id);
             return (
-              <tr key={row.lead.id} className="hover:bg-gray-50">
+              <tr key={row.lead.id} className="hover:bg-white/[0.03]">
                 <td className="px-3 py-2">
                   {slide ? (
                     <button
@@ -64,16 +64,16 @@ export function CrmLeadListTable({
                     </Link>
                   )}
                 </td>
-                <td className="px-3 py-2 text-gray-700">
+                <td className="px-3 py-2 text-slate-300">
                   {personLabel}
                   {patientBit}
                 </td>
-                <td className="px-3 py-2 text-gray-800">{row.stage?.label ?? "—"}</td>
-                <td className="px-3 py-2 text-gray-700">{row.lead.status}</td>
-                <td className="px-3 py-2 text-gray-700">{row.lead.priority ?? "—"}</td>
-                <td className="px-3 py-2 text-gray-700">{row.owner?.email ?? row.lead.primary_owner_user_id ?? "—"}</td>
-                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{fmtTs(row.lead.updated_at)}</td>
-                <td className="px-3 py-2 whitespace-nowrap text-gray-600">{fmtTs(row.lead.created_at)}</td>
+                <td className="px-3 py-2 text-slate-200">{row.stage?.label ?? "—"}</td>
+                <td className="px-3 py-2 text-slate-300">{row.lead.status}</td>
+                <td className="px-3 py-2 text-slate-300">{row.lead.priority ?? "—"}</td>
+                <td className="px-3 py-2 text-slate-300">{row.owner?.email ?? row.lead.primary_owner_user_id ?? "—"}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-slate-400">{fmtTs(row.lead.updated_at)}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-slate-400">{fmtTs(row.lead.created_at)}</td>
               </tr>
             );
           })}

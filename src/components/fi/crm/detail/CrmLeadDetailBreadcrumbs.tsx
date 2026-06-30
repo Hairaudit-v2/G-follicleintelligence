@@ -8,7 +8,7 @@ export function CrmLeadDetailBreadcrumbs({
   leadTitle: string;
 }) {
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-gray-600">
+    <nav aria-label="Breadcrumb" className="text-sm text-slate-400">
       <ol className="flex flex-wrap items-center gap-1.5">
         <li>
           <Link href={`/fi-admin/${tenantId}`} className="text-blue-600 hover:underline">
@@ -26,7 +26,7 @@ export function CrmLeadDetailBreadcrumbs({
         <li aria-hidden className="text-gray-400">
           /
         </li>
-        <li className="font-medium text-gray-900" aria-current="page">
+        <li className="font-medium text-slate-100" aria-current="page">
           {leadTitle}
         </li>
       </ol>

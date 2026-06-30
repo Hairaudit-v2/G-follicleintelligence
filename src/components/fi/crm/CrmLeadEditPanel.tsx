@@ -150,15 +150,15 @@ export function CrmLeadEditPanel({
   }
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="mb-1 text-sm font-semibold text-gray-900">Edit lead details</h2>
-      <p className="mb-4 text-xs text-gray-600">
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 className="mb-1 text-sm font-semibold text-slate-100">Edit lead details</h2>
+      <p className="mb-4 text-xs text-slate-400">
         Updates summary, status, priority, owner, and scope. Pipeline stage is unchanged here — use{" "}
         <strong>Move stage</strong> below.
       </p>
       <form onSubmit={onSubmit} className="grid max-w-2xl gap-3 text-sm">
         <label className="block">
-          <span className="text-xs font-medium text-gray-700">Summary *</span>
+          <span className="text-xs font-medium text-slate-300">Summary *</span>
           <textarea
             value={summary}
             onChange={(e) => {
@@ -166,21 +166,21 @@ export function CrmLeadEditPanel({
               if (fieldErrors.summary) setFieldErrors((p) => ({ ...p, summary: undefined }));
             }}
             rows={2}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
           />
-          {fieldErrors.summary ? <p className="mt-1 text-xs text-red-700">{fieldErrors.summary}</p> : null}
+          {fieldErrors.summary ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.summary}</p> : null}
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">Status</span>
+            <span className="text-xs font-medium text-slate-300">Status</span>
             <select
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
                 if (fieldErrors.status) setFieldErrors((p) => ({ ...p, status: undefined }));
               }}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
             >
               {statusOpts.map((s) => (
                 <option key={s} value={s}>
@@ -191,17 +191,17 @@ export function CrmLeadEditPanel({
                 </option>
               ))}
             </select>
-            {fieldErrors.status ? <p className="mt-1 text-xs text-red-700">{fieldErrors.status}</p> : null}
+            {fieldErrors.status ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.status}</p> : null}
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">Priority</span>
+            <span className="text-xs font-medium text-slate-300">Priority</span>
             <select
               value={priority}
               onChange={(e) => {
                 setPriority(e.target.value);
                 if (fieldErrors.priority) setFieldErrors((p) => ({ ...p, priority: undefined }));
               }}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
             >
               <option value="">None</option>
               {priorityOpts.map((p) => (
@@ -213,16 +213,16 @@ export function CrmLeadEditPanel({
                 </option>
               ))}
             </select>
-            {fieldErrors.priority ? <p className="mt-1 text-xs text-red-700">{fieldErrors.priority}</p> : null}
+            {fieldErrors.priority ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.priority}</p> : null}
           </label>
         </div>
 
         <label className="block">
-          <span className="text-xs font-medium text-gray-700">Primary owner</span>
+          <span className="text-xs font-medium text-slate-300">Primary owner</span>
           <select
             value={ownerId}
             onChange={(e) => setOwnerId(e.target.value)}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
           >
             <option value="">Unassigned</option>
             {ownerId && !owners.some((o) => o.id === ownerId) ? (
@@ -241,7 +241,7 @@ export function CrmLeadEditPanel({
         {(organisations.length > 0 || clinics.length > 0 || organisationId !== "" || clinicId !== "") && (
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="text-xs font-medium text-gray-700">Organisation</span>
+              <span className="text-xs font-medium text-slate-300">Organisation</span>
               <select
                 value={organisationId}
                 onChange={(e) => {
@@ -253,7 +253,7 @@ export function CrmLeadEditPanel({
                     return cur;
                   });
                 }}
-                className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               >
                 <option value="">Tenant default</option>
                 {organisationId && !organisations.some((o) => o.id === organisationId) ? (
@@ -267,11 +267,11 @@ export function CrmLeadEditPanel({
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-medium text-gray-700">Clinic</span>
+              <span className="text-xs font-medium text-slate-300">Clinic</span>
               <select
                 value={clinicId}
                 onChange={(e) => setClinicId(e.target.value)}
-                className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               >
                 <option value="">None</option>
                 {clinicId && !clinicsForOrg.some((c) => c.id === clinicId) ? (
@@ -288,7 +288,7 @@ export function CrmLeadEditPanel({
         )}
 
         <label className="block">
-          <span className="text-xs font-medium text-gray-700">Metadata (JSON object)</span>
+          <span className="text-xs font-medium text-slate-300">Metadata (JSON object)</span>
           <textarea
             value={metadataRaw}
             onChange={(e) => {
@@ -297,15 +297,15 @@ export function CrmLeadEditPanel({
             }}
             rows={5}
             spellCheck={false}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 font-mono text-xs"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-xs"
           />
-          {fieldErrors.metadata ? <p className="mt-1 text-xs text-red-700">{fieldErrors.metadata}</p> : null}
+          {fieldErrors.metadata ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.metadata}</p> : null}
         </label>
 
-        <div className="rounded border border-dashed border-gray-300 bg-gray-50/80 p-3">
-          <p className="mb-2 text-xs font-medium text-gray-800">FI admin — optional metadata merge</p>
-          <p className="mb-2 text-xs text-gray-600">
-            Shallow-merged onto metadata when the FI admin key below matches <code className="rounded bg-gray-100 px-0.5">FI_ADMIN_API_KEY</code>.
+        <div className="rounded border border-dashed border-slate-700 bg-white/[0.03] p-3">
+          <p className="mb-2 text-xs font-medium text-slate-200">FI admin — optional metadata merge</p>
+          <p className="mb-2 text-xs text-slate-400">
+            Shallow-merged onto metadata when the FI admin key below matches <code className="rounded bg-white/[0.06] px-0.5">FI_ADMIN_API_KEY</code>.
           </p>
           <textarea
             value={adminMergeRaw}
@@ -316,24 +316,24 @@ export function CrmLeadEditPanel({
             rows={3}
             spellCheck={false}
             placeholder='{"internal_flag": true}'
-            className="w-full rounded border border-gray-300 px-2 py-1.5 font-mono text-xs"
+            className="w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-xs"
           />
-          {fieldErrors.adminMerge ? <p className="mt-1 text-xs text-red-700">{fieldErrors.adminMerge}</p> : null}
+          {fieldErrors.adminMerge ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.adminMerge}</p> : null}
         </div>
 
         <label className="block">
-          <span className="text-xs text-gray-600">FI admin key (optional)</span>
+          <span className="text-xs text-slate-400">FI admin key (optional)</span>
           <input
             type="password"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
             autoComplete="off"
           />
         </label>
 
         {formError ? (
-          <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900" role="alert">
+          <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
             {formError}
           </div>
         ) : null}

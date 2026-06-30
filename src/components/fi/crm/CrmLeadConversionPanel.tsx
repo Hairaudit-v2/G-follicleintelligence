@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { convertCrmLeadAction } from "@/lib/actions/fi-crm-actions";
 import type { CrmLeadConversionState } from "@/src/lib/crm/types";
 
-const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
+const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 function personLabel(person: CrmLeadConversionState["person"]): string {
   if (!person) return "—";
@@ -78,35 +78,35 @@ export function CrmLeadConversionPanel({
 
   return (
     <section className={card}>
-      <h2 className="mb-1 text-sm font-semibold text-gray-900">Lead conversion</h2>
-      <p className="mb-3 text-xs text-gray-600">
+      <h2 className="mb-1 text-sm font-semibold text-slate-100">Lead conversion</h2>
+      <p className="mb-3 text-xs text-slate-400">
         Conversion preserves the CRM lead history and creates the patient foundation for bookings, clinical records, images,
         and treatment planning.
       </p>
 
-      <div className="mb-3 rounded border border-gray-100 bg-gray-50/80 p-3 text-xs text-gray-700">
+      <div className="mb-3 rounded border border-white/[0.06] bg-white/[0.03] p-3 text-xs text-slate-300">
         <p>
-          <span className="font-medium text-gray-900">Person on lead:</span> {personLabel(person)}{" "}
+          <span className="font-medium text-slate-100">Person on lead:</span> {personLabel(person)}{" "}
           <span className="font-mono text-gray-500">({lead.person_id})</span>
         </p>
         {patient ? (
           <p className="mt-1">
-            <span className="font-medium text-gray-900">Patient record:</span>{" "}
+            <span className="font-medium text-slate-100">Patient record:</span>{" "}
             <span className="font-mono">{patient.id}</span>
           </p>
         ) : null}
         {caseRow ? (
           <p className="mt-1">
-            <span className="font-medium text-gray-900">Linked patient:</span>{" "}
+            <span className="font-medium text-slate-100">Linked patient:</span>{" "}
             <span className="font-mono">{caseRow.id}</span> ({caseRow.status})
           </p>
         ) : null}
       </div>
 
       {converted ? (
-        <div className="space-y-2 text-sm text-gray-700">
-          <p className="font-medium text-gray-900">Conversion complete</p>
-          <p className="text-xs text-gray-600">Converted at {lead.converted_at}</p>
+        <div className="space-y-2 text-sm text-slate-300">
+          <p className="font-medium text-slate-100">Conversion complete</p>
+          <p className="text-xs text-slate-400">Converted at {lead.converted_at}</p>
           {lead.converted_person_id ? (
             <p className="text-xs">
               Linked person: <span className="font-mono">{lead.converted_person_id}</span>
@@ -122,52 +122,52 @@ export function CrmLeadConversionPanel({
       ) : (
         <form onSubmit={onConvert} className="space-y-3 text-sm">
           <label className="block max-w-md text-xs">
-            <span className="text-gray-600">FI admin key (optional)</span>
+            <span className="text-slate-400">FI admin key (optional)</span>
             <input
               type="password"
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1"
             />
           </label>
 
-          <label className="flex items-center gap-2 text-xs text-gray-700">
+          <label className="flex items-center gap-2 text-xs text-slate-300">
             <input type="checkbox" checked={seedCase && canSeedCase} disabled={!canSeedCase} onChange={(e) => setSeedCase(e.target.checked)} />
-            Create draft patient record now (adds a <code className="rounded bg-gray-100 px-0.5">fi_cases</code> shell in{" "}
-            <code className="rounded bg-gray-100 px-0.5">draft</code> status)
+            Create draft patient record now (adds a <code className="rounded bg-white/[0.06] px-0.5">fi_cases</code> shell in{" "}
+            <code className="rounded bg-white/[0.06] px-0.5">draft</code> status)
           </label>
-          {!canSeedCase ? <p className="text-xs text-amber-800">This lead already has a patient link; a second shell is not created here.</p> : null}
+          {!canSeedCase ? <p className="text-xs text-amber-300">This lead already has a patient link; a second shell is not created here.</p> : null}
 
           {seedCase && canSeedCase ? (
             <div className="grid gap-2 sm:grid-cols-2">
-              <label className="text-xs text-gray-600">
+              <label className="text-xs text-slate-400">
                 Patient type (optional, stored in patient metadata)
                 <input
                   value={caseType}
                   onChange={(e) => setCaseType(e.target.value)}
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1"
                   maxLength={128}
                 />
               </label>
-              <label className="text-xs text-gray-600">
+              <label className="text-xs text-slate-400">
                 Treatment interest (optional)
                 <input
                   value={treatmentInterest}
                   onChange={(e) => setTreatmentInterest(e.target.value)}
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1"
                   maxLength={512}
                 />
               </label>
             </div>
           ) : null}
 
-          <label className="block text-xs text-gray-600">
+          <label className="block text-xs text-slate-400">
             Internal conversion note (optional, stored on lead metadata only — not in activity)
             <textarea
               value={conversionNote}
               onChange={(e) => setConversionNote(e.target.value)}
               rows={2}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1"
               maxLength={2000}
             />
           </label>
@@ -178,7 +178,7 @@ export function CrmLeadConversionPanel({
         </form>
       )}
 
-      {feedback ? <p className="mt-3 text-sm text-gray-800">{feedback}</p> : null}
+      {feedback ? <p className="mt-3 text-sm text-slate-200">{feedback}</p> : null}
     </section>
   );
 }

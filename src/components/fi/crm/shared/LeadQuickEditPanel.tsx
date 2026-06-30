@@ -43,21 +43,21 @@ export function LeadQuickEditPanel({
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Quick edit</h3>
       <form className="space-y-2" onSubmit={onSubmit}>
         <label className="block">
-          <span className="text-xs font-medium text-gray-700">Summary</span>
+          <span className="text-xs font-medium text-slate-300">Summary</span>
           <textarea
             value={summary}
             onChange={(e) => onSummaryChange(e.target.value)}
             rows={2}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
           />
         </label>
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">Status</span>
+            <span className="text-xs font-medium text-slate-300">Status</span>
             <select
               value={status}
               onChange={(e) => onStatusChange(e.target.value)}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             >
               {crmStatusSelectOptions(lead.status).map((s) => (
                 <option key={s} value={s}>
@@ -67,11 +67,11 @@ export function LeadQuickEditPanel({
             </select>
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">Priority</span>
+            <span className="text-xs font-medium text-slate-300">Priority</span>
             <select
               value={priority}
               onChange={(e) => onPriorityChange(e.target.value)}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             >
               <option value="">None</option>
               {crmPrioritySelectOptions(lead.priority).map((p) => (
@@ -83,11 +83,11 @@ export function LeadQuickEditPanel({
           </label>
         </div>
         <label className="block">
-          <span className="text-xs font-medium text-gray-700">Primary owner</span>
+          <span className="text-xs font-medium text-slate-300">Primary owner</span>
           <select
             value={ownerId}
             onChange={(e) => onOwnerIdChange(e.target.value)}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
           >
             <option value="">Unassigned</option>
             {owners.map((o) => (
@@ -97,7 +97,7 @@ export function LeadQuickEditPanel({
             ))}
           </select>
         </label>
-        {error ? <p className="text-xs text-red-700">{error}</p> : null}
+        {error ? <p className="text-xs text-rose-300">{error}</p> : null}
         <button
           type="submit"
           disabled={busy}

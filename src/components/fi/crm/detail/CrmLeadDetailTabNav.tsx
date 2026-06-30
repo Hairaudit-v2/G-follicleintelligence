@@ -33,7 +33,7 @@ export function CrmLeadDetailTabNav({
 
   return (
     <div
-      className="flex flex-wrap gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm"
+      className="flex flex-wrap gap-1 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-1 shadow-lg shadow-black/40"
       role="tablist"
       aria-label="Lead sections"
     >
@@ -46,7 +46,7 @@ export function CrmLeadDetailTabNav({
             role="tab"
             aria-selected={active}
             className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-              active ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50"
+              active ? "bg-gray-900 text-white" : "text-slate-300 hover:bg-white/[0.03]"
             }`}
           >
             {CRM_LEAD_DETAIL_TAB_LABELS[tab]}

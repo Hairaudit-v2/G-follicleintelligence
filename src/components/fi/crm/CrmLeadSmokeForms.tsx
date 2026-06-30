@@ -99,22 +99,22 @@ export function CrmLeadSmokeForms({
   }
 
   return (
-    <section className="rounded border border-dashed border-amber-300 bg-amber-50/50 p-4">
-      <h2 className="mb-2 text-sm font-semibold text-amber-900">Smoke: mutations (this lead)</h2>
-      <p className="mb-3 text-xs text-amber-800">All calls go through gated server actions only.</p>
+    <section className="rounded border border-dashed border-amber-300 bg-amber-400/10 p-4">
+      <h2 className="mb-2 text-sm font-semibold text-amber-200">Smoke: mutations (this lead)</h2>
+      <p className="mb-3 text-xs text-amber-300">All calls go through gated server actions only.</p>
       <label className="mb-4 block max-w-md text-xs">
-        <span className="text-gray-600">FI admin key (optional)</span>
-        <input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1" />
+        <span className="text-slate-400">FI admin key (optional)</span>
+        <input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1" />
       </label>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <form onSubmit={doMove} className="space-y-2 rounded border border-amber-200 bg-white/80 p-3 text-sm">
-          <h3 className="font-medium text-gray-900">Move stage</h3>
+        <form onSubmit={doMove} className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm">
+          <h3 className="font-medium text-slate-100">Move stage</h3>
           {stages.length === 0 ? (
-            <p className="text-xs text-gray-600">No stages available.</p>
+            <p className="text-xs text-slate-400">No stages available.</p>
           ) : (
             <>
-              <select value={toStageId} onChange={(e) => setToStageId(e.target.value)} className="w-full rounded border border-gray-300 px-2 py-1">
+              <select value={toStageId} onChange={(e) => setToStageId(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1">
                 {stages.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.label} ({s.slug})
@@ -128,33 +128,33 @@ export function CrmLeadSmokeForms({
           )}
         </form>
 
-        <form onSubmit={doNote} className="space-y-2 rounded border border-amber-200 bg-white/80 p-3 text-sm">
-          <h3 className="font-medium text-gray-900">Foundation note (fi_crm_notes)</h3>
-          <p className="text-xs text-gray-600">Smoke path for the general notes table — internal lead notes use the dedicated section on this page.</p>
-          <textarea value={noteBody} onChange={(e) => setNoteBody(e.target.value)} rows={3} className="w-full rounded border border-gray-300 px-2 py-1 text-sm" placeholder="Note body" required />
+        <form onSubmit={doNote} className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm">
+          <h3 className="font-medium text-slate-100">Foundation note (fi_crm_notes)</h3>
+          <p className="text-xs text-slate-400">Smoke path for the general notes table — internal lead notes use the dedicated section on this page.</p>
+          <textarea value={noteBody} onChange={(e) => setNoteBody(e.target.value)} rows={3} className="w-full rounded border border-slate-700 px-2 py-1 text-sm" placeholder="Note body" required />
           <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
             Save note
           </button>
         </form>
 
-        <form onSubmit={doMsg} className="space-y-2 rounded border border-amber-200 bg-white/80 p-3 text-sm">
-          <h3 className="font-medium text-gray-900">Message preview</h3>
+        <form onSubmit={doMsg} className="space-y-2 rounded border border-amber-400/20 bg-white/80 p-3 text-sm">
+          <h3 className="font-medium text-slate-100">Message preview</h3>
           <div className="flex flex-wrap gap-2">
-            <input value={msgChannel} onChange={(e) => setMsgChannel(e.target.value)} className="w-24 rounded border border-gray-300 px-2 py-1 text-xs" placeholder="channel" />
-            <select value={msgDirection} onChange={(e) => setMsgDirection(e.target.value as "inbound" | "outbound")} className="rounded border border-gray-300 px-2 py-1 text-xs">
+            <input value={msgChannel} onChange={(e) => setMsgChannel(e.target.value)} className="w-24 rounded border border-slate-700 px-2 py-1 text-xs" placeholder="channel" />
+            <select value={msgDirection} onChange={(e) => setMsgDirection(e.target.value as "inbound" | "outbound")} className="rounded border border-slate-700 px-2 py-1 text-xs">
               <option value="inbound">inbound</option>
               <option value="outbound">outbound</option>
             </select>
           </div>
-          <input value={msgSubject} onChange={(e) => setMsgSubject(e.target.value)} className="w-full rounded border border-gray-300 px-2 py-1 text-xs" placeholder="Subject (optional)" />
-          <textarea value={msgPreview} onChange={(e) => setMsgPreview(e.target.value)} rows={2} className="w-full rounded border border-gray-300 px-2 py-1 text-xs" placeholder="body_preview only" />
+          <input value={msgSubject} onChange={(e) => setMsgSubject(e.target.value)} className="w-full rounded border border-slate-700 px-2 py-1 text-xs" placeholder="Subject (optional)" />
+          <textarea value={msgPreview} onChange={(e) => setMsgPreview(e.target.value)} rows={2} className="w-full rounded border border-slate-700 px-2 py-1 text-xs" placeholder="body_preview only" />
           <button type="submit" disabled={busy} className="rounded bg-gray-800 px-2 py-1 text-xs text-white disabled:opacity-50">
             Save preview
           </button>
         </form>
       </div>
 
-      {feedback ? <p className="mt-3 text-sm text-gray-800">{feedback}</p> : null}
+      {feedback ? <p className="mt-3 text-sm text-slate-200">{feedback}</p> : null}
     </section>
   );
 }

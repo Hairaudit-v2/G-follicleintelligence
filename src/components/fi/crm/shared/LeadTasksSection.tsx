@@ -31,13 +31,13 @@ export function LeadTasksSection({
     <section className={crmLeadCardClass}>
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Open tasks</h3>
       {openTasks.length === 0 ? (
-        <p className="text-xs text-gray-600">No open tasks.</p>
+        <p className="text-xs text-slate-400">No open tasks.</p>
       ) : (
         <ul className="space-y-2 text-xs">
           {openTasks.map((t) => (
-            <li key={t.id} className="flex items-start justify-between gap-2 rounded border border-gray-100 p-2">
+            <li key={t.id} className="flex items-start justify-between gap-2 rounded border border-white/[0.06] p-2">
               <div>
-                <p className="font-medium text-gray-900">{t.title}</p>
+                <p className="font-medium text-slate-100">{t.title}</p>
                 <p className="text-gray-500">
                   {t.task_type} · {t.status}
                   {t.due_at ? ` · due ${t.due_at}` : ""}
@@ -62,18 +62,18 @@ export function LeadTasksSection({
             value={taskTitle}
             onChange={(e) => onTaskTitleChange(e.target.value)}
             placeholder="New task title"
-            className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="min-w-0 flex-1 rounded border border-slate-700 px-2 py-1.5 text-sm"
           />
           <button
             type="submit"
             disabled={taskBusy}
-            className="rounded border border-gray-300 px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+            className="rounded border border-slate-700 px-3 py-1.5 hover:bg-white/[0.03] disabled:opacity-50"
           >
             Add
           </button>
         </form>
       ) : null}
-      {taskErr ? <p className="mt-1 text-xs text-red-700">{taskErr}</p> : null}
+      {taskErr ? <p className="mt-1 text-xs text-rose-300">{taskErr}</p> : null}
     </section>
   );
 }

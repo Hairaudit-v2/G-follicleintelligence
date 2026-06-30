@@ -51,8 +51,8 @@ export function LeadBookNextAppointmentCard({
     <section className={crmLeadCardClass}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">Book next appointment</h2>
-          <p className="mt-1 text-xs text-gray-600">
+          <h2 className="text-sm font-semibold text-slate-100">Book next appointment</h2>
+          <p className="mt-1 text-xs text-slate-400">
             Opens the appointment slide-over with lead, patient, and clinic context pre-filled.
           </p>
         </div>
@@ -68,12 +68,12 @@ export function LeadBookNextAppointmentCard({
       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Recommended type</dt>
-          <dd className="font-medium text-gray-900">{bookingTypeLabel(recommended.bookingType)}</dd>
+          <dd className="font-medium text-slate-100">{bookingTypeLabel(recommended.bookingType)}</dd>
           <dd className="text-xs text-gray-500">{recommended.reason}</dd>
         </div>
         <div>
           <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">Next scheduled</dt>
-          <dd className="text-gray-900">
+          <dd className="text-slate-100">
             {nextUpcoming ? formatUpcomingBookingLabel(nextUpcoming) : "No upcoming visits"}
           </dd>
         </div>
