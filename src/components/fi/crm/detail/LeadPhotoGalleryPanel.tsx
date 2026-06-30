@@ -37,8 +37,8 @@ export function LeadPhotoGalleryPanel({
   if (!patientId) {
     return (
       <section className={crmLeadCardClass}>
-        <h2 className="text-sm font-semibold text-gray-900">Before / after gallery</h2>
-        <p className="mt-2 text-sm text-gray-600">Link a patient via conversion to attach tagged clinical photos.</p>
+        <h2 className="text-sm font-semibold text-slate-100">Before / after gallery</h2>
+        <p className="mt-2 text-sm text-slate-400">Link a patient via conversion to attach tagged clinical photos.</p>
       </section>
     );
   }
@@ -50,7 +50,7 @@ export function LeadPhotoGalleryPanel({
       <section className={crmLeadCardClass}>
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Before / after gallery</h2>
+            <h2 className="text-sm font-semibold text-slate-100">Before / after gallery</h2>
             <p className="mt-1 text-xs text-gray-500">
               Images are tagged by category on the patient record. Upload and edit on the patient profile.
             </p>
@@ -60,7 +60,7 @@ export function LeadPhotoGalleryPanel({
           </Link>
         </div>
         {bundle ? (
-          <p className="mt-2 text-xs text-gray-600">
+          <p className="mt-2 text-xs text-slate-400">
             {bundle.counts.active} active · {bundle.counts.archived} archived
           </p>
         ) : null}
@@ -68,7 +68,7 @@ export function LeadPhotoGalleryPanel({
 
       {tilesByGroup.map((group) => (
         <section key={group.id} className={crmLeadCardClass}>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-600">{group.label}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">{group.label}</h3>
           <div className="mt-3">
             {group.tiles.length === 0 ? (
               <p className="text-sm text-gray-500">No {group.label.toLowerCase()} images tagged yet.</p>
@@ -81,11 +81,11 @@ export function LeadPhotoGalleryPanel({
 
       {selectedTile ? (
         <section className={crmLeadCardClass}>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-600">Selected image</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Selected image</h3>
           <div className="mt-2 max-w-xs">
             <PatientImageTile tile={selectedTile} selected onSelect={() => setSelectedId(null)} />
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-700">
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
             <PatientImageCategoryBadge category={selectedTile.image.image_category} />
             {selectedTile.image.caption ? <span>{selectedTile.image.caption}</span> : null}
             {selectedTile.image.taken_at ? <span className="text-gray-500">taken {selectedTile.image.taken_at}</span> : null}

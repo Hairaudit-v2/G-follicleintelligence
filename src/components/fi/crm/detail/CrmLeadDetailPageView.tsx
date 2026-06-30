@@ -61,10 +61,10 @@ export function CrmLeadDetailPageView({
 
       <header className="space-y-1">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <h1 className="text-xl font-semibold text-gray-900">{leadTitle}</h1>
+          <h1 className="text-xl font-semibold text-slate-100">{leadTitle}</h1>
           {lead.patient_id ? <PatientTwinNavLink tenantId={tenantId} patientId={lead.patient_id} /> : null}
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-400">
           CRM lead · <span className="font-mono text-xs">{lead.id}</span>
           {lead.patient_id ? (
             <>
@@ -75,7 +75,7 @@ export function CrmLeadDetailPageView({
         </p>
       </header>
 
-      <Suspense fallback={<div className="h-16 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
+      <Suspense fallback={<div className="h-16 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
         <CrmLeadDetailPreviewBridge
           tenantId={tenantId}
           currentLeadId={lead.id}
@@ -84,7 +84,7 @@ export function CrmLeadDetailPageView({
         />
       </Suspense>
 
-      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
+      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
         <CrmLeadDetailTabNav tenantId={tenantId} leadId={leadId} activeTab={activeTab} />
       </Suspense>
 

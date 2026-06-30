@@ -188,11 +188,11 @@ export function CrmCreateLeadPanel({
   }
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="mb-1 text-sm font-semibold text-gray-900">Create lead</h2>
-      <p className="mb-4 text-xs text-gray-600">
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 className="mb-1 text-sm font-semibold text-slate-100">Create lead</h2>
+      <p className="mb-4 text-xs text-slate-400">
         Internal workflow — uses the gated CRM server action. Choose <strong>New / matched person</strong> to resolve or
-        create <code className="rounded bg-gray-100 px-0.5">fi_persons</code> from contact fields, or{" "}
+        create <code className="rounded bg-white/[0.06] px-0.5">fi_persons</code> from contact fields, or{" "}
         <strong>Existing person</strong> to attach by UUID.
       </p>
 
@@ -225,47 +225,47 @@ export function CrmCreateLeadPanel({
         </div>
 
         <label className="block">
-          <span className="text-xs font-medium text-gray-700">Lead title / summary *</span>
+          <span className="text-xs font-medium text-slate-300">Lead title / summary *</span>
           <input
             value={summary}
             onChange={(e) => {
               setSummary(e.target.value);
               clearField("summary");
             }}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
             placeholder="e.g. FUE consult — follow up Monday"
             autoComplete="off"
           />
-          {fieldErrors.summary ? <p className="mt-1 text-xs text-red-700">{fieldErrors.summary}</p> : null}
+          {fieldErrors.summary ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.summary}</p> : null}
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">Status</span>
+            <span className="text-xs font-medium text-slate-300">Status</span>
             <input
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               placeholder="open"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">Priority</span>
+            <span className="text-xs font-medium text-slate-300">Priority</span>
             <input
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               placeholder="normal, high, …"
             />
           </label>
         </div>
 
         <label className="block">
-          <span className="text-xs font-medium text-gray-700">Owner</span>
+          <span className="text-xs font-medium text-slate-300">Owner</span>
           <select
             value={primaryOwnerUserId}
             onChange={(e) => setPrimaryOwnerUserId(e.target.value)}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
           >
             <option value="">Unassigned</option>
             {owners.map((o) => (
@@ -279,7 +279,7 @@ export function CrmCreateLeadPanel({
         {(organisations.length > 0 || clinics.length > 0) && (
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="text-xs font-medium text-gray-700">Organisation scope</span>
+              <span className="text-xs font-medium text-slate-300">Organisation scope</span>
               <select
                 value={organisationId}
                 onChange={(e) => {
@@ -291,7 +291,7 @@ export function CrmCreateLeadPanel({
                     return cur;
                   });
                 }}
-                className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               >
                 <option value="">Tenant default (no org)</option>
                 {organisations.map((o) => (
@@ -302,11 +302,11 @@ export function CrmCreateLeadPanel({
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-medium text-gray-700">Clinic scope</span>
+              <span className="text-xs font-medium text-slate-300">Clinic scope</span>
               <select
                 value={clinicId}
                 onChange={(e) => setClinicId(e.target.value)}
-                className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               >
                 <option value="">No clinic</option>
                 {clinicsForOrg.map((c) => (
@@ -322,64 +322,64 @@ export function CrmCreateLeadPanel({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">External source system</span>
+            <span className="text-xs font-medium text-slate-300">External source system</span>
             <input
               value={sourceSystem}
               onChange={(e) => {
                 setSourceSystem(e.target.value);
                 clearField("sourcePair");
               }}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               placeholder="hubspot, meta_ads, …"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">External source lead id</span>
+            <span className="text-xs font-medium text-slate-300">External source lead id</span>
             <input
               value={sourceLeadId}
               onChange={(e) => {
                 setSourceLeadId(e.target.value);
                 clearField("sourcePair");
               }}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
               placeholder="Upstream lead / deal id"
             />
           </label>
         </div>
-        {fieldErrors.sourcePair ? <p className="text-xs text-red-700">{fieldErrors.sourcePair}</p> : null}
+        {fieldErrors.sourcePair ? <p className="text-xs text-rose-300">{fieldErrors.sourcePair}</p> : null}
 
         {personMode === "link" ? (
           <label className="block">
-            <span className="text-xs font-medium text-gray-700">Person id *</span>
+            <span className="text-xs font-medium text-slate-300">Person id *</span>
             <input
               value={personId}
               onChange={(e) => {
                 setPersonId(e.target.value);
                 clearField("personId");
               }}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 font-mono text-xs"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-xs"
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
               spellCheck={false}
             />
-            {fieldErrors.personId ? <p className="mt-1 text-xs text-red-700">{fieldErrors.personId}</p> : null}
+            {fieldErrors.personId ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.personId}</p> : null}
           </label>
         ) : (
-          <div className="space-y-3 rounded border border-gray-100 bg-gray-50/80 p-3">
-            <p className="text-xs font-medium text-gray-800">Person</p>
+          <div className="space-y-3 rounded border border-white/[0.06] bg-white/[0.03] p-3">
+            <p className="text-xs font-medium text-slate-200">Person</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="block sm:col-span-2">
-                <span className="text-xs text-gray-600">Display name</span>
+                <span className="text-xs text-slate-400">Display name</span>
                 <input
                   value={displayName}
                   onChange={(e) => {
                     setDisplayName(e.target.value);
                     clearField("personResolve");
                   }}
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-gray-600">Email</span>
+                <span className="text-xs text-slate-400">Email</span>
                 <input
                   type="email"
                   value={email}
@@ -387,43 +387,43 @@ export function CrmCreateLeadPanel({
                     setEmail(e.target.value);
                     clearField("personResolve");
                   }}
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-gray-600">Phone</span>
+                <span className="text-xs text-slate-400">Phone</span>
                 <input
                   value={phone}
                   onChange={(e) => {
                     setPhone(e.target.value);
                     clearField("personResolve");
                   }}
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-gray-600">Person source system</span>
+                <span className="text-xs text-slate-400">Person source system</span>
                 <input
                   value={personSourceSystem}
                   onChange={(e) => setPersonSourceSystem(e.target.value)}
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
                   placeholder="fi_crm"
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-gray-600">External person id (optional)</span>
+                <span className="text-xs text-slate-400">External person id (optional)</span>
                 <input
                   value={sourcePersonId}
                   onChange={(e) => {
                     setSourcePersonId(e.target.value);
                     clearField("personResolve");
                   }}
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
                 />
               </label>
             </div>
             <label className="block">
-              <span className="text-xs text-gray-600">Extra person metadata (JSON object, optional)</span>
+              <span className="text-xs text-slate-400">Extra person metadata (JSON object, optional)</span>
               <textarea
                 value={personMetadataRaw}
                 onChange={(e) => {
@@ -431,28 +431,28 @@ export function CrmCreateLeadPanel({
                   clearField("personMetadata");
                 }}
                 rows={2}
-                className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 font-mono text-xs"
+                className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 font-mono text-xs"
                 placeholder='{"segment":"web_form"}'
               />
-              {fieldErrors.personMetadata ? <p className="mt-1 text-xs text-red-700">{fieldErrors.personMetadata}</p> : null}
+              {fieldErrors.personMetadata ? <p className="mt-1 text-xs text-rose-300">{fieldErrors.personMetadata}</p> : null}
             </label>
-            {fieldErrors.personResolve ? <p className="text-xs text-red-700">{fieldErrors.personResolve}</p> : null}
+            {fieldErrors.personResolve ? <p className="text-xs text-rose-300">{fieldErrors.personResolve}</p> : null}
           </div>
         )}
 
         <label className="block">
-          <span className="text-xs text-gray-600">FI admin key (optional — same as Configuration)</span>
+          <span className="text-xs text-slate-400">FI admin key (optional — same as Configuration)</span>
           <input
             type="password"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5"
             autoComplete="off"
           />
         </label>
 
         {formError ? (
-          <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900" role="alert">
+          <div className="rounded border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
             {formError}
           </div>
         ) : null}

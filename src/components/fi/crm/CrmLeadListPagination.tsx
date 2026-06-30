@@ -27,7 +27,7 @@ export function CrmLeadListPagination({
     current < pageCount ? buildCrmLeadListHref(tenantId, { ...base, page: current + 1 }) : null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
       <p>
         Showing <strong>{from}</strong>–<strong>{to}</strong> of <strong>{total}</strong>
         {total > pageSize ? ` (page ${current} of ${pageCount})` : null}

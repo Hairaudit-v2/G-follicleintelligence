@@ -28,7 +28,7 @@ export function LeadStageSection({
     <>
       <section className={crmLeadCardClass}>
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Pipeline</h3>
-        <dl className="grid gap-1 text-xs text-gray-700">
+        <dl className="grid gap-1 text-xs text-slate-300">
           <div className="flex justify-between gap-2">
             <dt className="text-gray-500">Status</dt>
             <dd>{lead.status}</dd>
@@ -44,7 +44,7 @@ export function LeadStageSection({
         <section className={crmLeadCardClass}>
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Change stage</h3>
           <select
-            className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={lead.current_stage_id ?? ""}
             disabled={stageBusy}
             onChange={(e) => {
@@ -60,12 +60,12 @@ export function LeadStageSection({
               </option>
             ))}
           </select>
-          {stageErr ? <p className="mt-1 text-xs text-red-700">{stageErr}</p> : null}
+          {stageErr ? <p className="mt-1 text-xs text-rose-300">{stageErr}</p> : null}
           <details className="mt-2">
-            <summary className="cursor-pointer text-xs text-gray-600">Recent stage history</summary>
-            <ul className="mt-2 max-h-40 space-y-2 overflow-y-auto text-xs text-gray-700">
+            <summary className="cursor-pointer text-xs text-slate-400">Recent stage history</summary>
+            <ul className="mt-2 max-h-40 space-y-2 overflow-y-auto text-xs text-slate-300">
               {stageHistory.slice(0, historyLimit).map((h) => (
-                <li key={h.id} className="border-l-2 border-gray-200 pl-2">
+                <li key={h.id} className="border-l-2 border-white/[0.08] pl-2">
                   <time className="text-gray-500">{h.changed_at}</time>
                   <p>
                     {crmStageLabel(h.from_stage_id, stages)} → {crmStageLabel(h.to_stage_id, stages)}
@@ -77,7 +77,7 @@ export function LeadStageSection({
           </details>
         </section>
       ) : (
-        <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
           Your role can view this lead but not change CRM data here.
         </p>
       )}
