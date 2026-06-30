@@ -1,5 +1,5 @@
 /**
- * Runs `tsx --test` over all `*.test.ts` files under lib/, src/, and packages/
+ * Runs `tsx --test` over all `*.test.ts` files under lib/, src/, packages/, and tests/
  * so Windows is not blocked by npm script argv length limits.
  */
 import { spawnSync } from "node:child_process";
@@ -10,7 +10,11 @@ import { fileURLToPath } from "node:url";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const root = join(__dirname, "..");
 
-const roots = ["lib", "src", "packages"].map((d) => join(root, d));
+const roots = (process.env.FI_TEST_ROOTS ?? "lib,src,packages,tests")
+  .split(",")
+  .map((d) => d.trim())
+  .filter(Boolean)
+  .map((d) => join(root, d));
 
 /** @param {string} dir @param {string[]} acc */
 function walk(dir, acc) {

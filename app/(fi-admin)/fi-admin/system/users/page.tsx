@@ -40,9 +40,15 @@ export default function SystemUsersImpersonationPage() {
     setMsg(null);
     setBusy(true);
     try {
-      await fetch("/api/fi-os/impersonation/stop", { method: "POST" });
+      const r = await fetch("/api/fi-os/impersonation/stop", { method: "POST" });
+      if (!r.ok) {
+        setMsg(`Could not end impersonation (${r.status}).`);
+        return;
+      }
       router.refresh();
       setMsg("Impersonation ended.");
+    } catch {
+      setMsg("Could not end impersonation. Try again.");
     } finally {
       setBusy(false);
     }

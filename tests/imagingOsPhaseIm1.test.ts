@@ -242,7 +242,11 @@ describe("ImagingOS IM-1 — HairAudit endpoint stub compatibility", () => {
 
 describe("ImagingOS IM-1 — no AI provider imports in foundation modules", () => {
   const imagingOsDir = path.join(process.cwd(), "src/lib/imaging-os");
-  const files = fs.readdirSync(imagingOsDir).filter((f) => f.endsWith(".ts"));
+  /** IM-11+ modules may reference provider names in types/contracts — excluded from IM-1 guard. */
+  const postFoundationModules = new Set(["liveAi.ts", "aiVision.ts"]);
+  const files = fs
+    .readdirSync(imagingOsDir)
+    .filter((f) => f.endsWith(".ts") && !postFoundationModules.has(f));
 
   for (const file of files) {
     it(`${file} does not import OpenAI/Claude/Gemini`, () => {

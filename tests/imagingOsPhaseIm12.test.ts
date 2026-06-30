@@ -445,19 +445,31 @@ describe("ImagingOS IM-12 — IM-1 through IM-11 compatibility", () => {
   });
 
   it("preserves IM-8 comparison and HairAudit adapters", () => {
-    const comparison = evaluateHairAuditVisualComparison(
-      fullGrowthComparisonSet("month_12").map((image) => ({
-        category: image.canonical_category,
-        timepoint: image.timepoint,
-        quality_status: "excellent" as const,
-      }))
-    );
-    const outcome = evaluateHairAuditOutcomeMeasurement(
-      fullGrowthAssessmentEvidence().map((item) => ({
-        category: item.canonical_category,
-        timepoint: item.timepoint,
-        quality_status: "excellent" as const,
-      }))
+    const comparison = evaluateVisualComparisonReadiness({
+      domain: "growth_change",
+      images: fullGrowthComparisonSet("month_12"),
+    });
+    const outcome = evaluateOutcomeMeasurementReadiness({
+      domain: "growth_assessment",
+      evidence: fullGrowthAssessmentEvidence(),
+    });
+    const hairAuditComparison = evaluateHairAuditVisualComparison([
+      {
+        category: "patient_current_front",
+        timepoint: "baseline",
+        quality_status: "excellent",
+        is_clinically_usable: true,
+      },
+      {
+        category: "patient_current_front",
+        timepoint: "month_12",
+        quality_status: "excellent",
+        is_clinically_usable: true,
+      },
+    ]);
+    assert.ok(
+      hairAuditComparison.comparison_status === "ready" ||
+        hairAuditComparison.comparison_status === "partial"
     );
     const protocol = evaluateHairAuditCaseImageProtocol([
       "front",

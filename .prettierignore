@@ -2,3 +2,5 @@
 node_modules
 out
 *.min.js
+tools/*.json
+tools/dangerous-rows.raw.json

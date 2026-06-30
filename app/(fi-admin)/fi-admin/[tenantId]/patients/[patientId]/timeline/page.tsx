@@ -34,8 +34,8 @@ export default async function PatientTimelineRoutePage({
   // Tenant access gate (redirects/throws when the operator lacks access).
   await getClinicFloorPageSession(tenantId);
 
-  const result = await loadPatientTimeline(tenantId, patientId);
-  if (!result.ok) notFound();
+  const result = await loadPatientTimeline(tenantId, patientId).catch(() => null);
+  if (!result?.ok) notFound();
 
   const payload = await loadPatientDetailPayload(tenantId, patientId).catch(() => null);
   const displayName = payload?.displayName ?? "Patient";

@@ -8,6 +8,7 @@ const validProdBase = (): NodeJS.ProcessEnv => ({
   NEXT_PUBLIC_SUPABASE_URL: "https://xyzcompany.supabase.co",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test",
   SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.service-role",
+  CRON_SECRET: "sixteen_chars_min_",
 });
 
 describe("validateFullEnv", () => {
@@ -28,6 +29,26 @@ describe("validateFullEnv", () => {
       }
     } catch {
       assert.fail("expected validation result");
+    }
+  });
+
+  it("missing CRON_SECRET fails in production", () => {
+    const e = { ...validProdBase() };
+    delete e.CRON_SECRET;
+    const r = validateFullEnv(e);
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.ok(r.issues.some((i) => i.variable === "CRON_SECRET"));
+  });
+
+  it("FI_PAYMENTS_ENABLED requires Stripe secrets in production", () => {
+    const r = validateFullEnv({
+      ...validProdBase(),
+      FI_PAYMENTS_ENABLED: "true",
+    });
+    assert.equal(r.ok, false);
+    if (!r.ok) {
+      assert.ok(r.issues.some((i) => i.variable === "STRIPE_SECRET_KEY"));
+      assert.ok(r.issues.some((i) => i.variable === "STRIPE_WEBHOOK_SECRET"));
     }
   });
 

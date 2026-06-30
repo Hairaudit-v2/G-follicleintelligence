@@ -2,7 +2,7 @@
 
 import { FiAdminSegmentError } from "@/src/components/fi-admin/FiAdminSegmentError";
 
-export default function FiAdminTenantError({
+export default function FiAdminCalendarError({
   error,
   reset,
 }: {
@@ -13,8 +13,8 @@ export default function FiAdminTenantError({
     <FiAdminSegmentError
       error={error}
       reset={reset}
-      title="Could not load this workspace"
-      surface="fi_admin_tenant"
+      title="Could not load calendar"
+      surface="fi_admin_calendar"
     />
   );
 }

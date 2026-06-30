@@ -11,9 +11,16 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint, typecheck, unit tests
+    name: Lint, typecheck, unit tests, build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+
+    env:
+      NODE_ENV: production
+      SKIP_ENV_VALIDATION: "1"
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-placeholder-anon
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-placeholder-service-role-key
 
     steps:
       - name: Checkout
@@ -31,6 +38,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Migration version check
+        run: npm run check:migrations
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -42,3 +52,6 @@ jobs:
 
       - name: Production env rules (fixture)
         run: npm run check:env:production-rules
+
+      - name: Production build
+        run: npm run build

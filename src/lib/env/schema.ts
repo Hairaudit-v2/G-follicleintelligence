@@ -221,6 +221,31 @@ export function collectCrossEnvValidationIssues(
         message: "Required in production (server-only)",
       });
     }
+    if (!isPresent(g("CRON_SECRET"))) {
+      issues.push({
+        variable: "CRON_SECRET",
+        message: "Required in production (Vercel scheduled crons use Bearer auth)",
+      });
+    } else if (g("CRON_SECRET")!.trim().length < 16) {
+      issues.push({
+        variable: "CRON_SECRET",
+        message: "Must be at least 16 characters in production",
+      });
+    }
+    if (isAffirmative(g("FI_PAYMENTS_ENABLED"))) {
+      if (!isPresent(g("STRIPE_SECRET_KEY"))) {
+        issues.push({
+          variable: "STRIPE_SECRET_KEY",
+          message: "Required when FI_PAYMENTS_ENABLED is on in production",
+        });
+      }
+      if (!isPresent(g("STRIPE_WEBHOOK_SECRET"))) {
+        issues.push({
+          variable: "STRIPE_WEBHOOK_SECRET",
+          message: "Required when FI_PAYMENTS_ENABLED is on in production",
+        });
+      }
+    }
     if (isAffirmative(g("FI_ALLOW_INSECURE_API"))) {
       issues.push({
         variable: "FI_ALLOW_INSECURE_API",

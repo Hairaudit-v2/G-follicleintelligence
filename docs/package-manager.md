@@ -1,6 +1,6 @@
 # Package manager discipline
 
-This repository currently contains **both** `package-lock.json` (npm) and `pnpm-lock.yaml` (pnpm). They are **not** interchangeable: mixing installs corrupts `node_modules` layout, causes subtle resolution bugs, and on Windows increases the risk of file locks under `.next/` and `node_modules/`.
+This repository uses **npm** only. `package-lock.json` is the single lockfile. Do not add or refresh `pnpm-lock.yaml` unless the team explicitly migrates to pnpm-only.
 
 ## Supported workflow (canonical)
 
@@ -11,10 +11,6 @@ This repository currently contains **both** `package-lock.json` (npm) and `pnpm-
 
 - Run **`npm install` and `pnpm install` on the same clone** (or alternate between them without a full wipe of `node_modules` and a single lockfile-driven reinstall).
 - Commit lockfile changes from a different package manager than the one your team agreed to use for that branch.
-
-## pnpm-lock.yaml
-
-`pnpm-lock.yaml` may remain in the tree for historical or automation reasons. Unless your team explicitly standardises on pnpm for this repo, **prefer npm** and do not refresh `pnpm-lock.yaml` unless you are intentionally migrating to pnpm-only.
 
 Some internal runbooks still show `pnpm run …` for historical reasons; the **npm** equivalent is `npm run …` with the same script name.
 

@@ -12,6 +12,7 @@ const validProdBase = (): NodeJS.ProcessEnv => ({
   NEXT_PUBLIC_SUPABASE_URL: "https://xyzcompany.supabase.co",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test",
   SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.service-role",
+  CRON_SECRET: "sixteen_chars_min_",
 });
 
 describe("validateFiServerEnv", () => {
@@ -83,6 +84,36 @@ describe("validateFiServerEnv", () => {
     });
     assert.equal(r.ok, false);
     if (!r.ok) assert.ok(r.errors.includes("CRON_SECRET"));
+  });
+
+  it("missing CRON_SECRET fails in production", () => {
+    const e = { ...validProdBase() };
+    delete e.CRON_SECRET;
+    const r = validateFiServerEnv(e);
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.ok(r.errors.includes("CRON_SECRET"));
+  });
+
+  it("FI_PAYMENTS_ENABLED requires Stripe secrets in production", () => {
+    const r = validateFiServerEnv({
+      ...validProdBase(),
+      FI_PAYMENTS_ENABLED: "true",
+    });
+    assert.equal(r.ok, false);
+    if (!r.ok) {
+      assert.ok(r.errors.includes("STRIPE_SECRET_KEY"));
+      assert.ok(r.errors.includes("STRIPE_WEBHOOK_SECRET"));
+    }
+  });
+
+  it("FI_PAYMENTS_ENABLED passes when Stripe secrets are set", () => {
+    const r = validateFiServerEnv({
+      ...validProdBase(),
+      FI_PAYMENTS_ENABLED: "true",
+      STRIPE_SECRET_KEY: "sk_live_placeholder_key_12345",
+      STRIPE_WEBHOOK_SECRET: "whsec_placeholder_secret_12345",
+    });
+    assert.equal(r.ok, true);
   });
 
   it("FI_HR_SYNC_CRON_SECRET too short fails", () => {
