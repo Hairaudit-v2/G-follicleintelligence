@@ -7,19 +7,19 @@ import { formatReferenceComparisonLabel } from "@/src/lib/vie/vieSameAngleAlignm
 import type { VieCaptureReviewPayload } from "@/src/lib/vie/vieProtocolTypes";
 
 function alignmentStatusTone(status: VieSameAngleAlignmentResult["alignment_status"]): string {
-  if (status === "excellent") return "border-emerald-200 bg-emerald-50 text-emerald-900";
+  if (status === "excellent") return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
   if (status === "acceptable") return "border-cyan-200 bg-cyan-50 text-cyan-900";
-  if (status === "poor") return "border-amber-200 bg-amber-50 text-amber-900";
-  if (status === "retake_recommended") return "border-red-200 bg-red-50 text-red-900";
-  return "border-gray-200 bg-gray-50 text-gray-700";
+  if (status === "poor") return "border-amber-400/20 bg-amber-400/10 text-amber-200";
+  if (status === "retake_recommended") return "border-rose-500/20 bg-rose-500/10 text-rose-300";
+  return "border-white/[0.08] bg-white/[0.03] text-slate-300";
 }
 
 function statusTone(status: string): { className: string; icon: "pass" | "warn" | "fail" | "pending" } {
   if (status === "heuristic_pass" || status === "stub_pass" || status === "stub_match") {
-    return { className: "text-emerald-700", icon: "pass" };
+    return { className: "text-emerald-300", icon: "pass" };
   }
-  if (status === "heuristic_fail") return { className: "text-red-700", icon: "fail" };
-  return { className: "text-amber-700", icon: "pending" };
+  if (status === "heuristic_fail") return { className: "text-rose-300", icon: "fail" };
+  return { className: "text-amber-300", icon: "pending" };
 }
 
 function StatusIcon({ kind }: { kind: ReturnType<typeof statusTone>["icon"] }) {
@@ -57,16 +57,16 @@ export function VieIntelligenceResultPanel({
   const usability = review.clinical_usability;
   const usabilityTone =
     usability.status === "usable"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+      ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
       : usability.status === "warning"
-        ? "border-amber-200 bg-amber-50 text-amber-900"
-        : "border-red-200 bg-red-50 text-red-900";
+        ? "border-amber-400/20 bg-amber-400/10 text-amber-200"
+        : "border-rose-500/20 bg-rose-500/10 text-rose-300";
 
   return (
     <div className="space-y-3 rounded-lg border border-cyan-200 bg-cyan-50/40 p-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-cyan-800">Capture intelligence</p>
-        <p className="mt-1 text-sm text-gray-800">
+        <p className="mt-1 text-sm text-slate-200">
           Detected view: <span className="font-medium">{review.protocol_slot_slug.replace(/_/g, " ")}</span>
           {" · "}
           Region: {review.classification.expected_region.replace(/_/g, " ")}
@@ -74,10 +74,10 @@ export function VieIntelligenceResultPanel({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="rounded-md bg-white px-3 py-2 ring-1 ring-gray-200">
+        <div className="rounded-md bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 ring-1 ring-gray-200">
           <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-gray-500">Quality score</p>
-          <p className="text-lg font-semibold tabular-nums text-gray-900">{review.quality_score}/100</p>
-          <p className="text-xs text-gray-600">{review.quality_band.replace(/_/g, " ")}</p>
+          <p className="text-lg font-semibold tabular-nums text-slate-100">{review.quality_score}/100</p>
+          <p className="text-xs text-slate-400">{review.quality_band.replace(/_/g, " ")}</p>
         </div>
         <div className={`flex-1 rounded-md border px-3 py-2 ${usabilityTone}`}>
           <p className="text-[0.65rem] font-semibold uppercase tracking-wide">Clinical usability</p>
@@ -128,9 +128,9 @@ export function VieIntelligenceResultPanel({
       ) : null}
 
       {usability.warnings.length > 0 ? (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Warnings</p>
-          <ul className="mt-1 list-inside list-disc text-xs text-amber-900">
+        <div className="rounded-md border border-amber-400/20 bg-amber-400/10 px-3 py-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">Warnings</p>
+          <ul className="mt-1 list-inside list-disc text-xs text-amber-200">
             {usability.warnings.map((w) => (
               <li key={w}>{w}</li>
             ))}
@@ -139,7 +139,7 @@ export function VieIntelligenceResultPanel({
       ) : null}
 
       {!review.review.allowed && review.review.reason ? (
-        <p className="text-sm text-red-700" role="alert">
+        <p className="text-sm text-rose-300" role="alert">
           {review.review.reason}
         </p>
       ) : null}
@@ -158,7 +158,7 @@ export function VieIntelligenceResultPanel({
           type="button"
           disabled={pending}
           onClick={onRetake}
-          className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 text-sm font-semibold text-slate-100 hover:bg-white/[0.03] disabled:opacity-50"
         >
           <RotateCcw className="h-4 w-4" aria-hidden />
           Retake
@@ -170,7 +170,7 @@ export function VieIntelligenceResultPanel({
           type="button"
           disabled={pending}
           onClick={onOverrideAccept}
-          className="w-full rounded-lg border border-amber-400 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+          className="w-full rounded-lg border border-amber-400 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-200 hover:bg-amber-400/15 disabled:opacity-50"
         >
           Accept with quality override (clinic policy allows)
         </button>

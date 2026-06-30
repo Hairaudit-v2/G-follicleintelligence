@@ -365,12 +365,12 @@ export function ImagingGuidedCaptureWizard({
   ]);
 
   return (
-    <section className="space-y-6 rounded-xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white p-4 sm:p-6">
+    <section className="space-y-6 rounded-xl border border-white/[0.08] bg-gradient-to-b from-gray-50 to-white p-4 sm:p-6">
       {toast ? (
         <div
           role="status"
           className={`rounded-lg px-4 py-3 text-sm font-medium ${
-            toast.kind === "success" ? "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200" : "bg-red-50 text-red-900 ring-1 ring-red-200"
+            toast.kind === "success" ? "bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-200" : "bg-rose-500/10 text-rose-300 ring-1 ring-red-200"
           }`}
         >
           {toast.text}
@@ -378,17 +378,17 @@ export function ImagingGuidedCaptureWizard({
       ) : null}
 
       <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">Guided clinical capture</h2>
-        <p className="max-w-2xl text-sm text-gray-600">
+        <h2 className="text-lg font-semibold tracking-tight text-slate-100 sm:text-xl">Guided clinical capture</h2>
+        <p className="max-w-2xl text-sm text-slate-400">
           Touch-friendly workflow for iPad and phones. Uses the device camera or photo library; images stay in private
           patient storage with signed thumbnails only.
         </p>
       </header>
 
       {!currentSession ? (
-        <div className="rounded-lg border border-dashed border-gray-300 bg-white p-6 text-center">
-          <p className="text-sm font-medium text-gray-800">No active session</p>
-          <p className="mt-1 text-xs text-gray-600">Choose a protocol template to begin guided capture.</p>
+        <div className="rounded-lg border border-dashed border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 p-6 text-center">
+          <p className="text-sm font-medium text-slate-200">No active session</p>
+          <p className="mt-1 text-xs text-slate-400">Choose a protocol template to begin guided capture.</p>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {orderedTemplates.map((t) => (
               <button
@@ -396,7 +396,7 @@ export function ImagingGuidedCaptureWizard({
                 type="button"
                 disabled={pending}
                 onClick={() => onStartTemplate(t.slug)}
-                className="min-h-[48px] rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-sm font-medium text-gray-900 shadow-sm hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
+                className="min-h-[48px] rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 py-3 text-left text-sm font-medium text-slate-100 shadow-sm hover:bg-white/[0.03] active:bg-white/[0.06] disabled:opacity-50"
               >
                 {t.name}
               </button>
@@ -406,7 +406,7 @@ export function ImagingGuidedCaptureWizard({
       ) : (
         <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <label className="block min-w-0 flex-1 text-xs font-medium text-gray-700">
+            <label className="block min-w-0 flex-1 text-xs font-medium text-slate-300">
               Active session
               <select
                 value={sessionId}
@@ -414,7 +414,7 @@ export function ImagingGuidedCaptureWizard({
                   setSessionId(e.target.value);
                   setSlotOverride(null);
                 }}
-                className="mt-1 block w-full min-h-[44px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                className="mt-1 block w-full min-h-[44px] rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-2 text-sm"
               >
                 {initial.protocolSessions.map((s) => {
                   const tpl = initial.protocolTemplates.find((t) => t.slug === s.template_slug);
@@ -440,27 +440,27 @@ export function ImagingGuidedCaptureWizard({
           </div>
 
           {sessionComplete ? (
-            <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+            <p className="rounded-lg bg-amber-400/10 px-4 py-3 text-sm text-amber-200 ring-1 ring-amber-200">
               This session is marked complete. Start a new session from the protocols tab or pick another active session
               above.
             </p>
           ) : null}
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            <div className="space-y-3 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Session progress</h3>
               <div className="flex items-center gap-3">
-                <div className="h-3 flex-1 overflow-hidden rounded-full bg-gray-200">
+                <div className="h-3 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
                   <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-sm font-semibold tabular-nums text-gray-900">{pct}%</span>
+                <span className="text-sm font-semibold tabular-nums text-slate-100">{pct}%</span>
               </div>
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Missing (required)</h3>
                 {missing.length === 0 ? (
-                  <p className="mt-1 text-sm text-emerald-700">None — all required slots satisfied.</p>
+                  <p className="mt-1 text-sm text-emerald-300">None — all required slots satisfied.</p>
                 ) : (
-                  <ul className="mt-1 list-inside list-disc text-sm text-gray-800">
+                  <ul className="mt-1 list-inside list-disc text-sm text-slate-200">
                     {missing.map((slug) => (
                       <li key={slug}>{slots.find((s) => s.slug === slug)?.label ?? slug}</li>
                     ))}
@@ -469,24 +469,24 @@ export function ImagingGuidedCaptureWizard({
               </div>
             </div>
 
-            <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            <div className="space-y-3 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Optional metadata</h3>
-              <label className="block text-xs text-gray-600">
+              <label className="block text-xs text-slate-400">
                 Clinic ID (UUID)
                 <input
                   value={clinicIdInput}
                   onChange={(e) => setClinicIdInput(e.target.value)}
-                  className="mt-1 block w-full min-h-[44px] rounded-lg border border-gray-300 px-3 font-mono text-sm"
+                  className="mt-1 block w-full min-h-[44px] rounded-lg border border-slate-700 px-3 font-mono text-sm"
                   placeholder="Optional"
                   autoComplete="off"
                 />
               </label>
-              <label className="block text-xs text-gray-600">
+              <label className="block text-xs text-slate-400">
                 Capturing staff ID (UUID)
                 <input
                   value={staffIdInput}
                   onChange={(e) => setStaffIdInput(e.target.value)}
-                  className="mt-1 block w-full min-h-[44px] rounded-lg border border-gray-300 px-3 font-mono text-sm"
+                  className="mt-1 block w-full min-h-[44px] rounded-lg border border-slate-700 px-3 font-mono text-sm"
                   placeholder="Optional"
                   autoComplete="off"
                 />
@@ -519,7 +519,7 @@ export function ImagingGuidedCaptureWizard({
                 type="button"
                 disabled={pending || !currentSlot || sessionComplete}
                 onClick={() => camRef.current?.click()}
-                className="min-h-[52px] flex-1 rounded-xl bg-white px-4 text-base font-semibold text-gray-900 shadow hover:bg-gray-100 disabled:opacity-40"
+                className="min-h-[52px] flex-1 rounded-xl bg-[#0F1629]/80 backdrop-blur-md px-4 text-base font-semibold text-slate-100 shadow hover:bg-white/[0.06] disabled:opacity-40"
               >
                 {pending ? "Uploading…" : "Take photo"}
               </button>
@@ -540,7 +540,7 @@ export function ImagingGuidedCaptureWizard({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Captured</h3>
               {lastPreviewUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -549,7 +549,7 @@ export function ImagingGuidedCaptureWizard({
                 <p className="mt-2 text-sm text-gray-500">After each upload, a thumbnail preview appears here.</p>
               )}
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Slot checklist</h3>
               <ul className="mt-2 max-h-56 space-y-1 overflow-y-auto text-sm">
                 {slots.map((s) => {
@@ -572,7 +572,7 @@ export function ImagingGuidedCaptureWizard({
                         disabled={sessionComplete}
                         onClick={() => setSlotOverride(s.slug)}
                         className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left ${
-                          active ? "bg-gray-900 text-white" : ok ? "bg-emerald-50 text-emerald-900" : pending ? "bg-amber-50 text-amber-900" : "bg-gray-50 hover:bg-gray-100"
+                          active ? "bg-gray-900 text-white" : ok ? "bg-emerald-500/10 text-emerald-300" : pending ? "bg-amber-400/10 text-amber-200" : "bg-white/[0.03] hover:bg-white/[0.06]"
                         }`}
                       >
                         <span className="pr-2">{s.label}</span>
@@ -591,7 +591,7 @@ export function ImagingGuidedCaptureWizard({
                 type="button"
                 disabled={pending || sessionComplete}
                 onClick={() => setSkipOpen(true)}
-                className="min-h-[44px] rounded-lg border border-gray-400 bg-white px-4 text-sm font-medium text-gray-800 hover:bg-gray-50"
+                className="min-h-[44px] rounded-lg border border-slate-600 bg-[#0F1629]/80 backdrop-blur-md px-4 text-sm font-medium text-slate-200 hover:bg-white/[0.03]"
               >
                 Skip with reason…
               </button>
@@ -600,18 +600,18 @@ export function ImagingGuidedCaptureWizard({
 
           {skipOpen ? (
             <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" role="dialog" aria-modal="true">
-              <div className="w-full max-w-md rounded-xl bg-white p-4 shadow-xl">
-                <h4 className="text-base font-semibold text-gray-900">Skip optional slot</h4>
-                <p className="mt-1 text-xs text-gray-600">Required views cannot be skipped.</p>
+              <div className="w-full max-w-md rounded-xl bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-xl">
+                <h4 className="text-base font-semibold text-slate-100">Skip optional slot</h4>
+                <p className="mt-1 text-xs text-slate-400">Required views cannot be skipped.</p>
                 <textarea
                   value={skipReason}
                   onChange={(e) => setSkipReason(e.target.value)}
                   rows={3}
-                  className="mt-3 w-full rounded-lg border border-gray-300 p-2 text-sm"
+                  className="mt-3 w-full rounded-lg border border-slate-700 p-2 text-sm"
                   placeholder="Clinical reason (visible in session progress metadata)"
                 />
                 <div className="mt-4 flex justify-end gap-2">
-                  <button type="button" className="rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setSkipOpen(false)}>
+                  <button type="button" className="rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-white/[0.06]" onClick={() => setSkipOpen(false)}>
                     Cancel
                   </button>
                   <button
@@ -627,8 +627,8 @@ export function ImagingGuidedCaptureWizard({
             </div>
           ) : null}
 
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Start another guided session</p>
+          <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Start another guided session</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {orderedTemplates.map((t) => (
                 <button
@@ -636,7 +636,7 @@ export function ImagingGuidedCaptureWizard({
                   type="button"
                   disabled={pending}
                   onClick={() => onStartTemplate(t.slug)}
-                  className="min-h-[40px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-800 hover:bg-gray-100 disabled:opacity-50"
+                  className="min-h-[40px] rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-white/[0.06] disabled:opacity-50"
                 >
                   + {t.name}
                 </button>

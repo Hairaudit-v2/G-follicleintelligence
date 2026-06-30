@@ -133,10 +133,10 @@ function SlotChecklist({
           return (
             <li
               key={s.slug}
-              className={`flex items-center gap-2 rounded-md px-2 py-1 text-xs ${active ? "bg-cyan-50 text-cyan-900" : "text-gray-600"}`}
+              className={`flex items-center gap-2 rounded-md px-2 py-1 text-xs ${active ? "bg-cyan-50 text-cyan-900" : "text-slate-400"}`}
             >
               {done ? (
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" aria-hidden />
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-300" aria-hidden />
               ) : pending ? (
                 <Circle className="h-3.5 w-3.5 shrink-0 text-amber-500" aria-hidden />
               ) : (
@@ -435,7 +435,7 @@ export function VieCaptureWizard({
 
   if (!protocol || !currentSlot) {
     return (
-      <p className="text-sm text-red-700" role="alert">
+      <p className="text-sm text-rose-300" role="alert">
         Protocol configuration not found.
       </p>
     );
@@ -446,20 +446,20 @@ export function VieCaptureWizard({
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">Visual Intelligence Engine</p>
-          <h3 className="text-base font-semibold text-gray-900">{protocol.name}</h3>
-          <p className="mt-1 text-xs text-gray-600">
+          <h3 className="text-base font-semibold text-slate-100">{protocol.name}</h3>
+          <p className="mt-1 text-xs text-slate-400">
             Required: {requiredComplete}/{requiredTotal} accepted
             {optionalTotal > 0 ? ` · Optional: ${optionalComplete}/${optionalTotal}` : null}
             {sessionCompleted ? " — protocol complete" : null}
           </p>
         </div>
-        <button type="button" onClick={onClose} className="text-sm text-gray-500 hover:text-gray-800">
+        <button type="button" onClick={onClose} className="text-sm text-gray-500 hover:text-slate-200">
           Close
         </button>
       </div>
 
       {!awaitingReview ? (
-        <div className="rounded-lg border border-gray-200 bg-slate-950 p-4">
+        <div className="rounded-lg border border-white/[0.08] bg-slate-950 p-4">
           <div className="flex flex-wrap items-center justify-center gap-2">
             <p className="text-center text-sm font-semibold text-white">{currentSlot.label}</p>
             <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-cyan-200">
@@ -561,9 +561,9 @@ export function VieCaptureWizard({
         </>
       ) : null}
 
-      {pending ? <p className="text-sm text-gray-600">Processing capture…</p> : null}
+      {pending ? <p className="text-sm text-slate-400">Processing capture…</p> : null}
       {err ? (
-        <p className="text-sm text-red-700" role="alert">
+        <p className="text-sm text-rose-300" role="alert">
           {err}
         </p>
       ) : null}

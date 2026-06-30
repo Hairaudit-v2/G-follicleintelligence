@@ -108,20 +108,20 @@ export function StartCaptureProtocolButton({
           aria-modal="true"
           aria-labelledby="vie-capture-dialog-title"
         >
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-xl">
             {step === "pick" ? (
               <>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h2 id="vie-capture-dialog-title" className="text-base font-semibold text-gray-900">
+                    <h2 id="vie-capture-dialog-title" className="text-base font-semibold text-slate-100">
                       Start capture protocol
                     </h2>
-                    <p className="mt-1 text-xs text-gray-600">
+                    <p className="mt-1 text-xs text-slate-400">
                       All clinical photography is protocol-driven. Select the visit type to begin guided capture with
                       visual framing guides and instant quality checks.
                     </p>
                   </div>
-                  <button type="button" onClick={close} className="text-sm text-gray-500 hover:text-gray-800">
+                  <button type="button" onClick={close} className="text-sm text-gray-500 hover:text-slate-200">
                     Close
                   </button>
                 </div>
@@ -141,10 +141,10 @@ export function StartCaptureProtocolButton({
                                 type="button"
                                 disabled={pending}
                                 onClick={() => startProtocol(p.slug)}
-                                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-left hover:border-cyan-400 hover:bg-cyan-50/50 disabled:opacity-50"
+                                className="w-full rounded-lg border border-white/[0.08] px-3 py-2.5 text-left hover:border-cyan-400 hover:bg-cyan-50/50 disabled:opacity-50"
                               >
-                                <span className="block text-sm font-semibold text-gray-900">{p.name}</span>
-                                <span className="mt-0.5 block text-xs text-gray-600">
+                                <span className="block text-sm font-semibold text-slate-100">{p.name}</span>
+                                <span className="mt-0.5 block text-xs text-slate-400">
                                   {protocolSlotSummary(p.slug)} · {p.description}
                                 </span>
                               </button>
@@ -156,9 +156,9 @@ export function StartCaptureProtocolButton({
                   })}
                 </div>
 
-                {pending ? <p className="mt-3 text-sm text-gray-600">Starting protocol…</p> : null}
+                {pending ? <p className="mt-3 text-sm text-slate-400">Starting protocol…</p> : null}
                 {err ? (
-                  <p className="mt-3 text-sm text-red-700" role="alert">
+                  <p className="mt-3 text-sm text-rose-300" role="alert">
                     {err}
                   </p>
                 ) : null}

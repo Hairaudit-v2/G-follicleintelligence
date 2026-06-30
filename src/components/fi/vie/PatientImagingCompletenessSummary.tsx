@@ -20,9 +20,9 @@ export function PatientImagingCompletenessSummary({
   const pct = completeness.headline.percent;
   const qualityLine = qualityLabel(completeness);
 
-  const trackClass = variant === "dark" ? "bg-white/10" : "bg-gray-200";
+  const trackClass = variant === "dark" ? "bg-white/10" : "bg-white/[0.08]";
   const fillClass = pct >= 100 ? "bg-emerald-500" : "bg-cyan-500";
-  const textClass = variant === "dark" ? "text-slate-300" : "text-gray-700";
+  const textClass = variant === "dark" ? "text-slate-300" : "text-slate-300";
   const labelClass = variant === "dark" ? "text-slate-500" : "text-gray-500";
 
   return (

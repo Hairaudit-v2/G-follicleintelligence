@@ -199,7 +199,7 @@ export function ImagingOsWorkspace({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-white/[0.08] pb-3">
         {(
           [
             ["gallery", "Gallery"],
@@ -216,7 +216,7 @@ export function ImagingOsWorkspace({
             type="button"
             onClick={() => setTab(id)}
             className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-              tab === id ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+              tab === id ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.03]"
             }`}
           >
             {label}
@@ -224,27 +224,27 @@ export function ImagingOsWorkspace({
         ))}
       </div>
 
-      <label className="block text-xs text-gray-600">
+      <label className="block text-xs text-slate-400">
         Optional admin key (CRM write gate)
         <input
           value={adminKey}
           onChange={(e) => setAdminKey(e.target.value)}
-          className="mt-1 block w-full max-w-md rounded border border-gray-300 px-2 py-1 font-mono text-xs"
+          className="mt-1 block w-full max-w-md rounded border border-slate-700 px-2 py-1 font-mono text-xs"
           autoComplete="off"
         />
       </label>
 
-      {msg ? <p className="text-sm text-gray-700">{msg}</p> : null}
+      {msg ? <p className="text-sm text-slate-300">{msg}</p> : null}
       {pending ? <p className="text-xs text-gray-500">Working…</p> : null}
 
       {tab === "gallery" ? (
         <section className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-gray-700">Library axis</span>
+            <span className="text-xs font-medium text-slate-300">Library axis</span>
             <select
               value={axisFilter}
               onChange={(e) => setAxisFilter(e.target.value)}
-              className="rounded border border-gray-300 bg-white px-2 py-1 text-sm"
+              className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm"
             >
               <option value="">All</option>
               {IMAGING_LIBRARY_AXES.map((a) => (
@@ -256,11 +256,11 @@ export function ImagingOsWorkspace({
           </div>
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {tiles.map((t) => (
-              <figure key={t.image.id} className="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
-                <div className="relative aspect-square bg-gray-100">
+              <figure key={t.image.id} className="overflow-hidden rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
+                <div className="relative aspect-square bg-white/[0.06]">
                   <Image src={t.signed.url} alt="" fill className="object-cover" sizes="200px" unoptimized />
                 </div>
-                <figcaption className="space-y-1 p-2 text-xs text-gray-700">
+                <figcaption className="space-y-1 p-2 text-xs text-slate-300">
                   <p className="font-mono text-[10px] text-gray-500">{t.image.id.slice(0, 8)}…</p>
                   <p>
                     <span className="font-medium">{t.image.imaging_library_axis}</span>
@@ -271,7 +271,7 @@ export function ImagingOsWorkspace({
                       <button
                         key={k}
                         type="button"
-                        className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700 hover:bg-gray-200"
+                        className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium text-slate-300 hover:bg-white/[0.08]"
                         onClick={() => onEnqueueAi(t.image.id, k)}
                       >
                         AI:{k.slice(0, 4)}
@@ -286,7 +286,7 @@ export function ImagingOsWorkspace({
       ) : null}
 
       {tab === "timeline" ? (
-        <ol className="relative space-y-4 border-l border-gray-200 pl-6">
+        <ol className="relative space-y-4 border-l border-white/[0.08] pl-6">
           {timelineTiles.map((t) => {
             const timelineMeta = t.image.metadata?.fi_image_timeline;
             const label =
@@ -306,14 +306,14 @@ export function ImagingOsWorkspace({
             return (
               <li key={t.image.id} className="text-sm">
                 <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-900" />
-                <p className="font-medium text-gray-900">{label ?? new Date(t.image.taken_at ?? t.image.created_at).toLocaleString()}</p>
-                <p className="text-xs text-gray-600">
+                <p className="font-medium text-slate-100">{label ?? new Date(t.image.taken_at ?? t.image.created_at).toLocaleString()}</p>
+                <p className="text-xs text-slate-400">
                   {imageType ? `${imageType} · ` : ""}
                   {t.image.imaging_library_axis}
                   {t.image.visit_type ? ` · ${t.image.visit_type}` : ""}
                   {t.image.follow_up_interval ? ` · ${t.image.follow_up_interval}` : ""}
                 </p>
-                <div className="relative mt-2 h-40 max-w-xs overflow-hidden rounded border border-gray-100 bg-gray-50">
+                <div className="relative mt-2 h-40 max-w-xs overflow-hidden rounded border border-white/[0.06] bg-white/[0.03]">
                   <Image src={t.signed.url} alt="" fill className="object-cover" sizes="200px" unoptimized />
                 </div>
               </li>
@@ -325,8 +325,8 @@ export function ImagingOsWorkspace({
       {tab === "compare" ? (
         <section className="space-y-8">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Suggested comparison pairs</h2>
-            <p className="mt-1 text-xs text-gray-600">
+            <h2 className="text-sm font-semibold text-slate-100">Suggested comparison pairs</h2>
+            <p className="mt-1 text-xs text-slate-400">
               Auto-matched from accepted VIE protocol captures — metadata heuristics and same-angle alignment scoring (AI vision pending).
             </p>
             <div className="mt-4">
@@ -341,14 +341,14 @@ export function ImagingOsWorkspace({
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-sm font-semibold text-gray-900">Manual compare</h2>
-            <p className="mt-1 text-xs text-gray-600">{IMAGING_COMPARE_PRESETS.map((p) => p.label).join(" · ")} — pick any two active images.</p>
+          <div className="border-t border-white/[0.08] pt-6">
+            <h2 className="text-sm font-semibold text-slate-100">Manual compare</h2>
+            <p className="mt-1 text-xs text-slate-400">{IMAGING_COMPARE_PRESETS.map((p) => p.label).join(" · ")} — pick any two active images.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Left / baseline
               <select
-                className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
                 value={compareLeft || leftTile?.image.id || ""}
                 onChange={(e) => setCompareLeft(e.target.value)}
               >
@@ -359,10 +359,10 @@ export function ImagingOsWorkspace({
                 ))}
               </select>
             </label>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Right / current
               <select
-                className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
                 value={compareRight || rightTile?.image.id || ""}
                 onChange={(e) => setCompareRight(e.target.value)}
               >
@@ -377,14 +377,14 @@ export function ImagingOsWorkspace({
           <div className="flex gap-2">
             <button
               type="button"
-              className={`rounded px-3 py-1 text-xs font-medium ${compareLayout === "side" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white"}`}
+              className={`rounded px-3 py-1 text-xs font-medium ${compareLayout === "side" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500"}`}
               onClick={() => setCompareLayout("side")}
             >
               Side-by-side
             </button>
             <button
               type="button"
-              className={`rounded px-3 py-1 text-xs font-medium ${compareLayout === "overlay" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white"}`}
+              className={`rounded px-3 py-1 text-xs font-medium ${compareLayout === "overlay" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500"}`}
               onClick={() => setCompareLayout("overlay")}
             >
               Overlay
@@ -393,10 +393,10 @@ export function ImagingOsWorkspace({
           {leftTile && rightTile && leftTile.image.id !== rightTile.image.id ? (
             compareLayout === "side" ? (
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="relative aspect-square overflow-hidden rounded border border-gray-200 bg-gray-100">
+                <div className="relative aspect-square overflow-hidden rounded border border-white/[0.08] bg-white/[0.06]">
                   <Image src={leftTile.signed.url} alt="Left" fill className="object-contain" sizes="(max-width:768px) 100vw, 50vw" unoptimized />
                 </div>
-                <div className="relative aspect-square overflow-hidden rounded border border-gray-200 bg-gray-100">
+                <div className="relative aspect-square overflow-hidden rounded border border-white/[0.08] bg-white/[0.06]">
                   <Image src={rightTile.signed.url} alt="Right" fill className="object-contain" sizes="(max-width:768px) 100vw, 50vw" unoptimized />
                 </div>
               </div>
@@ -410,7 +410,7 @@ export function ImagingOsWorkspace({
                   onChange={(e) => setOverlayPct(Number(e.target.value))}
                   className="w-full max-w-md"
                 />
-                <div className="relative mx-auto aspect-square w-full max-w-lg overflow-hidden rounded border border-gray-200 bg-gray-900">
+                <div className="relative mx-auto aspect-square w-full max-w-lg overflow-hidden rounded border border-white/[0.08] bg-gray-900">
                   <Image src={leftTile.signed.url} alt="" fill className="object-contain" sizes="600px" unoptimized />
                   <div
                     className="absolute inset-0"
@@ -422,7 +422,7 @@ export function ImagingOsWorkspace({
               </div>
             )
           ) : (
-            <p className="text-sm text-gray-600">Select two different images to compare.</p>
+            <p className="text-sm text-slate-400">Select two different images to compare.</p>
           )}
           </div>
         </section>
@@ -430,17 +430,17 @@ export function ImagingOsWorkspace({
 
       {tab === "protocols" ? (
         <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-gray-900">Standard photography protocols</h2>
+          <h2 className="text-sm font-semibold text-slate-100">Standard photography protocols</h2>
           <ul className="space-y-3">
             {initial.protocolTemplates.map((tpl) => {
               const session = initial.protocolSessions.find((s) => s.template_slug === tpl.slug);
               return (
-                <li key={tpl.slug} className="rounded border border-gray-200 bg-white p-3 text-sm shadow-sm">
+                <li key={tpl.slug} className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 text-sm shadow-lg shadow-black/40">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium text-gray-900">{tpl.name}</p>
-                      <p className="text-xs text-gray-600">{tpl.description}</p>
-                      <p className="mt-2 text-xs text-gray-700">
+                      <p className="font-medium text-slate-100">{tpl.name}</p>
+                      <p className="text-xs text-slate-400">{tpl.description}</p>
+                      <p className="mt-2 text-xs text-slate-300">
                         Required slots: {tpl.slots.filter((s) => s.required !== false).length} · Completion:{" "}
                         {session ? `${session.completion_percent}%` : "— (no session)"}
                       </p>
@@ -462,18 +462,18 @@ export function ImagingOsWorkspace({
 
       {tab === "scalp" ? (
         <section className="space-y-3">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-slate-400">
             Wireframe reference (read-only). Persisted highlights/paths/notes live in JSON — interactive canvas can replace this layer later.
           </p>
-          <ScalpWireframe className="max-w-md text-gray-800" />
-          <label className="block text-xs font-medium text-gray-700">
+          <ScalpWireframe className="max-w-md text-slate-200" />
+          <label className="block text-xs font-medium text-slate-300">
             Map state (JSON)
             <textarea
               value={scalpJson}
               onChange={(e) => setScalpJson(e.target.value)}
               rows={12}
               spellCheck={false}
-              className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 font-mono text-xs"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 font-mono text-xs"
             />
           </label>
           <button
@@ -489,10 +489,10 @@ export function ImagingOsWorkspace({
 
       {tab === "annotate" ? (
         <section className="space-y-3">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-slate-400">
             Vector annotation layer (arrows, circles, free draw, measurement, text). Stored in `fi_imaging_annotation_sets`, not on the original file.
           </p>
-          <label className="block text-xs font-medium text-gray-700">
+          <label className="block text-xs font-medium text-slate-300">
             Image
             <select
               value={annotateImageId}
@@ -502,7 +502,7 @@ export function ImagingOsWorkspace({
                 const ann = initial.annotationsByImageId[id];
                 setAnnotateJson(JSON.stringify(ann?.payload ?? { elements: [] }, null, 2));
               }}
-              className="mt-1 block w-full max-w-lg rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+              className="mt-1 block w-full max-w-lg rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             >
               {initial.bundle.activeWithSignedUrls.map((t) => (
                 <option key={t.image.id} value={t.image.id}>
@@ -511,14 +511,14 @@ export function ImagingOsWorkspace({
               ))}
             </select>
           </label>
-          <label className="block text-xs font-medium text-gray-700">
+          <label className="block text-xs font-medium text-slate-300">
             Payload JSON
             <textarea
               value={annotateJson}
               onChange={(e) => setAnnotateJson(e.target.value)}
               rows={14}
               spellCheck={false}
-              className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 font-mono text-xs"
+              className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 font-mono text-xs"
             />
           </label>
           <button
