@@ -36,9 +36,9 @@ export function PatientProfileSummaryCards({ data }: { data: PatientProfileFound
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
+    <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">{label}</p>
-      <p className="mt-1 text-lg font-semibold tabular-nums text-gray-900">{value}</p>
+      <p className="mt-1 text-lg font-semibold tabular-nums text-slate-100">{value}</p>
     </div>
   );
 }

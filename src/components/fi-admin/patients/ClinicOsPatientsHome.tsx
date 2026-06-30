@@ -51,8 +51,8 @@ export function ClinicOsPatientsHome({
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         <div className="space-y-5 lg:col-span-8">
           <FiCard>
-            <h2 className="text-sm font-semibold text-slate-900">Find a patient</h2>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">
+            <h2 className="text-sm font-semibold text-slate-100">Find a patient</h2>
+            <p className="mt-1 text-sm leading-relaxed text-slate-400">
               Search by name, phone, email or patient number.
             </p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -61,24 +61,24 @@ export function ClinicOsPatientsHome({
                   <ClinicOsOpenGlobalSearchButton />
                   <p className="text-xs leading-relaxed text-slate-500 sm:max-w-xs">
                     Same search as the top bar or{" "}
-                    <kbd className="rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-mono text-[10px] text-slate-600">
+                    <kbd className="rounded border border-white/[0.08] bg-white/[0.03] px-1 py-0.5 font-mono text-[10px] text-slate-400">
                       ⌘K
                     </kbd>{" "}
                     /{" "}
-                    <kbd className="rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-mono text-[10px] text-slate-600">
+                    <kbd className="rounded border border-white/[0.08] bg-white/[0.03] px-1 py-0.5 font-mono text-[10px] text-slate-400">
                       Ctrl+K
                     </kbd>
                     .
                   </p>
                 </>
               ) : (
-                <p className="text-sm leading-relaxed text-slate-600">
+                <p className="text-sm leading-relaxed text-slate-400">
                   Workspace search (header bar or{" "}
-                  <kbd className="rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-mono text-[10px] text-slate-600">
+                  <kbd className="rounded border border-white/[0.08] bg-white/[0.03] px-1 py-0.5 font-mono text-[10px] text-slate-400">
                     ⌘K
                   </kbd>{" "}
                   /{" "}
-                  <kbd className="rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-mono text-[10px] text-slate-600">
+                  <kbd className="rounded border border-white/[0.08] bg-white/[0.03] px-1 py-0.5 font-mono text-[10px] text-slate-400">
                     Ctrl+K
                   </kbd>
                   ) opens patient search when the Clinic OS shell is enabled for this deployment.
@@ -88,7 +88,7 @@ export function ClinicOsPatientsHome({
           </FiCard>
 
           <div>
-            <h2 className="mb-3 text-sm font-semibold text-slate-900">Workflows</h2>
+            <h2 className="mb-3 text-sm font-semibold text-slate-100">Workflows</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <FiQuickActionCard
                 title="Add new patient"
@@ -122,7 +122,7 @@ export function ClinicOsPatientsHome({
         </div>
 
         <aside className="space-y-3 lg:col-span-4" aria-label="Patient work queues (preview)">
-          <h2 className="text-sm font-semibold text-slate-900">Patient work queues</h2>
+          <h2 className="text-sm font-semibold text-slate-100">Patient work queues</h2>
           <p className="text-xs text-slate-500">Preview · not connected to live metrics</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <FiKpiTile label="New enquiries" value="—" description="Preview · Coming soon" tone="info" />
@@ -136,18 +136,18 @@ export function ClinicOsPatientsHome({
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Recent patients</h2>
+        <h2 className="mb-2 text-sm font-semibold text-slate-100">Recent patients</h2>
         <FiEmptyState
           title="No recent activity to show"
           description="Preview only — recent patients will appear here once connected to live data. Use search to open a patient record."
         />
-        <ul className="mt-3 space-y-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-3 text-sm text-slate-600" aria-hidden>
-          <li className="flex justify-between gap-2 border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
-            <span className="font-medium text-slate-800">A. Preview</span>
+        <ul className="mt-3 space-y-2 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.03] p-3 text-sm text-slate-400" aria-hidden>
+          <li className="flex justify-between gap-2 border-b border-white/[0.06] pb-2 last:border-b-0 last:pb-0">
+            <span className="font-medium text-slate-200">A. Preview</span>
             <span className="text-xs text-slate-400">Sample row</span>
           </li>
-          <li className="flex justify-between gap-2 border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
-            <span className="font-medium text-slate-800">B. Preview</span>
+          <li className="flex justify-between gap-2 border-b border-white/[0.06] pb-2 last:border-b-0 last:pb-0">
+            <span className="font-medium text-slate-200">B. Preview</span>
             <span className="text-xs text-slate-400">Sample row</span>
           </li>
         </ul>

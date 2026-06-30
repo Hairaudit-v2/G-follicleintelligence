@@ -37,7 +37,7 @@ function rowsFromItems(items: PathologyResultItemRow[]): EditableRow[] {
 function ScorePill({ label, value }: { label: string; value: number | null }) {
   if (value == null) return null;
   return (
-    <span className="rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-900">
+    <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-xs font-medium text-cyan-200">
       {label}: {value}/100
     </span>
   );
@@ -46,7 +46,7 @@ function ScorePill({ label, value }: { label: string; value: number | null }) {
 function ContributorList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["likely_contributors"] }) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
-    <ul className="space-y-1 text-sm text-gray-800">
+    <ul className="space-y-1 text-sm text-slate-200">
       {items.map((item, idx) => (
         <li key={`${item.name}-${idx}`}>
           <span className="font-medium">{item.name}:</span> {item.rationale}
@@ -59,7 +59,7 @@ function ContributorList({ items }: { items: PathologyAiInterpretationRow["inter
 function MarkerList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["abnormal_markers"] }) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
-    <ul className="space-y-1 text-sm text-gray-800">
+    <ul className="space-y-1 text-sm text-slate-200">
       {items.map((item, idx) => (
         <li key={`${item.marker}-${idx}`}>
           <span className="font-medium">{item.marker}</span>
@@ -67,7 +67,7 @@ function MarkerList({ items }: { items: PathologyAiInterpretationRow["interpreta
           {item.unit ? ` ${item.unit}` : ""}
           {item.reference_range ? ` (ref ${item.reference_range})` : ""}
           {item.flag ? ` · ${item.flag}` : ""}
-          <span className="block text-xs text-gray-600">{item.hair_relevance}</span>
+          <span className="block text-xs text-slate-400">{item.hair_relevance}</span>
           {item.suggested_next_step ? <span className="block text-xs text-gray-500">Next: {item.suggested_next_step}</span> : null}
         </li>
       ))}
@@ -78,11 +78,11 @@ function MarkerList({ items }: { items: PathologyAiInterpretationRow["interpreta
 function ConsiderationList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["treatment_considerations"] }) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
-    <ul className="list-disc space-y-1 pl-4 text-sm text-gray-800">
+    <ul className="list-disc space-y-1 pl-4 text-sm text-slate-200">
       {items.map((item, idx) => (
         <li key={`${item.label}-${idx}`}>
           <span className="font-medium">{item.label}</span>
-          {item.rationale ? <span className="text-gray-600"> · {item.rationale}</span> : null}
+          {item.rationale ? <span className="text-slate-400"> · {item.rationale}</span> : null}
         </li>
       ))}
     </ul>
@@ -92,11 +92,11 @@ function ConsiderationList({ items }: { items: PathologyAiInterpretationRow["int
 function RepeatTestingList({ items }: { items: PathologyAiInterpretationRow["interpretation_json"]["repeat_testing_recommendations"] }) {
   if (items.length === 0) return <p className="text-sm text-gray-500">None listed.</p>;
   return (
-    <ul className="list-disc space-y-1 pl-4 text-sm text-gray-800">
+    <ul className="list-disc space-y-1 pl-4 text-sm text-slate-200">
       {items.map((item, idx) => (
         <li key={`${item.marker_or_panel}-${idx}`}>
           <span className="font-medium">{item.marker_or_panel}</span>
-          <span className="text-gray-600"> · {item.rationale}</span>
+          <span className="text-slate-400"> · {item.rationale}</span>
           {item.suggested_timing ? <span className="text-gray-500"> · {item.suggested_timing}</span> : null}
         </li>
       ))}
@@ -346,11 +346,11 @@ export function BloodPathologyResultDetailClient({
   return (
     <div className="space-y-6">
       {isArchived ? (
-        <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">This result is archived.</p>
+        <p className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">This result is archived.</p>
       ) : null}
 
-      <section className="rounded border border-gray-200 bg-white p-4 shadow-sm space-y-2 text-sm">
-        <h2 className="text-sm font-semibold text-gray-900">Summary</h2>
+      <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-2 text-sm">
+        <h2 className="text-sm font-semibold text-slate-100">Summary</h2>
         <dl className="grid gap-1 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-gray-500">Status</dt>
@@ -366,7 +366,7 @@ export function BloodPathologyResultDetailClient({
               {isDraft ? (
                 <input
                   type="date"
-                  className="mt-0.5 rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="mt-0.5 rounded border border-slate-700 px-2 py-1 text-sm"
                   value={resultDate}
                   onChange={(e) => setResultDate(e.target.value)}
                 />
@@ -380,7 +380,7 @@ export function BloodPathologyResultDetailClient({
             <dd>
               {isDraft ? (
                 <input
-                  className="mt-0.5 w-full max-w-xs rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="mt-0.5 w-full max-w-xs rounded border border-slate-700 px-2 py-1 text-sm"
                   value={providerName}
                   onChange={(e) => setProviderName(e.target.value)}
                 />
@@ -394,7 +394,7 @@ export function BloodPathologyResultDetailClient({
             <dd>
               {isDraft ? (
                 <select
-                  className="mt-1 w-full max-w-lg rounded border border-gray-300 px-2 py-1.5 text-sm"
+                  className="mt-1 w-full max-w-lg rounded border border-slate-700 px-2 py-1.5 text-sm"
                   value={pathologyRequestId}
                   onChange={(e) => setPathologyRequestId(e.target.value)}
                 >
@@ -408,7 +408,7 @@ export function BloodPathologyResultDetailClient({
               ) : bundle.linkedRequest ? (
                 <Link
                   href={`/fi-admin/${tenantId}/patients/${patientId}/blood-request/${bundle.linkedRequest.id}`}
-                  className="font-medium text-sky-700 hover:underline"
+                  className="font-medium text-cyan-300 hover:underline"
                 >
                   {bundle.linkedRequest.request_date} · {bundle.linkedRequest.template_used.replace(/_/g, " ")} ({bundle.linkedRequest.status})
                 </Link>
@@ -419,7 +419,7 @@ export function BloodPathologyResultDetailClient({
           </div>
           <div>
             <dt className="text-xs text-gray-500">Reviewed</dt>
-            <dd className="text-gray-800">
+            <dd className="text-slate-200">
               {bundle.result.reviewed_at ? (
                 <>
                   {bundle.reviewerDisplayName ?? bundle.result.reviewed_by_user_id ?? "Unknown"}
@@ -436,7 +436,7 @@ export function BloodPathologyResultDetailClient({
             <dd className="font-medium">
               {bundle.items.length} total
               {abnormalCount > 0 ? (
-                <span className="ml-2 text-amber-800">
+                <span className="ml-2 text-amber-300">
                   · {abnormalCount} abnormal (low / high / critical)
                 </span>
               ) : null}
@@ -446,13 +446,13 @@ export function BloodPathologyResultDetailClient({
       </section>
 
       {bundle.pdfSignedUrl ? (
-        <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900">Uploaded PDF</h2>
+        <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+          <h2 className="text-sm font-semibold text-slate-100">Uploaded PDF</h2>
           <a
             href={bundle.pdfSignedUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-block text-sm font-medium text-sky-700 hover:underline"
+            className="mt-2 inline-block text-sm font-medium text-cyan-300 hover:underline"
           >
             Open PDF (signed link, expires in ~1 hour)
           </a>
@@ -461,28 +461,28 @@ export function BloodPathologyResultDetailClient({
           ) : null}
         </section>
       ) : bundle.result.uploaded_file_path ? (
-        <p className="text-sm text-amber-800">PDF is stored but a signed link could not be generated. Refresh the page or check storage permissions.</p>
+        <p className="text-sm text-amber-300">PDF is stored but a signed link could not be generated. Refresh the page or check storage permissions.</p>
       ) : null}
 
-      <section className="rounded border border-gray-200 bg-white p-4 shadow-sm space-y-2">
-        <h2 className="text-sm font-semibold text-gray-900">Clinical summary</h2>
+      <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-2">
+        <h2 className="text-sm font-semibold text-slate-100">Clinical summary</h2>
         {isDraft ? (
           <textarea
-            className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             rows={4}
             value={clinicalSummary}
             onChange={(e) => setClinicalSummary(e.target.value)}
           />
         ) : (
-          <p className="text-sm text-gray-800 whitespace-pre-wrap">{bundle.result.clinical_summary?.trim() ? bundle.result.clinical_summary : "—"}</p>
+          <p className="text-sm text-slate-200 whitespace-pre-wrap">{bundle.result.clinical_summary?.trim() ? bundle.result.clinical_summary : "—"}</p>
         )}
       </section>
 
-      <section className="rounded border border-sky-200 bg-white p-4 shadow-sm space-y-4">
+      <section className="rounded border border-cyan-500/20 bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">AI Hair Loss Interpretation</h2>
-            <p className="mt-1 text-xs text-gray-600">
+            <h2 className="text-sm font-semibold text-slate-100">AI Hair Loss Interpretation</h2>
+            <p className="mt-1 text-xs text-slate-400">
               This interpretation is clinical decision support only and must be reviewed by the treating clinician.
             </p>
           </div>
@@ -500,7 +500,7 @@ export function BloodPathologyResultDetailClient({
                 <button
                   type="button"
                   disabled={busy || aiInterpretation.status === "archived"}
-                  className="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                  className="rounded border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                   onClick={() => void patchAiInterpretation("update_summaries")}
                 >
                   Save summaries
@@ -516,7 +516,7 @@ export function BloodPathologyResultDetailClient({
                 <button
                   type="button"
                   disabled={busy}
-                  className="rounded border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-900 hover:bg-red-100 disabled:opacity-50"
+                  className="rounded border border-red-300 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/15 disabled:opacity-50"
                   onClick={() => void patchAiInterpretation("archive")}
                 >
                   Archive
@@ -527,21 +527,21 @@ export function BloodPathologyResultDetailClient({
         </div>
 
         {!aiInterpretation ? (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-400">
             No AI interpretation has been generated for this result yet. Generate uses the structured marker rows only and creates a new draft.
           </p>
         ) : (
           <>
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium capitalize text-gray-800">
+              <span className="rounded-full bg-white/[0.06] px-2 py-1 text-xs font-medium capitalize text-slate-200">
                 {aiInterpretation.status.replace(/_/g, " ")}
               </span>
               <ScorePill label="Hair relevance" value={aiInterpretation.hair_loss_relevance_score} />
               <ScorePill label="Surgery readiness" value={aiInterpretation.surgical_readiness_score} />
             </div>
 
-            <div className="rounded border border-sky-100 bg-sky-50 p-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-sky-900">Overview</h3>
+            <div className="rounded border border-sky-100 bg-cyan-500/10 p-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-200">Overview</h3>
               <p className="mt-1 whitespace-pre-wrap text-sm text-sky-950">{aiInterpretation.interpretation_json.overview}</p>
             </div>
 
@@ -557,11 +557,11 @@ export function BloodPathologyResultDetailClient({
                 {aiInterpretation.interpretation_json.risk_flags.length === 0 ? (
                   <p className="mt-2 text-sm text-gray-500">None listed.</p>
                 ) : (
-                  <ul className="mt-2 space-y-1 text-sm text-gray-800">
+                  <ul className="mt-2 space-y-1 text-sm text-slate-200">
                     {aiInterpretation.interpretation_json.risk_flags.map((f, idx) => (
                       <li key={`${f.label}-${idx}`}>
                         <span className="font-medium">{f.label}</span>
-                        <span className="text-gray-600"> · {f.urgency.replace(/_/g, " ")} · {f.rationale}</span>
+                        <span className="text-slate-400"> · {f.urgency.replace(/_/g, " ")} · {f.rationale}</span>
                       </li>
                     ))}
                   </ul>
@@ -608,7 +608,7 @@ export function BloodPathologyResultDetailClient({
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Surgery readiness</h3>
-                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-800">{aiInterpretation.interpretation_json.surgery_readiness.narrative}</p>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">{aiInterpretation.interpretation_json.surgery_readiness.narrative}</p>
               </div>
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Repeat testing</h3>
@@ -631,7 +631,7 @@ export function BloodPathologyResultDetailClient({
               <label className="block">
                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Doctor summary</span>
                 <textarea
-                  className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                  className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   rows={5}
                   value={doctorSummary}
                   onChange={(e) => setDoctorSummary(e.target.value)}
@@ -640,7 +640,7 @@ export function BloodPathologyResultDetailClient({
               <label className="block">
                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Patient-friendly summary</span>
                 <textarea
-                  className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                  className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   rows={5}
                   value={patientFriendlySummary}
                   onChange={(e) => setPatientFriendlySummary(e.target.value)}
@@ -651,13 +651,13 @@ export function BloodPathologyResultDetailClient({
         )}
       </section>
 
-      <section className="rounded border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+      <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-gray-900">Markers</h2>
+          <h2 className="text-sm font-semibold text-slate-100">Markers</h2>
           {isDraft ? (
             <button
               type="button"
-              className="text-xs font-medium text-sky-700 hover:underline"
+              className="text-xs font-medium text-cyan-300 hover:underline"
               onClick={() =>
                 setRows((p) => [
                   ...p,
@@ -680,7 +680,7 @@ export function BloodPathologyResultDetailClient({
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-gray-200 text-gray-600">
+              <tr className="border-b border-white/[0.08] text-slate-400">
                 <th className="py-1 pr-2 font-medium">Test</th>
                 <th className="py-1 pr-2 font-medium">Code</th>
                 <th className="py-1 pr-2 font-medium">Value</th>
@@ -692,45 +692,45 @@ export function BloodPathologyResultDetailClient({
             <tbody>
               {isDraft
                 ? rows.map((r) => (
-                    <tr key={r.clientId} className="border-b border-gray-100 align-top">
+                    <tr key={r.clientId} className="border-b border-white/[0.06] align-top">
                       <td className="py-1 pr-2">
                         <input
-                          className="w-36 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                          className="w-36 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                           value={r.test_label}
                           onChange={(e) => patchRow(r.clientId, { test_label: e.target.value })}
                         />
                       </td>
                       <td className="py-1 pr-2">
                         <input
-                          className="w-16 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                          className="w-16 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                           value={r.test_code}
                           onChange={(e) => patchRow(r.clientId, { test_code: e.target.value })}
                         />
                       </td>
                       <td className="py-1 pr-2">
                         <input
-                          className="w-20 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                          className="w-20 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                           value={r.result_value}
                           onChange={(e) => patchRow(r.clientId, { result_value: e.target.value })}
                         />
                       </td>
                       <td className="py-1 pr-2">
                         <input
-                          className="w-16 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                          className="w-16 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                           value={r.result_unit}
                           onChange={(e) => patchRow(r.clientId, { result_unit: e.target.value })}
                         />
                       </td>
                       <td className="py-1 pr-2">
                         <input
-                          className="w-24 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                          className="w-24 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                           value={r.reference_range}
                           onChange={(e) => patchRow(r.clientId, { reference_range: e.target.value })}
                         />
                       </td>
                       <td className="py-1 pr-2">
                         <select
-                          className="rounded border border-gray-200 px-1 py-0.5"
+                          className="rounded border border-white/[0.08] px-1 py-0.5"
                           value={r.flag}
                           onChange={(e) => patchRow(r.clientId, { flag: e.target.value as Flag })}
                         >
@@ -744,14 +744,14 @@ export function BloodPathologyResultDetailClient({
                     </tr>
                   ))
                 : bundle.items.map((i) => (
-                    <tr key={i.id} className="border-b border-gray-100 align-top">
+                    <tr key={i.id} className="border-b border-white/[0.06] align-top">
                       <td className="py-1 pr-2">{i.test_label}</td>
                       <td className="py-1 pr-2">{i.test_code || "—"}</td>
                       <td className="py-1 pr-2">{i.result_value}</td>
                       <td className="py-1 pr-2">{i.result_unit || "—"}</td>
                       <td className="py-1 pr-2">{i.reference_range || "—"}</td>
                       <td className="py-1 pr-2">
-                        <span className={i.flag === "normal" || i.flag === "unknown" ? "" : "font-semibold text-amber-900"}>{i.flag}</span>
+                        <span className={i.flag === "normal" || i.flag === "unknown" ? "" : "font-semibold text-amber-200"}>{i.flag}</span>
                       </td>
                     </tr>
                   ))}
@@ -760,7 +760,7 @@ export function BloodPathologyResultDetailClient({
         </div>
       </section>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
       {!isArchived ? (
         <div className="flex flex-wrap gap-2">
@@ -769,7 +769,7 @@ export function BloodPathologyResultDetailClient({
               <button
                 type="button"
                 disabled={busy}
-                className="rounded bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-300 disabled:opacity-50"
+                className="rounded bg-white/[0.08] px-4 py-2 text-sm font-medium text-slate-100 hover:bg-white/[0.15] disabled:opacity-50"
                 onClick={() => void saveDraft()}
               >
                 Save draft
@@ -787,7 +787,7 @@ export function BloodPathologyResultDetailClient({
           <button
             type="button"
             disabled={busy}
-            className="rounded border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-50"
+            className="rounded border border-red-300 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-300 hover:bg-rose-500/15 disabled:opacity-50"
             onClick={() => void archive()}
           >
             Archive
@@ -796,7 +796,7 @@ export function BloodPathologyResultDetailClient({
       ) : null}
 
       {isDraft ? (
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-slate-400">
           Save draft to persist marker rows, the linked request, and summary fields before marking reviewed.
         </p>
       ) : null}

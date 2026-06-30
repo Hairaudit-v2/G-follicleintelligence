@@ -45,12 +45,12 @@ export function PatientTreatmentTimelineCard({
   const grouped = useMemo(() => groupPatientTimelineByPeriod(visible), [visible]);
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Treatment timeline</h2>
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 className="text-sm font-semibold text-slate-100">Treatment timeline</h2>
       <p className="mt-1 text-xs text-gray-500">
         This timeline summarises patient activity without exposing full clinical notes, admin notes, or message bodies.
       </p>
-      <p className="mt-2 text-xs text-amber-900/90">
+      <p className="mt-2 text-xs text-amber-200">
         Read-only aggregation across CRM, bookings, cases, clinical metadata, and imaging. Editing, drag-and-drop
         timelines, and patient-facing views remain out of scope for Stage 4D.
       </p>
@@ -69,7 +69,7 @@ export function PatientTreatmentTimelineCard({
       ) : null}
 
       {visible.length === 0 ? (
-        <p className="mt-4 text-sm text-gray-600">
+        <p className="mt-4 text-sm text-slate-400">
           {patientTimeline.items.length === 0
             ? "No timeline events yet. Activity will appear as leads, bookings, cases, clinical details, and images are linked to this patient."
             : "No timeline events matched the current filters."}

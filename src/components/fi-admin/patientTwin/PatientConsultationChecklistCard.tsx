@@ -26,7 +26,7 @@ function priorityBadgeClass(p: string): string {
     case "high":
       return "bg-orange-500/90 text-white";
     case "moderate":
-      return "bg-amber-500/90 text-slate-900";
+      return "bg-amber-500/90 text-slate-100";
     default:
       return "bg-slate-600/80 text-white";
   }

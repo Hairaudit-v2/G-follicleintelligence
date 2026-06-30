@@ -33,7 +33,7 @@ export default async function ImagingOsPatientPage({
   if (!tid || !pid) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const initial = await loadImagingOsPatientPayload(tid, pid);
@@ -43,7 +43,7 @@ export default async function ImagingOsPatientPage({
     <div className="mx-auto max-w-6xl space-y-5 py-6">
       <Link
         href={profileHref}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-slate-100"
       >
         <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
         Back to patient profile
@@ -51,14 +51,14 @@ export default async function ImagingOsPatientPage({
 
       <header className="space-y-1">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">ImagingOS</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Clinical imaging workspace</h1>
-        <p className="max-w-3xl text-sm text-gray-600">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">Clinical imaging workspace</h1>
+        <p className="max-w-3xl text-sm text-slate-400">
           Longitudinal image library, photography protocols, scalp mapping, annotations, compare modes, and AI-ready job
           hooks — all tenant-scoped and linked to this foundation patient for Patient Twin and AuditOS.
         </p>
       </header>
 
-      <Suspense fallback={<div className="h-48 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
+      <Suspense fallback={<div className="h-48 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
         <ImagingOsWorkspace tenantId={tid} patientId={pid} initial={initial} />
       </Suspense>
     </div>

@@ -15,7 +15,7 @@ export function NewPatientEntryPage({ tenantId }: NewPatientEntryPageProps) {
       <div className="mx-auto max-w-xl">
         <Link
           href={`${base}/patients`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-700 hover:text-sky-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-300 hover:text-cyan-200 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back to patients

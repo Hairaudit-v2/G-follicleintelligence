@@ -13,8 +13,8 @@ export function PatientDocumentsTab({
   return (
     <div className="space-y-4">
       <section className={crmLeadCardClass}>
-        <h2 className="text-sm font-semibold text-gray-900">Documents</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-sm font-semibold text-slate-100">Documents</h2>
+        <p className="mt-2 text-sm text-slate-400">
           Consent PDFs and a full document vault are not connected yet. <strong>Blood test request PDFs</strong>{" "}
           generated in DoctorOS are stored privately (patient storage) when you download or email them from a saved
           request, and appear on the patient&apos;s treatment timeline.

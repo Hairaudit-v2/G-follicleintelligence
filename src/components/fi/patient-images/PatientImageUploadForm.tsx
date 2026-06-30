@@ -22,8 +22,8 @@ export function PatientImageUploadForm({
 
   return (
     <div className="rounded-lg border border-cyan-100 bg-cyan-50/40 p-4">
-      <h3 className="text-sm font-semibold text-gray-900">Protocol-driven capture</h3>
-      <p className="mt-1 text-xs text-gray-600">
+      <h3 className="text-sm font-semibold text-slate-100">Protocol-driven capture</h3>
+      <p className="mt-1 text-xs text-slate-400">
         Generic image upload is disabled. All clinical photography must follow a Visual Intelligence Engine protocol so
         views, quality checks, and Patient Twin sync stay consistent.
       </p>
@@ -39,7 +39,7 @@ export function PatientImageUploadForm({
         />
         <Link
           href={`/fi-admin/${tenantId}/patients/${patientId}/imaging?tab=capture`}
-          className="inline-flex min-h-[40px] items-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+          className="inline-flex min-h-[40px] items-center rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 text-sm font-semibold text-slate-100 hover:bg-white/[0.03]"
           onClick={() => router.refresh()}
         >
           Open ImagingOS capture

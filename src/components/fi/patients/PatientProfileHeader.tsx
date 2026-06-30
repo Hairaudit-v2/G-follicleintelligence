@@ -18,15 +18,15 @@ export function PatientProfileHeader({
   });
 
   return (
-    <header className="space-y-2 border-b border-gray-200 pb-4">
+    <header className="space-y-2 border-b border-white/[0.08] pb-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">{idc.fullName}</h1>
-          <p className="text-sm text-gray-600">
+          <h1 className="text-lg font-semibold text-slate-100">{idc.fullName}</h1>
+          <p className="text-sm text-slate-400">
             {idc.primaryEmail ?? "—"} · {idc.primaryPhone ?? "—"}
           </p>
           {idc.dateOfBirth ? (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-400">
               <span className="text-gray-500">DOB </span>
               <time dateTime={idc.dateOfBirth}>{idc.dateOfBirth}</time>
               {idc.ageYears != null ? ` · ${idc.ageYears} years` : null}
@@ -40,7 +40,7 @@ export function PatientProfileHeader({
       </div>
       <p className="text-xs text-gray-500">
         Patient since <time dateTime={data.patient.created_at}>{data.patient.created_at.slice(0, 10)}</time> · ID{" "}
-        <code className="rounded bg-gray-100 px-1">{data.foundationPatientId}</code>
+        <code className="rounded bg-white/[0.06] px-1">{data.foundationPatientId}</code>
       </p>
     </header>
   );

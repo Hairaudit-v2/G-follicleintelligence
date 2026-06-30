@@ -26,8 +26,8 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
   if (beforeTiles.length === 0 && afterTiles.length === 0) {
     return (
       <section className={crmLeadCardClass}>
-        <h2 className="text-sm font-semibold text-gray-900">Before / after compare</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-sm font-semibold text-slate-100">Before / after compare</h2>
+        <p className="mt-2 text-sm text-slate-400">
           Tag images as <strong>before</strong> and <strong>after</strong> to use the comparison viewer.
         </p>
       </section>
@@ -36,14 +36,14 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
 
   return (
     <section className={crmLeadCardClass}>
-      <h2 className="text-sm font-semibold text-gray-900">Before / after compare</h2>
-      <p className="mt-1 text-xs text-gray-600">Side-by-side or drag the slider to compare progress photos.</p>
+      <h2 className="text-sm font-semibold text-slate-100">Before / after compare</h2>
+      <p className="mt-1 text-xs text-slate-400">Side-by-side or drag the slider to compare progress photos.</p>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Before
           <select
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             value={beforeId}
             onChange={(e) => setBeforeId(e.target.value)}
           >
@@ -55,10 +55,10 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           After
           <select
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
             value={afterId}
             onChange={(e) => setAfterId(e.target.value)}
           >
@@ -79,7 +79,7 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
             <ComparePane label="After" tile={afterTile} />
           </div>
 
-          <div className="relative mt-4 aspect-[4/3] max-w-xl overflow-hidden rounded border border-gray-200 bg-gray-100">
+          <div className="relative mt-4 aspect-[4/3] max-w-xl overflow-hidden rounded border border-white/[0.08] bg-white/[0.06]">
             {beforeTile.signed?.url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={beforeTile.signed.url} alt="Before" className="absolute inset-0 h-full w-full object-cover" />
@@ -94,12 +94,12 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
               />
             ) : null}
             <div
-              className="pointer-events-none absolute inset-y-0 w-0.5 bg-white shadow"
+              className="pointer-events-none absolute inset-y-0 w-0.5 bg-[#0F1629]/80 backdrop-blur-md shadow"
               style={{ left: `${slider}%` }}
               aria-hidden
             />
           </div>
-          <label className="mt-2 flex max-w-xl items-center gap-2 text-xs text-gray-600">
+          <label className="mt-2 flex max-w-xl items-center gap-2 text-xs text-slate-400">
             Slider
             <input
               type="range"
@@ -112,7 +112,7 @@ export function PatientProgressCompare({ bundle }: { bundle: PatientImagesProfil
           </label>
         </>
       ) : (
-        <p className="mt-3 text-sm text-gray-600">Select both a before and an after image to compare.</p>
+        <p className="mt-3 text-sm text-slate-400">Select both a before and an after image to compare.</p>
       )}
     </section>
   );
@@ -122,7 +122,7 @@ function ComparePane({ label, tile }: { label: string; tile: PatientImageProfile
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</p>
-      <div className="mt-2 aspect-[4/3] overflow-hidden rounded border border-gray-200 bg-gray-50">
+      <div className="mt-2 aspect-[4/3] overflow-hidden rounded border border-white/[0.08] bg-white/[0.03]">
         {tile.signed?.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={tile.signed.url} alt={label} className="h-full w-full object-cover" />
@@ -130,7 +130,7 @@ function ComparePane({ label, tile }: { label: string; tile: PatientImageProfile
           <div className="flex h-full items-center justify-center text-xs text-gray-500">No preview</div>
         )}
       </div>
-      <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-700">
+      <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-300">
         <PatientImageCategoryBadge category={tile.image.image_category as "before"} />
         {tile.image.caption ? <span>{tile.image.caption}</span> : null}
       </div>

@@ -17,7 +17,7 @@ import { PatientTreatmentTimelineCard } from "./timeline/PatientTreatmentTimelin
 export function PatientProfilePage({ tenantId, data }: { tenantId: string; data: PatientProfileFoundationData }) {
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-slate-400">
         <Link href={`/fi-admin/${tenantId}/patients`} className="text-blue-600 hover:underline">
           ← Patients
         </Link>
@@ -32,7 +32,7 @@ export function PatientProfilePage({ tenantId, data }: { tenantId: string; data:
       <PatientContactDetailsCard data={data} />
       <PatientImportedSourceSection data={data} />
 
-      <p className="rounded border border-blue-100 bg-blue-50/80 p-3 text-sm text-blue-950">
+      <p className="rounded border border-blue-100 bg-blue-500/10 p-3 text-sm text-blue-950">
         Patient profiles are the foundation for future clinical records, images, treatment plans, HLI assessments,
         HairAudit outcomes, and SurgeryOS workflows.
       </p>

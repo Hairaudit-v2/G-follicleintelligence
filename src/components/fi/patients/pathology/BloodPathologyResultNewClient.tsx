@@ -130,23 +130,23 @@ export function BloodPathologyResultNewClient({
 
   return (
     <div className="space-y-6">
-      <div className="rounded border border-gray-200 bg-white p-4 shadow-sm space-y-4">
-        <h2 className="text-sm font-semibold text-gray-900">Result details</h2>
+      <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-4">
+        <h2 className="text-sm font-semibold text-slate-100">Result details</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-sm">
-            <span className="text-gray-700">Result date</span>
+            <span className="text-slate-300">Result date</span>
             <input
               type="date"
-              className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
               value={resultDate}
               onChange={(e) => setResultDate(e.target.value)}
             />
           </label>
           <label className="block text-sm">
-            <span className="text-gray-700">Provider / lab (optional)</span>
+            <span className="text-slate-300">Provider / lab (optional)</span>
             <input
               type="text"
-              className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
               value={providerName}
               onChange={(e) => setProviderName(e.target.value)}
               placeholder="e.g. Sonic / local lab"
@@ -154,9 +154,9 @@ export function BloodPathologyResultNewClient({
           </label>
         </div>
         <label className="block text-sm">
-          <span className="text-gray-700">Link to blood request (optional)</span>
+          <span className="text-slate-300">Link to blood request (optional)</span>
           <select
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={pathologyRequestId}
             onChange={(e) => setPathologyRequestId(e.target.value)}
           >
@@ -169,9 +169,9 @@ export function BloodPathologyResultNewClient({
           </select>
         </label>
         <label className="block text-sm">
-          <span className="text-gray-700">Clinical summary (optional)</span>
+          <span className="text-slate-300">Clinical summary (optional)</span>
           <textarea
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             rows={3}
             value={clinicalSummary}
             onChange={(e) => setClinicalSummary(e.target.value)}
@@ -179,7 +179,7 @@ export function BloodPathologyResultNewClient({
           />
         </label>
         <label className="block text-sm">
-          <span className="text-gray-700">Upload pathology PDF (optional)</span>
+          <span className="text-slate-300">Upload pathology PDF (optional)</span>
           <input
             type="file"
             accept="application/pdf,.pdf"
@@ -190,21 +190,21 @@ export function BloodPathologyResultNewClient({
         </label>
       </div>
 
-      <div className="rounded border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+      <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-gray-900">Structured markers</h2>
-          <button type="button" className="text-xs font-medium text-sky-700 hover:underline" onClick={addRow}>
+          <h2 className="text-sm font-semibold text-slate-100">Structured markers</h2>
+          <button type="button" className="text-xs font-medium text-cyan-300 hover:underline" onClick={addRow}>
             + Add row
           </button>
         </div>
-        <p className="text-xs text-gray-600">Enter at least a test name for each row you want stored. Values can be filled after quick-add.</p>
+        <p className="text-xs text-slate-400">Enter at least a test name for each row you want stored. Values can be filled after quick-add.</p>
 
         <div className="flex flex-wrap gap-2">
           {PATHOLOGY_RESULT_QUICK_PANELS.map((p) => (
             <button
               key={p.id}
               type="button"
-              className="rounded border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-800 hover:bg-gray-100"
+              className="rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-xs font-medium text-slate-200 hover:bg-white/[0.06]"
               onClick={() => appendPanel(p.id)}
             >
               + {p.label}
@@ -215,7 +215,7 @@ export function BloodPathologyResultNewClient({
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-gray-200 text-gray-600">
+              <tr className="border-b border-white/[0.08] text-slate-400">
                 <th className="py-1 pr-2 font-medium">Test</th>
                 <th className="py-1 pr-2 font-medium">Code</th>
                 <th className="py-1 pr-2 font-medium">Value</th>
@@ -227,45 +227,45 @@ export function BloodPathologyResultNewClient({
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.clientId} className="border-b border-gray-100 align-top">
+                <tr key={r.clientId} className="border-b border-white/[0.06] align-top">
                   <td className="py-1 pr-2">
                     <input
-                      className="w-40 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                      className="w-40 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                       value={r.test_label}
                       onChange={(e) => patchRow(r.clientId, { test_label: e.target.value })}
                     />
                   </td>
                   <td className="py-1 pr-2">
                     <input
-                      className="w-20 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                      className="w-20 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                       value={r.test_code}
                       onChange={(e) => patchRow(r.clientId, { test_code: e.target.value })}
                     />
                   </td>
                   <td className="py-1 pr-2">
                     <input
-                      className="w-24 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                      className="w-24 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                       value={r.result_value}
                       onChange={(e) => patchRow(r.clientId, { result_value: e.target.value })}
                     />
                   </td>
                   <td className="py-1 pr-2">
                     <input
-                      className="w-20 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                      className="w-20 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                       value={r.result_unit}
                       onChange={(e) => patchRow(r.clientId, { result_unit: e.target.value })}
                     />
                   </td>
                   <td className="py-1 pr-2">
                     <input
-                      className="w-28 max-w-full rounded border border-gray-200 px-1 py-0.5"
+                      className="w-28 max-w-full rounded border border-white/[0.08] px-1 py-0.5"
                       value={r.reference_range}
                       onChange={(e) => patchRow(r.clientId, { reference_range: e.target.value })}
                     />
                   </td>
                   <td className="py-1 pr-2">
                     <select
-                      className="rounded border border-gray-200 px-1 py-0.5"
+                      className="rounded border border-white/[0.08] px-1 py-0.5"
                       value={r.flag}
                       onChange={(e) => patchRow(r.clientId, { flag: e.target.value as Flag })}
                     >
@@ -277,7 +277,7 @@ export function BloodPathologyResultNewClient({
                     </select>
                   </td>
                   <td className="py-1">
-                    <button type="button" className="text-red-600 hover:underline" onClick={() => removeRow(r.clientId)}>
+                    <button type="button" className="text-rose-300 hover:underline" onClick={() => removeRow(r.clientId)}>
                       Remove
                     </button>
                   </td>
@@ -288,13 +288,13 @@ export function BloodPathologyResultNewClient({
         </div>
       </div>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
           disabled={saving}
-          className="rounded bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-300 disabled:opacity-50"
+          className="rounded bg-white/[0.08] px-4 py-2 text-sm font-medium text-slate-100 hover:bg-white/[0.15] disabled:opacity-50"
           onClick={() => void submit("draft")}
         >
           Save draft

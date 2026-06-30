@@ -29,7 +29,7 @@ export default async function BloodPathologyRequestDetailPage({
   if (!tenantId?.trim() || !patientId?.trim() || !requestId?.trim()) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   await assertCrmTenantReadAllowed({ tenantId: tenantId.trim() });
@@ -47,7 +47,7 @@ export default async function BloodPathologyRequestDetailPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-slate-400">
         <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-600 hover:underline">
           ← Patient profile
         </Link>

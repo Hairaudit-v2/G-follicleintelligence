@@ -34,15 +34,15 @@ export function PatientContactDetailsCard({ data }: { data: PatientProfileFounda
   ];
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm" aria-labelledby="patient-contact-details-heading">
-      <h2 id="patient-contact-details-heading" className="text-sm font-semibold text-gray-900">
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40" aria-labelledby="patient-contact-details-heading">
+      <h2 id="patient-contact-details-heading" className="text-sm font-semibold text-slate-100">
         Contact details
       </h2>
       <p className="mt-1 text-xs text-gray-500">
         Combined from the person record, patient record, and import metadata (for example HubSpot) when first-class
         columns are empty.
       </p>
-      <dl className="mt-3 grid gap-2 text-sm text-gray-800 sm:grid-cols-2">
+      <dl className="mt-3 grid gap-2 text-sm text-slate-200 sm:grid-cols-2">
         {rows.map((r) => (
           <div key={r.label} className="min-w-0">
             <dt className="text-xs font-medium text-gray-500">{r.label}</dt>

@@ -287,10 +287,10 @@ function TechnicalDetailsAccordion({
           <Activity className="h-3.5 w-3.5" aria-hidden />
           More records
         </div>
-        <span className="text-xs text-slate-600">Person record · Clinical patients</span>
+        <span className="text-xs text-slate-400">Person record · Clinical patients</span>
       </summary>
       <div className={`space-y-4 border-t border-white/[0.05] px-4 pb-4 pt-3`}>
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-slate-400">
           Raw person and clinical patient records — for diagnostics and data reconciliation.
         </p>
         <PatientPersonDetailsCard data={profile} />

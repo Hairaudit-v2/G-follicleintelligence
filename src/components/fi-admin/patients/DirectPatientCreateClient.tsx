@@ -84,11 +84,11 @@ export function DirectPatientCreateClient({ tenantId }: { tenantId: string }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={busy}
-              className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm"
+              className="block w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm text-slate-100 shadow-lg shadow-black/40"
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Date of birth</span>
+            <span className="mb-1 block font-medium text-slate-300">Date of birth</span>
             <input
               id="direct-patient-dob"
               type="date"
@@ -96,12 +96,12 @@ export function DirectPatientCreateClient({ tenantId }: { tenantId: string }) {
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
               disabled={busy}
-              className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900"
+              className="block w-full rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-100"
             />
           </label>
 
           {error ? (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+            <p className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300" role="alert">
               {error}
             </p>
           ) : null}
@@ -117,7 +117,7 @@ export function DirectPatientCreateClient({ tenantId }: { tenantId: string }) {
             <button
               type="button"
               disabled={busy}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:bg-white/[0.03] disabled:opacity-60"
               onClick={() => router.push(`${base}/patients`)}
             >
               Cancel

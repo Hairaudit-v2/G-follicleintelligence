@@ -31,7 +31,7 @@ export function PatientAppointmentsTab({
     <div className="space-y-4">
       <section className={crmLeadCardClass}>
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <h2 className="text-sm font-semibold text-gray-900">Appointments & bookings</h2>
+          <h2 className="text-sm font-semibold text-slate-100">Appointments & bookings</h2>
           <Link
             href={`/fi-admin/${tenantId}/appointments`}
             className="text-xs text-blue-600 hover:underline"
@@ -40,11 +40,11 @@ export function PatientAppointmentsTab({
           </Link>
         </div>
         {all.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-600">No appointments for this patient.</p>
+          <p className="mt-2 text-sm text-slate-400">No appointments for this patient.</p>
         ) : (
           <div className="mt-3 overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-600">
+            <table className="min-w-full divide-y divide-white/[0.08] text-sm">
+              <thead className="bg-white/[0.03] text-xs font-semibold uppercase tracking-wide text-slate-400">
                 <tr>
                   <th className="px-3 py-2 text-left">When</th>
                   <th className="px-3 py-2 text-left">Appointment</th>
@@ -52,13 +52,13 @@ export function PatientAppointmentsTab({
                   <th className="px-3 py-2 text-left">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-white/[0.06]">
                 {all.map((b) => {
                   const title = b.title?.trim() || bookingTypeLabel(b.booking_type);
                   const href = `/fi-admin/${tenantId}/appointments/${b.id}`;
                   return (
-                    <tr key={b.id} className="hover:bg-gray-50">
-                      <td className="whitespace-nowrap px-3 py-2 text-gray-600">{fmt(b.start_at)}</td>
+                    <tr key={b.id} className="hover:bg-white/[0.03]">
+                      <td className="whitespace-nowrap px-3 py-2 text-slate-400">{fmt(b.start_at)}</td>
                       <td className="px-3 py-2">
                         {slide ? (
                           <button
@@ -74,8 +74,8 @@ export function PatientAppointmentsTab({
                           </Link>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-gray-700">{bookingTypeLabel(b.booking_type)}</td>
-                      <td className="px-3 py-2 text-gray-700">{b.booking_status}</td>
+                      <td className="px-3 py-2 text-slate-300">{bookingTypeLabel(b.booking_type)}</td>
+                      <td className="px-3 py-2 text-slate-300">{b.booking_status}</td>
                     </tr>
                   );
                 })}

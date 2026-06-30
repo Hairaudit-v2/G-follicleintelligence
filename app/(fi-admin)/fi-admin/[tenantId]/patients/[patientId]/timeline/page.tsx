@@ -45,14 +45,14 @@ export default async function PatientTimelineRoutePage({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Activity timeline</p>
-          <h1 className="mt-1 text-xl font-semibold text-gray-900">{displayName}</h1>
+          <h1 className="mt-1 text-xl font-semibold text-slate-100">{displayName}</h1>
           <p className="mt-1 text-sm text-gray-500">
             Communication and CRM activity history synced from external systems (read-only).
           </p>
         </div>
         <Link
           href={`/fi-admin/${tenantId}/patients/${patientId}`}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-white/[0.03]"
         >
           Back to patient
         </Link>

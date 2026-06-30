@@ -13,29 +13,29 @@ export function PatientTwinClinicalIntelligenceCard(props: {
 
   return (
     <section
-      className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40"
       aria-labelledby="patient-twin-clinical-intel-heading"
     >
-      <h2 id="patient-twin-clinical-intel-heading" className="text-sm font-semibold text-slate-900">
+      <h2 id="patient-twin-clinical-intel-heading" className="text-sm font-semibold text-slate-100">
         Clinical intelligence
       </h2>
-      <p className="mt-1 text-xs text-slate-600">
+      <p className="mt-1 text-xs text-slate-400">
         Neutral signals from linked records — review in context; does not replace clinician judgement.
       </p>
       {view.signals.length === 0 ? (
-        <p className="mt-3 text-sm text-slate-600">No open signals from the current Patient Twin projection.</p>
+        <p className="mt-3 text-sm text-slate-400">No open signals from the current Patient Twin projection.</p>
       ) : (
-        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-800">
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-200">
           {view.signals.map((s) => (
             <li key={`${s.signalKey}-${s.title}`}>
-              <span className="font-medium text-slate-900">{s.title}</span>
-              <span className="text-slate-600"> — {recommendedNextStepForClinicalSignal(s.signalKey)}</span>
+              <span className="font-medium text-slate-100">{s.title}</span>
+              <span className="text-slate-400"> — {recommendedNextStepForClinicalSignal(s.signalKey)}</span>
             </li>
           ))}
         </ul>
       )}
       {view.recommendedNextStep ? (
-        <p className="mt-3 text-sm text-slate-700">
+        <p className="mt-3 text-sm text-slate-300">
           <span className="font-medium">Suggested next step: </span>
           {view.recommendedNextStep}
         </p>

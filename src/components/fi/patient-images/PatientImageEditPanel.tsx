@@ -91,7 +91,7 @@ export function PatientImageEditPanel({
   }, [caption, category, metadataStr, patientId, router, takenAt, tenantId, tile.image.id]);
 
   return (
-    <div className="rounded border border-blue-100 bg-blue-50/60 p-3 text-sm">
+    <div className="rounded border border-blue-100 bg-blue-500/10 p-3 text-sm">
       <div className="flex items-start justify-between gap-2">
         <p className="text-xs font-semibold text-blue-950">Edit image</p>
         <button type="button" className="text-xs text-blue-800 hover:underline" onClick={onClose}>
@@ -99,12 +99,12 @@ export function PatientImageEditPanel({
         </button>
       </div>
       <div className="mt-2 grid gap-2 sm:grid-cols-2">
-        <label className="block text-xs text-gray-800">
+        <label className="block text-xs text-slate-200">
           Category
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as typeof category)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             {PATIENT_IMAGE_CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -113,36 +113,36 @@ export function PatientImageEditPanel({
             ))}
           </select>
         </label>
-        <label className="block text-xs text-gray-800">
+        <label className="block text-xs text-slate-200">
           Taken at
           <input
             type="datetime-local"
             value={takenAt}
             onChange={(e) => setTakenAt(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs text-gray-800 sm:col-span-2">
+        <label className="block text-xs text-slate-200 sm:col-span-2">
           Caption
           <input
             type="text"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs text-gray-800 sm:col-span-2">
+        <label className="block text-xs text-slate-200 sm:col-span-2">
           Metadata (JSON object)
           <textarea
             rows={5}
             spellCheck={false}
             value={metadataStr}
             onChange={(e) => setMetadataStr(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 font-mono text-xs"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 font-mono text-xs"
           />
         </label>
       </div>
-      {msg ? <p className="mt-2 text-xs text-gray-800">{msg}</p> : null}
+      {msg ? <p className="mt-2 text-xs text-slate-200">{msg}</p> : null}
       <div className="mt-2 flex flex-wrap gap-2">
         <button
           type="button"

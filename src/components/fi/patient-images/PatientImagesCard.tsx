@@ -19,12 +19,12 @@ export function PatientImagesCard({ tenantId, data }: { tenantId: string; data: 
   );
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Patient images</h2>
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 className="text-sm font-semibold text-slate-100">Patient images</h2>
       <p className="mt-1 text-xs text-gray-500">
         Private visual record for this patient. Images are stored privately and viewed through secure signed URLs.
       </p>
-      <p className="mt-2 text-xs text-gray-600">
+      <p className="mt-2 text-xs text-slate-400">
         {bundle.counts.total} total · {bundle.counts.active} active · {bundle.counts.archived} archived
         {bundle.counts.active > bundle.activeWithSignedUrls.length ? (
           <span className="text-amber-700"> · showing latest {bundle.activeWithSignedUrls.length} active thumbnails</span>
@@ -36,7 +36,7 @@ export function PatientImagesCard({ tenantId, data }: { tenantId: string; data: 
       </div>
 
       <div className="mt-6">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-600">Active images</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Active images</h3>
         <div className="mt-2">
           <PatientImageGrid tiles={bundle.activeWithSignedUrls} selectedId={selectedId} onSelect={setSelectedId} />
         </div>
@@ -54,15 +54,15 @@ export function PatientImagesCard({ tenantId, data }: { tenantId: string; data: 
         </div>
       ) : null}
 
-      <details className="mt-6 rounded border border-gray-100 bg-gray-50/50 p-3">
-        <summary className="cursor-pointer text-xs font-medium text-gray-800">Archived images ({bundle.archived.length})</summary>
-        <ul className="mt-2 space-y-2 text-xs text-gray-700">
+      <details className="mt-6 rounded border border-white/[0.06] bg-white/[0.03] p-3">
+        <summary className="cursor-pointer text-xs font-medium text-slate-200">Archived images ({bundle.archived.length})</summary>
+        <ul className="mt-2 space-y-2 text-xs text-slate-300">
           {bundle.archived.length === 0 ? <li className="text-gray-500">No archived images.</li> : null}
           {bundle.archived.map((img) => (
-            <li key={img.id} className="flex flex-wrap items-center gap-2 border-b border-gray-100 pb-2 last:border-0">
+            <li key={img.id} className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] pb-2 last:border-0">
               <PatientImageCategoryBadge category={img.image_category} />
               <span className="font-mono text-[10px] text-gray-500">{img.id.slice(0, 8)}…</span>
-              {img.caption ? <span className="text-gray-800">{img.caption}</span> : null}
+              {img.caption ? <span className="text-slate-200">{img.caption}</span> : null}
               {img.archived_at ? (
                 <span className="text-gray-500">archived {img.archived_at.slice(0, 16).replace("T", " ")}</span>
               ) : null}
@@ -72,7 +72,7 @@ export function PatientImagesCard({ tenantId, data }: { tenantId: string; data: 
       </details>
 
       <p className="mt-4 text-[11px] text-gray-500">
-        Patient-native activity logging for image events is deferred; the server returns <code className="rounded bg-gray-100 px-0.5">changed_keys</code>{" "}
+        Patient-native activity logging for image events is deferred; the server returns <code className="rounded bg-white/[0.06] px-0.5">changed_keys</code>{" "}
         for future audit streams. CRM activity is not written from this card.
       </p>
     </section>

@@ -20,9 +20,9 @@ export function PatientTimelineItem({
 }) {
   const typeHint = patientTimelineItemTypeLabel(item.item_type);
   return (
-    <li className="flex gap-3 border-b border-gray-100 py-3 last:border-b-0">
+    <li className="flex gap-3 border-b border-white/[0.06] py-3 last:border-b-0">
       {thumbnailUrl && item.item_type === "image_uploaded" ? (
-        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded border border-gray-200 bg-gray-50">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded border border-white/[0.08] bg-white/[0.03]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={thumbnailUrl} alt="" width={48} height={48} className="h-12 w-12 object-cover" />
         </div>
@@ -35,12 +35,12 @@ export function PatientTimelineItem({
           <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{typeHint}</span>
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+          <p className="text-sm font-semibold text-slate-100">{item.title}</p>
           <time className="shrink-0 text-xs text-gray-500" dateTime={item.occurred_at}>
             {fmt(item.occurred_at)}
           </time>
         </div>
-        {item.subtitle ? <p className="text-xs text-gray-600">{item.subtitle}</p> : null}
+        {item.subtitle ? <p className="text-xs text-slate-400">{item.subtitle}</p> : null}
         {item.metadata_summary ? <p className="text-xs text-gray-500">{item.metadata_summary}</p> : null}
         <div className="flex flex-wrap gap-2 text-xs">
           {item.href ? (

@@ -102,15 +102,15 @@ export function BloodPathologyRequestClient({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="space-y-4 rounded border border-gray-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-900">Template</h2>
-        <p className="text-xs text-gray-600">Pick a panel to populate the test list. You can edit tests before saving.</p>
+      <div className="space-y-4 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+        <h2 className="text-sm font-semibold text-slate-100">Template</h2>
+        <p className="text-xs text-slate-400">Pick a panel to populate the test list. You can edit tests before saving.</p>
         <div className="space-y-2">
           {PATHOLOGY_TEMPLATES.map((t) => (
             <label
               key={t.id}
               className={`flex cursor-pointer flex-col rounded border p-3 text-sm ${
-                templateId === t.id ? "border-blue-500 bg-blue-50/60" : "border-gray-200 hover:border-gray-300"
+                templateId === t.id ? "border-blue-500 bg-blue-500/10" : "border-white/[0.08] hover:border-slate-700"
               }`}
             >
               <div className="flex items-start gap-2">
@@ -122,32 +122,32 @@ export function BloodPathologyRequestClient({
                   onChange={() => applyTemplate(t.id)}
                 />
                 <span>
-                  <span className="font-medium text-gray-900">{t.label}</span>
-                  <span className="mt-1 block text-xs text-gray-600">{t.description}</span>
+                  <span className="font-medium text-slate-100">{t.label}</span>
+                  <span className="mt-1 block text-xs text-slate-400">{t.description}</span>
                 </span>
               </div>
             </label>
           ))}
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700" htmlFor="req-date">
+          <label className="block text-xs font-medium text-slate-300" htmlFor="req-date">
             Request date
           </label>
           <input
             id="req-date"
             type="date"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={requestDate}
             onChange={(e) => setRequestDate(e.target.value)}
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700" htmlFor="clinical-notes">
+          <label className="block text-xs font-medium text-slate-300" htmlFor="clinical-notes">
             Clinical notes / indication (optional)
           </label>
           <textarea
             id="clinical-notes"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-2 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-2 text-sm"
             rows={4}
             value={clinicalNotes}
             onChange={(e) => setClinicalNotes(e.target.value)}
@@ -156,30 +156,30 @@ export function BloodPathologyRequestClient({
         </div>
       </div>
 
-      <div className="space-y-4 rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="space-y-4 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Requested tests</h2>
-            <p className="mt-1 text-xs text-gray-600">
+            <h2 className="text-sm font-semibold text-slate-100">Requested tests</h2>
+            <p className="mt-1 text-xs text-slate-400">
               {templateMeta?.label ?? "Tests"} — {lines.length} line{lines.length === 1 ? "" : "s"}
             </p>
           </div>
           <button
             type="button"
-            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
+            className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/[0.03]"
             onClick={addLine}
           >
             Add test
           </button>
         </div>
 
-        <ul className="divide-y divide-gray-100 rounded border border-gray-100">
+        <ul className="divide-y divide-white/[0.06] rounded border border-white/[0.06]">
           {lines.map((line) => (
             <li key={line.clientId} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-end">
               <div className="min-w-0 flex-1 space-y-1">
                 <label className="text-[10px] font-semibold uppercase text-gray-500">Test name</label>
                 <input
-                  className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   value={line.label}
                   onChange={(e) => patchLine(line.clientId, { label: e.target.value })}
                   placeholder="e.g. Full blood count"
@@ -188,7 +188,7 @@ export function BloodPathologyRequestClient({
               <div className="w-full space-y-1 sm:w-32">
                 <label className="text-[10px] font-semibold uppercase text-gray-500">Code</label>
                 <input
-                  className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
                   value={line.code}
                   onChange={(e) => patchLine(line.clientId, { code: e.target.value })}
                   placeholder="FBC"
@@ -196,7 +196,7 @@ export function BloodPathologyRequestClient({
               </div>
               <button
                 type="button"
-                className="rounded border border-red-200 px-2 py-1.5 text-xs text-red-800 hover:bg-red-50"
+                className="rounded border border-rose-500/20 px-2 py-1.5 text-xs text-rose-300 hover:bg-rose-500/10"
                 onClick={() => removeLine(line.clientId)}
                 aria-label="Remove test"
               >
@@ -206,7 +206,7 @@ export function BloodPathologyRequestClient({
           ))}
         </ul>
 
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
         <div className="flex flex-wrap gap-2">
           <button
@@ -219,7 +219,7 @@ export function BloodPathologyRequestClient({
           </button>
           <button
             type="button"
-            className="rounded border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 hover:bg-gray-50"
+            className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-4 py-2 text-sm text-slate-200 hover:bg-white/[0.03]"
             onClick={() => router.back()}
           >
             Cancel

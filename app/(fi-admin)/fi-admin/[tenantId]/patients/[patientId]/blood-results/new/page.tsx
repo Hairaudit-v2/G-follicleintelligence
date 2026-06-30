@@ -32,7 +32,7 @@ export default async function PatientBloodResultsNewPage({
   if (!tenantId?.trim() || !patientId?.trim()) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const loaded = await loadPatientProfile(tenantId, patientId);
@@ -43,14 +43,14 @@ export default async function PatientBloodResultsNewPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-slate-400">
         <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-600 hover:underline">
           ← Patient profile
         </Link>
       </p>
       <header className="space-y-1">
-        <h1 className="text-lg font-semibold text-gray-900">Upload blood results</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="text-lg font-semibold text-slate-100">Upload blood results</h1>
+        <p className="text-sm text-slate-400">
           DoctorOS pathology results (Stage 3). Attach a lab PDF and/or enter structured markers. OCR and lab integrations
           are not enabled yet.
         </p>

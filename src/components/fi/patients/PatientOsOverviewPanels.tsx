@@ -12,8 +12,8 @@ import type { PatientOsOverviewModel } from "@/src/lib/patients/patientOsDashboa
 function SectionCard({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
     <FiCard>
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-      {description ? <p className="mt-1 text-sm text-slate-600">{description}</p> : null}
+      <h2 className="text-sm font-semibold text-slate-100">{title}</h2>
+      {description ? <p className="mt-1 text-sm text-slate-400">{description}</p> : null}
       <div className="mt-3">{children}</div>
     </FiCard>
   );
@@ -62,14 +62,14 @@ export function PatientOsOverviewPanels({
             {showCrmNav ? (
               <Link
                 href={`${base}/crm`}
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-center text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
               >
                 Open LeadFlow
               </Link>
             ) : null}
             <Link
               href={`${base}/cases`}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-center text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
             >
               Open SurgeryOS
             </Link>
@@ -114,11 +114,11 @@ export function PatientOsOverviewPanels({
             {model.recentPatients.length === 0 ? (
               <FiEmptyState title="No patients yet" description="Create a patient or convert a lead to populate this list." />
             ) : (
-              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+              <ul className="divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
                 {model.recentPatients.map((p) => (
                   <li key={p.patientId} className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
-                      <Link href={`${base}/patients/${p.patientId}`} className="font-medium text-sky-700 hover:underline">
+                      <Link href={`${base}/patients/${p.patientId}`} className="font-medium text-cyan-300 hover:underline">
                         {p.displayName}
                       </Link>
                       <p className="text-xs text-slate-500">
@@ -142,11 +142,11 @@ export function PatientOsOverviewPanels({
                 description="When cases are in progress for linked patients, they will appear here with a shortcut into SurgeryOS."
               />
             ) : (
-              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+              <ul className="divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
                 {model.activeJourneys.map((j) => (
                   <li key={`${j.patientId}-${j.caseId}`} className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
-                      <Link href={`${base}/patients/${j.patientId}`} className="font-medium text-sky-700 hover:underline">
+                      <Link href={`${base}/patients/${j.patientId}`} className="font-medium text-cyan-300 hover:underline">
                         {j.displayName}
                       </Link>
                       <p className="text-xs text-slate-500">
@@ -157,7 +157,7 @@ export function PatientOsOverviewPanels({
                     </div>
                     <Link
                       href={`${base}/cases/${j.caseId}`}
-                      className="shrink-0 text-xs font-semibold text-sky-700 hover:underline"
+                      className="shrink-0 text-xs font-semibold text-cyan-300 hover:underline"
                     >
                       Open case
                     </Link>
@@ -177,11 +177,11 @@ export function PatientOsOverviewPanels({
                 description="When appointments are scheduled in Bookings or the calendar, they will appear here."
               />
             ) : (
-              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+              <ul className="divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
                 {model.upcomingBookings.map((b) => (
                   <li key={b.bookingId} className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
-                      <Link href={`${base}/patients/${b.patientId}`} className="font-medium text-sky-700 hover:underline">
+                      <Link href={`${base}/patients/${b.patientId}`} className="font-medium text-cyan-300 hover:underline">
                         {b.displayName}
                       </Link>
                       <p className="text-xs text-slate-500">
@@ -193,7 +193,7 @@ export function PatientOsOverviewPanels({
                     </div>
                     <Link
                       href={`${base}/appointments/${b.bookingId}`}
-                      className="shrink-0 text-xs font-semibold text-sky-700 hover:underline"
+                      className="shrink-0 text-xs font-semibold text-cyan-300 hover:underline"
                     >
                       View appointment
                     </Link>
@@ -213,17 +213,17 @@ export function PatientOsOverviewPanels({
                 description="Milestones and clinical events appear here when the foundation timeline is populated for cases."
               />
             ) : (
-              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+              <ul className="divide-y divide-white/[0.06] rounded-lg border border-white/[0.06]">
                 {model.timelineHighlights.map((h) => (
                   <li key={h.id} className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-900">{h.title ?? h.eventKind}</p>
+                      <p className="text-sm font-medium text-slate-100">{h.title ?? h.eventKind}</p>
                       <p className="text-xs text-slate-500">
                         {h.eventKind}
                         {h.patientId ? (
                           <>
                             <span className="text-slate-400"> · </span>
-                            <Link href={`${base}/patients/${h.patientId}`} className="text-sky-700 hover:underline">
+                            <Link href={`${base}/patients/${h.patientId}`} className="text-cyan-300 hover:underline">
                               {h.patientDisplayName ?? "Patient"}
                             </Link>
                           </>
@@ -232,7 +232,7 @@ export function PatientOsOverviewPanels({
                     </div>
                     <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
                       <span className="text-xs text-slate-500">{formatWhen(h.occurredAt)}</span>
-                      <Link href={`${base}/cases/${h.caseId}`} className="text-xs font-semibold text-sky-700 hover:underline">
+                      <Link href={`${base}/cases/${h.caseId}`} className="text-xs font-semibold text-cyan-300 hover:underline">
                         Case
                       </Link>
                     </div>
@@ -245,8 +245,8 @@ export function PatientOsOverviewPanels({
 
         <div className="min-w-0 space-y-4 lg:col-span-4">
           <FiCard>
-            <h2 className="text-sm font-semibold text-slate-900">Quick actions</h2>
-            <p className="mt-1 text-sm text-slate-600">Shortcuts use existing FI OS routes only.</p>
+            <h2 className="text-sm font-semibold text-slate-100">Quick actions</h2>
+            <p className="mt-1 text-sm text-slate-400">Shortcuts use existing FI OS routes only.</p>
             <div className="mt-4 grid grid-cols-1 gap-3">
               <FiQuickActionCard
                 title="New patient"

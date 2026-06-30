@@ -46,7 +46,7 @@ export default async function PatientProfileRoutePage({
   if (!tenantId?.trim() || !patientId?.trim()) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   const session = await getClinicFloorPageSession(tenantId);
@@ -62,9 +62,9 @@ export default async function PatientProfileRoutePage({
     if (!record.ok) notFound();
     return (
       <div className="mx-auto max-w-6xl space-y-4 py-6">
-        <p className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+        <p className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-200">
           This URL resolves to a <strong>legacy global patient</strong> without a linked foundation{" "}
-          <code className="rounded bg-amber-100/80 px-1">fi_patients</code> row. Showing the universal read-only aggregate
+          <code className="rounded bg-amber-400/15 px-1">fi_patients</code> row. Showing the universal read-only aggregate
           until ingest maps a foundation patient.
         </p>
         <UniversalPatientRecord tenantId={tenantId} patientSlug={loaded.data.globalPatientId} record={record} />
@@ -115,7 +115,7 @@ export default async function PatientProfileRoutePage({
             activeTab === "prescriptions" ? (
               <Suspense
                 fallback={
-                  <div className="mx-auto max-w-6xl animate-pulse rounded border border-gray-200 bg-white py-12" aria-hidden />
+                  <div className="mx-auto max-w-6xl animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md py-12" aria-hidden />
                 }
               >
                 <PatientPrescriptionsTab tenantId={tenantId} patientId={patientId.trim()} />

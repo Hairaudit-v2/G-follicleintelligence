@@ -151,30 +151,30 @@ export function PatientSlideOverPanel({
       }}
     >
       <aside
-        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-gray-200 bg-white shadow-xl sm:max-w-lg"
+        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-xl sm:max-w-lg"
         role="dialog"
         aria-modal="true"
         aria-label="Patient preview"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 px-4 py-3">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-gray-900">Patient preview</h2>
+            <h2 className="truncate text-sm font-semibold text-slate-100">Patient preview</h2>
             {payload ? (
               <Link href={href} className="text-xs text-blue-600 hover:underline" onClick={() => onClose()}>
                 Open full profile →
               </Link>
             ) : null}
           </div>
-          <button type="button" className="shrink-0 text-sm text-gray-600 hover:text-gray-900" onClick={onClose}>
+          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
             Close
           </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 text-sm">
-          {loading ? <p className="text-gray-600">Loading…</p> : null}
+          {loading ? <p className="text-slate-400">Loading…</p> : null}
           {loadError ? (
-            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900" role="alert">
+            <div className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300" role="alert">
               {loadError}
             </div>
           ) : null}
@@ -185,8 +185,8 @@ export function PatientSlideOverPanel({
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Patient</h3>
-                    <p className="mt-1 font-medium text-gray-900">{payload.displayName}</p>
-                    <p className="mt-1 text-xs text-gray-600">
+                    <p className="mt-1 font-medium text-slate-100">{payload.displayName}</p>
+                    <p className="mt-1 text-xs text-slate-400">
                       {payload.email ?? "—"} · {payload.phone ?? "—"}
                     </p>
                   </div>
@@ -202,20 +202,20 @@ export function PatientSlideOverPanel({
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Since {payload.createdAt.slice(0, 10)} · ID{" "}
-                  <code className="rounded bg-gray-100 px-1">{payload.patientId.slice(0, 8)}…</code>
+                  <code className="rounded bg-white/[0.06] px-1">{payload.patientId.slice(0, 8)}…</code>
                 </p>
               </section>
 
               <section className={crmLeadCardClass}>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Clinical summary</h3>
-                <p className="mt-2 text-sm text-gray-800">
+                <p className="mt-2 text-sm text-slate-200">
                   {payload.clinicalScalesSummary ?? "No Norwood / clinical summary on file yet."}
                 </p>
               </section>
 
               <section className={crmLeadCardClass}>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Hair clinic ops</h3>
-                <dl className="mt-2 grid gap-2 text-sm text-gray-800 sm:grid-cols-2">
+                <dl className="mt-2 grid gap-2 text-sm text-slate-200 sm:grid-cols-2">
                   <div>
                     <dt className="text-xs text-gray-500">Next appointment</dt>
                     <dd className="font-medium">
@@ -274,7 +274,7 @@ export function PatientSlideOverPanel({
 
               <section className={crmLeadCardClass}>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Linked records</h3>
-                <ul className="mt-2 space-y-1 text-sm text-gray-800">
+                <ul className="mt-2 space-y-1 text-sm text-slate-200">
                   <li>
                     <strong>{payload.linkedLeadCount}</strong> CRM lead{payload.linkedLeadCount === 1 ? "" : "s"}
                   </li>

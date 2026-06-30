@@ -10,12 +10,12 @@ export function PatientPersonDetailsCard({ data }: { data: PatientProfileFoundat
   });
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Person record</h2>
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 className="text-sm font-semibold text-slate-100">Person record</h2>
       <p className="mt-1 text-xs text-gray-500">
         Same identity resolution as the Contact details card; useful when comparing to the raw person row.
       </p>
-      <dl className="mt-3 grid gap-2 text-sm text-gray-700 sm:grid-cols-2">
+      <dl className="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
         <div>
           <dt className="text-xs text-gray-500">Name</dt>
           <dd>{idc.fullName}</dd>

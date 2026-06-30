@@ -45,14 +45,14 @@ export function PatientTimelineFilters({
   const sourceVal = filters.sourceTypes?.length === 1 ? filters.sourceTypes[0]! : "";
 
   return (
-    <div className="flex flex-col gap-3 border-b border-gray-100 pb-3 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between">
+    <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-3 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between">
       <div className="flex flex-col gap-1">
-        <label htmlFor="timeline-type-filter" className="text-xs font-medium text-gray-600">
+        <label htmlFor="timeline-type-filter" className="text-xs font-medium text-slate-400">
           Event type
         </label>
         <select
           id="timeline-type-filter"
-          className="max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900"
+          className="max-w-xs rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm text-slate-100"
           value={typeVal}
           onChange={(e) => {
             const v = e.target.value;
@@ -71,12 +71,12 @@ export function PatientTimelineFilters({
         </select>
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="timeline-source-filter" className="text-xs font-medium text-gray-600">
+        <label htmlFor="timeline-source-filter" className="text-xs font-medium text-slate-400">
           Source
         </label>
         <select
           id="timeline-source-filter"
-          className="max-w-xs rounded border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900"
+          className="max-w-xs rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm text-slate-100"
           value={sourceVal}
           onChange={(e) => {
             const v = e.target.value;
@@ -95,12 +95,12 @@ export function PatientTimelineFilters({
         </select>
       </div>
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-gray-600">Order</span>
+        <span className="text-xs font-medium text-slate-400">Order</span>
         <div className="flex gap-2">
           <button
             type="button"
             className={`rounded px-3 py-1.5 text-xs font-medium ${
-              sortDirection === "newest_first" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"
+              sortDirection === "newest_first" ? "bg-blue-600 text-white" : "bg-white/[0.06] text-slate-200"
             }`}
             onClick={() => onSortDirectionChange("newest_first")}
           >
@@ -109,7 +109,7 @@ export function PatientTimelineFilters({
           <button
             type="button"
             className={`rounded px-3 py-1.5 text-xs font-medium ${
-              sortDirection === "oldest_first" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"
+              sortDirection === "oldest_first" ? "bg-blue-600 text-white" : "bg-white/[0.06] text-slate-200"
             }`}
             onClick={() => onSortDirectionChange("oldest_first")}
           >

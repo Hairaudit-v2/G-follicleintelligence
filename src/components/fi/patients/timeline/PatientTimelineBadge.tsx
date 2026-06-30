@@ -3,14 +3,14 @@ import { patientTimelineSourceLabel } from "@/src/lib/patients/timeline/patientT
 import { cn } from "@/lib/utils";
 
 const SOURCE_STYLES: Record<PatientTimelineSourceType, string> = {
-  patient: "bg-violet-100 text-violet-900",
-  lead: "bg-sky-100 text-sky-900",
-  crm_activity: "bg-amber-100 text-amber-950",
-  booking: "bg-emerald-100 text-emerald-900",
+  patient: "bg-violet-500/15 text-violet-300",
+  lead: "bg-cyan-500/15 text-cyan-200",
+  crm_activity: "bg-amber-400/15 text-amber-200",
+  booking: "bg-emerald-500/15 text-emerald-300",
   case: "bg-indigo-100 text-indigo-900",
-  clinical: "bg-rose-100 text-rose-900",
+  clinical: "bg-rose-500/15 text-rose-300",
   image: "bg-teal-100 text-teal-900",
-  system: "bg-gray-100 text-gray-800",
+  system: "bg-white/[0.06] text-slate-200",
 };
 
 export function PatientTimelineBadge({ sourceType }: { sourceType: PatientTimelineSourceType }) {
@@ -19,7 +19,7 @@ export function PatientTimelineBadge({ sourceType }: { sourceType: PatientTimeli
     <span
       className={cn(
         "inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-        SOURCE_STYLES[sourceType] ?? "bg-gray-100 text-gray-800"
+        SOURCE_STYLES[sourceType] ?? "bg-white/[0.06] text-slate-200"
       )}
     >
       {label}

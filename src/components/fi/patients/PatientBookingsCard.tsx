@@ -15,10 +15,10 @@ function BookingLine({ tenantId, b }: { tenantId: string; b: PatientProfileBooki
   return (
     <li className="py-2">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="text-sm font-medium text-gray-900">{b.title?.trim() || b.booking_type}</span>
+        <span className="text-sm font-medium text-slate-100">{b.title?.trim() || b.booking_type}</span>
         <span className="text-xs text-gray-500">{b.booking_status}</span>
       </div>
-      <p className="text-xs text-gray-600">{fmt(b.start_at)}</p>
+      <p className="text-xs text-slate-400">{fmt(b.start_at)}</p>
       <p className="mt-1 text-xs">
         <Link href={cal} className="text-blue-600 hover:underline">
           Open calendar
@@ -35,10 +35,10 @@ function BookingLine({ tenantId, b }: { tenantId: string; b: PatientProfileBooki
 export function PatientBookingsCard({ tenantId, data }: { tenantId: string; data: PatientProfileFoundationData }) {
   const { upcoming, past } = data.bookings;
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Appointments</h2>
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 className="text-sm font-semibold text-slate-100">Appointments</h2>
       {upcoming.length === 0 && past.length === 0 ? (
-        <div className="mt-2 space-y-2 text-sm text-gray-600">
+        <div className="mt-2 space-y-2 text-sm text-slate-400">
           <p>No appointments for this patient yet.</p>
           <p className="text-xs text-gray-500">
             Open{" "}
@@ -57,19 +57,19 @@ export function PatientBookingsCard({ tenantId, data }: { tenantId: string; data
           {upcoming.length ? (
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Upcoming</h3>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-white/[0.06]">
                 {upcoming.map((b) => (
                   <BookingLine key={b.id} tenantId={tenantId} b={b} />
                 ))}
               </ul>
             </div>
           ) : (
-            <p className="text-sm text-gray-600">No upcoming appointments.</p>
+            <p className="text-sm text-slate-400">No upcoming appointments.</p>
           )}
           {past.length ? (
-            <details className="rounded border border-gray-100 bg-gray-50/50 p-2">
-              <summary className="cursor-pointer text-xs font-semibold text-gray-700">Past appointments ({past.length})</summary>
-              <ul className="mt-2 divide-y divide-gray-100">
+            <details className="rounded border border-white/[0.06] bg-white/[0.03] p-2">
+              <summary className="cursor-pointer text-xs font-semibold text-slate-300">Past appointments ({past.length})</summary>
+              <ul className="mt-2 divide-y divide-white/[0.06]">
                 {past.map((b) => (
                   <BookingLine key={b.id} tenantId={tenantId} b={b} />
                 ))}

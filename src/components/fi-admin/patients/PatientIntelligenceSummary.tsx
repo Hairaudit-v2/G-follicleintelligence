@@ -63,7 +63,7 @@ function SignalRow({
         ) : (
           <div>
             <p className={`mt-0.5 ${pwsEmpty}`}>{empty}</p>
-            {hint && <p className="mt-0.5 text-[0.65rem] text-slate-600">{hint}</p>}
+            {hint && <p className="mt-0.5 text-[0.65rem] text-slate-400">{hint}</p>}
           </div>
         )}
       </div>
@@ -184,7 +184,7 @@ export function PatientIntelligenceSummary({
               </Link>
               <span className="text-xs text-slate-500">· {latestConsultation.status}</span>
               {completedConsultations.length > 0 && completedConsultations.length !== consultations.length && (
-                <span className="text-xs text-slate-600">
+                <span className="text-xs text-slate-400">
                   · {completedConsultations.length} of {consultations.length} completed
                 </span>
               )}
@@ -192,7 +192,7 @@ export function PatientIntelligenceSummary({
           ) : (
             <div>
               <p className={`mt-0.5 ${pwsEmpty}`}>No consultations recorded.</p>
-              <p className="mt-0.5 text-[0.65rem] text-slate-600">
+              <p className="mt-0.5 text-[0.65rem] text-slate-400">
                 Use &ldquo;New consultation&rdquo; to document a clinical review.
               </p>
             </div>
@@ -213,7 +213,7 @@ export function PatientIntelligenceSummary({
           ) : (
             <div>
               <p className={`mt-0.5 ${pwsEmpty}`}>No imaging protocol completed yet.</p>
-              <p className="mt-0.5 text-[0.65rem] text-slate-600">
+              <p className="mt-0.5 text-[0.65rem] text-slate-400">
                 Start ImagingOS to create a baseline.
               </p>
             </div>

@@ -84,8 +84,8 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
   }, [row]);
 
   return (
-    <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Clinical details</h2>
+    <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+      <h2 className="text-sm font-semibold text-slate-100">Clinical details</h2>
       <p className="mt-1 text-xs text-gray-500">
         These details are a structured clinical summary only. Full diagnostics, blood analysis, images, HLI assessments
         and treatment planning will be added in later stages.
@@ -97,7 +97,7 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
         </div>
       ) : null}
       {row?.updated_at ? (
-        <p className="mt-2 text-xs text-gray-600">
+        <p className="mt-2 text-xs text-slate-400">
           Last updated:{" "}
           <time dateTime={row.updated_at}>{row.updated_at.slice(0, 16).replace("T", " ")}</time>
           {data.clinicalDetails.updatedByLabel ? (
@@ -108,7 +108,7 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
           ) : null}
         </p>
       ) : (
-        <p className="mt-2 text-xs text-gray-600">No clinical summary row yet — save to create one.</p>
+        <p className="mt-2 text-xs text-slate-400">No clinical summary row yet — save to create one.</p>
       )}
 
       <div className="mt-4 space-y-3">
@@ -124,94 +124,94 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
           primaryConcernLabel={CLINICAL_DETAIL_FIELD_LABELS.primary_concern}
         />
 
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.primary_hair_concern}
           <textarea
             value={form.primary_hair_concern}
             onChange={(e) => setForm((f) => ({ ...f, primary_hair_concern: e.target.value }))}
             rows={2}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.treatment_interest}
           <textarea
             value={form.treatment_interest}
             onChange={(e) => setForm((f) => ({ ...f, treatment_interest: e.target.value }))}
             rows={2}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.hair_loss_duration}
           <textarea
             value={form.hair_loss_duration}
             onChange={(e) => setForm((f) => ({ ...f, hair_loss_duration: e.target.value }))}
             rows={2}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.family_history}
           <textarea
             value={form.family_history}
             onChange={(e) => setForm((f) => ({ ...f, family_history: e.target.value }))}
             rows={3}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.relevant_medical_history}
           <textarea
             value={form.relevant_medical_history}
             onChange={(e) => setForm((f) => ({ ...f, relevant_medical_history: e.target.value }))}
             rows={4}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.current_medications}
           <textarea
             value={form.current_medications}
             onChange={(e) => setForm((f) => ({ ...f, current_medications: e.target.value }))}
             rows={4}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.allergies}
           <textarea
             value={form.allergies}
             onChange={(e) => setForm((f) => ({ ...f, allergies: e.target.value }))}
             rows={3}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.contraindications}
           <textarea
             value={form.contraindications}
             onChange={(e) => setForm((f) => ({ ...f, contraindications: e.target.value }))}
             rows={3}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.scalp_conditions}
           <textarea
             value={form.scalp_conditions}
             onChange={(e) => setForm((f) => ({ ...f, scalp_conditions: e.target.value }))}
             rows={3}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           {CLINICAL_DETAIL_FIELD_LABELS.previous_hair_treatments}
           <textarea
             value={form.previous_hair_treatments}
             onChange={(e) => setForm((f) => ({ ...f, previous_hair_treatments: e.target.value }))}
             rows={3}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           />
         </label>
 
@@ -224,32 +224,32 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
           {CLINICAL_DETAIL_FIELD_LABELS.metadata})
         </button>
         {showJson ? (
-          <div className="space-y-3 border-t border-gray-100 pt-3">
-            <label className="block text-xs font-medium text-gray-700">
+          <div className="space-y-3 border-t border-white/[0.06] pt-3">
+            <label className="block text-xs font-medium text-slate-300">
               {CLINICAL_DETAIL_FIELD_LABELS.clinical_flags}
               <textarea
                 value={form.clinical_flags}
                 onChange={(e) => setForm((f) => ({ ...f, clinical_flags: e.target.value }))}
                 rows={6}
                 spellCheck={false}
-                className="mt-1 block w-full rounded border border-gray-300 bg-gray-50 px-2 py-1.5 font-mono text-xs"
+                className="mt-1 block w-full rounded border border-slate-700 bg-white/[0.03] px-2 py-1.5 font-mono text-xs"
               />
             </label>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               {CLINICAL_DETAIL_FIELD_LABELS.metadata}
               <textarea
                 value={form.metadata}
                 onChange={(e) => setForm((f) => ({ ...f, metadata: e.target.value }))}
                 rows={6}
                 spellCheck={false}
-                className="mt-1 block w-full rounded border border-gray-300 bg-gray-50 px-2 py-1.5 font-mono text-xs"
+                className="mt-1 block w-full rounded border border-slate-700 bg-white/[0.03] px-2 py-1.5 font-mono text-xs"
               />
             </label>
           </div>
         ) : null}
       </div>
 
-      {msg ? <p className="mt-2 text-xs text-gray-700">{msg}</p> : null}
+      {msg ? <p className="mt-2 text-xs text-slate-300">{msg}</p> : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button
@@ -299,7 +299,7 @@ export function PatientClinicalDetailsCard({ tenantId, data }: { tenantId: strin
           type="button"
           disabled={pending || !dirty}
           onClick={reset}
-          className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
         >
           Cancel
         </button>

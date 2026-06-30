@@ -35,8 +35,8 @@ export function PatientPersonLeadHistoryCard({
     <section className={crmLeadCardClass}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">Enquiry & lead history</h2>
-          <p className="mt-1 text-xs text-gray-600">
+          <h2 className="text-sm font-semibold text-slate-100">Enquiry & lead history</h2>
+          <p className="mt-1 text-xs text-slate-400">
             Person-level CRM leads ({items.length}) and merged activity — linked to this patient ({linked.length}),
             prior enquiries ({personOnly.length}).
           </p>
@@ -47,9 +47,9 @@ export function PatientPersonLeadHistoryCard({
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-3 text-sm text-gray-600">No CRM leads for this person yet.</p>
+        <p className="mt-3 text-sm text-slate-400">No CRM leads for this person yet.</p>
       ) : (
-        <ul className={`mt-3 divide-y divide-gray-100 ${compact ? "max-h-48 overflow-y-auto" : ""}`}>
+        <ul className={`mt-3 divide-y divide-white/[0.06] ${compact ? "max-h-48 overflow-y-auto" : ""}`}>
           {(compact ? items.slice(0, 6) : items).map(({ lead, stageLabel, ownerLabel, linkedToThisPatient }) => {
             const title = leadTitleFromRow(lead.summary, lead.id);
             const href = `/fi-admin/${tenantId}/crm/leads/${lead.id}`;
@@ -60,7 +60,7 @@ export function PatientPersonLeadHistoryCard({
                     <Link href={href} className="text-sm font-medium text-blue-700 hover:underline">
                       {title}
                     </Link>
-                    <p className="mt-0.5 text-xs text-gray-600">
+                    <p className="mt-0.5 text-xs text-slate-400">
                       {lead.status}
                       {stageLabel ? ` · ${stageLabel}` : ""}
                       {ownerLabel ? ` · ${ownerLabel}` : ""}
@@ -78,9 +78,9 @@ export function PatientPersonLeadHistoryCard({
       )}
 
       {activity && activity.length > 0 ? (
-        <div className="mt-4 border-t border-gray-100 pt-3">
+        <div className="mt-4 border-t border-white/[0.06] pt-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Merged CRM activity</h3>
-          <ul className={`mt-2 divide-y divide-gray-100 ${compact ? "max-h-48 overflow-y-auto" : ""}`}>
+          <ul className={`mt-2 divide-y divide-white/[0.06] ${compact ? "max-h-48 overflow-y-auto" : ""}`}>
             {timelineRows
               .filter((r) => r.kind === "crm_activity")
               .map((row) => {
@@ -89,12 +89,12 @@ export function PatientPersonLeadHistoryCard({
                 return (
                   <li key={row.id} className="py-2 text-sm">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="font-medium text-gray-900">{a.title?.trim() || a.activity_kind}</span>
+                      <span className="font-medium text-slate-100">{a.title?.trim() || a.activity_kind}</span>
                       <time className="text-xs text-gray-500" dateTime={a.occurred_at}>
                         {a.occurred_at.slice(0, 16).replace("T", " ")}
                       </time>
                     </div>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-slate-400">
                       {a.activity_kind}
                       {a.lead_id ? (
                         <>
@@ -118,7 +118,7 @@ export function PatientPersonLeadHistoryCard({
                         </>
                       )}
                       {!a.linkedToThisPatient ? (
-                        <span className="ml-1 rounded bg-amber-50 px-1 text-[10px] font-semibold uppercase text-amber-900">
+                        <span className="ml-1 rounded bg-amber-400/10 px-1 text-[10px] font-semibold uppercase text-amber-200">
                           Other enquiry
                         </span>
                       ) : null}
@@ -145,10 +145,10 @@ function LeadLinkBadge({
 }) {
   const label = linkedToThisPatient ? "This patient" : hasOtherPatient ? "Other patient" : "Unconverted";
   const cls = linkedToThisPatient
-    ? "bg-emerald-100 text-emerald-900"
+    ? "bg-emerald-500/15 text-emerald-300"
     : hasOtherPatient
-      ? "bg-amber-100 text-amber-900"
-      : "bg-gray-100 text-gray-700";
+      ? "bg-amber-400/15 text-amber-200"
+      : "bg-white/[0.06] text-slate-300";
 
   return (
     <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${cls}`}>

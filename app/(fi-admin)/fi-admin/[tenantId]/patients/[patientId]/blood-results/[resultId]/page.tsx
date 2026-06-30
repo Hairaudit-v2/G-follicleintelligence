@@ -30,7 +30,7 @@ export default async function PatientBloodResultDetailPage({
   if (!tenantId?.trim() || !patientId?.trim() || !resultId?.trim()) notFound();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return <p className="text-sm text-red-600">Server misconfigured (Supabase).</p>;
+    return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
   await assertCrmTenantReadAllowed({ tenantId: tenantId.trim() });
@@ -43,7 +43,7 @@ export default async function PatientBloodResultDetailPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-slate-400">
         <Link href={`/fi-admin/${tenantId.trim()}/patients/${patientId.trim()}`} className="text-blue-600 hover:underline">
           ← Patient profile
         </Link>
@@ -56,8 +56,8 @@ export default async function PatientBloodResultDetailPage({
         </Link>
       </p>
       <header className="space-y-1">
-        <h1 className="text-lg font-semibold text-gray-900">Blood result</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="text-lg font-semibold text-slate-100">Blood result</h1>
+        <p className="text-sm text-slate-400">
           Result date {bundle.result.result_date} · {bundle.result.status}
         </p>
       </header>

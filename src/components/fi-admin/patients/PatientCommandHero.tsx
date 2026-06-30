@@ -88,7 +88,7 @@ export function PatientCommandHero({
             {idc.primaryEmail ?? "No email on record"}&ensp;·&ensp;
             {idc.primaryPhone ?? "No phone on record"}
           </p>
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-400">
             Patient since{" "}
             <time dateTime={data.patient.created_at}>{data.patient.created_at.slice(0, 10)}</time>
           </p>
@@ -116,7 +116,7 @@ export function PatientCommandHero({
       <div className="mt-5 space-y-2 border-t border-white/[0.06] pt-4">
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-600">
+          <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
             Clinical
           </span>
           <VoiceNoteEntryButton
@@ -141,7 +141,7 @@ export function PatientCommandHero({
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-600">
+          <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
             Imaging
           </span>
           <Link href={`${base}/imaging`} className={chipIndigo}>
@@ -151,7 +151,7 @@ export function PatientCommandHero({
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-600">
+          <span className="w-[4.5rem] shrink-0 text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-slate-400">
             Intelligence
           </span>
           <Link href={`${base}/twin`} className={chipCyanPrimary}>

@@ -98,7 +98,7 @@ export function PatientDetailPageView({
         <PatientPhotoAddedFeedback />
       </Suspense>
 
-      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
+      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
         <PatientDetailTabNav tenantId={tenantId} patientId={patientId} activeTab={activeTab} />
       </Suspense>
 

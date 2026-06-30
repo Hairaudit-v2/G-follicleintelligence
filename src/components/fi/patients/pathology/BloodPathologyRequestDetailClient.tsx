@@ -118,9 +118,9 @@ export function BloodPathologyRequestDetailClient({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">Blood test request</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Patient <span className="font-medium text-gray-900">{patientName}</span>
+          <h1 className="text-lg font-semibold text-slate-100">Blood test request</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Patient <span className="font-medium text-slate-100">{patientName}</span>
             {dateOfBirth ? (
               <>
                 {" "}
@@ -129,7 +129,7 @@ export function BloodPathologyRequestDetailClient({
             ) : null}
           </p>
           <p className="mt-1 text-xs text-gray-500">
-            Request ID <code className="rounded bg-gray-100 px-1">{requestId}</code>
+            Request ID <code className="rounded bg-white/[0.06] px-1">{requestId}</code>
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -137,7 +137,7 @@ export function BloodPathologyRequestDetailClient({
             type="button"
             disabled={Boolean(busy) || cancelled}
             onClick={downloadPdf}
-            className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-gray-50 disabled:opacity-50"
+            className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-white/[0.03] disabled:opacity-50"
           >
             {busy === "pdf" ? "Preparing…" : "Download PDF"}
           </button>
@@ -145,73 +145,73 @@ export function BloodPathologyRequestDetailClient({
             type="button"
             disabled={Boolean(busy) || cancelled}
             onClick={cancelReq}
-            className="rounded border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
+            className="rounded border border-rose-500/20 bg-[#0F1629]/80 backdrop-blur-md px-3 py-1.5 text-sm font-medium text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
           >
             {busy === "cancel" ? "Cancelling…" : "Cancel request"}
           </button>
         </div>
       </div>
 
-      {err ? <p className="rounded border border-red-200 bg-red-50 p-2 text-sm text-red-900">{err}</p> : null}
+      {err ? <p className="rounded border border-rose-500/20 bg-rose-500/10 p-2 text-sm text-rose-300">{err}</p> : null}
 
       {!cancelled && !patientEmail ? (
-        <p className="rounded border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
+        <p className="rounded border border-amber-400/20 bg-amber-400/10 p-2 text-sm text-amber-200">
           No email is stored on the linked person record — add one to enable emailing this PDF to the patient.
         </p>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900">Request details</h2>
+        <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+          <h2 className="text-sm font-semibold text-slate-100">Request details</h2>
           <dl className="mt-3 space-y-2 text-sm">
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Status</dt>
-              <dd className="font-medium text-gray-900">{request.status}</dd>
+              <dd className="font-medium text-slate-100">{request.status}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Request date</dt>
-              <dd className="text-gray-900">{request.request_date}</dd>
+              <dd className="text-slate-100">{request.request_date}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Template</dt>
-              <dd className="text-right text-gray-900">{templateLabel}</dd>
+              <dd className="text-right text-slate-100">{templateLabel}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Doctor</dt>
-              <dd className="text-right text-gray-900">{doctorDisplayName ?? "—"}</dd>
+              <dd className="text-right text-slate-100">{doctorDisplayName ?? "—"}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Patient email</dt>
-              <dd className="text-right text-gray-900">{patientEmail ?? "—"}</dd>
+              <dd className="text-right text-slate-100">{patientEmail ?? "—"}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Patient phone</dt>
-              <dd className="text-right text-gray-900">{patientPhone ?? "—"}</dd>
+              <dd className="text-right text-slate-100">{patientPhone ?? "—"}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Emailed to patient</dt>
-              <dd className="text-right text-xs text-gray-900">
+              <dd className="text-right text-xs text-slate-100">
                 {request.emailed_to_patient_at ? request.emailed_to_patient_at.slice(0, 19).replace("T", " ") : "—"}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Stored PDF</dt>
-              <dd className="text-right text-xs text-gray-700">{request.pdf_storage_path ? "Yes (private bucket)" : "—"}</dd>
+              <dd className="text-right text-xs text-slate-300">{request.pdf_storage_path ? "Yes (private bucket)" : "—"}</dd>
             </div>
             {request.cancelled_at ? (
               <div className="flex justify-between gap-2">
                 <dt className="text-gray-500">Cancelled at</dt>
-                <dd className="text-right text-xs text-gray-900">{request.cancelled_at.slice(0, 19).replace("T", " ")}</dd>
+                <dd className="text-right text-xs text-slate-100">{request.cancelled_at.slice(0, 19).replace("T", " ")}</dd>
               </div>
             ) : null}
           </dl>
         </section>
 
-        <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900">Clinical notes / indication</h2>
-          <p className="mt-1 text-xs text-gray-600">Shown on the PDF. {cancelled ? "Read-only (cancelled)." : null}</p>
+        <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+          <h2 className="text-sm font-semibold text-slate-100">Clinical notes / indication</h2>
+          <p className="mt-1 text-xs text-slate-400">Shown on the PDF. {cancelled ? "Read-only (cancelled)." : null}</p>
           <textarea
-            className="mt-2 w-full rounded border border-gray-300 px-2 py-2 text-sm"
+            className="mt-2 w-full rounded border border-slate-700 px-2 py-2 text-sm"
             rows={6}
             value={notes}
             disabled={cancelled}
@@ -228,20 +228,20 @@ export function BloodPathologyRequestDetailClient({
               >
                 {notesSaving ? "Saving…" : "Save notes"}
               </button>
-              {notesMsg ? <span className="text-xs text-gray-600">{notesMsg}</span> : null}
+              {notesMsg ? <span className="text-xs text-slate-400">{notesMsg}</span> : null}
             </div>
           ) : null}
         </section>
       </div>
 
       {!cancelled && patientEmail ? (
-        <section className="rounded border border-blue-100 bg-blue-50/40 p-4">
-          <h2 className="text-sm font-semibold text-gray-900">Email to patient</h2>
-          <p className="mt-1 text-xs text-gray-600">
+        <section className="rounded border border-blue-100 bg-blue-500/10 p-4">
+          <h2 className="text-sm font-semibold text-slate-100">Email to patient</h2>
+          <p className="mt-1 text-xs text-slate-400">
             Sends a short message with the PDF attached. Requires Resend (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`).
           </p>
           <textarea
-            className="mt-2 w-full rounded border border-gray-300 px-2 py-2 text-sm"
+            className="mt-2 w-full rounded border border-slate-700 px-2 py-2 text-sm"
             rows={3}
             value={emailNote}
             onChange={(e) => setEmailNote(e.target.value)}
@@ -258,12 +258,12 @@ export function BloodPathologyRequestDetailClient({
         </section>
       ) : null}
 
-      <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-900">Requested tests</h2>
-        <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-gray-900">
+      <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+        <h2 className="text-sm font-semibold text-slate-100">Requested tests</h2>
+        <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-slate-100">
           {items.map((it) => (
             <li key={it.id}>
-              {it.test_code ? <span className="font-mono text-xs text-gray-600">{it.test_code}</span> : null}
+              {it.test_code ? <span className="font-mono text-xs text-slate-400">{it.test_code}</span> : null}
               {it.test_code ? " · " : null}
               {it.test_label}
             </li>
@@ -271,29 +271,29 @@ export function BloodPathologyRequestDetailClient({
         </ol>
       </section>
 
-      <section className="rounded border border-gray-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-900">Audit trail (this request)</h2>
-        <p className="mt-1 text-xs text-gray-600">CRM activity rows scoped to this pathology request id.</p>
+      <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40">
+        <h2 className="text-sm font-semibold text-slate-100">Audit trail (this request)</h2>
+        <p className="mt-1 text-xs text-slate-400">CRM activity rows scoped to this pathology request id.</p>
         {audit.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-600">No matching events.</p>
+          <p className="mt-2 text-sm text-slate-400">No matching events.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-gray-100">
+          <ul className="mt-3 divide-y divide-white/[0.06]">
             {audit.map((a) => (
               <li key={a.id} className="py-2 text-sm">
                 <div className="flex flex-wrap justify-between gap-2">
-                  <span className="font-medium text-gray-900">{a.title?.trim() || a.activity_kind}</span>
+                  <span className="font-medium text-slate-100">{a.title?.trim() || a.activity_kind}</span>
                   <time className="text-xs text-gray-500" dateTime={a.occurred_at}>
                     {a.occurred_at.slice(0, 19).replace("T", " ")}
                   </time>
                 </div>
-                <p className="text-xs text-gray-600">{a.activity_kind}</p>
+                <p className="text-xs text-slate-400">{a.activity_kind}</p>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-slate-400">
         <Link href={`/fi-admin/${tenantId}/patients/${patientId}`} className="text-blue-600 hover:underline">
           ← Back to patient profile
         </Link>

@@ -15,11 +15,11 @@ export function PatientImageTile({
     <button
       type="button"
       onClick={onSelect}
-      className={`group relative flex flex-col overflow-hidden rounded border bg-white text-left shadow-sm transition ring-offset-1 hover:border-gray-400 ${
-        selected ? "border-blue-500 ring-2 ring-blue-400" : "border-gray-200"
+      className={`group relative flex flex-col overflow-hidden rounded border bg-[#0F1629]/80 backdrop-blur-md text-left shadow-lg shadow-black/40 transition ring-offset-1 hover:border-gray-400 ${
+        selected ? "border-blue-500 ring-2 ring-blue-400" : "border-white/[0.08]"
       }`}
     >
-      <div className="relative aspect-square w-full bg-gray-100">
+      <div className="relative aspect-square w-full bg-white/[0.06]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={tile.signed.url}
@@ -32,7 +32,7 @@ export function PatientImageTile({
       </div>
       <div className="space-y-1 p-2">
         <PatientImageCategoryBadge category={tile.image.image_category} />
-        {cap ? <p className="line-clamp-2 text-xs text-gray-700">{cap}</p> : null}
+        {cap ? <p className="line-clamp-2 text-xs text-slate-300">{cap}</p> : null}
       </div>
     </button>
   );
