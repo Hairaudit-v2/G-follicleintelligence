@@ -120,14 +120,14 @@ export function CalendarReminderTestingSection({
   return (
     <div className="space-y-6">
       <FiCard>
-        <div className="flex flex-wrap items-start gap-2 border-b border-slate-200/90 pb-3">
+        <div className="flex flex-wrap items-start gap-2 border-b border-white/[0.08] pb-3">
           <Bell className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" aria-hidden />
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold text-slate-900">Appointment reminders (UAT)</h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <h2 className="text-base font-semibold text-slate-100">Appointment reminders (UAT)</h2>
+            <p className="mt-1 text-sm text-slate-400">
               Inspect templates and jobs, preview merged copy, and optionally send a <strong>test email</strong> to{" "}
-              <code className="rounded bg-slate-100 px-1 font-mono text-xs">FI_REMINDER_TEST_EMAIL</code> when{" "}
-              <code className="rounded bg-slate-100 px-1 font-mono text-xs">FI_REMINDERS_TEST_SEND=true</code>. Patient
+              <code className="rounded bg-white/[0.06] px-1 font-mono text-xs">FI_REMINDER_TEST_EMAIL</code> when{" "}
+              <code className="rounded bg-white/[0.06] px-1 font-mono text-xs">FI_REMINDERS_TEST_SEND=true</code>. Patient
               addresses are never used from this panel.
             </p>
           </div>
@@ -137,7 +137,7 @@ export function CalendarReminderTestingSection({
           <div
             className={cn(
               "rounded-lg border p-3 text-sm",
-              reminders.liveDeliveryEnabled ? "border-amber-200 bg-amber-50/50 text-amber-950" : "border-emerald-200 bg-emerald-50/40 text-emerald-950"
+              reminders.liveDeliveryEnabled ? "border-amber-400/20 bg-amber-400/10 text-amber-200" : "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"
             )}
           >
             <p className="font-semibold">{reminders.liveDeliveryEnabled ? "Live delivery ON" : "Live delivery OFF"}</p>
@@ -146,7 +146,7 @@ export function CalendarReminderTestingSection({
           <div
             className={cn(
               "rounded-lg border p-3 text-sm",
-              reminders.testSendConfigured ? "border-sky-200 bg-sky-50/40 text-sky-950" : "border-slate-200 bg-slate-50/80 text-slate-800"
+              reminders.testSendConfigured ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-200" : "border-white/[0.08] bg-white/[0.03] text-slate-200"
             )}
           >
             <p className="font-semibold">Test email override</p>
@@ -155,33 +155,33 @@ export function CalendarReminderTestingSection({
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2 text-xs">
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 font-medium text-slate-700">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1 font-medium text-slate-300">
             <Mail className="h-3.5 w-3.5" aria-hidden />
             Email keys {reminders.emailChannelConfigured ? "configured" : "missing"}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 font-medium text-slate-700">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1 font-medium text-slate-300">
             <MessageSquare className="h-3.5 w-3.5" aria-hidden />
             SMS keys {reminders.smsChannelConfigured ? "configured" : "missing"}
           </span>
         </div>
 
-        <p className="mt-4 text-sm leading-relaxed text-slate-600">{reminders.bookingEnqueueSummary}</p>
+        <p className="mt-4 text-sm leading-relaxed text-slate-400">{reminders.bookingEnqueueSummary}</p>
       </FiCard>
 
       <FiCard>
-        <h3 className="text-sm font-semibold text-slate-900">Template readiness</h3>
+        <h3 className="text-sm font-semibold text-slate-100">Template readiness</h3>
         <p className="mt-1 text-xs text-slate-500">Active templates in this tenant vs common UAT scenarios.</p>
-        <ul className="mt-3 divide-y divide-slate-100">
+        <ul className="mt-3 divide-y divide-white/[0.06]">
           {reminders.templateChecklist.map((row) => (
             <li key={row.id} className="flex flex-col gap-1 py-3 first:pt-0 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-slate-900">{row.label}</span>
+                  <span className="text-sm font-medium text-slate-100">{row.label}</span>
                   <FiStatusBadge tone={row.satisfied ? "success" : "warning"} appearance="pill" density="compact">
                     {row.satisfied ? "Ready" : "Gap"}
                   </FiStatusBadge>
                 </div>
-                <p className="mt-1 text-sm text-slate-600">{row.detail}</p>
+                <p className="mt-1 text-sm text-slate-400">{row.detail}</p>
               </div>
             </li>
           ))}
@@ -189,12 +189,12 @@ export function CalendarReminderTestingSection({
       </FiCard>
 
       <FiCard>
-        <h3 className="text-sm font-semibold text-slate-900">Reminder jobs (last 30 days, tenant-wide)</h3>
+        <h3 className="text-sm font-semibold text-slate-100">Reminder jobs (last 30 days, tenant-wide)</h3>
         <div className="mt-3 flex flex-wrap gap-2">
           {statKeys.map((k) => (
             <span
               key={k}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-medium text-slate-800"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-slate-200"
             >
               <FiStatusBadge tone={jobTone(k)} appearance="pill" density="compact">
                 {k}
@@ -208,22 +208,22 @@ export function CalendarReminderTestingSection({
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Failed (recent)</h4>
             {reminders.recentFailedJobs.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-600">No failed jobs in range.</p>
+              <p className="mt-2 text-sm text-slate-400">No failed jobs in range.</p>
             ) : (
               <ul className="mt-2 space-y-2">
                 {reminders.recentFailedJobs.map((j) => (
-                  <li key={j.id} className="rounded border border-slate-100 bg-white p-2 text-xs">
+                  <li key={j.id} className="rounded border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md p-2 text-xs">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-medium text-slate-900">{j.template_name}</span>
+                      <span className="font-medium text-slate-100">{j.template_name}</span>
                       <span className="text-slate-500">{j.scheduled_at}</span>
                     </div>
-                    <p className="mt-1 font-mono text-[11px] text-rose-700">{j.error_log || "—"}</p>
+                    <p className="mt-1 font-mono text-[11px] text-rose-300">{j.error_log || "—"}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <button
                         type="button"
                         disabled={previewBusy === j.id}
                         onClick={() => void openPreview(j.id)}
-                        className="rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+                        className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1 text-[11px] font-semibold text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                       >
                         {previewBusy === j.id ? "…" : "Preview"}
                       </button>
@@ -231,7 +231,7 @@ export function CalendarReminderTestingSection({
                         type="button"
                         disabled={sendBusy === j.id}
                         onClick={() => void onSendTest(j.id)}
-                        className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+                        className="rounded border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-[11px] font-semibold text-cyan-200 hover:bg-cyan-500/15 disabled:opacity-50"
                       >
                         {sendBusy === j.id ? "…" : "Test email"}
                       </button>
@@ -244,16 +244,16 @@ export function CalendarReminderTestingSection({
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Upcoming (pending)</h4>
             {reminders.upcomingJobs.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-600">No upcoming pending jobs (or none scheduled ahead).</p>
+              <p className="mt-2 text-sm text-slate-400">No upcoming pending jobs (or none scheduled ahead).</p>
             ) : (
               <ul className="mt-2 space-y-2">
                 {reminders.upcomingJobs.map((j) => (
-                  <li key={j.id} className="rounded border border-slate-100 bg-white p-2 text-xs">
+                  <li key={j.id} className="rounded border border-white/[0.06] bg-[#0F1629]/80 backdrop-blur-md p-2 text-xs">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-medium text-slate-900">{j.template_name}</span>
+                      <span className="font-medium text-slate-100">{j.template_name}</span>
                       <span className="text-slate-500">{j.scheduled_at}</span>
                     </div>
-                    <p className="mt-0.5 text-slate-600">
+                    <p className="mt-0.5 text-slate-400">
                       {j.trigger_event}
                       {j.booking_id ? (
                         <>
@@ -267,7 +267,7 @@ export function CalendarReminderTestingSection({
                         type="button"
                         disabled={previewBusy === j.id}
                         onClick={() => void openPreview(j.id)}
-                        className="rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+                        className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1 text-[11px] font-semibold text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                       >
                         {previewBusy === j.id ? "…" : "Preview"}
                       </button>
@@ -275,7 +275,7 @@ export function CalendarReminderTestingSection({
                         type="button"
                         disabled={sendBusy === j.id}
                         onClick={() => void onSendTest(j.id)}
-                        className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+                        className="rounded border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-[11px] font-semibold text-cyan-200 hover:bg-cyan-500/15 disabled:opacity-50"
                       >
                         {sendBusy === j.id ? "…" : "Test email"}
                       </button>
@@ -289,13 +289,13 @@ export function CalendarReminderTestingSection({
       </FiCard>
 
       <FiCard>
-        <h3 className="text-sm font-semibold text-slate-900">Booking reminder jobs</h3>
-        <p className="mt-1 text-sm text-slate-600">Paste a booking UUID to list all reminder jobs anchored to it.</p>
+        <h3 className="text-sm font-semibold text-slate-100">Booking reminder jobs</h3>
+        <p className="mt-1 text-sm text-slate-400">Paste a booking UUID to list all reminder jobs anchored to it.</p>
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
-          <label className="block min-w-0 flex-1 text-xs font-medium text-slate-700">
+          <label className="block min-w-0 flex-1 text-xs font-medium text-slate-300">
             Booking ID
             <input
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 font-mono text-xs"
+              className="mt-1 w-full rounded-lg border border-white/[0.08] px-2 py-2 font-mono text-xs"
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
@@ -309,34 +309,34 @@ export function CalendarReminderTestingSection({
             className={cn(
               "shrink-0 rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2",
               bookingBusy || !bookingId.trim()
-                ? "cursor-not-allowed bg-slate-200 text-slate-500"
+                ? "cursor-not-allowed bg-white/[0.08] text-slate-500"
                 : "bg-slate-800 text-white hover:bg-slate-900"
             )}
           >
             {bookingBusy ? "Loading…" : "Load jobs"}
           </button>
         </div>
-        {bookingErr ? <p className="mt-2 text-sm text-rose-700">{bookingErr}</p> : null}
+        {bookingErr ? <p className="mt-2 text-sm text-rose-300">{bookingErr}</p> : null}
         {bookingJobs && bookingJobs.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-600">No reminder jobs for this booking id.</p>
+          <p className="mt-3 text-sm text-slate-400">No reminder jobs for this booking id.</p>
         ) : null}
         {bookingJobs && bookingJobs.length > 0 ? (
-          <ul className="mt-3 divide-y divide-slate-100 rounded border border-slate-100">
+          <ul className="mt-3 divide-y divide-white/[0.06] rounded border border-white/[0.06]">
             {bookingJobs.map((j) => (
               <li key={j.id} className="flex flex-col gap-2 px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <p className="font-medium text-slate-900">{j.template_name}</p>
-                  <p className="text-slate-600">
+                  <p className="font-medium text-slate-100">{j.template_name}</p>
+                  <p className="text-slate-400">
                     {j.scheduled_at} · {j.status} · {j.template_type} · {j.template_trigger_event}
                   </p>
-                  {j.error_log ? <p className="mt-1 font-mono text-[11px] text-rose-700">{j.error_log}</p> : null}
+                  {j.error_log ? <p className="mt-1 font-mono text-[11px] text-rose-300">{j.error_log}</p> : null}
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <button
                     type="button"
                     disabled={previewBusy === j.id}
                     onClick={() => void openPreview(j.id)}
-                    className="rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+                    className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1 text-[11px] font-semibold text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                   >
                     {previewBusy === j.id ? "…" : "Preview"}
                   </button>
@@ -345,7 +345,7 @@ export function CalendarReminderTestingSection({
                     disabled={sendBusy === j.id || j.template_type !== "email"}
                     title={j.template_type !== "email" ? "Test send supports email jobs only" : undefined}
                     onClick={() => void onSendTest(j.id)}
-                    className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+                    className="rounded border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-[11px] font-semibold text-cyan-200 hover:bg-cyan-500/15 disabled:opacity-50"
                   >
                     {sendBusy === j.id ? "…" : "Test email"}
                   </button>
@@ -356,16 +356,16 @@ export function CalendarReminderTestingSection({
         ) : null}
       </FiCard>
 
-      {previewErr ? <p className="text-sm text-rose-700">{previewErr}</p> : null}
-      {sendErr ? <p className="text-sm text-rose-700">{sendErr}</p> : null}
-      {sendMsg ? <p className="text-sm text-emerald-800">{sendMsg}</p> : null}
+      {previewErr ? <p className="text-sm text-rose-300">{previewErr}</p> : null}
+      {sendErr ? <p className="text-sm text-rose-300">{sendErr}</p> : null}
+      {sendMsg ? <p className="text-sm text-emerald-300">{sendMsg}</p> : null}
 
       {preview ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" role="dialog">
-          <div className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+          <div className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl bg-[#0F1629]/80 backdrop-blur-md shadow-xl">
+            <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
               <div>
-                <p className="text-sm font-semibold text-slate-900">Preview · {preview.templateName}</p>
+                <p className="text-sm font-semibold text-slate-100">Preview · {preview.templateName}</p>
                 <p className="text-xs text-slate-500">
                   {preview.triggerEvent} · {preview.channel}
                 </p>
@@ -374,7 +374,7 @@ export function CalendarReminderTestingSection({
                 type="button"
                 aria-label="Close preview"
                 onClick={() => setPreview(null)}
-                className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -383,16 +383,16 @@ export function CalendarReminderTestingSection({
               {preview.subject ? (
                 <div>
                   <p className="text-xs font-semibold uppercase text-slate-500">Subject</p>
-                  <p className="mt-1 text-slate-900">{preview.subject}</p>
+                  <p className="mt-1 text-slate-100">{preview.subject}</p>
                 </div>
               ) : null}
               <div>
                 <p className="text-xs font-semibold uppercase text-slate-500">Body</p>
-                <pre className="mt-1 max-h-[45vh] overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-3 text-xs text-slate-800">
+                <pre className="mt-1 max-h-[45vh] overflow-auto whitespace-pre-wrap rounded bg-white/[0.03] p-3 text-xs text-slate-200">
                   {preview.body}
                 </pre>
               </div>
-              <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+              <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-3">
                 <button
                   type="button"
                   disabled={Boolean(sendBusy)}
@@ -404,7 +404,7 @@ export function CalendarReminderTestingSection({
                 <button
                   type="button"
                   onClick={() => setPreview(null)}
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50"
+                  className="rounded-lg border border-white/[0.08] px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-white/[0.03]"
                 >
                   Close
                 </button>

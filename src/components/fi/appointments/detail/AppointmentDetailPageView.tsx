@@ -72,8 +72,8 @@ export function AppointmentDetailPageView({
       <header className="space-y-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className="text-xl font-semibold text-slate-100">{title}</h1>
+            <p className="text-sm text-slate-400">
               Appointment · <span className="font-mono text-xs">{booking.id}</span>
             </p>
           </div>
@@ -84,32 +84,32 @@ export function AppointmentDetailPageView({
         </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {leadHref ? (
-            <Link href={leadHref} className="text-blue-600 hover:underline">
+            <Link href={leadHref} className="text-blue-300 hover:underline">
               CRM lead →
             </Link>
           ) : null}
           {patientHref ? (
-            <Link href={patientHref} className="text-blue-600 hover:underline">
+            <Link href={patientHref} className="text-blue-300 hover:underline">
               Patient record →
             </Link>
           ) : null}
           {booking.case_id ? (
-            <Link href={`/fi-admin/${tenantId}/cases/${booking.case_id}`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/cases/${booking.case_id}`} className="text-blue-300 hover:underline">
               Case →
             </Link>
           ) : null}
-          <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-600 hover:underline">
+          <Link href={`/fi-admin/${tenantId}/appointments`} className="text-blue-300 hover:underline">
             All appointments
           </Link>
           {booking.booking_type.trim().toLowerCase() === "surgery" ? (
-            <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-600 hover:underline">
+            <Link href={`/fi-admin/${tenantId}/surgery-readiness`} className="text-blue-300 hover:underline">
               Surgery readiness board
             </Link>
           ) : null}
         </div>
       </header>
 
-      <Suspense fallback={<div className="h-16 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
+      <Suspense fallback={<div className="h-16 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
         <AppointmentDetailPreviewBridge
           tenantId={tenantId}
           currentAppointmentId={booking.id}
@@ -118,7 +118,7 @@ export function AppointmentDetailPageView({
         />
       </Suspense>
 
-      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-gray-200 bg-white" aria-hidden />}>
+      <Suspense fallback={<div className="h-10 animate-pulse rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md" aria-hidden />}>
         <AppointmentDetailTabNav tenantId={tenantId} appointmentId={appointmentId} activeTab={activeTab} />
       </Suspense>
 
@@ -128,7 +128,7 @@ export function AppointmentDetailPageView({
             <div className="flex justify-end">
               <button
                 type="button"
-                className="rounded border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
+                className="rounded border border-slate-700 px-3 py-1.5 text-sm hover:bg-white/[0.03]"
                 onClick={() =>
                   slide.openCreateAppointment(
                     buildAppointmentCreatePrefillFromLead({ lead, bookings: [booking] })

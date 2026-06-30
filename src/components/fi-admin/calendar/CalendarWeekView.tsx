@@ -32,15 +32,15 @@ function TimeGutter({ gridConfig }: { gridConfig: BusinessGridConfig }) {
   const bodyH = businessGridBodyHeightPx(gridConfig);
   return (
     <div
-      className="sticky left-0 z-[3] shrink-0 border-r border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
+      className="sticky left-0 z-[3] shrink-0 border-r border-white/[0.08] bg-white/[0.03] dark:border-slate-800 dark:bg-slate-900"
       style={TIME_GUTTER_STYLE}
     >
-      <div className="h-14 border-b border-slate-200 dark:border-slate-800" aria-hidden />
+      <div className="h-14 border-b border-white/[0.08] dark:border-slate-800" aria-hidden />
       <div className="relative" style={{ height: bodyH }}>
         {hours.map((h) => (
           <div
             key={h}
-            className="absolute left-0 right-0 border-t border-slate-100 pr-1 text-right text-[10px] font-medium tabular-nums text-slate-500 dark:border-slate-800 dark:text-slate-400"
+            className="absolute left-0 right-0 border-t border-white/[0.06] pr-1 text-right text-[10px] font-medium tabular-nums text-slate-500 dark:border-slate-800 dark:text-slate-400"
             style={{
               top: (h - gridConfig.dayStartHourUtc) * OPERATIONAL_CAL_PX_PER_HOUR,
               height: OPERATIONAL_CAL_PX_PER_HOUR,
@@ -72,7 +72,7 @@ function SlotDropLayer({
       {Array.from({ length: n }, (_, slotIndex) => (
         <div
           key={slotIndex}
-          className="pointer-events-auto shrink-0 border-b border-slate-100/90 last:border-b-0 dark:border-slate-800/80"
+          className="pointer-events-auto shrink-0 border-b border-white/[0.06] last:border-b-0 dark:border-slate-800/80"
           style={{ height: h }}
           onDragOver={(e) => {
             if (disabled) return;
@@ -141,7 +141,7 @@ export function CalendarWeekView({
     const lane = lanes[0];
     const dayKey = lane.dayKey;
     return (
-      <div className="flex w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <div className="flex w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40 dark:border-slate-800 dark:bg-slate-950">
         <TimeGutter gridConfig={gridConfig} />
         <div className="flex min-w-[720px] flex-1">
           {resourceColumns.map((col) => {
@@ -198,7 +198,7 @@ export function CalendarWeekView({
   }
 
   return (
-    <div className="flex w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+    <div className="flex w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40 dark:border-slate-800 dark:bg-slate-950">
       <TimeGutter gridConfig={gridConfig} />
       <div className="flex min-w-[640px] flex-1">
         {lanes.map((lane) => {

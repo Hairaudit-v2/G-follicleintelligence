@@ -193,24 +193,24 @@ export function QuickCallInBookingModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-call-in-title"
-        className="relative z-[121] m-0 flex max-h-[min(92dvh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:m-4 sm:rounded-2xl"
+        className="relative z-[121] m-0 flex max-h-[min(92dvh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-2xl sm:m-4 sm:rounded-2xl"
       >
-        <div className="flex items-start gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
-          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-800">
+        <div className="flex items-start gap-3 border-b border-white/[0.06] px-4 py-3 sm:px-5">
+          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-200">
             <Phone className="h-5 w-5" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 id="quick-call-in-title" className="text-base font-semibold text-slate-900">
+            <h2 id="quick-call-in-title" className="text-base font-semibold text-slate-100">
               New call-in booking
             </h2>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-slate-400">
               Creates a CRM lead (source Phone), patient shell, and consultation appointment. Times use{" "}
               <span className="font-medium">{tz}</span>.
             </p>
           </div>
           <button
             type="button"
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-40"
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200 disabled:opacity-40"
             onClick={() => !busy && onClose()}
             aria-label="Close"
           >
@@ -222,20 +222,20 @@ export function QuickCallInBookingModal({
           <div className="space-y-3 px-4 py-4 sm:px-5">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className="block text-sm">
-                <span className="font-medium text-slate-800">First name</span>
+                <span className="font-medium text-slate-200">First name</span>
                 <input
                   required
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   autoComplete="given-name"
                 />
               </label>
               <label className="block text-sm">
-                <span className="font-medium text-slate-800">Surname</span>
+                <span className="font-medium text-slate-200">Surname</span>
                 <input
                   required
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
                   autoComplete="family-name"
@@ -243,10 +243,10 @@ export function QuickCallInBookingModal({
               </label>
             </div>
             <label className="block text-sm">
-              <span className="font-medium text-slate-800">Mobile</span>
+              <span className="font-medium text-slate-200">Mobile</span>
               <input
                 required
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
                 autoComplete="tel"
@@ -254,10 +254,10 @@ export function QuickCallInBookingModal({
               />
             </label>
             <label className="block text-sm">
-              <span className="font-medium text-slate-800">Email (optional)</span>
+              <span className="font-medium text-slate-200">Email (optional)</span>
               <input
                 type="email"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
@@ -265,20 +265,20 @@ export function QuickCallInBookingModal({
             </label>
 
             <label className="block text-sm">
-              <span className="font-medium text-slate-800">Start (local)</span>
+              <span className="font-medium text-slate-200">Start (local)</span>
               <input
                 type="datetime-local"
                 required
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                 value={localStart}
                 onChange={(e) => setLocalStart(e.target.value)}
               />
             </label>
 
             <label className="block text-sm">
-              <span className="font-medium text-slate-800">Service / procedure</span>
+              <span className="font-medium text-slate-200">Service / procedure</span>
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                 value={bookingType}
                 onChange={(e) => setBookingType(e.target.value)}
               >
@@ -295,15 +295,15 @@ export function QuickCallInBookingModal({
                     ))}
               </select>
               {selectedCatalog && selectedCatalog.base_price > 0 ? (
-                <p className="mt-1 text-xs text-slate-600">Suggested price: {formatPriceAud(selectedCatalog.base_price)}</p>
+                <p className="mt-1 text-xs text-slate-400">Suggested price: {formatPriceAud(selectedCatalog.base_price)}</p>
               ) : null}
             </label>
 
             {clinics.length > 0 ? (
               <label className="block text-sm">
-                <span className="font-medium text-slate-800">Clinic (optional)</span>
+                <span className="font-medium text-slate-200">Clinic (optional)</span>
                 <select
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                   value={clinicId}
                   onChange={(e) => setClinicId(e.target.value)}
                 >
@@ -319,35 +319,35 @@ export function QuickCallInBookingModal({
 
             {clinicalStaffOptions.length > 0 ? (
               <label className="block text-sm">
-                <span className="font-medium text-slate-800">Clinical provider (optional)</span>
+                <span className="font-medium text-slate-200">Clinical provider (optional)</span>
                 <StaffClinicalSelect
                   tenantId={tenantId}
                   options={clinicalStaffOptions}
                   value={assignedStaffId}
                   onChange={setAssignedStaffId}
                   emptyLabel="—"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                 />
               </label>
             ) : null}
 
             <label className="block text-sm">
-              <span className="font-medium text-slate-800">Notes (optional)</span>
+              <span className="font-medium text-slate-200">Notes (optional)</span>
               <textarea
                 rows={3}
-                className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full resize-y rounded-lg border border-white/[0.08] px-3 py-2 text-sm"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
             </label>
 
-            {error ? <p className="text-sm text-red-700">{error}</p> : null}
+            {error ? <p className="text-sm text-rose-300">{error}</p> : null}
           </div>
 
-          <div className="mt-auto flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-slate-50 px-4 py-3 sm:px-5">
+          <div className="mt-auto flex flex-wrap justify-end gap-2 border-t border-white/[0.06] bg-white/[0.03] px-4 py-3 sm:px-5">
             <button
               type="button"
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+              className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2 text-sm font-medium text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
               disabled={busy}
               onClick={() => onClose()}
             >

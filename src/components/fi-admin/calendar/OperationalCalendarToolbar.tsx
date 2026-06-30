@@ -28,24 +28,24 @@ export function OperationalCalendarToolbar({
   const weekHref = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: "week" }));
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/90 p-3 dark:border-slate-800 dark:bg-slate-900/40 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 dark:border-slate-800 dark:bg-slate-900/40 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href={prev}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+          className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm font-medium text-slate-200 shadow-lg shadow-black/40 hover:bg-white/[0.03] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden />
           Prev
         </Link>
         <Link
           href={today}
-          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+          className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm font-medium text-slate-200 shadow-lg shadow-black/40 hover:bg-white/[0.03] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
         >
           Today
         </Link>
         <Link
           href={next}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+          className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1.5 text-sm font-medium text-slate-200 shadow-lg shadow-black/40 hover:bg-white/[0.03] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
         >
           Next
           <ChevronRight className="h-4 w-4" aria-hidden />
@@ -60,7 +60,7 @@ export function OperationalCalendarToolbar({
             "rounded-lg px-2.5 py-1.5 text-sm font-medium",
             query.view === "week"
               ? "bg-sky-700 text-white shadow-sm dark:bg-sky-600"
-              : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+              : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-200 hover:bg-white/[0.03] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
           )}
         >
           Week
@@ -71,7 +71,7 @@ export function OperationalCalendarToolbar({
             "rounded-lg px-2.5 py-1.5 text-sm font-medium",
             query.view === "day"
               ? "bg-sky-700 text-white shadow-sm dark:bg-sky-600"
-              : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+              : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-200 hover:bg-white/[0.03] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
           )}
         >
           Day
@@ -85,8 +85,8 @@ export function OperationalCalendarToolbar({
           className={cn(
             "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium",
             showFilters
-              ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-              : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+              ? "bg-slate-900 text-white dark:bg-white/[0.06] dark:text-slate-100"
+              : "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-200 hover:bg-white/[0.03] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
           )}
         >
           <Filter className="h-4 w-4" aria-hidden />
@@ -94,7 +94,7 @@ export function OperationalCalendarToolbar({
         </button>
       </div>
 
-      <p className="w-full text-center text-sm font-medium text-slate-800 dark:text-slate-100 sm:w-auto sm:text-right">{rangeTitle}</p>
+      <p className="w-full text-center text-sm font-medium text-slate-200 dark:text-slate-100 sm:w-auto sm:text-right">{rangeTitle}</p>
     </div>
   );
 }

@@ -49,43 +49,43 @@ export function AppointmentListTable({
 
   if (bookings.length === 0) {
     return (
-      <div className="rounded border border-gray-200 bg-white p-8 text-center text-sm text-gray-600">
+      <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-8 text-center text-sm text-slate-400">
         No appointments in this range for the current filters.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
+      <table className="min-w-full divide-y divide-white/[0.08] text-sm">
+        <thead className="bg-white/[0.03]">
           <tr>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">When</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Appointment</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Type</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Provider</th>
-            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">Clinic</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">When</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Appointment</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Type</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Status</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Provider</th>
+            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Clinic</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-white/[0.06]">
           {bookings.map((row) => {
             const href = `/fi-admin/${tenantId}/appointments/${row.id}`;
             const title = row.title?.trim() || bookingTypeLabel(row.booking_type);
             const when = `${fmtTs(row.start_at)} → ${fmtTs(row.end_at)}`;
             const titleCell = slide ? (
-              <AppointmentSlideOverTrigger appointmentId={row.id} className="text-left font-medium text-blue-700 hover:underline">
+              <AppointmentSlideOverTrigger appointmentId={row.id} className="text-left font-medium text-blue-300 hover:underline">
                 {title}
               </AppointmentSlideOverTrigger>
             ) : (
-              <a href={href} className="font-medium text-blue-700 hover:underline">
+              <a href={href} className="font-medium text-blue-300 hover:underline">
                 {title}
               </a>
             );
             return (
               <tr
                 key={row.id}
-                className="hover:bg-gray-50"
+                className="hover:bg-white/[0.03]"
                 onClick={(e) => {
                   if (!slide) return;
                   const t = e.target as HTMLElement;
@@ -93,7 +93,7 @@ export function AppointmentListTable({
                   slide.openAppointment(row.id);
                 }}
               >
-                <td className="whitespace-nowrap px-3 py-2 text-gray-600">{when}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-slate-400">{when}</td>
                 <td className="px-3 py-2">{titleCell}</td>
                 <td className="px-3 py-2">
                   <BookingTypeBadge type={row.booking_type} />
@@ -101,8 +101,8 @@ export function AppointmentListTable({
                 <td className="px-3 py-2">
                   <BookingStatusBadge status={row.booking_status} />
                 </td>
-                <td className="px-3 py-2 text-gray-700">{assigneeLabel(clinicalStaffOptions, userAssignees, row)}</td>
-                <td className="px-3 py-2 text-gray-700">{clinicLabel(clinics, row)}</td>
+                <td className="px-3 py-2 text-slate-300">{assigneeLabel(clinicalStaffOptions, userAssignees, row)}</td>
+                <td className="px-3 py-2 text-slate-300">{clinicLabel(clinics, row)}</td>
               </tr>
             );
           })}

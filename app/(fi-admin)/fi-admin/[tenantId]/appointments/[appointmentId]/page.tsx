@@ -46,11 +46,11 @@ export default async function AppointmentDetailRoutePage({
   if (!payload) {
     return (
       <div className="mx-auto max-w-3xl space-y-4 py-6">
-        <h1 className="text-lg font-semibold text-gray-900">Appointment not found</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="text-lg font-semibold text-slate-100">Appointment not found</h1>
+        <p className="text-sm text-slate-400">
           No appointment <code className="font-mono text-xs">{appointmentId}</code> for this tenant.
         </p>
-        <Link href={`/fi-admin/${tenantId}/appointments`} className="text-sm text-blue-600 hover:underline">
+        <Link href={`/fi-admin/${tenantId}/appointments`} className="text-sm text-blue-300 hover:underline">
           ← Appointments
         </Link>
       </div>

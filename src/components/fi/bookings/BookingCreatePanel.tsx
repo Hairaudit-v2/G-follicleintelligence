@@ -16,7 +16,7 @@ import {
 } from "./bookingFormUtils";
 import { displayCalendarTimezoneSubtitle } from "@/src/lib/calendar/calendarTimezone";
 
-const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
+const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function BookingCreatePanel({
   tenantId,
@@ -148,12 +148,12 @@ export function BookingCreatePanel({
 
   return (
     <div className={card}>
-      <h3 className="text-sm font-semibold text-gray-900">{mode === "create" ? "New booking" : "Edit booking"}</h3>
+      <h3 className="text-sm font-semibold text-slate-100">{mode === "create" ? "New booking" : "Edit booking"}</h3>
       <form className="mt-3 space-y-3" onSubmit={(e) => void onSubmit(e)}>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Type
           <select
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm disabled:bg-gray-100"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm disabled:bg-white/[0.06]"
             value={converted ? bookingType : "consultation"}
             disabled={!converted}
             onChange={(ev) => onProcedureTypeChange(ev.target.value)}
@@ -166,38 +166,38 @@ export function BookingCreatePanel({
           </select>
         </label>
         {!converted ? <p className="text-xs text-gray-500">Only consultation is available before conversion.</p> : null}
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Title
           <input
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             value={title}
             onChange={(ev) => setTitle(ev.target.value)}
           />
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Description
           <textarea
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             rows={2}
             value={description}
             onChange={(ev) => setDescription(ev.target.value)}
           />
         </label>
         <div className="grid gap-2 sm:grid-cols-2">
-          <label className="block text-xs text-gray-600">
+          <label className="block text-xs text-slate-400">
             Start{clinicTz ? ` (${displayCalendarTimezoneSubtitle(clinicTz)})` : ""}
             <input
               type="datetime-local"
-              className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
               value={startLocal}
               onChange={(ev) => setStartLocal(ev.target.value)}
             />
           </label>
-          <label className="block text-xs text-gray-600">
+          <label className="block text-xs text-slate-400">
             End{clinicTz ? ` (${displayCalendarTimezoneSubtitle(clinicTz)})` : ""}
             <input
               type="datetime-local"
-              className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
               value={endLocal}
               onChange={(ev) => setEndLocal(ev.target.value)}
             />
@@ -212,27 +212,27 @@ export function BookingCreatePanel({
             ) : null}
           </label>
         </div>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Timezone override (optional)
           <input
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             value={timezone}
             onChange={(ev) => setTimezone(ev.target.value)}
             placeholder="e.g. Europe/London"
           />
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Location (optional)
           <input
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             value={location}
             onChange={(ev) => setLocation(ev.target.value)}
           />
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Clinic (optional)
           <select
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             value={clinicId}
             onChange={(ev) => setClinicId(ev.target.value)}
           >
@@ -244,10 +244,10 @@ export function BookingCreatePanel({
             ))}
           </select>
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Assigned user (optional)
           <select
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             value={assignee}
             onChange={(ev) => setAssignee(ev.target.value)}
           >
@@ -270,7 +270,7 @@ export function BookingCreatePanel({
           {mode === "edit" ? (
             <button
               type="button"
-              className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50"
+              className="rounded border border-slate-700 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/[0.03]"
               disabled={busy}
               onClick={onCancelEdit}
             >
@@ -278,7 +278,7 @@ export function BookingCreatePanel({
             </button>
           ) : null}
         </div>
-        {feedback ? <p className="text-xs text-red-600">{feedback}</p> : null}
+        {feedback ? <p className="text-xs text-rose-300">{feedback}</p> : null}
       </form>
     </div>
   );

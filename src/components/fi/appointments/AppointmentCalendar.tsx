@@ -272,10 +272,10 @@ export function AppointmentCalendar({
   return (
     <div className="space-y-4">
       {listTruncated ? (
-        <p className="text-xs text-amber-800">Calendar row cap reached — narrow filters or date range.</p>
+        <p className="text-xs text-amber-300">Calendar row cap reached — narrow filters or date range.</p>
       ) : null}
       {conflictMsg ? (
-        <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="alert">
+        <div className="rounded border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200" role="alert">
           {conflictMsg}
           <button type="button" className="ml-2 underline" onClick={() => setConflictMsg(null)}>
             Dismiss
@@ -283,28 +283,28 @@ export function AppointmentCalendar({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-3 rounded border border-gray-200 bg-gray-50 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded border border-white/[0.08] bg-white/[0.03] p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={prev} className="rounded border border-gray-300 bg-white px-2 py-1 text-sm hover:bg-gray-100">
+          <Link href={prev} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]">
             Previous
           </Link>
-          <Link href={todayHref} className="rounded border border-gray-300 bg-white px-2 py-1 text-sm hover:bg-gray-100">
+          <Link href={todayHref} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]">
             Today
           </Link>
-          <Link href={next} className="rounded border border-gray-300 bg-white px-2 py-1 text-sm hover:bg-gray-100">
+          <Link href={next} className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm hover:bg-white/[0.06]">
             Next
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={buildAppointmentsHref(tenantId, { tab: "calendar", view: "day", date: query.dateAnchor })}
-            className={`rounded px-2 py-1 text-sm ${query.view === "day" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white"}`}
+            className={`rounded px-2 py-1 text-sm ${query.view === "day" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500"}`}
           >
             Day
           </Link>
           <Link
             href={buildAppointmentsHref(tenantId, { tab: "calendar", view: "week", date: query.dateAnchor })}
-            className={`rounded px-2 py-1 text-sm ${query.view === "week" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white"}`}
+            className={`rounded px-2 py-1 text-sm ${query.view === "week" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500"}`}
           >
             Week
           </Link>
@@ -313,7 +313,7 @@ export function AppointmentCalendar({
           <button
             type="button"
             onClick={() => setShowFilters((v) => !v)}
-            className={`rounded px-2 py-1 text-sm ${showFilters ? "bg-gray-900 text-white" : "border border-gray-300 bg-white"}`}
+            className={`rounded px-2 py-1 text-sm ${showFilters ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500"}`}
           >
             Filters
           </button>
@@ -325,14 +325,14 @@ export function AppointmentCalendar({
             New appointment
           </button>
         </div>
-        <p className="w-full text-center text-sm text-gray-700 sm:text-right">{rangeTitle} · drag to reschedule</p>
+        <p className="w-full text-center text-sm text-slate-300 sm:text-right">{rangeTitle} · drag to reschedule</p>
       </div>
 
       {showFilters ? (
-        <p className="text-xs text-gray-600">Use the shared filters panel above the tabs for staff, type, and status.</p>
+        <p className="text-xs text-slate-400">Use the shared filters panel above the tabs for staff, type, and status.</p>
       ) : null}
 
-      <div className="flex flex-wrap gap-2 text-[10px] text-gray-600">
+      <div className="flex flex-wrap gap-2 text-[10px] text-slate-400">
         {BOOKING_TYPES.map((t) => {
           const row = serviceForBookingType(catalog, t);
           const chip = bookingCalendarChipSurface(t, row?.color);
@@ -345,15 +345,15 @@ export function AppointmentCalendar({
         })}
       </div>
 
-      <div className="flex w-full overflow-x-auto rounded border border-gray-200 bg-white">
+      <div className="flex w-full overflow-x-auto rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md">
         <div
-          className="sticky left-0 z-10 w-12 shrink-0 border-r border-gray-200 bg-gray-50 text-[10px] text-gray-500"
+          className="sticky left-0 z-10 w-12 shrink-0 border-r border-white/[0.08] bg-white/[0.03] text-[10px] text-gray-500"
           style={{ paddingTop: 48 }}
         >
           {HOURS.map((h) => (
             <div
               key={h}
-              className="border-t border-gray-100 pr-1 text-right"
+              className="border-t border-white/[0.06] pr-1 text-right"
               style={{ height: CALENDAR_GRID_PX_PER_HOUR }}
             >
               {String(h).padStart(2, "0")}:00
@@ -364,8 +364,8 @@ export function AppointmentCalendar({
           {lanes.map((lane) => {
             const events = buckets[lane.dayKey] ?? [];
             return (
-              <div key={lane.dayKey} className="min-w-0 flex-1 border-l border-gray-200">
-                <div className="sticky top-0 z-[3] border-b border-gray-200 bg-gray-50 px-1 py-2 text-center text-[11px] font-medium">
+              <div key={lane.dayKey} className="min-w-0 flex-1 border-l border-white/[0.08]">
+                <div className="sticky top-0 z-[3] border-b border-white/[0.08] bg-white/[0.03] px-1 py-2 text-center text-[11px] font-medium">
                   <div>{calendarDayHeading(lane)}</div>
                   <div className="text-[10px] font-normal text-gray-500">UTC</div>
                 </div>
@@ -375,7 +375,7 @@ export function AppointmentCalendar({
                       key={h}
                       type="button"
                       aria-label={`New appointment ${lane.dayKey} ${h}:00`}
-                      className="absolute left-0 right-0 border-t border-gray-100 hover:bg-primary/5"
+                      className="absolute left-0 right-0 border-t border-white/[0.06] hover:bg-primary/5"
                       style={{ top: h * CALENDAR_GRID_PX_PER_HOUR, height: CALENDAR_GRID_PX_PER_HOUR }}
                       onClick={() => openCreateFromSlot(lane.dayKey, h)}
                     />

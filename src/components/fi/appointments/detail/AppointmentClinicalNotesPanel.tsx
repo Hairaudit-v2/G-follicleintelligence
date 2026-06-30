@@ -37,20 +37,20 @@ export function AppointmentClinicalNotesPanel({
         clinicalScalesSummary={clinicalScalesSummary}
       />
       <section className={appointmentCardClass}>
-        <h2 className="text-sm font-semibold text-gray-900">Appointment clinical notes</h2>
-        <p className="mt-1 text-xs text-gray-600">
+        <h2 className="text-sm font-semibold text-slate-100">Appointment clinical notes</h2>
+        <p className="mt-1 text-xs text-slate-400">
           Free-text notes stored on this booking (consultation findings, intra-op observations, plan for next visit).
         </p>
         {canMutate ? (
           <form className="mt-3 space-y-2" onSubmit={onSaveDescription}>
             <textarea
-              className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+              className="w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
               rows={8}
               value={description}
               onChange={(e) => onDescriptionChange(e.target.value)}
               placeholder="Clinical notes for this appointment…"
             />
-            {error ? <p className="text-xs text-red-700">{error}</p> : null}
+            {error ? <p className="text-xs text-rose-300">{error}</p> : null}
             <button
               type="submit"
               disabled={busy}
@@ -60,7 +60,7 @@ export function AppointmentClinicalNotesPanel({
             </button>
           </form>
         ) : (
-          <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">{description.trim() || "—"}</p>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-slate-300">{description.trim() || "—"}</p>
         )}
       </section>
     </div>

@@ -56,9 +56,9 @@ function formatOsWhenSummary(startIso: string, endIso: string, tz: string): stri
 }
 
 function anchorSummary(tenantId: string, row: FiBookingRow, variant: "default" | "fiOs"): ReactNode {
-  const link = variant === "fiOs" ? "text-cyan-300 hover:text-cyan-200 hover:underline" : "text-blue-600 hover:underline";
-  const muted = variant === "fiOs" ? "text-slate-400" : "text-gray-700";
-  const code = variant === "fiOs" ? "rounded bg-white/[0.06] px-0.5 text-xs text-slate-200" : "rounded bg-gray-100 px-0.5 text-xs";
+  const link = variant === "fiOs" ? "text-cyan-300 hover:text-cyan-200 hover:underline" : "text-blue-300 hover:underline";
+  const muted = variant === "fiOs" ? "text-slate-400" : "text-slate-300";
+  const code = variant === "fiOs" ? "rounded bg-white/[0.06] px-0.5 text-xs text-slate-200" : "rounded bg-white/[0.06] px-0.5 text-xs";
   const parts: ReactNode[] = [];
   if (row.lead_id) {
     parts.push(
@@ -294,7 +294,7 @@ export function BookingCalendarDrawer({
         className={
           os
             ? "flex h-full w-full max-w-sm flex-col overflow-hidden border-l border-white/[0.08] bg-[#070f1a]/96 text-slate-100 shadow-2xl shadow-black/60 backdrop-blur-xl"
-            : "h-full w-full max-w-md overflow-y-auto bg-white shadow-xl"
+            : "h-full w-full max-w-md overflow-y-auto bg-[#0F1629]/80 backdrop-blur-md shadow-xl"
         }
         role="dialog"
         aria-label="Booking details"
@@ -549,17 +549,17 @@ export function BookingCalendarDrawer({
           </>
         ) : (
           <>
-            <div className="flex items-center justify-between gap-2 border-b border-gray-200 px-4 py-3">
-              <h2 className="text-sm font-semibold text-gray-900">{row.title?.trim() || "Booking"}</h2>
-              <button type="button" className="text-sm text-gray-600 hover:text-gray-900" onClick={onClose}>
+            <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
+              <h2 className="text-sm font-semibold text-slate-100">{row.title?.trim() || "Booking"}</h2>
+              <button type="button" className="text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
                 Close
               </button>
             </div>
 
-            <div className="space-y-4 p-4 text-sm text-gray-800">
+            <div className="space-y-4 p-4 text-sm text-slate-200">
               {calendarOsEvent ? (
                 <>
-                  <p className="rounded border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+                  <p className="rounded border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-200">
                     CalendarOS event — read-only display. No edits from the calendar UI in this phase.
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -568,7 +568,7 @@ export function BookingCalendarDrawer({
                   </div>
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">Title</p>
-                    <p className="mt-1 text-base font-medium text-gray-900">{headerName}</p>
+                    <p className="mt-1 text-base font-medium text-slate-100">{headerName}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">When</p>
@@ -590,7 +590,7 @@ export function BookingCalendarDrawer({
                     <div>
                       <p className="text-xs font-medium uppercase text-gray-500">Google Meet</p>
                       <p className="mt-1">
-                        <a href={googleMeetUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        <a href={googleMeetUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:underline">
                           Join meeting
                         </a>
                       </p>
@@ -602,7 +602,7 @@ export function BookingCalendarDrawer({
                   </div>
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">Calendar id</p>
-                    <p className="mt-1 font-mono text-xs text-gray-700">{calendarOsCalendarId?.trim() || "—"}</p>
+                    <p className="mt-1 font-mono text-xs text-slate-300">{calendarOsCalendarId?.trim() || "—"}</p>
                   </div>
                   {calendarOsExternalEventId?.trim() ? (
                     <div>
@@ -623,7 +623,7 @@ export function BookingCalendarDrawer({
               {patientSummary?.trim() ? (
                 <div>
                   <p className="text-xs font-medium uppercase text-gray-500">Patient / anchor</p>
-                  <p className="mt-1 text-base font-medium text-gray-900">{patientSummary.trim()}</p>
+                  <p className="mt-1 text-base font-medium text-slate-100">{patientSummary.trim()}</p>
                 </div>
               ) : null}
 
@@ -649,22 +649,22 @@ export function BookingCalendarDrawer({
 
               <div>
                 <p className="text-xs font-medium uppercase text-gray-500">Notes</p>
-                <p className="mt-1 whitespace-pre-wrap text-gray-700">{row.description?.trim() || "—"}</p>
+                <p className="mt-1 whitespace-pre-wrap text-slate-300">{row.description?.trim() || "—"}</p>
               </div>
 
               {cancelled ? (
-                <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
                   <p className="font-medium">Cancelled</p>
                   {row.cancellation_reason?.trim() ? <p className="mt-2">Reason: {row.cancellation_reason}</p> : null}
                 </div>
               ) : null}
 
-              <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+              <div className="flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
                 {!cancelled && !completed ? (
                   <>
                     <button
                       type="button"
-                      className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                      className="rounded border border-slate-700 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                       disabled={busy}
                       onClick={() => {
                         onEdit(row);
@@ -675,7 +675,7 @@ export function BookingCalendarDrawer({
                     </button>
                     <button
                       type="button"
-                      className="rounded border border-emerald-600 px-3 py-1.5 text-sm text-emerald-800 hover:bg-emerald-50 disabled:opacity-50"
+                      className="rounded border border-emerald-600 px-3 py-1.5 text-sm text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50"
                       disabled={busy}
                       onClick={() => void onComplete()}
                     >
@@ -683,7 +683,7 @@ export function BookingCalendarDrawer({
                     </button>
                     <button
                       type="button"
-                      className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-800 hover:bg-red-50 disabled:opacity-50"
+                      className="rounded border border-red-300 px-3 py-1.5 text-sm text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
                       disabled={busy}
                       onClick={() => void onCancel()}
                     >
@@ -696,7 +696,7 @@ export function BookingCalendarDrawer({
                   <p className="text-xs text-gray-500">Cancelled bookings are locked.</p>
                 )}
               </div>
-              {feedback ? <p className="text-sm text-red-600">{feedback}</p> : null}
+              {feedback ? <p className="text-sm text-rose-300">{feedback}</p> : null}
                 </>
               )}
             </div>

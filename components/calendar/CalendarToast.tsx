@@ -71,15 +71,15 @@ export function CalendarToastProvider({ children }: { children: ReactNode }) {
             className={cn(
               "pointer-events-auto flex items-start gap-2 rounded-xl border px-3 py-2.5 shadow-lg backdrop-blur-sm transition-all animate-in slide-in-from-bottom-2 fade-in",
               toast.tone === "success"
-                ? "border-emerald-200/90 bg-emerald-50/95 text-emerald-950"
-                : "border-rose-200/90 bg-rose-50/95 text-rose-950"
+                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"
+                : "border-rose-500/20 bg-rose-500/10 text-rose-200"
             )}
             role="status"
           >
             {toast.tone === "success" ? (
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" aria-hidden />
             ) : (
-              <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" aria-hidden />
+              <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-300" aria-hidden />
             )}
             <p className="min-w-0 flex-1 text-sm font-medium leading-snug">{toast.message}</p>
             {toast.action ? (

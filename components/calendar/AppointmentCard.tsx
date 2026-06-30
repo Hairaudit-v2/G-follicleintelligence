@@ -463,7 +463,7 @@ function AppointmentCardInner({
       style={dragStyle}
       className={cn(
         "group relative overflow-hidden rounded-xl text-left ring-1 ring-inset ring-white/[0.04]",
-        "border border-slate-200/90 bg-white/95 shadow-sm backdrop-blur-sm",
+        "border border-white/[0.08] bg-white/95 shadow-sm backdrop-blur-sm",
         "transition-all duration-200 ease-out",
         "hover:-translate-y-px hover:shadow-md",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0f172a]",
@@ -512,10 +512,10 @@ function AppointmentCardInner({
           aria-label="Drag appointment"
           className={cn(
             "absolute left-0.5 top-0.5 z-20 flex cursor-grab items-center justify-center rounded-md text-slate-400",
-            "touch-none transition-opacity hover:text-slate-600 active:cursor-grabbing",
+            "touch-none transition-opacity hover:text-slate-400 active:cursor-grabbing",
             "dark:text-slate-500 dark:hover:text-slate-300",
             touchFriendly
-              ? "fi-calendar-touch-target h-10 w-9 bg-white/80 opacity-100 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-800/90 dark:ring-[#1e2937]"
+              ? "fi-calendar-touch-target h-10 w-9 bg-white/80 opacity-100 shadow-sm ring-1 ring-white/[0.08] dark:bg-slate-800/90 dark:ring-[#1e2937]"
               : "h-5 w-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
             isDragging && "opacity-100"
           )}
@@ -558,7 +558,7 @@ function AppointmentCardInner({
             ) : null}
             <AvatarFallback
               className={cn(
-                "bg-slate-100 text-[10px] font-semibold uppercase tracking-wide text-slate-600",
+                "bg-white/[0.06] text-[10px] font-semibold uppercase tracking-wide text-slate-400",
                 "dark:bg-slate-800 dark:text-slate-300"
               )}
             >
@@ -573,7 +573,7 @@ function AppointmentCardInner({
             <div className="min-w-0 flex-1">
               <p
                 className={cn(
-                  "truncate font-bold tracking-tight text-slate-900 dark:text-slate-50",
+                  "truncate font-bold tracking-tight text-slate-100 dark:text-slate-50",
                   nameSize
                 )}
               >
@@ -587,12 +587,12 @@ function AppointmentCardInner({
                     strokeWidth={2}
                     aria-hidden
                   />
-                  <p className={cn("truncate font-semibold text-slate-700 dark:text-slate-200", textSize)}>
+                  <p className={cn("truncate font-semibold text-slate-300 dark:text-slate-200", textSize)}>
                     {procedureLabel}
                   </p>
                 </div>
               ) : (
-                <p className={cn("truncate font-medium text-slate-600 dark:text-slate-400", textSize)}>
+                <p className={cn("truncate font-medium text-slate-400 dark:text-slate-400", textSize)}>
                   {procedureLabel}
                 </p>
               )}

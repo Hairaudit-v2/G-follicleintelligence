@@ -1,2 +1,2 @@
 /** Matches CRM slide-over card chrome (`crmLeadCardClass`). */
-export const appointmentCardClass = "rounded border border-gray-200 bg-white p-3 shadow-sm";
+export const appointmentCardClass = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40";

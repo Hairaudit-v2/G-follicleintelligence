@@ -147,7 +147,7 @@ export function CalendarRightPanel({
     return (
       <aside
         className={cn(
-          "flex w-12 shrink-0 flex-col items-center gap-3 border-l border-slate-200/80 bg-white py-4",
+          "flex w-12 shrink-0 flex-col items-center gap-3 border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md py-4",
           className
         )}
         aria-label="Calendar insights panel"
@@ -155,7 +155,7 @@ export function CalendarRightPanel({
         <button
           type="button"
           onClick={() => setCollapsed(false)}
-          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="rounded-lg p-2 text-slate-500 transition hover:bg-white/[0.06] hover:text-slate-200"
           aria-label="Expand insights panel"
         >
           <PanelRightOpen className="h-5 w-5" />
@@ -166,7 +166,7 @@ export function CalendarRightPanel({
             setTab("search");
             setCollapsed(false);
           }}
-          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="rounded-lg p-2 text-slate-500 transition hover:bg-white/[0.06] hover:text-slate-200"
           aria-label="Patient search"
         >
           <Search className="h-5 w-5" />
@@ -177,7 +177,7 @@ export function CalendarRightPanel({
             setTab("stats");
             setCollapsed(false);
           }}
-          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="rounded-lg p-2 text-slate-500 transition hover:bg-white/[0.06] hover:text-slate-200"
           aria-label="Daily stats"
         >
           <BarChart3 className="h-5 w-5" />
@@ -188,17 +188,17 @@ export function CalendarRightPanel({
 
   return (
     <aside
-      className={cn("flex w-[17rem] shrink-0 flex-col border-l border-slate-200/80 bg-white", className)}
+      className={cn("flex w-[17rem] shrink-0 flex-col border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md", className)}
       aria-label="Calendar insights panel"
     >
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200/70 px-4 py-3">
-        <div className="inline-flex rounded-lg border border-slate-200/90 bg-slate-50 p-0.5">
+      <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
+        <div className="inline-flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
           <button
             type="button"
             onClick={() => setTab("search")}
             className={cn(
               "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-              tab === "search" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
+              tab === "search" ? "bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg shadow-black/40" : "text-slate-500 hover:text-slate-200"
             )}
           >
             Search
@@ -208,7 +208,7 @@ export function CalendarRightPanel({
             onClick={() => setTab("stats")}
             className={cn(
               "rounded-md px-2.5 py-1 text-xs font-semibold transition",
-              tab === "stats" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
+              tab === "stats" ? "bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg shadow-black/40" : "text-slate-500 hover:text-slate-200"
             )}
           >
             Stats
@@ -217,7 +217,7 @@ export function CalendarRightPanel({
         <button
           type="button"
           onClick={() => setCollapsed(true)}
-          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-white/[0.06] hover:text-slate-200"
           aria-label="Collapse insights panel"
         >
           <PanelRightClose className="h-4 w-4" />
@@ -242,7 +242,7 @@ export function CalendarRightPanel({
                   value={localQ}
                   onChange={(e) => setLocalQ(e.target.value)}
                   placeholder="Name, procedure, status…"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-300 focus:bg-white focus:ring-2 focus:ring-sky-400/20"
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-300 focus:bg-[#0F1629]/80 backdrop-blur-md focus:ring-2 focus:ring-sky-400/20"
                   autoComplete="off"
                 />
               </div>
@@ -257,7 +257,7 @@ export function CalendarRightPanel({
             <button
               type="button"
               onClick={openGlobalSearch}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              className="w-full rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-white/[0.03]"
             >
               Open workspace search (⌘K)
             </button>
@@ -269,9 +269,9 @@ export function CalendarRightPanel({
                   {quickMatches.map((b) => (
                     <li
                       key={b.id}
-                      className="rounded-lg border border-slate-200/80 bg-slate-50/60 px-2.5 py-2 text-xs text-slate-700"
+                      className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 text-xs text-slate-300"
                     >
-                      <p className="truncate font-semibold text-slate-900">
+                      <p className="truncate font-semibold text-slate-100">
                         {bookingDisplay[b.id]?.anchorLabel ?? b.title ?? "Booking"}
                       </p>
                       <p className="mt-0.5 truncate text-slate-500">
@@ -287,7 +287,7 @@ export function CalendarRightPanel({
           <div className="space-y-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Today</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{stats.total}</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-100">{stats.total}</p>
               <p className="text-xs text-slate-500">appointments scheduled</p>
             </div>
 
@@ -302,10 +302,10 @@ export function CalendarRightPanel({
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-xl border border-slate-200/80 bg-slate-50/50 px-3 py-2.5"
+                  className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5"
                 >
                   <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</dt>
-                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-slate-900">{item.value}</dd>
+                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-slate-100">{item.value}</dd>
                 </div>
               ))}
             </dl>
@@ -313,11 +313,11 @@ export function CalendarRightPanel({
         )}
       </div>
 
-      <div className="border-t border-slate-200/70 px-4 py-3">
+      <div className="border-t border-white/[0.08] px-4 py-3">
         <button
           type="button"
           onClick={() => setCollapsed(true)}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-200"
         >
           <ChevronRight className="h-3.5 w-3.5" aria-hidden />
           Collapse

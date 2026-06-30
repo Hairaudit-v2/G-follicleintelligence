@@ -67,16 +67,16 @@ function QaRowView({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2 border-b border-slate-200/80 py-3 last:border-b-0 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex flex-col gap-2 border-b border-white/[0.08] py-3 last:border-b-0 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-medium text-slate-900">{row.title}</p>
+          <p className="text-sm font-medium text-slate-100">{row.title}</p>
           <FiStatusBadge tone={statusTone(effectiveStatus)} appearance="pill" density="compact">
             {statusLabel(effectiveStatus)}
           </FiStatusBadge>
         </div>
         {row.description ? <p className="text-xs text-slate-500">{row.description}</p> : null}
-        {row.detail ? <p className="text-sm leading-relaxed text-slate-600">{row.detail}</p> : null}
+        {row.detail ? <p className="text-sm leading-relaxed text-slate-400">{row.detail}</p> : null}
       </div>
       {children ? <div className="flex shrink-0 flex-wrap items-center gap-2 sm:pt-0.5">{children}</div> : null}
     </div>
@@ -203,33 +203,33 @@ export function CalendarTestingPanel({
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
             >
               <RefreshCw className="h-4 w-4" aria-hidden />
               Refresh probes
             </button>
             <Link
               href={`${base}/appointments`}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
             >
               Appointments
             </Link>
             <Link
               href={`${base}/staff`}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
             >
               Staff
             </Link>
             <Link
               href={`${base}/services`}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
             >
               Services
             </Link>
             {showCrmNav ? (
               <Link
                 href={`${base}/crm`}
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-lg shadow-black/40 transition hover:border-slate-700 hover:bg-white/[0.03] focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
               >
                 CRM
               </Link>
@@ -238,19 +238,19 @@ export function CalendarTestingPanel({
         }
       />
 
-      <FiCard className="border-sky-200/80 bg-sky-50/40">
+      <FiCard className="border-cyan-400/30 bg-cyan-500/10">
         <div className="flex gap-2">
-          <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-sky-700" aria-hidden />
-          <div className="min-w-0 text-sm text-sky-950">
-            <p className="font-semibold text-sky-900">Internal UAT only</p>
-            <p className="mt-1 leading-relaxed text-sky-950/90">
+          <FlaskConical className="mt-0.5 h-5 w-5 shrink-0 text-cyan-300" aria-hidden />
+          <div className="min-w-0 text-sm text-cyan-200">
+            <p className="font-semibold text-cyan-200">Internal UAT only</p>
+            <p className="mt-1 leading-relaxed text-cyan-200">
               The consultation smoke test creates a real booking and immediately cancels it (audit trail may still list the event). Manual checklist progress is stored in{" "}
               <code className="rounded bg-white/80 px-1 font-mono text-xs">localStorage</code> for this browser — not synced to the server. Public booking, SMS, and payments are out of scope here.
             </p>
             <button
               type="button"
               onClick={clearManual}
-              className="mt-2 text-xs font-semibold text-sky-800 underline decoration-sky-400/80 underline-offset-2 hover:text-sky-950"
+              className="mt-2 text-xs font-semibold text-cyan-200 underline decoration-sky-400/80 underline-offset-2 hover:text-cyan-200"
             >
               Clear saved manual checklist
             </button>
@@ -259,19 +259,19 @@ export function CalendarTestingPanel({
       </FiCard>
 
       {uatSeedEnabled ? (
-        <FiCard className="border-amber-200/80 bg-amber-50/30">
-          <h2 className="text-base font-semibold text-amber-950">Optional demo seed (dev / staging)</h2>
-          <p className="mt-1 text-sm text-amber-950/90">
+        <FiCard className="border-amber-400/20 bg-amber-400/10">
+          <h2 className="text-base font-semibold text-amber-200">Optional demo seed (dev / staging)</h2>
+          <p className="mt-1 text-sm text-amber-200">
             Creates up to three schedulable staff rows, three catalog services (consultation / PRP / surgery), and sample
             bookings when a CRM lead with <code className="font-mono text-xs">person_id</code> and at least one clinic exist.
             Requires tenant <strong>admin</strong> or <strong>fi_admin</strong>, or a valid <code className="font-mono text-xs">FI_ADMIN_API_KEY</code> in the field below. Idempotent for matching staff names and UAT-titled bookings.
           </p>
-          <label className="mt-3 block text-xs font-medium text-amber-950">
+          <label className="mt-3 block text-xs font-medium text-amber-200">
             FI Admin API key (optional)
             <input
               type="password"
               autoComplete="off"
-              className="mt-1 w-full max-w-md rounded border border-amber-200 bg-white px-2 py-1.5 text-sm font-mono"
+              className="mt-1 w-full max-w-md rounded border border-amber-400/20 bg-[#0F1629]/80 backdrop-blur-md px-2 py-1.5 text-sm font-mono"
               value={seedAdminKey}
               onChange={(e) => setSeedAdminKey(e.target.value)}
             />
@@ -283,14 +283,14 @@ export function CalendarTestingPanel({
               onClick={onUatSeed}
               className={cn(
                 "rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2",
-                seedBusy ? "cursor-not-allowed bg-slate-200 text-slate-500" : "bg-amber-700 text-white hover:bg-amber-800"
+                seedBusy ? "cursor-not-allowed bg-white/[0.08] text-slate-500" : "bg-amber-700 text-white hover:bg-amber-800"
               )}
             >
               {seedBusy ? "Seeding…" : "Run UAT seed"}
             </button>
           </div>
           {seedLines?.length ? (
-            <ul className={cn("mt-3 list-inside list-disc space-y-1 text-sm", seedOk ? "text-emerald-900" : "text-rose-900")}>
+            <ul className={cn("mt-3 list-inside list-disc space-y-1 text-sm", seedOk ? "text-emerald-300" : "text-rose-300")}>
               {seedLines.map((line, i) => (
                 <li key={`${i}-${line}`}>{line}</li>
               ))}
@@ -301,14 +301,14 @@ export function CalendarTestingPanel({
 
       {sections.map((section) => (
         <FiCard key={section.id}>
-          <div className="flex items-start gap-2 border-b border-slate-200/90 pb-3">
+          <div className="flex items-start gap-2 border-b border-white/[0.08] pb-3">
             <ClipboardCheck className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" aria-hidden />
             <div>
-              <h2 className="text-base font-semibold text-slate-900">{section.title}</h2>
-              {section.description ? <p className="mt-1 text-sm text-slate-600">{section.description}</p> : null}
+              <h2 className="text-base font-semibold text-slate-100">{section.title}</h2>
+              {section.description ? <p className="mt-1 text-sm text-slate-400">{section.description}</p> : null}
             </div>
           </div>
-          <div className="mt-1 divide-y divide-slate-100">
+          <div className="mt-1 divide-y divide-white/[0.06]">
             {section.rows.map((r) => {
               const eff = effectiveStatusFor(section.id, r);
               const isSmoke = r.id === "probe_valid_create";
@@ -322,7 +322,7 @@ export function CalendarTestingPanel({
                       onClick={onSmokeTest}
                       className={cn(
                         "rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2",
-                        smokeBusy ? "cursor-not-allowed bg-slate-200 text-slate-500" : "bg-sky-600 text-white hover:bg-sky-700"
+                        smokeBusy ? "cursor-not-allowed bg-white/[0.08] text-slate-500" : "bg-sky-600 text-white hover:bg-sky-700"
                       )}
                     >
                       {smokeBusy ? "Running…" : "Run smoke test"}
@@ -333,28 +333,28 @@ export function CalendarTestingPanel({
                       <button
                         type="button"
                         onClick={() => setWorkflowStatus(r.id, "ready")}
-                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
+                        className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/15"
                       >
                         Mark ready
                       </button>
                       <button
                         type="button"
                         onClick={() => setWorkflowStatus(r.id, "warning")}
-                        className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+                        className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-200 hover:bg-amber-400/15"
                       >
                         Warning
                       </button>
                       <button
                         type="button"
                         onClick={() => setWorkflowStatus(r.id, "failed")}
-                        className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-900 hover:bg-rose-100"
+                        className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-300 hover:bg-rose-500/15"
                       >
                         Failed
                       </button>
                       <button
                         type="button"
                         onClick={() => setWorkflowStatus(r.id, "not_tested")}
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        className="rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2.5 py-1 text-xs font-semibold text-slate-300 hover:bg-white/[0.03]"
                       >
                         Reset
                       </button>
@@ -365,7 +365,7 @@ export function CalendarTestingPanel({
             })}
           </div>
           {section.id === "validation" && smokeMessage ? (
-            <p className={cn("mt-3 text-sm", smokeOk ? "text-emerald-800" : "text-rose-800")} role="status">
+            <p className={cn("mt-3 text-sm", smokeOk ? "text-emerald-300" : "text-rose-300")} role="status">
               {smokeMessage}
             </p>
           ) : null}

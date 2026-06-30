@@ -16,14 +16,14 @@ export function AppointmentClinicalSection({
     <section className={appointmentCardClass}>
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Clinical context</h3>
       {clinicalScalesSummary ? (
-        <p className="text-sm text-gray-900">{clinicalScalesSummary}</p>
+        <p className="text-sm text-slate-100">{clinicalScalesSummary}</p>
       ) : (
-        <p className="text-sm text-gray-600">Link a patient to show Norwood / Ludwig summary.</p>
+        <p className="text-sm text-slate-400">Link a patient to show Norwood / Ludwig summary.</p>
       )}
-      {clinicalLine ? <p className="mt-2 text-xs text-gray-700">{clinicalLine}</p> : null}
+      {clinicalLine ? <p className="mt-2 text-xs text-slate-300">{clinicalLine}</p> : null}
       {surgeryPlan ? (
-        <div className="mt-3 rounded border border-gray-100 bg-gray-50 p-2 text-xs text-gray-800">
-          <p className="font-medium text-gray-900">Case surgery plan</p>
+        <div className="mt-3 rounded border border-white/[0.06] bg-white/[0.03] p-2 text-xs text-slate-200">
+          <p className="font-medium text-slate-100">Case surgery plan</p>
           {surgeryPlan.planned_procedure_type ? (
             <p className="mt-1">Procedure: {surgeryPlan.planned_procedure_type}</p>
           ) : null}

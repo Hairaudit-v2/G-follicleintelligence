@@ -581,7 +581,7 @@ function WeekViewInner({
   if (usesProviderColumns(view) && !primaryLane) {
     return (
       <div
-        className="rounded-2xl border border-dashed border-slate-200 px-4 py-12"
+        className="rounded-2xl border border-dashed border-white/[0.08] px-4 py-12"
         style={{ backgroundColor: "var(--fi-cal-ws-grid-bg, #0f172a)" }}
       >
         <CalendarEmptyState preset="day" title="No day selected" description="Pick a date to load the schedule." />
@@ -592,7 +592,7 @@ function WeekViewInner({
   if (columnsForView.length === 0) {
     return (
       <div
-        className="rounded-2xl border border-dashed border-slate-200 px-4 py-12"
+        className="rounded-2xl border border-dashed border-white/[0.08] px-4 py-12"
         style={{ backgroundColor: "var(--fi-cal-ws-grid-bg, #0f172a)" }}
       >
         <CalendarEmptyState

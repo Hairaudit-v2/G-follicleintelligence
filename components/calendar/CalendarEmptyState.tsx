@@ -70,13 +70,13 @@ export function CalendarEmptyState({
     >
       <span
         className={cn(
-          "mb-3 inline-flex items-center justify-center rounded-2xl bg-slate-100 text-slate-500 ring-1 ring-slate-200/80",
+          "mb-3 inline-flex items-center justify-center rounded-2xl bg-white/[0.06] text-slate-500 ring-1 ring-white/[0.08]",
           compact ? "h-10 w-10" : "h-12 w-12"
         )}
       >
         <Icon className={cn(compact ? "h-5 w-5" : "h-6 w-6")} strokeWidth={1.75} aria-hidden />
       </span>
-      <p className={cn("font-semibold tracking-tight text-slate-800", compact ? "text-xs" : "text-sm")}>
+      <p className={cn("font-semibold tracking-tight text-slate-200", compact ? "text-xs" : "text-sm")}>
         {heading}
       </p>
       {body ? (

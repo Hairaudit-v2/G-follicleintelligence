@@ -248,17 +248,17 @@ function AppointmentSlideOverShell({
       }}
     >
       <aside
-        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-gray-200 bg-white shadow-xl sm:max-w-lg"
+        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-xl sm:max-w-lg"
         role="dialog"
         aria-modal="true"
         aria-label={createPrefill ? "New appointment" : "Appointment preview"}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 px-4 py-3">
-          <h2 className="truncate text-sm font-semibold text-gray-900">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
+          <h2 className="truncate text-sm font-semibold text-slate-100">
             {createPrefill ? "New appointment" : "Appointment preview"}
           </h2>
-          <button type="button" className="shrink-0 text-sm text-gray-600 hover:text-gray-900" onClick={onClose}>
+          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
             Close
           </button>
         </div>
@@ -839,16 +839,16 @@ export function AppointmentSlideOverPanel({
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="min-w-0">
             {booking ? (
-              <Link href={href} className="text-xs text-blue-600 hover:underline" onClick={() => onClose()}>
+              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
                 Open full page →
               </Link>
             ) : null}
           </div>
         </div>
       ) : null}
-      {loading ? <p className="text-gray-600">Loading…</p> : null}
+      {loading ? <p className="text-slate-400">Loading…</p> : null}
       {loadError ? (
-        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900" role="alert">
+        <div className="rounded border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300" role="alert">
           {loadError}
         </div>
       ) : null}
@@ -921,9 +921,9 @@ export function AppointmentSlideOverPanel({
               />
 
               {booking.description?.trim() ? (
-                <section className="rounded border border-gray-200 bg-white p-3 shadow-sm">
+                <section className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Appointment notes</h3>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">{booking.description}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">{booking.description}</p>
                 </section>
               ) : null}
 
@@ -1017,9 +1017,9 @@ export function AppointmentSlideOverPanel({
               />
 
               {cancelled && booking.cancellation_reason?.trim() ? (
-                <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
                   <p className="font-medium">Cancelled</p>
-                  <p className="mt-1 text-gray-800">{booking.cancellation_reason}</p>
+                  <p className="mt-1 text-slate-200">{booking.cancellation_reason}</p>
                 </div>
               ) : null}
         </div>
@@ -1038,22 +1038,22 @@ export function AppointmentSlideOverPanel({
       }}
     >
       <aside
-        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-gray-200 bg-white shadow-xl sm:max-w-lg"
+        className="flex h-full max-h-[100dvh] w-full flex-col overflow-hidden border-l border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-xl sm:max-w-lg"
         role="dialog"
         aria-modal="true"
         aria-label="Appointment preview"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-200 px-4 py-3">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-gray-900">Appointment preview</h2>
+            <h2 className="truncate text-sm font-semibold text-slate-100">Appointment preview</h2>
             {booking ? (
-              <Link href={href} className="text-xs text-blue-600 hover:underline" onClick={() => onClose()}>
+              <Link href={href} className="text-xs text-blue-300 hover:underline" onClick={() => onClose()}>
                 Open full page →
               </Link>
             ) : null}
           </div>
-          <button type="button" className="shrink-0 text-sm text-gray-600 hover:text-gray-900" onClick={onClose}>
+          <button type="button" className="shrink-0 text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
             Close
           </button>
         </div>

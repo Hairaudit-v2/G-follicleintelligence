@@ -44,22 +44,22 @@ export function AppointmentViewTabs({
   const tab = query.tab;
 
   return (
-    <div className="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm shadow-sm">
+    <div className="inline-flex rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-0.5 text-sm shadow-lg shadow-black/40">
       <Link
         href={calendarHref}
-        className={`rounded-md px-3 py-1.5 font-medium ${tab === "calendar" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+        className={`rounded-md px-3 py-1.5 font-medium ${tab === "calendar" ? "bg-gray-900 text-white" : "text-slate-300 hover:bg-white/[0.03]"}`}
       >
         Calendar
       </Link>
       <Link
         href={listHref}
-        className={`rounded-md px-3 py-1.5 font-medium ${tab === "list" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+        className={`rounded-md px-3 py-1.5 font-medium ${tab === "list" ? "bg-gray-900 text-white" : "text-slate-300 hover:bg-white/[0.03]"}`}
       >
         List
       </Link>
       <Link
         href={todayHref}
-        className={`rounded-md px-3 py-1.5 font-medium ${tab === "today" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50"}`}
+        className={`rounded-md px-3 py-1.5 font-medium ${tab === "today" ? "bg-gray-900 text-white" : "text-slate-300 hover:bg-white/[0.03]"}`}
       >
         Today
       </Link>

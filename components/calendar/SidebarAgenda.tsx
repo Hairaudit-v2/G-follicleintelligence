@@ -163,15 +163,15 @@ function AgendaMiniCard({
   const tzKey = normalizeCalendarTimezone(clinicTimeZone ?? booking.timezone);
 
   const className = cn(
-    "group relative w-full overflow-hidden rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-left shadow-sm transition",
-    onClick && "hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
+    "group relative w-full overflow-hidden rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2.5 text-left shadow-lg shadow-black/40 transition",
+    onClick && "hover:border-slate-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
   );
 
   const inner = (
     <>
       <span aria-hidden className={cn("absolute inset-y-2 left-0 w-1 rounded-full", accent)} />
       <div className="pl-2">
-        <p className="truncate text-[13px] font-semibold tracking-tight text-slate-900">{label}</p>
+        <p className="truncate text-[13px] font-semibold tracking-tight text-slate-100">{label}</p>
         <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">{procedure}</p>
         <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px] text-slate-500">
           <span className="inline-flex items-center gap-1 tabular-nums">
@@ -179,7 +179,7 @@ function AgendaMiniCard({
             {formatIsoTimeNumericInTimezone(booking.start_at, tzKey)}
             {durMin > 0 ? ` · ${durMin}m` : ""}
           </span>
-          <span className="truncate font-medium text-slate-600">{bookingStatusLabel(booking.booking_status)}</span>
+          <span className="truncate font-medium text-slate-400">{bookingStatusLabel(booking.booking_status)}</span>
         </div>
       </div>
     </>
@@ -242,7 +242,7 @@ function WaitlistMiniCard({
       ref={setNodeRef}
       style={dragStyle}
       className={cn(
-        "relative overflow-hidden rounded-xl border border-dashed border-slate-300/90 bg-slate-50/80 px-2.5 py-2 transition",
+        "relative overflow-hidden rounded-xl border border-dashed border-slate-700 bg-white/[0.03] px-2.5 py-2 transition",
         draggable && "cursor-grab active:cursor-grabbing",
         isDragging && "z-10 opacity-60 shadow-md ring-2 ring-sky-300/50"
       )}
@@ -254,13 +254,13 @@ function WaitlistMiniCard({
           <GripVertical className="fi-calendar-touch-target mt-0.5 h-4 w-4 shrink-0 text-slate-400 sm:h-3.5 sm:w-3.5" aria-hidden />
         ) : null}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-slate-900">{item.patientName}</p>
+          <p className="truncate text-[13px] font-semibold text-slate-100">{item.patientName}</p>
           <p className="mt-0.5 truncate text-[11px] text-slate-500">{procedure}</p>
           {item.notes ? (
             <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-slate-500">{item.notes}</p>
           ) : null}
           {draggable ? (
-            <p className="mt-1.5 text-[10px] font-medium text-sky-700">Drag to calendar to schedule</p>
+            <p className="mt-1.5 text-[10px] font-medium text-cyan-300">Drag to calendar to schedule</p>
           ) : null}
         </div>
       </div>
@@ -283,7 +283,7 @@ function AgendaSection({
     <section className="space-y-2">
       <div className="flex items-center justify-between gap-2 px-0.5">
         <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</h3>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-600">
+        <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-400">
           {count}
         </span>
       </div>
@@ -292,7 +292,7 @@ function AgendaSection({
           preset="agenda"
           description={emptyLabel}
           compact
-          className="rounded-lg border border-dashed border-slate-200/80 bg-white/60"
+          className="rounded-lg border border-dashed border-white/[0.08] bg-white/60"
         />
       ) : (
         <div className="space-y-2">{children}</div>
@@ -388,7 +388,7 @@ export function SidebarAgenda({
     return (
       <aside
         className={cn(
-          "flex w-12 shrink-0 flex-col items-center gap-3 border-r border-slate-200/80 bg-white py-3 sm:w-14 sm:py-4",
+          "flex w-12 shrink-0 flex-col items-center gap-3 border-r border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md py-3 sm:w-14 sm:py-4",
           className
         )}
         aria-label="Agenda sidebar"
@@ -396,7 +396,7 @@ export function SidebarAgenda({
         <button
           type="button"
           onClick={() => setCollapsed(false)}
-          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="rounded-lg p-2 text-slate-500 transition hover:bg-white/[0.06] hover:text-slate-200"
           aria-label="Expand agenda sidebar"
         >
           <PanelLeftOpen className="h-5 w-5" />
@@ -405,7 +405,7 @@ export function SidebarAgenda({
         {addAppointmentHref ? (
           <Link
             href={addAppointmentHref}
-            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100"
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-white/[0.06]"
             aria-label="Add appointment"
           >
             <Plus className="h-5 w-5" />
@@ -414,13 +414,13 @@ export function SidebarAgenda({
           <button
             type="button"
             onClick={onAddAppointment}
-            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100"
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-white/[0.06]"
             aria-label="Add appointment"
           >
             <Plus className="h-5 w-5" />
           </button>
         )}
-        <span className="mt-auto rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold tabular-nums text-slate-600">
+        <span className="mt-auto rounded-full bg-white/[0.06] px-2 py-1 text-[10px] font-semibold tabular-nums text-slate-400">
           {totalUpcoming}
         </span>
       </aside>
@@ -439,7 +439,7 @@ export function SidebarAgenda({
       ) : null}
       <aside
         className={cn(
-          "flex shrink-0 flex-col border-r border-slate-200/80 bg-[#fafbfc]",
+          "flex shrink-0 flex-col border-r border-white/[0.08] bg-[#fafbfc]",
           isMobileOverlay
             ? "fixed inset-y-0 left-0 z-40 w-[min(100vw-2.5rem,17.5rem)] shadow-2xl"
             : "w-[min(100%,17.5rem)]",
@@ -447,15 +447,15 @@ export function SidebarAgenda({
         )}
         aria-label="Agenda sidebar"
       >
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200/70 px-4 py-3">
+      <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] px-4 py-3">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Agenda</p>
-          <p className="truncate text-sm font-semibold text-slate-900">{totalUpcoming} upcoming</p>
+          <p className="truncate text-sm font-semibold text-slate-100">{totalUpcoming} upcoming</p>
         </div>
         <button
           type="button"
           onClick={() => setCollapsed(true)}
-          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-white hover:text-slate-800"
+          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:text-slate-200"
           aria-label="Collapse agenda sidebar"
         >
           <PanelLeftClose className="h-4 w-4" />
@@ -490,10 +490,10 @@ export function SidebarAgenda({
           );
         })}
 
-        <section className="space-y-2 border-t border-slate-200/70 pt-4">
+        <section className="space-y-2 border-t border-white/[0.08] pt-4">
           <div className="flex items-center justify-between gap-2 px-0.5">
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Waitlist</h3>
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-amber-800 ring-1 ring-amber-200/80">
+            <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-amber-300 ring-1 ring-amber-200/80">
               {waitlist.length}
             </span>
           </div>
@@ -501,7 +501,7 @@ export function SidebarAgenda({
             Patients awaiting a slot. Drag onto the calendar to schedule.
           </p>
           {waitlist.length === 0 ? (
-            <CalendarEmptyState preset="waitlist" compact className="rounded-lg border border-dashed border-amber-200/70 bg-amber-50/40" />
+            <CalendarEmptyState preset="waitlist" compact className="rounded-lg border border-dashed border-amber-400/20 bg-amber-400/10" />
           ) : (
             <div className="space-y-2">
               {waitlist.map((item) => (
@@ -512,11 +512,11 @@ export function SidebarAgenda({
         </section>
       </div>
 
-      <div className="border-t border-slate-200/70 px-4 py-3">
+      <div className="border-t border-white/[0.08] px-4 py-3">
         <button
           type="button"
           onClick={() => setCollapsed(true)}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white hover:text-slate-800"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-[#0F1629]/80 backdrop-blur-md hover:text-slate-200"
         >
           <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
           Collapse

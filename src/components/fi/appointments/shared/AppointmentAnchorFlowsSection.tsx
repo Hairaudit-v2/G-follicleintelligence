@@ -44,13 +44,13 @@ export function AppointmentAnchorFlowsSection({
 
       {showConvert && canMutate ? (
         <div className="mb-3 space-y-2">
-          <p className="text-xs text-gray-600">Convert this lead to a foundation patient, then link the appointment.</p>
+          <p className="text-xs text-slate-400">Convert this lead to a foundation patient, then link the appointment.</p>
           <form className="space-y-2" onSubmit={onConvert}>
             <label className="flex items-center gap-2 text-xs">
               <input type="checkbox" checked={seedCase} onChange={(e) => onSeedCaseChange(e.target.checked)} />
               Seed a case when converting
             </label>
-            {convErr ? <p className="text-xs text-red-700">{convErr}</p> : null}
+            {convErr ? <p className="text-xs text-rose-300">{convErr}</p> : null}
             <button
               type="submit"
               disabled={convBusy}
@@ -64,12 +64,12 @@ export function AppointmentAnchorFlowsSection({
 
       {showLink && canMutate ? (
         <div className="space-y-2">
-          <p className="text-xs text-gray-600">Lead has a patient record that is not yet on this appointment.</p>
-          {linkErr ? <p className="text-xs text-red-700">{linkErr}</p> : null}
+          <p className="text-xs text-slate-400">Lead has a patient record that is not yet on this appointment.</p>
+          {linkErr ? <p className="text-xs text-rose-300">{linkErr}</p> : null}
           <button
             type="button"
             disabled={linkBusy}
-            className="rounded border border-blue-600 px-3 py-1.5 text-xs text-blue-800 hover:bg-blue-50 disabled:opacity-50"
+            className="rounded border border-blue-600 px-3 py-1.5 text-xs text-blue-300 hover:bg-blue-500/10 disabled:opacity-50"
             onClick={() => void onLinkPatient()}
           >
             {linkBusy ? "Linking…" : "Link to patient"}
@@ -78,7 +78,7 @@ export function AppointmentAnchorFlowsSection({
       ) : null}
 
       {!showConvert && lead.patient_id && booking.patient_id === lead.patient_id ? (
-        <p className="text-xs text-gray-600">Patient is linked on this appointment and lead.</p>
+        <p className="text-xs text-slate-400">Patient is linked on this appointment and lead.</p>
       ) : null}
 
       {instructionsSent.pre_op_at || instructionsSent.post_op_at ? (

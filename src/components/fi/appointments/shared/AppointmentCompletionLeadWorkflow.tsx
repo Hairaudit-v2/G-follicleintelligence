@@ -51,13 +51,13 @@ export function AppointmentCompletionLeadWorkflow({
   );
 
   return (
-    <section className={`${appointmentCardClass} border-emerald-100 bg-emerald-50/40`}>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-emerald-900">On completion — update lead</h3>
-      <p className="mt-1 text-xs text-gray-600">
+    <section className={`${appointmentCardClass} border-emerald-100 bg-emerald-500/10`}>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-emerald-300">On completion — update lead</h3>
+      <p className="mt-1 text-xs text-slate-400">
         Optional CRM updates when you mark this appointment complete. Current stage: {opportunity.stageLabel}.
       </p>
 
-      <label className="mt-3 flex items-center gap-2 text-sm text-gray-800">
+      <label className="mt-3 flex items-center gap-2 text-sm text-slate-200">
         <input
           type="checkbox"
           checked={value.advanceStage}
@@ -74,7 +74,7 @@ export function AppointmentCompletionLeadWorkflow({
       </label>
       {value.advanceStage ? (
         <select
-          className="mt-2 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+          className="mt-2 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
           value={value.toStageId ?? ""}
           disabled={disabled}
           onChange={(e) => onChange({ ...value, toStageId: e.target.value || null })}
@@ -91,22 +91,22 @@ export function AppointmentCompletionLeadWorkflow({
       ) : null}
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Treatment value
           <input
             type="text"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             placeholder={opportunity.treatmentValueLabel ?? "e.g. 8500"}
             value={value.treatmentValue}
             disabled={disabled}
             onChange={(e) => onChange({ ...value, treatmentValue: e.target.value })}
           />
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Conversion probability
           <input
             type="text"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             placeholder={opportunity.conversionProbabilityLabel ?? "e.g. 65%"}
             value={value.conversionProbability}
             disabled={disabled}

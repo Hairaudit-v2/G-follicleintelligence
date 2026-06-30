@@ -29,7 +29,7 @@ export function AppointmentFiltersBar({
   const action = buildAppointmentsHref(tenantId, { tab });
 
   return (
-    <form method="get" action={action} className="space-y-3 rounded border border-gray-200 bg-gray-50 p-4">
+    <form method="get" action={action} className="space-y-3 rounded border border-white/[0.08] bg-white/[0.03] p-4">
       <input type="hidden" name="tab" value={tab} />
       {tab === "calendar" ? (
         <>
@@ -40,32 +40,32 @@ export function AppointmentFiltersBar({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {tab === "list" ? (
           <>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Range start
               <input
                 name="start"
                 type="datetime-local"
                 defaultValue={toDatetimeLocalValue(query.operator.startIso, tz)}
-                className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
               />
             </label>
-            <label className="block text-xs font-medium text-gray-700">
+            <label className="block text-xs font-medium text-slate-300">
               Range end
               <input
                 name="end"
                 type="datetime-local"
                 defaultValue={toDatetimeLocalValue(query.operator.endIso, tz)}
-                className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+                className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
               />
             </label>
           </>
         ) : null}
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Clinical provider
           <select
             name="staffId"
             defaultValue={query.operator.assignedStaffId ?? query.calendar.staffId ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any provider</option>
             {clinicalStaffOptions.map((s) => (
@@ -75,12 +75,12 @@ export function AppointmentFiltersBar({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Procedure type
           <select
             name="type"
             defaultValue={query.operator.bookingType ?? query.calendar.bookingType ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any</option>
             {allBookingTypeOptions().map((o) => (
@@ -90,12 +90,12 @@ export function AppointmentFiltersBar({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Status
           <select
             name="status"
             defaultValue={query.operator.status ?? query.calendar.status ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any</option>
             {allBookingStatusOptions().map((o) => (
@@ -105,12 +105,12 @@ export function AppointmentFiltersBar({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Clinic
           <select
             name="clinicId"
             defaultValue={query.operator.clinicId ?? query.calendar.clinicId ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any</option>
             {clinics.map((c) => (
@@ -120,7 +120,7 @@ export function AppointmentFiltersBar({
             ))}
           </select>
         </label>
-        <label className="flex items-end gap-2 pb-1 text-xs text-gray-700">
+        <label className="flex items-end gap-2 pb-1 text-xs text-slate-300">
           <input
             type="checkbox"
             name="includeCancelled"

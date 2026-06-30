@@ -333,49 +333,49 @@ export function BookingEditDrawer({
   return (
     <div className="fixed inset-0 z-40 flex justify-end bg-black/30" role="presentation" onClick={onClose}>
       <aside
-        className="h-full w-full max-w-md overflow-y-auto bg-white shadow-xl"
+        className="h-full w-full max-w-md overflow-y-auto bg-[#0F1629]/80 backdrop-blur-md shadow-xl"
         role="dialog"
         aria-label="Edit booking"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-gray-200 px-4 py-3 flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-gray-900">Edit booking</h2>
-          <button type="button" className="text-sm text-gray-600 hover:text-gray-900" onClick={onClose}>
+        <div className="border-b border-white/[0.08] px-4 py-3 flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-100">Edit booking</h2>
+          <button type="button" className="text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
             Close
           </button>
         </div>
 
         <div className="space-y-4 p-4 text-sm">
           {cancelled ? (
-            <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            <div className="rounded border border-amber-400/20 bg-amber-400/10 p-3 text-xs text-amber-200">
               <p className="font-medium">Cancelled bookings are locked except for viewing cancellation details.</p>
               {booking.cancellation_reason?.trim() ? (
-                <p className="mt-2 text-gray-800">Reason: {booking.cancellation_reason}</p>
+                <p className="mt-2 text-slate-200">Reason: {booking.cancellation_reason}</p>
               ) : null}
               {booking.cancelled_at ? (
-                <p className="mt-1 text-gray-700">
+                <p className="mt-1 text-slate-300">
                   Cancelled at: {formatIsoDateTimeInTimezone(booking.cancelled_at, displayTz)}
                 </p>
               ) : null}
             </div>
           ) : completed ? (
-            <p className="text-xs text-gray-600">This booking is completed and cannot be edited here.</p>
+            <p className="text-xs text-slate-400">This booking is completed and cannot be edited here.</p>
           ) : (
             <form onSubmit={(e) => void onSubmit(e)} className="space-y-3">
-              <div className="text-xs text-gray-600">
-                <span className="font-medium text-gray-800">Anchors (read-only): </span>
+              <div className="text-xs text-slate-400">
+                <span className="font-medium text-slate-200">Anchors (read-only): </span>
                 {booking.lead_id ? `Lead ${booking.lead_id.slice(0, 8)}… ` : ""}
                 {booking.person_id ? `Person ${booking.person_id.slice(0, 8)}… ` : ""}
                 {booking.patient_id ? `Patient ${booking.patient_id.slice(0, 8)}… ` : ""}
                 {booking.case_id ? `Patient ${booking.case_id.slice(0, 8)}…` : ""}
                 {!booking.lead_id && !booking.person_id && !booking.patient_id && !booking.case_id ? "—" : ""}
               </div>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Type
                 <select
                   value={bookingType}
                   onChange={(e) => onProcedureTypeChange(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 >
                   {typeOptions.map((t) => (
                     <option key={t} value={t}>
@@ -384,12 +384,12 @@ export function BookingEditDrawer({
                   ))}
                 </select>
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Status
                 <select
                   value={bookingStatus}
                   onChange={(e) => setBookingStatus(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 >
                   {WRITABLE_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -398,39 +398,39 @@ export function BookingEditDrawer({
                   ))}
                 </select>
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Title
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Description
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Start (local)
                 <input
                   type="datetime-local"
                   value={startLocal}
                   onChange={(e) => setStartLocal(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 End (local)
                 <input
                   type="datetime-local"
                   value={endLocal}
                   onChange={(e) => setEndLocal(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
                 <p className="mt-1 text-[11px] text-gray-500">
                   Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min
@@ -440,28 +440,28 @@ export function BookingEditDrawer({
                   ) : null}
                 </p>
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Timezone (optional)
                 <input
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Location
                 <input
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Clinic
                 <select
                   value={clinicId}
                   onChange={(e) => setClinicId(e.target.value)}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 >
                   <option value="">None</option>
                   {clinics.map((c) => (
@@ -471,19 +471,19 @@ export function BookingEditDrawer({
                   ))}
                 </select>
               </label>
-              <label className="block text-xs font-medium text-gray-700">
+              <label className="block text-xs font-medium text-slate-300">
                 Assigned staff
                 <StaffClinicalSelect
                   tenantId={tenantId}
                   options={clinicalStaffOptions}
                   value={assignedStaffId}
                   onChange={setAssignedStaffId}
-                  className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                  className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                 />
               </label>
-              <div className="rounded border border-gray-200 bg-gray-50 p-2 text-xs">
-                <p className="font-semibold text-gray-900">Supporting staff & rooms</p>
-                <p className="mt-1 text-gray-600">
+              <div className="rounded border border-white/[0.08] bg-white/[0.03] p-2 text-xs">
+                <p className="font-semibold text-slate-100">Supporting staff & rooms</p>
+                <p className="mt-1 text-slate-400">
                   Extra team members and rooms (multi-resource). Primary provider and primary room stay in the fields
                   above.
                 </p>
@@ -492,7 +492,7 @@ export function BookingEditDrawer({
                     {resourceDraft.map((x, idx) => (
                       <li
                         key={`${x.resource_type}-${x.resource_id}-${idx}`}
-                        className="flex items-center justify-between gap-2 border-t border-gray-200 pt-1 first:border-0 first:pt-0"
+                        className="flex items-center justify-between gap-2 border-t border-white/[0.08] pt-1 first:border-0 first:pt-0"
                       >
                         <span>
                           {x.resource_type === "staff" ? "Staff" : "Room"}:{" "}
@@ -503,7 +503,7 @@ export function BookingEditDrawer({
                         </span>
                         <button
                           type="button"
-                          className="text-rose-600 hover:underline"
+                          className="text-rose-300 hover:underline"
                           onClick={() => setResourceDraft((d) => d.filter((_, i) => i !== idx))}
                         >
                           Remove
@@ -515,9 +515,9 @@ export function BookingEditDrawer({
                   <p className="mt-2 text-gray-500">No extra resources assigned.</p>
                 )}
                 <div className="mt-2">
-                  <p className="text-[11px] font-medium text-gray-700">Add supporting staff</p>
+                  <p className="text-[11px] font-medium text-slate-300">Add supporting staff</p>
                   <select
-                    className="mt-1 block w-full rounded border border-gray-300 px-2 py-1"
+                    className="mt-1 block w-full rounded border border-slate-700 px-2 py-1"
                     defaultValue=""
                     onChange={(e) => {
                       const id = e.target.value.trim();
@@ -559,27 +559,27 @@ export function BookingEditDrawer({
               >
                 {busy ? "Saving…" : "Save changes"}
               </button>
-              {feedback ? <p className="text-sm text-red-600">{feedback}</p> : null}
+              {feedback ? <p className="text-sm text-rose-300">{feedback}</p> : null}
             </form>
           )}
           {reminderJobsLazy && lazyReminderJobsLoading ? (
             <p className="text-xs text-gray-500">Loading reminders…</p>
           ) : null}
           {effectiveReminderJobs.length > 0 ? (
-            <div className="rounded border border-gray-200 bg-gray-50 p-3 text-xs text-gray-800">
-              <p className="font-semibold text-gray-900">Reminder queue</p>
+            <div className="rounded border border-white/[0.08] bg-white/[0.03] p-3 text-xs text-slate-200">
+              <p className="font-semibold text-slate-100">Reminder queue</p>
               <ul className="mt-2 space-y-1">
                 {effectiveReminderJobs.map((j) => (
-                  <li key={j.id} className="flex flex-wrap justify-between gap-1 border-t border-gray-200 pt-1 first:border-0 first:pt-0">
+                  <li key={j.id} className="flex flex-wrap justify-between gap-1 border-t border-white/[0.08] pt-1 first:border-0 first:pt-0">
                     <span className="font-medium">{j.template_name || "Template"}</span>
-                    <span className="text-gray-600">
+                    <span className="text-slate-400">
                       {j.template_type} · {j.template_trigger_event}
                     </span>
-                    <span className="w-full text-gray-600 sm:w-auto">
+                    <span className="w-full text-slate-400 sm:w-auto">
                       {j.status} · scheduled {formatIsoDateTimeInTimezone(j.scheduled_at, displayTz)}
                     </span>
                     {j.error_log?.trim() && (j.status === "failed" || j.status === "cancelled") ? (
-                      <span className="w-full text-[11px] text-amber-800">{j.error_log}</span>
+                      <span className="w-full text-[11px] text-amber-300">{j.error_log}</span>
                     ) : null}
                   </li>
                 ))}

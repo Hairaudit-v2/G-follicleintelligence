@@ -59,10 +59,10 @@ export function OperationalCalendarFilters({
     <form
       method="get"
       action={action}
-      className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+      className="space-y-3 rounded-xl border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40 dark:border-slate-800 dark:bg-slate-950"
       aria-labelledby={FILTER_HEADING_ID}
     >
-      <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+      <h2 id={FILTER_HEADING_ID} className="text-sm font-semibold text-slate-100 dark:text-slate-100">
         Filter calendar bookings
       </h2>
       <input type="hidden" name="view" value={query.view} />
@@ -72,7 +72,7 @@ export function OperationalCalendarFilters({
         <label
           id={FILTER_FIELDS.q.labelId}
           htmlFor={FILTER_FIELDS.q.inputId}
-          className="block text-xs font-medium text-slate-700 dark:text-slate-300"
+          className="block text-xs font-medium text-slate-300 dark:text-slate-300"
         >
           {FILTER_FIELDS.q.label}
           <input
@@ -81,21 +81,21 @@ export function OperationalCalendarFilters({
             name="q"
             defaultValue={query.search ?? ""}
             placeholder="Patient, lead, title…"
-            className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="mt-1 block w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
             autoComplete="off"
           />
         </label>
         <label
           id={FILTER_FIELDS.type.labelId}
           htmlFor={FILTER_FIELDS.type.inputId}
-          className="block text-xs font-medium text-slate-700 dark:text-slate-300"
+          className="block text-xs font-medium text-slate-300 dark:text-slate-300"
         >
           {FILTER_FIELDS.type.label}
           <select
             id={FILTER_FIELDS.type.inputId}
             name="type"
             defaultValue={query.bookingType ?? ""}
-            className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="mt-1 block w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">Any type</option>
             {allBookingTypeOptions().map((o) => (
@@ -108,14 +108,14 @@ export function OperationalCalendarFilters({
         <label
           id={FILTER_FIELDS.status.labelId}
           htmlFor={FILTER_FIELDS.status.inputId}
-          className="block text-xs font-medium text-slate-700 dark:text-slate-300"
+          className="block text-xs font-medium text-slate-300 dark:text-slate-300"
         >
           {FILTER_FIELDS.status.label}
           <select
             id={FILTER_FIELDS.status.inputId}
             name="status"
             defaultValue={query.status ?? ""}
-            className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="mt-1 block w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">Any status</option>
             {allBookingStatusOptions().map((o) => (
@@ -128,14 +128,14 @@ export function OperationalCalendarFilters({
         <label
           id={FILTER_FIELDS.staffId.labelId}
           htmlFor={FILTER_FIELDS.staffId.inputId}
-          className="block text-xs font-medium text-slate-700 dark:text-slate-300"
+          className="block text-xs font-medium text-slate-300 dark:text-slate-300"
         >
           {FILTER_FIELDS.staffId.label}
           <select
             id={FILTER_FIELDS.staffId.inputId}
             name="staffId"
             defaultValue={query.staffId ?? ""}
-            className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="mt-1 block w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">All staff</option>
             {staffDirectory.map((u) => (
@@ -148,14 +148,14 @@ export function OperationalCalendarFilters({
         <label
           id={FILTER_FIELDS.clinicId.labelId}
           htmlFor={FILTER_FIELDS.clinicId.inputId}
-          className="block text-xs font-medium text-slate-700 dark:text-slate-300"
+          className="block text-xs font-medium text-slate-300 dark:text-slate-300"
         >
           {FILTER_FIELDS.clinicId.label}
           <select
             id={FILTER_FIELDS.clinicId.inputId}
             name="clinicId"
             defaultValue={query.clinicId ?? ""}
-            className="mt-1 block w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="mt-1 block w-full rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
           >
             <option value="">Any site</option>
             {clinics.map((c) => (
@@ -168,7 +168,7 @@ export function OperationalCalendarFilters({
         <label
           id={FILTER_FIELDS.includeCancelled.labelId}
           htmlFor={FILTER_FIELDS.includeCancelled.inputId}
-          className="flex items-center gap-2 pt-5 text-xs text-slate-700 dark:text-slate-300"
+          className="flex items-center gap-2 pt-5 text-xs text-slate-300 dark:text-slate-300"
         >
           <input
             id={FILTER_FIELDS.includeCancelled.inputId}
@@ -183,7 +183,7 @@ export function OperationalCalendarFilters({
       <div className="flex flex-wrap gap-2">
         <button
           type="submit"
-          className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+          className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 dark:bg-white/[0.06] dark:text-slate-100 dark:hover:bg-[#0F1629]/80 backdrop-blur-md"
         >
           Apply
         </button>
@@ -193,18 +193,18 @@ export function OperationalCalendarFilters({
             date: query.dateAnchor,
             sample: query.sampleMode ? true : undefined,
           })}
-          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+          className="inline-flex items-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-1.5 text-sm font-medium text-slate-200 hover:bg-white/[0.03] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
         >
           Reset
         </a>
       </div>
       <p className="text-xs leading-snug text-slate-500 dark:text-slate-400">
         Grid uses clinic-local business hours from{" "}
-        <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">fi_tenant_settings.default_timezone</code>{" "}
+        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">fi_tenant_settings.default_timezone</code>{" "}
         (IANA). Optional window overrides live in{" "}
-        <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">fi_tenant_settings.metadata.operational_calendar</code>{" "}
-        (<code className="rounded bg-slate-100 px-1 dark:bg-slate-800">dayStartHourUtc</code> /{" "}
-        <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">dayEndHourUtc</code> are wall-clock hours in that
+        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">fi_tenant_settings.metadata.operational_calendar</code>{" "}
+        (<code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">dayStartHourUtc</code> /{" "}
+        <code className="rounded bg-white/[0.06] px-1 dark:bg-slate-800">dayEndHourUtc</code> are wall-clock hours in that
         zone). Same booking overlap query as the tenant dashboard agenda.
       </p>
     </form>

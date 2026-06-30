@@ -463,7 +463,7 @@ const MonthDayCell = memo(function MonthDayCell({
               ? "bg-sky-500 font-bold text-white shadow-md shadow-sky-500/30"
               : cell.inCurrentMonth
                 ? "font-bold text-slate-100 group-hover/cell:bg-slate-800/80"
-                : "font-medium text-slate-600"
+                : "font-medium text-slate-400"
           )}
         >
           {cell.dayOfMonth}
@@ -516,7 +516,7 @@ const MonthDayCell = memo(function MonthDayCell({
             onClick={() =>
               openEmptyDayQuickCreate ? openEmptyDayQuickCreate(cell.dayKey) : onDayClick(cell.dayKey)
             }
-            className="mt-auto w-full rounded-md border border-dashed border-[#1e2937]/80 px-1.5 py-1 text-[10px] font-medium text-slate-600 opacity-0 transition group-hover/cell:opacity-100 hover:border-slate-600 hover:bg-slate-900/50 hover:text-slate-300"
+            className="mt-auto w-full rounded-md border border-dashed border-[#1e2937]/80 px-1.5 py-1 text-[10px] font-medium text-slate-400 opacity-0 transition group-hover/cell:opacity-100 hover:border-slate-600 hover:bg-slate-900/50 hover:text-slate-300"
           >
             {openEmptyDayQuickCreate ? "Quick book" : "Open · click to schedule"}
           </button>

@@ -11,7 +11,7 @@ import type { FiServiceRow } from "@/src/lib/services/fiServiceTypes";
 import { BookingCreatePanel } from "./BookingCreatePanel";
 import { BookingSummaryCard } from "./BookingSummaryCard";
 
-const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
+const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function LeadBookingPanel({
   tenantId,
@@ -64,23 +64,23 @@ export function LeadBookingPanel({
   return (
     <div className="space-y-4">
       <div className={card}>
-        <h2 className="text-sm font-semibold text-gray-900">Appointments</h2>
-        <p className="mt-1 text-xs text-gray-600">
+        <h2 className="text-sm font-semibold text-slate-100">Appointments</h2>
+        <p className="mt-1 text-xs text-slate-400">
           Lead-scoped list and quick create. Use the tenant{" "}
-          <Link href={`${base}/calendar`} className="text-blue-600 hover:underline">
+          <Link href={`${base}/calendar`} className="text-blue-300 hover:underline">
             calendar
           </Link>{" "}
           or{" "}
-          <Link href={`${base}/appointments`} className="text-blue-600 hover:underline">
+          <Link href={`${base}/appointments`} className="text-blue-300 hover:underline">
             Appointments
           </Link>{" "}
           for the full operational view. Optional FI Admin key for writes when your session role cannot mutate CRM data.
         </p>
-        <label className="mt-2 block text-xs text-gray-600">
+        <label className="mt-2 block text-xs text-slate-400">
           FI Admin key (optional)
           <input
             type="password"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm font-mono"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 text-sm font-mono"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
             autoComplete="off"
@@ -107,15 +107,15 @@ export function LeadBookingPanel({
       />
 
       {!hasAny ? (
-        <div className={`${card} border-dashed bg-gray-50/80`}>
-          <p className="text-sm text-gray-700">No appointments for this lead yet.</p>
+        <div className={`${card} border-dashed bg-white/[0.03]`}>
+          <p className="text-sm text-slate-300">No appointments for this lead yet.</p>
           <p className="mt-1 text-xs text-gray-500">
             Create one above, or open{" "}
-            <Link href={`${base}/calendar`} className="text-blue-600 hover:underline">
+            <Link href={`${base}/calendar`} className="text-blue-300 hover:underline">
               Calendar
             </Link>{" "}
             /{" "}
-            <Link href={`${base}/appointments`} className="text-blue-600 hover:underline">
+            <Link href={`${base}/appointments`} className="text-blue-300 hover:underline">
               Appointments
             </Link>{" "}
             for scheduling with staff hours and overlap checks.
@@ -143,8 +143,8 @@ export function LeadBookingPanel({
 
       <section className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Past & cancelled</h3>
-        <details className="rounded border border-gray-100 bg-gray-50 p-2">
-          <summary className="cursor-pointer text-sm text-gray-700">Past & cancelled ({past.length})</summary>
+        <details className="rounded border border-white/[0.06] bg-white/[0.03] p-2">
+          <summary className="cursor-pointer text-sm text-slate-300">Past & cancelled ({past.length})</summary>
           <div className="mt-2 space-y-2">
             {past.map((b) => (
               <BookingSummaryCard

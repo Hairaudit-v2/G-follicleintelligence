@@ -71,17 +71,17 @@ export function AppointmentProcedurePhotosPanel({
   return (
     <div className="space-y-4">
       <section className={appointmentCardClass}>
-        <h2 className="text-sm font-semibold text-gray-900">Upload during / after procedure</h2>
-        <p className="mt-1 text-xs text-gray-600">
+        <h2 className="text-sm font-semibold text-slate-100">Upload during / after procedure</h2>
+        <p className="mt-1 text-xs text-slate-400">
           Images are tagged and linked to this appointment. Prefer <strong>before</strong>, <strong>after</strong>, or{" "}
           <strong>post_op</strong> categories for Evolved Hair Clinics workflows.
         </p>
         {!patientId ? (
-          <p className="mt-2 text-sm text-amber-900">Link a patient on this appointment to enable uploads.</p>
+          <p className="mt-2 text-sm text-amber-200">Link a patient on this appointment to enable uploads.</p>
         ) : (
-          <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded border border-gray-100 bg-gray-50/80 p-3">
+          <form onSubmit={onSubmit} className="mt-3 space-y-3 rounded border border-white/[0.06] bg-white/[0.03] p-3">
             <div className="grid gap-2 sm:grid-cols-2">
-              <label className="block text-xs text-gray-700">
+              <label className="block text-xs text-slate-300">
                 File
                 <input
                   name="file"
@@ -91,12 +91,12 @@ export function AppointmentProcedurePhotosPanel({
                   className="mt-1 block w-full text-sm"
                 />
               </label>
-              <label className="block text-xs text-gray-700">
+              <label className="block text-xs text-slate-300">
                 Category
                 <select
                   name="image_category"
                   defaultValue="post_op"
-                  className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+                  className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
                 >
                   {PROCEDURE_CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -112,15 +112,15 @@ export function AppointmentProcedurePhotosPanel({
                   ))}
                 </select>
               </label>
-              <label className="block text-xs text-gray-700 sm:col-span-2">
+              <label className="block text-xs text-slate-300 sm:col-span-2">
                 Caption
-                <input name="caption" type="text" className="mt-1 block w-full rounded border border-gray-300 px-2 py-1.5 text-sm" />
+                <input name="caption" type="text" className="mt-1 block w-full rounded border border-slate-700 px-2 py-1.5 text-sm" />
               </label>
               <input type="hidden" name="booking_id" value={bookingId} />
               {leadId ? <input type="hidden" name="lead_id" value={leadId} /> : null}
               {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
             </div>
-            {msg ? <p className="text-xs text-gray-700">{msg}</p> : null}
+            {msg ? <p className="text-xs text-slate-300">{msg}</p> : null}
             <button
               type="submit"
               disabled={pending}

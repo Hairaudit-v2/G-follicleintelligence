@@ -31,34 +31,34 @@ export function BookingCalendarToolbar({
   const weekHref = buildCalendarHref(tenantId, mergeCalendarHrefQuery(query, { view: "week" }));
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-gray-200 bg-gray-50 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded border border-white/[0.08] bg-white/[0.03] p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href={prev}
-          className="rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 hover:bg-gray-100"
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm text-slate-200 hover:bg-white/[0.06]"
         >
           Previous
         </Link>
         <Link
           href={today}
-          className="rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 hover:bg-gray-100"
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm text-slate-200 hover:bg-white/[0.06]"
         >
           Today
         </Link>
         <Link
           href={next}
-          className="rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 hover:bg-gray-100"
+          className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm text-slate-200 hover:bg-white/[0.06]"
         >
           Next
         </Link>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-gray-900">View</span>
+        <span className="text-sm font-medium text-slate-100">View</span>
         <Link
           href={dayHref}
           className={`rounded px-2 py-1 text-sm ${
-            query.view === "day" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
+            query.view === "day" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
           }`}
         >
           Day
@@ -66,7 +66,7 @@ export function BookingCalendarToolbar({
         <Link
           href={weekHref}
           className={`rounded px-2 py-1 text-sm ${
-            query.view === "week" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
+            query.view === "week" ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
           }`}
         >
           Week
@@ -78,7 +78,7 @@ export function BookingCalendarToolbar({
           type="button"
           onClick={onToggleFilters}
           className={`rounded px-2 py-1 text-sm ${
-            showFilters ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
+            showFilters ? "bg-gray-900 text-white" : "border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 text-slate-200 hover:bg-white/[0.06]"
           }`}
         >
           Filters
@@ -92,7 +92,7 @@ export function BookingCalendarToolbar({
         </button>
       </div>
 
-      <p className="w-full text-center text-sm text-gray-700 sm:w-auto sm:text-right">{rangeTitle}</p>
+      <p className="w-full text-center text-sm text-slate-300 sm:w-auto sm:text-right">{rangeTitle}</p>
     </div>
   );
 }

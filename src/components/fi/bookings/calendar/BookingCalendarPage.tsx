@@ -34,15 +34,15 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
   return (
     <div className="mx-auto max-w-7xl space-y-6 py-6">
       <header className="space-y-2">
-        <h1 className="text-lg font-semibold text-gray-900">Calendar</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="text-lg font-semibold text-slate-100">Calendar</h1>
+        <p className="text-sm text-slate-400">
           Scheduling for the selected clinic-local range. Use the operator list for bulk filters and wide exports.
         </p>
-        <label className="block max-w-md text-xs text-gray-600">
+        <label className="block max-w-md text-xs text-slate-400">
           FI Admin key (optional — paste when your session role cannot write via service actions alone)
           <input
             type="password"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 font-mono text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 font-mono text-sm"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
             autoComplete="off"
@@ -51,7 +51,7 @@ export function BookingCalendarPage({ data }: { data: CalendarViewData }) {
       </header>
 
       {listTruncated ? (
-        <p className="text-xs text-amber-800">
+        <p className="text-xs text-amber-300">
           The calendar hit the row cap for this range. Narrow filters or use the Bookings operator page for a wider
           window.
         </p>

@@ -26,9 +26,9 @@ const CONTAINER_CLASSES: Record<
     blocked: "border-rose-500/35 bg-rose-950/25 text-rose-100",
   },
   light: {
-    available: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    warning: "border-amber-200 bg-amber-50 text-amber-900",
-    blocked: "border-rose-200 bg-rose-50 text-rose-900",
+    available: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+    warning: "border-amber-400/20 bg-amber-400/10 text-amber-200",
+    blocked: "border-rose-500/20 bg-rose-500/10 text-rose-300",
   },
 };
 
@@ -42,16 +42,16 @@ const HEADER_CLASSES: Record<
     blocked: "text-rose-200",
   },
   light: {
-    available: "text-emerald-800",
-    warning: "text-amber-800",
-    blocked: "text-rose-800",
+    available: "text-emerald-300",
+    warning: "text-amber-300",
+    blocked: "text-rose-300",
   },
 };
 
 function severityIconClass(severity: BookingConflictMessage["severity"], variant: BookingConflictPreviewVariant): string {
-  if (severity === "error") return variant === "dark" ? "text-rose-300" : "text-rose-600";
-  if (severity === "warning") return variant === "dark" ? "text-amber-300" : "text-amber-600";
-  return variant === "dark" ? "text-sky-300" : "text-sky-600";
+  if (severity === "error") return variant === "dark" ? "text-rose-300" : "text-rose-300";
+  if (severity === "warning") return variant === "dark" ? "text-amber-300" : "text-amber-300";
+  return variant === "dark" ? "text-sky-300" : "text-cyan-300";
 }
 
 function SeverityIcon({
@@ -89,7 +89,7 @@ export function BookingConflictPreview({
           "rounded-xl border px-3 py-2.5 text-xs",
           variant === "dark"
             ? "border-white/[0.1] bg-slate-950/25 text-slate-400"
-            : "border-gray-200 bg-gray-50 text-gray-500",
+            : "border-white/[0.08] bg-white/[0.03] text-gray-500",
           className
         )}
         role="status"

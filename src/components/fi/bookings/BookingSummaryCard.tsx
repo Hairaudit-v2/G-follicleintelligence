@@ -9,7 +9,7 @@ import { formatBookingWindowInTimezone, normalizeCalendarTimezone } from "@/src/
 import { bookingAssignmentDisplay } from "@/src/lib/staff/staffAssigneeDisplay";
 import type { ClinicalStaffPickerOption } from "@/src/lib/staff/clinicalStaffPicker";
 
-const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
+const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function BookingSummaryCard({
   tenantId,
@@ -78,8 +78,8 @@ export function BookingSummaryCard({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="text-xs font-medium uppercase text-gray-500">{bookingTypeLabel(booking.booking_type)}</p>
-          <p className="text-sm font-semibold text-gray-900">{booking.title?.trim() || "Booking"}</p>
-          <p className="text-xs text-gray-600">{range}</p>
+          <p className="text-sm font-semibold text-slate-100">{booking.title?.trim() || "Booking"}</p>
+          <p className="text-xs text-slate-400">{range}</p>
           <p className="text-xs text-gray-500">
             {bookingStatusLabel(booking.booking_status)}
             {" · "}
@@ -91,7 +91,7 @@ export function BookingSummaryCard({
             <>
               <button
                 type="button"
-                className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                 disabled={busy}
                 onClick={onEdit}
               >
@@ -99,7 +99,7 @@ export function BookingSummaryCard({
               </button>
               <button
                 type="button"
-                className="rounded border border-emerald-600 px-2 py-1 text-xs text-emerald-800 hover:bg-emerald-50 disabled:opacity-50"
+                className="rounded border border-emerald-600 px-2 py-1 text-xs text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50"
                 disabled={busy}
                 onClick={() => void onComplete()}
               >
@@ -107,7 +107,7 @@ export function BookingSummaryCard({
               </button>
               <button
                 type="button"
-                className="rounded border border-red-300 px-2 py-1 text-xs text-red-800 hover:bg-red-50 disabled:opacity-50"
+                className="rounded border border-red-300 px-2 py-1 text-xs text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
                 disabled={busy}
                 onClick={() => void onCancel()}
               >
@@ -117,7 +117,7 @@ export function BookingSummaryCard({
           ) : null}
         </div>
       </div>
-      {feedback ? <p className="mt-2 text-xs text-red-600">{feedback}</p> : null}
+      {feedback ? <p className="mt-2 text-xs text-rose-300">{feedback}</p> : null}
     </div>
   );
 }

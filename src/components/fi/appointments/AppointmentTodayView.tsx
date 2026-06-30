@@ -35,7 +35,7 @@ export function AppointmentTodayView({
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-slate-400">
         Appointments starting today (UTC). Use Calendar for drag-and-drop scheduling or List for a wider date range.
       </p>
       <AppointmentListTable

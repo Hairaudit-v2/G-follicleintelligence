@@ -35,8 +35,8 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
     <div className="mx-auto max-w-7xl space-y-6 py-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold text-gray-900">Appointments</h1>
-          <p className="text-sm text-gray-600">
+          <h1 className="text-lg font-semibold text-slate-100">Appointments</h1>
+          <p className="text-sm text-slate-400">
             Calendar, list, and today views for Evolved Hair Clinics scheduling. Click a row or drag on the calendar;
             use New appointment for lead-aware booking.
           </p>
@@ -56,7 +56,7 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
           </button>
           <button
             type="button"
-            className="rounded border border-gray-300 px-2 py-1.5 text-sm hover:bg-gray-50"
+            className="rounded border border-slate-700 px-2 py-1.5 text-sm hover:bg-white/[0.03]"
             onClick={() => setShowFilters((v) => !v)}
           >
             {showFilters ? "Hide filters" : "Filters"}
@@ -76,7 +76,7 @@ export function AppointmentsPage({ data }: { data: AppointmentsPageData }) {
       ) : null}
 
       {operator.listTruncated && query.tab !== "calendar" ? (
-        <p className="text-xs text-amber-800">List capped — narrow your date range or filters.</p>
+        <p className="text-xs text-amber-300">List capped — narrow your date range or filters.</p>
       ) : null}
 
       {query.tab === "calendar" && calendar ? (

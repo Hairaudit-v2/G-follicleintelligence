@@ -22,9 +22,9 @@ function portaledMenuStyles(
   if (variant === "fiOs") {
     if (displayTheme === "light") {
       return {
-        content: "border border-slate-200 bg-white text-slate-900 shadow-lg",
+        content: "border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md text-slate-100 shadow-lg",
         item:
-          "text-slate-900 focus:bg-slate-100 focus:text-slate-900 data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900",
+          "text-slate-100 focus:bg-white/[0.06] focus:text-slate-100 data-[highlighted]:bg-white/[0.06] data-[highlighted]:text-slate-100",
         itemActive: "bg-cyan-500/15 font-semibold text-cyan-900",
       };
     }

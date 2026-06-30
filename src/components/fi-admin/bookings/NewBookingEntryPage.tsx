@@ -28,7 +28,7 @@ export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }:
       <div>
         <Link
           href={base}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-700 hover:text-sky-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-300 hover:text-cyan-200 focus-visible:outline focus-visible:ring-2 focus-visible:ring-sky-400/40 focus-visible:ring-offset-2"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back to dashboard
@@ -41,15 +41,15 @@ export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }:
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-        <FiCard className="flex min-h-[200px] flex-col border-dashed bg-slate-50/80 sm:min-h-[220px]">
-          <h2 className="text-lg font-semibold text-slate-800">Book from existing patient</h2>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+        <FiCard className="flex min-h-[200px] flex-col border-dashed bg-white/[0.03] sm:min-h-[220px]">
+          <h2 className="text-lg font-semibold text-slate-200">Book from existing patient</h2>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
             Use this when the person already has a patient profile.
           </p>
           <button
             type="button"
             disabled
-            className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-400"
+            className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-slate-400"
             title="Coming soon"
           >
             Coming soon
@@ -64,18 +64,18 @@ export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }:
             openAffordanceLabel="Open CRM leads"
           />
         ) : (
-          <FiCard className="flex min-h-[200px] flex-col border-dashed bg-slate-50/80 sm:min-h-[220px]">
-            <h2 className="text-lg font-semibold text-slate-800">Book from lead</h2>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+          <FiCard className="flex min-h-[200px] flex-col border-dashed bg-white/[0.03] sm:min-h-[220px]">
+            <h2 className="text-lg font-semibold text-slate-200">Book from lead</h2>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
               Use this when the appointment is connected to a new enquiry or sales pipeline.
             </p>
-            <p className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs leading-snug text-amber-950">
+            <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-snug text-amber-200">
               CRM workspace access is required to open leads. Ask an administrator if you need this path.
             </p>
             <button
               type="button"
               disabled
-              className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400"
+              className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-slate-400"
             >
               Open CRM leads
             </button>
@@ -90,19 +90,19 @@ export function NewBookingEntryPage({ tenantId, showCrmNav, showBookingsBoard }:
             openAffordanceLabel="Open bookings"
           />
         ) : (
-          <FiCard className="flex min-h-[200px] flex-col border-dashed bg-slate-50/80 sm:min-h-[220px]">
-            <h2 className="text-lg font-semibold text-slate-800">Create consultation booking</h2>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+          <FiCard className="flex min-h-[200px] flex-col border-dashed bg-white/[0.03] sm:min-h-[220px]">
+            <h2 className="text-lg font-semibold text-slate-200">Create consultation booking</h2>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
               Use this for new consultations, assessments, or follow-up appointments.
             </p>
-            <p className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs leading-snug text-amber-950">
+            <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs leading-snug text-amber-200">
               Scheduling access requires an Administrator or CRM operator role, or an active link to this tenant in Staff.
               Ask an administrator if you need this path.
             </p>
             <button
               type="button"
               disabled
-              className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400"
+              className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-slate-400"
             >
               Open bookings
             </button>

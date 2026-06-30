@@ -68,83 +68,83 @@ export function AppointmentProcedureSection({
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Procedure fields</h3>
       {canMutate ? (
         <form className="space-y-2 text-xs" onSubmit={onSubmit}>
-          <label className="block text-gray-600">
+          <label className="block text-slate-400">
             Graft count estimate
             <input
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
               value={graftCountEstimate}
               onChange={(e) => onGraftCountEstimateChange(e.target.value)}
               placeholder="e.g. 2,400–2,800"
             />
           </label>
-          <label className="block text-gray-600">
+          <label className="block text-slate-400">
             Donor area
             <input
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
               value={donorArea}
               onChange={(e) => onDonorAreaChange(e.target.value)}
               placeholder="Occipital, mid-scalp…"
             />
           </label>
-          <label className="block text-gray-600">
+          <label className="block text-slate-400">
             Technique
             <input
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
               value={technique}
               onChange={(e) => onTechniqueChange(e.target.value)}
               placeholder="FUE, DHI, FUT…"
             />
           </label>
-          <label className="block text-gray-600">
+          <label className="block text-slate-400">
             Surgeon
             <StaffClinicalSelect
               tenantId={tenantId}
               options={assignees}
               value={surgeonUserId}
               onChange={onSurgeonUserIdChange}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             />
           </label>
-          <label className="block text-gray-600">
+          <label className="block text-slate-400">
             Consultant
             <StaffClinicalSelect
               tenantId={tenantId}
               options={assignees}
               value={consultantUserId}
               onChange={onConsultantUserIdChange}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             />
           </label>
-          <label className="block text-gray-600">
+          <label className="block text-slate-400">
             Technician
             <StaffClinicalSelect
               tenantId={tenantId}
               options={assignees}
               value={techUserId}
               onChange={onTechUserIdChange}
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
             />
           </label>
-          <label className="block text-gray-600">
+          <label className="block text-slate-400">
             Special instructions
             <textarea
-              className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+              className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
               rows={3}
               value={specialInstructions}
               onChange={(e) => onSpecialInstructionsChange(e.target.value)}
             />
           </label>
-          {error ? <p className="text-red-700">{error}</p> : null}
+          {error ? <p className="text-rose-300">{error}</p> : null}
           <button
             type="submit"
             disabled={busy}
-            className="rounded border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50"
+            className="rounded border border-slate-700 px-3 py-1.5 text-sm hover:bg-white/[0.03] disabled:opacity-50"
           >
             {busy ? "Saving…" : "Save procedure fields"}
           </button>
         </form>
       ) : (
-        <dl className="space-y-1 text-xs text-gray-700">
+        <dl className="space-y-1 text-xs text-slate-300">
           {graftCountEstimate.trim() ? (
             <div>
               <dt className="text-gray-500">Graft estimate</dt>

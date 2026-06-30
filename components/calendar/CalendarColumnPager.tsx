@@ -28,7 +28,7 @@ export function CalendarColumnPager({
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center gap-2 border-b border-slate-200/80 bg-white px-3 py-2 lg:hidden",
+        "flex shrink-0 items-center gap-2 border-b border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md px-3 py-2 lg:hidden",
         className
       )}
       role="toolbar"
@@ -38,14 +38,14 @@ export function CalendarColumnPager({
         type="button"
         onClick={() => onSelect(safeIndex - 1)}
         disabled={safeIndex <= 0}
-        className="fi-calendar-touch-target inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/90 bg-slate-50 text-slate-700 transition enabled:hover:bg-white disabled:opacity-40"
+        className="fi-calendar-touch-target inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-slate-300 transition enabled:hover:bg-[#0F1629]/80 backdrop-blur-md disabled:opacity-40"
         aria-label="Previous column"
       >
         <ChevronLeft className="h-5 w-5" aria-hidden />
       </button>
 
       <div className="min-w-0 flex-1 text-center">
-        <p className="truncate text-sm font-semibold text-slate-900">{labels[safeIndex]}</p>
+        <p className="truncate text-sm font-semibold text-slate-100">{labels[safeIndex]}</p>
         {subtitle ? (
           <p className="truncate text-[11px] font-medium text-slate-500">{subtitle}</p>
         ) : (
@@ -59,7 +59,7 @@ export function CalendarColumnPager({
         type="button"
         onClick={() => onSelect(safeIndex + 1)}
         disabled={safeIndex >= total - 1}
-        className="fi-calendar-touch-target inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200/90 bg-slate-50 text-slate-700 transition enabled:hover:bg-white disabled:opacity-40"
+        className="fi-calendar-touch-target inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-slate-300 transition enabled:hover:bg-[#0F1629]/80 backdrop-blur-md disabled:opacity-40"
         aria-label="Next column"
       >
         <ChevronRight className="h-5 w-5" aria-hidden />

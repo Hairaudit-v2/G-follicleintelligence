@@ -103,19 +103,19 @@ export function NextAvailableBookingSlots({
     <div
       className={cn(
         "rounded-xl border px-3 py-2.5 text-xs",
-        isDark ? "border-white/[0.1] bg-slate-950/35 text-slate-200" : "border-gray-200 bg-gray-50 text-gray-800",
+        isDark ? "border-white/[0.1] bg-slate-950/35 text-slate-200" : "border-white/[0.08] bg-white/[0.03] text-slate-200",
         className
       )}
     >
-      <p className={cn("font-semibold uppercase tracking-wide", isDark ? "text-slate-300" : "text-gray-700")}>
+      <p className={cn("font-semibold uppercase tracking-wide", isDark ? "text-slate-300" : "text-slate-300")}>
         Suggested available times
       </p>
       {loading ? (
         <p className={cn("mt-2", isDark ? "text-slate-500" : "text-gray-500")}>Searching nearby slots…</p>
       ) : err ? (
-        <p className={cn("mt-2", isDark ? "text-rose-300" : "text-red-600")}>{err}</p>
+        <p className={cn("mt-2", isDark ? "text-rose-300" : "text-rose-300")}>{err}</p>
       ) : slots.length === 0 ? (
-        <p className={cn("mt-2", isDark ? "text-slate-500" : "text-gray-600")}>
+        <p className={cn("mt-2", isDark ? "text-slate-500" : "text-slate-400")}>
           No alternative slots found in the next two weeks with these constraints.
         </p>
       ) : (
@@ -125,15 +125,15 @@ export function NextAvailableBookingSlots({
               key={`${s.startAt}-${s.roomId}-${s.staffId ?? ""}`}
               className={cn(
                 "flex flex-col gap-1.5 rounded-lg border px-2.5 py-2 sm:flex-row sm:items-center sm:justify-between",
-                isDark ? "border-white/[0.08] bg-slate-950/40" : "border-gray-200 bg-white"
+                isDark ? "border-white/[0.08] bg-slate-950/40" : "border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md"
               )}
             >
               <div className="min-w-0 space-y-0.5">
                 <p className="font-medium tabular-nums text-[13px]">
                   {formatTimeRangeInTimezone(s.startAt, s.endAt, tz)}
                 </p>
-                <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-400" : "text-gray-600")}>
-                  <span className={cn("font-medium", isDark ? "text-slate-100" : "text-gray-900")}>{s.roomLabel}</span>
+                <p className={cn("text-[11px] leading-snug", isDark ? "text-slate-400" : "text-slate-400")}>
+                  <span className={cn("font-medium", isDark ? "text-slate-100" : "text-slate-100")}>{s.roomLabel}</span>
                   {s.staffLabel ? (
                     <>
                       {" · "}
@@ -150,7 +150,7 @@ export function NextAvailableBookingSlots({
                   "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition",
                   isDark
                     ? "border border-cyan-500/40 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25"
-                    : "border border-gray-300 bg-gray-900 text-white hover:bg-gray-800"
+                    : "border border-slate-700 bg-gray-900 text-white hover:bg-gray-800"
                 )}
               >
                 Use this time

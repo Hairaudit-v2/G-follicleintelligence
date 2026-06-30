@@ -207,7 +207,7 @@ export function AppointmentCreateSlideOver({
     <div className="space-y-4">
       <section className={appointmentCardClass}>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">New appointment</h3>
-        <p className="mt-1 text-xs text-gray-600">
+        <p className="mt-1 text-xs text-slate-400">
           Pre-filled from your current context. Start/end use the clinic timezone ({tenantCalendarTimezone}).
           Availability uses a {DEFAULT_APPOINTMENT_BUFFER_MINUTES}-minute buffer around existing bookings for the
           selected staff member.
@@ -215,10 +215,10 @@ export function AppointmentCreateSlideOver({
       </section>
 
       <form className="space-y-3" onSubmit={onSubmit}>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Procedure type
           <select
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={bookingType}
             onChange={(e) => onProcedureTypeChange(e.target.value)}
           >
@@ -229,41 +229,41 @@ export function AppointmentCreateSlideOver({
             ))}
           </select>
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Title
           <input
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Consultation — …"
           />
         </label>
         {prefill.consultationId?.trim() ? (
-          <p className="text-[11px] text-gray-600">
+          <p className="text-[11px] text-slate-400">
             Linked consultation{" "}
             <Link
               href={`/fi-admin/${tenantId}/consultations/${encodeURIComponent(prefill.consultationId.trim())}`}
-              className="font-semibold text-blue-700 underline"
+              className="font-semibold text-blue-300 underline"
             >
               open record
             </Link>
             .
           </p>
         ) : null}
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Clinical / scheduling notes
           <textarea
-            className="mt-0.5 min-h-[120px] w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 min-h-[120px] w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={notesBody}
             onChange={(e) => setNotesBody(e.target.value)}
             placeholder="Optional — pre-filled when scheduling from a quote."
           />
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Start
           <input
             type="datetime-local"
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={startLocal}
             onChange={(e) => {
               setStartLocal(e.target.value);
@@ -271,11 +271,11 @@ export function AppointmentCreateSlideOver({
             }}
           />
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           End
           <input
             type="datetime-local"
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={endLocal}
             onChange={(e) => {
               setEndLocal(e.target.value);
@@ -290,7 +290,7 @@ export function AppointmentCreateSlideOver({
             ) : null}
           </p>
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Staff
           <StaffClinicalSelect
             tenantId={tenantId}
@@ -301,12 +301,12 @@ export function AppointmentCreateSlideOver({
               setAvailabilityHint(null);
             }}
           />
-          <p className="mt-1 text-[11px] leading-snug text-gray-600">{staffScheduleHint}</p>
+          <p className="mt-1 text-[11px] leading-snug text-slate-400">{staffScheduleHint}</p>
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Clinic
           <select
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={clinicId}
             onChange={(e) => setClinicId(e.target.value)}
           >
@@ -318,10 +318,10 @@ export function AppointmentCreateSlideOver({
             ))}
           </select>
         </label>
-        <label className="block text-xs text-gray-600">
+        <label className="block text-xs text-slate-400">
           Location note
           <input
-            className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+            className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1.5 text-sm"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
@@ -330,20 +330,20 @@ export function AppointmentCreateSlideOver({
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className="rounded border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50"
+            className="rounded border border-slate-700 px-2 py-1 text-xs hover:bg-white/[0.03]"
             onClick={() => runAvailabilityCheck()}
           >
             Check availability
           </button>
         </div>
         {availabilityHint ? (
-          <p className={`text-xs ${availabilityHint.startsWith("Slot is") ? "text-emerald-800" : "text-amber-900"}`}>
+          <p className={`text-xs ${availabilityHint.startsWith("Slot is") ? "text-emerald-300" : "text-amber-200"}`}>
             {availabilityHint}
           </p>
         ) : null}
-        {error ? <p className="text-xs text-red-700">{error}</p> : null}
+        {error ? <p className="text-xs text-rose-300">{error}</p> : null}
 
-        <div className="flex gap-2 border-t border-gray-100 pt-2">
+        <div className="flex gap-2 border-t border-white/[0.06] pt-2">
           <button
             type="submit"
             disabled={busy}
@@ -351,7 +351,7 @@ export function AppointmentCreateSlideOver({
           >
             {busy ? "Creating…" : "Create appointment"}
           </button>
-          <button type="button" className="text-sm text-gray-600 hover:text-gray-900" onClick={onClose}>
+          <button type="button" className="text-sm text-slate-400 hover:text-slate-100" onClick={onClose}>
             Cancel
           </button>
         </div>

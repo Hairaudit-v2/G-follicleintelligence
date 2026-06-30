@@ -16,17 +16,17 @@ export function CalendarResourceColumn({
   bodyMinHeightPx: number;
 }) {
   return (
-    <div className="flex min-w-[7.5rem] flex-1 flex-col border-l border-slate-200 first:border-l-0 dark:border-slate-800">
+    <div className="flex min-w-[7.5rem] flex-1 flex-col border-l border-white/[0.08] first:border-l-0 dark:border-slate-800">
       <div
         className={cn(
-          "sticky top-0 z-[2] flex min-h-[3.5rem] flex-col justify-center border-b border-slate-200 bg-slate-50 px-1 py-2 text-center dark:border-slate-800 dark:bg-slate-900",
+          "sticky top-0 z-[2] flex min-h-[3.5rem] flex-col justify-center border-b border-white/[0.08] bg-white/[0.03] px-1 py-2 text-center dark:border-slate-800 dark:bg-slate-900",
           headerClassName
         )}
       >
-        <div className="truncate text-[11px] font-semibold text-slate-900 dark:text-slate-100">{label}</div>
-        {subtitle ? <div className="truncate text-[10px] text-slate-600 dark:text-slate-400">{subtitle}</div> : null}
+        <div className="truncate text-[11px] font-semibold text-slate-100 dark:text-slate-100">{label}</div>
+        {subtitle ? <div className="truncate text-[10px] text-slate-400 dark:text-slate-400">{subtitle}</div> : null}
       </div>
-      <div className="relative flex-1 bg-white dark:bg-slate-950" style={{ minHeight: bodyMinHeightPx }}>
+      <div className="relative flex-1 bg-[#0F1629]/80 backdrop-blur-md dark:bg-slate-950" style={{ minHeight: bodyMinHeightPx }}>
         {children}
       </div>
     </div>

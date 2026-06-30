@@ -26,17 +26,17 @@ export function BookingOperatorTable({
 }) {
   if (bookings.length === 0) {
     return (
-      <div className="rounded border border-gray-200 bg-white p-8 text-center text-sm text-gray-600">
+      <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-8 text-center text-sm text-slate-400">
         No bookings in this range for the current filters.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md shadow-lg shadow-black/40">
       <table className="min-w-full border-collapse text-left text-sm">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-600">
+          <tr className="border-b border-white/[0.08] bg-white/[0.03] text-xs font-semibold uppercase tracking-wide text-slate-400">
             <th className="px-3 py-2">When</th>
             <th className="px-3 py-2">Type</th>
             <th className="px-3 py-2">Status</th>

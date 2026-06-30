@@ -269,7 +269,7 @@ export function ProviderColumnHeader({
     >
       <Avatar className="h-8 w-8 shrink-0 ring-1 ring-[color:var(--fi-cal-ws-shell-border,#1e2937)]">
         {photoUrl ? <AvatarImage src={photoUrl} alt={name} /> : null}
-        <AvatarFallback className="bg-slate-200 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+        <AvatarFallback className="bg-white/[0.08] text-[10px] font-semibold text-slate-300 dark:bg-slate-800 dark:text-slate-300">
           {providerInitials(name)}
         </AvatarFallback>
       </Avatar>
@@ -280,7 +280,7 @@ export function ProviderColumnHeader({
             <p className="truncate text-[11px] font-medium text-[var(--fi-cal-ws-header-subtitle,#94a3b8)]">{role}</p>
           ) : null}
           {ownerColumn ? (
-            <span className="shrink-0 rounded bg-slate-200/90 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-slate-700/80 dark:text-slate-300">
+            <span className="shrink-0 rounded bg-white/[0.08] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-300 dark:bg-slate-700/80 dark:text-slate-300">
               Owner
             </span>
           ) : null}

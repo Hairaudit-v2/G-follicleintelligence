@@ -71,13 +71,13 @@ export function AppointmentCoreDetailsSection({
   return (
     <section className={appointmentCardClass}>
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Schedule & team</h3>
-      <p className="text-sm text-gray-900">{range}</p>
-      <p className="mt-1 text-xs text-gray-600">
+      <p className="text-sm text-slate-100">{range}</p>
+      <p className="mt-1 text-xs text-slate-400">
         Duration: {durationMin > 0 ? `${durationMin} min` : "—"}
         {booking.timezone?.trim() ? ` · ${booking.timezone}` : ""}
       </p>
 
-      <dl className="mt-3 grid gap-1.5 text-xs text-gray-700">
+      <dl className="mt-3 grid gap-1.5 text-xs text-slate-300">
         <div className="flex justify-between gap-2">
           <dt className="text-gray-500">Primary assignee</dt>
           <dd>{userLabel(assignees, booking.assigned_user_id)}</dd>
@@ -101,34 +101,34 @@ export function AppointmentCoreDetailsSection({
       </dl>
 
       {canMutate ? (
-        <div className="mt-3 border-t border-gray-100 pt-2">
-          <button type="button" className="text-xs font-medium text-blue-600 hover:underline" onClick={onToggleReschedule}>
+        <div className="mt-3 border-t border-white/[0.06] pt-2">
+          <button type="button" className="text-xs font-medium text-blue-300 hover:underline" onClick={onToggleReschedule}>
             {rescheduleOpen ? "Hide reschedule" : "Reschedule / update status"}
           </button>
           {rescheduleOpen ? (
             <form className="mt-2 space-y-2" onSubmit={onRescheduleSubmit}>
-              <label className="block text-xs text-gray-600">
+              <label className="block text-xs text-slate-400">
                 Start
                 <input
                   type="datetime-local"
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
                   value={startLocal}
                   onChange={(e) => onStartLocalChange(e.target.value)}
                 />
               </label>
-              <label className="block text-xs text-gray-600">
+              <label className="block text-xs text-slate-400">
                 End
                 <input
                   type="datetime-local"
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
                   value={endLocal}
                   onChange={(e) => onEndLocalChange(e.target.value)}
                 />
               </label>
-              <label className="block text-xs text-gray-600">
+              <label className="block text-xs text-slate-400">
                 Status
                 <select
-                  className="mt-0.5 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="mt-0.5 w-full rounded border border-slate-700 px-2 py-1 text-sm"
                   value={bookingStatus}
                   onChange={(e) => onBookingStatusChange(e.target.value)}
                 >
@@ -142,7 +142,7 @@ export function AppointmentCoreDetailsSection({
                   ) : null}
                 </select>
               </label>
-              {rescheduleErr ? <p className="text-xs text-red-700">{rescheduleErr}</p> : null}
+              {rescheduleErr ? <p className="text-xs text-rose-300">{rescheduleErr}</p> : null}
               <button
                 type="submit"
                 disabled={rescheduleBusy}
@@ -155,16 +155,16 @@ export function AppointmentCoreDetailsSection({
         </div>
       ) : null}
 
-      <div className="mt-3 border-t border-gray-100 pt-2">
+      <div className="mt-3 border-t border-white/[0.06] pt-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Status history</p>
         {statusHistory.length === 0 ? (
-          <p className="mt-1 text-xs text-gray-600">No history recorded yet.</p>
+          <p className="mt-1 text-xs text-slate-400">No history recorded yet.</p>
         ) : (
           <ul className="mt-2 max-h-32 space-y-1.5 overflow-y-auto text-xs">
             {statusHistory.slice(0, 12).map((h, i) => (
-              <li key={`${h.at}-${h.status}-${i}`} className="border-l-2 border-gray-100 pl-2">
+              <li key={`${h.at}-${h.status}-${i}`} className="border-l-2 border-white/[0.06] pl-2">
                 <span className="text-gray-500">{h.at}</span> · <span className="font-medium">{h.status}</span>
-                {h.note ? <span className="text-gray-600"> — {h.note}</span> : null}
+                {h.note ? <span className="text-slate-400"> — {h.note}</span> : null}
               </li>
             ))}
           </ul>

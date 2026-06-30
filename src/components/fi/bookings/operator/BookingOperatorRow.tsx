@@ -26,15 +26,15 @@ function anchorSummary(tenantId: string, row: FiBookingRow): ReactNode {
   const parts: ReactNode[] = [];
   if (row.lead_id) {
     parts.push(
-      <Link key="lead" className="text-blue-600 hover:underline" href={`/fi-admin/${tenantId}/crm/leads/${row.lead_id}`}>
+      <Link key="lead" className="text-blue-300 hover:underline" href={`/fi-admin/${tenantId}/crm/leads/${row.lead_id}`}>
         Lead
       </Link>
     );
   }
   if (row.person_id) {
     parts.push(
-      <span key="person" className="text-gray-700">
-        Person <code className="rounded bg-gray-100 px-0.5 text-xs">{row.person_id.slice(0, 8)}…</code>
+      <span key="person" className="text-slate-300">
+        Person <code className="rounded bg-white/[0.06] px-0.5 text-xs">{row.person_id.slice(0, 8)}…</code>
       </span>
     );
   }
@@ -42,7 +42,7 @@ function anchorSummary(tenantId: string, row: FiBookingRow): ReactNode {
     parts.push(
       <Link
         key="patient"
-        className="text-blue-600 hover:underline"
+        className="text-blue-300 hover:underline"
         href={`/fi-admin/${tenantId}/patients/${row.patient_id}`}
       >
         Patient
@@ -51,7 +51,7 @@ function anchorSummary(tenantId: string, row: FiBookingRow): ReactNode {
   }
   if (row.case_id) {
     parts.push(
-      <Link key="case" className="text-blue-600 hover:underline" href={`/fi-admin/${tenantId}/cases/${row.case_id}`}>
+      <Link key="case" className="text-blue-300 hover:underline" href={`/fi-admin/${tenantId}/cases/${row.case_id}`}>
         Case
       </Link>
     );
@@ -123,32 +123,32 @@ export function BookingOperatorRow({
   }
 
   return (
-    <tr className="border-t border-gray-100 text-sm">
-      <td className="whitespace-nowrap px-3 py-2 align-top text-gray-800">{range}</td>
+    <tr className="border-t border-white/[0.06] text-sm">
+      <td className="whitespace-nowrap px-3 py-2 align-top text-slate-200">{range}</td>
       <td className="px-3 py-2 align-top">
         <BookingTypeBadge type={booking.booking_type} />
       </td>
       <td className="px-3 py-2 align-top">
         <BookingStatusBadge status={booking.booking_status} />
       </td>
-      <td className="max-w-[14rem] px-3 py-2 align-top text-gray-900">
+      <td className="max-w-[14rem] px-3 py-2 align-top text-slate-100">
         <div className="font-medium">{booking.title?.trim() || "Booking"}</div>
         {cancelled && booking.cancellation_reason?.trim() ? (
           <p className="mt-0.5 text-xs text-gray-500">Reason: {booking.cancellation_reason}</p>
         ) : null}
       </td>
       <td className="px-3 py-2 align-top">{anchorSummary(tenantId, booking)}</td>
-      <td className="max-w-[14rem] px-3 py-2 align-top text-gray-700">
+      <td className="max-w-[14rem] px-3 py-2 align-top text-slate-300">
         <span className="block text-xs leading-snug">{assignment.summaryLine}</span>
       </td>
-      <td className="max-w-[10rem] px-3 py-2 align-top text-gray-700">{clinicOrLocation(clinics, booking)}</td>
+      <td className="max-w-[10rem] px-3 py-2 align-top text-slate-300">{clinicOrLocation(clinics, booking)}</td>
       <td className="whitespace-nowrap px-3 py-2 align-top">
         <div className="flex flex-wrap gap-1">
           {!cancelled && !completed ? (
             <>
               <button
                 type="button"
-                className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200 hover:bg-white/[0.03] disabled:opacity-50"
                 disabled={busy}
                 onClick={onEdit}
               >
@@ -156,7 +156,7 @@ export function BookingOperatorRow({
               </button>
               <button
                 type="button"
-                className="rounded border border-emerald-600 px-2 py-1 text-xs text-emerald-800 hover:bg-emerald-50 disabled:opacity-50"
+                className="rounded border border-emerald-600 px-2 py-1 text-xs text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50"
                 disabled={busy}
                 onClick={() => void onComplete()}
               >
@@ -164,7 +164,7 @@ export function BookingOperatorRow({
               </button>
               <button
                 type="button"
-                className="rounded border border-red-300 px-2 py-1 text-xs text-red-800 hover:bg-red-50 disabled:opacity-50"
+                className="rounded border border-red-300 px-2 py-1 text-xs text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
                 disabled={busy}
                 onClick={() => void onCancel()}
               >
@@ -177,7 +177,7 @@ export function BookingOperatorRow({
             <span className="text-xs text-gray-500">Done</span>
           )}
         </div>
-        {feedback ? <p className="mt-1 text-xs text-red-600">{feedback}</p> : null}
+        {feedback ? <p className="mt-1 text-xs text-rose-300">{feedback}</p> : null}
       </td>
     </tr>
   );

@@ -25,23 +25,23 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-6">
       <header className="space-y-2">
-        <h1 className="text-lg font-semibold text-gray-900">Bookings</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="text-lg font-semibold text-slate-100">Bookings</h1>
+        <p className="text-sm text-slate-400">
           Use the{" "}
-          <Link className="text-blue-600 underline hover:text-blue-800" href={`/fi-admin/${tenantId}/calendar`}>
+          <Link className="text-blue-300 underline hover:text-blue-300" href={`/fi-admin/${tenantId}/calendar`}>
             Calendar
           </Link>{" "}
           for week/day scheduling. This page is the operational booking list — filter, create, and complete work in a
           dense table.
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-400">
           Cancelled bookings are locked except for cancellation details (server policy); use the list to review reasons.
         </p>
-        <label className="block max-w-md text-xs text-gray-600">
+        <label className="block max-w-md text-xs text-slate-400">
           FI Admin key (optional — paste when your session role cannot write via service actions alone)
           <input
             type="password"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 font-mono text-sm"
+            className="mt-1 w-full rounded border border-slate-700 px-2 py-1 font-mono text-sm"
             value={adminKey}
             onChange={(e) => setAdminKey(e.target.value)}
             autoComplete="off"
@@ -50,36 +50,36 @@ export function BookingOperatorPage({ data }: { data: BookingsOperatorPageData }
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
+        <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-gray-500">Today (clinic calendar day)</p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900">{summaryCounts.today}</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">{summaryCounts.today}</p>
         </div>
-        <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
+        <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-gray-500">Upcoming (active)</p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900">{summaryCounts.upcoming}</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">{summaryCounts.upcoming}</p>
         </div>
-        <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
+        <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-gray-500">Overdue / past incomplete</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-900">{summaryCounts.overdue}</p>
+          <p className="mt-1 text-2xl font-semibold text-amber-200">{summaryCounts.overdue}</p>
         </div>
-        <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
+        <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-gray-500">Cancelled (in summary window)</p>
-          <p className="mt-1 text-2xl font-semibold text-gray-700">{summaryCounts.cancelled}</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-300">{summaryCounts.cancelled}</p>
         </div>
-        <div className="rounded border border-gray-200 bg-white p-3 shadow-sm">
+        <div className="rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-3 shadow-lg shadow-black/40">
           <p className="text-xs font-medium uppercase text-gray-500">Completed (in summary window)</p>
-          <p className="mt-1 text-2xl font-semibold text-emerald-900">{summaryCounts.completed}</p>
+          <p className="mt-1 text-2xl font-semibold text-emerald-300">{summaryCounts.completed}</p>
         </div>
       </section>
       {summaryTruncated ? (
-        <p className="text-xs text-amber-800">
+        <p className="text-xs text-amber-300">
           Summary counts may be capped: more than the configured maximum bookings overlap the internal summary window.
           Narrow your list filters or extend the range in a follow-up if needed.
         </p>
       ) : null}
 
       {listTruncated ? (
-        <p className="text-xs text-amber-800">
+        <p className="text-xs text-amber-300">
           The booking list hit the row cap for this query ({bookings.length} rows shown, cap{" "}
           {DEFAULT_OPERATOR_BOOKINGS_LIMIT}). Narrow your date range or filters.
         </p>

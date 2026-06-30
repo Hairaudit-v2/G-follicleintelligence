@@ -28,7 +28,7 @@ function isUuid(v: string): boolean {
   return UUID_RE.test(v.trim());
 }
 
-const card = "rounded border border-gray-200 bg-white p-4 shadow-sm";
+const card = "rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4 shadow-lg shadow-black/40";
 
 export function BookingQuickCreatePanel({
   tenantId,
@@ -158,19 +158,19 @@ export function BookingQuickCreatePanel({
 
   return (
     <div className={card}>
-      <h2 className="text-sm font-semibold text-gray-900">Quick create</h2>
-      <p className="mt-1 text-xs text-gray-600">
+      <h2 className="text-sm font-semibold text-slate-100">Quick create</h2>
+      <p className="mt-1 text-xs text-slate-400">
         Paste an existing UUID for a lead, person, patient, or case anchor (no search yet). Consultation-only rules apply
         when the anchor is a non-converted lead.
       </p>
       <form onSubmit={(e) => void onSubmit(e)} className="mt-3 grid gap-3 sm:grid-cols-2">
-        <label className="block text-xs font-medium text-gray-700 sm:col-span-2">
+        <label className="block text-xs font-medium text-slate-300 sm:col-span-2">
           Anchor
           <div className="mt-1 flex flex-wrap gap-2">
             <select
               value={anchorKind}
               onChange={(e) => setAnchorKind(e.target.value as typeof anchorKind)}
-              className="rounded border border-gray-300 bg-white px-2 py-1 text-sm"
+              className="rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm"
             >
               <option value="lead">Lead ID</option>
               <option value="person">Person ID</option>
@@ -181,16 +181,16 @@ export function BookingQuickCreatePanel({
               value={anchorId}
               onChange={(e) => setAnchorId(e.target.value)}
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-              className="min-w-[16rem] flex-1 rounded border border-gray-300 px-2 py-1 font-mono text-sm"
+              className="min-w-[16rem] flex-1 rounded border border-slate-700 px-2 py-1 font-mono text-sm"
             />
           </div>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Type
           <select
             value={bookingType}
             onChange={(e) => onProcedureTypeChange(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm"
           >
             {typeOptions.map((t) => (
               <option key={t} value={t}>
@@ -199,30 +199,30 @@ export function BookingQuickCreatePanel({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Title (optional)
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Start{tz ? ` (${displayCalendarTimezoneSubtitle(tz)})` : " (device)"}
           <input
             type="datetime-local"
             value={startLocal}
             onChange={(e) => setStartLocal(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           End{tz ? ` (${displayCalendarTimezoneSubtitle(tz)})` : " (device)"}
           <input
             type="datetime-local"
             value={endLocal}
             onChange={(e) => setEndLocal(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
           />
           <p className="mt-1 text-[11px] text-gray-500">
             Default slot for this procedure type: {defaultProcedureDurationMinutes(bookingType, services)} min (end
@@ -232,22 +232,22 @@ export function BookingQuickCreatePanel({
             ) : null}
           </p>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Clinical provider
           <StaffClinicalSelect
             tenantId={tenantId}
             options={clinicalStaffOptions}
             value={assignedStaffId}
             onChange={setAssignedStaffId}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Clinic (optional)
           <select
             value={clinicId}
             onChange={(e) => setClinicId(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1 text-sm"
           >
             <option value="">None</option>
             {clinics.map((c) => (
@@ -257,12 +257,12 @@ export function BookingQuickCreatePanel({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700 sm:col-span-2">
+        <label className="block text-xs font-medium text-slate-300 sm:col-span-2">
           Location text (optional)
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="mt-1 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 px-2 py-1 text-sm"
           />
         </label>
         <div className="sm:col-span-2">
@@ -274,7 +274,7 @@ export function BookingQuickCreatePanel({
             {busy ? "Creating…" : "Create booking"}
           </button>
         </div>
-        {feedback ? <p className="sm:col-span-2 text-sm text-red-600">{feedback}</p> : null}
+        {feedback ? <p className="sm:col-span-2 text-sm text-rose-300">{feedback}</p> : null}
       </form>
     </div>
   );

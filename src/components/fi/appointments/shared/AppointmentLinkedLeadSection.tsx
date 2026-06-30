@@ -29,8 +29,8 @@ export function AppointmentLinkedLeadSection({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Linked CRM lead</h3>
-          <p className="mt-1 text-sm font-medium text-gray-900">{leadTitleFromRow(lead.summary, lead.id)}</p>
-          {personName && personName !== "—" ? <p className="text-sm text-gray-700">{personName}</p> : null}
+          <p className="mt-1 text-sm font-medium text-slate-100">{leadTitleFromRow(lead.summary, lead.id)}</p>
+          {personName && personName !== "—" ? <p className="text-sm text-slate-300">{personName}</p> : null}
         </div>
         {bookingType ? <BookingTypeBadge type={bookingType} /> : null}
       </div>
@@ -38,28 +38,28 @@ export function AppointmentLinkedLeadSection({
       <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
         <div>
           <dt className="text-gray-500">Stage</dt>
-          <dd className="font-medium text-gray-900">{opportunity.stageLabel}</dd>
+          <dd className="font-medium text-slate-100">{opportunity.stageLabel}</dd>
         </div>
         <div>
           <dt className="text-gray-500">Lead status</dt>
-          <dd className="text-gray-900">{lead.status}</dd>
+          <dd className="text-slate-100">{lead.status}</dd>
         </div>
         <div>
           <dt className="text-gray-500">Treatment value</dt>
-          <dd className="text-gray-900">{opportunity.treatmentValueLabel ?? "—"}</dd>
+          <dd className="text-slate-100">{opportunity.treatmentValueLabel ?? "—"}</dd>
         </div>
         <div>
           <dt className="text-gray-500">Conversion probability</dt>
-          <dd className="text-gray-900">{opportunity.conversionProbabilityLabel ?? "—"}</dd>
+          <dd className="text-slate-100">{opportunity.conversionProbabilityLabel ?? "—"}</dd>
         </div>
       </dl>
 
       <div className="mt-3 flex flex-wrap gap-3 text-sm">
-        <Link href={leadHref} className="font-medium text-blue-600 hover:underline">
+        <Link href={leadHref} className="font-medium text-blue-300 hover:underline">
           Open lead detail →
         </Link>
         {patientHref ? (
-          <Link href={patientHref} className="text-blue-600 hover:underline">
+          <Link href={patientHref} className="text-blue-300 hover:underline">
             Patient record →
           </Link>
         ) : (

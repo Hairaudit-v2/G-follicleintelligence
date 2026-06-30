@@ -29,17 +29,17 @@ export function BookingCalendarFilters({
   });
 
   return (
-    <form method="get" action={action} className="space-y-3 rounded border border-gray-200 bg-white p-4">
+    <form method="get" action={action} className="space-y-3 rounded border border-white/[0.08] bg-[#0F1629]/80 backdrop-blur-md p-4">
       <input type="hidden" name="view" value={query.view} />
       <input type="hidden" name="date" value={query.dateAnchor} />
       {query.sampleMode ? <input type="hidden" name="sample" value="1" /> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Type
           <select
             name="type"
             defaultValue={query.bookingType ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any type</option>
             {allBookingTypeOptions().map((o) => (
@@ -49,12 +49,12 @@ export function BookingCalendarFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Status
           <select
             name="status"
             defaultValue={query.status ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any status</option>
             {allBookingStatusOptions().map((o) => (
@@ -64,12 +64,12 @@ export function BookingCalendarFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Clinical provider
           <select
             name="staffId"
             defaultValue={query.staffId ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any provider</option>
             {clinicalStaffOptions.map((s) => (
@@ -79,12 +79,12 @@ export function BookingCalendarFilters({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-medium text-gray-700">
+        <label className="block text-xs font-medium text-slate-300">
           Clinic
           <select
             name="clinicId"
             defaultValue={query.clinicId ?? ""}
-            className="mt-1 block w-full rounded border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 block w-full rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-2 py-1.5 text-sm"
           >
             <option value="">Any clinic</option>
             {clinics.map((c) => (
@@ -94,7 +94,7 @@ export function BookingCalendarFilters({
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-2 text-xs text-gray-700">
+        <label className="flex items-center gap-2 text-xs text-slate-300">
           <input type="checkbox" name="includeCancelled" value="1" defaultChecked={query.includeCancelled} />
           Include cancelled
         </label>
@@ -109,7 +109,7 @@ export function BookingCalendarFilters({
             date: query.dateAnchor,
             sample: query.sampleMode ? true : undefined,
           })}
-          className="inline-flex items-center rounded border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50"
+          className="inline-flex items-center rounded border border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/[0.03]"
         >
           Reset filters
         </a>
