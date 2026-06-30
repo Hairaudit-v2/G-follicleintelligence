@@ -67,7 +67,7 @@ export function PatientPhotoCaptureActions({
               tenantId={tenantId}
               patientId={patientId}
               label="Add Note"
-              className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-violet-300 bg-violet-500/10 px-3 text-xs font-semibold text-violet-950 hover:bg-violet-500/15"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-violet-300 bg-violet-500/10 px-3 text-xs font-semibold text-violet-200 hover:bg-violet-500/15"
             />
           </div>
         </div>

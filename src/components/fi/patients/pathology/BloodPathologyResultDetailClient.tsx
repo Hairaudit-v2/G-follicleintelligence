@@ -542,7 +542,7 @@ export function BloodPathologyResultDetailClient({
 
             <div className="rounded border border-sky-100 bg-cyan-500/10 p-3">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-cyan-200">Overview</h3>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-sky-950">{aiInterpretation.interpretation_json.overview}</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-cyan-200">{aiInterpretation.interpretation_json.overview}</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">

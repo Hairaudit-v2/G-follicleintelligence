@@ -93,7 +93,7 @@ export function PatientImageEditPanel({
   return (
     <div className="rounded border border-blue-100 bg-blue-500/10 p-3 text-sm">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold text-blue-950">Edit image</p>
+        <p className="text-xs font-semibold text-blue-200">Edit image</p>
         <button type="button" className="text-xs text-blue-800 hover:underline" onClick={onClose}>
           Close
         </button>

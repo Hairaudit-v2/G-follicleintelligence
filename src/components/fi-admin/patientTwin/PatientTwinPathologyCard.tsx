@@ -64,7 +64,7 @@ export function PatientTwinPathologyCard({ tenantId, patientId, twin }: { tenant
               Open result
             </Link>
           </div>
-          <ul className="mt-2 flex flex-wrap gap-2 text-xs text-sky-950">
+          <ul className="mt-2 flex flex-wrap gap-2 text-xs text-cyan-200">
             {latest_ai_interpretation.hair_loss_relevance_score != null ? (
               <li className="rounded-full bg-[#0F1629]/80 backdrop-blur-md px-2 py-1">Hair relevance: {latest_ai_interpretation.hair_loss_relevance_score}/100</li>
             ) : null}
@@ -73,9 +73,9 @@ export function PatientTwinPathologyCard({ tenantId, patientId, twin }: { tenant
             ) : null}
           </ul>
           {latest_ai_interpretation.main_contributors.length > 0 ? (
-            <p className="mt-2 text-sm text-sky-950">Main contributors: {latest_ai_interpretation.main_contributors.join(", ")}</p>
+            <p className="mt-2 text-sm text-cyan-200">Main contributors: {latest_ai_interpretation.main_contributors.join(", ")}</p>
           ) : latest_ai_interpretation.overview_snippet ? (
-            <p className="mt-2 text-sm text-sky-950">{latest_ai_interpretation.overview_snippet}</p>
+            <p className="mt-2 text-sm text-cyan-200">{latest_ai_interpretation.overview_snippet}</p>
           ) : null}
         </div>
       ) : null}

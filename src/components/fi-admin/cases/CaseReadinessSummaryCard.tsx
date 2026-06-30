@@ -41,7 +41,7 @@ export function CaseReadinessSummaryCard({ report }: { report: CaseReadinessRepo
 
       <div className="mt-4 rounded border border-blue-100 bg-blue-500/10 p-3">
         <p className="text-[11px] font-medium uppercase tracking-wide text-blue-300">Next recommended step</p>
-        <p className="mt-1 text-sm text-blue-950">{nextRecommendedStep}</p>
+        <p className="mt-1 text-sm text-blue-200">{nextRecommendedStep}</p>
       </div>
 
       {warnings.length > 0 ? (
