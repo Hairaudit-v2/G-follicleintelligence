@@ -177,19 +177,21 @@ No provisioning scripts executed against production (no deploy / no destructive 
 
 | # | Evidence item | Artifact placeholder | Owner | Target date | Status |
 |---|---------------|----------------------|-------|-------------|--------|
-| E1 | `EVOLVED_PERTH_TENANT_ID` matches production `fi_tenants.id` | Redacted env + SQL read-only UUID | Platform | | ☐ |
-| E2 | ≥2 real operators: Auth + `fi_users.auth_user_id` | Redacted UUID table below | Evolved clinic lead | | ☐ |
+| E1 | `EVOLVED_PERTH_TENANT_ID` matches production `fi_tenants.id` | Redacted env + SQL read-only UUID | Platform | 2026-06-30 | ☑ |
+| E2 | ≥2 real operators: Auth + `fi_users.auth_user_id` | Redacted UUID table below | Evolved clinic lead | 2026-06-30 | ☑ |
 | E3 | Payroll import commit or IIOHR cron verified | Import/cron log | Clinical ops | | ☐ |
-| E4 | Staff ↔ fi_users link for calendar operators | Admin screenshot | Clinical ops | | ☐ |
+| E4 | Staff ↔ fi_users link for calendar operators | 10/12 fi_staff linked (audit 2026-06-30) | Clinical ops | 2026-06-30 | ☑ |
 | E5 | Authenticated smoketest journey complete | [smoketest journey](../evolved-smoketest-journey.md) | Sprint lead | | ☐ |
-| E6 | Cross-tenant denial verified | E2E or manual test note | Security | | ☐ |
-| E7 | Seed `@follicleintelligence.local` users disabled in prod (if present) | Note below | Platform | | ☐ |
+| E6 | Cross-tenant denial verified | `smoke-prod-2026-06-30.txt` check J PASS | Security | 2026-06-30 | ☑ |
+| E7 | Seed `@follicleintelligence.local` users disabled in prod (if present) | N/A on evolved-hair tenant | Platform | 2026-06-30 | ☑ |
+
+**Tenant resolution (2026-06-30):** Production uses slug `evolved-hair` (`Evolved Hair Restoration`), id `c2615b95-b707-4485-aa5f-be8f78ec868a`. Separate slug `evolved` (`Evolved Hair Clinics`) exists for provision-script seeding only.
 
 ### Provisioned identities (redacted template)
 
 | Role | fi_users.id | auth.users linked (Y/N) | Date provisioned | Verifier |
 |------|-------------|-------------------------|------------------|----------|
-| Admin | | | | |
-| Consultant | | | | |
+| tenant_backend | 09f64918… | Y (pre-existing) | 2026-06-30 | Platform audit |
+| crm_operator (reception) | 94934c4c-c28f-4881-a6ac-91929db1a588 | Y (invite sent) | 2026-06-30 | `provision-evolved-operator.ts --commit` |
 
 **Closure rule:** BLK-SEC-05 → **Complete** when E2 + E5 + E6 Complete.

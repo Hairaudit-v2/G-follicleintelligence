@@ -15,6 +15,8 @@
     "check:migrations": "tsx scripts/check-migration-versions.ts",
     "check:env:production-rules": "tsx --test src/lib/env/fiEnv.server.test.ts",
     "smoke:prod": "tsx scripts/fi-production-smoke-test.ts",
+    "audit:evolved-readiness": "tsx scripts/audit-evolved-production-readiness.ts",
+    "provision:evolved-operator": "tsx scripts/provision-evolved-operator.ts",
     "smoke:reception-os": "tsx scripts/reception-os-smoke-test.ts",
     "smoke:financial-os": "tsx scripts/financial-os-smoke-test.ts",
     "validate:reception-os": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/reception-os-pilot-validation.ts",

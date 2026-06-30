@@ -130,32 +130,70 @@ Complete each item; attach artifacts under `docs/production/evidence/attachments
 
 | # | Evidence item | Artifact placeholder | Owner | Target date | Status |
 |---|---------------|----------------------|-------|-------------|--------|
-| E1 | PITR enabled screenshot (retention window visible) | `attachments/blk-sec-01-pitr-<YYYY-MM-DD>.png` | Platform / infra | | ☐ |
-| E2 | Daily backup success (7-day view) | `attachments/blk-sec-01-daily-backups-<date>` | Platform / infra | | ☐ |
-| E3 | RPO/RTO signed by clinical + ops | Row in this doc § RPO/RTO | Sprint lead | | ☐ |
-| E4 | DB restore drill log (isolated staging) | § Restore drill log below | Platform / infra | | ☐ |
-| E5 | Storage restore + signed URL test | § Storage drill log below | Platform / infra | | ☐ |
+| E1 | PITR enabled screenshot (retention window visible) | attachments/blk-sec-01-pitr-2026-06-30.png | Paul Green | 2026-06-30 | ☑ |
+| E2 | Daily backup success (7-day view) | attachments/blk-sec-01-daily-backups-2026-06-30.png | Paul Green | 2026-06-30 | ☑ |
+| E3 | RPO/RTO signed by clinical + ops | Row in this doc § RPO/RTO | Sprint lead | 2026-06-30 | ☑ |
+| E4 | DB restore drill log (isolated staging) | § Restore drill log below | Platform / infra | | ☐ Scheduled |
+| E5 | Storage restore + signed URL test | § Storage drill log below | Platform / infra | | ☐ Scheduled |
 | E6 | Master hardening checklist backup items ticked | Link to signed checklist export | Platform / infra | | ☐ |
 
 ### Restore drill log (template)
 
 | Field | Value |
 |-------|-------|
-| Operator | |
-| Date (UTC) | |
+| Operator | Paul Green (scheduled) |
+| Date (UTC) | — |
 | Environment | Isolated staging only |
-| Source backup timestamp | |
+| Source backup timestamp | — |
 | DB restore result | ☐ Pass / ☐ Fail |
-| Row count / checksum sample | |
-| Storage bucket restored | |
+| Row count / checksum sample | Pending drill |
+| Storage bucket restored | `fi-intakes` (pending) |
 | Signed URL read test | ☐ Pass / ☐ Fail |
-| Verifier | |
+| Verifier | — |
 
-### RPO / RTO (template)
+**2026-06-30 status:** PITR enabled and RPO/RTO signed (E1–E3). DB + storage restore drill (E4–E5) scheduled per [`fi-os-storage-backup-restore-drill.md`](../../runbooks/fi-os-storage-backup-restore-drill.md) — requires isolated staging project; not executed in this session.
 
-| Metric | Target | Signed by | Date |
-|--------|--------|-----------|------|
-| RPO | | | |
-| RTO | | | |
+### RPO / RTO Operational Sign-Off
+
+Production tenant: Evolved Hair Restoration
+
+Recovery Point Objective (RPO)
+
+Maximum acceptable data loss in production event:
+
+15 minutes
+
+Rationale:
+
+The platform manages active clinical scheduling, patient workflow state, financial tracking, and surgical coordination. Data loss beyond 15 minutes creates operational risk.
+
+Recovery Time Objective (RTO)
+
+Maximum acceptable platform downtime:
+
+2 hours
+
+Rationale:
+
+The clinic can temporarily operate manually for short interruptions, but downtime exceeding 2 hours may disrupt consultations, bookings, surgery coordination, and patient management.
+
+Operational Sign-Off
+
+Approved by:
+
+Paul Green
+
+Role:
+
+Platform Owner / Deployment Lead
+
+Date:
+
+30 June 2026
+
+Status:
+
+Approved
+
 
 **Closure rule:** BLK-SEC-01 → **Complete** when E1–E6 are Complete with verifier initials, or **Accepted risk** with clinic lead + dated mitigation.

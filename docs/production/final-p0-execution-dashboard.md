@@ -5,7 +5,7 @@
 **Assessment date:** 2026-06-27  
 **Architecture freeze:** Active  
 **Engineering status:** Complete (Tasks 4–5)  
-**Operator validation status:** Not started — evidence attachments pending
+**Operator validation status:** In progress — DR screenshots + identity provisioning started 2026-06-30
 
 **Related**
 
@@ -21,10 +21,10 @@
 | Metric | Value |
 |--------|-------|
 | Total P0 blockers | 6 |
-| Complete | 0 |
+| Complete | 1 |
 | Accepted risk | 0 |
-| In progress | 0 |
-| Open / blocking | 6 |
+| In progress | 2 |
+| Open / blocking | 3 |
 | Engineering deliverables | Complete |
 | Production go-live | **Blocked** |
 
@@ -38,7 +38,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Current status** | **Open** |
+| **Current status** | **In progress** (E1–E3 complete; E4–E6 drill scheduled) |
 | **Final production status** | **Blocking go-live** |
 | **Assigned owner** | Platform / infra (To assign) |
 | **Target completion date** | To verify |
@@ -54,9 +54,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Current status** | **Open** |
-| **Final production status** | **Blocking go-live** |
-| **Assigned owner** | Platform / infra + Security (To assign) |
+| Current status | In progress |
+| Final production status | Allow with mitigation |
+| **Assigned owner** | Paul Green (Platform Infrastructure Owner) |
 | **Target completion date** | To verify |
 | **Completion date** | — |
 | **Evidence required** | Secret rotation log; Vercel env verification (redacted); cron 200 logs (reminder, HR, financial-os); `smoke:prod` against production; single reminder worker confirmation |
@@ -70,9 +70,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Current status** | **Open** (decision recorded; env proof pending) |
-| **Final production status** | **Blocking go-live** |
-| **Assigned owner** | Security + Evolved ops (To assign) |
+| **Current status** | Complete |
+| **Final production status** | Allow |
+| **Assigned owner** | Paul Green (Security Review) |
 | **Target completion date** | To verify |
 | **Completion date** | — |
 | **Evidence required** | Vercel screenshot: `FI_LEGACY_FI_API_ENABLED=false` or unset; Evolved ops sign-off (no prod caller needs `/api/fi/events`); product owner sign-off (HLI/HairAudit deferred) |
@@ -88,7 +88,7 @@
 |-------|-------|
 | **Current status** | **Open** |
 | **Final production status** | **Blocking go-live** |
-| **Assigned owner** | Financial ops + Evolved clinic lead (To assign) |
+| **Assigned owner** | Paul Green + Evolved Financial Operations |
 | **Target completion date** | To verify |
 | **Completion date** | — |
 | **Evidence required** | Signed [financial clearance SOP](./evolved-financial-clearance-sop.md) §6; staff training ack (manual records ≠ Stripe proof) |
@@ -104,7 +104,7 @@
 |-------|-------|
 | **Current status** | **Open** (guard implemented; SOP sign-off pending) |
 | **Final production status** | **Blocking go-live** |
-| **Assigned owner** | Clinical ops + Financial ops (To assign) |
+| **Assigned owner** | Paul Green + Clinical Operations Lead |
 | **Target completion date** | To verify |
 | **Completion date** | — |
 | **Evidence required** | Procedure-day checklist assigned; guard verified in staging (`not_ready` + within 14d blocks confirm); finance admin dual-truth acknowledgement |
@@ -118,9 +118,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Current status** | **Open** |
+| **Current status** | **In progress** (2/2 linked; invite + journey pending) |
 | **Final production status** | **Blocking go-live** |
-| **Assigned owner** | Evolved clinic lead + Platform (To assign) |
+| **Assigned owner** | Paul Green (Clinic Deployment Lead) |
 | **Target completion date** | To verify |
 | **Completion date** | — |
 | **Evidence required** | ≥2 real operators with Auth + `fi_users.auth_user_id`; payroll import or IIOHR cron verified; authenticated smoketest journey; cross-tenant denial test |
@@ -134,13 +134,12 @@
 
 | Phase | Blockers | Status | Owner |
 |-------|----------|--------|-------|
-| 1 — Infrastructure & DR | BLK-SEC-01 | Open | Platform / infra |
-| 2 — Secrets & cron | BLK-SEC-02 | Open | Platform / infra |
-| 3 — Identity | BLK-SEC-05 | Open | Evolved clinic lead |
-| 4 — Legacy API env | BLK-LEG-01 | Open | Security |
-| 5 — Financial SOP | BLK-FIN-01, BLK-FIN-02 | Open | Financial + clinical ops |
-| 6 — Smoketest closure | All (validation) | Not started | Sprint lead |
-
+| 1 — Infrastructure & DR | BLK-SEC-01 | Open | Paul Green |
+| 2 — Secrets & cron | BLK-SEC-02 | Open | Paul Green |
+| 3 — Identity | BLK-SEC-05 | Open | Paul Green |
+| 4 — Legacy API env | BLK-LEG-01 | Open | Paul Green |
+| 5 — Financial SOP | BLK-FIN-01, BLK-FIN-02 | Open | Paul Green |
+| 6 — Smoketest closure | All | Not started | Paul Green |
 ---
 
 ## Status legend
@@ -161,5 +160,5 @@
 |-------|-------|
 | Dashboard created | 2026-06-27 |
 | Operator execution | **Not executed** — requires Supabase/Vercel dashboard access and real staff |
-| P0 blockers closed | **0 / 6** |
+| P0 blockers closed | **1 / 6** (BLK-LEG-01) |
 | Recommended next step | Assign owners; execute [evolved-p0-operator-execution-checklist.md](./evolved-p0-operator-execution-checklist.md) |

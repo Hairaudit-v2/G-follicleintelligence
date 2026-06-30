@@ -4,8 +4,8 @@
 **Production tenant:** Evolved Hair Restoration (Perth)  
 **Purpose:** Single end-to-end SMOKETEST journey template — lead through analytics closure  
 **Convention:** Prefix all test records with `SMOKETEST-` per [clinic readiness runbook](../smoke/fi-os-clinic-readiness-runbook.md)  
-**Status:** Task 6 — **Not executed** (blocked on BLK-SEC-05 real staff auth + operator assignment)  
-**Last updated:** 2026-06-27
+**Status:** Task 6 — **In progress** (unauthenticated smoke PASS 2026-06-30; authenticated journey pending invite acceptance)  
+**Last updated:** 2026-06-30
 
 **Related docs**
 
@@ -48,11 +48,11 @@ Analytics Updated
 
 | Field | Value |
 |-------|-------|
-| **Execution attempted** | No |
-| **Blocking reason** | BLK-SEC-05 — no real Evolved `auth.users` ↔ `fi_users` production session; operator not assigned |
-| **Prerequisite** | Complete [P0 operator checklist](./evolved-p0-operator-execution-checklist.md) §7–8 before re-run |
-| **Overall completed** | **No** (0 / 12 steps) |
-| **Evidence package** | None attached |
+| **Execution attempted** | Partial (unauthenticated smoke only) |
+| **Blocking reason** | Authenticated UI journey — crm_operator invite pending acceptance |
+| **Prerequisite** | Operator accepts Supabase invite; login → `/fi-admin/c2615b95…/cases` |
+| **Overall completed** | **No** (0 / 12 steps; infra smoke PASS) |
+| **Evidence package** | `evidence/attachments/smoke-prod-2026-06-30.txt` |
 
 ---
 
@@ -63,9 +63,9 @@ Analytics Updated
 | **Journey ID** | SMOKETEST-JOURNEY-001 |
 | **Operator** | To verify |
 | **Date** | To verify |
-| **Environment URL** | To verify |
-| **Tenant ID** | `EVOLVED_PERTH_TENANT_ID` (confirm in Vercel — do not paste UUID here) |
-| **Staff session** | To verify (real `fi_users` row) |
+| **Environment URL** | https://www.follicleintelligence.ai |
+| **Tenant ID** | `c2615b95-b707-4485-aa5f-be8f78ec868a` (evolved-hair / Evolved Hair Restoration) |
+| **Staff session** | 2 linked operators (tenant_backend + crm_operator); invite pending |
 | **Overall result** | ☐ Pass · ☑ Fail · ☐ Partial (Accepted risk) |
 
 **Linked records (fill as journey progresses):**

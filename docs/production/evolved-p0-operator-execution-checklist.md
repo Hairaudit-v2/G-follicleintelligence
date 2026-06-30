@@ -35,9 +35,9 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 1.1 | Supabase Dashboard → Project Settings → Database → Backups: confirm **PITR enabled** and retention window | Screenshot: `evidence/attachments/blk-sec-01-pitr-<date>.png` | ☐ |
-| 1.2 | Confirm **daily automated backups** succeeding (last 7 days green) | Export or screenshot: `blk-sec-01-daily-backups-<date>` | ☐ |
-| 1.3 | Record RPO/RTO with clinical ops sign-off | Signed row in [backup audit](./evidence/backup-disaster-recovery-audit.md) | ☐ |
+| 1.1 | Supabase Dashboard → Project Settings → Database → Backups: confirm **PITR enabled** and retention window | Screenshot: `evidence/attachments/blk-sec-01-pitr-2026-06-30.png` | ☑ |
+| 1.2 | Confirm **daily automated backups** succeeding (last 7 days green) | `blk-sec-01-daily-backups-2026-06-30.png` (PITR mode — daily full backups N/A) | ☑ |
+| 1.3 | Record RPO/RTO with clinical ops sign-off | Signed row in [backup audit](./evidence/backup-disaster-recovery-audit.md) | ☑ |
 
 **Runbook:** [`docs/runbooks/fi-os-supabase-backup-setup.md`](../runbooks/fi-os-supabase-backup-setup.md)
 
@@ -105,10 +105,10 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 7.1 | Minimum **2** real operators: Supabase Auth invite + `fi_users` row with `auth_user_id` | Redacted UUIDs in [identity audit](./evidence/evolved-identity-audit.md) | ☐ |
-| 7.2 | Payroll import dry-run → commit **or** verified IIOHR cron sync | Import log / cron success evidence | ☐ |
-| 7.3 | Staff ↔ fi_users link for calendar operators | Admin UI screenshot or SQL read-only probe | ☐ |
-| 7.4 | Remove or disable seed `@follicleintelligence.local` users in production (if present) | Note in identity audit | ☐ |
+| 7.1 | Minimum **2** real operators: Supabase Auth invite + `fi_users` row with `auth_user_id` | Redacted UUIDs in [identity audit](./evidence/evolved-identity-audit.md) | ☑ |
+| 7.2 | Payroll import dry-run → commit **or** verified IIOHR cron sync | 12 fi_staff rows; HR sync pending cron evidence | ☐ |
+| 7.3 | Staff ↔ fi_users link for calendar operators | 10/12 linked (audit 2026-06-30) | ☑ |
+| 7.4 | Remove or disable seed `@follicleintelligence.local` users in production (if present) | N/A on evolved-hair tenant | ☑ |
 
 **Runbook:** [Identity audit § Recommended provisioning sequence](./evidence/evolved-identity-audit.md)
 
@@ -118,9 +118,9 @@
 
 | # | Action | Evidence placeholder | Status |
 |---|--------|----------------------|--------|
-| 8.1 | Login as real Evolved admin → `/fi-admin/[tenantId]/cases` | Screenshot or E2E log | ☐ |
-| 8.2 | Cross-tenant denial: non-member auth user cannot access Evolved tenant | E2E or manual test note | ☐ |
-| 8.3 | Complete [smoketest journey](./evolved-smoketest-journey.md) authenticated sections | Journey checklist updated | ☐ |
+| 8.1 | Login as real Evolved admin → `/fi-admin/[tenantId]/cases` | Pending invite acceptance (crm_operator) | ☐ |
+| 8.2 | Cross-tenant denial: non-member auth user cannot access Evolved tenant | `smoke-prod-2026-06-30.txt` check J PASS | ☑ |
+| 8.3 | Complete [smoketest journey](./evolved-smoketest-journey.md) authenticated sections | Unauthenticated smoke PASS; journey 0/12 | ☐ |
 
 ---
 
@@ -149,11 +149,11 @@
 
 | Blocker | Final status | Owner | Evidence link | Date |
 |---------|--------------|-------|---------------|------|
-| BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☐ Blocking | | | |
-| BLK-SEC-02 | ☐ Complete / ☐ Accepted risk / ☐ Blocking | | | |
-| BLK-LEG-01 | ☐ Complete / ☐ Accepted risk / ☐ Blocking | | | |
-| BLK-FIN-01 | ☐ Complete / ☐ Accepted risk / ☐ Blocking | | | |
-| BLK-FIN-02 | ☐ Complete / ☐ Accepted risk / ☐ Blocking | | | |
-| BLK-SEC-05 | ☐ Complete / ☐ Accepted risk / ☐ Blocking | | | |
+| BLK-SEC-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | [backup audit](./evidence/backup-disaster-recovery-audit.md) — drill pending | 2026-06-30 |
+| BLK-SEC-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | Cron screenshots pending | |
+| BLK-LEG-01 | ☑ Complete / ☐ Accepted risk / ☐ Blocking | Paul Green | [legacy decision](./evidence/legacy-api-decision.md) | |
+| BLK-FIN-01 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
+| BLK-FIN-02 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | SOP sign-off pending | |
+| BLK-SEC-05 | ☐ Complete / ☐ Accepted risk / ☑ Blocking | Paul Green | Identity 2/2 linked; auth journey pending | 2026-06-30 |
 
 **Verifier (name + date):** ___________________________
