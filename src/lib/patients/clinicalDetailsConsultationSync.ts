@@ -1,7 +1,8 @@
 import "server-only";
 
+import { buildPatientClinicalPatchFromConsultationFormValues } from "./consultationScaleMapper";
 import { patientClinicalDetailsPatchBodySchema } from "./clinicalDetailsApiSchemas";
-import { updatePatientClinicalDetails } from "./clinicalDetailsServer";
+import { loadPatientClinicalDetails, updatePatientClinicalDetails } from "./clinicalDetailsServer";
 
 const SYNC_KEYS = ["norwood_scale", "ludwig_scale", "hairline_pattern", "primary_concern"] as const;
 
@@ -38,6 +39,47 @@ export async function syncConsultationMedicalHairLossToPatientClinicalDetails(pa
     } else if (raw === null) {
       patchRecord[key] = null;
     }
+  }
+
+  if (Object.keys(patchRecord).length === 0) return;
+
+  const parsed = patientClinicalDetailsPatchBodySchema.safeParse(patchRecord);
+  if (!parsed.success) return;
+
+  await updatePatientClinicalDetails({
+    tenantId: params.tenantId.trim(),
+    patientId: pid,
+    patch: parsed.data,
+    request: null,
+  });
+}
+
+/**
+ * When a guided ConsultationOS form completes, mirror visible scale / pattern fields from
+ * `values` onto `fi_patient_clinical_details` (consultation codes → patient column vocabulary).
+ */
+export async function syncConsultationFormValuesToPatientClinicalDetails(params: {
+  tenantId: string;
+  patientId: string | null;
+  values: Record<string, unknown>;
+}): Promise<void> {
+  const pid = params.patientId?.trim();
+  if (!pid) return;
+
+  const mapped = buildPatientClinicalPatchFromConsultationFormValues(params.values);
+  const patchRecord: Record<string, unknown> = { ...mapped.fields };
+
+  if (mapped.sinclairScale) {
+    const existing = await loadPatientClinicalDetails(params.tenantId.trim(), pid);
+    const priorMeta =
+      existing?.metadata && typeof existing.metadata === "object" && !Array.isArray(existing.metadata)
+        ? (existing.metadata as Record<string, unknown>)
+        : {};
+    patchRecord.metadata = {
+      ...priorMeta,
+      sinclair_scale: mapped.sinclairScale,
+      sinclair_scale_source: "consultation_form",
+    };
   }
 
   if (Object.keys(patchRecord).length === 0) return;

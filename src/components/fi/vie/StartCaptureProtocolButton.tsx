@@ -9,6 +9,12 @@ import { PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP } from "@/src/lib/patientImages/
 import { VIE_PROTOCOL_CATALOG } from "@/src/lib/vie/vieProtocolCatalog";
 import { VIE_PROTOCOL_PICKER_GROUPS } from "@/src/lib/vie/vieProtocolTypes";
 import type { VieProtocolSlug } from "@/src/lib/vie/vieProtocolTypes";
+import type { PatientTrialConsentGateView } from "@/src/lib/patients/patientTrialConsentShared";
+import {
+  isPatientTrialConsentCaptureAllowed,
+  PATIENT_TRIAL_CONSENT_REQUIRED_TOOLTIP,
+} from "@/src/lib/patients/patientTrialConsentShared";
+
 import { VieCaptureWizard } from "./VieCaptureWizard";
 
 function protocolSlotSummary(slug: VieProtocolSlug): string {
@@ -27,12 +33,14 @@ export function StartCaptureProtocolButton({
   tenantId,
   patientId,
   canCapture,
+  trialConsentGate,
   className,
   label = "Start Capture Protocol",
 }: {
   tenantId: string;
   patientId: string;
   canCapture: boolean;
+  trialConsentGate?: PatientTrialConsentGateView | null;
   className?: string;
   label?: string;
 }) {
@@ -75,10 +83,24 @@ export function StartCaptureProtocolButton({
     </>
   );
 
+  const consentAllowed = isPatientTrialConsentCaptureAllowed(trialConsentGate);
+
   if (!canCapture) {
     return (
       <span
         title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
+        aria-disabled="true"
+        className={cn(className, "cursor-not-allowed opacity-50")}
+      >
+        {buttonLabel}
+      </span>
+    );
+  }
+
+  if (!consentAllowed) {
+    return (
+      <span
+        title={PATIENT_TRIAL_CONSENT_REQUIRED_TOOLTIP}
         aria-disabled="true"
         className={cn(className, "cursor-not-allowed opacity-50")}
       >

@@ -10,11 +10,17 @@ import {
   PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP,
   type PatientPhotoQuickActionSource,
 } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
+import type { PatientTrialConsentGateView } from "@/src/lib/patients/patientTrialConsentShared";
+import {
+  isPatientTrialConsentCaptureAllowed,
+  PATIENT_TRIAL_CONSENT_REQUIRED_TOOLTIP,
+} from "@/src/lib/patients/patientTrialConsentShared";
 
 type Props = {
   tenantId: string;
   patientId: string;
   canCapture: boolean;
+  trialConsentGate?: PatientTrialConsentGateView | null;
   source: PatientPhotoQuickActionSource;
   variant?: "header" | "mobile-bar";
   className?: string;
@@ -25,6 +31,7 @@ export function PatientPhotoCaptureActions({
   tenantId,
   patientId,
   canCapture,
+  trialConsentGate,
   source: _source,
   variant = "header",
   className,
@@ -32,6 +39,11 @@ export function PatientPhotoCaptureActions({
 }: Props) {
   const chip =
     "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium";
+  const consentAllowed = isPatientTrialConsentCaptureAllowed(trialConsentGate);
+  const captureEnabled = canCapture && consentAllowed;
+  const deniedTooltip = !canCapture
+    ? PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP
+    : PATIENT_TRIAL_CONSENT_REQUIRED_TOOLTIP;
 
   if (variant === "mobile-bar") {
     return (
@@ -44,17 +56,18 @@ export function PatientPhotoCaptureActions({
         aria-label="Patient quick actions"
       >
         <div className="mx-auto flex max-w-6xl items-stretch gap-2">
-          {canCapture ? (
+          {captureEnabled ? (
             <StartCaptureProtocolButton
               tenantId={tenantId}
               patientId={patientId}
               canCapture
+              trialConsentGate={trialConsentGate}
               className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-gray-900 px-3 text-xs font-semibold text-white"
               label="Start Capture Protocol"
             />
           ) : (
             <span
-              title={PATIENT_IMAGING_CAPTURE_DENIED_TOOLTIP}
+              title={deniedTooltip}
               aria-disabled="true"
               className="inline-flex min-h-[44px] flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-white/[0.08] px-3 text-xs font-semibold text-gray-500 opacity-50"
             >
@@ -85,6 +98,7 @@ export function PatientPhotoCaptureActions({
         tenantId={tenantId}
         patientId={patientId}
         canCapture={canCapture}
+        trialConsentGate={trialConsentGate}
         className={`${chip} bg-gray-900 text-sm font-semibold text-white shadow-sm hover:bg-gray-800`}
         label="Start Capture Protocol"
       />

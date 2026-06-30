@@ -78,6 +78,7 @@ export function PatientDetailPageView({
         treatmentPlanSummary={initialPayload.treatmentPlanSummary}
         journeyStatus={journeyStatus}
         canCapturePhotos={canCapturePatientPhotos}
+        trialConsentGate={profile.trialConsentGate}
       />
 
       <PatientDetailsSummary data={profile} />
@@ -193,6 +194,7 @@ export function PatientDetailPageView({
         tenantId={tenantId}
         patientId={patientId}
         canCapture={canCapturePatientPhotos}
+        trialConsentGate={profile.trialConsentGate}
         source="patient_profile"
         variant="mobile-bar"
       />

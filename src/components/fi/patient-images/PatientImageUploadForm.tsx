@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { PatientProfileFoundationData } from "@/src/lib/patients/patientProfileLoader";
 import { StartCaptureProtocolButton } from "@/src/components/fi/vie/StartCaptureProtocolButton";
 import { PatientImagingCompletenessSummary } from "@/src/components/fi/vie/PatientImagingCompletenessSummary";
+import { PatientTrialConsentBanner } from "@/src/components/fi/patients/PatientTrialConsentBanner";
 
 export function PatientImageUploadForm({
   tenantId,
@@ -30,11 +31,18 @@ export function PatientImageUploadForm({
       <div className="mt-3">
         <PatientImagingCompletenessSummary completeness={data.vieImagingCompleteness} />
       </div>
+      <PatientTrialConsentBanner
+        tenantId={tenantId}
+        patientId={patientId}
+        trialConsentGate={data.trialConsentGate}
+        className="mt-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"
+      />
       <div className="mt-4 flex flex-wrap gap-2">
         <StartCaptureProtocolButton
           tenantId={tenantId}
           patientId={patientId}
           canCapture={canCapture}
+          trialConsentGate={data.trialConsentGate}
           className="inline-flex min-h-[40px] items-center gap-2 rounded-lg bg-gray-900 px-4 text-sm font-semibold text-white hover:bg-gray-800"
         />
         <Link

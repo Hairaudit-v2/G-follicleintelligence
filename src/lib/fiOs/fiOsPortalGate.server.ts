@@ -6,6 +6,7 @@ import { resolveAuthUserId } from "@/src/lib/crm/crmGate";
 import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImpersonation.server";
 
 import { getStaffPinClinicSessionIfValid } from "@/src/lib/staffPin/staffPinSession.server";
+import { isTenantBackendPortalAllowed } from "@/src/lib/fiOs/tenantBackendPortalAccess.server";
 
 import { isFiOsCrossTenantDirectoryRole } from "./fiOsRoles";
 import { isFiPortalStaff, loadFiOsIdentity } from "./fiOsIdentity.server";
@@ -34,53 +35,6 @@ async function loadFiUserRow(
     role: String(r.role ?? "member"),
     auth_user_id: r.auth_user_id ? String(r.auth_user_id) : null,
   };
-}
-
-/**
- * `fi_users.role = tenant_backend` is only for non-clinical admin access; require a matching
- * `fi_tenant_admin_users` row. Invited users may enter after auth confirms or first sign-in.
- */
-async function assertTenantBackendPortalAllowed(
-  tenantId: string,
-  row: { id: string; role: string; auth_user_id: string | null }
-): Promise<boolean> {
-  const role = row.role.trim().toLowerCase();
-  if (role !== "tenant_backend") return true;
-
-  const tid = tenantId.trim();
-  const supabase = supabaseAdmin();
-  const { data: adm, error } = await supabase
-    .from("fi_tenant_admin_users")
-    .select("id, status")
-    .eq("tenant_id", tid)
-    .eq("fi_user_id", row.id)
-    .maybeSingle();
-  if (error || !adm) return false;
-
-  const st = String((adm as { status: string }).status)
-    .trim()
-    .toLowerCase();
-  if (st === "suspended") return false;
-  if (st === "active") return true;
-
-  if (st !== "invited") return false;
-  const authUid = row.auth_user_id?.trim();
-  if (!authUid) return false;
-
-  const { data: authUser, error: authErr } = await supabase.auth.admin.getUserById(authUid);
-  if (authErr || !authUser?.user) return false;
-  const u = authUser.user;
-  const ready = Boolean(u.email_confirmed_at || u.last_sign_in_at);
-  if (!ready) return false;
-
-  const adminId = String((adm as { id: string }).id);
-  await supabase
-    .from("fi_tenant_admin_users")
-    .update({ status: "active", updated_at: new Date().toISOString() })
-    .eq("id", adminId)
-    .eq("tenant_id", tid);
-
-  return true;
 }
 
 async function assertTenantRowExists(tenantId: string): Promise<boolean> {
@@ -157,7 +111,7 @@ export async function assertFiTenantPortalAccess(tenantId: string): Promise<void
     redirect("/follicle-intelligence/login?notice=no_tenant_access");
   }
 
-  const backendOk = await assertTenantBackendPortalAllowed(tid, row);
+  const backendOk = await isTenantBackendPortalAllowed(tid, row);
   if (!backendOk) {
     redirect("/follicle-intelligence/login?notice=no_tenant_access");
   }

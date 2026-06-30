@@ -21,6 +21,11 @@ export type TenantFeatureFlags = {
   enable_progression_model?: boolean;
   enable_androgen_age_chart?: boolean;
   enable_surgical_readiness?: boolean;
+  /**
+   * When true, block clinical photography uploads and consultation completion until
+   * `fi_patient_documents` has at least one `consent` row for the patient.
+   */
+  trial_require_consent_before_capture?: boolean;
 };
 
 /** Scoring weight overrides. Keys = FiScorecardSectionId. */

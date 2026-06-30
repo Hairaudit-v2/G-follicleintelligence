@@ -19,6 +19,7 @@ import { FiCard } from "@/src/components/fi-design/FiCard";
 import { fiOsLightFormSurfaceClassNames } from "@/src/components/fi-design/fiDesignTokens";
 import { FiPageHeader } from "@/src/components/fi-design/FiPageHeader";
 import { evaluateConsultationFormCondition } from "@/src/lib/consultationForms/consultationFormCondition";
+import { validateConsultationFormRequiredFields } from "@/src/lib/consultationForms/consultationFormValidation";
 import type {
   ConsultationFormInstanceWithTemplate,
   ConsultationFormPersistenceContext,
@@ -26,6 +27,9 @@ import type {
 import type { ConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/consultationCompletionTypes";
 import { buildConsultationCompletionSummary } from "@/src/lib/consultationForms/completion/buildConsultationCompletionSummary";
 import type { ConsultationHandoffInitialIds } from "@/src/lib/consultationForms/handoff/consultationHandoffTypes";
+import { PatientTrialConsentBanner } from "@/src/components/fi/patients/PatientTrialConsentBanner";
+import type { PatientTrialConsentGateView } from "@/src/lib/patients/patientTrialConsentShared";
+import { isPatientTrialConsentCaptureAllowed } from "@/src/lib/patients/patientTrialConsentShared";
 
 const AUTOSAVE_MS = 900;
 
@@ -97,6 +101,7 @@ export function ConsultationFormRunner({
   leadId,
   handoffInitial,
   initialInstance,
+  trialConsentGate,
 }: {
   tenantId: string;
   consultationId: string;
@@ -106,6 +111,7 @@ export function ConsultationFormRunner({
   leadId?: string | null;
   handoffInitial?: ConsultationHandoffInitialIds;
   initialInstance: ConsultationFormInstanceWithTemplate;
+  trialConsentGate?: PatientTrialConsentGateView | null;
 }) {
   const router = useRouter();
   const tid = tenantId.trim();
@@ -273,6 +279,7 @@ export function ConsultationFormRunner({
 
   const showCompleteConsultationCta =
     initialInstance.status === "submitted" && !initialInstance.completed_at;
+  const consentCompleteAllowed = isPatientTrialConsentCaptureAllowed(trialConsentGate);
 
   const workflowPhase: WorkflowPhase = useMemo(() => {
     if (status === "draft") return "editing";
@@ -312,6 +319,13 @@ export function ConsultationFormRunner({
   const onSubmit = useCallback(async () => {
     if (!canEdit) return;
     setSubmitError(null);
+
+    const validationIssues = validateConsultationFormRequiredFields(schema, values);
+    if (validationIssues.length > 0) {
+      setSubmitError(validationIssues.map((i) => i.message).join(" "));
+      return;
+    }
+
     setBusySubmit(true);
     try {
       const res = await submitConsultationFormInstanceAction(tid, cid, initialInstance.id, {
@@ -327,7 +341,7 @@ export function ConsultationFormRunner({
     } finally {
       setBusySubmit(false);
     }
-  }, [canEdit, cid, initialInstance.id, router, tid, values]);
+  }, [canEdit, cid, initialInstance.id, router, schema, tid, values]);
 
   const autosaveLabel = useMemo(() => {
     if (!canEdit) {
@@ -464,20 +478,27 @@ export function ConsultationFormRunner({
             isPreview={showCompleteConsultationCta}
           />
           {showCompleteConsultationCta ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => void onCompleteConsultation()}
-                disabled={busyComplete}
-                className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {busyComplete ? "Completing…" : "Complete consultation"}
-              </button>
-              <p className={`max-w-xl ${fiOsLightFormSurfaceClassNames.helper}`}>
-                Locks this form, persists the rules-based snapshot, and unlocks routing plus
-                optional CRM, pathology, and SurgeryOS hand-offs. Nothing downstream runs
-                automatically.
-              </p>
+            <div className="space-y-3">
+              <PatientTrialConsentBanner
+                tenantId={tid}
+                patientId={patientId}
+                trialConsentGate={trialConsentGate}
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => void onCompleteConsultation()}
+                  disabled={busyComplete || !consentCompleteAllowed}
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {busyComplete ? "Completing…" : "Complete consultation"}
+                </button>
+                <p className={`max-w-xl ${fiOsLightFormSurfaceClassNames.helper}`}>
+                  Locks this form, persists the rules-based snapshot, and unlocks routing plus
+                  optional CRM, pathology, and SurgeryOS hand-offs. Nothing downstream runs
+                  automatically.
+                </p>
+              </div>
             </div>
           ) : null}
         </section>

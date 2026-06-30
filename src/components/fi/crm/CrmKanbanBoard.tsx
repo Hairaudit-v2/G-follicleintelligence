@@ -42,6 +42,7 @@ export function CrmKanbanBoard({
   const [dropStageId, setDropStageId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
   const [callInOpen, setCallInOpen] = useState(false);
+  const [movingLeadIds, setMovingLeadIds] = useState<Set<string>>(() => new Set());
 
   const canMutate = canMutateClinicFromOperatorContext({ userRole, canUseClinicFeatures });
 
@@ -64,8 +65,12 @@ export function CrmKanbanBoard({
 
   const unassigned = useMemo(() => cards.filter((c) => !c.lead.current_stage_id), [cards]);
 
+  const dragLocked = movingLeadIds.size > 0;
+
   const handleMove = useCallback(
     async (leadId: string, toStageId: string) => {
+      if (movingLeadIds.size > 0) return;
+
       const stageRow = stages.find((s) => s.id === toStageId);
       if (!stageRow) {
         setBannerError("Stage not found.");
@@ -77,47 +82,56 @@ export function CrmKanbanBoard({
 
       const snapshot = cards;
       setBannerError(null);
-      setCards((cur) =>
-        cur.map((c) =>
-          c.lead.id === leadId
-            ? {
-                ...c,
-                lead: { ...c.lead, current_stage_id: toStageId },
-                stage: mapStageRef(stageRow),
-                daysInStage: 0,
-                stageEnteredAtIso: new Date().toISOString(),
-              }
-            : c
-        )
-      );
+      setMovingLeadIds((prev) => new Set(prev).add(leadId));
+      try {
+        setCards((cur) =>
+          cur.map((c) =>
+            c.lead.id === leadId
+              ? {
+                  ...c,
+                  lead: { ...c.lead, current_stage_id: toStageId },
+                  stage: mapStageRef(stageRow),
+                  daysInStage: 0,
+                  stageEnteredAtIso: new Date().toISOString(),
+                }
+              : c
+          )
+        );
 
-      const r = await crmMoveLeadStageAction(tenantId, leadId, {
-        toStageId,
-        changedBy: operatorFiUserId,
-        source: "fi_admin_kanban",
-      });
+        const r = await crmMoveLeadStageAction(tenantId, leadId, {
+          toStageId,
+          changedBy: operatorFiUserId,
+          source: "fi_admin_kanban",
+        });
 
-      if (!r.ok) {
-        setCards(snapshot);
-        setBannerError(r.error);
-        return;
+        if (!r.ok) {
+          setCards(snapshot);
+          setBannerError(r.error);
+          return;
+        }
+
+        setCards((cur) =>
+          cur.map((c) =>
+            c.lead.id === leadId
+              ? {
+                  ...c,
+                  lead: r.lead,
+                  stage: mapStageRef(stageRow),
+                  daysInStage: 0,
+                  stageEnteredAtIso: new Date().toISOString(),
+                }
+              : c
+          )
+        );
+      } finally {
+        setMovingLeadIds((prev) => {
+          const next = new Set(prev);
+          next.delete(leadId);
+          return next;
+        });
       }
-
-      setCards((cur) =>
-        cur.map((c) =>
-          c.lead.id === leadId
-            ? {
-                ...c,
-                lead: r.lead,
-                stage: mapStageRef(stageRow),
-                daysInStage: 0,
-                stageEnteredAtIso: new Date().toISOString(),
-              }
-            : c
-        )
-      );
     },
-    [cards, operatorFiUserId, stages, tenantId]
+    [cards, movingLeadIds, operatorFiUserId, stages, tenantId]
   );
 
   const onColumnDragOver = (stageId: string) => (e: React.DragEvent) => {
@@ -132,7 +146,7 @@ export function CrmKanbanBoard({
       e.preventDefault();
       setDropStageId(null);
       const leadId = e.dataTransfer.getData("text/lead-id");
-      if (!leadId) return;
+      if (!leadId || dragLocked) return;
       void handleMove(leadId, stageId);
     };
 
@@ -214,7 +228,7 @@ export function CrmKanbanBoard({
                   stages={stages}
                   canMutate={canMutate}
                   onRequestMove={handleMove}
-                  disabled={isPending}
+                  disabled={isPending || dragLocked}
                   onOpenPreview={openLead}
                 />
               ))}
@@ -242,7 +256,7 @@ export function CrmKanbanBoard({
                 stages={stages}
                 canMutate={canMutate}
                 onRequestMove={handleMove}
-                disabled={isPending}
+                disabled={isPending || dragLocked}
                 onOpenPreview={openLead}
               />
             ))}

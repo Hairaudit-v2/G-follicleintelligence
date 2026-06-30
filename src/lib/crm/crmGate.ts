@@ -8,6 +8,7 @@ import { getFiOsImpersonationTargetAuthUserId } from "@/src/lib/fiOs/fiOsImperso
 import { loadFiOsIdentity } from "@/src/lib/fiOs/fiOsIdentity.server";
 import { isFiOsPlatformAdminRole } from "@/src/lib/fiOs/fiOsRoles";
 import { resolveDevelopmentClinicAccessForTenant } from "@/src/lib/fiOs/developmentClinicAccess.server";
+import { isTenantBackendPortalAllowed } from "@/src/lib/fiOs/tenantBackendPortalAccess.server";
 import type { StaffPinClinicAction } from "@/src/lib/staffPin/staffPinPermissions";
 import {
   rejectStaffPinSessionForRestrictedMutation,
@@ -94,23 +95,41 @@ export async function resolveAuthUserId(request?: Request | null): Promise<strin
   }
 }
 
+type FiUserTenantMembership = {
+  id: string;
+  role: string;
+  auth_user_id: string | null;
+};
+
 async function loadFiUserForTenant(
   tenantId: string,
   authUserId: string
-): Promise<{ id: string; role: string } | null> {
+): Promise<FiUserTenantMembership | null> {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("fi_users")
-    .select("id, role")
+    .select("id, role, auth_user_id")
     .eq("tenant_id", tenantId.trim())
     .eq("auth_user_id", authUserId)
     .maybeSingle();
   if (error) throw new CrmAccessError(500, "Could not verify tenant membership.");
   if (!data) return null;
+  const r = data as { id: string; role: string | null; auth_user_id: string | null };
   return {
-    id: String((data as { id: string }).id),
-    role: String((data as { role: string | null }).role ?? "member"),
+    id: String(r.id),
+    role: String(r.role ?? "member"),
+    auth_user_id: r.auth_user_id ? String(r.auth_user_id) : null,
   };
+}
+
+async function assertTenantMembershipPortalAllowed(
+  tenantId: string,
+  row: FiUserTenantMembership
+): Promise<void> {
+  const ok = await isTenantBackendPortalAllowed(tenantId, row);
+  if (!ok) {
+    throw new CrmAccessError(403, "Not authorized for this tenant.");
+  }
 }
 
 /** `fi_platform_admin` without an active impersonation cookie — full tenant API access (server-enforced). */
@@ -196,6 +215,7 @@ export async function assertCrmTenantReadAllowed(opts: {
   if (!row) {
     throw new CrmAccessError(403, "Not a member of this tenant.");
   }
+  await assertTenantMembershipPortalAllowed(tenantId, row);
 }
 
 /**
@@ -230,6 +250,12 @@ export async function assertCrmTenantWriteAllowed(opts: {
   if (await isFiOsPlatformAdminFullSessionBypass(authUserId)) {
     await assertTenantRowExists(tenantId);
     return;
+  }
+
+  const principal = await resolveTenantMembershipAuthUserId(authUserId);
+  const membership = await loadFiUserForTenant(tenantId, principal);
+  if (membership) {
+    await assertTenantMembershipPortalAllowed(tenantId, membership);
   }
 
   const access = await resolveDevelopmentClinicAccessForTenant(tenantId, authUserId);
@@ -294,6 +320,7 @@ export async function assertCrmTenantStaffManageAllowed(opts: {
   if (!row) {
     throw new CrmAccessError(403, "Not a member of this tenant.");
   }
+  await assertTenantMembershipPortalAllowed(tenantId, row);
 
   if (!isCrmStaffManageRole(row.role)) {
     throw new CrmAccessError(403, "Admin role required to manage staff.");

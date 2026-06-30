@@ -42,6 +42,7 @@ export function PatientCommandHero({
   treatmentPlanSummary,
   journeyStatus,
   canCapturePhotos = false,
+  trialConsentGate,
 }: {
   tenantId: string;
   patientId: string;
@@ -50,6 +51,7 @@ export function PatientCommandHero({
   treatmentPlanSummary: string | null;
   journeyStatus: PatientJourneyStatus;
   canCapturePhotos?: boolean;
+  trialConsentGate?: PatientProfileFoundationData["trialConsentGate"];
 }) {
   const idc = derivePatientIdentityContact({
     personMetadata: data.person.metadata,
@@ -124,6 +126,7 @@ export function PatientCommandHero({
             tenantId={tenantId}
             patientId={patientId}
             canCapture={canCapturePhotos}
+            trialConsentGate={trialConsentGate ?? data.trialConsentGate}
             className={chipGhost}
           />
           <Link href={`${base}/blood-request`} className={chipGhost}>

@@ -6,6 +6,7 @@ import { loadConsultationForTenant } from "@/src/lib/consultations/consultationL
 import { loadConsultationHandoffState } from "@/src/lib/consultationForms/handoff/consultationHandoffMutations.server";
 import { ensureInRoomHairTransplantConsultationFormInstance } from "@/src/lib/consultationForms/consultationFormMutations.server";
 import { assertFiTenantPortalAccess } from "@/src/lib/fiOs/fiOsPortalGate.server";
+import { loadTrialConsentGateStatus } from "@/src/lib/patients/patientConsentGate.server";
 
 export const metadata = {
   title: "Consultation form",
@@ -32,7 +33,10 @@ export default async function ConsultationGuidedFormPage({
 
   const instance = await ensureInRoomHairTransplantConsultationFormInstance(tid, cid);
 
-  const handoffInitial = await loadConsultationHandoffState(tid, cid, instance.id);
+  const [handoffInitial, trialConsentGate] = await Promise.all([
+    loadConsultationHandoffState(tid, cid, instance.id),
+    loadTrialConsentGateStatus(tid, row.patient_id),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -55,6 +59,7 @@ export default async function ConsultationGuidedFormPage({
         leadId={row.lead_id}
         handoffInitial={handoffInitial}
         initialInstance={instance}
+        trialConsentGate={trialConsentGate}
       />
     </div>
   );

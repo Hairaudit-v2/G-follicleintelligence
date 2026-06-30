@@ -1113,10 +1113,8 @@ export async function submitConsultationFormInstance(
     validateConsultationFormRequiredFields,
     validateVoiceNoteClinicalNoteShapesInValues,
   } = await import("./consultationFormValidation");
-  const issues = validateConsultationFormRequiredFields(
-    existing.template_version.schema,
-    input.values
-  );
+  const schema = existing.template_version.schema;
+  const issues = validateConsultationFormRequiredFields(schema, input.values);
   if (issues.length > 0) {
     throw new Error(issues.map((i) => i.message).join(" "));
   }
@@ -1364,6 +1362,10 @@ export async function completeConsultationFormInstance(
   const cons = await loadConsultationForTenant(tid, cid);
   if (!cons) throw new Error("Consultation not found.");
 
+  const { assertPatientTrialConsentRecorded } =
+    await import("@/src/lib/patients/patientConsentGate.server");
+  await assertPatientTrialConsentRecorded(tid, cons.patient_id, supabase);
+
   const nowIso = new Date().toISOString();
   const summary = buildConsultationCompletionSummary({
     consultationId: cid,
@@ -1427,8 +1429,18 @@ export async function completeConsultationFormInstance(
     .eq("id", cid);
   if (consErr) throw new Error(consErr.message);
 
-  const caseId = cons.case_id?.trim();
   const patientId = cons.patient_id?.trim();
+  if (patientId) {
+    const { syncConsultationFormValuesToPatientClinicalDetails } =
+      await import("@/src/lib/patients/clinicalDetailsConsultationSync");
+    await syncConsultationFormValuesToPatientClinicalDetails({
+      tenantId: tid,
+      patientId,
+      values: existing.values,
+    });
+  }
+
+  const caseId = cons.case_id?.trim();
   if (caseId && patientId) {
     const { data: evs, error: evErr } = await supabase
       .from("fi_timeline_events")

@@ -21,11 +21,14 @@ import {
   slotIsSatisfied,
   type ProtocolSlotDef,
 } from "@/src/lib/imagingOs/imagingOsProtocol";
+import { PatientTrialConsentBanner } from "@/src/components/fi/patients/PatientTrialConsentBanner";
 import {
   buildPatientProfilePhotoAddedHref,
   type PatientImagingCaptureIntent,
   type PatientPhotoQuickActionSource,
 } from "@/src/lib/patientImages/patientImagingCaptureRoutes";
+import type { PatientTrialConsentGateView } from "@/src/lib/patients/patientTrialConsentShared";
+import { isPatientTrialConsentCaptureAllowed } from "@/src/lib/patients/patientTrialConsentShared";
 
 const EMPTY_PROGRESS: Record<string, unknown> = {};
 const EMPTY_SLOTS: ProtocolSlotDef[] = [];
@@ -73,11 +76,13 @@ export function ImagingGuidedCaptureWizard({
   patientId,
   adminKey,
   initial,
+  trialConsentGate,
   captureIntent = null,
   captureSource = null,
 }: {
   tenantId: string;
   patientId: string;
+  trialConsentGate?: PatientTrialConsentGateView | null;
   adminKey: string;
   initial: ImagingOsPatientPayload;
   captureIntent?: PatientImagingCaptureIntent | null;
@@ -162,9 +167,15 @@ export function ImagingGuidedCaptureWizard({
     setToast({ kind, text });
   }, []);
 
+  const consentCaptureAllowed = isPatientTrialConsentCaptureAllowed(trialConsentGate);
+
   const uploadFile = useCallback(
     (file: File | null) => {
       if (!file || !currentSession || !currentSlug || sessionComplete) return;
+      if (!consentCaptureAllowed) {
+        showFlash("error", "Record patient consent on the Documents tab before uploading images.");
+        return;
+      }
 
       if (lastPreviewUrl?.startsWith("blob:")) URL.revokeObjectURL(lastPreviewUrl);
       const preview = URL.createObjectURL(file);
@@ -183,82 +194,88 @@ export function ImagingGuidedCaptureWizard({
       });
 
       startTransition(async () => {
-        const dims = await readImageDimensions(file);
-        const fd = new FormData();
-        fd.set("file", file);
-        fd.set("image_category", "scalp");
-        fd.set("protocol_session_id", currentSession.id);
-        fd.set("imaging_library_axis", fields.imaging_library_axis);
-        fd.set("visit_type", fields.visit_type);
-        fd.set("imaging_protocol_template_slug", fields.imaging_protocol_template_slug);
-        fd.set("imaging_protocol_slot_slug", fields.imaging_protocol_slot_slug);
-        if (fields.anatomical_region) fd.set("anatomical_region", fields.anatomical_region);
-        fd.set("device_type", fields.device_type);
-        if (fields.clinic_id) fd.set("clinic_id", fields.clinic_id);
-        if (fields.captured_by_staff_id)
-          fd.set("captured_by_staff_id", fields.captured_by_staff_id);
-        if (replaceNext) fd.set("guided_replace", "1");
-        fd.set("capture_type", captureIntent === "camera" ? "camera" : "upload");
-        fd.set("capture_source", captureSource ?? "imaging_os_wizard");
-        if (dims.width) fd.set("image_width", String(dims.width));
-        if (dims.height) fd.set("image_height", String(dims.height));
-        const k = adminKey.trim();
-        if (k) fd.set("adminKey", k);
+        try {
+          const dims = await readImageDimensions(file);
+          const fd = new FormData();
+          fd.set("file", file);
+          fd.set("image_category", "scalp");
+          fd.set("protocol_session_id", currentSession.id);
+          fd.set("imaging_library_axis", fields.imaging_library_axis);
+          fd.set("visit_type", fields.visit_type);
+          fd.set("imaging_protocol_template_slug", fields.imaging_protocol_template_slug);
+          fd.set("imaging_protocol_slot_slug", fields.imaging_protocol_slot_slug);
+          if (fields.anatomical_region) fd.set("anatomical_region", fields.anatomical_region);
+          fd.set("device_type", fields.device_type);
+          if (fields.clinic_id) fd.set("clinic_id", fields.clinic_id);
+          if (fields.captured_by_staff_id)
+            fd.set("captured_by_staff_id", fields.captured_by_staff_id);
+          if (replaceNext) fd.set("guided_replace", "1");
+          fd.set("capture_type", captureIntent === "camera" ? "camera" : "upload");
+          fd.set("capture_source", captureSource ?? "imaging_os_wizard");
+          if (dims.width) fd.set("image_width", String(dims.width));
+          if (dims.height) fd.set("image_height", String(dims.height));
+          const k = adminKey.trim();
+          if (k) fd.set("adminKey", k);
 
-        const res = await fetch(
-          `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/images`,
-          { method: "POST", body: fd, credentials: "include" }
-        );
-        const j = (await res.json().catch(() => ({}))) as {
-          ok?: boolean;
-          error?: string;
-          guided_session?: GuidedSessionApi;
-          attribution?: { quality?: { alert_message?: string | null } };
-        };
-        if (!res.ok || !j.ok) {
-          showFlash("error", j.error ?? `Upload failed (${res.status}).`);
-          return;
-        }
+          const res = await fetch(
+            `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/images`,
+            { method: "POST", body: fd, credentials: "include" }
+          );
+          const j = (await res.json().catch(() => ({}))) as {
+            ok?: boolean;
+            error?: string;
+            guided_session?: GuidedSessionApi;
+            attribution?: { quality?: { alert_message?: string | null } };
+          };
+          if (!res.ok || !j.ok) {
+            showFlash("error", j.error ?? `Upload failed (${res.status}).`);
+            return;
+          }
 
-        const qualityAlert = j.attribution?.quality?.alert_message;
+          const qualityAlert = j.attribution?.quality?.alert_message;
 
-        if (captureIntent && captureSource) {
+          if (captureIntent && captureSource) {
+            setReplaceNext(false);
+            if (camRef.current) camRef.current.value = "";
+            if (libRef.current) libRef.current.value = "";
+            void recordPatientPhotoQuickActionCompletedAction({
+              tenantId,
+              patientId,
+              intent: captureIntent,
+              source: captureSource,
+            });
+            router.push(buildPatientProfilePhotoAddedHref(tenantId, patientId, { tab: "gallery" }));
+            return;
+          }
+
+          const g = j.guided_session;
+          if (g) {
+            const base = g.sessionCompleted
+              ? "Session complete — all required views captured."
+              : "Image saved.";
+            showFlash(
+              qualityAlert ? "error" : "success",
+              qualityAlert ? `${qualityAlert} ${base}` : base
+            );
+            if (g.nextSlotSlug) setSlotOverride(g.nextSlotSlug);
+            else setSlotOverride(null);
+          } else {
+            showFlash(qualityAlert ? "error" : "success", qualityAlert ?? "Image saved.");
+          }
           setReplaceNext(false);
+          router.refresh();
           if (camRef.current) camRef.current.value = "";
           if (libRef.current) libRef.current.value = "";
-          void recordPatientPhotoQuickActionCompletedAction({
-            tenantId,
-            patientId,
-            intent: captureIntent,
-            source: captureSource,
-          });
-          router.push(buildPatientProfilePhotoAddedHref(tenantId, patientId, { tab: "gallery" }));
-          return;
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "Upload failed unexpectedly.";
+          showFlash("error", msg);
         }
-
-        const g = j.guided_session;
-        if (g) {
-          const base = g.sessionCompleted
-            ? "Session complete — all required views captured."
-            : "Image saved.";
-          showFlash(
-            qualityAlert ? "error" : "success",
-            qualityAlert ? `${qualityAlert} ${base}` : base
-          );
-          if (g.nextSlotSlug) setSlotOverride(g.nextSlotSlug);
-          else setSlotOverride(null);
-        } else {
-          showFlash(qualityAlert ? "error" : "success", qualityAlert ?? "Image saved.");
-        }
-        setReplaceNext(false);
-        router.refresh();
-        if (camRef.current) camRef.current.value = "";
-        if (libRef.current) libRef.current.value = "";
       });
     },
     [
       adminKey,
       clinicIdInput,
+      consentCaptureAllowed,
       currentSession,
       currentSlug,
       lastPreviewUrl,
@@ -416,6 +433,12 @@ export function ImagingGuidedCaptureWizard({
           images stay in private patient storage with signed thumbnails only.
         </p>
       </header>
+
+      <PatientTrialConsentBanner
+        tenantId={tenantId}
+        patientId={patientId}
+        trialConsentGate={trialConsentGate}
+      />
 
       {!currentSession ? (
         <div className="rounded-lg border border-dashed border-slate-700 bg-[#020617] text-slate-100 placeholder:text-slate-500 p-6 text-center">
@@ -582,7 +605,7 @@ export function ImagingGuidedCaptureWizard({
               />
               <button
                 type="button"
-                disabled={pending || !currentSlot || sessionComplete}
+                disabled={pending || !currentSlot || sessionComplete || !consentCaptureAllowed}
                 onClick={() => camRef.current?.click()}
                 className="min-h-[52px] flex-1 rounded-xl bg-[#0F1629]/80 backdrop-blur-md px-4 text-base font-semibold text-slate-100 shadow hover:bg-white/[0.06] disabled:opacity-40"
               >
@@ -590,7 +613,7 @@ export function ImagingGuidedCaptureWizard({
               </button>
               <button
                 type="button"
-                disabled={pending || !currentSlot || sessionComplete}
+                disabled={pending || !currentSlot || sessionComplete || !consentCaptureAllowed}
                 onClick={() => libRef.current?.click()}
                 className="min-h-[52px] flex-1 rounded-xl border border-white/40 px-4 text-base font-semibold text-white hover:bg-white/10 disabled:opacity-40"
               >

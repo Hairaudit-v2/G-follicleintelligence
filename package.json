@@ -15,6 +15,7 @@
     "check:migrations": "tsx scripts/check-migration-versions.ts",
     "check:env:production-rules": "tsx --test src/lib/env/fiEnv.server.test.ts",
     "smoke:prod": "tsx scripts/fi-production-smoke-test.ts",
+    "smoke:trial-security": "node -r ./scripts/patch-server-only-for-scripts.cjs ./node_modules/tsx/dist/cli.mjs scripts/smoke-trial-security-fixes.ts",
     "audit:production-cron": "tsx scripts/audit-production-cron-evidence.ts",
     "audit:evolved-readiness": "tsx scripts/audit-evolved-production-readiness.ts",
     "provision:evolved-operator": "tsx scripts/provision-evolved-operator.ts",
@@ -133,5 +134,6 @@
     "tsx": "^4.21.0",
     "typescript": "^5",
     "xlsx": "^0.18.5"
-  }
+  },
+  "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017"
 }

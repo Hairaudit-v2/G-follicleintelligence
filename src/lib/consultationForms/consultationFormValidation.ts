@@ -8,6 +8,17 @@ import {
 } from "./consultationFormNoteModel";
 import type { ConsultationFormField, ConsultationFormSchema } from "./consultationFormTypes";
 
+/** Guided intake scales that must be captured when their `showWhen` condition is visible. */
+export const CONSULTATION_CONDITIONAL_CLINICAL_SCALE_FIELD_IDS = new Set([
+  "norwood_classification",
+  "ludwig_classification",
+  "sinclair_classification",
+]);
+
+function isConditionalClinicalScaleField(field: ConsultationFormField): boolean {
+  return CONSULTATION_CONDITIONAL_CLINICAL_SCALE_FIELD_IDS.has(field.id);
+}
+
 function isEmptyForRequired(v: unknown, field: ConsultationFormField): boolean {
   if (v === null || v === undefined) return true;
   if (field.type === "body_area_map" && field.required) {
@@ -62,8 +73,10 @@ export function validateConsultationFormRequiredFields(
   for (const section of schema.sections) {
     if (!evaluateConsultationFormCondition(section.showWhen, values)) continue;
     for (const field of section.fields) {
-      if (!field.required) continue;
-      if (!evaluateConsultationFormCondition(field.showWhen, values)) continue;
+      const visible = evaluateConsultationFormCondition(field.showWhen, values);
+      if (!visible) continue;
+      const mustCapture = field.required || isConditionalClinicalScaleField(field);
+      if (!mustCapture) continue;
 
       const v = values[field.id];
       if (isEmptyForRequired(v, field)) {

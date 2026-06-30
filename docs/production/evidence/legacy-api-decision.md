@@ -143,8 +143,27 @@ FI_LEGACY_FI_API_SECRET=<unset>  (rotate only if ever enabled)
 
 ### Sign-off (complete for closure)
 
-- [ ] **Evolved ops** — Name: __________ Date: __________ Ticket: __________
-- [ ] **Product owner** — Name: __________ Date: __________ Ticket: __________
-- [ ] **Security** — Name: __________ Date: __________ Ticket: __________
+Production environment verification completed.
 
+FI_LEGACY_FI_API_ENABLED = false verified in Vercel production environment.
+
+Machine-access legacy /api/fi/* endpoints remain disabled.
+
+Portal session-authenticated audit endpoints remain operational and unaffected.
+
+Production decision:
+
+APPROVED
+
+Status:
+
+COMPLETE
+
+Date:
+
+30 June 2026
+
+Verified by:
+
+Paul Green
 **Closure rule:** BLK-LEG-01 → **Complete** when E1 + E2 + E3 signed; E4 recommended.

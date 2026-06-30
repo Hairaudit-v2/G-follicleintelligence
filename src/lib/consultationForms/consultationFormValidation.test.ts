@@ -243,6 +243,39 @@ describe("voice_note / clinical_note validation", () => {
 });
 
 describe("Hair Loss Treatment template validation", () => {
+  it("requires norwood when male-pattern zones are visible", () => {
+    const values: Record<string, unknown> = {
+      priority_focus: "general",
+      duration_band: "3_12m",
+      primary_objective: "patient_twin_baseline",
+      shedding_reported: "none",
+      previous_treatment_yes_no: "no",
+      pattern_type: "hairline",
+      norwood_classification: "",
+      hair_calibre: "fine",
+      scalp_condition: "normal",
+      medical_flags: [],
+      hormonal_flags: [],
+      stress_sleep_flags: [],
+      nutrition_flags: [],
+      pathology_recommended_explicit: false,
+      recommended_treatments: ["topical_minoxidil"],
+      blood_analysis_recommended: false,
+      treatment_priority: "patient_led_pacing",
+      treatment_timeline: "watchful",
+      hli_pathway_recommended: "patient_twin_lite",
+      consultation_outcome_type: "review_later",
+      structured_clinical_note: { mode: "clinical_note", note: "Hairline recession." },
+      follow_up_urgency: "routine",
+    };
+
+    const issues = validateConsultationFormRequiredFields(
+      hairLossTreatmentConsultationSchemaV1,
+      values
+    );
+    assert.ok(issues.some((i) => i.fieldId === "norwood_classification"));
+  });
+
   it("hidden classification fields do not fail validation when pattern omits them", () => {
     const values: Record<string, unknown> = {
       priority_focus: "general",

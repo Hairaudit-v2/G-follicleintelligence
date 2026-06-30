@@ -18,6 +18,7 @@ import {
   IMAGING_LIBRARY_AXES,
 } from "@/src/lib/imagingOs/imagingOsConstants";
 import type { ImagingOsPatientPayload } from "@/src/lib/imagingOs/imagingOsLoad.server";
+import type { PatientTrialConsentGateView } from "@/src/lib/patients/patientTrialConsentShared";
 import type { PatientImageProfileTile } from "@/src/lib/patientImages/patientImageTypes";
 import {
   parseImagingCaptureIntent,
@@ -37,10 +38,12 @@ export function ImagingOsWorkspace({
   tenantId,
   patientId,
   initial,
+  trialConsentGate,
 }: {
   tenantId: string;
   patientId: string;
   initial: ImagingOsPatientPayload;
+  trialConsentGate?: PatientTrialConsentGateView | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -627,6 +630,7 @@ export function ImagingOsWorkspace({
           patientId={patientId}
           adminKey={adminKey}
           initial={initial}
+          trialConsentGate={trialConsentGate}
           captureIntent={captureIntent}
           captureSource={captureSource}
         />

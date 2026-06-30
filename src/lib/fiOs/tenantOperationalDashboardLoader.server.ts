@@ -441,6 +441,7 @@ async function loadStaleLeads(
   const { data: persons, error: pe } = await supabase
     .from("fi_persons")
     .select("id, metadata")
+    .eq("tenant_id", tid)
     .in("id", personIds);
   if (pe) throw new Error(pe.message);
   const personMeta = new Map(
@@ -729,8 +730,6 @@ async function loadQuickStats(
 
   const weekStart = mondayStartUtc(now).toISOString();
   const thirtyAgo = new Date(now.getTime() - 30 * MS_DAY).toISOString();
-  const dayStart = utcDayStart(now).toISOString();
-  const dayEnd = addHours(utcDayStart(now), 24).toISOString();
 
   const { localStartIso, localEndIso } = operationalLocalDay;
 
@@ -770,8 +769,8 @@ async function loadQuickStats(
         .select("id", { count: "exact", head: true })
         .eq("tenant_id", tid)
         .eq("booking_status", "no_show")
-        .gte("start_at", dayStart)
-        .lt("start_at", dayEnd),
+        .gte("start_at", localStartIso)
+        .lt("start_at", localEndIso),
       supabase
         .from("fi_bookings")
         .select("assigned_staff_id")

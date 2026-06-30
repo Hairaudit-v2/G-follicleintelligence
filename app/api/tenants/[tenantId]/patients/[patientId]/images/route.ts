@@ -12,6 +12,7 @@ import {
 } from "@/src/lib/crm/crmHttp";
 import { assertGuidedSessionUploadPreconditions } from "@/src/lib/imagingOs/imagingOsGuidedFields";
 import { applyGuidedCaptureToSession } from "@/src/lib/imagingOs/imagingOsGuidedCapture.server";
+import { assertPatientTrialConsentRecorded } from "@/src/lib/patients/patientConsentGate.server";
 import { createPatientImageRecord } from "@/src/lib/patientImages/patientImagesServer";
 import {
   assertVieProtocolCapturePolicy,
@@ -138,6 +139,8 @@ export async function POST(
           ? { ...(metadata as Record<string, unknown>), ...surgeryMeta }
           : surgeryMeta;
     }
+    await assertPatientTrialConsentRecorded(tid, pid);
+
     const actingUserId = await tryResolveFiUserIdForTenant(tid, req);
 
     const parseDim = (raw: FormDataEntryValue | null): number | null => {

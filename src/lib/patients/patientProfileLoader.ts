@@ -28,6 +28,10 @@ import {
   mapActivityRowForTimeline,
 } from "@/src/lib/patients/timeline/patientTimelineBuild";
 import type { PatientTimelineBuildResult } from "@/src/lib/patients/timeline/patientTimelineTypes";
+import {
+  loadTrialConsentGateStatus,
+  type TrialConsentGateStatus,
+} from "@/src/lib/patients/patientConsentGate.server";
 
 export type PatientProfilePerson = {
   id: string;
@@ -107,6 +111,7 @@ export type PatientProfileFoundationData = {
   activity: PatientProfileActivityItem[];
   patientTimeline: PatientTimelineBuildResult;
   summary: ReturnType<typeof computePatientProfileSummaryMetrics>;
+  trialConsentGate: TrialConsentGateStatus;
 };
 
 export type PatientProfileLegacyGlobalData = {
@@ -546,6 +551,12 @@ export async function loadPatientProfile(
     activityEvents: activity.map((e) => ({ occurred_at: e.occurred_at })),
   });
 
+  const trialConsentGate = await loadTrialConsentGateStatus(
+    tid,
+    foundationPatientId,
+    supabase
+  );
+
   return {
     ok: true,
     mode: "foundation",
@@ -563,6 +574,7 @@ export async function loadPatientProfile(
       activity,
       patientTimeline,
       summary,
+      trialConsentGate,
     },
   };
 }

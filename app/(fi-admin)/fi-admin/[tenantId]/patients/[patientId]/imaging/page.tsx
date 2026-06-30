@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react";
 
 import { ImagingOsWorkspace } from "@/src/components/fi-admin/imaging/ImagingOsWorkspace";
 import { loadImagingOsPatientPayload } from "@/src/lib/imagingOs/imagingOsLoad.server";
+import { loadTrialConsentGateStatus } from "@/src/lib/patients/patientConsentGate.server";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,10 @@ export default async function ImagingOsPatientPage({
     return <p className="text-sm text-rose-300">Server misconfigured (Supabase).</p>;
   }
 
-  const initial = await loadImagingOsPatientPayload(tid, pid);
+  const [initial, trialConsentGate] = await Promise.all([
+    loadImagingOsPatientPayload(tid, pid),
+    loadTrialConsentGateStatus(tid, pid),
+  ]);
   const profileHref = `/fi-admin/${tid}/patients/${pid}`;
 
   return (
@@ -74,7 +78,12 @@ export default async function ImagingOsPatientPage({
           />
         }
       >
-        <ImagingOsWorkspace tenantId={tid} patientId={pid} initial={initial} />
+        <ImagingOsWorkspace
+          tenantId={tid}
+          patientId={pid}
+          initial={initial}
+          trialConsentGate={trialConsentGate}
+        />
       </Suspense>
     </div>
   );
