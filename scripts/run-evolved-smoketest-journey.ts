@@ -136,8 +136,7 @@ async function main(): Promise<void> {
         summary: `${JOURNEY_TAG} SMOKETEST-LEAD-001`,
         metadata: { smoketest: JOURNEY_TAG },
         person: {
-          first_name: "SMOKETEST-Patient",
-          last_name: "001",
+          display_name: "SMOKETEST-Patient 001",
           email: DEMO_EMAIL,
           phone: DEMO_PHONE,
         },

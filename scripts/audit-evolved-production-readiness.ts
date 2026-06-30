@@ -157,7 +157,7 @@ async function main(): Promise<void> {
   if (unlinkedReal.length > 15) {
     console.log(`  … and ${unlinkedReal.length - 15} more unlinked real users`);
   }
-  for (const u of unlinked.filter(isSeedEmail).slice(0, 5)) {
+  for (const u of unlinked.filter((u) => isSeedEmail(u.email)).slice(0, 5)) {
     console.log(
       `  UNLINKED seed ${u.role ?? "unknown"} id=${u.id.slice(0, 8)}… email=${redactEmail(u.email)}`
     );
