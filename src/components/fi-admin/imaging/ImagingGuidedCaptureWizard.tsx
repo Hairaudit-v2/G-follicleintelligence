@@ -13,6 +13,12 @@ import { inferCaptureDeviceType } from "@/src/lib/imagingOs/imagingOsConstants";
 import type { ImagingOsPatientPayload } from "@/src/lib/imagingOs/imagingOsLoad.server";
 import { buildGuidedImageUploadFields } from "@/src/lib/imagingOs/imagingOsGuidedFields";
 import {
+  postGuidedCaptureImage,
+  resolveGuidedCaptureUploadException,
+  resolveGuidedCaptureUploadFailure,
+  type GuidedCaptureUploadJson,
+} from "@/src/lib/imagingOs/imagingGuidedCaptureUpload.client";
+import {
   defaultSlotInstruction,
   isSessionMarkedComplete,
   missingRequiredSlotSlugs,
@@ -57,13 +63,6 @@ const GUIDED_TEMPLATE_SLUGS = [
   "trichoscopy_review",
 ] as const;
 
-type GuidedSessionApi = {
-  completionPercent: number;
-  sessionCompleted: boolean;
-  missingRequired: string[];
-  nextSlotSlug: string | null;
-};
-
 function firstOpenSessionId(sessions: ImagingOsPatientPayload["protocolSessions"]): string {
   for (const s of sessions) {
     if (!isSessionMarkedComplete(s.progress)) return s.id;
@@ -101,11 +100,14 @@ export function ImagingGuidedCaptureWizard({
   const [skipOpen, setSkipOpen] = useState(false);
   const [skipReason, setSkipReason] = useState("");
   const [toast, setToast] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [lastCaptureFile, setLastCaptureFile] = useState<File | null>(null);
 
   const camRef = useRef<HTMLInputElement>(null);
   const libRef = useRef<HTMLInputElement>(null);
   const sessionStartAttempted = useRef(false);
   const captureOpenAttempted = useRef(false);
+  const uploadInFlightRef = useRef(false);
 
   useEffect(() => {
     setSessionId((prev) => {
@@ -172,14 +174,18 @@ export function ImagingGuidedCaptureWizard({
   const uploadFile = useCallback(
     (file: File | null) => {
       if (!file || !currentSession || !currentSlug || sessionComplete) return;
+      if (pending || uploadInFlightRef.current) return;
       if (!consentCaptureAllowed) {
         showFlash("error", "Record patient consent on the Documents tab before uploading images.");
         return;
       }
 
+      setUploadError(null);
+
       if (lastPreviewUrl?.startsWith("blob:")) URL.revokeObjectURL(lastPreviewUrl);
       const preview = URL.createObjectURL(file);
       setLastPreviewUrl(preview);
+      setLastCaptureFile(file);
 
       const slot = slots.find((s) => s.slug === currentSlug);
       const fields = buildGuidedImageUploadFields({
@@ -194,6 +200,7 @@ export function ImagingGuidedCaptureWizard({
       });
 
       startTransition(async () => {
+        uploadInFlightRef.current = true;
         try {
           const dims = await readImageDimensions(file);
           const fd = new FormData();
@@ -217,24 +224,35 @@ export function ImagingGuidedCaptureWizard({
           const k = adminKey.trim();
           if (k) fd.set("adminKey", k);
 
-          const res = await fetch(
-            `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/images`,
-            { method: "POST", body: fd, credentials: "include" }
-          );
-          const j = (await res.json().catch(() => ({}))) as {
-            ok?: boolean;
-            error?: string;
-            guided_session?: GuidedSessionApi;
-            attribution?: { quality?: { alert_message?: string | null } };
-          };
-          if (!res.ok || !j.ok) {
-            showFlash("error", j.error ?? `Upload failed (${res.status}).`);
+          let res: Response;
+          let j: GuidedCaptureUploadJson;
+          try {
+            const result = await postGuidedCaptureImage(
+              `/api/tenants/${encodeURIComponent(tenantId)}/patients/${encodeURIComponent(patientId)}/images`,
+              fd
+            );
+            res = result.response;
+            j = result.json;
+          } catch (e) {
+            const msg = resolveGuidedCaptureUploadException(e);
+            console.error("[ImagingGuidedCaptureWizard] upload failed", e);
+            setUploadError(msg);
+            showFlash("error", msg);
+            return;
+          }
+
+          const failureMsg = resolveGuidedCaptureUploadFailure(res, j);
+          if (failureMsg) {
+            setUploadError(failureMsg);
+            showFlash("error", failureMsg);
             return;
           }
 
           const qualityAlert = j.attribution?.quality?.alert_message;
 
           if (captureIntent && captureSource) {
+            setUploadError(null);
+            setLastCaptureFile(null);
             setReplaceNext(false);
             if (camRef.current) camRef.current.value = "";
             if (libRef.current) libRef.current.value = "";
@@ -262,13 +280,19 @@ export function ImagingGuidedCaptureWizard({
           } else {
             showFlash(qualityAlert ? "error" : "success", qualityAlert ?? "Image saved.");
           }
+          setUploadError(null);
+          setLastCaptureFile(null);
           setReplaceNext(false);
           router.refresh();
           if (camRef.current) camRef.current.value = "";
           if (libRef.current) libRef.current.value = "";
         } catch (e) {
-          const msg = e instanceof Error ? e.message : "Upload failed unexpectedly.";
+          const msg = resolveGuidedCaptureUploadException(e);
+          console.error("[ImagingGuidedCaptureWizard] upload failed", e);
+          setUploadError(msg);
           showFlash("error", msg);
+        } finally {
+          uploadInFlightRef.current = false;
         }
       });
     },
@@ -282,6 +306,7 @@ export function ImagingGuidedCaptureWizard({
       captureIntent,
       captureSource,
       patientId,
+      pending,
       replaceNext,
       router,
       sessionComplete,
@@ -620,6 +645,22 @@ export function ImagingGuidedCaptureWizard({
                 From library
               </button>
             </div>
+
+            {uploadError ? (
+              <p className="mt-3 text-sm text-rose-300" role="alert">
+                {uploadError}
+              </p>
+            ) : null}
+            {uploadError && lastCaptureFile ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => uploadFile(lastCaptureFile)}
+                className="mt-3 min-h-[44px] rounded-lg border border-rose-400/40 bg-rose-500/10 px-4 text-sm font-semibold text-rose-100 hover:bg-rose-500/20 disabled:opacity-40"
+              >
+                Retry upload
+              </button>
+            ) : null}
 
             <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm text-gray-300">
               <input
