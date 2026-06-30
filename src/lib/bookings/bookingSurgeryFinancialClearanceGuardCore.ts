@@ -42,18 +42,19 @@ export function isSurgeryWithinClearanceWindow(ctx: SurgeryConfirmationGuardCont
 }
 
 /**
- * Blocks only when FinancialOS reports explicit `not_ready` for a surgery within 14 days.
- * Does not block `unavailable` (no safe financial signal) or other clearance states.
+ * Blocks when FinancialOS reports the surgery is not financially safe within the 14-day window.
+ * Uses `financially_safe_to_proceed` so `unavailable`, `attention_required`, and `pathway_pending`
+ * also block confirmation — not only explicit `not_ready`.
  */
 export function shouldBlockSurgeryConfirmationForFinancialClearance(
   clearance: Pick<
     FinancialClearanceResult,
-    "clearance_state" | "clearance_reason" | "next_required_action"
+    "clearance_state" | "clearance_reason" | "next_required_action" | "financially_safe_to_proceed"
   >,
   surgeryWithinClearanceWindow: boolean
 ): boolean {
   if (!surgeryWithinClearanceWindow) return false;
-  return clearance.clearance_state === "not_ready";
+  return clearance.financially_safe_to_proceed !== true;
 }
 
 export function surgeryConfirmationFinancialClearanceBlockedMessage(

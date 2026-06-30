@@ -32,8 +32,8 @@ export type AssertSurgeryBookingConfirmationFinancialClearanceInput = {
 };
 
 /**
- * Minimal FI-PH1 guard: blocks surgery booking confirmation when FinancialOS clearance
- * is explicitly `not_ready` and the procedure is within the tenant 14-day window.
+ * FI-PH1 guard: blocks surgery booking confirmation when FinancialOS reports
+ * `financially_safe_to_proceed !== true` and the procedure is within the tenant 14-day window.
  */
 export async function assertSurgeryBookingConfirmationFinancialClearance(
   input: AssertSurgeryBookingConfirmationFinancialClearanceInput

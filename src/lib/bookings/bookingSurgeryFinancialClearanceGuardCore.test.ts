@@ -67,10 +67,14 @@ describe("bookingSurgeryFinancialClearanceGuardCore", () => {
     assert.equal(isSurgeryWithinClearanceWindow(windowCtx("2026-07-01T01:00:00.000Z")), false);
   });
 
-  it("blocks only explicit not_ready within clearance window", () => {
+  it("blocks when financially_safe_to_proceed is false within clearance window", () => {
+    const blocked = {
+      financially_safe_to_proceed: false as const,
+    };
     assert.equal(
       shouldBlockSurgeryConfirmationForFinancialClearance(
         {
+          ...blocked,
           clearance_state: "not_ready",
           clearance_reason: "Deposit not collected",
           next_required_action: "Collect surgery deposit",
@@ -81,25 +85,44 @@ describe("bookingSurgeryFinancialClearanceGuardCore", () => {
     );
     assert.equal(
       shouldBlockSurgeryConfirmationForFinancialClearance(
-        { clearance_state: "unavailable", clearance_reason: "No data", next_required_action: null },
+        {
+          ...blocked,
+          clearance_state: "unavailable",
+          clearance_reason: "No data",
+          next_required_action: null,
+        },
         true
       ),
-      false
+      true
     );
     assert.equal(
       shouldBlockSurgeryConfirmationForFinancialClearance(
         {
+          ...blocked,
           clearance_state: "attention_required",
           clearance_reason: "Balance overdue",
           next_required_action: "Collect balance",
         },
         true
       ),
-      false
+      true
     );
     assert.equal(
       shouldBlockSurgeryConfirmationForFinancialClearance(
         {
+          ...blocked,
+          clearance_state: "pathway_pending",
+          clearance_reason: "Pathway in progress",
+          next_required_action: "Wait for pathway settlement",
+        },
+        true
+      ),
+      true
+    );
+    assert.equal(
+      shouldBlockSurgeryConfirmationForFinancialClearance(
+        {
+          ...blocked,
           clearance_state: "not_ready",
           clearance_reason: "Deposit not collected",
           next_required_action: null,
@@ -108,6 +131,27 @@ describe("bookingSurgeryFinancialClearanceGuardCore", () => {
       ),
       false
     );
+  });
+
+  it("allows confirmation when financially_safe_to_proceed is true", () => {
+    const safe = { financially_safe_to_proceed: true as const, next_required_action: null };
+    for (const clearance_state of [
+      "deposit_ready",
+      "financially_cleared",
+      "paid_in_full",
+    ] as const) {
+      assert.equal(
+        shouldBlockSurgeryConfirmationForFinancialClearance(
+          {
+            ...safe,
+            clearance_state,
+            clearance_reason: "OK",
+          },
+          true
+        ),
+        false
+      );
+    }
   });
 
   it("returns operational blocked message", () => {

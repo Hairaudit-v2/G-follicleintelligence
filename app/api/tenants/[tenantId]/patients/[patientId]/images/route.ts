@@ -56,6 +56,8 @@ export async function POST(
       return crmJsonError(400, "Missing or empty file.");
     }
 
+    await assertPatientTrialConsentRecorded(tid, pid);
+
     const imageCategory = form.get("image_category");
     const caption = form.get("caption");
     const takenAt = form.get("taken_at");
@@ -139,8 +141,6 @@ export async function POST(
           ? { ...(metadata as Record<string, unknown>), ...surgeryMeta }
           : surgeryMeta;
     }
-    await assertPatientTrialConsentRecorded(tid, pid);
-
     const actingUserId = await tryResolveFiUserIdForTenant(tid, req);
 
     const parseDim = (raw: FormDataEntryValue | null): number | null => {
