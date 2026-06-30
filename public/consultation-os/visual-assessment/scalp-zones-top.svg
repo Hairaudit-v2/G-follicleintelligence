@@ -1,7 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-label="Scalp zones top view reference">
-  <title>Scalp zones</title>
-  <rect width="400" height="400" fill="#f8fafc" stroke="#cbd5e1"/>
-  <text x="200" y="32" text-anchor="middle" font-size="13" fill="#334155" font-family="system-ui,sans-serif">Top-down scalp  reference (replace with clinical asset)</text>
-  <ellipse cx="200" cy="210" rx="150" ry="185" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-  <text x="200" y="380" text-anchor="middle" font-size="11" fill="#64748b" font-family="system-ui,sans-serif">Use interactive map in the form for precise zone capture.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="470" viewBox="0 0 400 470" role="img" aria-label="Scalp zones — top-down reference with frontal, temporal, mid-scalp, crown, occipital and donor regions">
+  <title>Scalp zones (top-down reference)</title>
+  <defs>
+    <clipPath id="scalpHeadRef">
+      <path d="M200 62 C268 64 330 122 336 236 C341 330 284 410 200 414 C116 410 59 330 64 236 C70 122 132 64 200 62 Z"/>
+    </clipPath>
+    <style>
+      .plate{fill:#eef2f7;stroke:#cbd5e1;stroke-width:1}
+      .head{fill:#f8fafc;stroke:#94a3b8;stroke-width:2}
+      .edge{fill:none;stroke:#64748b;stroke-width:2}
+      .zedge{stroke:#94a3b8;stroke-width:1.25}
+      .ori{fill:#475569;font:600 13px system-ui,sans-serif;text-anchor:middle}
+      .zl{fill:#1e293b;font:600 12px system-ui,sans-serif;text-anchor:middle}
+      .nose{fill:#e2e8f0;stroke:#94a3b8;stroke-width:1.5}
+    </style>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="399" height="469" rx="14" class="plate"/>
+
+  <text x="200" y="26" class="ori">Front (hairline)</text>
+  <path d="M188 54 L212 54 L200 36 Z" class="nose"/>
+
+  <path d="M200 62 C268 64 330 122 336 236 C341 330 284 410 200 414 C116 410 59 330 64 236 C70 122 132 64 200 62 Z" class="head"/>
+
+  <g clip-path="url(#scalpHeadRef)">
+    <path class="zedge" fill="#bae6fd" d="M132 70 L268 70 L272 150 L128 150 Z"/>
+    <path class="zedge" fill="#ddd6fe" d="M58 108 L128 150 L138 268 L58 268 Z"/>
+    <path class="zedge" fill="#ddd6fe" d="M342 108 L272 150 L262 268 L342 268 Z"/>
+    <path class="zedge" fill="#bbf7d0" d="M130 152 L270 152 L260 246 L140 246 Z"/>
+    <path class="zedge" fill="#fde68a" d="M150 248 L250 248 L262 312 L138 312 Z"/>
+    <path class="zedge" fill="#fecaca" d="M104 314 L296 314 L280 374 L120 374 Z"/>
+    <path class="zedge" fill="#a7f3d0" d="M120 376 L280 376 L246 414 L154 414 Z"/>
+  </g>
+
+  <path d="M200 62 C268 64 330 122 336 236 C341 330 284 410 200 414 C116 410 59 330 64 236 C70 122 132 64 200 62 Z" class="edge"/>
+
+  <g>
+    <text x="200" y="116" class="zl">Frontal</text>
+    <text x="97" y="200" class="zl">L temporal</text>
+    <text x="303" y="200" class="zl">R temporal</text>
+    <text x="200" y="202" class="zl">Mid-scalp</text>
+    <text x="200" y="284" class="zl">Crown</text>
+    <text x="200" y="348" class="zl">Occipital</text>
+    <text x="200" y="398" class="zl">Donor</text>
+  </g>
+
+  <text x="200" y="450" class="ori">Back / nape (donor)</text>
 </svg>

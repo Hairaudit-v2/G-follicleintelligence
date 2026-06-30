@@ -1,25 +1,119 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="220" viewBox="0 0 960 220" role="img" aria-label="Norwood pattern reference (schematic)">
-  <title>Norwood reference</title>
-  <rect width="960" height="220" fill="#f8fafc" stroke="#cbd5e1"/>
-  <text x="480" y="28" text-anchor="middle" font-size="14" fill="#334155" font-family="system-ui,sans-serif">Norwood scale  schematic reference (replace with clinical asset)</text>
-  <g fill="#e2e8f0" stroke="#64748b" stroke-width="1.5">
-    <ellipse cx="90" cy="120" rx="38" ry="52"/>
-    <ellipse cx="210" cy="118" rx="40" ry="54"/>
-    <ellipse cx="330" cy="116" rx="42" ry="56"/>
-    <ellipse cx="450" cy="114" rx="44" ry="58"/>
-    <ellipse cx="570" cy="112" rx="46" ry="60"/>
-    <ellipse cx="690" cy="110" rx="48" ry="62"/>
-    <ellipse cx="810" cy="108" rx="50" ry="64"/>
-    <ellipse cx="930" cy="106" rx="22" ry="30"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="250" viewBox="0 0 960 250" role="img" aria-label="Norwood–Hamilton scale — top-down progression of male pattern hair loss">
+  <title>Norwood–Hamilton scale (top-down)</title>
+  <defs>
+    <clipPath id="nwHead"><ellipse cx="60" cy="96" rx="46" ry="58"/></clipPath>
+    <style>
+      .plate{fill:#eef2f7;stroke:#cbd5e1;stroke-width:1}
+      .ttl{fill:#334155;font:600 15px system-ui,sans-serif}
+      .sub{fill:#64748b;font:400 11px system-ui,sans-serif}
+      .lbl{fill:#334155;font:600 12px system-ui,sans-serif;text-anchor:middle}
+      .hair{fill:#3f4654}
+      .skin{fill:#f0dcc6}
+      .edge{fill:none;stroke:#5b6472;stroke-width:2}
+      .nose{fill:#f0dcc6;stroke:#5b6472;stroke-width:1.5}
+    </style>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="959" height="249" rx="14" class="plate"/>
+  <text x="24" y="28" class="ttl">Norwood–Hamilton scale</text>
+  <text x="252" y="28" class="sub">top-down view · nose marks the front (hairline)</text>
+
+  <!-- I : full hair -->
+  <g transform="translate(0,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">I</text>
   </g>
-  <g font-size="11" fill="#475569" font-family="system-ui,sans-serif" text-anchor="middle">
-    <text x="90" y="195">I</text>
-    <text x="210" y="195">II</text>
-    <text x="330" y="195">III</text>
-    <text x="450" y="195">IV</text>
-    <text x="570" y="195">V</text>
-    <text x="690" y="195">VI</text>
-    <text x="810" y="195">VII</text>
-    <text x="930" y="195">?</text>
+
+  <!-- II : mild fronto-temporal recession -->
+  <g transform="translate(120,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <g clip-path="url(#nwHead)">
+      <path class="skin" d="M22 46 Q40 42 52 46 Q46 64 44 72 Q32 58 22 56 Z"/>
+      <path class="skin" d="M98 46 Q80 42 68 46 Q74 64 76 72 Q88 58 98 56 Z"/>
+    </g>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">II</text>
+  </g>
+
+  <!-- III : deeper temporal recession (M) -->
+  <g transform="translate(240,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <g clip-path="url(#nwHead)">
+      <path class="skin" d="M18 44 Q42 40 56 48 Q50 74 46 86 Q30 64 18 58 Z"/>
+      <path class="skin" d="M102 44 Q78 40 64 48 Q70 74 74 86 Q90 64 102 58 Z"/>
+    </g>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">III</text>
+  </g>
+
+  <!-- III vertex : temporal + crown spot -->
+  <g transform="translate(360,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <g clip-path="url(#nwHead)">
+      <path class="skin" d="M18 44 Q42 40 56 48 Q50 72 46 82 Q30 64 18 58 Z"/>
+      <path class="skin" d="M102 44 Q78 40 64 48 Q70 72 74 82 Q90 64 102 58 Z"/>
+      <ellipse class="skin" cx="60" cy="128" rx="16" ry="15"/>
+    </g>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">III vertex</text>
+  </g>
+
+  <!-- IV : frontal + crown, hair bridge between -->
+  <g transform="translate(480,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <g clip-path="url(#nwHead)">
+      <path class="skin" d="M16 44 Q60 36 104 44 Q98 76 60 80 Q22 76 16 44 Z"/>
+      <ellipse class="skin" cx="60" cy="130" rx="20" ry="18"/>
+    </g>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">IV</text>
+  </g>
+
+  <!-- V : larger, bridge narrowing -->
+  <g transform="translate(600,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <g clip-path="url(#nwHead)">
+      <path class="skin" d="M14 42 Q60 34 106 42 Q102 88 60 92 Q18 88 14 42 Z"/>
+      <ellipse class="skin" cx="60" cy="132" rx="26" ry="20"/>
+    </g>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">V</text>
+  </g>
+
+  <!-- VI : bridge gone, frontal + crown merge -->
+  <g transform="translate(720,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <g clip-path="url(#nwHead)">
+      <path class="skin" d="M14 44 Q60 32 106 44 Q116 120 60 146 Q4 120 14 44 Z"/>
+    </g>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">VI</text>
+  </g>
+
+  <!-- VII : only a horseshoe rim of hair remains -->
+  <g transform="translate(840,40)">
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="hair"/>
+    <g clip-path="url(#nwHead)">
+      <ellipse class="skin" cx="60" cy="90" rx="40" ry="50"/>
+    </g>
+    <ellipse cx="60" cy="96" rx="46" ry="58" class="edge"/>
+    <path d="M53 39 L67 39 L60 28 Z" class="nose"/>
+    <text x="60" y="190" class="lbl">VII</text>
+  </g>
+
+  <!-- legend -->
+  <g transform="translate(24,234)">
+    <rect x="0" y="-9" width="12" height="12" rx="2" class="hair"/>
+    <text x="18" y="1" class="sub">Hair</text>
+    <rect x="74" y="-9" width="12" height="12" rx="2" fill="#f0dcc6" stroke="#5b6472" stroke-width="1"/>
+    <text x="92" y="1" class="sub">Bald / thinning scalp</text>
   </g>
 </svg>
